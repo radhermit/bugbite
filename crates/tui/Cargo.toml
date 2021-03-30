@@ -1,0 +1,22 @@
+[package]
+name = "bugbite-tui"
+version = "0.0.1"
+description = "bugbite terminal user interface"
+documentation = "https://github.com/radhermit/bugbite"
+homepage = "https://github.com/radhermit/bugbite"
+repository = "https://github.com/radhermit/bugbite"
+license = "Apache-2.0"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+bench = false
+path = "src/main.rs"
+name = "bugbite"
+
+[dependencies]
+anyhow = "1.0.79"
+bugbite = { path = "../lib", version = "0.0.1" }
+crossterm = "0.27.0"
+ratatui = "0.26.1"

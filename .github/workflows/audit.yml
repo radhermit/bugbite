@@ -1,0 +1,22 @@
+name: audit
+
+on:
+  schedule:
+    - cron: '39 7 13 * *'
+  push:
+    branches: ['**']
+    paths:
+      - "Cargo.lock"
+      - ".github/workflows/audit.yml"
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - uses: actions-rust-lang/audit@v1
