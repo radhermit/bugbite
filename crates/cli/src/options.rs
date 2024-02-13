@@ -3,37 +3,41 @@ use bugbite::config::{Config, CONFIG};
 use bugbite::service::{self, ServiceKind};
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
-use clap::{CommandFactory, Parser};
+use clap::{Parser, Subcommand};
 use strum::VariantNames;
 
 #[derive(Parser)]
 #[command(disable_help_flag = true)]
 pub(crate) struct Command {
     #[clap(flatten)]
-    config: ConfigOpts,
+    config_opts: ConfigOpts,
     #[clap(flatten)]
-    service: ServiceOpts,
+    service_opts: ServiceOpts,
+    #[command(subcommand)]
+    subcmd: Remaining,
+}
+
+#[derive(Subcommand)]
+enum Remaining {
+    #[command(external_subcommand)]
+    Remaining(Vec<String>),
 }
 
 impl Command {
     pub(crate) fn service() -> anyhow::Result<service::Config> {
-        // TODO: rework partial parsing once clap supports a Parser-based API for it
-        let cmd = Self::command().ignore_errors(true);
-        let args = cmd.get_matches();
-        let (config, connection, base, service) = (
-            args.get_one::<String>("config"),
-            args.get_one::<String>("connection"),
-            args.get_one::<String>("base"),
-            args.get_one::<ServiceKind>("service"),
-        );
+        let cmd = Command::parse();
+        let config = cmd.config_opts.config;
+        let connection = cmd.config_opts.connection;
+        let base = cmd.service_opts.base;
+        let service = cmd.service_opts.service;
         let service = match (config, connection, base, service) {
-            (None, Some(name), None, None) => CONFIG.get(name)?.clone(),
+            (None, Some(name), None, None) => CONFIG.get(&name)?.clone(),
             (Some(path), Some(name), None, None) => {
                 let config = Config::try_new(path)?;
-                let service = config.get(name)?;
+                let service = config.get(&name)?;
                 service.clone()
             }
-            (None, None, Some(base), Some(service)) => service.create(base)?,
+            (None, None, Some(base), Some(service)) => service.create(&base)?,
             // use a stub URL so `bite -s service -h` can be used to show help output
             (None, None, None, Some(service)) => service.create("https://fake/url")?,
             // TODO: use default service from config if it exists
