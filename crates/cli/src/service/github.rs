@@ -13,7 +13,12 @@ mod search;
 
 /// command line interface for github
 #[derive(Debug, Parser)]
-#[command(name = "bite", version, long_about = None, disable_help_subcommand = true)]
+#[command(
+    name = env!("CARGO_BIN_NAME"),
+    version,
+    long_about = None,
+    disable_help_subcommand = true,
+)]
 pub(crate) struct Command {
     #[command(flatten)]
     pub(super) verbosity: Verbosity,
