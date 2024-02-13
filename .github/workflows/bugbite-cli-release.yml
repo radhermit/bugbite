@@ -42,9 +42,7 @@ jobs:
       id: rust
 
     - name: Generate man pages
-      run: |
-        echo "OUT_DIR=man" >> $GITHUB_ENV
-        cargo run --features doc --bin mangen -p bugbite-cli
+      run: cargo run --features doc --bin mangen -p bugbite-cli man
 
     - name: Create archive
       run: tar -cv -I "xz -9 -T0" -f ${{ github.ref_name }}-docs.tar.xz man
