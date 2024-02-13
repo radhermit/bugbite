@@ -47,7 +47,7 @@ impl Command {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Config")]
 #[group(requires = "connection", conflicts_with = "Service")]
-pub(crate) struct ConfigOpts {
+struct ConfigOpts {
     /// use a custom config
     #[arg(long)]
     config: Option<String>,
@@ -59,7 +59,7 @@ pub(crate) struct ConfigOpts {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Service")]
 #[group(requires_all = ["base", "service"], conflicts_with = "Config")]
-pub(super) struct ServiceOpts {
+struct ServiceOpts {
     /// base service URL
     #[arg(short, long)]
     base: Option<String>,
@@ -76,7 +76,7 @@ pub(super) struct ServiceOpts {
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Connection")]
-pub(crate) struct Connection {
+struct Connection {
     /// skip SSL certificate verification
     #[arg(short, long)]
     insecure: bool,
@@ -90,7 +90,7 @@ pub(crate) struct Connection {
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Authentication")]
-pub(crate) struct Authentication {
+struct Authentication {
     /// skip service authentication
     #[arg(short = 'S', long)]
     skip: bool,
