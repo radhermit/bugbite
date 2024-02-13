@@ -1,3 +1,4 @@
+use std::io::{stdout, IsTerminal};
 use std::process::ExitCode;
 
 use bugbite::args::Csv;
@@ -85,7 +86,10 @@ impl Command {
                     println!("{line}");
                 }
             }
-            println!(" * {count} results found");
+
+            if count > 0 && stdout().is_terminal() {
+                println!(" * {count} found");
+            }
         }
 
         Ok(ExitCode::SUCCESS)
