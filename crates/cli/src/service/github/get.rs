@@ -6,7 +6,7 @@ use tokio::runtime::Handle;
 use tokio::task;
 
 #[derive(Debug, Args)]
-pub struct Command {
+pub(super) struct Command {
     ids: Vec<String>,
 }
 

@@ -4,7 +4,7 @@ use bugbite::client::Client;
 use clap::Args;
 
 #[derive(Debug, Args)]
-pub struct Command {
+pub(super) struct Command {
     ids: Vec<String>,
 }
 
