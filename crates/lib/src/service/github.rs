@@ -146,8 +146,8 @@ impl fmt::Display for SearchOrder {
 #[strum(serialize_all = "kebab-case")]
 pub enum SearchTerm {
     Comments,
-    Reactions,
-    Interactions,
     Created,
+    Interactions,
+    Reactions,
     Updated,
 }
