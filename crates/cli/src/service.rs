@@ -4,8 +4,8 @@ use bugbite::service::{Config, ServiceKind};
 use clap::Parser;
 use clap_verbosity_flag::Verbosity;
 
-mod bugzilla;
-mod github;
+pub(crate) mod bugzilla;
+pub(crate) mod github;
 
 #[allow(clippy::large_enum_variant)]
 pub(super) enum Command {

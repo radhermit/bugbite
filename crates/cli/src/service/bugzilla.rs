@@ -15,7 +15,7 @@ mod search;
 /// command line interface for bugzilla
 #[derive(Debug, Parser)]
 #[command(
-    name = env!("CARGO_BIN_NAME"),
+    name = "bite-bugzilla",
     version,
     long_about = None,
     disable_help_subcommand = true,
