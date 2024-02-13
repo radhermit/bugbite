@@ -22,11 +22,12 @@ use crate::utils::{launch_browser, COLUMNS};
 struct Params {
     // TODO: use enum to define supported fields
     /// fields to output
-    #[arg(short, long, help_heading = "Search related")]
+    #[arg(short = 'F', long, help_heading = "Search related")]
     fields: Option<Csv<String>>,
 
     /// sorting order for search query
     #[arg(
+        short = 'S',
         long,
         help_heading = "Search related",
         value_name = "TERM",
