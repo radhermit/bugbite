@@ -18,7 +18,7 @@ pub enum Error {
 
 impl From<reqwest::Error> for Error {
     fn from(e: reqwest::Error) -> Self {
-        Error::Request(e.to_string())
+        Error::Request(e.without_url())
     }
 }
 
