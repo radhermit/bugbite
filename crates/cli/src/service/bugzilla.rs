@@ -6,6 +6,7 @@ use clap_verbosity_flag::Verbosity;
 
 use crate::options::Options;
 use crate::service::Config;
+use crate::utils::COLUMNS;
 
 mod attachments;
 mod get;
@@ -19,6 +20,7 @@ mod search;
     version,
     long_about = None,
     disable_help_subcommand = true,
+    term_width = *COLUMNS,
 )]
 pub(crate) struct Command {
     #[command(flatten)]

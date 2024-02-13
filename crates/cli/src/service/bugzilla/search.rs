@@ -17,7 +17,7 @@ use tokio::runtime::Handle;
 use tokio::task;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::utils::{launch_browser, possible_values, COLUMNS};
+use crate::utils::{launch_browser, COLUMNS};
 
 /// Available search parameters.
 ///
@@ -57,7 +57,7 @@ struct Params {
             work properly.
 
             possible values:
-            {}", possible_values(SearchTerm::VARIANTS)}
+            {}", SearchTerm::VARIANTS.join(", ")}
     )]
     sort: Option<Csv<SearchOrder>>,
 
