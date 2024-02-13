@@ -11,7 +11,7 @@ pub enum Error {
     #[error("bugzilla error: {message}")]
     Bugzilla { code: i64, message: String },
     #[error("{0}")]
-    Request(String),
+    Request(reqwest::Error),
     #[error("{0}")]
     Unsupported(String),
 }
