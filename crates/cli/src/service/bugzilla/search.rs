@@ -38,14 +38,18 @@ struct Params {
         help_heading = "Search related",
         value_name = "TERM[,TERM,...]",
         long_help = indoc::formatdoc! {"
-            Requested sorting order for the given search query.
+            Perform server-side sorting on the given query.
 
             Sorting in descending order can be done by prefixing a given term
-            with '-'; otherwise, sorting is performed in ascending fashion by
-            default.
+            with '-'; otherwise, sorting is performed in ascending order by
+            default. Note that using a single descending order argument requires
+            using '=' between the option and value such as `-S=-status` or
+            `--sort=-summary`.
 
             Multiple terms are supported in a comma-separated list which will
-            cause the data response to be sorted by the each term in order.
+            cause the data response to be sorted by the each term in order. For
+            example, the value `reporter,-status` will sort by the bug reporter
+            in ascending order and then by status in descending order.
 
             Note that if an invalid sorting request is made, bugzilla will fall
             back to its default which is sorting by bug ID. Also, some sorting

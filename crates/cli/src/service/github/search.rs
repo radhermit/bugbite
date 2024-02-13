@@ -32,11 +32,13 @@ struct Params {
         help_heading = "Search related",
         value_name = "TERM",
         long_help = indoc::formatdoc! {"
-            Requested sorting order for the given search query.
+            Perform server-side sorting on the given query.
 
             Sorting in descending order can be done by prefixing a given term
-            with '-'; otherwise, sorting is performed in ascending fashion by
-            default.
+            with '-'; otherwise, sorting is performed in ascending order by
+            default. Note that using a single descending order argument requires
+            using '=' between the option and value such as `-S=-created` or
+            `--sort=-comments`.
 
             Possible values:
               {}", SearchTerm::VARIANTS.iter().join("\n  ")}
