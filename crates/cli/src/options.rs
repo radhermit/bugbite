@@ -46,7 +46,7 @@ impl Command {
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Config")]
-#[group(requires = "connection", conflicts_with = "Service")]
+#[group(requires = "connection", conflicts_with = "ServiceOpts")]
 struct ConfigOpts {
     /// use a custom config
     #[arg(long)]
@@ -58,7 +58,7 @@ struct ConfigOpts {
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Service")]
-#[group(requires_all = ["base", "service"], conflicts_with = "Config")]
+#[group(requires_all = ["base", "service"], conflicts_with = "ConfigOpts")]
 struct ServiceOpts {
     /// base service URL
     #[arg(short, long)]
