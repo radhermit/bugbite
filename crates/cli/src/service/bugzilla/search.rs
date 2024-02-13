@@ -58,7 +58,7 @@ struct Params {
 
     /// search using quicksearch syntax
     #[arg(
-        short,
+        short = 'Q',
         long,
         help_heading = "Search related",
         long_help = indoc::indoc! {"
