@@ -14,7 +14,7 @@ use tokio::runtime::Handle;
 use tokio::task;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::utils::{launch_browser, COLUMNS};
+use crate::utils::{launch_browser, possible_values, COLUMNS};
 
 /// Available search parameters.
 #[skip_serializing_none]
@@ -40,8 +40,8 @@ struct Params {
             using '=' between the option and value such as `-S=-created` or
             `--sort=-comments`.
 
-            Possible values:
-              {}", SearchTerm::VARIANTS.iter().join("\n  ")}
+            possible values:
+            {}", possible_values(SearchTerm::VARIANTS)}
     )]
     sort: Option<SearchOrder>,
 
