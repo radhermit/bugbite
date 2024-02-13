@@ -18,7 +18,7 @@ name = "bite"
 path = "src/main.rs"
 
 [[bin]]
-name = "bite-mangen"
+name = "mangen"
 path = "src/mangen.rs"
 required-features = ["doc"]
 

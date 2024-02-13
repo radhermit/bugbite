@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # Create a vendored rust release tarball.
+#
+# Requires a single argument of the target package name with an optional second
+# argument of a directory to generate man pages into.
 
 set -e
 
 PACKAGE=$1
+MAN_DIR=$2
 
 # build crate
 cargo package -p ${PACKAGE}
@@ -39,6 +43,14 @@ EOF
 popd >/dev/null
 # target/package
 popd >/dev/null
+
+if [[ -n ${MAN_DIR} ]]; then
+	# create man pages
+	mkdir -p ${MAN_DIR}
+	export OUT_DIR=${MAN_DIR}
+	cargo run --features doc --bin mangen -p ${PACKAGE}
+	mv ${MAN_DIR} target/package
+fi
 
 # create release tarball
 tar -C target/package -cv -I 'xz -9 -T0' -f ${RELEASE}.tar.xz ${RELEASE}
