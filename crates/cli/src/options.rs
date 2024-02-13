@@ -52,7 +52,7 @@ struct ConfigOpts {
     #[arg(long)]
     config: Option<String>,
     /// use configured connection
-    #[arg(short, long)]
+    #[arg(short, long, env = "BUGBITE_CONNECTION")]
     connection: Option<String>,
 }
 
@@ -61,12 +61,13 @@ struct ConfigOpts {
 #[group(requires_all = ["base", "service"], conflicts_with = "ConfigOpts")]
 struct ServiceOpts {
     /// base service URL
-    #[arg(short, long)]
+    #[arg(short, long, env = "BUGBITE_BASE")]
     base: Option<String>,
     /// service type
     #[arg(
         short,
         long,
+        env = "BUGBITE_SERVICE",
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(ServiceKind::VARIANTS)
             .map(|s| s.parse::<ServiceKind>().unwrap()),
