@@ -22,6 +22,9 @@ use crate::Error;
     DeserializeFromStr,
     SerializeDisplay,
     Debug,
+    Eq,
+    PartialEq,
+    Hash,
     Copy,
     Clone,
 )]
