@@ -2,20 +2,23 @@ use bugbite::client::Client;
 use bugbite::service::{Config, ServiceKind};
 use bugbite::services::SERVICES;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
-use clap::Args;
+use clap::{Args, CommandFactory};
 use clap::{Parser, Subcommand};
+use clap_verbosity_flag::Verbosity;
 use strum::VariantNames;
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[command(disable_help_flag = true)]
 pub(crate) struct Command {
+    #[command(flatten)]
+    _verbosity: Verbosity,
     #[clap(flatten)]
     service_opts: ServiceOpts,
     #[command(subcommand)]
     subcmd: Remaining,
 }
 
-#[derive(Subcommand)]
+#[derive(Debug, Subcommand)]
 enum Remaining {
     #[command(external_subcommand)]
     Remaining(Vec<String>),
@@ -24,19 +27,25 @@ enum Remaining {
 impl Command {
     pub(crate) fn service() -> anyhow::Result<Config> {
         let service = if let Ok(cmd) = Command::try_parse() {
-            let connection = cmd.service_opts.connection;
-            let base = cmd.service_opts.base;
-            let service = cmd.service_opts.service;
+            let connection = &cmd.service_opts.connection;
+            let base = &cmd.service_opts.base;
+            let service = &cmd.service_opts.service;
             match (connection, base, service) {
-                (Some(name), None, None) => SERVICES.get(&name)?.clone(),
-                (None, Some(base), Some(service)) => service.create(&base)?,
-                // use a stub URL so `bite -s service -h` can be used to show help output
-                (None, None, Some(service)) => service.create("https://fake/url")?,
+                (Some(name), None, None) => SERVICES.get(name)?.clone(),
+                (None, Some(base), Some(service)) => service.create(base)?,
                 // TODO: use default service from config if it exists
-                _ => SERVICES.get("gentoo")?.clone(),
+                (None, None, None) => SERVICES.get("gentoo")?.clone(),
+                _ => panic!("misconfigured service option restrictions"),
             }
         } else {
-            SERVICES.get("gentoo")?.clone()
+            let cmd = Self::command().ignore_errors(true);
+            let args = cmd.get_matches();
+            if let Some(service) = args.get_one::<ServiceKind>("service") {
+                // use a stub URL so `bite -s service -h` can be used to show help output
+                service.create("https://fake/url")?
+            } else {
+                SERVICES.get("gentoo")?.clone()
+            }
         };
 
         Ok(service)
