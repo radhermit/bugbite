@@ -62,6 +62,7 @@ impl ServiceCommand {
         let service = match (connection, base, service) {
             (Some(name), None, None) => SERVICES.get(name)?.clone(),
             (None, Some(base), Some(service)) => service.create(base)?,
+            (None, Some(base), None) => ServiceKind::default().create(base)?,
             (None, None, None) => match subcmd_kind {
                 // use stub URL so `bite service_subcmd -h` can be used
                 Some(kind) => kind.create("https://fake/url")?,
@@ -102,7 +103,7 @@ struct ServiceOpts {
     )]
     connection: Option<String>,
     /// base service URL
-    #[arg(short, long, env = "BUGBITE_BASE", requires = "service")]
+    #[arg(short, long, env = "BUGBITE_BASE")]
     base: Option<String>,
     /// service type
     #[arg(
