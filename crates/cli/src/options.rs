@@ -76,6 +76,8 @@ impl ServiceCommand {
         // inject subcommand for requested service type if missing
         if let Some(kind) = subcmd_kind {
             if kind != &selected {
+                // output help in case `-h/--help` is specified
+                Command::parse();
                 anyhow::bail!("{subcmd} not compatible with service: {selected}");
             }
         } else {
