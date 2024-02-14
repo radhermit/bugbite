@@ -25,23 +25,26 @@ enum Remaining {
 
 impl Command {
     pub(crate) fn service() -> anyhow::Result<service::Config> {
-        let cmd = Command::parse();
-        let config = cmd.config_opts.config;
-        let connection = cmd.config_opts.connection;
-        let base = cmd.service_opts.base;
-        let service = cmd.service_opts.service;
-        let service = match (config, connection, base, service) {
-            (None, Some(name), None, None) => CONFIG.get(&name)?.clone(),
-            (Some(path), Some(name), None, None) => {
-                let config = Config::try_new(path)?;
-                let service = config.get(&name)?;
-                service.clone()
+        let service = if let Ok(cmd) = Command::try_parse() {
+            let config = cmd.config_opts.config;
+            let connection = cmd.config_opts.connection;
+            let base = cmd.service_opts.base;
+            let service = cmd.service_opts.service;
+            match (config, connection, base, service) {
+                (None, Some(name), None, None) => CONFIG.get(&name)?.clone(),
+                (Some(path), Some(name), None, None) => {
+                    let config = Config::try_new(path)?;
+                    let service = config.get(&name)?;
+                    service.clone()
+                }
+                (None, None, Some(base), Some(service)) => service.create(&base)?,
+                // use a stub URL so `bite -s service -h` can be used to show help output
+                (None, None, None, Some(service)) => service.create("https://fake/url")?,
+                // TODO: use default service from config if it exists
+                _ => CONFIG.get("gentoo")?.clone(),
             }
-            (None, None, Some(base), Some(service)) => service.create(&base)?,
-            // use a stub URL so `bite -s service -h` can be used to show help output
-            (None, None, None, Some(service)) => service.create("https://fake/url")?,
-            // TODO: use default service from config if it exists
-            _ => CONFIG.get("gentoo")?.clone(),
+        } else {
+            CONFIG.get("gentoo")?.clone()
         };
 
         Ok(service)
