@@ -5,7 +5,7 @@ use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 
-use crate::service;
+use crate::service::{self, ServiceKind};
 use crate::Error;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -34,34 +34,18 @@ impl Config {
 
 /// Pre-defined services.
 pub static CONFIG: Lazy<Config> = Lazy::new(|| {
-    use crate::service::ServiceKind::*;
-    Config {
-        services: [
-            (
-                "gentoo",
-                BugzillaRestV1.create("https://bugs.gentoo.org/").unwrap(),
-            ),
-            (
-                "gcc",
-                BugzillaRestV1
-                    .create("https://gcc.gnu.org/bugzilla/")
-                    .unwrap(),
-            ),
-            (
-                "linux",
-                BugzillaRestV1
-                    .create("https://bugzilla.kernel.org/")
-                    .unwrap(),
-            ),
-            (
-                "pkgcraft",
-                Github
-                    .create("https://github.com/pkgcraft/pkgcraft/")
-                    .unwrap(),
-            ),
-        ]
-        .into_iter()
-        .map(|(name, service)| (name.to_string(), service))
-        .collect(),
-    }
+    use ServiceKind::*;
+    let services = [
+        (BugzillaRestV1, "gentoo", "https://bugs.gentoo.org"),
+        (BugzillaRestV1, "gcc", "https://gcc.gnu.org.bugzilla/"),
+        (BugzillaRestV1, "linux", "https://bugzilla.kernel.org/"),
+        (Github, "bugbite", "https://github.com/radhermit/bugbite/"),
+    ]
+    .into_iter()
+    .map(|(kind, name, base)| {
+        let service = kind.create(base).unwrap_or_else(|e| panic!("{e}"));
+        (name.to_string(), service)
+    })
+    .collect();
+    Config { services }
 });
