@@ -7,8 +7,7 @@ mod service;
 mod utils;
 
 fn err_exit(err: anyhow::Error) -> anyhow::Result<ExitCode> {
-    let cmd = env!("CARGO_BIN_NAME");
-    eprintln!("{cmd}: error: {err}");
+    eprintln!("bite: error: {err}");
     Ok(ExitCode::from(2))
 }
 

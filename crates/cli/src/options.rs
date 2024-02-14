@@ -71,7 +71,7 @@ impl ServiceCommand {
         };
 
         // construct new args for the main command to parse
-        let mut args = vec![env!("CARGO_BIN_NAME").to_string()];
+        let mut args = vec!["bite".to_string()];
 
         // inject subcommand for requested service type if missing
         if let Some(kind) = subcmd_kind {
