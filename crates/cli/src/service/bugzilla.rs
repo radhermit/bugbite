@@ -31,7 +31,6 @@ impl Command {
     }
 }
 
-#[allow(clippy::large_enum_variant)]
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
     /// Get attachments from bugs

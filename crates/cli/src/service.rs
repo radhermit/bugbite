@@ -7,7 +7,6 @@ use crate::options::Options;
 pub(crate) mod bugzilla;
 pub(crate) mod github;
 
-#[allow(clippy::large_enum_variant)]
 #[derive(Debug, clap::Subcommand)]
 pub(crate) enum Subcommand {
     Bugzilla(bugzilla::Command),

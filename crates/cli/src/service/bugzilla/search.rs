@@ -143,7 +143,7 @@ pub(super) struct Command {
     browser: bool,
 
     #[clap(flatten)]
-    params: Params,
+    params: Box<Params>,
 }
 
 impl Command {
