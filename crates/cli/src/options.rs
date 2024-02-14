@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::io::stderr;
 use std::process::ExitCode;
 
-use bugbite::client::Client;
 use bugbite::service::{Config, ServiceKind};
 use bugbite::services::SERVICES;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
@@ -156,13 +155,6 @@ pub(crate) struct Options {
     auth: Authentication,
 }
 
-impl Options {
-    pub(super) fn collapse(self, service: Config) -> anyhow::Result<Client> {
-        let client = Client::builder().build(service)?;
-        Ok(client)
-    }
-}
-
 /// command line interface for bugbite
 #[derive(Debug, Parser)]
 #[command(
@@ -199,7 +191,6 @@ impl Command {
             .init();
 
         info!("{service}");
-        let client = self.options.collapse(service)?;
-        self.subcmd.run(client)
+        self.subcmd.run(self.options, service)
     }
 }

@@ -1,6 +1,9 @@
 use std::process::ExitCode;
 
 use bugbite::client::Client;
+use bugbite::service;
+
+use crate::options::Options;
 
 mod get;
 mod modify;
@@ -13,7 +16,12 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(
+        self,
+        _options: Options,
+        service: service::Config,
+    ) -> anyhow::Result<ExitCode> {
+        let client = Client::builder().build(service)?;
         self.cmd.run(client)
     }
 }

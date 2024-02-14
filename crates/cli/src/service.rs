@@ -1,6 +1,8 @@
 use std::process::ExitCode;
 
-use bugbite::client::Client;
+use bugbite::service;
+
+use crate::options::Options;
 
 pub(crate) mod bugzilla;
 pub(crate) mod github;
@@ -13,10 +15,14 @@ pub(crate) enum Subcommand {
 }
 
 impl Subcommand {
-    pub(crate) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+    pub(crate) fn run(
+        self,
+        options: Options,
+        service: service::Config,
+    ) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Bugzilla(cmd) => cmd.run(client),
-            Self::Github(cmd) => cmd.run(client),
+            Self::Bugzilla(cmd) => cmd.run(options, service),
+            Self::Github(cmd) => cmd.run(options, service),
         }
     }
 }
