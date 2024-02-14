@@ -15,6 +15,14 @@ impl Services {
             .get(name)
             .ok_or_else(|| Error::InvalidValue(format!("unknown service: {name}")))
     }
+
+    pub fn get_raw(&self, name: &str) -> crate::Result<(ServiceKind, String)> {
+        let service = self
+            .services
+            .get(name)
+            .ok_or_else(|| Error::InvalidValue(format!("unknown service: {name}")))?;
+        Ok((service.kind(), service.base().to_string()))
+    }
 }
 
 /// Pre-defined services.
