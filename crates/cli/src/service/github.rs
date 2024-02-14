@@ -1,7 +1,8 @@
 use std::process::ExitCode;
 
 use bugbite::client::Client;
-use bugbite::service;
+use bugbite::service::ServiceKind;
+use tracing::info;
 
 use crate::options::Options;
 
@@ -11,6 +12,9 @@ mod search;
 
 #[derive(Debug, clap::Args)]
 pub(crate) struct Command {
+    /// project to target
+    #[arg(short, long)]
+    project: Option<String>,
     #[command(subcommand)]
     cmd: Subcommand,
 }
@@ -19,8 +23,14 @@ impl Command {
     pub(super) fn run(
         self,
         _options: Options,
-        service: service::Config,
+        kind: ServiceKind,
+        base: String,
     ) -> anyhow::Result<ExitCode> {
+        let service = match self.project {
+            Some(project) => kind.create(&format!("https://github.com/{project}"))?,
+            None => kind.create(&base)?,
+        };
+        info!("{service}");
         let client = Client::builder().build(service)?;
         self.cmd.run(client)
     }

@@ -1,7 +1,8 @@
 use std::process::ExitCode;
 
 use bugbite::client::Client;
-use bugbite::service;
+use bugbite::service::ServiceKind;
+use tracing::info;
 
 use crate::options::Options;
 
@@ -20,8 +21,11 @@ impl Command {
     pub(super) fn run(
         self,
         _options: Options,
-        service: service::Config,
+        kind: ServiceKind,
+        base: String,
     ) -> anyhow::Result<ExitCode> {
+        let service = kind.create(&base)?;
+        info!("{service}");
         let client = Client::builder().build(service)?;
         self.cmd.run(client)
     }

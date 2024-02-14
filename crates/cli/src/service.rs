@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::service;
+use bugbite::service::ServiceKind;
 
 use crate::options::Options;
 
@@ -18,11 +18,12 @@ impl Subcommand {
     pub(crate) fn run(
         self,
         options: Options,
-        service: service::Config,
+        kind: ServiceKind,
+        base: String,
     ) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Bugzilla(cmd) => cmd.run(options, service),
-            Self::Github(cmd) => cmd.run(options, service),
+            Self::Bugzilla(cmd) => cmd.run(options, kind, base),
+            Self::Github(cmd) => cmd.run(options, kind, base),
         }
     }
 }

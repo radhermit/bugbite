@@ -2,13 +2,12 @@ use std::collections::HashMap;
 use std::io::stderr;
 use std::process::ExitCode;
 
-use bugbite::service::{Config, ServiceKind};
+use bugbite::service::ServiceKind;
 use bugbite::services::SERVICES;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
 use strum::{IntoEnumIterator, VariantNames};
-use tracing::info;
 use tracing_log::AsTrace;
 
 use crate::utils::COLUMNS;
@@ -31,7 +30,7 @@ enum Remaining {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service() -> anyhow::Result<(Config, Vec<String>)> {
+    pub(crate) fn service() -> anyhow::Result<(ServiceKind, String, Vec<String>)> {
         // create mapping for service kind to subcommand names
         let subcmds: HashMap<ServiceKind, String> = ServiceKind::iter()
             .map(|x| match x.as_ref().split_once('-') {
@@ -58,19 +57,15 @@ impl ServiceCommand {
             .map(|(k, _)| k);
 
         // determine service type
-        let service = match (connection, base, service) {
-            (Some(name), None, None) => SERVICES.get(name)?.clone(),
-            (None, Some(base), Some(service)) => service.create(base)?,
-            (None, Some(base), None) => ServiceKind::default().create(base)?,
+        let (selected, base) = match (connection, base, service) {
+            (Some(name), None, None) => SERVICES.get_raw(name)?,
+            (None, Some(base), Some(service)) => (*service, base.clone()),
+            (None, Some(base), None) => (ServiceKind::default(), base.clone()),
             (None, None, None) => match subcmd_kind {
-                Some(kind) => {
-                    // support help output for usage such as `bite bugzilla -h`
-                    Command::parse();
-                    // TODO: add mapping for default services for each type?
-                    anyhow::bail!("no default service: {kind}");
-                }
+                // TODO: use default service for type from config if it exists
+                Some(kind) => (*kind, "default".to_string()),
                 // TODO: use default service from config if it exists
-                None => SERVICES.get("gentoo")?.clone(),
+                None => SERVICES.get_raw("gentoo")?,
             },
             _ => panic!("misconfigured service option restrictions"),
         };
@@ -80,17 +75,16 @@ impl ServiceCommand {
 
         // inject subcommand for requested service type if missing
         if let Some(kind) = subcmd_kind {
-            let selected = &service.kind();
-            if kind != selected {
+            if kind != &selected {
                 anyhow::bail!("{subcmd} not compatible with service: {selected}");
             }
         } else {
-            let cmd = subcmds.get(&service.kind()).unwrap();
+            let cmd = subcmds.get(&selected).unwrap();
             args.push(cmd.clone());
         }
 
         args.extend(remaining);
-        Ok((service, args))
+        Ok((selected, base, args))
     }
 }
 
@@ -180,7 +174,7 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, service: Config) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(self, kind: ServiceKind, base: String) -> anyhow::Result<ExitCode> {
         // custom log event formatter
         let format = tracing_subscriber::fmt::format()
             .with_level(true)
@@ -194,7 +188,6 @@ impl Command {
             .with_writer(stderr)
             .init();
 
-        info!("{service}");
-        self.subcmd.run(self.options, service)
+        self.subcmd.run(self.options, kind, base)
     }
 }
