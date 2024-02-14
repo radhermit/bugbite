@@ -63,8 +63,12 @@ impl ServiceCommand {
             (None, Some(base), Some(service)) => service.create(base)?,
             (None, Some(base), None) => ServiceKind::default().create(base)?,
             (None, None, None) => match subcmd_kind {
-                // use stub URL so `bite service_subcmd -h` can be used
-                Some(kind) => kind.create("https://fake/url")?,
+                Some(kind) => {
+                    // support help output for usage such as `bite bugzilla -h`
+                    Command::parse();
+                    // TODO: add mapping for default services for each type?
+                    anyhow::bail!("no default service: {kind}");
+                }
                 // TODO: use default service from config if it exists
                 None => SERVICES.get("gentoo")?.clone(),
             },
