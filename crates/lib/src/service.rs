@@ -22,6 +22,7 @@ use crate::Error;
     DeserializeFromStr,
     SerializeDisplay,
     Debug,
+    Default,
     Eq,
     PartialEq,
     Hash,
@@ -32,6 +33,7 @@ use crate::Error;
 pub enum ServiceKind {
     /// Targets the REST API v1 provided by bugzilla-5.0 and up.
     /// API docs: https://bugzilla.readthedocs.io/en/latest/api/
+    #[default]
     BugzillaRestV1,
     Github,
 }
