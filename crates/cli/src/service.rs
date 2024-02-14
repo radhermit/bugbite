@@ -1,37 +1,22 @@
 use std::process::ExitCode;
 
-use bugbite::service::{Config, ServiceKind};
-use clap::Parser;
-use clap_verbosity_flag::Verbosity;
+use bugbite::client::Client;
 
 pub(crate) mod bugzilla;
 pub(crate) mod github;
 
 #[allow(clippy::large_enum_variant)]
-pub(super) enum Command {
+#[derive(Debug, clap::Subcommand)]
+pub(crate) enum Subcommand {
     Bugzilla(bugzilla::Command),
     Github(github::Command),
 }
 
-impl Command {
-    pub(super) fn parse(service: &Config) -> Self {
-        match service.kind() {
-            ServiceKind::BugzillaRestV1 => Self::Bugzilla(bugzilla::Command::parse()),
-            ServiceKind::Github => Self::Github(github::Command::parse()),
-        }
-    }
-
-    pub(super) fn verbosity(&self) -> &Verbosity {
+impl Subcommand {
+    pub(crate) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Bugzilla(cmd) => &cmd.verbosity,
-            Self::Github(cmd) => &cmd.verbosity,
-        }
-    }
-
-    pub(super) fn run(self, service: Config) -> anyhow::Result<ExitCode> {
-        match self {
-            Self::Bugzilla(cmd) => cmd.run(service),
-            Self::Github(cmd) => cmd.run(service),
+            Self::Bugzilla(cmd) => cmd.run(client),
+            Self::Github(cmd) => cmd.run(client),
         }
     }
 }

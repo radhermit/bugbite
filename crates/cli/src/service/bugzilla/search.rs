@@ -147,7 +147,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(mut self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(mut self, client: Client) -> anyhow::Result<ExitCode> {
         let mut query = QueryBuilder::new();
 
         if let Some(value) = self.params.created.take() {

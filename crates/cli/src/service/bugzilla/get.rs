@@ -32,7 +32,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         let comments = !self.options.no_comments;
         let attachments = !self.options.no_attachments;
 

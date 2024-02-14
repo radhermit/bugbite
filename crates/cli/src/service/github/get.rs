@@ -11,7 +11,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         let issues = task::block_in_place(move || {
             Handle::current().block_on(async { client.get(&self.ids, false, false).await })
         })?;

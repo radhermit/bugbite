@@ -1,40 +1,20 @@
 use std::process::ExitCode;
 
 use bugbite::client::Client;
-use clap::Parser;
-use clap_verbosity_flag::Verbosity;
-
-use crate::options::Options;
-use crate::service::Config;
 
 mod get;
 mod modify;
 mod search;
 
-/// command line interface for github
-#[derive(Debug, Parser)]
-#[command(
-    name = "bite-github",
-    version,
-    long_about = None,
-    disable_help_subcommand = true,
-)]
+#[derive(Debug, clap::Args)]
 pub(crate) struct Command {
-    #[command(flatten)]
-    pub(super) verbosity: Verbosity,
-
-    #[clap(flatten)]
-    options: Options,
-
-    // positional
     #[command(subcommand)]
-    subcmd: Subcommand,
+    cmd: Subcommand,
 }
 
 impl Command {
-    pub(super) fn run(self, config: Config) -> anyhow::Result<ExitCode> {
-        let client = self.options.collapse(config)?;
-        self.subcmd.run(&client)
+    pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+        self.cmd.run(client)
     }
 }
 
@@ -52,12 +32,11 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
-        use Subcommand::*;
+    fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         match self {
-            Get(cmd) => cmd.run(client),
-            Modify(cmd) => cmd.run(client),
-            Search(cmd) => cmd.run(client),
+            Self::Get(cmd) => cmd.run(client),
+            Self::Modify(cmd) => cmd.run(client),
+            Self::Search(cmd) => cmd.run(client),
         }
     }
 }

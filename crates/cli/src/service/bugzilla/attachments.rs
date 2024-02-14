@@ -31,7 +31,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, _client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(self, _client: Client) -> anyhow::Result<ExitCode> {
         Ok(ExitCode::SUCCESS)
     }
 }
