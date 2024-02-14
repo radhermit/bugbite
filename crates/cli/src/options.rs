@@ -1,6 +1,6 @@
 use bugbite::client::Client;
-use bugbite::config::{Config, CONFIG};
-use bugbite::service::{self, ServiceKind};
+use bugbite::service::{Config, ServiceKind};
+use bugbite::services::SERVICES;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use clap::{Parser, Subcommand};
@@ -9,8 +9,6 @@ use strum::VariantNames;
 #[derive(Parser)]
 #[command(disable_help_flag = true)]
 pub(crate) struct Command {
-    #[clap(flatten)]
-    config_opts: ConfigOpts,
     #[clap(flatten)]
     service_opts: ServiceOpts,
     #[command(subcommand)]
@@ -24,27 +22,21 @@ enum Remaining {
 }
 
 impl Command {
-    pub(crate) fn service() -> anyhow::Result<service::Config> {
+    pub(crate) fn service() -> anyhow::Result<Config> {
         let service = if let Ok(cmd) = Command::try_parse() {
-            let config = cmd.config_opts.config;
-            let connection = cmd.config_opts.connection;
+            let connection = cmd.service_opts.connection;
             let base = cmd.service_opts.base;
             let service = cmd.service_opts.service;
-            match (config, connection, base, service) {
-                (None, Some(name), None, None) => CONFIG.get(&name)?.clone(),
-                (Some(path), Some(name), None, None) => {
-                    let config = Config::try_new(path)?;
-                    let service = config.get(&name)?;
-                    service.clone()
-                }
-                (None, None, Some(base), Some(service)) => service.create(&base)?,
+            match (connection, base, service) {
+                (Some(name), None, None) => SERVICES.get(&name)?.clone(),
+                (None, Some(base), Some(service)) => service.create(&base)?,
                 // use a stub URL so `bite -s service -h` can be used to show help output
-                (None, None, None, Some(service)) => service.create("https://fake/url")?,
+                (None, None, Some(service)) => service.create("https://fake/url")?,
                 // TODO: use default service from config if it exists
-                _ => CONFIG.get("gentoo")?.clone(),
+                _ => SERVICES.get("gentoo")?.clone(),
             }
         } else {
-            CONFIG.get("gentoo")?.clone()
+            SERVICES.get("gentoo")?.clone()
         };
 
         Ok(service)
@@ -52,29 +44,25 @@ impl Command {
 }
 
 #[derive(Debug, Args)]
-#[clap(next_help_heading = "Config")]
-#[group(requires = "connection", conflicts_with = "ServiceOpts")]
-struct ConfigOpts {
-    /// use a custom config
-    #[arg(long)]
-    config: Option<String>,
-    /// use configured connection
-    #[arg(short, long, env = "BUGBITE_CONNECTION")]
-    connection: Option<String>,
-}
-
-#[derive(Debug, Args)]
 #[clap(next_help_heading = "Service")]
-#[group(requires_all = ["base", "service"], conflicts_with = "ConfigOpts")]
 struct ServiceOpts {
+    /// use pre-configured connection
+    #[arg(
+        short,
+        long,
+        env = "BUGBITE_CONNECTION",
+        conflicts_with_all = ["base", "service"]
+    )]
+    connection: Option<String>,
     /// base service URL
-    #[arg(short, long, env = "BUGBITE_BASE")]
+    #[arg(short, long, env = "BUGBITE_BASE", requires = "service")]
     base: Option<String>,
     /// service type
     #[arg(
         short,
         long,
         env = "BUGBITE_SERVICE",
+        requires = "base",
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(ServiceKind::VARIANTS)
             .map(|s| s.parse::<ServiceKind>().unwrap()),
@@ -113,8 +101,6 @@ struct Authentication {
 #[derive(Debug, Args)]
 pub(crate) struct Options {
     #[clap(flatten)]
-    _config: ConfigOpts,
-    #[clap(flatten)]
     _service: ServiceOpts,
     #[clap(flatten)]
     connection: Connection,
@@ -123,7 +109,7 @@ pub(crate) struct Options {
 }
 
 impl Options {
-    pub(super) fn collapse(self, service: service::Config) -> anyhow::Result<Client> {
+    pub(super) fn collapse(self, service: Config) -> anyhow::Result<Client> {
         let client = Client::builder().build(service)?;
         Ok(client)
     }

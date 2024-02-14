@@ -3,8 +3,6 @@ pub enum Error {
     #[error("{0}")]
     Auth(String),
     #[error("{0}")]
-    Config(String),
-    #[error("{0}")]
     InvalidValue(String),
     #[error("{0}")]
     Json(serde_json::Error),

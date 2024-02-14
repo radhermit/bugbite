@@ -3,9 +3,9 @@ use std::collections::HashSet;
 
 pub mod args;
 pub mod client;
-pub mod config;
 pub mod error;
 pub mod service;
+pub mod services;
 pub mod time;
 pub mod traits;
 
