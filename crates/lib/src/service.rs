@@ -67,7 +67,7 @@ impl Config {
         }
     }
 
-    fn base(&self) -> &Url {
+    pub fn base(&self) -> &Url {
         match self {
             Self::BugzillaRestV1(config) => config.base(),
             Self::Github(config) => config.base(),
