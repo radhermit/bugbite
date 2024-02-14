@@ -8,11 +8,23 @@ mod options;
 mod service;
 mod utils;
 
+fn err_exit(err: anyhow::Error) -> anyhow::Result<ExitCode> {
+    let cmd = env!("CARGO_BIN_NAME");
+    eprintln!("{cmd}: error: {err}");
+    Ok(ExitCode::from(2))
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
     // TODO: reset SIGPIPE behavior since rust ignores it by default
 
-    let service = options::Command::service()?;
+    // parse initial options to determine the service type
+    let service = match options::Command::service() {
+        Ok(service) => service,
+        Err(e) => return err_exit(e),
+    };
+
+    // re-parse all args using the service parser
     let cmd = service::Command::parse(&service);
 
     // custom log event formatter
@@ -29,8 +41,5 @@ async fn main() -> anyhow::Result<ExitCode> {
         .init();
 
     info!("{service}");
-    cmd.run(service).or_else(|err| {
-        eprintln!("bite: error: {err}");
-        Ok(ExitCode::from(2))
-    })
+    cmd.run(service).or_else(err_exit)
 }
