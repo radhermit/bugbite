@@ -139,13 +139,14 @@ impl fmt::Display for Bug {
         if !self.comments.is_empty() {
             writeln!(f, "Comments: {}", self.comments.len())?;
         }
+
         if !self.attachments.is_empty() {
-            writeln!(f, "Attachment: {}", self.attachments.len())?;
+            writeln!(f, "Attachment: {}\n", self.attachments.len())?;
+            for attachment in &self.attachments {
+                write!(f, "{attachment}")?;
+            }
         }
 
-        for attachment in &self.attachments {
-            write!(f, "\n{attachment}")?;
-        }
         for comment in &self.comments {
             write!(f, "\n{comment}")?;
         }
