@@ -1,3 +1,4 @@
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::client::bugzilla::Client;
@@ -36,9 +37,10 @@ impl Command {
         let comments = !self.options.no_comments;
         let attachments = !self.options.no_attachments;
         let bugs = async_block!(client.get(&self.ids, comments, attachments))?;
+        let mut stdout = stdout().lock();
 
         for bug in bugs {
-            print!("{bug}");
+            write!(stdout, "{bug}")?;
         }
 
         Ok(ExitCode::SUCCESS)

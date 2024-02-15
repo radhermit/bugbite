@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::client::bugzilla::Client;
@@ -38,10 +39,12 @@ impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         let dir = self.options.dir.unwrap_or(current_dir()?);
         let attachments = async_block!(client.attachments(&self.ids))?;
+        let mut stdout = stdout().lock();
+
         if self.options.view {
             for attachment in attachments {
                 // TODO: support auto-decompressing standard archive formats
-                print!("{}", attachment.read());
+                write!(stdout, "{}", attachment.read())?;
             }
         } else {
             fs::create_dir_all(&dir)?;
@@ -51,7 +54,7 @@ impl Command {
                 if path.exists() {
                     anyhow::bail!("file already exists: {path}");
                 }
-                println!("Saving attachment: {path}");
+                writeln!(stdout, "Saving attachment: {path}")?;
                 fs::write(&path, attachment.data())?;
             }
         }

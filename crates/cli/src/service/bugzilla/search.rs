@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::io::{stdout, IsTerminal};
+use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::Csv;
@@ -193,6 +193,7 @@ impl Command {
         }
 
         let bugs = async_block!(client.search(query))?;
+        let mut stdout = stdout().lock();
         let mut count = 0;
 
         for bug in bugs {
@@ -201,14 +202,14 @@ impl Command {
             if line.len() > *COLUMNS {
                 // truncate line to the terminal width of graphemes
                 let mut iter = UnicodeSegmentation::graphemes(line.as_str(), true).take(*COLUMNS);
-                println!("{}", iter.join(""));
+                writeln!(stdout, "{}", iter.join(""))?;
             } else {
-                println!("{line}");
+                writeln!(stdout, "{line}")?;
             }
         }
 
-        if count > 0 && stdout().is_terminal() {
-            println!(" * {count} found");
+        if count > 0 && stdout.is_terminal() {
+            writeln!(stdout, " * {count} found")?;
         }
 
         Ok(ExitCode::SUCCESS)

@@ -1,3 +1,4 @@
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::client::github::Client;
@@ -13,9 +14,10 @@ pub(super) struct Command {
 impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         let issues = async_block!(client.get(&self.ids, false, false))?;
+        let mut stdout = stdout().lock();
 
         for issue in issues {
-            print!("{issue}");
+            write!(stdout, "{issue}")?;
         }
 
         Ok(ExitCode::SUCCESS)
