@@ -200,11 +200,11 @@ pub(crate) struct Options {
     auth: Authentication,
 }
 
-/// command line tool for mangling bugs, issues, and tickets
 #[derive(Debug, Parser)]
 #[command(
     name = "bite",
     version,
+    about = "command line tool for mangling bugs, issues, and tickets",
     long_about = indoc::indoc! {"
         Bite is a command line tool that aids interaction with a subset of the
         myriad bug, issue, and ticket trackers accessible online. It tries to
