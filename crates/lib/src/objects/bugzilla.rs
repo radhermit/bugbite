@@ -1,6 +1,7 @@
 use std::fmt;
 
 use chrono::prelude::*;
+use humansize::{format_size, BINARY};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -9,12 +10,32 @@ use super::Item;
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Attachment {
     id: u64,
+    bug_id: u64,
     file_name: String,
+    summary: String,
+    size: u64,
+    creator: String,
+    content_type: String,
+    #[serde(rename = "creation_time")]
+    created: DateTime<Utc>,
+    #[serde(rename = "last_change_time")]
+    updated: DateTime<Utc>,
+    #[serde(default)]
+    data: Vec<u8>,
 }
 
 impl fmt::Display for Attachment {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "Attachment: [{}] [{}]", self.id, self.file_name)?;
+        writeln!(
+            f,
+            "Attachment: [{}] [{}] ({}, {}) by {}, {}",
+            self.id,
+            self.file_name,
+            format_size(self.size, BINARY),
+            self.content_type,
+            self.creator,
+            self.updated
+        )?;
         Ok(())
     }
 }
