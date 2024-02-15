@@ -231,6 +231,7 @@ dependencies = [
  "indexmap",
  "indoc",
  "itertools",
+ "libc",
  "once_cell",
  "predicates",
  "serde",
