@@ -7,6 +7,8 @@ use crate::service::ServiceKind;
 use crate::traits::{Params, WebService};
 use crate::Error;
 
+mod attachments;
+mod comments;
 mod get;
 pub mod search;
 

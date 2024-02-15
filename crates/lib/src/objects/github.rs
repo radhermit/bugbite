@@ -14,7 +14,7 @@ impl Issue {
 
 impl From<Issue> for Item {
     fn from(value: Issue) -> Self {
-        Item::Github(value)
+        Item::Github(Box::new(value))
     }
 }
 

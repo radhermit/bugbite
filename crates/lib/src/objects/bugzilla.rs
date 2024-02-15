@@ -1,5 +1,6 @@
 use std::fmt;
 
+use chrono::prelude::*;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -19,12 +20,24 @@ impl fmt::Display for Attachment {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Comment {
+    id: u64,
+    count: u64,
     text: String,
+    creator: String,
+    #[serde(rename = "creation_time")]
+    created: DateTime<Utc>,
 }
 
 impl fmt::Display for Comment {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "{}", self.text)?;
+        if self.count != 0 {
+            write!(f, "Comment #{} ", self.count)?;
+        } else {
+            write!(f, "Description ")?;
+        }
+        writeln!(f, "by {}, {}", self.creator, self.created)?;
+        writeln!(f, "{}", "-".repeat(80))?;
+        writeln!(f, "{}", self.text.trim())?;
         Ok(())
     }
 }
@@ -36,19 +49,24 @@ pub struct Bug {
     assigned_to: Option<String>,
     #[serde(rename = "creator")]
     reporter: Option<String>,
+    #[serde(rename = "creation_time")]
+    created: Option<DateTime<Utc>>,
+    #[serde(rename = "last_change_time")]
+    updated: Option<DateTime<Utc>>,
     #[serde(rename = "alias")]
     aliases: Vec<String>,
     summary: Option<String>,
     status: Option<String>,
+    whiteboard: Option<String>,
     cc: Vec<String>,
     blocks: Vec<u64>,
-    comments: Vec<Comment>,
-    attachments: Vec<Attachment>,
+    pub(crate) comments: Vec<Comment>,
+    pub(crate) attachments: Vec<Attachment>,
 }
 
 impl From<Bug> for Item {
     fn from(value: Bug) -> Self {
-        Item::Bugzilla(value)
+        Item::Bugzilla(Box::new(value))
     }
 }
 
@@ -63,8 +81,17 @@ impl fmt::Display for Bug {
         if let Some(data) = self.reporter.as_deref() {
             writeln!(f, "Reporter: {data}")?;
         }
+        if let Some(data) = &self.created {
+            writeln!(f, "Reported: {data}")?;
+        }
+        if let Some(data) = &self.updated {
+            writeln!(f, "Updated: {data}")?;
+        }
         if let Some(data) = self.status.as_deref() {
             writeln!(f, "Status: {data}")?;
+        }
+        if let Some(data) = self.whiteboard.as_deref() {
+            writeln!(f, "Whiteboard: {data}")?;
         }
         writeln!(f, "ID: {}", self.id)?;
         if !self.aliases.is_empty() {
@@ -82,12 +109,14 @@ impl fmt::Display for Bug {
         if !self.attachments.is_empty() {
             writeln!(f, "Attachment: {}", self.attachments.len())?;
         }
+
         for attachment in &self.attachments {
-            write!(f, "{attachment}")?;
+            write!(f, "\n{attachment}")?;
         }
         for comment in &self.comments {
-            write!(f, "{comment}")?;
+            write!(f, "\n{comment}")?;
         }
+
         Ok(())
     }
 }

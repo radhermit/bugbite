@@ -13,6 +13,7 @@ use crate::time::TimeDelta;
 use crate::traits::{Params, Request, WebService};
 use crate::Error;
 
+#[derive(Debug)]
 pub(crate) struct SearchRequest(reqwest::Request);
 
 impl Request for SearchRequest {
