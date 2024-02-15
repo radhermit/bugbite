@@ -197,7 +197,13 @@ pub(crate) struct Options {
 #[command(
     name = "bite",
     version,
-    long_about = None,
+    long_about = indoc::indoc! {"
+        Bite is a command line tool that aids interaction with a subset of the
+        myriad bug, issue, and ticket trackers accessible online. It tries to
+        support a consistent interface to search, request, modify, and create
+        bugs (or their variants) in addition to other actions a service
+        provides access to.
+    "},
     disable_help_subcommand = true,
     term_width = *COLUMNS,
 )]
