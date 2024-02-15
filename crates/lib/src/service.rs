@@ -25,6 +25,8 @@ use crate::Error;
     Default,
     Eq,
     PartialEq,
+    Ord,
+    PartialOrd,
     Hash,
     Copy,
     Clone,
