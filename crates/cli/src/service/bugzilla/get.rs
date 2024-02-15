@@ -26,9 +26,9 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
-    /// bug IDs or aliases
+    /// bug IDs
     #[clap(help_heading = "Arguments")]
-    ids: Vec<String>,
+    ids: Vec<u64>,
 }
 
 impl Command {
