@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::env;
 use std::io::stderr;
 use std::process::ExitCode;
 
@@ -42,6 +43,10 @@ impl ServiceCommand {
 
         // parse connection info
         let Ok(cmd) = Self::try_parse() else {
+            // skip parsing connection options if help is requested
+            if !env::args().skip(1).any(|s| s == "-h" || s == "--help") {
+                ServiceCommand::parse();
+            }
             // fallback for `bite -h/--help` usage
             Command::parse();
             panic!("command parsing should have exited");
