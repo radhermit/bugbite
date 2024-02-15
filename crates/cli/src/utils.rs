@@ -15,6 +15,6 @@ where
 }
 
 pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {
-    let (cols, _rows) = terminal::size().unwrap_or_default();
+    let (cols, _rows) = terminal::size().unwrap_or((80, 24));
     cols.into()
 });
