@@ -28,6 +28,11 @@ impl Attachment {
     pub fn data(&self) -> &[u8] {
         &self.data.0
     }
+
+    pub fn read(&self) -> std::borrow::Cow<str> {
+        // TODO: auto-decompress standard archive formats
+        String::from_utf8_lossy(&self.data.0)
+    }
 }
 
 impl fmt::Display for Attachment {

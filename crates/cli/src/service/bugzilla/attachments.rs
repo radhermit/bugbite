@@ -12,7 +12,7 @@ use crate::macros::async_block;
 #[clap(next_help_heading = "Attachments options")]
 struct Options {
     /// output attachment data
-    #[arg(short = 'V', long)]
+    #[arg(short = 'V', long, conflicts_with = "dir")]
     view: bool,
 
     /// search by bug ID
@@ -37,15 +37,25 @@ pub(super) struct Command {
 impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         let dir = self.options.dir.unwrap_or(current_dir()?);
-        fs::create_dir_all(&dir)?;
         let attachments = async_block!(client.attachments(&self.ids))?;
-        for a in attachments {
-            let path = dir.join(&a.file_name);
-            if path.exists() {
-                anyhow::bail!("file already exists: {path}");
+        if self.options.view {
+            for attachment in attachments {
+                // TODO: support auto-decompressing standard archive formats
+                print!("{}", attachment.read());
             }
-            fs::write(&path, a.data())?;
+        } else {
+            fs::create_dir_all(&dir)?;
+            for attachment in attachments {
+                let path = dir.join(&attachment.file_name);
+                // TODO: confirm overwriting file (with a -f/--force option?)
+                if path.exists() {
+                    anyhow::bail!("file already exists: {path}");
+                }
+                println!("Saving attachment: {path}");
+                fs::write(&path, attachment.data())?;
+            }
         }
+
         Ok(ExitCode::SUCCESS)
     }
 }
