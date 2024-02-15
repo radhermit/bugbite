@@ -44,14 +44,14 @@ impl ServiceCommand {
 
         // determine possible subcommands
         let possible_subcmds: HashSet<_> = subcmds::Subcommand::VARIANTS.iter().copied().collect();
-        // determine if help is requested
-        let opts = HashSet::from(["-h", "--help", "-V", "--version"]);
-        let help_or_version = env::args().skip(1).any(|s| opts.contains(s.as_str()));
+        // determine if an option is requested that triggers an exit
+        let exit_opts = HashSet::from(["-h", "--help", "-V", "--version"]);
+        let exit_opts = env::args().skip(1).any(|s| exit_opts.contains(s.as_str()));
 
         // parse connection info
         let Ok(cmd) = Self::try_parse() else {
             // raise connection option parsing failures
-            if !help_or_version {
+            if !exit_opts {
                 ServiceCommand::parse();
             }
             // fallback for `bite -h/--help/-V/--version` usage
