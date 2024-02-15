@@ -34,16 +34,16 @@ impl Command {
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
     /// Get attachments from bugs
-    #[command(alias = "a")]
+    #[command(visible_alias = "a")]
     Attachments(attachments::Command),
     /// Get bugs
-    #[command(alias = "g")]
+    #[command(visible_alias = "g")]
     Get(get::Command),
     /// Modify bugs
-    #[command(alias = "m")]
+    #[command(visible_alias = "m")]
     Modify(modify::Command),
     /// Search bugs
-    #[command(alias = "s")]
+    #[command(visible_alias = "s")]
     Search(search::Command),
 }
 

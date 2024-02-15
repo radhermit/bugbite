@@ -39,13 +39,13 @@ impl Command {
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
     /// Get issues
-    #[command(alias = "g")]
+    #[command(visible_alias = "g")]
     Get(get::Command),
     /// Modify issues
-    #[command(alias = "m")]
+    #[command(visible_alias = "m")]
     Modify(modify::Command),
     /// Search issues
-    #[command(alias = "s")]
+    #[command(visible_alias = "s")]
     Search(search::Command),
 }
 
