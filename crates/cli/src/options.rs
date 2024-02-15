@@ -108,7 +108,18 @@ struct ServiceOpts {
     )]
     connection: Option<String>,
     /// base service URL
-    #[arg(short, long, env = "BUGBITE_BASE")]
+    #[arg(
+        short,
+        long,
+        env = "BUGBITE_BASE",
+        long_help = indoc::indoc! {"
+            Specify the service URL to connect to.
+
+            For example, a bugzilla service would use `https://bugzilla.kernel.org`
+            and a github service would use `https://github.com/radhermit/bugbite`.
+        "}
+
+    )]
     base: Option<String>,
     /// service type
     #[arg(
