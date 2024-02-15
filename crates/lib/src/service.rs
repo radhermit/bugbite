@@ -1,6 +1,6 @@
 use std::fmt;
 
-use reqwest::{Client, Request};
+use enum_as_inner::EnumAsInner;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{AsRefStr, Display, EnumIter, EnumString, VariantNames};
@@ -9,7 +9,7 @@ use url::Url;
 pub mod bugzilla;
 pub mod github;
 
-use crate::traits::{Params, WebService};
+use crate::traits::WebService;
 use crate::Error;
 
 /// Supported service variants
@@ -60,13 +60,6 @@ pub enum Config {
 }
 
 impl Config {
-    pub(crate) fn service(self, client: Client) -> Service {
-        match self {
-            Self::BugzillaRestV1(config) => Service::BugzillaRestV1(config.service(client)),
-            Self::Github(config) => Service::Github(config.service(client)),
-        }
-    }
-
     pub fn base(&self) -> &Url {
         match self {
             Self::BugzillaRestV1(config) => config.base(),
@@ -88,54 +81,30 @@ impl fmt::Display for Config {
     }
 }
 
-/// Service support
+#[derive(EnumAsInner, Debug)]
 pub enum Service {
-    BugzillaRestV1(bugzilla::Service),
+    Bugzilla(bugzilla::Service),
     Github(github::Service),
+}
+
+impl Service {
+    pub fn base(&self) -> &Url {
+        match self {
+            Self::Bugzilla(service) => service.base(),
+            Self::Github(service) => service.base(),
+        }
+    }
+
+    pub fn kind(&self) -> ServiceKind {
+        match self {
+            Self::Bugzilla(service) => service.kind(),
+            Self::Github(service) => service.kind(),
+        }
+    }
 }
 
 impl fmt::Display for Service {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Service: {} -- {}", self.base(), self.kind())
-    }
-}
-
-impl WebService for Service {
-    fn base(&self) -> &Url {
-        match self {
-            Self::BugzillaRestV1(service) => service.base(),
-            Self::Github(service) => service.base(),
-        }
-    }
-
-    fn kind(&self) -> ServiceKind {
-        match self {
-            Self::BugzillaRestV1(service) => service.kind(),
-            Self::Github(service) => service.kind(),
-        }
-    }
-
-    fn client(&self) -> &reqwest::Client {
-        match self {
-            Self::BugzillaRestV1(service) => service.client(),
-            Self::Github(service) => service.client(),
-        }
-    }
-
-    fn get_request<S>(&self, id: S, comments: bool, attachments: bool) -> crate::Result<Request>
-    where
-        S: std::fmt::Display,
-    {
-        match self {
-            Self::BugzillaRestV1(service) => service.get_request(id, comments, attachments),
-            Self::Github(service) => service.get_request(id, comments, attachments),
-        }
-    }
-
-    fn search_request<P: Params>(&self, query: P) -> crate::Result<Request> {
-        match self {
-            Self::BugzillaRestV1(service) => service.search_request(query),
-            Self::Github(service) => service.search_request(query),
-        }
     }
 }

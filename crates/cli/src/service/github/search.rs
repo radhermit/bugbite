@@ -2,9 +2,8 @@ use std::io::{stdout, IsTerminal};
 use std::process::ExitCode;
 
 use bugbite::args::Csv;
-use bugbite::client::Client;
+use bugbite::client::github::Client;
 use bugbite::service::github::{QueryBuilder, SearchOrder, SearchTerm};
-use bugbite::traits::WebService;
 use clap::Args;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -14,7 +13,7 @@ use tokio::runtime::Handle;
 use tokio::task;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::utils::{launch_browser, COLUMNS};
+use crate::utils::COLUMNS;
 
 /// Available search parameters.
 #[skip_serializing_none]
@@ -52,10 +51,6 @@ struct Params {
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
-    /// open query in a browser
-    #[arg(short = 'B', long, help_heading = "Search related")]
-    browser: bool,
-
     #[clap(flatten)]
     params: Params,
 }
@@ -68,31 +63,25 @@ impl Command {
             query.sort(value);
         }
 
-        if self.browser {
-            let request = client.service().search_request(query)?;
-            launch_browser([request.url().as_str()])?;
-        } else {
-            let items = task::block_in_place(move || {
-                Handle::current().block_on(async { client.search(query).await })
-            })?;
+        let items = task::block_in_place(move || {
+            Handle::current().block_on(async { client.search(query).await })
+        })?;
 
-            let mut count = 0;
-            for item in items {
-                count += 1;
-                let line = item.search_display();
-                if line.len() > *COLUMNS {
-                    // truncate line to the terminal width of graphemes
-                    let mut iter =
-                        UnicodeSegmentation::graphemes(line.as_str(), true).take(*COLUMNS);
-                    println!("{}", iter.join(""));
-                } else {
-                    println!("{line}");
-                }
+        let mut count = 0;
+        for item in items {
+            count += 1;
+            let line = item.search_display();
+            if line.len() > *COLUMNS {
+                // truncate line to the terminal width of graphemes
+                let mut iter = UnicodeSegmentation::graphemes(line.as_str(), true).take(*COLUMNS);
+                println!("{}", iter.join(""));
+            } else {
+                println!("{line}");
             }
+        }
 
-            if count > 0 && stdout().is_terminal() {
-                println!(" * {count} found");
-            }
+        if count > 0 && stdout().is_terminal() {
+            println!(" * {count} found");
         }
 
         Ok(ExitCode::SUCCESS)

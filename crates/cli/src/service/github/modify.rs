@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::client::Client;
+use bugbite::client::github::Client;
 use clap::Args;
 
 #[derive(Debug, Args)]

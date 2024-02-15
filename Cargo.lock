@@ -169,6 +169,7 @@ version = "0.0.1"
 dependencies = [
  "chrono",
  "chronoutil",
+ "enum-as-inner",
  "indexmap",
  "itertools",
  "once_cell",
@@ -195,6 +196,7 @@ dependencies = [
  "clap-verbosity-flag",
  "clap_mangen",
  "crossterm",
+ "enum-as-inner",
  "indoc",
  "itertools",
  "once_cell",

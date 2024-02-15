@@ -1,0 +1,25 @@
+use std::fmt;
+
+use super::Item;
+
+pub struct Issue {
+    id: String,
+}
+
+impl Issue {
+    pub fn search_display(&self) -> String {
+        self.id.to_string()
+    }
+}
+
+impl From<Issue> for Item {
+    fn from(value: Issue) -> Self {
+        Item::Github(value)
+    }
+}
+
+impl fmt::Display for Issue {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "ID: {}", self.id)
+    }
+}

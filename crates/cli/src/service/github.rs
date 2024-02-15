@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::client::Client;
+use bugbite::client::{github::Client, ClientBuilder};
 use bugbite::service::ServiceKind;
 use tracing::info;
 
@@ -31,8 +31,8 @@ impl Command {
             None => kind.create(&base)?,
         };
         info!("{service}");
-        let client = Client::builder().build(service)?;
-        self.cmd.run(client)
+        let client = ClientBuilder::new().build(service)?;
+        self.cmd.run(client.into_github().unwrap())
     }
 }
 

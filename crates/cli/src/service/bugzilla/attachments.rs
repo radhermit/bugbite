@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::client::Client;
+use bugbite::client::bugzilla::Client;
 use camino::Utf8PathBuf;
 use clap::Args;
 

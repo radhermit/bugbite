@@ -2,7 +2,6 @@ use std::fmt;
 use std::str::FromStr;
 
 use ordered_multimap::ListOrderedMultimap;
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{Display, EnumIter, EnumString, VariantNames};
@@ -12,6 +11,9 @@ use crate::traits::{Params, WebService};
 use crate::Error;
 
 use super::ServiceKind;
+
+mod get;
+pub mod search;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
@@ -27,7 +29,7 @@ impl Config {
         }
     }
 
-    pub(super) fn service(self, client: Client) -> Service {
+    pub(crate) fn service(self, client: reqwest::Client) -> Service {
         Service {
             config: self,
             client,
@@ -43,12 +45,17 @@ impl Config {
     }
 }
 
+#[derive(Debug)]
 pub struct Service {
     config: Config,
     client: reqwest::Client,
 }
 
 impl WebService for Service {
+    type Response = serde_json::Value;
+    type GetRequest = get::GetRequest;
+    type SearchRequest = search::SearchRequest;
+
     fn base(&self) -> &Url {
         self.config.base()
     }
