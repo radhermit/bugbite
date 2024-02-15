@@ -2,8 +2,8 @@ use std::process::ExitCode;
 
 use bugbite::client::bugzilla::Client;
 use clap::Args;
-use tokio::runtime::Handle;
-use tokio::task;
+
+use crate::macros::async_block;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
@@ -35,10 +35,7 @@ impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         let comments = !self.options.no_comments;
         let attachments = !self.options.no_attachments;
-
-        let bugs = task::block_in_place(move || {
-            Handle::current().block_on(async { client.get(&self.ids, comments, attachments).await })
-        })?;
+        let bugs = async_block!(client.get(&self.ids, comments, attachments))?;
 
         for bug in bugs {
             print!("{bug}");

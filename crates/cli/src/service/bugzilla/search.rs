@@ -12,10 +12,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::skip_serializing_none;
 use strum::VariantNames;
-use tokio::runtime::Handle;
-use tokio::task;
 use unicode_segmentation::UnicodeSegmentation;
 
+use crate::macros::async_block;
 use crate::utils::COLUMNS;
 
 /// Available search parameters.
@@ -193,11 +192,9 @@ impl Command {
             }
         }
 
-        let bugs = task::block_in_place(move || {
-            Handle::current().block_on(async { client.search(query).await })
-        })?;
-
+        let bugs = async_block!(client.search(query))?;
         let mut count = 0;
+
         for bug in bugs {
             count += 1;
             let line = bug.search_display();

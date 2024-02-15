@@ -2,8 +2,8 @@ use std::process::ExitCode;
 
 use bugbite::client::github::Client;
 use clap::Args;
-use tokio::runtime::Handle;
-use tokio::task;
+
+use crate::macros::async_block;
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
@@ -12,9 +12,7 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
-        let issues = task::block_in_place(move || {
-            Handle::current().block_on(async { client.get(&self.ids, false, false).await })
-        })?;
+        let issues = async_block!(client.get(&self.ids, false, false))?;
 
         for issue in issues {
             print!("{issue}");
