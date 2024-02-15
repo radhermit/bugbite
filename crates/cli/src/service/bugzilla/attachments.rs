@@ -1,8 +1,12 @@
+use std::fs;
 use std::process::ExitCode;
 
 use bugbite::client::bugzilla::Client;
+use bugbite::utils::current_dir;
 use camino::Utf8PathBuf;
 use clap::Args;
+
+use crate::macros::async_block;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attachments options")]
@@ -17,7 +21,7 @@ struct Options {
 
     /// save attachments to a specified directory
     #[arg(short, long, value_name = "PATH")]
-    dir: Utf8PathBuf,
+    dir: Option<Utf8PathBuf>,
 }
 
 #[derive(Debug, Args)]
@@ -31,7 +35,17 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, _client: Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+        let dir = self.options.dir.unwrap_or(current_dir()?);
+        fs::create_dir_all(&dir)?;
+        let attachments = async_block!(client.attachments(&self.ids))?;
+        for a in attachments {
+            let path = dir.join(&a.file_name);
+            if path.exists() {
+                anyhow::bail!("file already exists: {path}");
+            }
+            fs::write(&path, a.data())?;
+        }
         Ok(ExitCode::SUCCESS)
     }
 }
