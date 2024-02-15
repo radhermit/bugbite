@@ -5,23 +5,29 @@ use humansize::{format_size, BINARY};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-use super::Item;
+use super::{Base64, Item};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Attachment {
-    id: u64,
-    bug_id: u64,
-    file_name: String,
-    summary: String,
-    size: u64,
-    creator: String,
-    content_type: String,
+    pub id: u64,
+    pub bug_id: u64,
+    pub file_name: String,
+    pub summary: String,
+    pub size: u64,
+    pub creator: String,
+    pub content_type: String,
     #[serde(rename = "creation_time")]
-    created: DateTime<Utc>,
+    pub created: DateTime<Utc>,
     #[serde(rename = "last_change_time")]
-    updated: DateTime<Utc>,
+    pub updated: DateTime<Utc>,
     #[serde(default)]
-    data: Vec<u8>,
+    data: Base64,
+}
+
+impl Attachment {
+    pub fn data(&self) -> &[u8] {
+        &self.data.0
+    }
 }
 
 impl fmt::Display for Attachment {

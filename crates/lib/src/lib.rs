@@ -6,6 +6,7 @@ pub mod service;
 pub mod services;
 pub mod time;
 pub mod traits;
+pub mod utils;
 
 pub use self::error::Error;
 
