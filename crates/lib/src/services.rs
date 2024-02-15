@@ -35,7 +35,7 @@ pub static SERVICES: Lazy<Services> = Lazy::new(|| {
     #[rustfmt::skip]
     let services = [
         (BugzillaRestV1, "gentoo", "https://bugs.gentoo.org/"),
-        (BugzillaRestV1, "gcc", "https://gcc.gnu.org.bugzilla/"),
+        (BugzillaRestV1, "gcc", "https://gcc.gnu.org/bugzilla/"),
         (BugzillaRestV1, "glibc", "https://sourceware.org/bugzilla/"),
         (BugzillaRestV1, "kde", "https://bugs.kde.org/"),
         (BugzillaRestV1, "linux", "https://bugzilla.kernel.org/"),
