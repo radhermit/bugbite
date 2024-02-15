@@ -20,7 +20,7 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(
+    pub(crate) fn run(
         self,
         _options: Options,
         kind: ServiceKind,

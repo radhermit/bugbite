@@ -5,6 +5,7 @@ use clap::Parser;
 mod macros;
 mod options;
 mod service;
+mod subcmds;
 mod utils;
 
 fn err_exit(err: anyhow::Error) -> anyhow::Result<ExitCode> {

@@ -8,6 +8,7 @@ use clap::CommandFactory;
 mod macros;
 mod options;
 mod service;
+mod subcmds;
 mod utils;
 
 fn main() -> io::Result<()> {

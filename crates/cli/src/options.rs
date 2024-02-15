@@ -215,7 +215,7 @@ pub(crate) struct Command {
     options: Options,
 
     #[command(subcommand)]
-    subcmd: crate::service::Subcommand,
+    subcmd: crate::subcmds::Subcommand,
 }
 
 impl Command {
