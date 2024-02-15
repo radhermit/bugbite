@@ -205,6 +205,7 @@ pub(crate) struct Options {
 #[command(
     name = "bite",
     version,
+    author = clap::crate_authors!(),
     about = "command line tool for mangling bugs, issues, and tickets",
     long_about = indoc::indoc! {"
         Bite is a command line tool that aids interaction with a subset of the
@@ -215,6 +216,22 @@ pub(crate) struct Options {
     "},
     disable_help_subcommand = true,
     term_width = *COLUMNS,
+    help_template = indoc::indoc! {"
+        {before-help}{name} {version}
+        {author}
+
+        {about}
+
+        {usage-heading} {usage}
+
+        Bite automatically injects service subcommands so they can be dropped for quicker
+        command-line access if desired. In addition, most common service action subcommands can be
+        run by their aliases consisting of their first letter. For example, the command `bite
+        bugzilla search test` is equivalent to `bite s test` when targeting the default bugzilla
+        connection.
+
+        {all-args}{after-help}
+    "},
 )]
 pub(crate) struct Command {
     #[command(flatten)]
