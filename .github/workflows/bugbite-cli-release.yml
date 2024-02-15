@@ -42,10 +42,12 @@ jobs:
       id: rust
 
     - name: Generate man pages
-      run: cargo run --features doc --bin mangen -p bugbite-cli man
+      run: |
+        cargo run --features doc --bin mangen -p bugbite-cli man
+        cargo run --features shell --bin compgen -p bugbite-cli shell
 
     - name: Create archive
-      run: tar -cv -I "xz -9 -T0" -f ${{ github.ref_name }}-docs.tar.xz man
+      run: tar -cv -I "xz -9 -T0" -f ${{ github.ref_name }}-docs.tar.xz man shell
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
