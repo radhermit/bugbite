@@ -23,6 +23,10 @@ impl Services {
             .ok_or_else(|| Error::InvalidValue(format!("unknown service: {name}")))?;
         Ok((service.kind(), service.base().to_string()))
     }
+
+    pub fn iter(&self) -> indexmap::map::Iter<String, Config> {
+        self.services.iter()
+    }
 }
 
 /// Pre-defined services.
