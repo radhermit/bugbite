@@ -45,15 +45,16 @@ impl ServiceCommand {
         // determine possible subcommands
         let possible_subcmds: HashSet<_> = subcmds::Subcommand::VARIANTS.iter().copied().collect();
         // determine if help is requested
-        let help = env::args().skip(1).any(|s| s == "-h" || s == "--help");
+        let opts = HashSet::from(["-h", "--help", "-V", "--version"]);
+        let help_or_version = env::args().skip(1).any(|s| opts.contains(s.as_str()));
 
         // parse connection info
         let Ok(cmd) = Self::try_parse() else {
-            // skip parsing connection options if help is requested
-            if !help {
+            // raise connection option parsing failures
+            if !help_or_version {
                 ServiceCommand::parse();
             }
-            // fallback for `bite -h/--help` usage
+            // fallback for `bite -h/--help/-V/--version` usage
             Command::parse();
             panic!("command parsing should have exited");
         };
