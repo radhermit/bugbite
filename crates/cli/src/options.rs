@@ -62,9 +62,15 @@ impl ServiceCommand {
             (None, Some(base), Some(service)) => (*service, base.clone()),
             (None, Some(base), None) => (ServiceKind::default(), base.clone()),
             (None, None, None) => match subcmd_kind {
-                // TODO: use default service for type from config if it exists
-                Some(kind) => (*kind, "default".to_string()),
-                // TODO: use default service from config if it exists
+                // TODO: use default service for type from user config if it exists
+                Some(kind) => match SERVICES
+                    .iter()
+                    .find(|(_name, config)| config.kind() == *kind)
+                {
+                    Some((_name, config)) => (config.kind(), config.base().to_string()),
+                    None => (*kind, "default".to_string()),
+                },
+                // TODO: use default service from user config if it exists
                 None => SERVICES.get_raw("gentoo")?,
             },
             _ => panic!("misconfigured service option restrictions"),
