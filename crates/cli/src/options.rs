@@ -119,7 +119,7 @@ struct ServiceOpts {
             defined service aliases will take priority over bundled variants.
 
             Bundled services: {}
-            ", SERVICES.iter().map(|(name, _)| name).sorted().join(", ")}
+        ", SERVICES.iter().map(|(name, _)| name).sorted().join(", ")}
     )]
     connection: Option<String>,
     /// base service URL
@@ -142,6 +142,11 @@ struct ServiceOpts {
         long,
         env = "BUGBITE_SERVICE",
         requires = "base",
+        long_help = indoc::formatdoc! {"
+            Specify the service type to use.
+
+            Possible values: {}
+        ", ServiceKind::VARIANTS.join(", ")},
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(ServiceKind::VARIANTS)
             .map(|s| s.parse::<ServiceKind>().unwrap()),
