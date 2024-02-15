@@ -1,15 +1,25 @@
 use std::process::ExitCode;
 
 use bugbite::service::ServiceKind;
+use strum::VariantNames;
 
 use crate::options::Options;
 use crate::service::*;
 
-#[derive(Debug, clap::Subcommand)]
+mod show;
+
+#[derive(Debug, VariantNames, clap::Subcommand)]
+#[strum(serialize_all = "kebab-case")]
 pub(crate) enum Subcommand {
     // service subcommands
+    /// bugzilla service support
     Bugzilla(bugzilla::Command),
+    /// github service support
     Github(github::Command),
+
+    // regular subcommands
+    /// show various bite-related information
+    Show(show::Command),
 }
 
 impl Subcommand {
@@ -22,6 +32,7 @@ impl Subcommand {
         match self {
             Self::Bugzilla(cmd) => cmd.run(options, kind, base),
             Self::Github(cmd) => cmd.run(options, kind, base),
+            Self::Show(cmd) => cmd.run(),
         }
     }
 }

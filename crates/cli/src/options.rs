@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::io::stderr;
 use std::process::ExitCode;
@@ -12,6 +12,7 @@ use itertools::Itertools;
 use strum::{IntoEnumIterator, VariantNames};
 use tracing_log::AsTrace;
 
+use crate::subcmds;
 use crate::utils::COLUMNS;
 
 #[derive(Debug, Parser)]
@@ -41,10 +42,15 @@ impl ServiceCommand {
             })
             .collect();
 
+        // determine possible subcommands
+        let possible_subcmds: HashSet<_> = subcmds::Subcommand::VARIANTS.iter().copied().collect();
+        // determine if help is requested
+        let help = env::args().skip(1).any(|s| s == "-h" || s == "--help");
+
         // parse connection info
         let Ok(cmd) = Self::try_parse() else {
             // skip parsing connection options if help is requested
-            if !env::args().skip(1).any(|s| s == "-h" || s == "--help") {
+            if !help {
                 ServiceCommand::parse();
             }
             // fallback for `bite -h/--help` usage
@@ -85,7 +91,6 @@ impl ServiceCommand {
         // construct new args for the main command to parse
         let mut args = vec!["bite".to_string()];
 
-        // inject subcommand for requested service type if missing
         if let Some(kind) = subcmd_kind {
             if kind != &selected {
                 // output help in case `-h/--help` is specified
@@ -93,8 +98,11 @@ impl ServiceCommand {
                 anyhow::bail!("{subcmd} not compatible with service: {selected}");
             }
         } else {
-            let cmd = subcmds.get(&selected).unwrap();
-            args.push(cmd.clone());
+            // inject subcommand for requested service type if missing
+            if !possible_subcmds.contains(subcmd) {
+                let cmd = subcmds.get(&selected).unwrap();
+                args.push(cmd.clone());
+            }
         }
 
         args.extend(remaining);
@@ -215,7 +223,7 @@ pub(crate) struct Command {
     options: Options,
 
     #[command(subcommand)]
-    subcmd: crate::subcmds::Subcommand,
+    subcmd: subcmds::Subcommand,
 }
 
 impl Command {
