@@ -7,6 +7,7 @@ use bugbite::services::SERVICES;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
+use itertools::Itertools;
 use strum::{IntoEnumIterator, VariantNames};
 use tracing_log::AsTrace;
 
@@ -104,7 +105,16 @@ struct ServiceOpts {
         short,
         long,
         env = "BUGBITE_CONNECTION",
-        conflicts_with_all = ["base", "service"]
+        conflicts_with_all = ["base", "service"],
+        long_help = indoc::formatdoc! {"
+            Use a pre-configured connection by its alias.
+
+            Connections can be defined in the user config and bugbite bundles
+            many for well known projects (and bugbite itself). Note that user
+            defined service aliases will take priority over bundled variants.
+
+            Bundled services: {}
+            ", SERVICES.iter().map(|(name, _)| name).sorted().join(", ")}
     )]
     connection: Option<String>,
     /// base service URL
