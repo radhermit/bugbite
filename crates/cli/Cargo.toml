@@ -27,6 +27,9 @@ name = "mangen"
 path = "src/mangen.rs"
 required-features = ["doc"]
 
+[[test]]
+name = "bite"
+
 [features]
 default = []
 # build documentation
@@ -57,3 +60,7 @@ tracing = "0.1.40"
 tracing-log = "0.2.0"
 tracing-subscriber = "0.3.18"
 unicode-segmentation = "1.11.0"
+
+[dev-dependencies]
+assert_cmd = "2.0.13"
+predicates = "3.1.0"
