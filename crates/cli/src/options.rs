@@ -192,7 +192,7 @@ pub(crate) struct Options {
     auth: Authentication,
 }
 
-/// command line interface for bugbite
+/// command line tool for mangling bugs, issues, and tickets
 #[derive(Debug, Parser)]
 #[command(
     name = "bite",
