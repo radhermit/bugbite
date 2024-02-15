@@ -50,6 +50,7 @@ pub struct Service {
 
 impl WebService for Service {
     type Response = serde_json::Value;
+    type AttachmentsRequest = attachments::AttachmentsRequest;
     type GetRequest = get::GetRequest;
     type SearchRequest = search::SearchRequest;
 
@@ -75,6 +76,16 @@ impl WebService for Service {
         } else {
             Ok(data)
         }
+    }
+
+    fn attachments_request<S>(&self, ids: &[S]) -> crate::Result<Self::AttachmentsRequest>
+    where
+        S: std::fmt::Display,
+    {
+        attachments::AttachmentsRequest::builder()
+            .attachment_ids(ids)
+            .data(true)
+            .build(self)
     }
 
     fn get_request<S>(

@@ -17,6 +17,7 @@ pub(crate) trait Request {
 
 pub(crate) trait WebService {
     type Response;
+    type AttachmentsRequest: Request;
     type GetRequest: Request;
     type SearchRequest: Request;
 
@@ -30,6 +31,17 @@ pub(crate) trait WebService {
     async fn parse_response(&self, _response: reqwest::Response) -> crate::Result<Self::Response> {
         Err(Error::Unsupported(format!(
             "{}: request parsing unsupported",
+            self.kind()
+        )))
+    }
+
+    /// Create a request for attachments by their IDs.
+    fn attachments_request<S>(&self, _ids: &[S]) -> crate::Result<Self::AttachmentsRequest>
+    where
+        S: std::fmt::Display,
+    {
+        Err(Error::Unsupported(format!(
+            "{}: attachments requests unsupported",
             self.kind()
         )))
     }

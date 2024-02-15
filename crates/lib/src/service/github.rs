@@ -12,6 +12,7 @@ use crate::Error;
 
 use super::ServiceKind;
 
+mod attachments;
 mod get;
 pub mod search;
 
@@ -53,6 +54,7 @@ pub struct Service {
 
 impl WebService for Service {
     type Response = serde_json::Value;
+    type AttachmentsRequest = attachments::AttachmentsRequest;
     type GetRequest = get::GetRequest;
     type SearchRequest = search::SearchRequest;
 

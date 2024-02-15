@@ -8,12 +8,13 @@ use super::Item;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Attachment {
-    name: String,
+    id: u64,
+    file_name: String,
 }
 
 impl fmt::Display for Attachment {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "Attachment: {}", self.name)?;
+        writeln!(f, "Attachment: [{}] [{}]", self.id, self.file_name)?;
         Ok(())
     }
 }

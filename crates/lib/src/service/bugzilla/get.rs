@@ -39,7 +39,11 @@ impl GetRequest {
                 None
             };
             let attachment_req = if attachments {
-                Some(AttachmentsRequest::new(service, id)?)
+                Some(
+                    AttachmentsRequest::builder()
+                        .bug_ids(&[id])
+                        .build(service)?,
+                )
             } else {
                 None
             };

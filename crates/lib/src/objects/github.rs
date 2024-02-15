@@ -23,3 +23,7 @@ impl fmt::Display for Issue {
         writeln!(f, "ID: {}", self.id)
     }
 }
+
+pub struct Attachment {
+    id: String,
+}

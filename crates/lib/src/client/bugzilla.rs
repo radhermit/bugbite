@@ -1,4 +1,4 @@
-use crate::objects::bugzilla::Bug;
+use crate::objects::bugzilla::{Attachment, Bug};
 use crate::service::bugzilla::Service;
 use crate::traits::{Params, Request, WebService};
 
@@ -14,6 +14,14 @@ impl Client {
 
     pub fn service(&self) -> &Service {
         &self.service
+    }
+
+    pub async fn attachments<S>(&self, ids: &[S]) -> crate::Result<Vec<Attachment>>
+    where
+        S: std::fmt::Display,
+    {
+        let request = self.service.attachments_request(ids)?;
+        request.send(&self.service).await
     }
 
     pub async fn get<S>(
