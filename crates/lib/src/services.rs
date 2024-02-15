@@ -32,10 +32,16 @@ impl Services {
 /// Pre-defined services.
 pub static SERVICES: Lazy<Services> = Lazy::new(|| {
     use ServiceKind::*;
+    #[rustfmt::skip]
     let services = [
-        (BugzillaRestV1, "gentoo", "https://bugs.gentoo.org"),
+        (BugzillaRestV1, "gentoo", "https://bugs.gentoo.org/"),
         (BugzillaRestV1, "gcc", "https://gcc.gnu.org.bugzilla/"),
+        (BugzillaRestV1, "glibc", "https://sourceware.org/bugzilla/"),
+        (BugzillaRestV1, "kde", "https://bugs.kde.org/"),
         (BugzillaRestV1, "linux", "https://bugzilla.kernel.org/"),
+        (BugzillaRestV1, "libreoffice", "https://bugs.documentfoundation.org/"),
+        (BugzillaRestV1, "mozilla", "https://bugzilla.mozilla.org/"),
+        (BugzillaRestV1, "redhat", "https://bugzilla.redhat.com/"),
         (Github, "bugbite", "https://github.com/radhermit/bugbite/"),
     ]
     .into_iter()
