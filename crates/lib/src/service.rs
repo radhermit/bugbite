@@ -37,6 +37,9 @@ pub enum ServiceKind {
     /// API docs: https://bugzilla.readthedocs.io/en/latest/api/core/v1/
     #[default]
     BugzillaRestV1,
+
+    /// Targets the GitHub REST API version 2022-11-28.
+    /// API docs: https://docs.github.com/en/rest/about-the-rest-api
     Github,
 }
 
