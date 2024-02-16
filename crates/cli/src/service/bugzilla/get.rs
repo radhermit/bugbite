@@ -11,15 +11,15 @@ use crate::macros::async_block;
 struct Options {
     /// disable attachments
     #[arg(short = 'A', long)]
-    no_attachments: bool,
+    without_attachments: bool,
 
     /// disable comments
     #[arg(short = 'C', long)]
-    no_comments: bool,
+    without_comments: bool,
 
     /// show bug history
     #[arg(short = 'H', long)]
-    show_history: bool,
+    with_history: bool,
 }
 
 #[derive(Debug, Args)]
@@ -35,9 +35,9 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
-        let attachments = !self.options.no_attachments;
-        let comments = !self.options.no_comments;
-        let history = self.options.show_history;
+        let attachments = !self.options.without_attachments;
+        let comments = !self.options.without_comments;
+        let history = self.options.with_history;
         let bugs = async_block!(client.get(&self.ids, attachments, comments, history))?;
         let mut stdout = stdout().lock();
 
