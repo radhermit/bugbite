@@ -11,7 +11,6 @@ pub(crate) struct AttachmentsRequestBuilder {
     bug_ids: Option<Vec<String>>,
     attachment_ids: Option<Vec<String>>,
     data: bool,
-    params: Vec<(String, String)>,
 }
 
 impl AttachmentsRequestBuilder {
@@ -30,36 +29,42 @@ impl AttachmentsRequestBuilder {
         self
     }
 
-    pub(crate) fn build(mut self, service: &super::Service) -> crate::Result<AttachmentsRequest> {
-        let base = service.base();
-        let url = match (&self.bug_ids.as_deref(), &self.attachment_ids.as_deref()) {
+    pub(crate) fn build(self, service: &super::Service) -> crate::Result<AttachmentsRequest> {
+        let mut params = vec![];
+        let mut url = match (&self.bug_ids.as_deref(), &self.attachment_ids.as_deref()) {
             (Some([id, ids @ ..]), None) => {
                 if !ids.is_empty() {
-                    self.params.push(("ids".to_string(), ids.iter().join(",")));
+                    params.push(("ids".to_string(), ids.iter().join(",")));
                 }
-                format!("{base}/rest/bug/{id}/attachment")
+                service
+                    .base()
+                    .join(&format!("/rest/bug/{id}/attachment"))
+                    .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?
             }
             (None, Some([id, ids @ ..])) => {
                 if !ids.is_empty() {
-                    self.params
-                        .push(("attachment_ids".to_string(), ids.iter().join(",")));
+                    params.push(("attachment_ids".to_string(), ids.iter().join(",")));
                 }
-                format!("{base}/rest/bug/attachment/{id}")
+                service
+                    .base()
+                    .join(&format!("/rest/bug/attachment/{id}"))
+                    .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?
             }
             _ => {
                 return Err(Error::InvalidValue(
-                    "invalid attachments IDs state".to_string(),
+                    "invalid attachments ID state".to_string(),
                 ))
             }
         };
 
         if !self.data {
-            self.params
-                .push(("exclude_fields".to_string(), "data".to_string()));
+            params.push(("exclude_fields".to_string(), "data".to_string()));
         }
 
-        let url = Url::parse_with_params(&url, self.params)
-            .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?;
+        if !params.is_empty() {
+            url = Url::parse_with_params(url.as_str(), params)
+                .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?;
+        }
 
         Ok(AttachmentsRequest {
             bug_ids: self.bug_ids,
