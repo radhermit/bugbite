@@ -2,6 +2,7 @@ pub mod args;
 pub mod client;
 pub mod error;
 pub mod objects;
+pub(crate) mod serde;
 pub mod service;
 pub mod services;
 pub mod time;

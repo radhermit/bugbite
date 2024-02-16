@@ -5,6 +5,8 @@ use humansize::{format_size, BINARY};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use crate::serde::non_empty_str;
+
 use super::{Base64, Item};
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -88,8 +90,11 @@ pub struct Bug {
     updated: Option<DateTime<Utc>>,
     #[serde(rename = "alias")]
     aliases: Vec<String>,
+    #[serde(deserialize_with = "non_empty_str")]
     summary: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
     status: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
     whiteboard: Option<String>,
     cc: Vec<String>,
     blocks: Vec<u64>,
