@@ -1,4 +1,4 @@
-use crate::objects::bugzilla::{Attachment, Bug, Event};
+use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::Service;
 use crate::time::TimeDelta;
 use crate::traits::{Params, Request, WebService};
@@ -30,6 +30,18 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.item_attachments_request(ids, data)?;
+        request.send(&self.service).await
+    }
+
+    pub async fn comments<S>(
+        &self,
+        ids: &[S],
+        created: Option<TimeDelta>,
+    ) -> crate::Result<Vec<Comment>>
+    where
+        S: std::fmt::Display,
+    {
+        let request = self.service.comments_request(ids, created)?;
         request.send(&self.service).await
     }
 

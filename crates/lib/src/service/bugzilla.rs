@@ -51,6 +51,17 @@ pub struct Service {
 }
 
 impl Service {
+    pub(crate) fn comments_request<S>(
+        &self,
+        ids: &[S],
+        created: Option<TimeDelta>,
+    ) -> crate::Result<comments::CommentsRequest>
+    where
+        S: std::fmt::Display,
+    {
+        comments::CommentsRequest::new(self, ids, created)
+    }
+
     pub(crate) fn history_request<S>(
         &self,
         ids: &[S],

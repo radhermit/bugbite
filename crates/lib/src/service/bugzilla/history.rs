@@ -25,14 +25,17 @@ impl HistoryRequest {
         S: std::fmt::Display,
     {
         let mut params = vec![];
-        let url = match ids {
+        let mut url = match ids {
             [id, ids @ ..] => {
                 if !ids.is_empty() {
                     params.push(("ids".to_string(), ids.iter().join(",")));
                 }
-                format!("{}/rest/bug/{id}/history", service.base())
+                service
+                    .base()
+                    .join(&format!("/rest/bug/{id}/history"))
+                    .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?
             }
-            _ => return Err(Error::InvalidValue("invalid history IDs state".to_string())),
+            _ => return Err(Error::InvalidValue("invalid history ID state".to_string())),
         };
 
         if let Some(interval) = created {
@@ -41,8 +44,10 @@ impl HistoryRequest {
             params.push(("new_since".to_string(), target));
         }
 
-        let url = Url::parse_with_params(&url, params)
-            .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?;
+        if !params.is_empty() {
+            url = Url::parse_with_params(url.as_str(), params)
+                .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?;
+        }
 
         debug!("history request url: {url}");
         Ok(Self {

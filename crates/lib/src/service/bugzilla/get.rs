@@ -46,7 +46,7 @@ impl GetRequest {
                 None
             };
             let comments_req = if comments {
-                Some(CommentsRequest::new(service, id)?)
+                Some(CommentsRequest::new(service, &[id], None)?)
             } else {
                 None
             };
