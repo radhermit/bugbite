@@ -34,7 +34,7 @@ impl Command {
 
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
-    /// Get attachments from bugs
+    /// Get attachments
     #[command(visible_alias = "a")]
     Attachments(attachments::Command),
     /// Get bugs
