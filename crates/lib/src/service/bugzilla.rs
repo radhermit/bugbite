@@ -64,6 +64,7 @@ impl Service {
 }
 
 impl WebService for Service {
+    const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
     type AttachmentsRequest = attachments::AttachmentsRequest;
     type GetRequest = get::GetRequest;

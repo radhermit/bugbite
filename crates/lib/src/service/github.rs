@@ -53,6 +53,7 @@ pub struct Service {
 }
 
 impl WebService for Service {
+    const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
     type AttachmentsRequest = attachments::AttachmentsRequest;
     type GetRequest = get::GetRequest;

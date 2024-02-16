@@ -27,6 +27,7 @@ impl Request for NullRequest {
 }
 
 pub(crate) trait WebService {
+    const API_VERSION: &'static str;
     type Response;
     type AttachmentsRequest: Request;
     type GetRequest: Request;
