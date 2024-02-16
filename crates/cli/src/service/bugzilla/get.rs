@@ -35,9 +35,10 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
-        let comments = !self.options.no_comments;
         let attachments = !self.options.no_attachments;
-        let bugs = async_block!(client.get(&self.ids, comments, attachments))?;
+        let comments = !self.options.no_comments;
+        let history = self.options.show_history;
+        let bugs = async_block!(client.get(&self.ids, attachments, comments, history))?;
         let mut stdout = stdout().lock();
 
         for bug in bugs {

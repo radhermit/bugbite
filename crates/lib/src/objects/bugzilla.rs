@@ -143,6 +143,7 @@ pub struct Bug {
     blocks: Vec<u64>,
     pub(crate) comments: Vec<Comment>,
     pub(crate) attachments: Vec<Attachment>,
+    pub(crate) history: Vec<Event>,
 }
 
 impl From<Bug> for Item {

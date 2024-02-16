@@ -19,13 +19,16 @@ impl Client {
     pub async fn get<S>(
         &self,
         ids: &[S],
-        comments: bool,
         attachments: bool,
+        comments: bool,
+        history: bool,
     ) -> crate::Result<Vec<Issue>>
     where
         S: std::fmt::Display,
     {
-        let request = self.service.get_request(ids, comments, attachments)?;
+        let request = self
+            .service
+            .get_request(ids, attachments, comments, history)?;
         request.send(&self.service).await
     }
 

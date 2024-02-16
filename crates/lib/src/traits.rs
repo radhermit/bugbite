@@ -80,8 +80,9 @@ pub(crate) trait WebService {
     fn get_request<S>(
         &self,
         _ids: &[S],
-        _comments: bool,
         _attachments: bool,
+        _comments: bool,
+        _history: bool,
     ) -> crate::Result<Self::GetRequest>
     where
         S: std::fmt::Display,

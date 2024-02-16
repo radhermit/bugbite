@@ -124,13 +124,14 @@ impl WebService for Service {
     fn get_request<S>(
         &self,
         ids: &[S],
-        comments: bool,
         attachments: bool,
+        comments: bool,
+        history: bool,
     ) -> crate::Result<Self::GetRequest>
     where
         S: std::fmt::Display,
     {
-        get::GetRequest::new(self, ids, comments, attachments)
+        get::GetRequest::new(self, ids, attachments, comments, history)
     }
 
     fn search_request<P: Params>(&self, query: P) -> crate::Result<Self::SearchRequest> {
