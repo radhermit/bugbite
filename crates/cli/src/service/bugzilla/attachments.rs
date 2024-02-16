@@ -20,9 +20,9 @@ struct Options {
     #[arg(short = 'V', long, conflicts_with = "dir")]
     view: bool,
 
-    /// search by bug ID
+    /// request attachments from bug IDs
     #[arg(short, long)]
-    bug_id: bool,
+    item_id: bool,
 
     /// save attachments to a specified directory
     #[arg(short, long, value_name = "PATH")]
@@ -34,17 +34,22 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
-    /// attachment IDs
+    /// attachment or bug IDs
     #[clap(help_heading = "Arguments")]
     ids: Vec<String>,
 }
 
 impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
-        let dir = self.options.dir.unwrap_or(current_dir()?);
-        let attachments = async_block!(client.attachments(&self.ids))?;
         let mut stdout = stdout().lock();
+        let get_data = !self.options.list;
+        let attachments = if self.options.item_id {
+            async_block!(client.item_attachments(&self.ids, get_data))
+        } else {
+            async_block!(client.attachments(&self.ids, get_data))
+        }?;
 
+        let dir = self.options.dir.unwrap_or(current_dir()?);
         if self.options.list {
             for attachment in attachments {
                 write!(stdout, "{attachment}")?;
