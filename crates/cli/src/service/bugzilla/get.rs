@@ -14,6 +14,7 @@ struct Options {
     #[arg(
         short = 'A',
         long,
+        value_name = "BOOL",
         default_value = "true",
         num_args = 0..=1,
         default_missing_value = "true",
@@ -26,6 +27,7 @@ struct Options {
     #[arg(
         short = 'C',
         long,
+        value_name = "BOOL",
         default_value = "true",
         num_args = 0..=1,
         default_missing_value = "true",
@@ -38,6 +40,7 @@ struct Options {
     #[arg(
         short = 'H',
         long,
+        value_name = "BOOL",
         default_value = "false",
         num_args = 0..=1,
         default_missing_value = "true",
