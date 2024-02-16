@@ -21,11 +21,31 @@ struct Options {
     view: bool,
 
     /// request attachments from bug IDs
-    #[arg(short, long)]
+    #[arg(
+        short,
+        long,
+        long_help = indoc::indoc! {"
+            Request all attachments from the specified bug IDs.
+
+            By default, ID arguments relate to individual attachment IDs.
+            Enabling this option treats ID arguments as bug IDs, pulling all
+            attachments from the related bugs.
+        "}
+    )]
     item_id: bool,
 
     /// save attachments to a specified directory
-    #[arg(short, long, value_name = "PATH")]
+    #[arg(
+        short,
+        long,
+        value_name = "PATH",
+        long_help = indoc::indoc! {"
+            Save attachments to a specified directory.
+
+            By default, attachments are saved to the current working directory
+            and this allows altering that target directory.
+        "}
+    )]
     dir: Option<Utf8PathBuf>,
 }
 

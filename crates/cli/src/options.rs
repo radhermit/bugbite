@@ -142,7 +142,6 @@ struct ServiceOpts {
             For example, a bugzilla service would use `https://bugzilla.kernel.org`
             and a github service would use `https://github.com/radhermit/bugbite`.
         "}
-
     )]
     base: Option<String>,
     /// service type
