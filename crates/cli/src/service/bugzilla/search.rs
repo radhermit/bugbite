@@ -6,6 +6,7 @@ use bugbite::args::Csv;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::search::{QueryBuilder, SearchOrder, SearchTerm};
 use bugbite::time::TimeDelta;
+use clap::builder::BoolishValueParser;
 use clap::Args;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -118,7 +119,16 @@ struct Params {
     comments: Option<u32>,
 
     /// restrict by attachment status
-    #[arg(long, value_name = "BOOL", help_heading = "Attribute related")]
+    #[arg(
+        short = 'A',
+        long,
+        help_heading = "Attribute related",
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "true",
+        value_parser = BoolishValueParser::new(),
+        hide_possible_values = true,
+    )]
     attachments: Option<bool>,
 
     /// created at this time or later
