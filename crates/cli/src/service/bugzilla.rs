@@ -7,6 +7,7 @@ use tracing::info;
 use crate::options::Options;
 
 mod attachments;
+mod comments;
 mod get;
 mod history;
 mod modify;
@@ -37,6 +38,8 @@ enum Subcommand {
     /// Get attachments
     #[command(visible_alias = "a")]
     Attachments(attachments::Command),
+    /// Get comments
+    Comments(comments::Command),
     /// Get bugs
     #[command(visible_alias = "g")]
     Get(get::Command),
@@ -55,6 +58,7 @@ impl Subcommand {
     fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         match self {
             Self::Attachments(cmd) => cmd.run(client),
+            Self::Comments(cmd) => cmd.run(client),
             Self::Get(cmd) => cmd.run(client),
             Self::History(cmd) => cmd.run(client),
             Self::Modify(cmd) => cmd.run(client),
