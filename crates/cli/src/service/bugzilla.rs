@@ -8,6 +8,7 @@ use crate::options::Options;
 
 mod attachments;
 mod get;
+mod history;
 mod modify;
 mod search;
 
@@ -39,6 +40,9 @@ enum Subcommand {
     /// Get bugs
     #[command(visible_alias = "g")]
     Get(get::Command),
+    /// Get bug history
+    #[command(visible_alias = "h")]
+    History(history::Command),
     /// Modify bugs
     #[command(visible_alias = "m")]
     Modify(modify::Command),
@@ -52,6 +56,7 @@ impl Subcommand {
         match self {
             Self::Attachments(cmd) => cmd.run(client),
             Self::Get(cmd) => cmd.run(client),
+            Self::History(cmd) => cmd.run(client),
             Self::Modify(cmd) => cmd.run(client),
             Self::Search(cmd) => cmd.run(client),
         }
