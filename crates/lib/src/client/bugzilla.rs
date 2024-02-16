@@ -1,5 +1,7 @@
+use reqwest::ClientBuilder;
+
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::{Config, Service};
 use crate::time::TimeDelta;
 use crate::traits::{Params, Request, WebService};
 
@@ -9,8 +11,9 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(service: Service) -> Self {
-        Self { service }
+    pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+        let client = builder.build()?;
+        Ok(Self { service: config.service(client) })
     }
 
     pub fn service(&self) -> &Service {

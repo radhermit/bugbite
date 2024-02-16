@@ -26,13 +26,13 @@ impl ClientBuilder {
     }
 
     pub fn build(self, config: Config) -> crate::Result<Client> {
-        let client = self.client.build()?;
         let client = match config {
             Config::BugzillaRestV1(config) => {
-                Client::Bugzilla(bugzilla::Client::new(config.service(client)))
+                Client::Bugzilla(bugzilla::Client::new(config, self.client)?)
             }
-            Config::Github(config) => Client::Github(github::Client::new(config.service(client))),
+            Config::Github(config) => Client::Github(github::Client::new(config, self.client)?),
         };
+
         Ok(client)
     }
 }

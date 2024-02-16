@@ -1,5 +1,7 @@
+use reqwest::ClientBuilder;
+
 use crate::objects::github::Issue;
-use crate::service::github::Service;
+use crate::service::github::{Config, Service};
 use crate::traits::{Params, Request, WebService};
 
 #[derive(Debug)]
@@ -8,8 +10,9 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(service: Service) -> Self {
-        Self { service }
+    pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+        let client = builder.build()?;
+        Ok(Self { service: config.service(client) })
     }
 
     pub fn service(&self) -> &Service {
