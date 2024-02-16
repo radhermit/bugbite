@@ -12,6 +12,10 @@ use crate::macros::async_block;
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attachments options")]
 struct Options {
+    /// list attachment metadata
+    #[arg(short, long, conflicts_with = "view")]
+    list: bool,
+
     /// output attachment data
     #[arg(short = 'V', long, conflicts_with = "dir")]
     view: bool,
@@ -41,7 +45,11 @@ impl Command {
         let attachments = async_block!(client.attachments(&self.ids))?;
         let mut stdout = stdout().lock();
 
-        if self.options.view {
+        if self.options.list {
+            for attachment in attachments {
+                write!(stdout, "{attachment}")?;
+            }
+        } else if self.options.view {
             for attachment in attachments {
                 // TODO: support auto-decompressing standard archive formats
                 write!(stdout, "{}", attachment.read())?;
