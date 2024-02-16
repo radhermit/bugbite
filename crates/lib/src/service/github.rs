@@ -113,10 +113,10 @@ impl QueryBuilder {
 }
 
 impl Params for QueryBuilder {
-    fn params(&mut self) -> String {
+    fn params(&mut self) -> crate::Result<String> {
         let mut params = url::form_urlencoded::Serializer::new(String::new());
         params.extend_pairs(self.query.iter());
-        params.finish()
+        Ok(params.finish())
     }
 }
 

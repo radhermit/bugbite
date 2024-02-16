@@ -5,7 +5,7 @@ use crate::Error;
 
 /// Encode into an application/x-www-form-urlencoded string format.
 pub trait Params {
-    fn params(&mut self) -> String;
+    fn params(&mut self) -> crate::Result<String>;
 }
 
 /// Scan a response for a web service error, raising it if one exists.

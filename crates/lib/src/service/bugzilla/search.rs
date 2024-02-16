@@ -33,7 +33,7 @@ impl SearchRequest {
     pub(super) fn new<P: Params>(service: &super::Service, mut query: P) -> crate::Result<Self> {
         let url = service
             .base()
-            .join(&format!("rest/bug?{}", query.params()))?;
+            .join(&format!("rest/bug?{}", query.params()?))?;
         Ok(Self(service.client.get(url).build()?))
     }
 }
@@ -145,7 +145,11 @@ impl QueryBuilder {
 }
 
 impl Params for QueryBuilder {
-    fn params(&mut self) -> String {
+    fn params(&mut self) -> crate::Result<String> {
+        if self.query.is_empty() {
+            return Err(Error::EmptyQuery);
+        }
+
         // TODO: Move this parameter to the service struct since it's configurable on the server
         // and can be queried for the supported values.
         // only return open bugs by default
@@ -163,7 +167,7 @@ impl Params for QueryBuilder {
 
         let mut params = url::form_urlencoded::Serializer::new(String::new());
         params.extend_pairs(self.query.iter());
-        params.finish()
+        Ok(params.finish())
     }
 }
 
