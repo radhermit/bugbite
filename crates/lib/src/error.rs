@@ -2,6 +2,8 @@
 pub enum Error {
     #[error("{0}")]
     Auth(String),
+    #[error("invalid URL: {0}")]
+    InvalidUrl(url::ParseError),
     #[error("{0}")]
     InvalidValue(String),
     #[error("{0}")]
@@ -23,5 +25,11 @@ impl From<reqwest::Error> for Error {
 impl From<serde_json::Error> for Error {
     fn from(e: serde_json::Error) -> Self {
         Error::Json(e)
+    }
+}
+
+impl From<url::ParseError> for Error {
+    fn from(e: url::ParseError) -> Self {
+        Error::InvalidUrl(e)
     }
 }

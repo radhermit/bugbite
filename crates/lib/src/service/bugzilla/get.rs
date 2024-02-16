@@ -2,7 +2,6 @@ use tracing::debug;
 
 use crate::objects::bugzilla::Bug;
 use crate::traits::{Request, WebService};
-use crate::Error;
 
 use super::attachments::AttachmentsRequest;
 use super::comments::CommentsRequest;
@@ -31,10 +30,7 @@ impl GetRequest {
     {
         let mut requests = vec![];
         for id in ids {
-            let url = service
-                .base()
-                .join(&format!("rest/bug/{id}"))
-                .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?;
+            let url = service.base().join(&format!("rest/bug/{id}"))?;
             let req = service.client().get(url).build()?;
             let attachments_req = if attachments {
                 Some(

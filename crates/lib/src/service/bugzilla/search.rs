@@ -33,8 +33,7 @@ impl SearchRequest {
     pub(super) fn new<P: Params>(service: &super::Service, mut query: P) -> crate::Result<Self> {
         let url = service
             .base()
-            .join(&format!("rest/bug?{}", query.params()))
-            .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?;
+            .join(&format!("rest/bug?{}", query.params()))?;
         Ok(Self(service.client.get(url).build()?))
     }
 }

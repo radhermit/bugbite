@@ -29,10 +29,7 @@ impl CommentsRequest {
                 if !ids.is_empty() {
                     params.push(("ids".to_string(), ids.iter().join(",")));
                 }
-                service
-                    .base()
-                    .join(&format!("/rest/bug/{id}/comment"))
-                    .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?
+                service.base().join(&format!("/rest/bug/{id}/comment"))?
             }
             _ => return Err(Error::InvalidValue("invalid comments ID state".to_string())),
         };
@@ -44,8 +41,7 @@ impl CommentsRequest {
         }
 
         if !params.is_empty() {
-            url = Url::parse_with_params(url.as_str(), params)
-                .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?;
+            url = Url::parse_with_params(url.as_str(), params)?;
         }
 
         debug!("comments request url: {url}");
