@@ -1,4 +1,4 @@
-use crate::objects::bugzilla::{Attachment, Bug};
+use crate::objects::bugzilla::{Attachment, Bug, Event};
 use crate::service::bugzilla::Service;
 use crate::traits::{Params, Request, WebService};
 
@@ -42,6 +42,14 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.get_request(ids, comments, attachments)?;
+        request.send(&self.service).await
+    }
+
+    pub async fn history<S>(&self, ids: &[S]) -> crate::Result<Vec<Event>>
+    where
+        S: std::fmt::Display,
+    {
+        let request = self.service.history_request(ids)?;
         request.send(&self.service).await
     }
 

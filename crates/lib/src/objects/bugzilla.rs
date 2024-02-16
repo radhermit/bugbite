@@ -71,9 +71,52 @@ impl fmt::Display for Comment {
             write!(f, "Description ")?;
         }
         writeln!(f, "by {}, {}", self.creator, self.created)?;
+        // TODO: pass in COLUMNS value?
         writeln!(f, "{}", "-".repeat(80))?;
         writeln!(f, "{}", self.text.trim())?;
         Ok(())
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Event {
+    who: String,
+    when: DateTime<Utc>,
+    changes: Vec<Change>,
+}
+
+impl fmt::Display for Event {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if !self.changes.is_empty() {
+            writeln!(f, "Changes made by {}, {}", self.who, self.when)?;
+            // TODO: pass in COLUMNS value?
+            writeln!(f, "{}", "-".repeat(80))?;
+            for change in &self.changes {
+                writeln!(f, "{change}")?;
+            }
+        }
+        Ok(())
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Change {
+    field_name: String,
+    #[serde(deserialize_with = "non_empty_str")]
+    removed: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
+    added: Option<String>,
+}
+
+impl fmt::Display for Change {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let name = &self.field_name;
+        match (self.removed.as_deref(), self.added.as_deref()) {
+            (Some(removed), None) => write!(f, "{name}: -{removed}"),
+            (Some(removed), Some(added)) => write!(f, "{name}: {removed} -> {added}"),
+            (None, Some(added)) => write!(f, "{name}: +{added}"),
+            (None, None) => panic!("invalid change"),
+        }
     }
 }
 

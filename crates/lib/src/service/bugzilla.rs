@@ -10,6 +10,7 @@ use crate::Error;
 mod attachments;
 mod comments;
 mod get;
+mod history;
 pub mod search;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -46,6 +47,15 @@ impl Config {
 pub struct Service {
     config: Config,
     client: reqwest::Client,
+}
+
+impl Service {
+    pub(crate) fn history_request<S>(&self, ids: &[S]) -> crate::Result<history::HistoryRequest>
+    where
+        S: std::fmt::Display,
+    {
+        history::HistoryRequest::new(self, ids)
+    }
 }
 
 impl WebService for Service {
