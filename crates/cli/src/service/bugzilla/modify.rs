@@ -5,6 +5,7 @@ use clap::Args;
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
+    // TODO: add stdin support
     ids: Vec<String>,
 }
 
