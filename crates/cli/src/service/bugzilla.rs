@@ -10,7 +10,6 @@ mod attachments;
 mod comments;
 mod get;
 mod history;
-mod modify;
 mod search;
 
 #[derive(Debug, clap::Args)]
@@ -45,9 +44,6 @@ enum Subcommand {
     Get(get::Command),
     /// Get bug history
     History(history::Command),
-    /// Modify bugs
-    #[command(visible_alias = "m")]
-    Modify(modify::Command),
     /// Search bugs
     #[command(visible_alias = "s")]
     Search(search::Command),
@@ -60,7 +56,6 @@ impl Subcommand {
             Self::Comments(cmd) => cmd.run(client),
             Self::Get(cmd) => cmd.run(client),
             Self::History(cmd) => cmd.run(client),
-            Self::Modify(cmd) => cmd.run(client),
             Self::Search(cmd) => cmd.run(client),
         }
     }

@@ -7,7 +7,6 @@ use tracing::info;
 use crate::options::Options;
 
 mod get;
-mod modify;
 mod search;
 
 #[derive(Debug, clap::Args)]
@@ -41,9 +40,6 @@ enum Subcommand {
     /// Get issues
     #[command(visible_alias = "g")]
     Get(get::Command),
-    /// Modify issues
-    #[command(visible_alias = "m")]
-    Modify(modify::Command),
     /// Search issues
     #[command(visible_alias = "s")]
     Search(search::Command),
@@ -53,7 +49,6 @@ impl Subcommand {
     fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         match self {
             Self::Get(cmd) => cmd.run(client),
-            Self::Modify(cmd) => cmd.run(client),
             Self::Search(cmd) => cmd.run(client),
         }
     }
