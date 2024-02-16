@@ -35,8 +35,27 @@ pub(crate) trait WebService {
         )))
     }
 
-    /// Create a request for attachments by their IDs.
-    fn attachments_request<S>(&self, _ids: &[S]) -> crate::Result<Self::AttachmentsRequest>
+    /// Create a request for attachments by attachment IDs.
+    fn attachments_request<S>(
+        &self,
+        _ids: &[S],
+        _data: bool,
+    ) -> crate::Result<Self::AttachmentsRequest>
+    where
+        S: std::fmt::Display,
+    {
+        Err(Error::Unsupported(format!(
+            "{}: attachments requests unsupported",
+            self.kind()
+        )))
+    }
+
+    /// Create a request for attachments by item IDs.
+    fn item_attachments_request<S>(
+        &self,
+        _ids: &[S],
+        _data: bool,
+    ) -> crate::Result<Self::AttachmentsRequest>
     where
         S: std::fmt::Display,
     {

@@ -46,7 +46,11 @@ impl AttachmentsRequestBuilder {
                 }
                 format!("{base}/rest/bug/attachment/{id}")
             }
-            _ => panic!("invalid attachments ID state"),
+            _ => {
+                return Err(Error::InvalidValue(
+                    "invalid attachments IDs state".to_string(),
+                ))
+            }
         };
 
         if !self.data {

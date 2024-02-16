@@ -16,11 +16,19 @@ impl Client {
         &self.service
     }
 
-    pub async fn attachments<S>(&self, ids: &[S]) -> crate::Result<Vec<Attachment>>
+    pub async fn attachments<S>(&self, ids: &[S], data: bool) -> crate::Result<Vec<Attachment>>
     where
         S: std::fmt::Display,
     {
-        let request = self.service.attachments_request(ids)?;
+        let request = self.service.attachments_request(ids, data)?;
+        request.send(&self.service).await
+    }
+
+    pub async fn item_attachments<S>(&self, ids: &[S], data: bool) -> crate::Result<Vec<Attachment>>
+    where
+        S: std::fmt::Display,
+    {
+        let request = self.service.item_attachments_request(ids, data)?;
         request.send(&self.service).await
     }
 

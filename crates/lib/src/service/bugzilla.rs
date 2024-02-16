@@ -78,13 +78,31 @@ impl WebService for Service {
         }
     }
 
-    fn attachments_request<S>(&self, ids: &[S]) -> crate::Result<Self::AttachmentsRequest>
+    fn attachments_request<S>(
+        &self,
+        ids: &[S],
+        data: bool,
+    ) -> crate::Result<Self::AttachmentsRequest>
     where
         S: std::fmt::Display,
     {
         attachments::AttachmentsRequest::builder()
             .attachment_ids(ids)
-            .data(true)
+            .data(data)
+            .build(self)
+    }
+
+    fn item_attachments_request<S>(
+        &self,
+        ids: &[S],
+        data: bool,
+    ) -> crate::Result<Self::AttachmentsRequest>
+    where
+        S: std::fmt::Display,
+    {
+        attachments::AttachmentsRequest::builder()
+            .bug_ids(ids)
+            .data(data)
             .build(self)
     }
 
