@@ -22,7 +22,7 @@ pub(super) struct Command {
     options: Options,
 
     /// bug IDs
-    #[clap(help_heading = "Arguments")]
+    #[clap(required = true, help_heading = "Arguments")]
     // TODO: add stdin support
     ids: Vec<u64>,
 }

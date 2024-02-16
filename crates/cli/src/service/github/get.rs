@@ -8,6 +8,7 @@ use crate::macros::async_block;
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
+    #[clap(required = true, help_heading = "Arguments")]
     ids: Vec<u64>,
 }
 
