@@ -1,9 +1,11 @@
+use chrono::offset::Utc;
 use itertools::Itertools;
 use serde_json::Value;
 use tracing::debug;
 use url::Url;
 
 use crate::objects::bugzilla::Event;
+use crate::time::TimeDelta;
 use crate::traits::{Request, WebService};
 use crate::Error;
 
@@ -14,7 +16,11 @@ pub(crate) struct HistoryRequest {
 }
 
 impl HistoryRequest {
-    pub(super) fn new<S>(service: &super::Service, ids: &[S]) -> crate::Result<Self>
+    pub(super) fn new<S>(
+        service: &super::Service,
+        ids: &[S],
+        created: Option<TimeDelta>,
+    ) -> crate::Result<Self>
     where
         S: std::fmt::Display,
     {
@@ -28,6 +34,12 @@ impl HistoryRequest {
             }
             _ => return Err(Error::InvalidValue("invalid history IDs state".to_string())),
         };
+
+        if let Some(interval) = created {
+            let datetime = Utc::now() - interval.delta();
+            let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
+            params.push(("new_since".to_string(), target));
+        }
 
         let url = Url::parse_with_params(&url, params)
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {e}")))?;

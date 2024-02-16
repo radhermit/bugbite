@@ -1,5 +1,6 @@
 use crate::objects::bugzilla::{Attachment, Bug, Event};
 use crate::service::bugzilla::Service;
+use crate::time::TimeDelta;
 use crate::traits::{Params, Request, WebService};
 
 #[derive(Debug)]
@@ -45,11 +46,15 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn history<S>(&self, ids: &[S]) -> crate::Result<Vec<Event>>
+    pub async fn history<S>(
+        &self,
+        ids: &[S],
+        created: Option<TimeDelta>,
+    ) -> crate::Result<Vec<Event>>
     where
         S: std::fmt::Display,
     {
-        let request = self.service.history_request(ids)?;
+        let request = self.service.history_request(ids, created)?;
         request.send(&self.service).await
     }
 

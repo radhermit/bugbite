@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::service::ServiceKind;
+use crate::time::TimeDelta;
 use crate::traits::{Params, WebService};
 use crate::Error;
 
@@ -50,11 +51,15 @@ pub struct Service {
 }
 
 impl Service {
-    pub(crate) fn history_request<S>(&self, ids: &[S]) -> crate::Result<history::HistoryRequest>
+    pub(crate) fn history_request<S>(
+        &self,
+        ids: &[S],
+        created: Option<TimeDelta>,
+    ) -> crate::Result<history::HistoryRequest>
     where
         S: std::fmt::Display,
     {
-        history::HistoryRequest::new(self, ids)
+        history::HistoryRequest::new(self, ids, created)
     }
 }
 
