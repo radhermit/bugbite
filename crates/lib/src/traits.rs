@@ -11,8 +11,19 @@ pub trait Params {
 /// Scan a response for a web service error, raising it if one exists.
 pub(crate) trait Request {
     type Output;
-    type Service: WebService;
+    type Service;
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output>;
+}
+
+/// Placeholder request that does nothing.
+pub(crate) struct NullRequest;
+
+impl Request for NullRequest {
+    type Output = ();
+    type Service = ();
+    async fn send(self, _service: &Self::Service) -> crate::Result<Self::Output> {
+        Ok(())
+    }
 }
 
 pub(crate) trait WebService {
