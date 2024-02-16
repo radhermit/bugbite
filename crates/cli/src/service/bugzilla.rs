@@ -44,7 +44,6 @@ enum Subcommand {
     #[command(visible_alias = "g")]
     Get(get::Command),
     /// Get bug history
-    #[command(visible_alias = "h")]
     History(history::Command),
     /// Modify bugs
     #[command(visible_alias = "m")]
