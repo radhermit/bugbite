@@ -5,7 +5,7 @@ use clap::Args;
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
-    ids: Vec<String>,
+    ids: Vec<u64>,
 }
 
 impl Command {

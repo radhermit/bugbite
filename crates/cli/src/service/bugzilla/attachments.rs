@@ -57,7 +57,7 @@ pub(super) struct Command {
     /// attachment or bug IDs
     #[clap(help_heading = "Arguments")]
     // TODO: add stdin support
-    ids: Vec<String>,
+    ids: Vec<u64>,
 }
 
 impl Command {
