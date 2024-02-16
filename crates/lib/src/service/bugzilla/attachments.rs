@@ -93,17 +93,21 @@ impl Request for AttachmentsRequest {
         match (self.bug_ids, self.attachment_ids) {
             (Some(ids), None) => {
                 debug!("attachments request data: {data}");
+                let mut data = data["bugs"].take();
                 for id in ids {
-                    let data = data["bugs"][id].take();
+                    let data = data[&id].take();
                     attachments.extend(serde_json::from_value::<Vec<Attachment>>(data)?);
                 }
                 Ok(attachments)
             }
             (None, Some(ids)) => {
                 debug!("attachments request data: {data}");
+                let mut data = data["attachments"].take();
                 for id in ids {
-                    let data = data["attachments"][id].take();
-                    attachments.push(serde_json::from_value(data)?);
+                    let data = data[&id].take();
+                    let attachment = serde_json::from_value(data)
+                        .map_err(|_| Error::InvalidValue(format!("unknown attachment ID: {id}")))?;
+                    attachments.push(attachment);
                 }
                 Ok(attachments)
             }
