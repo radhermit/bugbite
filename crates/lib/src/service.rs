@@ -34,7 +34,7 @@ use crate::Error;
 #[strum(serialize_all = "kebab-case")]
 pub enum ServiceKind {
     /// Targets the REST API v1 provided by bugzilla-5.0 and up.
-    /// API docs: https://bugzilla.readthedocs.io/en/latest/api/
+    /// API docs: https://bugzilla.readthedocs.io/en/latest/api/core/v1/
     #[default]
     BugzillaRestV1,
     Github,
