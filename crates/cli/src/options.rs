@@ -172,8 +172,8 @@ struct Connection {
     #[arg(long)]
     concurrent: Option<usize>,
     /// seconds to wait before request timeout
-    #[arg(long)]
-    timeout: Option<usize>,
+    #[arg(short, long, value_name = "SECONDS", default_value = "30")]
+    timeout: u64,
 }
 
 #[derive(Debug, Args)]
