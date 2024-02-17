@@ -176,8 +176,14 @@ pub struct Bug {
     status: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
     whiteboard: Option<String>,
+    product: Option<String>,
+    component: Option<String>,
     cc: Vec<String>,
     blocks: Vec<u64>,
+    #[serde(rename = "depends_on")]
+    depends: Vec<u64>,
+    #[serde(rename = "see_also")]
+    urls: Vec<String>,
     pub(crate) comments: Vec<Comment>,
     pub(crate) attachments: Vec<Attachment>,
     pub(crate) history: Vec<Event>,
@@ -212,6 +218,12 @@ impl fmt::Display for Bug {
         if let Some(data) = self.whiteboard.as_deref() {
             writeln!(f, "Whiteboard: {data}")?;
         }
+        if let Some(data) = self.product.as_deref() {
+            writeln!(f, "Product: {data}")?;
+        }
+        if let Some(data) = self.component.as_deref() {
+            writeln!(f, "Component: {data}")?;
+        }
         writeln!(f, "ID: {}", self.id)?;
         if !self.aliases.is_empty() {
             writeln!(f, "Aliases: {}", self.aliases.iter().join(", "))?;
@@ -221,6 +233,12 @@ impl fmt::Display for Bug {
         }
         if !self.blocks.is_empty() {
             writeln!(f, "Blocks: {}", self.blocks.iter().join(", "))?;
+        }
+        if !self.depends.is_empty() {
+            writeln!(f, "Depends on: {}", self.depends.iter().join(", "))?;
+        }
+        if !self.urls.is_empty() {
+            writeln!(f, "See also: {}", self.urls.iter().join(", "))?;
         }
         if !self.comments.is_empty() {
             writeln!(f, "Comments: {}", self.comments.len())?;
