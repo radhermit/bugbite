@@ -218,7 +218,9 @@ impl Command {
     pub(super) fn run(self, kind: ServiceKind, base: String) -> anyhow::Result<ExitCode> {
         let verbosity = self.options.verbosity.log_level_filter();
 
-        // simplify log output when using a info level
+        // Simplify log output when using info level since bugbite uses it for information messages
+        // that shouldn't be prefixed. The downside is warning and error level messages will also
+        // be non-prefixed, but they shouldn't occur during info level runs in most situations.
         let format = if verbosity == LevelFilter::Info {
             tracing_subscriber::fmt::format()
                 .with_level(false)
