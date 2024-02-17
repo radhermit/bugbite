@@ -43,4 +43,4 @@ popd >/dev/null
 popd >/dev/null
 
 # create release tarball
-tar -C target/package -cv -I 'xz -9 -T0' -f ${ARCHIVE}.tar.xz ${RELEASE}
+tar -C target/package -cv -f ${ARCHIVE}.tar ${RELEASE}
