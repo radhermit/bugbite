@@ -65,9 +65,9 @@ impl Command {
         let mut stdout = stdout().lock();
         let get_data = !self.options.list;
         let attachments = if self.options.item_id {
-            async_block!(client.attachments(&self.ids, get_data))
-        } else {
             async_block!(client.item_attachments(&self.ids, get_data))
+        } else {
+            async_block!(client.attachments(&self.ids, get_data))
         }?;
 
         let dir = self.options.dir.unwrap_or(current_dir()?);
