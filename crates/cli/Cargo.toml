@@ -1,7 +1,7 @@
 [package]
 name = "bugbite-cli"
 version = "0.0.1"
-description = "command line tool for mangling bugs, issues, and tickets"
+description = "command line tool for bug, issue, and ticket mangling"
 documentation = "https://github.com/radhermit/bugbite"
 homepage = "https://github.com/radhermit/bugbite"
 repository = "https://github.com/radhermit/bugbite"

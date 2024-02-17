@@ -1,3 +1,3 @@
 # Bugbite
 
-A terminal application for mangling bugs, issues, and tickets.
+A terminal application for bug, issue, and ticket mangling.

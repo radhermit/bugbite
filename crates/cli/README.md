@@ -1,3 +1,3 @@
 # Bite
 
-A command line tool for mangling bugs, issues, and tickets.
+A command line tool for bug, issue, and ticket mangling.

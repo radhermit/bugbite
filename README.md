@@ -2,7 +2,7 @@
 
 # Bugbite
 
-Library and toolkit for mangling bug, issue, and ticket services.
+Library and tools for bug, issue, and ticket mangling.
 
 - bugbite: core library
 - bite (bugbite-cli): CLI client
