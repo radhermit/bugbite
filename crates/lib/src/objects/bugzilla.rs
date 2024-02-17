@@ -247,7 +247,7 @@ impl fmt::Display for Bug {
         }
 
         if !self.attachments.is_empty() {
-            writeln!(f, "Attachment: {}\n", self.attachments.len())?;
+            writeln!(f, "Attachments: {}\n", self.attachments.len())?;
             for attachment in &self.attachments {
                 write!(f, "{attachment}")?;
             }
