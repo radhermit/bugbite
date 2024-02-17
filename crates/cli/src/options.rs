@@ -156,10 +156,10 @@ struct ServiceOpts {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Connection")]
 struct Connection {
-    /// skip SSL certificate verification
+    /// ignore invalid service certificates
     #[arg(long)]
     insecure: bool,
-    /// seconds to wait before request timeout
+    /// request timeout in seconds
     #[arg(short, long, value_name = "SECONDS", default_value = "30")]
     timeout: u64,
 }
