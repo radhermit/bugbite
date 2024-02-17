@@ -157,7 +157,7 @@ struct ServiceOpts {
 #[clap(next_help_heading = "Connection")]
 struct Connection {
     /// skip SSL certificate verification
-    #[arg(short = 'k', long)]
+    #[arg(long)]
     insecure: bool,
     /// max number of concurrent requests
     #[arg(long)]
@@ -168,20 +168,6 @@ struct Connection {
 }
 
 #[derive(Debug, Args)]
-#[clap(next_help_heading = "Authentication")]
-struct Authentication {
-    /// skip service authentication
-    #[arg(short = 'S', long)]
-    skip: bool,
-    /// username
-    #[arg(short, long, env = "BUGBITE_USER")]
-    user: Option<String>,
-    /// password
-    #[arg(short, long, env = "BUGBITE_PASS")]
-    password: Option<String>,
-}
-
-#[derive(Debug, Args)]
 pub(crate) struct Options {
     #[command(flatten)]
     verbosity: Verbosity,
@@ -189,8 +175,6 @@ pub(crate) struct Options {
     service: ServiceOpts,
     #[clap(flatten)]
     connection: Connection,
-    #[clap(flatten)]
-    auth: Authentication,
 }
 
 #[derive(Debug, Parser)]

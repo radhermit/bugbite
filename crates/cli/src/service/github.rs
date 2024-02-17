@@ -8,6 +8,14 @@ mod get;
 mod search;
 
 #[derive(Debug, clap::Args)]
+#[clap(next_help_heading = "Authentication")]
+struct Authentication {
+    /// GitHub personal access token
+    #[arg(short, long)]
+    token: Option<String>,
+}
+
+#[derive(Debug, clap::Args)]
 pub(crate) struct Command {
     /// project to target
     #[arg(short, long)]
