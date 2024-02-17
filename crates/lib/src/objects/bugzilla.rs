@@ -240,8 +240,10 @@ impl fmt::Display for Bug {
         if !self.urls.is_empty() {
             writeln!(f, "See also: {}", self.urls.iter().join(", "))?;
         }
-        if !self.comments.is_empty() {
-            writeln!(f, "Comments: {}", self.comments.len())?;
+
+        // Don't count the bug description as a comment.
+        if self.comments.len() > 1 {
+            writeln!(f, "Comments: {}", self.comments.len() - 1)?;
         }
 
         if !self.attachments.is_empty() {
