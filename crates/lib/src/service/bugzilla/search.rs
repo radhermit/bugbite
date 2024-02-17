@@ -13,7 +13,7 @@ use crate::time::TimeDelta;
 use crate::traits::{Api, Params, Request, WebService};
 use crate::Error;
 
-use super::Field;
+use super::BugField;
 
 #[derive(Debug)]
 pub(crate) struct SearchRequest(reqwest::Request);
@@ -120,10 +120,10 @@ impl QueryBuilder {
 
     pub fn fields<I>(&mut self, fields: I) -> crate::Result<()>
     where
-        I: IntoIterator<Item = Field>,
+        I: IntoIterator<Item = BugField>,
     {
         // always include the bug ID field
-        let include_fields: IndexSet<_> = [Field::Id].into_iter().chain(fields).collect();
+        let include_fields: IndexSet<_> = [BugField::Id].into_iter().chain(fields).collect();
         self.insert(
             "include_fields",
             include_fields.iter().map(|f| f.api()).join(","),

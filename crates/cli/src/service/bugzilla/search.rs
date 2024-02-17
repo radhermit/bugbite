@@ -6,7 +6,7 @@ use bugbite::args::Csv;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
     search::{QueryBuilder, SearchOrder, SearchTerm},
-    Field,
+    BugField,
 };
 use bugbite::time::TimeDelta;
 use clap::builder::BoolishValueParser;
@@ -31,7 +31,7 @@ struct Params {
     // TODO: use enum to define supported fields
     /// fields to output
     #[arg(short = 'F', long, help_heading = "Search related")]
-    fields: Option<Csv<Field>>,
+    fields: Option<Csv<BugField>>,
 
     /// sorting order for search query
     #[arg(

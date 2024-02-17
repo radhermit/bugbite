@@ -180,12 +180,12 @@ impl Api for FieldGroup {
 
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
-pub enum Field {
+pub enum BugField {
     Id,
     Group(FieldGroup),
 }
 
-impl Api for Field {
+impl Api for BugField {
     fn api(&self) -> &str {
         match self {
             Self::Id => "id",
