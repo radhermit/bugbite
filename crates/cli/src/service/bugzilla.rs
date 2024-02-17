@@ -1,10 +1,8 @@
 use std::process::ExitCode;
 
-use bugbite::client::{bugzilla::Client, ClientBuilder};
+use bugbite::client::{Client, ClientBuilder};
 use bugbite::service::ServiceKind;
 use tracing::info;
-
-use crate::options::Options;
 
 mod attachments;
 mod comments;
@@ -21,14 +19,13 @@ pub(crate) struct Command {
 impl Command {
     pub(crate) fn run(
         self,
-        _options: Options,
         kind: ServiceKind,
         base: String,
+        client: ClientBuilder,
     ) -> anyhow::Result<ExitCode> {
         let service = kind.create(&base)?;
         info!("{service}");
-        let client = ClientBuilder::new().build(service)?;
-        self.cmd.run(client.into_bugzilla().unwrap())
+        self.cmd.run(client.build(service)?)
     }
 }
 
@@ -51,6 +48,7 @@ enum Subcommand {
 
 impl Subcommand {
     fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+        let client = client.into_bugzilla().unwrap();
         match self {
             Self::Attachments(cmd) => cmd.run(client),
             Self::Comments(cmd) => cmd.run(client),

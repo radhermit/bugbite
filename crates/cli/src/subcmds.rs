@@ -1,5 +1,6 @@
 use std::process::ExitCode;
 
+use bugbite::client::Client;
 use bugbite::service::ServiceKind;
 use strum::VariantNames;
 
@@ -25,13 +26,15 @@ pub(crate) enum Subcommand {
 impl Subcommand {
     pub(crate) fn run(
         self,
-        options: Options,
+        _options: Options,
         kind: ServiceKind,
         base: String,
     ) -> anyhow::Result<ExitCode> {
+        let client = Client::builder();
+
         match self {
-            Self::Bugzilla(cmd) => cmd.run(options, kind, base),
-            Self::Github(cmd) => cmd.run(options, kind, base),
+            Self::Bugzilla(cmd) => cmd.run(kind, base, client),
+            Self::Github(cmd) => cmd.run(kind, base, client),
             Self::Show(cmd) => cmd.run(),
         }
     }

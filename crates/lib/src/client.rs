@@ -12,19 +12,7 @@ pub struct ClientBuilder {
     client: reqwest::ClientBuilder,
 }
 
-impl Default for ClientBuilder {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl ClientBuilder {
-    pub fn new() -> Self {
-        Self {
-            client: reqwest::Client::builder().user_agent(USER_AGENT),
-        }
-    }
-
     pub fn build(self, config: Config) -> crate::Result<Client> {
         let client = match config {
             Config::BugzillaRestV1(config) => {
@@ -41,4 +29,12 @@ impl ClientBuilder {
 pub enum Client {
     Bugzilla(bugzilla::Client),
     Github(github::Client),
+}
+
+impl Client {
+    pub fn builder() -> ClientBuilder {
+        ClientBuilder {
+            client: reqwest::Client::builder().user_agent(USER_AGENT),
+        }
+    }
 }

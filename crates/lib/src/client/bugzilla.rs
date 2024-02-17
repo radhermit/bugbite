@@ -13,7 +13,9 @@ pub struct Client {
 impl Client {
     pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
         let client = builder.build()?;
-        Ok(Self { service: config.service(client) })
+        Ok(Self {
+            service: config.service(client),
+        })
     }
 
     pub fn service(&self) -> &Service {
