@@ -69,7 +69,10 @@ impl ServiceCommand {
                 // use default service from config if it exists
                 None => config.get_default()?,
                 // TODO: use default service for type from config if it exists?
-                Some(_) => anyhow::bail!("no default connection configured for {subcmd}"),
+                Some(_) => {
+                    Command::parse();
+                    anyhow::bail!("no default connection configured for {subcmd}");
+                }
             },
             _ => panic!("misconfigured service option restrictions"),
         };
