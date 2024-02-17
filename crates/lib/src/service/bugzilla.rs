@@ -168,7 +168,8 @@ pub enum FieldGroup {
 }
 
 impl Api for FieldGroup {
-    fn api(&self) -> &str {
+    type Output = &'static str;
+    fn api(&self) -> Self::Output {
         match self {
             Self::All => "_all",
             Self::Default => "_default",
@@ -188,7 +189,8 @@ pub enum BugField {
 }
 
 impl Api for BugField {
-    fn api(&self) -> &str {
+    type Output = &'static str;
+    fn api(&self) -> Self::Output {
         match self {
             Self::Id => "id",
             Self::AssignedTo => "assigned_to",

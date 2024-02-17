@@ -10,7 +10,8 @@ pub trait Params {
 
 /// Encode a type into the expected API name.
 pub(crate) trait Api {
-    fn api(&self) -> &str;
+    type Output: std::fmt::Display;
+    fn api(&self) -> Self::Output;
 }
 
 /// Scan a response for a web service error, raising it if one exists.

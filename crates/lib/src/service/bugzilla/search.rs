@@ -211,9 +211,10 @@ impl fmt::Display for SearchOrder {
     }
 }
 
-impl SearchOrder {
+impl Api for SearchOrder {
+    type Output = String;
     /// Translate a search order variant into the expected REST API v1 name.
-    fn api(&self) -> String {
+    fn api(&self) -> Self::Output {
         let name = self.term.api();
         if self.descending {
             format!("{name} DESC")
@@ -246,9 +247,10 @@ pub enum SearchTerm {
     Votes,
 }
 
-impl SearchTerm {
+impl Api for SearchTerm {
+    type Output = &'static str;
     /// Translate a search order variant into the expected REST API v1 name.
-    fn api(&self) -> &'static str {
+    fn api(&self) -> Self::Output {
         match self {
             Self::Alias => "alias",
             Self::AssignedTo => "assigned_to",
