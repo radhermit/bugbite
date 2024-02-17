@@ -3,7 +3,6 @@ use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::client::bugzilla::Client;
-use bugbite::utils::current_dir;
 use camino::Utf8PathBuf;
 use clap::Args;
 
@@ -39,6 +38,7 @@ struct Options {
         short,
         long,
         value_name = "PATH",
+        default_value = ".",
         long_help = indoc::indoc! {"
             Save attachments to a specified directory.
 
@@ -46,7 +46,7 @@ struct Options {
             and this allows altering that target directory.
         "}
     )]
-    dir: Option<Utf8PathBuf>,
+    dir: Utf8PathBuf,
 }
 
 #[derive(Debug, Args)]
@@ -82,7 +82,7 @@ impl Command {
                 write!(stdout, "{}", attachment.read())?;
             }
         } else {
-            let dir = self.options.dir.unwrap_or(current_dir()?);
+            let dir = self.options.dir;
             fs::create_dir_all(&dir)?;
             for attachment in attachments.iter().flatten() {
                 // use per-bug directories when requesting attachments from multiple bugs
