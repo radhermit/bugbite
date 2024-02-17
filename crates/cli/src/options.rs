@@ -19,10 +19,8 @@ use crate::utils::COLUMNS;
 #[derive(Debug, Parser)]
 #[command(disable_help_flag = true)]
 pub(super) struct ServiceCommand {
-    #[command(flatten)]
-    _verbosity: Verbosity,
     #[clap(flatten)]
-    service_opts: ServiceOpts,
+    options: Options,
     #[command(subcommand)]
     subcmd: Remaining,
 }
@@ -35,6 +33,12 @@ enum Remaining {
 
 impl ServiceCommand {
     pub(crate) fn service() -> anyhow::Result<(ServiceKind, String, Vec<String>)> {
+        // parse pre-subcommand options with main command parsing failure fallback
+        let Ok(cmd) = Self::try_parse() else {
+            Command::parse();
+            panic!("command parsing should have exited");
+        };
+
         // create mapping for service kind to subcommand names
         let subcmds: HashMap<ServiceKind, String> = ServiceKind::iter()
             .map(|x| match x.as_ref().split_once('-') {
@@ -43,26 +47,9 @@ impl ServiceCommand {
             })
             .collect();
 
-        // determine possible subcommands
-        let possible_subcmds: HashSet<_> = subcmds::Subcommand::VARIANTS.iter().copied().collect();
-        // determine if an option is requested that triggers an exit
-        let exit_opts = HashSet::from(["-h", "--help", "-V", "--version"]);
-        let exit_opts = env::args().skip(1).any(|s| exit_opts.contains(s.as_str()));
-
-        // parse connection info
-        let Ok(cmd) = Self::try_parse() else {
-            // raise connection option parsing failures
-            if !exit_opts {
-                ServiceCommand::parse();
-            }
-            // fallback for `bite -h/--help/-V/--version` usage
-            Command::parse();
-            panic!("command parsing should have exited");
-        };
-
-        let connection = &cmd.service_opts.connection;
-        let base = &cmd.service_opts.base;
-        let service = &cmd.service_opts.service;
+        let connection = &cmd.options.service.connection;
+        let base = &cmd.options.service.base;
+        let service = &cmd.options.service.service;
         let Remaining::Args(remaining) = cmd.subcmd;
         let subcmd = remaining.first().map(|s| s.as_str()).unwrap_or_default();
         let subcmd_kind = subcmds
@@ -91,7 +78,7 @@ impl ServiceCommand {
         };
 
         // construct new args for the main command to parse
-        let mut args = vec!["bite".to_string()];
+        let mut args: Vec<_> = env::args().take_while(|x| x != subcmd).collect();
 
         if let Some(kind) = subcmd_kind {
             if kind != &selected {
@@ -100,6 +87,9 @@ impl ServiceCommand {
                 anyhow::bail!("{subcmd} not compatible with service: {selected}");
             }
         } else {
+            // determine possible subcommands
+            let possible_subcmds: HashSet<_> =
+                subcmds::Subcommand::VARIANTS.iter().copied().collect();
             // inject subcommand for requested service type if missing
             if !possible_subcmds.contains(subcmd) {
                 let cmd = subcmds.get(&selected).unwrap();
@@ -193,8 +183,10 @@ struct Authentication {
 
 #[derive(Debug, Args)]
 pub(crate) struct Options {
+    #[command(flatten)]
+    verbosity: Verbosity,
     #[clap(flatten)]
-    _service: ServiceOpts,
+    service: ServiceOpts,
     #[clap(flatten)]
     connection: Connection,
     #[clap(flatten)]
@@ -234,9 +226,6 @@ pub(crate) struct Options {
     "},
 )]
 pub(crate) struct Command {
-    #[command(flatten)]
-    verbosity: Verbosity,
-
     #[clap(flatten)]
     options: Options,
 
@@ -255,7 +244,7 @@ impl Command {
 
         tracing_subscriber::fmt()
             .event_format(format)
-            .with_max_level(self.verbosity.log_level_filter().as_trace())
+            .with_max_level(self.options.verbosity.log_level_filter().as_trace())
             .with_writer(stderr)
             .init();
 
