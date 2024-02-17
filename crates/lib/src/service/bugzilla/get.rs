@@ -29,6 +29,7 @@ impl GetRequest {
         S: std::fmt::Display,
     {
         let mut requests = vec![];
+        // TODO: collapse into singular queries for each object type
         for id in ids {
             let url = service.base().join(&format!("rest/bug/{id}"))?;
             let req = service.client().get(url).build()?;
