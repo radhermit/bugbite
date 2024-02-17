@@ -159,9 +159,6 @@ struct Connection {
     /// skip SSL certificate verification
     #[arg(long)]
     insecure: bool,
-    /// max number of concurrent requests
-    #[arg(long)]
-    concurrent: Option<usize>,
     /// seconds to wait before request timeout
     #[arg(short, long, value_name = "SECONDS", default_value = "30")]
     timeout: u64,
