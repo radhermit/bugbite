@@ -5,5 +5,5 @@
 Library and toolkit for mangling bug, issue, and ticket services.
 
 - bugbite: core library
-- bugbite-cli: CLI client
-- bugbite-tui: TUI client
+- bite (bugbite-cli): CLI client
+- bugbite (bugbite-tui): TUI client
