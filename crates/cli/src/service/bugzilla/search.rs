@@ -105,6 +105,10 @@ struct Params {
     #[arg(short = 'C', long, help_heading = "Attribute related")]
     component: Option<String>,
 
+    /// restrict by product
+    #[arg(short = 'P', long, help_heading = "Attribute related")]
+    product: Option<String>,
+
     /// restrict by keyword
     #[arg(short = 'K', long, help_heading = "Attribute related")]
     keywords: Option<Vec<String>>,
