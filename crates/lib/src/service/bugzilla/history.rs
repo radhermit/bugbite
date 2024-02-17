@@ -10,10 +10,7 @@ use crate::traits::{Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct HistoryRequest {
-    ids: Vec<String>,
-    req: reqwest::Request,
-}
+pub(crate) struct HistoryRequest(reqwest::Request);
 
 impl HistoryRequest {
     pub(super) fn new<S>(
@@ -48,19 +45,16 @@ impl HistoryRequest {
         }
 
         debug!("history request url: {url}");
-        Ok(Self {
-            ids: ids.iter().map(|s| s.to_string()).collect(),
-            req: service.client().get(url).build()?,
-        })
+        Ok(Self(service.client().get(url).build()?))
     }
 }
 
 impl Request for HistoryRequest {
-    type Output = Vec<Event>;
+    type Output = Vec<Vec<Event>>;
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let response = service.client().execute(self.req).await?;
+        let response = service.client().execute(self.0).await?;
         let mut data = service.parse_response(response).await?;
         debug!("history request data: {data}");
         let Value::Array(bugs) = data["bugs"].take() else {
@@ -72,8 +66,7 @@ impl Request for HistoryRequest {
         let mut history = vec![];
         for mut bug in bugs {
             let data = bug["history"].take();
-            let events: Vec<Event> = serde_json::from_value(data)?;
-            history.extend(events);
+            history.push(serde_json::from_value(data)?);
         }
 
         Ok(history)

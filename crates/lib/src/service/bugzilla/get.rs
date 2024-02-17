@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use tracing::debug;
 
 use crate::objects::bugzilla::Bug;
@@ -7,15 +8,13 @@ use super::attachments::AttachmentsRequest;
 use super::comments::CommentsRequest;
 use super::history::HistoryRequest;
 
-type CombinedRequest = (
-    reqwest::Request,
-    Option<AttachmentsRequest>,
-    Option<CommentsRequest>,
-    Option<HistoryRequest>,
-);
-
 #[derive(Debug)]
-pub(crate) struct GetRequest(Vec<CombinedRequest>);
+pub(crate) struct GetRequest {
+    request: reqwest::Request,
+    attachments: Option<AttachmentsRequest>,
+    comments: Option<CommentsRequest>,
+    history: Option<HistoryRequest>,
+}
 
 impl GetRequest {
     pub(super) fn new<S>(
@@ -28,30 +27,33 @@ impl GetRequest {
     where
         S: std::fmt::Display,
     {
-        let mut requests = vec![];
-        // TODO: collapse into singular queries for each object type
-        for id in ids {
-            let url = service.base().join(&format!("rest/bug/{id}"))?;
-            let req = service.client().get(url).build()?;
-            let attachments_req = if attachments {
-                Some(service.item_attachments_request(&[id], false)?)
-            } else {
-                None
-            };
-            let comments_req = if comments {
-                Some(CommentsRequest::new(service, &[id], None)?)
-            } else {
-                None
-            };
-            let history_req = if history {
-                Some(HistoryRequest::new(service, &[id], None)?)
-            } else {
-                None
-            };
-            requests.push((req, attachments_req, comments_req, history_req));
-        }
+        let url = service
+            .base()
+            .join(&format!("/rest/bug?id={}", ids.iter().join(",")))?;
+        let request = service.client().get(url).build()?;
 
-        Ok(Self(requests))
+        let attachments = if attachments {
+            Some(service.item_attachments_request(ids, false)?)
+        } else {
+            None
+        };
+        let comments = if comments {
+            Some(CommentsRequest::new(service, ids, None)?)
+        } else {
+            None
+        };
+        let history = if history {
+            Some(HistoryRequest::new(service, ids, None)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            request,
+            attachments,
+            comments,
+            history,
+        })
     }
 }
 
@@ -60,33 +62,39 @@ impl Request for GetRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let mut futures = vec![];
-        for (req, attachments_req, comments_req, history_req) in self.0 {
-            futures.push((
-                service.client().execute(req),
-                attachments_req.map(|r| r.send(service)),
-                comments_req.map(|r| r.send(service)),
-                history_req.map(|r| r.send(service)),
-            ));
-        }
+        let (bugs, attachments, comments, history) = (
+            service.client().execute(self.request),
+            self.attachments.map(|r| r.send(service)),
+            self.comments.map(|r| r.send(service)),
+            self.history.map(|r| r.send(service)),
+        );
 
-        let mut bugs = vec![];
-        for (future, attachments, comments, history) in futures {
-            let response = future.await?;
-            let mut data = service.parse_response(response).await?;
-            let data = data["bugs"][0].take();
-            debug!("get request data: {data}");
-            let mut bug: Bug = serde_json::from_value(data)?;
-            if let Some(f) = attachments {
-                bug.attachments = f.await?;
-            }
-            if let Some(f) = comments {
-                bug.comments = f.await?;
-            }
-            if let Some(f) = history {
-                bug.history = f.await?;
-            }
-            bugs.push(bug);
+        let response = bugs.await?;
+        let mut data = service.parse_response(response).await?;
+        let data = data["bugs"].take();
+        debug!("get request data: {data}");
+
+        let mut bugs: Vec<Bug> = serde_json::from_value(data)?;
+        let attachments: Vec<_> = match attachments {
+            Some(f) => f.await?,
+            None => Default::default(),
+        };
+        let mut attachments = attachments.into_iter();
+        let comments: Vec<_> = match comments {
+            Some(f) => f.await?,
+            None => Default::default(),
+        };
+        let mut comments = comments.into_iter();
+        let history: Vec<_> = match history {
+            Some(f) => f.await?,
+            None => Default::default(),
+        };
+        let mut history = history.into_iter();
+
+        for bug in &mut bugs {
+            bug.attachments = attachments.next().unwrap_or_default();
+            bug.comments = comments.next().unwrap_or_default();
+            bug.history = history.next().unwrap_or_default();
         }
 
         Ok(bugs)

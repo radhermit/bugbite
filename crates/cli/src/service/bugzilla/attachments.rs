@@ -73,18 +73,18 @@ impl Command {
         }?;
 
         if self.options.list {
-            for attachment in attachments {
+            for attachment in attachments.iter().flatten() {
                 write!(stdout, "{attachment}")?;
             }
         } else if self.options.view {
-            for attachment in attachments {
+            for attachment in attachments.iter().flatten() {
                 // TODO: support auto-decompressing standard archive formats
                 write!(stdout, "{}", attachment.read())?;
             }
         } else {
             let dir = self.options.dir.unwrap_or(current_dir()?);
             fs::create_dir_all(&dir)?;
-            for attachment in attachments {
+            for attachment in attachments.iter().flatten() {
                 // use per-bug directories when requesting attachments from multiple bugs
                 let path = if multiple_bugs {
                     let dir = dir.join(attachment.bug_id.to_string());

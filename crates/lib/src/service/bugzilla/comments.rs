@@ -55,7 +55,7 @@ impl CommentsRequest {
 }
 
 impl Request for CommentsRequest {
-    type Output = Vec<Comment>;
+    type Output = Vec<Vec<Comment>>;
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
@@ -64,10 +64,9 @@ impl Request for CommentsRequest {
         debug!("comments request data: {data}");
         let mut data = data["bugs"].take();
         let mut comments = vec![];
-        for id in &self.ids {
-            let data = data[id]["comments"].take();
-            let events: Vec<Comment> = serde_json::from_value(data)?;
-            comments.extend(events);
+        for id in self.ids {
+            let data = data[&id]["comments"].take();
+            comments.push(serde_json::from_value(data)?);
         }
         Ok(comments)
     }

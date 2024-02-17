@@ -22,7 +22,7 @@ impl Client {
         &self.service
     }
 
-    pub async fn attachments<S>(&self, ids: &[S], data: bool) -> crate::Result<Vec<Attachment>>
+    pub async fn attachments<S>(&self, ids: &[S], data: bool) -> crate::Result<Vec<Vec<Attachment>>>
     where
         S: std::fmt::Display,
     {
@@ -30,7 +30,11 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn item_attachments<S>(&self, ids: &[S], data: bool) -> crate::Result<Vec<Attachment>>
+    pub async fn item_attachments<S>(
+        &self,
+        ids: &[S],
+        data: bool,
+    ) -> crate::Result<Vec<Vec<Attachment>>>
     where
         S: std::fmt::Display,
     {
@@ -42,7 +46,7 @@ impl Client {
         &self,
         ids: &[S],
         created: Option<TimeDelta>,
-    ) -> crate::Result<Vec<Comment>>
+    ) -> crate::Result<Vec<Vec<Comment>>>
     where
         S: std::fmt::Display,
     {
@@ -70,7 +74,7 @@ impl Client {
         &self,
         ids: &[S],
         created: Option<TimeDelta>,
-    ) -> crate::Result<Vec<Event>>
+    ) -> crate::Result<Vec<Vec<Event>>>
     where
         S: std::fmt::Display,
     {

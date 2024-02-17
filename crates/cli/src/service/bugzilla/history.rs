@@ -31,7 +31,7 @@ impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         let events = async_block!(client.history(&self.ids, self.options.created))?;
         let mut stdout = stdout().lock();
-        write!(stdout, "{}", events.iter().join("\n"))?;
+        write!(stdout, "{}", events.iter().flatten().join("\n"))?;
         Ok(ExitCode::SUCCESS)
     }
 }

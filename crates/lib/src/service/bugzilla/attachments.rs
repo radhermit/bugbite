@@ -54,33 +54,34 @@ impl AttachmentsRequest {
 }
 
 impl Request for AttachmentsRequest {
-    type Output = Vec<Attachment>;
+    type Output = Vec<Vec<Attachment>>;
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
         let response = service.client().execute(self.req).await?;
         let mut data = service.parse_response(response).await?;
-        let mut attachments = vec![];
         match self.ids {
             Ids::Item(ids) => {
                 debug!("attachments request data: {data}");
+                let mut attachments = vec![];
                 let mut data = data["bugs"].take();
                 for id in ids {
                     let data = data[&id].take();
-                    attachments.extend(serde_json::from_value::<Vec<Attachment>>(data)?);
+                    attachments.push(serde_json::from_value::<Vec<Attachment>>(data)?);
                 }
                 Ok(attachments)
             }
             Ids::Object(ids) => {
                 debug!("attachments request data: {data}");
                 let mut data = data["attachments"].take();
+                let mut attachments = vec![];
                 for id in ids {
                     let data = data[&id].take();
                     let attachment = serde_json::from_value(data)
                         .map_err(|_| Error::InvalidValue(format!("unknown attachment ID: {id}")))?;
                     attachments.push(attachment);
                 }
-                Ok(attachments)
+                Ok(vec![attachments])
             }
         }
     }
