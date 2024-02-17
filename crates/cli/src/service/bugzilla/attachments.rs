@@ -70,7 +70,6 @@ impl Command {
             async_block!(client.attachments(&self.ids, get_data))
         }?;
 
-        let dir = self.options.dir.unwrap_or(current_dir()?);
         if self.options.list {
             for attachment in attachments {
                 write!(stdout, "{attachment}")?;
@@ -81,6 +80,7 @@ impl Command {
                 write!(stdout, "{}", attachment.read())?;
             }
         } else {
+            let dir = self.options.dir.unwrap_or(current_dir()?);
             fs::create_dir_all(&dir)?;
             for attachment in attachments {
                 let path = dir.join(&attachment.file_name);
