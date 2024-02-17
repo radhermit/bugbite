@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt;
 
 use chrono::prelude::*;
@@ -53,7 +54,43 @@ impl fmt::Display for Attachment {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Debug, Eq, PartialEq)]
+pub enum Modification<'a> {
+    Comment(&'a Comment),
+    Event(&'a Event),
+}
+
+impl Modification<'_> {
+    fn date(&self) -> &DateTime<Utc> {
+        match self {
+            Self::Comment(comment) => &comment.created,
+            Self::Event(event) => &event.when,
+        }
+    }
+}
+
+impl Ord for Modification<'_> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.date().cmp(other.date())
+    }
+}
+
+impl PartialOrd for Modification<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl fmt::Display for Modification<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Comment(comment) => write!(f, "{comment}"),
+            Self::Event(event) => write!(f, "{event}"),
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Comment {
     id: u64,
     count: u64,
@@ -78,7 +115,7 @@ impl fmt::Display for Comment {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Event {
     who: String,
     when: DateTime<Utc>,
@@ -99,7 +136,7 @@ impl fmt::Display for Event {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Change {
     field_name: String,
     #[serde(deserialize_with = "non_empty_str")]
@@ -196,8 +233,8 @@ impl fmt::Display for Bug {
             }
         }
 
-        for comment in &self.comments {
-            write!(f, "\n{comment}")?;
+        for e in self.events() {
+            write!(f, "\n{e}")?;
         }
 
         Ok(())
@@ -221,5 +258,13 @@ impl Bug {
 
     pub fn reporter(&self) -> Option<&str> {
         self.reporter.as_deref()
+    }
+
+    pub fn events(&self) -> impl Iterator<Item = Modification> {
+        let comments = self.comments.iter().map(Modification::Comment);
+        let history = self.history.iter().map(Modification::Event);
+        let mut events: Vec<_> = comments.chain(history).collect();
+        events.sort();
+        events.into_iter()
     }
 }
