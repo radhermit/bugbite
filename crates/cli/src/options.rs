@@ -166,7 +166,7 @@ struct ServiceOpts {
 #[clap(next_help_heading = "Connection")]
 struct Connection {
     /// skip SSL certificate verification
-    #[arg(short, long)]
+    #[arg(short = 'k', long)]
     insecure: bool,
     /// max number of concurrent requests
     #[arg(long)]
