@@ -6,6 +6,7 @@ use std::process::ExitCode;
 use bugbite::client::Client;
 use bugbite::service::ServiceKind;
 use bugbite::services::SERVICES;
+use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, Parser, Subcommand};
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
@@ -33,7 +34,7 @@ enum Remaining {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service(config: &Config) -> anyhow::Result<(ServiceKind, String, Vec<String>)> {
+    pub(crate) fn service() -> anyhow::Result<(ServiceKind, String, Vec<String>)> {
         // parse pre-subcommand options with main command parsing failure fallback
         let Ok(cmd) = Self::try_parse() else {
             Command::parse();
@@ -48,6 +49,7 @@ impl ServiceCommand {
             })
             .collect();
 
+        let config = Config::load(cmd.options.bite.config.as_deref())?;
         let connection = &cmd.options.service.connection;
         let base = &cmd.options.service.base;
         let service = &cmd.options.service.service;
@@ -149,8 +151,11 @@ struct ServiceOpts {
 }
 
 #[derive(Debug, Args)]
-#[clap(next_help_heading = "Connection")]
-struct Connection {
+#[clap(next_help_heading = "Bite options")]
+struct BiteOpts {
+    /// load config from a custom path
+    #[arg(long)]
+    config: Option<Utf8PathBuf>,
     /// ignore invalid service certificates
     #[arg(long)]
     insecure: bool,
@@ -166,7 +171,7 @@ pub(crate) struct Options {
     #[clap(flatten)]
     service: ServiceOpts,
     #[clap(flatten)]
-    connection: Connection,
+    bite: BiteOpts,
 }
 
 #[derive(Debug, Parser)]
@@ -237,8 +242,8 @@ impl Command {
             .init();
 
         let client = Client::builder()
-            .insecure(self.options.connection.insecure)
-            .timeout(self.options.connection.timeout);
+            .insecure(self.options.bite.insecure)
+            .timeout(self.options.bite.timeout);
 
         self.subcmd.run(kind, base, client)
     }

@@ -1,11 +1,45 @@
+use std::fs;
+
 use anyhow::anyhow;
 use bugbite::service::{self, ServiceKind};
 use bugbite::services::{DEFAULT, SERVICES};
+use camino::Utf8Path;
 use indexmap::IndexMap;
+use serde::Deserialize;
 
+#[derive(Debug, Deserialize)]
+struct TomlConfig {
+    default: Option<String>,
+    connections: Vec<TomlConnection>,
+}
+
+#[derive(Debug, Deserialize)]
+struct TomlConnection {
+    name: String,
+    base: String,
+    service: ServiceKind,
+}
+
+#[derive(Debug)]
 pub(crate) struct Config {
     pub(crate) default: Option<String>,
     pub(crate) connections: IndexMap<String, service::Config>,
+}
+
+impl TryFrom<TomlConfig> for Config {
+    type Error = anyhow::Error;
+
+    fn try_from(config: TomlConfig) -> anyhow::Result<Self> {
+        let mut connections = IndexMap::new();
+        for c in config.connections {
+            connections.insert(c.name, c.service.create(&c.base)?);
+        }
+
+        Ok(Self {
+            default: config.default,
+            connections,
+        })
+    }
 }
 
 impl Default for Config {
@@ -18,6 +52,19 @@ impl Default for Config {
 }
 
 impl Config {
+    pub(crate) fn load(path: Option<&Utf8Path>) -> anyhow::Result<Self> {
+        // TODO: fallback to loading from a default user path
+        if let Some(path) = path {
+            let data = fs::read_to_string(path)
+                .map_err(|e| anyhow!("failed loading config: {path}: {e}"))?;
+            let config: TomlConfig =
+                toml::from_str(&data).map_err(|e| anyhow!("failed parsing config: {path}: {e}"))?;
+            config.try_into()
+        } else {
+            Ok(Self::default())
+        }
+    }
+
     pub(crate) fn get(&self, name: &str) -> anyhow::Result<(ServiceKind, String)> {
         match (self.connections.get(name), SERVICES.get(name)) {
             (Some(service), _) | (_, Some(service)) => {

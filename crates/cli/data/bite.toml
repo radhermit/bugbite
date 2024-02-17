@@ -1,0 +1,13 @@
+# example config for bite
+
+default = "gentoo"
+
+[[connections]]
+name = "gentoo"
+base = "https://bugs.gentoo.org"
+service = "bugzilla-rest-v1"
+
+[[connections]]
+name = "bugbite"
+base = "https://github.com/radhermit/bugbite/"
+service = "github"

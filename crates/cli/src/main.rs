@@ -19,11 +19,8 @@ async fn main() -> anyhow::Result<ExitCode> {
     // reset SIGPIPE behavior since rust ignores it by default
     utils::reset_sigpipe();
 
-    let config = config::Config::default();
-    // TODO: load user config that overrides defaults
-
     // parse service options to determine the service type
-    let (kind, base, args) = match options::ServiceCommand::service(&config) {
+    let (kind, base, args) = match options::ServiceCommand::service() {
         Ok(value) => value,
         Err(e) => return err_exit(e),
     };
