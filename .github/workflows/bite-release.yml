@@ -1,11 +1,11 @@
-name: bugbite-cli-release
+name: bite-release
 
 on:
   push:
-    tags: [bugbite-cli-*]
+    tags: [bite-*]
     branches: ['**']
     paths:
-      - ".github/workflows/bugbite-cli-release.yml"
+      - ".github/workflows/bite-release.yml"
   workflow_dispatch:
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
       id: rust
 
     - name: Create vendored release tarball
-      run: .ci/vendor-tarball bugbite-cli man
+      run: .ci/vendor-tarball bugbite-cli ${{ github.ref_name }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4

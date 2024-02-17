@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Create a vendored rust release tarball.
-# Requires a single argument of the target package name.
+# Requires two arguments, a target package name and the target archive name.
 
 set -e
 
 PACKAGE=$1
+ARCHIVE=$2
 
 # build crate
 cargo package -p ${PACKAGE}
@@ -42,4 +43,4 @@ popd >/dev/null
 popd >/dev/null
 
 # create release tarball
-tar -C target/package -cv -I 'xz -9 -T0' -f ${RELEASE}.tar.xz ${RELEASE}
+tar -C target/package -cv -I 'xz -9 -T0' -f ${ARCHIVE}.tar.xz ${RELEASE}
