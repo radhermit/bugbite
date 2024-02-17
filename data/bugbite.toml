@@ -1,4 +1,4 @@
-# example config for bite
+# Example connections config for bugbite.
 
 default = "gentoo"
 

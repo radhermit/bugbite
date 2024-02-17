@@ -2,6 +2,8 @@
 pub enum Error {
     #[error("{0}")]
     Auth(String),
+    #[error("{0}")]
+    Config(String),
     #[error("no search terms specified")]
     EmptyQuery,
     #[error("invalid URL: {0}")]
