@@ -182,6 +182,8 @@ impl Api for FieldGroup {
 #[strum(serialize_all = "kebab-case")]
 pub enum BugField {
     Id,
+    AssignedTo,
+    Summary,
     Group(FieldGroup),
 }
 
@@ -189,6 +191,8 @@ impl Api for BugField {
     fn api(&self) -> &str {
         match self {
             Self::Id => "id",
+            Self::AssignedTo => "assigned_to",
+            Self::Summary => "summary",
             Self::Group(group) => group.api(),
         }
     }

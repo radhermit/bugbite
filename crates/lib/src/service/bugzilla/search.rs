@@ -15,6 +15,9 @@ use crate::Error;
 
 use super::BugField;
 
+// default fields to return for searches
+static DEFAULT_FIELDS: &[BugField] = &[BugField::Id, BugField::AssignedTo, BugField::Summary];
+
 #[derive(Debug)]
 pub(crate) struct SearchRequest(reqwest::Request);
 
@@ -165,8 +168,10 @@ impl Params for QueryBuilder {
 
         // limit requested fields by default to decrease bandwidth and speed up response
         if !self.query.contains_key("include_fields") {
-            let fields = ["id", "assigned_to", "summary"];
-            self.insert("include_fields", fields.iter().join(","));
+            self.insert(
+                "include_fields",
+                DEFAULT_FIELDS.iter().map(|f| f.api()).join(","),
+            );
         }
 
         let mut params = url::form_urlencoded::Serializer::new(String::new());
