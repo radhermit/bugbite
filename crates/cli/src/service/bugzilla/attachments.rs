@@ -34,7 +34,7 @@ struct Options {
     )]
     item_id: bool,
 
-    /// save attachments to a specified directory
+    /// save attachments into a base directory
     #[arg(
         short,
         long,
@@ -64,6 +64,8 @@ impl Command {
     pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
         let mut stdout = stdout().lock();
         let get_data = !self.options.list;
+        let multiple_bugs = self.ids.len() > 1 && self.options.item_id;
+
         let attachments = if self.options.item_id {
             async_block!(client.item_attachments(&self.ids, get_data))
         } else {
@@ -83,11 +85,20 @@ impl Command {
             let dir = self.options.dir.unwrap_or(current_dir()?);
             fs::create_dir_all(&dir)?;
             for attachment in attachments {
-                let path = dir.join(&attachment.file_name);
+                // use per-bug directories when requesting attachments from multiple bugs
+                let path = if multiple_bugs {
+                    let dir = dir.join(attachment.bug_id.to_string());
+                    fs::create_dir_all(&dir)?;
+                    dir.join(&attachment.file_name)
+                } else {
+                    dir.join(&attachment.file_name)
+                };
+
                 // TODO: confirm overwriting file (with a -f/--force option?)
                 if path.exists() {
                     anyhow::bail!("file already exists: {path}");
                 }
+
                 writeln!(stdout, "Saving attachment: {path}")?;
                 fs::write(&path, attachment.data())?;
             }
