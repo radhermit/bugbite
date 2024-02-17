@@ -66,8 +66,7 @@ impl Service {
     where
         S: std::fmt::Display,
     {
-        let ids = Ids::Object(ids.iter().map(|s| s.to_string()).collect());
-        attachments::AttachmentsRequest::new(self, ids, data)
+        attachments::AttachmentsRequest::new(self, Ids::object(ids), data)
     }
 
     pub(crate) fn item_attachments_request<S>(
@@ -78,8 +77,7 @@ impl Service {
     where
         S: std::fmt::Display,
     {
-        let ids = Ids::Item(ids.iter().map(|s| s.to_string()).collect());
-        attachments::AttachmentsRequest::new(self, ids, data)
+        attachments::AttachmentsRequest::new(self, Ids::item(ids), data)
     }
 
     pub(crate) fn comments_request<S>(

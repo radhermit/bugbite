@@ -27,6 +27,22 @@ impl Default for Ids {
 }
 
 impl Ids {
+    pub(crate) fn item<I, S>(ids: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: std::fmt::Display,
+    {
+        Ids::Item(ids.into_iter().map(|s| s.to_string()).collect())
+    }
+
+    pub(crate) fn object<I, S>(ids: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: std::fmt::Display,
+    {
+        Ids::Object(ids.into_iter().map(|s| s.to_string()).collect())
+    }
+
     pub(crate) fn as_slice(&self) -> IdsSlice {
         match self {
             Self::Item(ids) => IdsSlice::Item(ids.as_slice()),
