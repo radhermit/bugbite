@@ -174,10 +174,10 @@ struct Authentication {
     #[arg(short = 'S', long)]
     skip: bool,
     /// username
-    #[arg(short, long)]
+    #[arg(short, long, env = "BUGBITE_USER")]
     user: Option<String>,
     /// password
-    #[arg(short, long)]
+    #[arg(short, long, env = "BUGBITE_PASS")]
     password: Option<String>,
 }
 
