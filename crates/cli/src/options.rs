@@ -8,7 +8,7 @@ use bugbite::service::ServiceKind;
 use bugbite::services::SERVICES;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, Parser, Subcommand};
-use clap_verbosity_flag::Verbosity;
+use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
 use itertools::Itertools;
 use strum::{IntoEnumIterator, VariantNames};
 use tracing_log::AsTrace;
@@ -170,7 +170,7 @@ struct Connection {
 #[derive(Debug, Args)]
 pub(crate) struct Options {
     #[command(flatten)]
-    verbosity: Verbosity,
+    verbosity: Verbosity<WarnLevel>,
     #[clap(flatten)]
     service: ServiceOpts,
     #[clap(flatten)]
@@ -219,16 +219,26 @@ pub(crate) struct Command {
 
 impl Command {
     pub(super) fn run(self, kind: ServiceKind, base: String) -> anyhow::Result<ExitCode> {
-        // custom log event formatter
-        let format = tracing_subscriber::fmt::format()
-            .with_level(true)
-            .with_target(false)
-            .without_time()
-            .compact();
+        let verbosity = self.options.verbosity.log_level_filter();
+
+        // simplify log output when using a info level
+        let format = if verbosity == LevelFilter::Info {
+            tracing_subscriber::fmt::format()
+                .with_level(false)
+                .with_target(false)
+                .without_time()
+                .compact()
+        } else {
+            tracing_subscriber::fmt::format()
+                .with_level(true)
+                .with_target(true)
+                .without_time()
+                .compact()
+        };
 
         tracing_subscriber::fmt()
             .event_format(format)
-            .with_max_level(self.options.verbosity.log_level_filter().as_trace())
+            .with_max_level(verbosity.as_trace())
             .with_writer(stderr)
             .init();
 
