@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::client::{Client, ClientBuilder};
+use bugbite::client::{bugzilla::Client, ClientBuilder};
 use bugbite::service::ServiceKind;
 use tracing::info;
 
@@ -45,7 +45,8 @@ impl Command {
     ) -> anyhow::Result<ExitCode> {
         let service = kind.create(&base)?;
         info!("{service}");
-        self.cmd.run(client.build(service)?)
+        let client = client.build(service)?.into_bugzilla().unwrap();
+        self.cmd.run(client)
     }
 }
 
@@ -68,7 +69,6 @@ enum Subcommand {
 
 impl Subcommand {
     fn run(self, client: Client) -> anyhow::Result<ExitCode> {
-        let client = client.into_bugzilla().unwrap();
         match self {
             Self::Attachments(cmd) => cmd.run(client),
             Self::Comments(cmd) => cmd.run(client),

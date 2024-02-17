@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::client::{Client, ClientBuilder};
+use bugbite::client::{github::Client, ClientBuilder};
 use bugbite::service::ServiceKind;
 use tracing::info;
 
@@ -41,7 +41,8 @@ impl Command {
             None => kind.create(&base)?,
         };
         info!("{service}");
-        self.cmd.run(client.build(service)?)
+        let client = client.build(service)?.into_github().unwrap();
+        self.cmd.run(client)
     }
 }
 
@@ -57,7 +58,6 @@ enum Subcommand {
 
 impl Subcommand {
     fn run(self, client: Client) -> anyhow::Result<ExitCode> {
-        let client = client.into_github().unwrap();
         match self {
             Self::Get(cmd) => cmd.run(client),
             Self::Search(cmd) => cmd.run(client),

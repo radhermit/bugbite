@@ -31,6 +31,9 @@ impl Config {
     pub(crate) fn service(self, client: reqwest::Client) -> Service {
         Service {
             config: self,
+            user: None,
+            password: None,
+            api_key: None,
             client,
         }
     }
@@ -47,6 +50,9 @@ impl Config {
 #[derive(Debug)]
 pub struct Service {
     config: Config,
+    user: Option<String>,
+    password: Option<String>,
+    api_key: Option<String>,
     client: reqwest::Client,
 }
 

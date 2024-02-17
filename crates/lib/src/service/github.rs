@@ -33,6 +33,7 @@ impl Config {
     pub(crate) fn service(self, client: reqwest::Client) -> Service {
         Service {
             config: self,
+            token: None,
             client,
         }
     }
@@ -49,6 +50,7 @@ impl Config {
 #[derive(Debug)]
 pub struct Service {
     config: Config,
+    token: Option<String>,
     client: reqwest::Client,
 }
 
