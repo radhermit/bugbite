@@ -100,8 +100,7 @@ impl WebService for Service {
     }
 
     async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response> {
-        let data = response.text().await?;
-        let data: serde_json::Value = data.parse()?;
+        let data: serde_json::Value = response.json().await?;
         if data.get("error").is_some() {
             let code = data["code"].as_i64().unwrap();
             let message = data["message"].as_str().unwrap().to_string();
