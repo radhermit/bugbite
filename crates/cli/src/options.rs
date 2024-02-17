@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::env;
 use std::io::stderr;
 use std::process::ExitCode;
@@ -83,15 +83,10 @@ impl ServiceCommand {
                 Command::parse();
                 anyhow::bail!("{subcmd} not compatible with service: {selected}");
             }
-        } else {
-            // determine possible subcommands
-            let possible_subcmds: HashSet<_> =
-                subcmds::Subcommand::VARIANTS.iter().copied().collect();
+        } else if !subcmds::Subcommand::VARIANTS.iter().any(|s| *s == subcmd) {
             // inject subcommand for requested service type if missing
-            if !possible_subcmds.contains(subcmd) {
-                let cmd = subcmds.get(&selected).unwrap();
-                args.push(cmd.clone());
-            }
+            let cmd = subcmds.get(&selected).unwrap();
+            args.push(cmd.clone());
         }
 
         args.extend(remaining);
