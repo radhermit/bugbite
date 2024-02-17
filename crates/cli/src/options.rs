@@ -3,6 +3,7 @@ use std::env;
 use std::io::stderr;
 use std::process::ExitCode;
 
+use bugbite::client::Client;
 use bugbite::service::ServiceKind;
 use bugbite::services::SERVICES;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
@@ -258,6 +259,10 @@ impl Command {
             .with_writer(stderr)
             .init();
 
-        self.subcmd.run(self.options, kind, base)
+        let client = Client::builder()
+            .insecure(self.options.connection.insecure)
+            .timeout(self.options.connection.timeout);
+
+        self.subcmd.run(kind, base, client)
     }
 }
