@@ -5,6 +5,7 @@ use std::{env, fs, io};
 
 use clap::CommandFactory;
 
+mod config;
 mod macros;
 mod options;
 mod service;

@@ -13,6 +13,7 @@ use itertools::Itertools;
 use strum::{IntoEnumIterator, VariantNames};
 use tracing_log::AsTrace;
 
+use crate::config::Config;
 use crate::subcmds;
 use crate::utils::COLUMNS;
 
@@ -32,7 +33,7 @@ enum Remaining {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service() -> anyhow::Result<(ServiceKind, String, Vec<String>)> {
+    pub(crate) fn service(config: &Config) -> anyhow::Result<(ServiceKind, String, Vec<String>)> {
         // parse pre-subcommand options with main command parsing failure fallback
         let Ok(cmd) = Self::try_parse() else {
             Command::parse();
@@ -59,20 +60,14 @@ impl ServiceCommand {
 
         // determine service type
         let (selected, base) = match (connection, base, service) {
-            (Some(name), None, None) => SERVICES.get_raw(name)?,
+            (Some(name), None, None) => config.get(name)?,
             (None, Some(base), Some(service)) => (*service, base.clone()),
             (None, Some(base), None) => (ServiceKind::default(), base.clone()),
             (None, None, None) => match subcmd_kind {
-                // TODO: use default service for type from user config if it exists
-                Some(kind) => match SERVICES
-                    .iter()
-                    .find(|(_name, config)| config.kind() == *kind)
-                {
-                    Some((_name, config)) => (config.kind(), config.base().to_string()),
-                    None => (*kind, "default".to_string()),
-                },
-                // TODO: use default service from user config if it exists
-                None => SERVICES.get_raw("gentoo")?,
+                // use default service from config if it exists
+                None => config.get_default()?,
+                // TODO: use default service for type from config if it exists?
+                Some(_) => anyhow::bail!("no default connection configured for {subcmd}"),
             },
             _ => panic!("misconfigured service option restrictions"),
         };

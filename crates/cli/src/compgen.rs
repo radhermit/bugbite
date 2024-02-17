@@ -6,6 +6,7 @@ use std::{env, fs, io};
 use clap::{CommandFactory, ValueEnum};
 use clap_complete::Shell;
 
+mod config;
 mod macros;
 mod options;
 mod service;
