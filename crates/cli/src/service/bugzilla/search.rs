@@ -28,7 +28,6 @@ use crate::utils::COLUMNS;
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize, Args)]
 struct Params {
-    // TODO: use enum to define supported fields
     /// fields to output
     #[arg(short = 'F', long, help_heading = "Search related")]
     fields: Option<Csv<BugField>>,
