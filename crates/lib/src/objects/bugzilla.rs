@@ -145,6 +145,7 @@ pub struct Change {
     removed: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
     added: Option<String>,
+    attachment_id: Option<u64>,
 }
 
 impl fmt::Display for Change {
