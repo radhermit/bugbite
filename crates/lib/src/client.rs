@@ -30,6 +30,8 @@ impl ClientBuilder {
         let builder = reqwest::Client::builder()
             .use_rustls_tls()
             .user_agent(USER_AGENT)
+            // TODO: switch to cookie_provider() once cookie (de)serialization is supported
+            .cookie_store(true)
             .timeout(Duration::from_secs(self.timeout))
             .danger_accept_invalid_certs(self.insecure);
 
