@@ -93,6 +93,8 @@ impl fmt::Display for Modification<'_> {
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Comment {
     id: u64,
+    bug_id: u64,
+    attachment_id: Option<u64>,
     count: u64,
     text: String,
     creator: String,
