@@ -33,11 +33,7 @@ impl GetRequest {
             let url = service.base().join(&format!("rest/bug/{id}"))?;
             let req = service.client().get(url).build()?;
             let attachments_req = if attachments {
-                Some(
-                    AttachmentsRequest::builder()
-                        .bug_ids(&[id])
-                        .build(service)?,
-                )
+                Some(service.attachments_request(&[id], false)?)
             } else {
                 None
             };

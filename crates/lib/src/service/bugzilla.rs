@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+use crate::objects::Ids;
 use crate::service::ServiceKind;
 use crate::time::TimeDelta;
 use crate::traits::{Params, WebService};
@@ -57,6 +58,30 @@ pub struct Service {
 }
 
 impl Service {
+    pub(crate) fn attachments_request<S>(
+        &self,
+        ids: &[S],
+        data: bool,
+    ) -> crate::Result<attachments::AttachmentsRequest>
+    where
+        S: std::fmt::Display,
+    {
+        let ids = Ids::Item(ids.iter().map(|s| s.to_string()).collect());
+        attachments::AttachmentsRequest::new(self, ids, data)
+    }
+
+    pub(crate) fn item_attachments_request<S>(
+        &self,
+        ids: &[S],
+        data: bool,
+    ) -> crate::Result<attachments::AttachmentsRequest>
+    where
+        S: std::fmt::Display,
+    {
+        let ids = Ids::Object(ids.iter().map(|s| s.to_string()).collect());
+        attachments::AttachmentsRequest::new(self, ids, data)
+    }
+
     pub(crate) fn comments_request<S>(
         &self,
         ids: &[S],
@@ -83,7 +108,6 @@ impl Service {
 impl WebService for Service {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
-    type AttachmentsRequest = attachments::AttachmentsRequest;
     type GetRequest = get::GetRequest;
     type SearchRequest = search::SearchRequest;
 
@@ -108,34 +132,6 @@ impl WebService for Service {
         } else {
             Ok(data)
         }
-    }
-
-    fn attachments_request<S>(
-        &self,
-        ids: &[S],
-        data: bool,
-    ) -> crate::Result<Self::AttachmentsRequest>
-    where
-        S: std::fmt::Display,
-    {
-        attachments::AttachmentsRequest::builder()
-            .attachment_ids(ids)
-            .data(data)
-            .build(self)
-    }
-
-    fn item_attachments_request<S>(
-        &self,
-        ids: &[S],
-        data: bool,
-    ) -> crate::Result<Self::AttachmentsRequest>
-    where
-        S: std::fmt::Display,
-    {
-        attachments::AttachmentsRequest::builder()
-            .bug_ids(ids)
-            .data(data)
-            .build(self)
     }
 
     fn get_request<S>(
