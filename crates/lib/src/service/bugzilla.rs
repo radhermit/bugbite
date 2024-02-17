@@ -151,15 +151,15 @@ impl WebService for Service {
     }
 }
 
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Eq, PartialEq, Hash, Clone, Copy)]
+#[derive(
+    Display, EnumIter, EnumString, VariantNames, Debug, Default, Eq, PartialEq, Hash, Clone, Copy,
+)]
 #[strum(serialize_all = "kebab-case")]
-pub enum Field {
-    Id,
-
-    // groups
+pub enum FieldGroup {
     /// All possible fields
     All,
     /// All default fields
+    #[default]
     Default,
     /// All extra fields
     Extra,
@@ -167,15 +167,29 @@ pub enum Field {
     Custom,
 }
 
-impl Api for Field {
+impl Api for FieldGroup {
     fn api(&self) -> &str {
         match self {
-            Self::Id => "id",
-            // groups
             Self::All => "_all",
             Self::Default => "_default",
             Self::Extra => "_extra",
             Self::Custom => "_custom",
+        }
+    }
+}
+
+#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Eq, PartialEq, Hash, Clone, Copy)]
+#[strum(serialize_all = "kebab-case")]
+pub enum Field {
+    Id,
+    Group(FieldGroup),
+}
+
+impl Api for Field {
+    fn api(&self) -> &str {
+        match self {
+            Self::Id => "id",
+            Self::Group(group) => group.api(),
         }
     }
 }
