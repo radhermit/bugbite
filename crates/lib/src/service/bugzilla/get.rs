@@ -73,23 +73,20 @@ impl Request for GetRequest {
         let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
         debug!("get request data: {data}");
-
         let mut bugs: Vec<Bug> = serde_json::from_value(data)?;
-        let attachments: Vec<_> = match attachments {
-            Some(f) => f.await?,
-            None => Default::default(),
+
+        let mut attachments = match attachments {
+            Some(f) => f.await?.into_iter(),
+            None => Vec::new().into_iter(),
         };
-        let mut attachments = attachments.into_iter();
-        let comments: Vec<_> = match comments {
-            Some(f) => f.await?,
-            None => Default::default(),
+        let mut comments = match comments {
+            Some(f) => f.await?.into_iter(),
+            None => Vec::new().into_iter(),
         };
-        let mut comments = comments.into_iter();
-        let history: Vec<_> = match history {
-            Some(f) => f.await?,
-            None => Default::default(),
+        let mut history = match history {
+            Some(f) => f.await?.into_iter(),
+            None => Vec::new().into_iter(),
         };
-        let mut history = history.into_iter();
 
         for bug in &mut bugs {
             bug.attachments = attachments.next().unwrap_or_default();
