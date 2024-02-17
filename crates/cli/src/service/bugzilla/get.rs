@@ -6,6 +6,7 @@ use clap::builder::BoolishValueParser;
 use clap::Args;
 
 use crate::macros::async_block;
+use crate::utils::COLUMNS;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
@@ -67,10 +68,14 @@ impl Command {
         let comments = self.options.comments.unwrap_or_default();
         let history = self.options.history.unwrap_or_default();
         let bugs = async_block!(client.get(&self.ids, attachments, comments, history,))?;
+        let mut bugs = bugs.into_iter().peekable();
         let mut stdout = stdout().lock();
 
-        for bug in bugs {
+        while let Some(bug) = bugs.next() {
             write!(stdout, "{bug}")?;
+            if bugs.peek().is_some() {
+                writeln!(stdout, "{}", "=".repeat(*COLUMNS))?;
+            }
         }
 
         Ok(ExitCode::SUCCESS)
