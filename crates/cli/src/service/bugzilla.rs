@@ -16,18 +16,22 @@ struct Authentication {
     /// Bugzilla API key
     #[arg(short = 'k', long)]
     api_key: Option<String>,
+
     /// Bugzilla username
     #[arg(short, long, conflicts_with = "api_key")]
     user: Option<String>,
+
     /// Bugzilla password
     #[arg(short, long, conflicts_with = "api_key")]
     password: Option<String>,
 }
 
 #[derive(Debug, clap::Args)]
+#[clap(next_help_heading = "Bugzilla")]
 pub(crate) struct Command {
     #[clap(flatten)]
     auth: Authentication,
+
     #[command(subcommand)]
     cmd: Subcommand,
 }

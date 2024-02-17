@@ -16,10 +16,15 @@ struct Authentication {
 }
 
 #[derive(Debug, clap::Args)]
+#[clap(next_help_heading = "GitHub")]
 pub(crate) struct Command {
     /// project to target
     #[arg(short, long)]
     project: Option<String>,
+
+    #[clap(flatten)]
+    auth: Authentication,
+
     #[command(subcommand)]
     cmd: Subcommand,
 }
