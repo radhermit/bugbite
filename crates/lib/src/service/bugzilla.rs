@@ -1,12 +1,13 @@
 use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
+use strum::{Display, EnumIter, EnumString, VariantNames};
 use url::Url;
 
 use crate::objects::Ids;
 use crate::service::ServiceKind;
 use crate::time::TimeDelta;
-use crate::traits::{Params, WebService};
+use crate::traits::{Api, Params, WebService};
 use crate::Error;
 
 mod attachments;
@@ -147,6 +148,35 @@ impl WebService for Service {
 
     fn search_request<P: Params>(&self, query: P) -> crate::Result<Self::SearchRequest> {
         search::SearchRequest::new(self, query)
+    }
+}
+
+#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Eq, PartialEq, Hash, Clone, Copy)]
+#[strum(serialize_all = "kebab-case")]
+pub enum Field {
+    Id,
+
+    // groups
+    /// All possible fields
+    All,
+    /// All default fields
+    Default,
+    /// All extra fields
+    Extra,
+    /// All custom fields
+    Custom,
+}
+
+impl Api for Field {
+    fn api(&self) -> &str {
+        match self {
+            Self::Id => "id",
+            // groups
+            Self::All => "_all",
+            Self::Default => "_default",
+            Self::Extra => "_extra",
+            Self::Custom => "_custom",
+        }
     }
 }
 

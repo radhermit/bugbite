@@ -4,7 +4,10 @@ use std::process::ExitCode;
 
 use bugbite::args::Csv;
 use bugbite::client::bugzilla::Client;
-use bugbite::service::bugzilla::search::{QueryBuilder, SearchOrder, SearchTerm};
+use bugbite::service::bugzilla::{
+    search::{QueryBuilder, SearchOrder, SearchTerm},
+    Field,
+};
 use bugbite::time::TimeDelta;
 use clap::builder::BoolishValueParser;
 use clap::Args;
@@ -28,7 +31,7 @@ struct Params {
     // TODO: use enum to define supported fields
     /// fields to output
     #[arg(short = 'F', long, help_heading = "Search related")]
-    fields: Option<Csv<String>>,
+    fields: Option<Csv<Field>>,
 
     /// sorting order for search query
     #[arg(

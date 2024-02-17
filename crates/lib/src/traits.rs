@@ -8,6 +8,11 @@ pub trait Params {
     fn params(&mut self) -> crate::Result<String>;
 }
 
+/// Encode a type into the expected API name.
+pub(crate) trait Api {
+    fn api(&self) -> &str;
+}
+
 /// Scan a response for a web service error, raising it if one exists.
 pub(crate) trait Request {
     type Output;
