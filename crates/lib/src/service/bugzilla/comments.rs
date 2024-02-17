@@ -26,6 +26,8 @@ impl CommentsRequest {
         let mut params = vec![];
         let mut url = match ids {
             [id, ids @ ..] => {
+                // Note that multiple request support is missing from upstream's REST API
+                // documentation, but exists in older RPC-based docs.
                 if !ids.is_empty() {
                     params.push(("ids".to_string(), ids.iter().join(",")));
                 }

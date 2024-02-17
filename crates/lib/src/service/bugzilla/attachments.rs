@@ -31,6 +31,8 @@ impl AttachmentsRequestBuilder {
 
     pub(crate) fn build(self, service: &super::Service) -> crate::Result<AttachmentsRequest> {
         let mut params = vec![];
+        // Note that multiple request support is missing from upstream's REST API
+        // documentation, but exists in older RPC-based docs.
         let mut url = match (&self.bug_ids.as_deref(), &self.attachment_ids.as_deref()) {
             (Some([id, ids @ ..]), None) => {
                 if !ids.is_empty() {
