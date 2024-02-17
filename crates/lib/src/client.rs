@@ -28,6 +28,7 @@ impl ClientBuilder {
 
     pub fn build(self, config: Config) -> crate::Result<Client> {
         let builder = reqwest::Client::builder()
+            .use_rustls_tls()
             .user_agent(USER_AGENT)
             .timeout(Duration::from_secs(self.timeout))
             .danger_accept_invalid_certs(self.insecure);
