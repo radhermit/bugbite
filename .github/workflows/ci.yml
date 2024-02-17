@@ -40,6 +40,9 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         rust-version: ${{ fromJson(needs.setup.outputs.rust-version) }}
+        include:
+          - os: macos-latest
+            rust-version: stable
 
     steps:
     - name: Checkout code
