@@ -1,3 +1,5 @@
+use std::io;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("{0}")]
@@ -11,6 +13,8 @@ pub enum Error {
     #[error("{0}")]
     InvalidValue(String),
     #[error("{0}")]
+    IO(String),
+    #[error("{0}")]
     Json(serde_json::Error),
     #[error("bugzilla error: {message}")]
     Bugzilla { code: i64, message: String },
@@ -23,6 +27,12 @@ pub enum Error {
 impl From<reqwest::Error> for Error {
     fn from(e: reqwest::Error) -> Self {
         Error::Request(e.without_url())
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(e: io::Error) -> Self {
+        Error::IO(format!("{e}: {}", e.kind()))
     }
 }
 

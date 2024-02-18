@@ -16,7 +16,7 @@ impl HistoryRequest {
     pub(super) fn new<S>(
         service: &super::Service,
         ids: &[S],
-        created: Option<TimeDelta>,
+        created: Option<&TimeDelta>,
     ) -> crate::Result<Self>
     where
         S: std::fmt::Display,

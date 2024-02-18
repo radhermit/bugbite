@@ -72,24 +72,25 @@ impl QueryBuilder {
         Ok(())
     }
 
-    pub fn sort<I>(&mut self, terms: I)
+    pub fn sort<'a, I>(&mut self, terms: I)
     where
-        I: IntoIterator<Item = SearchOrder>,
+        I: IntoIterator<Item = &'a SearchOrder>,
     {
         let order = terms.into_iter().map(|x| x.api()).join(",");
         self.insert("order", order);
     }
 
-    pub fn commenter<I>(&mut self, values: I) -> crate::Result<()>
+    pub fn commenter<I, S>(&mut self, values: I) -> crate::Result<()>
     where
-        I: IntoIterator<Item = String>,
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
     {
         for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "commenter");
             self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
+            self.insert(format!("v{num}"), value.to_string());
         }
         Ok(())
     }
@@ -121,12 +122,12 @@ impl QueryBuilder {
         }
     }
 
-    pub fn fields<I>(&mut self, fields: I) -> crate::Result<()>
+    pub fn fields<'a, I>(&mut self, fields: I) -> crate::Result<()>
     where
-        I: IntoIterator<Item = BugField>,
+        I: IntoIterator<Item = &'a BugField>,
     {
         // always include the bug ID field
-        let include_fields: IndexSet<_> = [BugField::Id].into_iter().chain(fields).collect();
+        let include_fields: IndexSet<_> = [&BugField::Id].into_iter().chain(fields).collect();
         self.insert(
             "include_fields",
             include_fields.iter().map(|f| f.api()).join(","),
@@ -181,7 +182,7 @@ impl Params for QueryBuilder {
 }
 
 /// Invertable search order sorting term.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct SearchOrder {
     descending: bool,
     term: SearchTerm,
@@ -225,7 +226,7 @@ impl Api for SearchOrder {
 }
 
 /// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone)]
+#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum SearchTerm {
     Alias,

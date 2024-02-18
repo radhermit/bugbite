@@ -61,7 +61,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         let mut stdout = stdout().lock();
         let get_data = !self.options.list;
         let multiple_bugs = self.ids.len() > 1 && self.options.item_id;
@@ -82,8 +82,8 @@ impl Command {
                 write!(stdout, "{}", attachment.read())?;
             }
         } else {
-            let dir = self.options.dir;
-            fs::create_dir_all(&dir)?;
+            let dir = &self.options.dir;
+            fs::create_dir_all(dir)?;
             for attachment in attachments.iter().flatten() {
                 // use per-bug directories when requesting attachments from multiple bugs
                 let path = if multiple_bugs {
@@ -96,7 +96,7 @@ impl Command {
 
                 // TODO: confirm overwriting file (with a -f/--force option?)
                 if path.exists() {
-                    anyhow::bail!("file already exists: {path}");
+                    return Err(bugbite::Error::IO(format!("file already exists: {path}")));
                 }
 
                 writeln!(stdout, "Saving attachment: {path}")?;

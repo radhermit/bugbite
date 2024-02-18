@@ -28,8 +28,9 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
-        let events = async_block!(client.history(&self.ids, self.options.created))?;
+    pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+        let created = self.options.created.as_ref();
+        let events = async_block!(client.history(&self.ids, created))?;
         let mut stdout = stdout().lock();
         write!(stdout, "{}", events.iter().flatten().join("\n"))?;
         Ok(ExitCode::SUCCESS)

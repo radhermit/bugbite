@@ -45,7 +45,7 @@ impl Client {
     pub async fn comments<S>(
         &self,
         ids: &[S],
-        created: Option<TimeDelta>,
+        created: Option<&TimeDelta>,
     ) -> crate::Result<Vec<Vec<Comment>>>
     where
         S: std::fmt::Display,
@@ -73,7 +73,7 @@ impl Client {
     pub async fn history<S>(
         &self,
         ids: &[S],
-        created: Option<TimeDelta>,
+        created: Option<&TimeDelta>,
     ) -> crate::Result<Vec<Vec<Event>>>
     where
         S: std::fmt::Display,

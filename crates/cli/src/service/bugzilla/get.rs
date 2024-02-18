@@ -63,7 +63,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         let attachments = self.options.attachments.unwrap_or_default();
         let comments = self.options.comments.unwrap_or_default();
         let history = self.options.history.unwrap_or_default();

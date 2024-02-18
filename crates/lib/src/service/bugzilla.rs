@@ -84,7 +84,7 @@ impl Service {
     pub(crate) fn comments_request<S>(
         &self,
         ids: &[S],
-        created: Option<TimeDelta>,
+        created: Option<&TimeDelta>,
     ) -> crate::Result<comments::CommentsRequest>
     where
         S: std::fmt::Display,
@@ -95,7 +95,7 @@ impl Service {
     pub(crate) fn history_request<S>(
         &self,
         ids: &[S],
-        created: Option<TimeDelta>,
+        created: Option<&TimeDelta>,
     ) -> crate::Result<history::HistoryRequest>
     where
         S: std::fmt::Display,

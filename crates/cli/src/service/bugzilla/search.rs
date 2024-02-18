@@ -157,38 +157,38 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(mut self, client: Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         let mut query = QueryBuilder::new();
 
-        if let Some(value) = self.params.created.take() {
-            query.created_after(&value)?;
+        if let Some(value) = self.params.created.as_ref() {
+            query.created_after(value)?;
         }
 
-        if let Some(value) = self.params.modified.take() {
-            query.modified_after(&value)?;
+        if let Some(value) = self.params.modified.as_ref() {
+            query.modified_after(value)?;
         }
 
-        if let Some(value) = self.params.sort.take() {
+        if let Some(value) = self.params.sort.as_ref() {
             query.sort(value);
         }
 
-        if let Some(value) = self.params.commenter.take() {
+        if let Some(value) = self.params.commenter.as_ref() {
             query.commenter(value)?;
         }
 
-        if let Some(value) = self.params.votes.take() {
+        if let Some(value) = self.params.votes {
             query.votes(value);
         }
 
-        if let Some(value) = self.params.comments.take() {
+        if let Some(value) = self.params.comments {
             query.comments(value);
         }
 
-        if let Some(value) = self.params.attachments.take() {
+        if let Some(value) = self.params.attachments {
             query.attachments(value);
         }
 
-        if let Some(value) = self.params.fields.take() {
+        if let Some(value) = self.params.fields.as_ref() {
             query.fields(value)?;
         }
 

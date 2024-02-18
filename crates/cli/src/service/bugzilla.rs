@@ -4,6 +4,8 @@ use bugbite::client::{bugzilla::Client, ClientBuilder};
 use bugbite::service::ServiceKind;
 use tracing::info;
 
+use super::login_retry;
+
 mod attachments;
 mod comments;
 mod get;
@@ -46,7 +48,7 @@ impl Command {
         let service = kind.create(&base)?;
         info!("{service}");
         let client = client.build(service)?.into_bugzilla().unwrap();
-        self.cmd.run(client)
+        Ok(login_retry(|| self.cmd.run(&client))?)
     }
 }
 
@@ -68,7 +70,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+    fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         match self {
             Self::Attachments(cmd) => cmd.run(client),
             Self::Comments(cmd) => cmd.run(client),
