@@ -135,6 +135,17 @@ impl QueryBuilder {
         Ok(())
     }
 
+    pub fn extend<K, I, V>(&mut self, key: K, values: I)
+    where
+        I: IntoIterator<Item = V>,
+        K: ToString,
+        V: ToString,
+    {
+        for value in values {
+            self.query.append(key.to_string(), value.to_string());
+        }
+    }
+
     pub fn append<K, V>(&mut self, key: K, value: V)
     where
         K: ToString,

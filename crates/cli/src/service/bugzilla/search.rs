@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
@@ -12,9 +11,6 @@ use bugbite::time::TimeDelta;
 use clap::builder::BoolishValueParser;
 use clap::Args;
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use serde_with::skip_serializing_none;
 use strum::VariantNames;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -25,8 +21,7 @@ use crate::utils::COLUMNS;
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
 /// information.
-#[skip_serializing_none]
-#[derive(Debug, Deserialize, Serialize, Args)]
+#[derive(Debug, Args)]
 struct Params {
     /// fields to output
     #[arg(short = 'F', long, help_heading = "Search related")]
@@ -80,7 +75,6 @@ struct Params {
     assigned_to: Option<Vec<String>>,
 
     /// person who reported
-    #[serde(rename = "creator")]
     #[arg(short, long, help_heading = "Person related")]
     reporter: Option<Vec<String>>,
 
@@ -147,7 +141,7 @@ struct Params {
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
-    summary: Vec<String>,
+    summary: Option<Vec<String>>,
 }
 
 #[derive(Debug, Args)]
@@ -158,54 +152,74 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+        // TODO: implement a custom serde serializer to convert structs to URL parameters
         let mut query = QueryBuilder::new();
+        let params = &self.params;
 
-        if let Some(value) = self.params.created.as_ref() {
+        // custom
+        if let Some(value) = params.created.as_ref() {
             query.created_after(value)?;
         }
-
-        if let Some(value) = self.params.modified.as_ref() {
+        if let Some(value) = params.modified.as_ref() {
             query.modified_after(value)?;
         }
-
-        if let Some(value) = self.params.sort.as_ref() {
+        if let Some(value) = params.sort.as_ref() {
             query.sort(value);
         }
-
-        if let Some(value) = self.params.commenter.as_ref() {
+        if let Some(value) = params.commenter.as_ref() {
             query.commenter(value)?;
         }
-
-        if let Some(value) = self.params.votes {
+        if let Some(value) = params.votes {
             query.votes(value);
         }
-
-        if let Some(value) = self.params.comments {
+        if let Some(value) = params.comments {
             query.comments(value);
         }
-
-        if let Some(value) = self.params.attachments {
+        if let Some(value) = params.attachments {
             query.attachments(value);
         }
-
-        if let Some(value) = self.params.fields.as_ref() {
+        if let Some(value) = params.fields.as_ref() {
             query.fields(value)?;
         }
 
-        // TODO: replace with a custom serde serializer to convert structs to parameter strings
-        // convert search parameters to URL parameters
-        let params = serde_json::to_string(&self.params).unwrap();
-        let params: HashMap<String, Value> = serde_json::from_str(&params).unwrap();
-        for (name, value) in params {
-            match value {
-                Value::String(value) => query.insert(name, value),
-                Value::Array(values) => {
-                    for value in values.iter().filter_map(|v| v.as_str()) {
-                        query.append(&name, value);
-                    }
-                }
-                value => panic!("invalid search parameter type: {value:?}"),
-            }
+        // strings
+        if let Some(value) = params.quicksearch.as_ref() {
+            query.insert("quicksearch", value);
+        }
+        if let Some(value) = params.component.as_ref() {
+            query.insert("component", value);
+        }
+        if let Some(value) = params.product.as_ref() {
+            query.insert("product", value);
+        }
+
+        // vectors
+        if let Some(values) = params.assigned_to.as_ref() {
+            query.extend("assigned_to", values);
+        }
+        if let Some(values) = params.reporter.as_ref() {
+            query.extend("creator", values);
+        }
+        if let Some(values) = params.cc.as_ref() {
+            query.extend("cc", values);
+        }
+        if let Some(values) = params.commenter.as_ref() {
+            query.extend("commenter", values);
+        }
+        if let Some(values) = params.alias.as_ref() {
+            query.extend("alias", values);
+        }
+        if let Some(values) = params.id.as_ref() {
+            query.extend("id", values);
+        }
+        if let Some(values) = params.keywords.as_ref() {
+            query.extend("keywords", values);
+        }
+        if let Some(values) = params.status.as_ref() {
+            query.extend("status", values);
+        }
+        if let Some(values) = params.summary.as_ref() {
+            query.extend("summary", values);
         }
 
         let bugs = async_block!(client.search(query))?;
