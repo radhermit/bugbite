@@ -1,3 +1,4 @@
+use std::io::{stderr, Write};
 use std::process::ExitCode;
 
 use clap::Parser;
@@ -10,15 +11,12 @@ mod subcmds;
 mod utils;
 
 fn err_exit(err: anyhow::Error) -> anyhow::Result<ExitCode> {
-    eprintln!("bite: error: {err}");
+    writeln!(stderr(), "bite: error: {err}")?;
     Ok(ExitCode::from(2))
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
-    // reset SIGPIPE behavior since rust ignores it by default
-    utils::reset_sigpipe();
-
     // parse service options to determine the service type
     let (kind, base, args) = match options::ServiceCommand::service() {
         Ok(value) => value,
