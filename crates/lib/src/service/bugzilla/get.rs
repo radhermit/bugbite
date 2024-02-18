@@ -2,6 +2,7 @@ use url::Url;
 
 use crate::objects::bugzilla::Bug;
 use crate::traits::{Request, WebService};
+use crate::Error;
 
 use super::attachments::AttachmentsRequest;
 use super::comments::CommentsRequest;
@@ -26,11 +27,23 @@ impl GetRequest {
     where
         S: std::fmt::Display,
     {
-        // TODO: replace with a direct call to SearchRequest::new()
-        let url = service.base().join("/rest/bug")?;
-        let params = ids.iter().map(|x| ("id", x.to_string()));
-        let url = Url::parse_with_params(url.as_str(), params)?;
-        let request = service.client().get(url).build()?;
+
+        let mut params = vec![];
+        let mut url = match ids {
+            [id, ids @ ..] => {
+                // Note that multiple request support is missing from upstream's REST API
+                // documentation, but exists in older RPC-based docs.
+                for id in ids {
+                    params.push(("ids", id.to_string()));
+                }
+                service.base().join(&format!("/rest/bug/{id}"))?
+            }
+            _ => return Err(Error::InvalidValue("invalid get ID state".to_string())),
+        };
+
+        if !params.is_empty() {
+            url = Url::parse_with_params(url.as_str(), params)?;
+        }
 
         let attachments = if attachments {
             Some(service.item_attachments_request(ids, false)?)
@@ -49,7 +62,7 @@ impl GetRequest {
         };
 
         Ok(Self {
-            request,
+            request: service.client().get(url).build()?,
             attachments,
             comments,
             history,
