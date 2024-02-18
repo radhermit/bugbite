@@ -2,6 +2,7 @@ use std::fs;
 use std::io::{stdout, Write};
 use std::process::ExitCode;
 
+use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use camino::Utf8PathBuf;
 use clap::Args;
@@ -54,22 +55,26 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
-    /// attachment or bug IDs
+    // TODO: rework stdin support once clap supports custom containers
+    // See: https://github.com/clap-rs/clap/issues/3114
+    /// bug IDs
     #[clap(required = true, help_heading = "Arguments")]
-    // TODO: add stdin support
-    ids: Vec<u64>,
+    ids: MaybeStdinVec<u64>,
+    #[clap(hide = true, value_name = "IDS")]
+    ids2: Vec<u64>,
 }
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+        let ids = &[&self.ids[..], &self.ids2].concat();
         let mut stdout = stdout().lock();
         let get_data = !self.options.list;
-        let multiple_bugs = self.ids.len() > 1 && self.options.item_id;
+        let multiple_bugs = ids.len() > 1 && self.options.item_id;
 
         let attachments = if self.options.item_id {
-            async_block!(client.item_attachments(&self.ids, get_data))
+            async_block!(client.item_attachments(ids, get_data))
         } else {
-            async_block!(client.attachments(&self.ids, get_data))
+            async_block!(client.attachments(ids, get_data))
         }?;
 
         if self.options.list {

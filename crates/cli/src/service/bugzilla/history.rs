@@ -1,6 +1,7 @@
 use std::io::{stdout, Write};
 use std::process::ExitCode;
 
+use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::time::TimeDelta;
 use clap::Args;
@@ -21,16 +22,20 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
+    // TODO: rework stdin support once clap supports custom containers
+    // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs
     #[clap(required = true, help_heading = "Arguments")]
-    // TODO: add stdin support
-    ids: Vec<u64>,
+    ids: MaybeStdinVec<u64>,
+    #[clap(hide = true, value_name = "IDS")]
+    ids2: Vec<u64>,
 }
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+        let ids = &[&self.ids[..], &self.ids2].concat();
         let created = self.options.created.as_ref();
-        let events = async_block!(client.history(&self.ids, created))?;
+        let events = async_block!(client.history(ids, created))?;
         let mut stdout = stdout().lock();
         write!(stdout, "{}", events.iter().flatten().join("\n"))?;
         Ok(ExitCode::SUCCESS)
