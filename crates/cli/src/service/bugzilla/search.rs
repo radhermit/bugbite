@@ -178,16 +178,16 @@ impl Command {
 
         // custom
         if let Some(value) = params.created.as_ref() {
-            query.created_after(value)?;
+            query.created_after(value);
         }
         if let Some(value) = params.modified.as_ref() {
-            query.modified_after(value)?;
+            query.modified_after(value);
         }
         if let Some(value) = params.sort.as_ref() {
             query.sort(value);
         }
         if let Some(value) = params.commenter.as_ref() {
-            query.commenter(value)?;
+            query.commenter(value);
         }
         if let Some(values) = params.url.as_ref() {
             query.url(values);
@@ -202,7 +202,7 @@ impl Command {
             query.attachments(value);
         }
         if let Some(value) = params.fields.as_ref() {
-            query.fields(value)?;
+            query.fields(value);
         }
 
         // strings

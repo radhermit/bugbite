@@ -58,18 +58,16 @@ impl QueryBuilder {
         Self::default()
     }
 
-    pub fn created_after(&mut self, interval: &TimeDelta) -> crate::Result<()> {
+    pub fn created_after(&mut self, interval: &TimeDelta) {
         let datetime = Utc::now() - interval.delta();
         let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
         self.insert("creation_time", target);
-        Ok(())
     }
 
-    pub fn modified_after(&mut self, interval: &TimeDelta) -> crate::Result<()> {
+    pub fn modified_after(&mut self, interval: &TimeDelta) {
         let datetime = Utc::now() - interval.delta();
         let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
         self.insert("last_change_time", target);
-        Ok(())
     }
 
     pub fn sort<'a, I>(&mut self, terms: I)
@@ -80,7 +78,7 @@ impl QueryBuilder {
         self.insert("order", order);
     }
 
-    pub fn commenter<I, S>(&mut self, values: I) -> crate::Result<()>
+    pub fn commenter<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -92,7 +90,6 @@ impl QueryBuilder {
             self.insert(format!("o{num}"), "substring");
             self.insert(format!("v{num}"), value);
         }
-        Ok(())
     }
 
     pub fn url<I, S>(&mut self, values: I)
@@ -136,7 +133,7 @@ impl QueryBuilder {
         }
     }
 
-    pub fn fields<'a, I>(&mut self, fields: I) -> crate::Result<()>
+    pub fn fields<'a, I>(&mut self, fields: I)
     where
         I: IntoIterator<Item = &'a FilterField>,
     {
@@ -149,7 +146,6 @@ impl QueryBuilder {
             "include_fields",
             include_fields.iter().map(|f| f.api()).join(","),
         );
-        Ok(())
     }
 
     pub fn extend<K, I, V>(&mut self, key: K, values: I)
