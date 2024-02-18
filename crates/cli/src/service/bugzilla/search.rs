@@ -143,6 +143,14 @@ struct Params {
     )]
     attachments: Option<bool>,
 
+    /// restrict by blockers
+    #[arg(short = 'B', long, help_heading = "Attribute related")]
+    blocks: Option<Vec<u64>>,
+
+    /// restrict by dependencies
+    #[arg(short = 'D', long, help_heading = "Attribute related")]
+    depends: Option<Vec<u64>>,
+
     /// created at this time or later
     #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
     created: Option<TimeDelta>,
@@ -232,6 +240,12 @@ impl Command {
         }
         if let Some(values) = params.status.as_ref() {
             query.extend("status", values);
+        }
+        if let Some(values) = params.blocks.as_ref() {
+            query.extend("blocks", values);
+        }
+        if let Some(values) = params.depends.as_ref() {
+            query.extend("depends_on", values);
         }
         if let Some(values) = params.summary.as_ref() {
             query.extend("summary", values.iter().flatten());
