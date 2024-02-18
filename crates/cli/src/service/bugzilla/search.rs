@@ -5,7 +5,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
     search::{QueryBuilder, SearchOrder, SearchTerm},
-    BugField,
+    FilterField,
 };
 use bugbite::time::TimeDelta;
 use clap::builder::BoolishValueParser;
@@ -32,7 +32,7 @@ struct Params {
         value_name = "FIELD[,FIELD,...]",
         value_delimiter = ','
     )]
-    fields: Option<Vec<BugField>>,
+    fields: Option<Vec<FilterField>>,
 
     /// sorting order for search query
     #[arg(

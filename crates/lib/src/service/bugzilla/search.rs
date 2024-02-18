@@ -13,7 +13,7 @@ use crate::time::TimeDelta;
 use crate::traits::{Api, Params, Request, WebService};
 use crate::Error;
 
-use super::BugField;
+use super::{BugField, FilterField};
 
 // default fields to return for searches
 static DEFAULT_FIELDS: &[BugField] = &[BugField::Id, BugField::AssignedTo, BugField::Summary];
@@ -138,10 +138,13 @@ impl QueryBuilder {
 
     pub fn fields<'a, I>(&mut self, fields: I) -> crate::Result<()>
     where
-        I: IntoIterator<Item = &'a BugField>,
+        I: IntoIterator<Item = &'a FilterField>,
     {
         // always include the bug ID field
-        let include_fields: IndexSet<_> = [&BugField::Id].into_iter().chain(fields).collect();
+        let include_fields: IndexSet<_> = [&FilterField::Bug(BugField::Id)]
+            .into_iter()
+            .chain(fields)
+            .collect();
         self.insert(
             "include_fields",
             include_fields.iter().map(|f| f.api()).join(","),

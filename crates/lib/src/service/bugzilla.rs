@@ -1,4 +1,6 @@
 use std::collections::HashSet;
+use std::fmt;
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, VariantNames};
@@ -155,7 +157,7 @@ impl WebService for Service {
     Display, EnumIter, EnumString, VariantNames, Debug, Default, Eq, PartialEq, Hash, Clone, Copy,
 )]
 #[strum(serialize_all = "kebab-case")]
-pub enum FieldGroup {
+pub enum GroupField {
     /// All possible fields
     All,
     /// All default fields
@@ -167,7 +169,7 @@ pub enum FieldGroup {
     Custom,
 }
 
-impl Api for FieldGroup {
+impl Api for GroupField {
     type Output = &'static str;
     fn api(&self) -> Self::Output {
         match self {
@@ -185,7 +187,6 @@ pub enum BugField {
     Id,
     AssignedTo,
     Summary,
-    Group(FieldGroup),
 }
 
 impl Api for BugField {
@@ -195,7 +196,45 @@ impl Api for BugField {
             Self::Id => "id",
             Self::AssignedTo => "assigned_to",
             Self::Summary => "summary",
-            Self::Group(group) => group.api(),
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
+pub enum FilterField {
+    Bug(BugField),
+    Group(GroupField),
+}
+
+impl fmt::Display for FilterField {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Bug(value) => value.fmt(f),
+            Self::Group(value) => value.fmt(f),
+        }
+    }
+}
+
+impl FromStr for FilterField {
+    type Err = Error;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        if let Ok(value) = BugField::from_str(s) {
+            Ok(Self::Bug(value))
+        } else if let Ok(value) = GroupField::from_str(s) {
+            Ok(Self::Group(value))
+        } else {
+            Err(Error::InvalidValue(format!("invalid filter field: {s}")))
+        }
+    }
+}
+
+impl Api for FilterField {
+    type Output = &'static str;
+    fn api(&self) -> Self::Output {
+        match self {
+            Self::Bug(value) => value.api(),
+            Self::Group(value) => value.api(),
         }
     }
 }
