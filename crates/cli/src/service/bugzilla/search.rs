@@ -97,7 +97,7 @@ struct Params {
 
     /// restrict by ID
     #[arg(long, help_heading = "Attribute related")]
-    id: Option<Vec<String>>,
+    id: Option<Vec<u64>>,
 
     /// restrict by component
     #[arg(short = 'C', long, help_heading = "Attribute related")]
