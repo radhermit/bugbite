@@ -1,0 +1,71 @@
+{
+  "bugs": [
+    {
+      "is_cc_accessible": true,
+      "whiteboard": "whiteboard",
+      "creator_detail": {
+        "name": "person",
+        "email": "email",
+        "id": 12429,
+        "real_name": "A Person"
+      },
+      "id": 12345,
+      "resolution": "",
+      "alias": [
+        "alias"
+      ],
+      "summary": "summary",
+      "product": "product",
+      "url": "",
+      "severity": "normal",
+      "is_open": true,
+      "assigned_to_detail": {
+        "real_name": "A Person",
+        "id": 5643,
+        "email": "email",
+        "name": "person"
+      },
+      "platform": "All",
+      "assigned_to": "assignee",
+      "version": "unspecified",
+      "op_sys": "Linux",
+      "status": "CONFIRMED",
+      "creation_time": "2010-04-21T21:28:20Z",
+      "blocks": [],
+      "creator": "person",
+      "keywords": [],
+      "priority": "High",
+      "depends_on": [],
+      "classification": "Unclassified",
+      "cc": [
+        "person1",
+        "person2"
+      ],
+      "qa_contact": "",
+      "component": "component",
+      "flags": [],
+      "target_milestone": "---",
+      "is_confirmed": true,
+      "last_change_time": "2024-01-18T18:37:44Z",
+      "see_also": [],
+      "groups": [],
+      "cc_detail": [
+        {
+          "name": "person1",
+          "email": "person1",
+          "id": 54345,
+          "real_name": "Person 1"
+        },
+        {
+          "id": 54321,
+          "email": "person2",
+          "name": "person2",
+          "real_name": "Person 2"
+        }
+      ],
+      "is_creator_accessible": true,
+      "dupe_of": null,
+      "deadline": null
+    }
+  ]
+}
