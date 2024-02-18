@@ -1,4 +1,3 @@
-use tracing::debug;
 use url::Url;
 
 use crate::objects::bugzilla::Bug;
@@ -73,7 +72,6 @@ impl Request for GetRequest {
         let response = bugs.await?;
         let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
-        debug!("get request data: {data}");
         let mut bugs: Vec<Bug> = serde_json::from_value(data)?;
 
         let mut attachments = match attachments {

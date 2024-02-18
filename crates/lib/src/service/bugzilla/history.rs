@@ -1,6 +1,5 @@
 use chrono::offset::Utc;
 use serde_json::Value;
-use tracing::debug;
 use url::Url;
 
 use crate::objects::bugzilla::Event;
@@ -43,7 +42,6 @@ impl HistoryRequest {
             url = Url::parse_with_params(url.as_str(), params)?;
         }
 
-        debug!("history request url: {url}");
         Ok(Self(service.client().get(url).build()?))
     }
 }
@@ -55,7 +53,6 @@ impl Request for HistoryRequest {
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
         let response = service.client().execute(self.0).await?;
         let mut data = service.parse_response(response).await?;
-        debug!("history request data: {data}");
         let Value::Array(bugs) = data["bugs"].take() else {
             return Err(Error::InvalidValue(
                 "invalid history data returned".to_string(),

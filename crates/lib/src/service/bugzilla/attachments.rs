@@ -1,4 +1,3 @@
-use tracing::debug;
 use url::Url;
 
 use crate::objects::bugzilla::Attachment;
@@ -61,7 +60,6 @@ impl Request for AttachmentsRequest {
         let mut data = service.parse_response(response).await?;
         match self.ids {
             Ids::Item(ids) => {
-                debug!("attachments request data: {data}");
                 let mut attachments = vec![];
                 let mut data = data["bugs"].take();
                 for id in ids {
@@ -71,7 +69,6 @@ impl Request for AttachmentsRequest {
                 Ok(attachments)
             }
             Ids::Object(ids) => {
-                debug!("attachments request data: {data}");
                 let mut data = data["attachments"].take();
                 let mut attachments = vec![];
                 for id in ids {

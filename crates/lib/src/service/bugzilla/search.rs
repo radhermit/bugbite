@@ -6,7 +6,6 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 use ordered_multimap::ListOrderedMultimap;
 use strum::{Display, EnumIter, EnumString, VariantNames};
-use tracing::debug;
 
 use crate::objects::bugzilla::Bug;
 use crate::time::TimeDelta;
@@ -29,7 +28,6 @@ impl Request for SearchRequest {
         let response = service.client().execute(self.0).await?;
         let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
-        debug!("search request data: {data}");
         Ok(serde_json::from_value(data)?)
     }
 }

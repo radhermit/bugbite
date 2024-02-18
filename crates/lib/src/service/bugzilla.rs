@@ -4,6 +4,7 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, VariantNames};
+use tracing::debug;
 use url::Url;
 
 use crate::objects::Ids;
@@ -128,6 +129,7 @@ impl WebService for Service {
 
     async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response> {
         let data: serde_json::Value = response.json().await?;
+        debug!("{data}");
         if data.get("error").is_some() {
             let code = data["code"].as_i64().unwrap();
             let message = data["message"].as_str().unwrap().to_string();

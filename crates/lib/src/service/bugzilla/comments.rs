@@ -1,5 +1,4 @@
 use chrono::offset::Utc;
-use tracing::debug;
 use url::Url;
 
 use crate::objects::bugzilla::Comment;
@@ -45,7 +44,6 @@ impl CommentsRequest {
             url = Url::parse_with_params(url.as_str(), params)?;
         }
 
-        debug!("comments request url: {url}");
         Ok(Self {
             ids: ids.iter().map(|s| s.to_string()).collect(),
             req: service.client().get(url).build()?,
@@ -60,7 +58,6 @@ impl Request for CommentsRequest {
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
         let response = service.client().execute(self.req).await?;
         let mut data = service.parse_response(response).await?;
-        debug!("comments request data: {data}");
         let mut data = data["bugs"].take();
         let mut comments = vec![];
         for id in self.ids {
