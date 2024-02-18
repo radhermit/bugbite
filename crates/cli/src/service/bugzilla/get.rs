@@ -70,7 +70,7 @@ impl Command {
         let attachments = self.options.attachments.unwrap_or_default();
         let comments = self.options.comments.unwrap_or_default();
         let history = self.options.history.unwrap_or_default();
-        let bugs = async_block!(client.get(&ids, attachments, comments, history,))?;
+        let bugs = async_block!(client.get(&ids, attachments, comments, history))?;
         let mut bugs = bugs.into_iter().peekable();
         let mut stdout = stdout().lock();
 
