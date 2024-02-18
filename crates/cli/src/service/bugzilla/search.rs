@@ -24,7 +24,12 @@ use crate::utils::COLUMNS;
 #[derive(Debug, Args)]
 struct Params {
     /// fields to output
-    #[arg(short = 'F', long, help_heading = "Search related")]
+    #[arg(
+        short = 'F',
+        long,
+        help_heading = "Search related",
+        value_name = "FIELD[,FIELD,...]"
+    )]
     fields: Option<Csv<BugField>>,
 
     /// sorting order for search query
