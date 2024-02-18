@@ -1,4 +1,4 @@
-use std::io::{stdout, IsTerminal, Write};
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -12,6 +12,7 @@ use clap::builder::BoolishValueParser;
 use clap::Args;
 use itertools::Itertools;
 use strum::VariantNames;
+use tracing::info;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::macros::async_block;
@@ -245,8 +246,8 @@ impl Command {
             }
         }
 
-        if count > 0 && stdout.is_terminal() {
-            writeln!(stdout, " * {count} found")?;
+        if count > 0 {
+            info!(" * {count} found");
         }
 
         Ok(ExitCode::SUCCESS)
