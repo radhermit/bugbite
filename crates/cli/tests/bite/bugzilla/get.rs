@@ -19,7 +19,6 @@ async fn single_bug() {
         .mount(&mock_server)
         .await;
 
-
     let expected = fs::read_to_string(path.join("bugzilla/get/single-bug")).unwrap();
     env::set_var("BUGBITE_BASE", mock_server.uri());
     env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
@@ -27,7 +26,7 @@ async fn single_bug() {
         cmd("bite")
             .arg(subcmd)
             .arg("12345")
-            .args(&["-A", "no", "-C", "no", "-H", "no"])
+            .args(["-A", "no", "-C", "no", "-H", "no"])
             .assert()
             .stdout(predicate::str::diff(expected.clone()))
             .stderr("")
