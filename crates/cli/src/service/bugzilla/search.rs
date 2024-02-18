@@ -1,6 +1,7 @@
 use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
+use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
     search::{QueryBuilder, SearchOrder, SearchTerm},
@@ -98,7 +99,7 @@ struct Params {
 
     /// restrict by ID
     #[arg(long, help_heading = "Attribute related")]
-    id: Option<Vec<u64>>,
+    id: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// restrict by component
     #[arg(short = 'C', long, help_heading = "Attribute related")]
@@ -147,7 +148,7 @@ struct Params {
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
-    summary: Option<Vec<String>>,
+    summary: Option<Vec<MaybeStdinVec<String>>>,
 }
 
 #[derive(Debug, Args)]
@@ -216,7 +217,7 @@ impl Command {
             query.extend("alias", values);
         }
         if let Some(values) = params.id.as_ref() {
-            query.extend("id", values);
+            query.extend("id", values.iter().flatten());
         }
         if let Some(values) = params.keywords.as_ref() {
             query.extend("keywords", values);
@@ -225,7 +226,7 @@ impl Command {
             query.extend("status", values);
         }
         if let Some(values) = params.summary.as_ref() {
-            query.extend("summary", values);
+            query.extend("summary", values.iter().flatten());
         }
 
         let bugs = async_block!(client.search(query))?;
