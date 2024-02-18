@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use tracing::debug;
 use url::Url;
 
@@ -20,14 +19,14 @@ impl AttachmentsRequest {
         // documentation, but exists in older RPC-based docs.
         let mut url = match ids.as_slice() {
             IdsSlice::Item([id, ids @ ..]) => {
-                if !ids.is_empty() {
-                    params.push(("ids".to_string(), ids.iter().join(",")));
+                for id in ids {
+                    params.push(("ids", id.as_str()));
                 }
                 service.base().join(&format!("/rest/bug/{id}/attachment"))?
             }
             IdsSlice::Object([id, ids @ ..]) => {
-                if !ids.is_empty() {
-                    params.push(("attachment_ids".to_string(), ids.iter().join(",")));
+                for id in ids {
+                    params.push(("attachment_ids", id.as_str()));
                 }
                 service.base().join(&format!("/rest/bug/attachment/{id}"))?
             }
@@ -39,7 +38,7 @@ impl AttachmentsRequest {
         };
 
         if !data {
-            params.push(("exclude_fields".to_string(), "data".to_string()));
+            params.push(("exclude_fields", "data"));
         }
 
         if !params.is_empty() {

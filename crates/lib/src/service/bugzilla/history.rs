@@ -1,5 +1,4 @@
 use chrono::offset::Utc;
-use itertools::Itertools;
 use serde_json::Value;
 use tracing::debug;
 use url::Url;
@@ -26,8 +25,8 @@ impl HistoryRequest {
             [id, ids @ ..] => {
                 // Note that multiple request support is missing from upstream's REST API
                 // documentation, but exists in older RPC-based docs.
-                if !ids.is_empty() {
-                    params.push(("ids".to_string(), ids.iter().join(",")));
+                for id in ids {
+                    params.push(("ids", id.to_string()));
                 }
                 service.base().join(&format!("/rest/bug/{id}/history"))?
             }
@@ -37,7 +36,7 @@ impl HistoryRequest {
         if let Some(interval) = created {
             let datetime = Utc::now() - interval.delta();
             let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
-            params.push(("new_since".to_string(), target));
+            params.push(("new_since", target));
         }
 
         if !params.is_empty() {

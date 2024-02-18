@@ -1,5 +1,5 @@
-use itertools::Itertools;
 use tracing::debug;
+use url::Url;
 
 use crate::objects::bugzilla::Bug;
 use crate::traits::{Request, WebService};
@@ -27,9 +27,10 @@ impl GetRequest {
     where
         S: std::fmt::Display,
     {
-        let url = service
-            .base()
-            .join(&format!("/rest/bug?id={}", ids.iter().join(",")))?;
+        // TODO: replace with a direct call to SearchRequest::new()
+        let url = service.base().join("/rest/bug")?;
+        let params = ids.iter().map(|x| ("id", x.to_string()));
+        let url = Url::parse_with_params(url.as_str(), params)?;
         let request = service.client().get(url).build()?;
 
         let attachments = if attachments {
