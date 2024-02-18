@@ -145,11 +145,11 @@ struct Params {
 
     /// restrict by blockers
     #[arg(short = 'B', long, help_heading = "Attribute related")]
-    blocks: Option<Vec<u64>>,
+    blocks: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// restrict by dependencies
     #[arg(short = 'D', long, help_heading = "Attribute related")]
-    depends: Option<Vec<u64>>,
+    depends: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// created at this time or later
     #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
@@ -242,10 +242,10 @@ impl Command {
             query.extend("status", values);
         }
         if let Some(values) = params.blocks.as_ref() {
-            query.extend("blocks", values);
+            query.extend("blocks", values.iter().flatten());
         }
         if let Some(values) = params.depends.as_ref() {
-            query.extend("depends_on", values);
+            query.extend("depends_on", values.iter().flatten());
         }
         if let Some(values) = params.summary.as_ref() {
             query.extend("summary", values.iter().flatten());
