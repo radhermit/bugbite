@@ -90,9 +90,23 @@ impl QueryBuilder {
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "commenter");
             self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value.to_string());
+            self.insert(format!("v{num}"), value);
         }
         Ok(())
+    }
+
+    pub fn url<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        for value in values {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "bug_file_loc");
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
+        }
     }
 
     pub fn votes(&mut self, value: u32) {

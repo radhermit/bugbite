@@ -110,6 +110,10 @@ struct Params {
     #[arg(short = 'P', long, help_heading = "Attribute related")]
     product: Option<String>,
 
+    /// restrict by URL
+    #[arg(short = 'U', long, help_heading = "Attribute related")]
+    url: Option<Vec<String>>,
+
     /// restrict by keyword
     #[arg(short = 'K', long, help_heading = "Attribute related")]
     keywords: Option<Vec<String>>,
@@ -176,6 +180,9 @@ impl Command {
         }
         if let Some(value) = params.commenter.as_ref() {
             query.commenter(value)?;
+        }
+        if let Some(values) = params.url.as_ref() {
+            query.url(values);
         }
         if let Some(value) = params.votes {
             query.votes(value);
