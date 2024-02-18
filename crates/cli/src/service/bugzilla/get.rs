@@ -61,18 +61,16 @@ pub(super) struct Command {
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs
     #[clap(required = true, help_heading = "Arguments")]
-    ids: MaybeStdinVec<u64>,
-    #[clap(hide = true, value_name = "IDS")]
-    ids2: Vec<u64>,
+    ids: Vec<MaybeStdinVec<u64>>,
 }
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
-        let ids = &[&self.ids[..], &self.ids2].concat();
+        let ids: Vec<_> = self.ids.iter().flatten().collect();
         let attachments = self.options.attachments.unwrap_or_default();
         let comments = self.options.comments.unwrap_or_default();
         let history = self.options.history.unwrap_or_default();
-        let bugs = async_block!(client.get(ids, attachments, comments, history,))?;
+        let bugs = async_block!(client.get(&ids, attachments, comments, history,))?;
         let mut bugs = bugs.into_iter().peekable();
         let mut stdout = stdout().lock();
 

@@ -26,16 +26,14 @@ pub(super) struct Command {
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs
     #[clap(required = true, help_heading = "Arguments")]
-    ids: MaybeStdinVec<u64>,
-    #[clap(hide = true, value_name = "IDS")]
-    ids2: Vec<u64>,
+    ids: Vec<MaybeStdinVec<u64>>,
 }
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
-        let ids = &[&self.ids[..], &self.ids2].concat();
+        let ids: Vec<_> = self.ids.iter().flatten().collect();
         let created = self.options.created.as_ref();
-        let events = async_block!(client.history(ids, created))?;
+        let events = async_block!(client.history(&ids, created))?;
         let mut stdout = stdout().lock();
         write!(stdout, "{}", events.iter().flatten().join("\n"))?;
         Ok(ExitCode::SUCCESS)
