@@ -16,6 +16,8 @@ where
     result
 }
 
+// TODO: remove this once authentication support is added
+#[allow(dead_code)]
 /// Force authentication before running a command.
 fn login_required<F>(func: F) -> Result<ExitCode, bugbite::Error>
 where

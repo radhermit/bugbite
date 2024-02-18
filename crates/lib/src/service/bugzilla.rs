@@ -51,6 +51,8 @@ impl Config {
     }
 }
 
+// TODO: remove this once authentication support is added
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Service {
     config: Config,
