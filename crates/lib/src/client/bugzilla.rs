@@ -97,13 +97,11 @@ mod tests {
 
     use crate::client::Client;
     use crate::service::ServiceKind;
-    use crate::test::build_path;
+    use crate::test::TESTDATA_PATH;
 
     #[tokio::test]
     async fn get() {
-        let path = build_path!(env!("CARGO_MANIFEST_DIR"), "testdata");
-        let json = fs::read_to_string(path.join("bugzilla/get/single-bug.json")).unwrap();
-
+        let json = fs::read_to_string(TESTDATA_PATH.join("bugzilla/get/single-bug.json")).unwrap();
         let mock_server = MockServer::start().await;
         let template = ResponseTemplate::new(200).set_body_raw(json.as_bytes(), "application/json");
         Mock::given(any())
@@ -128,9 +126,8 @@ mod tests {
 
     #[tokio::test]
     async fn nonexistent_bug() {
-        let path = build_path!(env!("CARGO_MANIFEST_DIR"), "testdata");
-        let json = fs::read_to_string(path.join("bugzilla/errors/nonexistent-bug.json")).unwrap();
-
+        let json =
+            fs::read_to_string(TESTDATA_PATH.join("bugzilla/errors/nonexistent-bug.json")).unwrap();
         let mock_server = MockServer::start().await;
         let template = ResponseTemplate::new(404).set_body_raw(json.as_bytes(), "application/json");
         Mock::given(any())

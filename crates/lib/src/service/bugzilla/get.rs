@@ -27,7 +27,6 @@ impl GetRequest {
     where
         S: std::fmt::Display,
     {
-
         let mut params = vec![];
         let mut url = match ids {
             [id, ids @ ..] => {
