@@ -1,7 +1,6 @@
 use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
-use bugbite::args::Csv;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
     search::{QueryBuilder, SearchOrder, SearchTerm},
@@ -28,9 +27,10 @@ struct Params {
         short = 'F',
         long,
         help_heading = "Search related",
-        value_name = "FIELD[,FIELD,...]"
+        value_name = "FIELD[,FIELD,...]",
+        value_delimiter = ','
     )]
-    fields: Option<Csv<BugField>>,
+    fields: Option<Vec<BugField>>,
 
     /// sorting order for search query
     #[arg(
@@ -38,6 +38,7 @@ struct Params {
         long,
         help_heading = "Search related",
         value_name = "TERM[,TERM,...]",
+        value_delimiter = ',',
         long_help = indoc::formatdoc! {"
             Perform server-side sorting on the given query.
 
@@ -60,7 +61,7 @@ struct Params {
             possible values:
             {}", SearchTerm::VARIANTS.join(", ")}
     )]
-    sort: Option<Csv<SearchOrder>>,
+    sort: Option<Vec<SearchOrder>>,
 
     /// search using quicksearch syntax
     #[arg(
