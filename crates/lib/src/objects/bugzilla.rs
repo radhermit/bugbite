@@ -6,7 +6,7 @@ use humansize::{format_size, BINARY};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-use crate::serde::non_empty_str;
+use crate::serde::{non_empty_str, null_empty_vec};
 
 use super::{Base64, Item};
 
@@ -164,14 +164,15 @@ impl fmt::Display for Change {
 #[serde(default)]
 pub struct Bug {
     id: u64,
+    #[serde(deserialize_with = "non_empty_str")]
     assigned_to: Option<String>,
-    #[serde(rename = "creator")]
+    #[serde(rename = "creator", deserialize_with = "non_empty_str")]
     reporter: Option<String>,
     #[serde(rename = "creation_time")]
     created: Option<DateTime<Utc>>,
     #[serde(rename = "last_change_time")]
     updated: Option<DateTime<Utc>>,
-    #[serde(rename = "alias")]
+    #[serde(rename = "alias", deserialize_with = "null_empty_vec")]
     aliases: Vec<String>,
     #[serde(deserialize_with = "non_empty_str")]
     summary: Option<String>,
@@ -179,13 +180,17 @@ pub struct Bug {
     status: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
     whiteboard: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
     product: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
     component: Option<String>,
+    #[serde(deserialize_with = "null_empty_vec")]
     cc: Vec<String>,
+    #[serde(deserialize_with = "null_empty_vec")]
     blocks: Vec<u64>,
-    #[serde(rename = "depends_on")]
+    #[serde(rename = "depends_on", deserialize_with = "null_empty_vec")]
     depends: Vec<u64>,
-    #[serde(rename = "see_also")]
+    #[serde(rename = "see_also", deserialize_with = "null_empty_vec")]
     urls: Vec<String>,
     pub(crate) comments: Vec<Comment>,
     pub(crate) attachments: Vec<Attachment>,
