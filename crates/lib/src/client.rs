@@ -54,6 +54,6 @@ pub enum Client {
 
 impl Client {
     pub fn builder() -> ClientBuilder {
-        ClientBuilder::default()
+        ClientBuilder::default().timeout(30)
     }
 }
