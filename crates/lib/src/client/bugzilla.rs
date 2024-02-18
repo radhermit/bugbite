@@ -125,4 +125,29 @@ mod tests {
         let bug = &bugs[0];
         assert_eq!(bug.id(), 12345);
     }
+
+    #[tokio::test]
+    async fn nonexistent_bug() {
+        let path = build_path!(env!("CARGO_MANIFEST_DIR"), "testdata");
+        let json = fs::read_to_string(path.join("bugzilla/errors/nonexistent-bug.json")).unwrap();
+
+        let mock_server = MockServer::start().await;
+        let template = ResponseTemplate::new(404).set_body_raw(json.as_bytes(), "application/json");
+        Mock::given(any())
+            .respond_with(template)
+            .mount(&mock_server)
+            .await;
+
+        let service = ServiceKind::BugzillaRestV1
+            .create(&mock_server.uri())
+            .unwrap();
+        let client = Client::builder()
+            .build(service)
+            .unwrap()
+            .into_bugzilla()
+            .unwrap();
+
+        let result = client.get(&[1], false, false, false).await;
+        assert!(result.is_err());
+    }
 }
