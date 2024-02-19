@@ -167,3 +167,25 @@ async fn multiple_bugs_with_no_attachments() {
         }
     }
 }
+
+#[tokio::test]
+async fn nonexistent_bug() {
+    let server = start_server().await;
+
+    server
+        .respond(404, TEST_PATH.join("errors/nonexistent-bug.json"))
+        .await;
+
+    for subcmd in ["a", "attachments"] {
+        for opt in ["-i", "--item-id"] {
+            cmd("bite")
+                .arg(subcmd)
+                .arg("1")
+                .arg(opt)
+                .assert()
+                .stdout("")
+                .stderr("bite: error: bugzilla: Bug #1 does not exist.\n")
+                .failure();
+        }
+    }
+}
