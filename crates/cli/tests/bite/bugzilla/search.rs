@@ -1,10 +1,25 @@
 use std::fs;
 
 use predicates::prelude::*;
+use predicates::str::contains;
 
 use crate::command::cmd;
 
 use super::{start_server, TEST_PATH};
+
+#[test]
+fn invalid_ids() {
+    for subcmd in ["s", "search"] {
+        cmd("bite")
+            .arg(subcmd)
+            .args(["--id", "id"])
+            .assert()
+            .stdout("")
+            .stderr(contains("error: invalid value 'id' for '--id <ID>': "))
+            .failure()
+            .code(2);
+    }
+}
 
 #[tokio::test]
 async fn ids_only() {

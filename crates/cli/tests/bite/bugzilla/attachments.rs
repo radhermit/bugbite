@@ -1,11 +1,26 @@
 use std::{env, fs};
 
 use predicates::prelude::*;
+use predicates::str::contains;
 use tempfile::tempdir;
 
 use crate::command::cmd;
 
 use super::{start_server, TEST_PATH};
+
+#[test]
+fn invalid_ids() {
+    for subcmd in ["a", "attachments"] {
+        cmd("bite")
+            .arg(subcmd)
+            .arg("id")
+            .assert()
+            .stdout("")
+            .stderr(contains("error: invalid value 'id' for '<IDS>...': "))
+            .failure()
+            .code(2);
+    }
+}
 
 #[tokio::test]
 async fn list_single_without_data() {
