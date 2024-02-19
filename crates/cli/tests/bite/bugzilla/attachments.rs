@@ -1,4 +1,4 @@
-use std::fs;
+use std::{env, fs};
 
 use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
@@ -67,19 +67,17 @@ async fn save_single_via_bug_id_with_plain_text() {
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
+    // save files to the current working directory
+    env::set_current_dir(dir_path).unwrap();
+
     for subcmd in ["a", "attachments"] {
-        for opts in [
-            vec!["-d", dir_path, "-i"],
-            vec!["--dir", dir_path, "--item-id"],
-        ] {
+        for opt in ["-i", "--item-id"] {
             cmd("bite")
                 .arg(subcmd)
                 .arg("123")
-                .args(opts)
+                .arg(opt)
                 .assert()
-                .stdout(predicate::str::diff(format!(
-                    "Saving attachment: {dir_path}/test.txt\n"
-                )))
+                .stdout(predicate::str::diff("Saving attachment: ./test.txt\n"))
                 .stderr("")
                 .success();
 
