@@ -112,7 +112,7 @@ mod tests {
         server.reset().await;
 
         server
-            .respond(404, "bugzilla/errors/nonexistent-bug.json")
+            .respond(404, "bugzilla/get/error-nonexistent-bug.json")
             .await;
         let result = client.get(&[1], false, false, false).await;
         assert!(result.is_err());
