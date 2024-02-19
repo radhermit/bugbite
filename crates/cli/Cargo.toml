@@ -36,6 +36,8 @@ default = []
 doc = ["dep:clap_mangen"]
 # build shell completion
 shell = ["dep:clap_complete"]
+# test support
+test = ["bugbite/test"]
 
 [dependencies]
 anyhow = "1.0.79"
