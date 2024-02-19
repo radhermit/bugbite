@@ -255,7 +255,6 @@ dependencies = [
  "tracing-log",
  "tracing-subscriber",
  "unicode-segmentation",
- "wiremock",
 ]
 
 [[package]]
