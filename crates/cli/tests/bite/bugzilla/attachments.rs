@@ -32,4 +32,26 @@ async fn attachments() {
                 .success();
         }
     }
+
+    server.reset().await;
+
+    // viewing plain-text single attachment via bug ID
+    server
+        .respond(200, "bugzilla/attachments/single-plain-text.json")
+        .await;
+    let expected =
+        fs::read_to_string(path.join("bugzilla/attachments/single-plain-text.expected")).unwrap();
+
+    for subcmd in ["a", "attachments"] {
+        for opts in [vec!["-Vi"], vec!["-V", "-i"], vec!["--view", "--item-id"]] {
+            cmd("bite")
+                .arg(subcmd)
+                .arg("123")
+                .args(opts)
+                .assert()
+                .stdout(predicate::str::diff(expected.clone()))
+                .stderr("")
+                .success();
+        }
+    }
 }
