@@ -1,20 +1,22 @@
 use std::fs;
 
-use bugbite::test::TESTDATA_PATH;
+use camino::Utf8PathBuf;
+use once_cell::sync::Lazy;
 use predicates::prelude::*;
 
 use crate::command::cmd;
 
 use super::start_server;
 
+static TEST_PATH: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TESTDATA_PATH.join("bugzilla/get"));
+
 #[tokio::test]
-async fn get() {
+async fn single_bug() {
     let server = start_server().await;
-    let path = TESTDATA_PATH.join("bugzilla/get");
 
     // single bug
-    server.respond(200, path.join("single-bug.json")).await;
-    let expected = fs::read_to_string(path.join("single-bug.expected")).unwrap();
+    server.respond(200, TEST_PATH.join("single-bug.json")).await;
+    let expected = fs::read_to_string(TEST_PATH.join("single-bug.expected")).unwrap();
 
     for subcmd in ["g", "get"] {
         cmd("bite")
@@ -26,12 +28,15 @@ async fn get() {
             .stderr("")
             .success();
     }
+}
 
-    server.reset().await;
+#[tokio::test]
+async fn nonexistent_bug() {
+    let server = start_server().await;
 
     // nonexistent bug
     server
-        .respond(404, path.join("error-nonexistent-bug.json"))
+        .respond(404, TEST_PATH.join("error-nonexistent-bug.json"))
         .await;
 
     for subcmd in ["g", "get"] {

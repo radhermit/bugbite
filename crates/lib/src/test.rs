@@ -1,7 +1,6 @@
 use std::fs;
 
-use camino::{Utf8Path, Utf8PathBuf};
-use once_cell::sync::Lazy;
+use camino::Utf8Path;
 use wiremock::{matchers, Match, Mock, MockServer, ResponseTemplate};
 
 use crate::client::Client;
@@ -18,8 +17,9 @@ macro_rules! build_path {
 }
 pub use build_path;
 
-pub static TESTDATA_PATH: Lazy<Utf8PathBuf> =
-    Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
+#[cfg(test)]
+pub(crate) static TESTDATA_PATH: once_cell::sync::Lazy<camino::Utf8PathBuf> =
+    once_cell::sync::Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
 
 pub struct TestServer {
     server: MockServer,
@@ -51,7 +51,8 @@ impl TestServer {
         M: 'static + Match,
         P: AsRef<Utf8Path>,
     {
-        let json = fs::read_to_string(path.as_ref()).unwrap();
+        let path = path.as_ref();
+        let json = fs::read_to_string(path).unwrap_or_else(|e| panic!("invalid path: {path}: {e}"));
         let template =
             ResponseTemplate::new(status).set_body_raw(json.as_bytes(), "application/json");
         Mock::given(matcher)

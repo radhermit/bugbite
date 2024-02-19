@@ -1,6 +1,7 @@
 use std::fs;
 
-use bugbite::test::TESTDATA_PATH;
+use camino::Utf8PathBuf;
+use once_cell::sync::Lazy;
 use predicates::prelude::*;
 use tempfile::tempdir;
 
@@ -8,16 +9,17 @@ use crate::command::cmd;
 
 use super::start_server;
 
-#[tokio::test]
-async fn attachments() {
-    let server = start_server().await;
-    let path = TESTDATA_PATH.join("bugzilla/attachments");
+static TEST_PATH: Lazy<Utf8PathBuf> =
+    Lazy::new(|| crate::TESTDATA_PATH.join("bugzilla/attachments"));
 
-    // listing single attachment via bug ID without data
+#[tokio::test]
+async fn list_single_via_bug_id_without_data() {
+    let server = start_server().await;
+
     server
-        .respond(200, path.join("single-without-data.json"))
+        .respond(200, TEST_PATH.join("single-without-data.json"))
         .await;
-    let expected = fs::read_to_string(path.join("single-without-data.expected")).unwrap();
+    let expected = fs::read_to_string(TEST_PATH.join("single-without-data.expected")).unwrap();
 
     for subcmd in ["a", "attachments"] {
         for opts in [vec!["-li"], vec!["-l", "-i"], vec!["--list", "--item-id"]] {
@@ -31,14 +33,15 @@ async fn attachments() {
                 .success();
         }
     }
+}
 
-    server.reset().await;
-
-    // viewing plain-text single attachment via bug ID
+#[tokio::test]
+async fn view_single_via_bug_id_with_plain_text() {
+    let server = start_server().await;
     server
-        .respond(200, path.join("single-plain-text.json"))
+        .respond(200, TEST_PATH.join("single-plain-text.json"))
         .await;
-    let expected = fs::read_to_string(path.join("single-plain-text.expected")).unwrap();
+    let expected = fs::read_to_string(TEST_PATH.join("single-plain-text.expected")).unwrap();
 
     for subcmd in ["a", "attachments"] {
         for opts in [vec!["-Vi"], vec!["-V", "-i"], vec!["--view", "--item-id"]] {
@@ -52,13 +55,15 @@ async fn attachments() {
                 .success();
         }
     }
+}
 
-    server.reset().await;
-
-    // saving plain-text single attachment via bug ID
+#[tokio::test]
+async fn save_single_via_bug_id_with_plain_text() {
+    let server = start_server().await;
     server
-        .respond(200, path.join("single-plain-text.json"))
+        .respond(200, TEST_PATH.join("single-plain-text.json"))
         .await;
+    let expected = fs::read_to_string(TEST_PATH.join("single-plain-text.expected")).unwrap();
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
