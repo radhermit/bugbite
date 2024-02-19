@@ -15,7 +15,7 @@ async fn get() {
 
     // single bug
     server.respond(200, "bugzilla/get/single-bug.json").await;
-    let expected = fs::read_to_string(path.join("bugzilla/get/single-bug")).unwrap();
+    let expected = fs::read_to_string(path.join("bugzilla/get/single-bug.expected")).unwrap();
 
     for subcmd in ["g", "get"] {
         cmd("bite")
@@ -31,7 +31,9 @@ async fn get() {
     server.reset().await;
 
     // nonexistent bug
-    server.respond(404, "bugzilla/get/error-nonexistent-bug.json").await;
+    server
+        .respond(404, "bugzilla/get/error-nonexistent-bug.json")
+        .await;
 
     for subcmd in ["g", "get"] {
         cmd("bite")

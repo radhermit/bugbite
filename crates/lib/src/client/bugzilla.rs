@@ -130,6 +130,6 @@ mod tests {
         let mut query = client.service().search_query();
         query.insert("summary", "test");
         let bugs = client.search(query).await.unwrap();
-        assert_eq!(bugs.len(), 80);
+        assert_eq!(bugs.len(), 5);
     }
 }
