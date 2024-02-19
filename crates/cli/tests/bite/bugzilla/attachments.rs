@@ -1,25 +1,23 @@
-use std::{env, fs};
+use std::fs;
 
-use bugbite::test::TestServer;
+use bugbite::test::TESTDATA_PATH;
 use predicates::prelude::*;
 use tempfile::tempdir;
 
 use crate::command::cmd;
-use crate::macros::build_path;
+
+use super::start_server;
 
 #[tokio::test]
 async fn attachments() {
-    let server = TestServer::new().await;
-    env::set_var("BUGBITE_BASE", server.uri());
-    env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
-    let path = build_path!(env!("CARGO_MANIFEST_DIR"), "testdata");
+    let server = start_server().await;
+    let path = TESTDATA_PATH.join("bugzilla/attachments");
 
     // listing single attachment via bug ID without data
     server
-        .respond(200, "bugzilla/attachments/single-without-data.json")
+        .respond(200, path.join("single-without-data.json"))
         .await;
-    let expected =
-        fs::read_to_string(path.join("bugzilla/attachments/single-without-data.expected")).unwrap();
+    let expected = fs::read_to_string(path.join("single-without-data.expected")).unwrap();
 
     for subcmd in ["a", "attachments"] {
         for opts in [vec!["-li"], vec!["-l", "-i"], vec!["--list", "--item-id"]] {
@@ -38,10 +36,9 @@ async fn attachments() {
 
     // viewing plain-text single attachment via bug ID
     server
-        .respond(200, "bugzilla/attachments/single-plain-text.json")
+        .respond(200, path.join("single-plain-text.json"))
         .await;
-    let expected =
-        fs::read_to_string(path.join("bugzilla/attachments/single-plain-text.expected")).unwrap();
+    let expected = fs::read_to_string(path.join("single-plain-text.expected")).unwrap();
 
     for subcmd in ["a", "attachments"] {
         for opts in [vec!["-Vi"], vec!["-V", "-i"], vec!["--view", "--item-id"]] {
@@ -60,7 +57,7 @@ async fn attachments() {
 
     // saving plain-text single attachment via bug ID
     server
-        .respond(200, "bugzilla/attachments/single-plain-text.json")
+        .respond(200, path.join("single-plain-text.json"))
         .await;
 
     let dir = tempdir().unwrap();

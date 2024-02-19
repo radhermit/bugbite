@@ -1,21 +1,20 @@
-use std::{env, fs};
+use std::fs;
 
-use bugbite::test::TestServer;
+use bugbite::test::TESTDATA_PATH;
 use predicates::prelude::*;
 
 use crate::command::cmd;
-use crate::macros::build_path;
+
+use super::start_server;
 
 #[tokio::test]
 async fn get() {
-    let server = TestServer::new().await;
-    env::set_var("BUGBITE_BASE", server.uri());
-    env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
-    let path = build_path!(env!("CARGO_MANIFEST_DIR"), "testdata");
+    let server = start_server().await;
+    let path = TESTDATA_PATH.join("bugzilla/get");
 
     // single bug
-    server.respond(200, "bugzilla/get/single-bug.json").await;
-    let expected = fs::read_to_string(path.join("bugzilla/get/single-bug.expected")).unwrap();
+    server.respond(200, path.join("single-bug.json")).await;
+    let expected = fs::read_to_string(path.join("single-bug.expected")).unwrap();
 
     for subcmd in ["g", "get"] {
         cmd("bite")
@@ -32,7 +31,7 @@ async fn get() {
 
     // nonexistent bug
     server
-        .respond(404, "bugzilla/get/error-nonexistent-bug.json")
+        .respond(404, path.join("error-nonexistent-bug.json"))
         .await;
 
     for subcmd in ["g", "get"] {

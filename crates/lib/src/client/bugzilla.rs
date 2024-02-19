@@ -91,19 +91,20 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use crate::service::ServiceKind;
-    use crate::test::TestServer;
+    use crate::test::{TestServer, TESTDATA_PATH};
 
     use super::*;
 
     #[tokio::test]
     async fn get() {
+        let path = TESTDATA_PATH.join("bugzilla/get");
         let server = TestServer::new().await;
         let client = server
             .client(ServiceKind::BugzillaRestV1)
             .into_bugzilla()
             .unwrap();
 
-        server.respond(200, "bugzilla/get/single-bug.json").await;
+        server.respond(200, path.join("single-bug.json")).await;
         let bugs = client.get(&[12345], false, false, false).await.unwrap();
         assert_eq!(bugs.len(), 1);
         let bug = &bugs[0];
@@ -112,7 +113,7 @@ mod tests {
         server.reset().await;
 
         server
-            .respond(404, "bugzilla/get/error-nonexistent-bug.json")
+            .respond(404, path.join("error-nonexistent-bug.json"))
             .await;
         let result = client.get(&[1], false, false, false).await;
         assert!(result.is_err());
@@ -120,13 +121,14 @@ mod tests {
 
     #[tokio::test]
     async fn search() {
+        let path = TESTDATA_PATH.join("bugzilla/search");
         let server = TestServer::new().await;
         let client = server
             .client(ServiceKind::BugzillaRestV1)
             .into_bugzilla()
             .unwrap();
 
-        server.respond(200, "bugzilla/search/ids.json").await;
+        server.respond(200, path.join("ids.json")).await;
         let mut query = client.service().search_query();
         query.insert("summary", "test");
         let bugs = client.search(query).await.unwrap();

@@ -1,6 +1,6 @@
 use std::fs;
 
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use once_cell::sync::Lazy;
 use wiremock::{matchers, Match, Mock, MockServer, ResponseTemplate};
 
@@ -16,9 +16,9 @@ macro_rules! build_path {
         base
     }}
 }
-pub(crate) use build_path;
+pub use build_path;
 
-pub(crate) static TESTDATA_PATH: Lazy<Utf8PathBuf> =
+pub static TESTDATA_PATH: Lazy<Utf8PathBuf> =
     Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
 
 pub struct TestServer {
@@ -46,8 +46,12 @@ impl TestServer {
         &self.uri
     }
 
-    pub async fn respond_match<M: 'static + Match>(&self, matcher: M, status: u16, path: &str) {
-        let json = fs::read_to_string(TESTDATA_PATH.join(path)).unwrap();
+    pub async fn respond_match<M, P>(&self, matcher: M, status: u16, path: P)
+    where
+        M: 'static + Match,
+        P: AsRef<Utf8Path>,
+    {
+        let json = fs::read_to_string(path.as_ref()).unwrap();
         let template =
             ResponseTemplate::new(status).set_body_raw(json.as_bytes(), "application/json");
         Mock::given(matcher)
@@ -56,7 +60,7 @@ impl TestServer {
             .await;
     }
 
-    pub async fn respond(&self, status: u16, path: &str) {
+    pub async fn respond<P: AsRef<Utf8Path>>(&self, status: u16, path: P) {
         self.respond_match(matchers::any(), status, path).await
     }
 

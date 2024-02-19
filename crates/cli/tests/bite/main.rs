@@ -2,7 +2,6 @@ use predicates::prelude::*;
 
 mod bugzilla;
 mod command;
-mod macros;
 
 use command::cmd;
 
