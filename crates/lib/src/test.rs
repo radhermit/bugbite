@@ -21,37 +21,32 @@ pub(crate) use build_path;
 pub(crate) static TESTDATA_PATH: Lazy<Utf8PathBuf> =
     Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
 
-pub(crate) struct TestServer {
+pub struct TestServer {
     server: MockServer,
     uri: String,
 }
 
 impl TestServer {
-    pub(crate) async fn new() -> Self {
+    pub async fn new() -> Self {
         let server = MockServer::start().await;
         let uri = server.uri();
         Self { server, uri }
     }
 
-    pub(crate) fn client(&self, kind: ServiceKind) -> Client {
+    pub fn client(&self, kind: ServiceKind) -> Client {
         let service = kind.create(self.uri()).unwrap();
         Client::builder().build(service).unwrap()
     }
 
-    pub(crate) fn server(&self) -> &MockServer {
+    pub fn server(&self) -> &MockServer {
         &self.server
     }
 
-    pub(crate) fn uri(&self) -> &str {
+    pub fn uri(&self) -> &str {
         &self.uri
     }
 
-    pub(crate) async fn respond_match<M: 'static + Match>(
-        &self,
-        matcher: M,
-        status: u16,
-        path: &str,
-    ) {
+    pub async fn respond_match<M: 'static + Match>(&self, matcher: M, status: u16, path: &str) {
         let json = fs::read_to_string(TESTDATA_PATH.join(path)).unwrap();
         let template =
             ResponseTemplate::new(status).set_body_raw(json.as_bytes(), "application/json");
@@ -61,11 +56,11 @@ impl TestServer {
             .await;
     }
 
-    pub(crate) async fn respond(&self, status: u16, path: &str) {
+    pub async fn respond(&self, status: u16, path: &str) {
         self.respond_match(matchers::any(), status, path).await
     }
 
-    pub(crate) async fn reset(&self) {
+    pub async fn reset(&self) {
         self.server().reset().await;
     }
 }
