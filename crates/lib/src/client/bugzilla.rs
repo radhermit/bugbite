@@ -90,60 +90,36 @@ impl Client {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-
     use wiremock::matchers::any;
-    use wiremock::{Mock, MockServer, ResponseTemplate};
 
     use crate::client::Client;
     use crate::service::ServiceKind;
-    use crate::test::TESTDATA_PATH;
+    use crate::test::TestServer;
 
     #[tokio::test]
     async fn get() {
-        let json = fs::read_to_string(TESTDATA_PATH.join("bugzilla/get/single-bug.json")).unwrap();
-        let mock_server = MockServer::start().await;
-        let template = ResponseTemplate::new(200).set_body_raw(json.as_bytes(), "application/json");
-        Mock::given(any())
-            .respond_with(template)
-            .mount(&mock_server)
-            .await;
+        let server = TestServer::new().await;
 
-        let service = ServiceKind::BugzillaRestV1
-            .create(&mock_server.uri())
-            .unwrap();
+        let service = ServiceKind::BugzillaRestV1.create(server.uri()).unwrap();
         let client = Client::builder()
             .build(service)
             .unwrap()
             .into_bugzilla()
             .unwrap();
 
+        server
+            .respond(any(), 200, "bugzilla/get/single-bug.json")
+            .await;
         let bugs = client.get(&[12345], false, false, false).await.unwrap();
         assert_eq!(bugs.len(), 1);
         let bug = &bugs[0];
         assert_eq!(bug.id(), 12345);
-    }
 
-    #[tokio::test]
-    async fn nonexistent_bug() {
-        let json =
-            fs::read_to_string(TESTDATA_PATH.join("bugzilla/errors/nonexistent-bug.json")).unwrap();
-        let mock_server = MockServer::start().await;
-        let template = ResponseTemplate::new(404).set_body_raw(json.as_bytes(), "application/json");
-        Mock::given(any())
-            .respond_with(template)
-            .mount(&mock_server)
+        server.reset().await;
+
+        server
+            .respond(any(), 404, "bugzilla/errors/nonexistent-bug.json")
             .await;
-
-        let service = ServiceKind::BugzillaRestV1
-            .create(&mock_server.uri())
-            .unwrap();
-        let client = Client::builder()
-            .build(service)
-            .unwrap()
-            .into_bugzilla()
-            .unwrap();
-
         let result = client.get(&[1], false, false, false).await;
         assert!(result.is_err());
     }
