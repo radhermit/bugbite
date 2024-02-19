@@ -23,6 +23,16 @@ fn aliases() {
 }
 
 #[test]
+fn no_search_terms() {
+    cmd("bite search")
+        .assert()
+        .stdout("")
+        .stderr("bite: error: no search terms specified\n")
+        .failure()
+        .code(2);
+}
+
+#[test]
 fn invalid_ids() {
     cmd("bite search")
         .args(["--id", "id"])
