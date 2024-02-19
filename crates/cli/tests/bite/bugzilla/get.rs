@@ -66,3 +66,21 @@ async fn nonexistent_bug() {
         .stderr("bite: error: bugzilla: Bug #1 does not exist.\n")
         .failure();
 }
+
+#[tokio::test]
+async fn multiple_bugs() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_PATH.join("get/multiple-bugs.json"))
+        .await;
+    let expected = fs::read_to_string(TEST_PATH.join("get/multiple-bugs.expected")).unwrap();
+
+    cmd("bite get")
+        .args(["12345", "23456", "34567"])
+        .args(["-A", "no", "-C", "no", "-H", "no"])
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
+}

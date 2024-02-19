@@ -1,0 +1,169 @@
+{
+  "bugs": [
+    {
+      "is_cc_accessible": true,
+      "whiteboard": "whiteboard",
+      "creator_detail": {
+        "name": "person",
+        "email": "email",
+        "id": 12429,
+        "real_name": "A Person"
+      },
+      "id": 12345,
+      "resolution": "",
+      "alias": [
+        "alias"
+      ],
+      "summary": "summary",
+      "product": "product",
+      "url": "",
+      "severity": "normal",
+      "is_open": true,
+      "assigned_to_detail": {
+        "real_name": "A Person",
+        "id": 5643,
+        "email": "email",
+        "name": "person"
+      },
+      "platform": "All",
+      "assigned_to": "assignee",
+      "version": "unspecified",
+      "op_sys": "Linux",
+      "status": "CONFIRMED",
+      "creation_time": "2010-04-21T21:28:20Z",
+      "blocks": [],
+      "creator": "person",
+      "keywords": [],
+      "priority": "High",
+      "depends_on": [],
+      "classification": "Unclassified",
+      "cc": [
+        "person1",
+        "person2"
+      ],
+      "qa_contact": "",
+      "component": "component",
+      "flags": [],
+      "target_milestone": "---",
+      "is_confirmed": true,
+      "last_change_time": "2024-01-18T18:37:44Z",
+      "see_also": [],
+      "groups": [],
+      "cc_detail": [
+        {
+          "name": "person1",
+          "email": "person1",
+          "id": 54345,
+          "real_name": "Person 1"
+        },
+        {
+          "id": 54321,
+          "email": "person2",
+          "name": "person2",
+          "real_name": "Person 2"
+        }
+      ],
+      "is_creator_accessible": true,
+      "dupe_of": null,
+      "deadline": null
+    },
+    {
+      "is_cc_accessible": true,
+      "whiteboard": "",
+      "creator_detail": {
+        "name": "person1",
+        "email": "email1",
+        "id": 22429,
+        "real_name": "B Person"
+      },
+      "id": 23456,
+      "resolution": "FIXED",
+      "alias": [],
+      "summary": "summary1",
+      "product": "product1",
+      "url": "",
+      "severity": "high",
+      "is_open": false,
+      "assigned_to_detail": {
+        "real_name": "C Person",
+        "id": 876,
+        "email": "email2",
+        "name": "person2"
+      },
+      "platform": "All",
+      "assigned_to": "person2",
+      "version": "unspecified",
+      "op_sys": "Linux",
+      "status": "RESOLVED",
+      "creation_time": "2010-04-21T21:28:20Z",
+      "blocks": [],
+      "creator": "person",
+      "keywords": [],
+      "priority": "High",
+      "depends_on": [],
+      "classification": "Unclassified",
+      "cc": [],
+      "qa_contact": "",
+      "component": "component1",
+      "flags": [],
+      "target_milestone": "---",
+      "is_confirmed": true,
+      "last_change_time": "2024-01-18T18:37:44Z",
+      "see_also": [],
+      "groups": [],
+      "cc_detail": [],
+      "is_creator_accessible": true,
+      "dupe_of": null,
+      "deadline": null
+    },
+    {
+      "is_cc_accessible": true,
+      "whiteboard": "",
+      "creator_detail": {
+        "name": "person3",
+        "email": "email3",
+        "id": 32429,
+        "real_name": "Person"
+      },
+      "id": 34567,
+      "resolution": "",
+      "alias": [],
+      "summary": "summary1",
+      "product": "product1",
+      "url": "",
+      "severity": "high",
+      "is_open": false,
+      "assigned_to_detail": {
+        "real_name": "E Person",
+        "id": 876,
+        "email": "email3",
+        "name": "person3"
+      },
+      "platform": "All",
+      "assigned_to": "person3",
+      "version": "unspecified",
+      "op_sys": "Linux",
+      "status": "RESOLVED",
+      "creation_time": "2015-03-19T21:28:20Z",
+      "blocks": [],
+      "creator": "person",
+      "keywords": [],
+      "priority": "High",
+      "depends_on": [],
+      "classification": "Unclassified",
+      "cc": [],
+      "qa_contact": "",
+      "component": "component2",
+      "flags": [],
+      "target_milestone": "---",
+      "is_confirmed": true,
+      "last_change_time": "2020-01-18T18:37:44Z",
+      "see_also": [],
+      "groups": [],
+      "cc_detail": [],
+      "is_creator_accessible": true,
+      "dupe_of": null,
+      "deadline": null
+    }
+  ]
+}
