@@ -90,8 +90,6 @@ impl Client {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::any;
-
     use crate::service::ServiceKind;
     use crate::test::TestServer;
 
@@ -103,9 +101,7 @@ mod tests {
             .into_bugzilla()
             .unwrap();
 
-        server
-            .respond(any(), 200, "bugzilla/get/single-bug.json")
-            .await;
+        server.respond(200, "bugzilla/get/single-bug.json").await;
         let bugs = client.get(&[12345], false, false, false).await.unwrap();
         assert_eq!(bugs.len(), 1);
         let bug = &bugs[0];
@@ -114,7 +110,7 @@ mod tests {
         server.reset().await;
 
         server
-            .respond(any(), 404, "bugzilla/errors/nonexistent-bug.json")
+            .respond(404, "bugzilla/errors/nonexistent-bug.json")
             .await;
         let result = client.get(&[1], false, false, false).await;
         assert!(result.is_err());

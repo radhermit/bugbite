@@ -2,7 +2,7 @@ use std::fs;
 
 use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
-use wiremock::{Match, Mock, MockServer, ResponseTemplate};
+use wiremock::{matchers, Match, Mock, MockServer, ResponseTemplate};
 
 use crate::client::Client;
 use crate::service::ServiceKind;
@@ -46,7 +46,12 @@ impl TestServer {
         &self.uri
     }
 
-    pub(crate) async fn respond<M: 'static + Match>(&self, matcher: M, status: u16, path: &str) {
+    pub(crate) async fn respond_match<M: 'static + Match>(
+        &self,
+        matcher: M,
+        status: u16,
+        path: &str,
+    ) {
         let json = fs::read_to_string(TESTDATA_PATH.join(path)).unwrap();
         let template =
             ResponseTemplate::new(status).set_body_raw(json.as_bytes(), "application/json");
@@ -54,6 +59,10 @@ impl TestServer {
             .respond_with(template)
             .mount(self.server())
             .await;
+    }
+
+    pub(crate) async fn respond(&self, status: u16, path: &str) {
+        self.respond_match(matchers::any(), status, path).await
     }
 
     pub(crate) async fn reset(&self) {
