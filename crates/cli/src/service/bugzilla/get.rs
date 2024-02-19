@@ -5,6 +5,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use clap::builder::BoolishValueParser;
 use clap::Args;
+use itertools::Itertools;
 
 use crate::macros::async_block;
 use crate::utils::COLUMNS;
@@ -74,10 +75,15 @@ impl Command {
         let mut bugs = bugs.into_iter().peekable();
         let mut stdout = stdout().lock();
 
+        // restrict text width to 100 characters max
+        let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
+
         while let Some(bug) = bugs.next() {
-            write!(stdout, "{bug}")?;
+            let text = bug.to_string();
+            let wrapped = textwrap::wrap(&text, width);
+            write!(stdout, "{}", wrapped.iter().join("\n"))?;
             if bugs.peek().is_some() {
-                writeln!(stdout, "{}", "=".repeat(*COLUMNS))?;
+                writeln!(stdout, "{}", "=".repeat(width))?;
             }
         }
 
