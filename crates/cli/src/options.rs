@@ -189,7 +189,6 @@ pub(crate) struct Options {
     term_width = *COLUMNS,
     help_template = indoc::indoc! {"
         {before-help}{name} {version}
-        {author}
 
         {about}
 
