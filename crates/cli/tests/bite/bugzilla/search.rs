@@ -43,6 +43,17 @@ fn invalid_ids() {
         .code(2);
 }
 
+#[test]
+fn multiple_stdin() {
+    cmd("bite search --id - -")
+        .write_stdin("12345\n")
+        .assert()
+        .stdout("")
+        .stderr(contains("stdin argument used more than once"))
+        .failure()
+        .code(2);
+}
+
 #[tokio::test]
 async fn ids_only() {
     let server = start_server().await;
