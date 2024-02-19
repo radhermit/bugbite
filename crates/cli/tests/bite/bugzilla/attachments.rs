@@ -9,17 +9,29 @@ use crate::command::cmd;
 use super::{start_server, TEST_PATH};
 
 #[test]
-fn invalid_ids() {
+fn aliases() {
     for subcmd in ["a", "attachments"] {
-        cmd("bite")
-            .arg(subcmd)
-            .arg("id")
-            .assert()
-            .stdout("")
-            .stderr(contains("error: invalid value 'id' for '<IDS>...': "))
-            .failure()
-            .code(2);
+        for opt in ["-h", "--help"] {
+            cmd("bite")
+                .arg(subcmd)
+                .arg(opt)
+                .assert()
+                .stdout(predicate::str::is_empty().not())
+                .stderr("")
+                .success();
+        }
     }
+}
+
+#[test]
+fn invalid_ids() {
+    cmd("bite attachments")
+        .arg("id")
+        .assert()
+        .stdout("")
+        .stderr(contains("error: invalid value 'id' for '<IDS>...': "))
+        .failure()
+        .code(2);
 }
 
 #[tokio::test]
@@ -32,17 +44,14 @@ async fn list_single_without_data() {
     let expected =
         fs::read_to_string(TEST_PATH.join("attachments/single-without-data.expected")).unwrap();
 
-    for subcmd in ["a", "attachments"] {
-        for opt in ["-l", "--list"] {
-            cmd("bite")
-                .arg(subcmd)
-                .arg("123")
-                .arg(opt)
-                .assert()
-                .stdout(predicate::str::diff(expected.clone()))
-                .stderr("")
-                .success();
-        }
+    for opt in ["-l", "--list"] {
+        cmd("bite attachments")
+            .arg("123")
+            .arg(opt)
+            .assert()
+            .stdout(predicate::str::diff(expected.clone()))
+            .stderr("")
+            .success();
     }
 }
 
@@ -55,17 +64,14 @@ async fn view_single_with_plain_text() {
     let expected =
         fs::read_to_string(TEST_PATH.join("attachments/single-plain-text.expected")).unwrap();
 
-    for subcmd in ["a", "attachments"] {
-        for opt in ["-V", "--view"] {
-            cmd("bite")
-                .arg(subcmd)
-                .arg("123")
-                .arg(opt)
-                .assert()
-                .stdout(predicate::str::diff(expected.clone()))
-                .stderr("")
-                .success();
-        }
+    for opt in ["-V", "--view"] {
+        cmd("bite attachments")
+            .arg("123")
+            .arg(opt)
+            .assert()
+            .stdout(predicate::str::diff(expected.clone()))
+            .stderr("")
+            .success();
     }
 }
 
@@ -83,22 +89,17 @@ async fn save_single_with_plain_text() {
     // save files to the current working directory
     env::set_current_dir(dir_path).unwrap();
 
-    for subcmd in ["a", "attachments"] {
-        cmd("bite")
-            .arg(subcmd)
-            .arg("123")
-            .assert()
-            .stdout(predicate::str::diff("Saving attachment: ./test.txt\n"))
-            .stderr("")
-            .success();
+    cmd("bite attachments")
+        .arg("123")
+        .assert()
+        .stdout(predicate::str::diff("Saving attachment: ./test.txt\n"))
+        .stderr("")
+        .success();
 
-        // verify file content
-        let file = dir.path().join("test.txt");
-        let data = fs::read_to_string(&file).unwrap();
-        assert_eq!(&data, &expected);
-        // remove file to avoid existence errors on loop
-        fs::remove_file(&file).unwrap();
-    }
+    // verify file content
+    let file = dir.path().join("test.txt");
+    let data = fs::read_to_string(file).unwrap();
+    assert_eq!(&data, &expected);
 }
 
 #[tokio::test]
@@ -144,17 +145,14 @@ async fn single_bug_with_no_attachments() {
         )
         .await;
 
-    for subcmd in ["a", "attachments"] {
-        for opt in ["-i", "--item-id"] {
-            cmd("bite")
-                .arg(subcmd)
-                .arg("12345")
-                .arg(opt)
-                .assert()
-                .stdout("")
-                .stderr("")
-                .success();
-        }
+    for opt in ["-i", "--item-id"] {
+        cmd("bite attachments")
+            .arg("12345")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
     }
 }
 
@@ -169,17 +167,14 @@ async fn multiple_bugs_with_no_attachments() {
         )
         .await;
 
-    for subcmd in ["a", "attachments"] {
-        for opt in ["-i", "--item-id"] {
-            cmd("bite")
-                .arg(subcmd)
-                .args(["12345", "23456", "34567"])
-                .arg(opt)
-                .assert()
-                .stdout("")
-                .stderr("")
-                .success();
-        }
+    for opt in ["-i", "--item-id"] {
+        cmd("bite attachments")
+            .args(["12345", "23456", "34567"])
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
     }
 }
 
@@ -191,16 +186,13 @@ async fn nonexistent_bug() {
         .respond(404, TEST_PATH.join("errors/nonexistent-bug.json"))
         .await;
 
-    for subcmd in ["a", "attachments"] {
-        for opt in ["-i", "--item-id"] {
-            cmd("bite")
-                .arg(subcmd)
-                .arg("1")
-                .arg(opt)
-                .assert()
-                .stdout("")
-                .stderr("bite: error: bugzilla: Bug #1 does not exist.\n")
-                .failure();
-        }
+    for opt in ["-i", "--item-id"] {
+        cmd("bite attachments")
+            .arg("1")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr("bite: error: bugzilla: Bug #1 does not exist.\n")
+            .failure();
     }
 }

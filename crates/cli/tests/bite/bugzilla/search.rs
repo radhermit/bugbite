@@ -8,17 +8,29 @@ use crate::command::cmd;
 use super::{start_server, TEST_PATH};
 
 #[test]
-fn invalid_ids() {
+fn aliases() {
     for subcmd in ["s", "search"] {
-        cmd("bite")
-            .arg(subcmd)
-            .args(["--id", "id"])
-            .assert()
-            .stdout("")
-            .stderr(contains("error: invalid value 'id' for '--id <ID>': "))
-            .failure()
-            .code(2);
+        for opt in ["-h", "--help"] {
+            cmd("bite")
+                .arg(subcmd)
+                .arg(opt)
+                .assert()
+                .stdout(predicate::str::is_empty().not())
+                .stderr("")
+                .success();
+        }
     }
+}
+
+#[test]
+fn invalid_ids() {
+    cmd("bite search")
+        .args(["--id", "id"])
+        .assert()
+        .stdout("")
+        .stderr(contains("error: invalid value 'id' for '--id <ID>': "))
+        .failure()
+        .code(2);
 }
 
 #[tokio::test]
@@ -28,13 +40,10 @@ async fn ids_only() {
     server.respond(200, TEST_PATH.join("search/ids.json")).await;
     let expected = fs::read_to_string(TEST_PATH.join("search/ids.expected")).unwrap();
 
-    for subcmd in ["s", "search"] {
-        cmd("bite")
-            .arg(subcmd)
-            .args(["-F", "id", "test"])
-            .assert()
-            .stdout(predicate::str::diff(expected.clone()))
-            .stderr("")
-            .success();
-    }
+    cmd("bite search")
+        .args(["-F", "id", "test"])
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
 }
