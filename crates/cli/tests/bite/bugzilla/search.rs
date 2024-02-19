@@ -1,22 +1,17 @@
 use std::fs;
 
-use camino::Utf8PathBuf;
-use once_cell::sync::Lazy;
 use predicates::prelude::*;
 
 use crate::command::cmd;
 
-use super::start_server;
-
-static TEST_PATH: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TESTDATA_PATH.join("bugzilla/search"));
+use super::{start_server, TEST_PATH};
 
 #[tokio::test]
 async fn ids_only() {
     let server = start_server().await;
 
-    // only ids
-    server.respond(200, TEST_PATH.join("ids.json")).await;
-    let expected = fs::read_to_string(TEST_PATH.join("ids.expected")).unwrap();
+    server.respond(200, TEST_PATH.join("search/ids.json")).await;
+    let expected = fs::read_to_string(TEST_PATH.join("search/ids.expected")).unwrap();
 
     for subcmd in ["s", "search"] {
         cmd("bite")

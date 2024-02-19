@@ -1,25 +1,21 @@
 use std::{env, fs};
 
-use camino::Utf8PathBuf;
-use once_cell::sync::Lazy;
 use predicates::prelude::*;
 use tempfile::tempdir;
 
 use crate::command::cmd;
 
-use super::start_server;
-
-static TEST_PATH: Lazy<Utf8PathBuf> =
-    Lazy::new(|| crate::TESTDATA_PATH.join("bugzilla/attachments"));
+use super::{start_server, TEST_PATH};
 
 #[tokio::test]
 async fn list_single_without_data() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_PATH.join("single-without-data.json"))
+        .respond(200, TEST_PATH.join("attachments/single-without-data.json"))
         .await;
-    let expected = fs::read_to_string(TEST_PATH.join("single-without-data.expected")).unwrap();
+    let expected =
+        fs::read_to_string(TEST_PATH.join("attachments/single-without-data.expected")).unwrap();
 
     for subcmd in ["a", "attachments"] {
         for opt in ["-l", "--list"] {
@@ -39,9 +35,10 @@ async fn list_single_without_data() {
 async fn view_single_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(200, TEST_PATH.join("single-plain-text.json"))
+        .respond(200, TEST_PATH.join("attachments/single-plain-text.json"))
         .await;
-    let expected = fs::read_to_string(TEST_PATH.join("single-plain-text.expected")).unwrap();
+    let expected =
+        fs::read_to_string(TEST_PATH.join("attachments/single-plain-text.expected")).unwrap();
 
     for subcmd in ["a", "attachments"] {
         for opt in ["-V", "--view"] {
@@ -61,9 +58,10 @@ async fn view_single_with_plain_text() {
 async fn save_single_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(200, TEST_PATH.join("single-plain-text.json"))
+        .respond(200, TEST_PATH.join("attachments/single-plain-text.json"))
         .await;
-    let expected = fs::read_to_string(TEST_PATH.join("single-plain-text.expected")).unwrap();
+    let expected =
+        fs::read_to_string(TEST_PATH.join("attachments/single-plain-text.expected")).unwrap();
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
@@ -92,7 +90,7 @@ async fn save_single_with_plain_text() {
 async fn save_single_existing_error() {
     let server = start_server().await;
     server
-        .respond(200, TEST_PATH.join("single-plain-text.json"))
+        .respond(200, TEST_PATH.join("attachments/single-plain-text.json"))
         .await;
 
     let dir = tempdir().unwrap();
@@ -125,7 +123,10 @@ async fn single_bug_with_no_attachments() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_PATH.join("bug-with-no-attachments.json"))
+        .respond(
+            200,
+            TEST_PATH.join("attachments/bug-with-no-attachments.json"),
+        )
         .await;
 
     for subcmd in ["a", "attachments"] {
@@ -147,7 +148,10 @@ async fn multiple_bugs_with_no_attachments() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_PATH.join("bugs-with-no-attachments.json"))
+        .respond(
+            200,
+            TEST_PATH.join("attachments/bugs-with-no-attachments.json"),
+        )
         .await;
 
     for subcmd in ["a", "attachments"] {
