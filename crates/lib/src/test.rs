@@ -4,6 +4,9 @@ use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
 use wiremock::{Match, Mock, MockServer, ResponseTemplate};
 
+use crate::client::Client;
+use crate::service::ServiceKind;
+
 /// Build a [`Utf8PathBuf`] path from a base and components.
 #[macro_export]
 macro_rules! build_path {
@@ -28,6 +31,11 @@ impl TestServer {
         let server = MockServer::start().await;
         let uri = server.uri();
         Self { server, uri }
+    }
+
+    pub(crate) fn client(&self, kind: ServiceKind) -> Client {
+        let service = kind.create(self.uri()).unwrap();
+        Client::builder().build(service).unwrap()
     }
 
     pub(crate) fn server(&self) -> &MockServer {

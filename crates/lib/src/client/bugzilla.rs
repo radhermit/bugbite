@@ -92,18 +92,14 @@ impl Client {
 mod tests {
     use wiremock::matchers::any;
 
-    use crate::client::Client;
     use crate::service::ServiceKind;
     use crate::test::TestServer;
 
     #[tokio::test]
     async fn get() {
         let server = TestServer::new().await;
-
-        let service = ServiceKind::BugzillaRestV1.create(server.uri()).unwrap();
-        let client = Client::builder()
-            .build(service)
-            .unwrap()
+        let client = server
+            .client(ServiceKind::BugzillaRestV1)
             .into_bugzilla()
             .unwrap();
 
