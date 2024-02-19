@@ -93,6 +93,8 @@ mod tests {
     use crate::service::ServiceKind;
     use crate::test::TestServer;
 
+    use super::*;
+
     #[tokio::test]
     async fn get() {
         let server = TestServer::new().await;
@@ -114,5 +116,20 @@ mod tests {
             .await;
         let result = client.get(&[1], false, false, false).await;
         assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn search() {
+        let server = TestServer::new().await;
+        let client = server
+            .client(ServiceKind::BugzillaRestV1)
+            .into_bugzilla()
+            .unwrap();
+
+        server.respond(200, "bugzilla/search/ids.json").await;
+        let mut query = client.service().search_query();
+        query.insert("summary", "test");
+        let bugs = client.search(query).await.unwrap();
+        assert_eq!(bugs.len(), 80);
     }
 }
