@@ -75,7 +75,7 @@ impl Command {
         let mut bugs = bugs.into_iter().peekable();
         let mut stdout = stdout().lock();
 
-        // restrict text width to 100 characters max
+        // text wrap width
         let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
 
         while let Some(bug) = bugs.next() {
