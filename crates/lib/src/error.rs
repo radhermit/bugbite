@@ -16,7 +16,7 @@ pub enum Error {
     IO(String),
     #[error("{0}")]
     Json(serde_json::Error),
-    #[error("bugzilla error: {message}")]
+    #[error("bugzilla: {message}")]
     Bugzilla { code: i64, message: String },
     #[error("{0}")]
     Request(reqwest::Error),
