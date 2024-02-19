@@ -10,7 +10,7 @@ use url::Url;
 use crate::objects::Ids;
 use crate::service::ServiceKind;
 use crate::time::TimeDelta;
-use crate::traits::{Api, Params, WebService};
+use crate::traits::{Api, Query, WebService};
 use crate::Error;
 
 mod attachments;
@@ -114,6 +114,7 @@ impl WebService for Service {
     type Response = serde_json::Value;
     type GetRequest = get::GetRequest;
     type SearchRequest = search::SearchRequest;
+    type SearchQuery = search::QueryBuilder;
 
     fn base(&self) -> &Url {
         self.config.base()
@@ -153,7 +154,7 @@ impl WebService for Service {
         get::GetRequest::new(self, ids, attachments, comments, history)
     }
 
-    fn search_request<P: Params>(&self, query: P) -> crate::Result<Self::SearchRequest> {
+    fn search_request<Q: Query>(&self, query: Q) -> crate::Result<Self::SearchRequest> {
         search::SearchRequest::new(self, query)
     }
 }

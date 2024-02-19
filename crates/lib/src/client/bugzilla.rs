@@ -3,7 +3,7 @@ use reqwest::ClientBuilder;
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::{Config, Service};
 use crate::time::TimeDelta;
-use crate::traits::{Params, Request, WebService};
+use crate::traits::{Query, Request, WebService};
 
 #[derive(Debug)]
 pub struct Client {
@@ -82,7 +82,7 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn search<Q: Params>(&self, query: Q) -> crate::Result<Vec<Bug>> {
+    pub async fn search<Q: Query>(&self, query: Q) -> crate::Result<Vec<Bug>> {
         let request = self.service.search_request(query)?;
         request.send(&self.service).await
     }

@@ -3,7 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::Csv;
 use bugbite::client::github::Client;
-use bugbite::service::github::{QueryBuilder, SearchOrder, SearchTerm};
+use bugbite::service::github::search::{QueryBuilder, SearchOrder, SearchTerm};
 use clap::Args;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};

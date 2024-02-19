@@ -9,7 +9,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::bugzilla::Bug;
 use crate::time::TimeDelta;
-use crate::traits::{Api, Params, Request, WebService};
+use crate::traits::{Api, Query, Request, WebService};
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -33,7 +33,7 @@ impl Request for SearchRequest {
 }
 
 impl SearchRequest {
-    pub(super) fn new<P: Params>(service: &super::Service, mut query: P) -> crate::Result<Self> {
+    pub(super) fn new<Q: Query>(service: &super::Service, mut query: Q) -> crate::Result<Self> {
         let url = service
             .base()
             .join(&format!("rest/bug?{}", query.params()?))?;
@@ -54,11 +54,6 @@ pub struct QueryBuilder {
 impl QueryBuilder {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        // TODO: move the keys to skip into a trait attribute
-        !self.query.keys().any(|k| k != "order")
     }
 
     pub fn created_after(&mut self, interval: &TimeDelta) {
@@ -179,7 +174,12 @@ impl QueryBuilder {
     }
 }
 
-impl Params for QueryBuilder {
+impl Query for QueryBuilder {
+    fn is_empty(&self) -> bool {
+        // TODO: move the keys to skip into a trait attribute
+        !self.query.keys().any(|k| k != "order")
+    }
+
     fn params(&mut self) -> crate::Result<String> {
         if self.is_empty() {
             return Err(Error::EmptyQuery);

@@ -3,8 +3,12 @@ use url::Url;
 use crate::service::ServiceKind;
 use crate::Error;
 
-/// Encode into an application/x-www-form-urlencoded string format.
-pub trait Params {
+pub trait Query {
+    /// Returns true if no relevant parameters are defined, false otherwise.
+    fn is_empty(&self) -> bool {
+        true
+    }
+    /// Encode query parameters into the application/x-www-form-urlencoded string format.
     fn params(&mut self) -> crate::Result<String>;
 }
 
@@ -37,6 +41,7 @@ pub(crate) trait WebService {
     type Response;
     type GetRequest: Request;
     type SearchRequest: Request;
+    type SearchQuery: Query + Default;
 
     /// Return the base URL for a service.
     fn base(&self) -> &Url;
@@ -70,10 +75,15 @@ pub(crate) trait WebService {
     }
 
     /// Create a search request for bugs, issues, or tickets.
-    fn search_request<P: Params>(&self, _query: P) -> crate::Result<Self::SearchRequest> {
+    fn search_request<Q: Query>(&self, _query: Q) -> crate::Result<Self::SearchRequest> {
         Err(Error::Unsupported(format!(
             "{}: search requests unsupported",
             self.kind()
         )))
+    }
+
+    /// Create a search query builder for the service.
+    fn search_query(&self) -> Self::SearchQuery {
+        Default::default()
     }
 }
