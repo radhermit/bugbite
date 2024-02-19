@@ -1,5 +1,5 @@
 // This is clap-stdin (https://crates.io/crates/clap-stdin) with the addition of
-// MaybeStdinVec to read stdin lines into a vector.
+// MaybeStdinVec to read stdin lines into a vector and other changes.
 //
 // Copyright (c) Matthew Wood
 //
@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use std::io::{self, BufRead, Read};
+use std::io::{self, BufRead, IsTerminal, Read};
 use std::str::FromStr;
 use std::sync::atomic::AtomicBool;
 
@@ -31,6 +31,8 @@ static STDIN_HAS_BEEN_USED: AtomicBool = AtomicBool::new(false);
 pub enum StdinError {
     #[error("stdin argument used more than once")]
     StdInRepeatedUse,
+    #[error("stdin is a terminal")]
+    StdinIsTerminal,
     #[error(transparent)]
     StdIn(#[from] io::Error),
     #[error("{0}")]
@@ -89,9 +91,12 @@ where
         let source = Source::from_str(s)?;
         match &source {
             Source::Stdin => {
-                let stdin = io::stdin();
+                let mut stdin = io::stdin().lock();
+                if stdin.is_terminal() {
+                    return Err(StdinError::StdinIsTerminal);
+                }
                 let mut input = String::new();
-                stdin.lock().read_to_string(&mut input)?;
+                stdin.read_to_string(&mut input)?;
                 Ok(T::from_str(input.trim_end())
                     .map_err(|e| StdinError::FromStr(format!("{e}")))
                     .map(|val| Self { source, inner: val })?)
@@ -162,6 +167,9 @@ where
         match &source {
             Source::Stdin => {
                 let stdin = io::stdin().lock();
+                if stdin.is_terminal() {
+                    return Err(StdinError::StdinIsTerminal);
+                }
                 let mut inner = vec![];
                 for arg in stdin.lines().map_while(Result::ok) {
                     let val = T::from_str(arg.trim_end())
