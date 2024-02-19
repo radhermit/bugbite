@@ -23,6 +23,16 @@ fn aliases() {
 }
 
 #[test]
+fn missing_ids() {
+    cmd("bite get")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::is_empty().not())
+        .failure()
+        .code(2);
+}
+
+#[test]
 fn invalid_ids() {
     cmd("bite get")
         .arg("id")
