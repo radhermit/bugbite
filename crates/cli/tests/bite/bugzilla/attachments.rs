@@ -13,7 +13,7 @@ static TEST_PATH: Lazy<Utf8PathBuf> =
     Lazy::new(|| crate::TESTDATA_PATH.join("bugzilla/attachments"));
 
 #[tokio::test]
-async fn list_single_via_bug_id_without_data() {
+async fn list_single_without_data() {
     let server = start_server().await;
 
     server
@@ -22,11 +22,11 @@ async fn list_single_via_bug_id_without_data() {
     let expected = fs::read_to_string(TEST_PATH.join("single-without-data.expected")).unwrap();
 
     for subcmd in ["a", "attachments"] {
-        for opts in [vec!["-li"], vec!["-l", "-i"], vec!["--list", "--item-id"]] {
+        for opt in ["-l", "--list"] {
             cmd("bite")
                 .arg(subcmd)
                 .arg("123")
-                .args(opts)
+                .arg(opt)
                 .assert()
                 .stdout(predicate::str::diff(expected.clone()))
                 .stderr("")
@@ -36,7 +36,7 @@ async fn list_single_via_bug_id_without_data() {
 }
 
 #[tokio::test]
-async fn view_single_via_bug_id_with_plain_text() {
+async fn view_single_with_plain_text() {
     let server = start_server().await;
     server
         .respond(200, TEST_PATH.join("single-plain-text.json"))
@@ -44,11 +44,11 @@ async fn view_single_via_bug_id_with_plain_text() {
     let expected = fs::read_to_string(TEST_PATH.join("single-plain-text.expected")).unwrap();
 
     for subcmd in ["a", "attachments"] {
-        for opts in [vec!["-Vi"], vec!["-V", "-i"], vec!["--view", "--item-id"]] {
+        for opt in ["-V", "--view"] {
             cmd("bite")
                 .arg(subcmd)
                 .arg("123")
-                .args(opts)
+                .arg(opt)
                 .assert()
                 .stdout(predicate::str::diff(expected.clone()))
                 .stderr("")
@@ -58,7 +58,7 @@ async fn view_single_via_bug_id_with_plain_text() {
 }
 
 #[tokio::test]
-async fn save_single_via_bug_id_with_plain_text() {
+async fn save_single_with_plain_text() {
     let server = start_server().await;
     server
         .respond(200, TEST_PATH.join("single-plain-text.json"))
@@ -71,23 +71,20 @@ async fn save_single_via_bug_id_with_plain_text() {
     env::set_current_dir(dir_path).unwrap();
 
     for subcmd in ["a", "attachments"] {
-        for opt in ["-i", "--item-id"] {
-            cmd("bite")
-                .arg(subcmd)
-                .arg("123")
-                .arg(opt)
-                .assert()
-                .stdout(predicate::str::diff("Saving attachment: ./test.txt\n"))
-                .stderr("")
-                .success();
+        cmd("bite")
+            .arg(subcmd)
+            .arg("123")
+            .assert()
+            .stdout(predicate::str::diff("Saving attachment: ./test.txt\n"))
+            .stderr("")
+            .success();
 
-            // verify file content
-            let file = dir.path().join("test.txt");
-            let data = fs::read_to_string(&file).unwrap();
-            assert_eq!(&data, &expected);
-            // remove file to avoid existence errors on loop
-            fs::remove_file(&file).unwrap();
-        }
+        // verify file content
+        let file = dir.path().join("test.txt");
+        let data = fs::read_to_string(&file).unwrap();
+        assert_eq!(&data, &expected);
+        // remove file to avoid existence errors on loop
+        fs::remove_file(&file).unwrap();
     }
 }
 
@@ -103,7 +100,7 @@ async fn save_single_existing_error() {
 
     cmd("bite attachments")
         .arg("123")
-        .args(["-d", dir_path, "-i"])
+        .args(["-d", dir_path])
         .assert()
         .stdout(predicate::str::diff(format!(
             "Saving attachment: {dir_path}/test.txt\n"
@@ -114,7 +111,7 @@ async fn save_single_existing_error() {
     // re-running causes a file existence failure
     cmd("bite attachments")
         .arg("123")
-        .args(["-d", dir_path, "-i"])
+        .args(["-d", dir_path])
         .assert()
         .stdout("")
         .stderr(predicate::str::diff(format!(
