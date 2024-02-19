@@ -92,3 +92,35 @@ async fn save_single_via_bug_id_with_plain_text() {
         }
     }
 }
+
+#[tokio::test]
+async fn save_single_existing_error() {
+    let server = start_server().await;
+    server
+        .respond(200, TEST_PATH.join("single-plain-text.json"))
+        .await;
+
+    let dir = tempdir().unwrap();
+    let dir_path = dir.path().to_str().unwrap();
+
+    cmd("bite attachments")
+        .arg("123")
+        .args(["-d", dir_path, "-i"])
+        .assert()
+        .stdout(predicate::str::diff(format!(
+            "Saving attachment: {dir_path}/test.txt\n"
+        )))
+        .stderr("")
+        .success();
+
+    // re-running causes a file existence failure
+    cmd("bite attachments")
+        .arg("123")
+        .args(["-d", dir_path, "-i"])
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff(format!(
+            "bite: error: file already exists: {dir_path}/test.txt\n"
+        )))
+        .failure();
+}
