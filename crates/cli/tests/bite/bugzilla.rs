@@ -5,7 +5,9 @@ use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
 
 mod attachments;
+mod comments;
 mod get;
+mod history;
 mod search;
 
 static TEST_PATH: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TESTDATA_PATH.join("bugzilla"));
