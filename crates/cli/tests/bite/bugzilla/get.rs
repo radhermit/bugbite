@@ -49,6 +49,15 @@ async fn single_bug() {
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
         .success();
+
+    // pull id from stdin
+    cmd("bite get -")
+        .write_stdin("12345\n")
+        .args(["-A", "no", "-C", "no", "-H", "no"])
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
 }
 
 #[tokio::test]
@@ -78,6 +87,15 @@ async fn multiple_bugs() {
 
     cmd("bite get")
         .args(["12345", "23456", "34567"])
+        .args(["-A", "no", "-C", "no", "-H", "no"])
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
+
+    // pull ids from stdin
+    cmd("bite get -")
+        .write_stdin("12345\n23456\n34567\n")
         .args(["-A", "no", "-C", "no", "-H", "no"])
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
