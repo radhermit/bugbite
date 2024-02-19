@@ -56,6 +56,11 @@ impl QueryBuilder {
         Self::default()
     }
 
+    pub fn is_empty(&self) -> bool {
+        // TODO: move the keys to skip into a trait attribute
+        !self.query.keys().any(|k| k != "order")
+    }
+
     pub fn created_after(&mut self, interval: &TimeDelta) {
         let datetime = Utc::now() - interval.delta();
         let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
@@ -176,7 +181,7 @@ impl QueryBuilder {
 
 impl Params for QueryBuilder {
     fn params(&mut self) -> crate::Result<String> {
-        if self.query.is_empty() {
+        if self.is_empty() {
             return Err(Error::EmptyQuery);
         }
 
