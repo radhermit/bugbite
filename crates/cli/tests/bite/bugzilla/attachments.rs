@@ -119,3 +119,47 @@ async fn save_single_existing_error() {
         )))
         .failure();
 }
+
+#[tokio::test]
+async fn single_bug_with_no_attachments() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_PATH.join("bug-with-no-attachments.json"))
+        .await;
+
+    for subcmd in ["a", "attachments"] {
+        for opt in ["-i", "--item-id"] {
+            cmd("bite")
+                .arg(subcmd)
+                .arg("12345")
+                .arg(opt)
+                .assert()
+                .stdout("")
+                .stderr("")
+                .success();
+        }
+    }
+}
+
+#[tokio::test]
+async fn multiple_bugs_with_no_attachments() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_PATH.join("bugs-with-no-attachments.json"))
+        .await;
+
+    for subcmd in ["a", "attachments"] {
+        for opt in ["-i", "--item-id"] {
+            cmd("bite")
+                .arg(subcmd)
+                .args(["12345", "23456", "34567"])
+                .arg(opt)
+                .assert()
+                .stdout("")
+                .stderr("")
+                .success();
+        }
+    }
+}
