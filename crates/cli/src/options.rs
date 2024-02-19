@@ -167,9 +167,9 @@ pub(crate) struct Options {
     #[command(flatten)]
     verbosity: Verbosity<WarnLevel>,
     #[clap(flatten)]
-    service: ServiceOpts,
-    #[clap(flatten)]
     bite: BiteOpts,
+    #[clap(flatten)]
+    service: ServiceOpts,
 }
 
 #[derive(Debug, Parser)]
