@@ -2,6 +2,7 @@ use std::fmt;
 
 use super::Item;
 
+#[derive(Debug, Eq, PartialEq)]
 pub struct Issue {
     id: String,
 }

@@ -10,7 +10,7 @@ use crate::serde::{non_empty_str, null_empty_vec};
 
 use super::{Base64, Item};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Attachment {
     pub id: u64,
     pub bug_id: u64,
@@ -160,7 +160,7 @@ impl fmt::Display for Change {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Default)]
+#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 #[serde(default)]
 pub struct Bug {
     id: u64,
