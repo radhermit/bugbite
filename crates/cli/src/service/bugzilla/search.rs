@@ -135,6 +135,10 @@ struct Params {
     #[arg(short, long, help_heading = "Attribute related")]
     status: Option<Vec<String>>,
 
+    /// restrict by resolution
+    #[arg(long, help_heading = "Attribute related")]
+    resolution: Option<Vec<String>>,
+
     /// specified range of votes
     #[arg(long, help_heading = "Attribute related")]
     votes: Option<u32>,
@@ -250,6 +254,9 @@ impl Command {
         }
         if let Some(values) = params.status.as_ref() {
             query.extend("status", values);
+        }
+        if let Some(values) = params.resolution.as_ref() {
+            query.extend("resolution", values);
         }
         if let Some(values) = params.blocks.as_ref() {
             query.extend("blocks", values.iter().flatten());
