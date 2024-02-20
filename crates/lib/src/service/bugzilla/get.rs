@@ -10,7 +10,7 @@ use super::history::HistoryRequest;
 
 #[derive(Debug)]
 pub(crate) struct GetRequest {
-    request: reqwest::Request,
+    url: Url,
     attachments: Option<AttachmentsRequest>,
     comments: Option<CommentsRequest>,
     history: Option<HistoryRequest>,
@@ -61,7 +61,7 @@ impl GetRequest {
         };
 
         Ok(Self {
-            request: service.client().get(url).build()?,
+            url,
             attachments,
             comments,
             history,
@@ -75,7 +75,7 @@ impl Request for GetRequest {
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
         let (bugs, attachments, comments, history) = (
-            service.client().execute(self.request),
+            service.client().get(self.url).send(),
             self.attachments.map(|r| r.send(service)),
             self.comments.map(|r| r.send(service)),
             self.history.map(|r| r.send(service)),

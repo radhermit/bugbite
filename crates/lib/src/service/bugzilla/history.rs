@@ -8,7 +8,7 @@ use crate::traits::{Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct HistoryRequest(reqwest::Request);
+pub(crate) struct HistoryRequest(Url);
 
 impl HistoryRequest {
     pub(super) fn new<S>(
@@ -42,7 +42,7 @@ impl HistoryRequest {
             url = Url::parse_with_params(url.as_str(), params)?;
         }
 
-        Ok(Self(service.client().get(url).build()?))
+        Ok(Self(url))
     }
 }
 
@@ -51,7 +51,7 @@ impl Request for HistoryRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let response = service.client().execute(self.0).await?;
+        let response = service.client().get(self.0).send().await?;
         let mut data = service.parse_response(response).await?;
         let Value::Array(bugs) = data["bugs"].take() else {
             return Err(Error::InvalidValue(

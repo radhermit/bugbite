@@ -18,14 +18,14 @@ use super::{BugField, FilterField};
 static DEFAULT_FIELDS: &[BugField] = &[BugField::Id, BugField::AssignedTo, BugField::Summary];
 
 #[derive(Debug)]
-pub(crate) struct SearchRequest(reqwest::Request);
+pub(crate) struct SearchRequest(url::Url);
 
 impl Request for SearchRequest {
     type Output = Vec<Bug>;
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let response = service.client().execute(self.0).await?;
+        let response = service.client().get(self.0).send().await?;
         let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
         Ok(serde_json::from_value(data)?)
@@ -37,7 +37,7 @@ impl SearchRequest {
         let url = service
             .base()
             .join(&format!("rest/bug?{}", query.params()?))?;
-        Ok(Self(service.client.get(url).build()?))
+        Ok(Self(url))
     }
 }
 

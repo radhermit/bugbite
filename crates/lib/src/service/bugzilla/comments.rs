@@ -9,7 +9,7 @@ use crate::Error;
 #[derive(Debug)]
 pub(crate) struct CommentsRequest {
     ids: Vec<String>,
-    req: reqwest::Request,
+    url: Url,
 }
 
 impl CommentsRequest {
@@ -46,7 +46,7 @@ impl CommentsRequest {
 
         Ok(Self {
             ids: ids.iter().map(|s| s.to_string()).collect(),
-            req: service.client().get(url).build()?,
+            url,
         })
     }
 }
@@ -56,7 +56,7 @@ impl Request for CommentsRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let response = service.client().execute(self.req).await?;
+        let response = service.client().get(self.url).send().await?;
         let mut data = service.parse_response(response).await?;
         let mut data = data["bugs"].take();
         let mut comments = vec![];

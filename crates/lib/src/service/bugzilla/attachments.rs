@@ -8,7 +8,7 @@ use crate::Error;
 #[derive(Debug)]
 pub(crate) struct AttachmentsRequest {
     ids: Ids,
-    req: reqwest::Request,
+    url: Url,
 }
 
 impl AttachmentsRequest {
@@ -44,10 +44,7 @@ impl AttachmentsRequest {
             url = Url::parse_with_params(url.as_str(), params)?;
         }
 
-        Ok(AttachmentsRequest {
-            ids,
-            req: service.client().get(url).build()?,
-        })
+        Ok(AttachmentsRequest { ids, url })
     }
 }
 
@@ -56,7 +53,7 @@ impl Request for AttachmentsRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let response = service.client().execute(self.req).await?;
+        let response = service.client().get(self.url).send().await?;
         let mut data = service.parse_response(response).await?;
         match self.ids {
             Ids::Item(ids) => {
