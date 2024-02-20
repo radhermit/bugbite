@@ -262,7 +262,7 @@ impl Command {
         }
 
         let fields = &params.fields;
-        query.fields(fields.iter().copied().map(Into::into));
+        query.fields(fields.iter().copied())?;
 
         let bugs = async_block!(client.search(query))?;
         let mut stdout = stdout().lock();

@@ -132,19 +132,20 @@ impl QueryBuilder {
         }
     }
 
-    pub fn fields<I>(&mut self, fields: I)
+    pub fn fields<I, F>(&mut self, fields: I) -> crate::Result<()>
     where
-        I: IntoIterator<Item = FilterField>,
+        I: IntoIterator<Item = F>,
+        F: Into<FilterField>,
     {
-        // always include the bug ID field
-        let include_fields: IndexSet<_> = [FilterField::Bug(BugField::Id)]
-            .into_iter()
-            .chain(fields)
-            .collect();
+        let include_fields: IndexSet<_> = fields.into_iter().map(Into::into).collect();
+        if include_fields.is_empty() {
+            return Err(Error::InvalidValue("fields cannot be empty".to_string()));
+        }
         self.insert(
             "include_fields",
             include_fields.iter().map(|f| f.api()).join(","),
         );
+        Ok(())
     }
 
     pub fn extend<K, I, V>(&mut self, key: K, values: I)
