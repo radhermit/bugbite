@@ -32,6 +32,10 @@ struct Options {
             By default, ID arguments relate to individual attachment IDs.
             Enabling this option treats ID arguments as bug IDs, pulling all
             attachments from the related bugs.
+
+            Note that when saving multiple attachments from multiple bugs,
+            subdirectories named after the bug IDs are automatically used in
+            order to avoid file name overlap.
         "}
     )]
     item_id: bool,
