@@ -1,4 +1,4 @@
-use std::io::{stdout, IsTerminal, Write};
+use std::io::stdout;
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -14,7 +14,8 @@ use strum::VariantNames;
 use tracing::info;
 
 use crate::macros::async_block;
-use crate::utils::{truncate, COLUMNS};
+use crate::service::RenderSearch;
+use crate::utils::COLUMNS;
 
 /// Available search parameters.
 ///
@@ -255,12 +256,7 @@ impl Command {
 
         for bug in bugs {
             count += 1;
-            let line = bug.search_display();
-            if stdout.is_terminal() {
-                writeln!(stdout, "{}", truncate(&line, *COLUMNS))?;
-            } else {
-                writeln!(stdout, "{line}")?;
-            }
+            bug.render(&mut stdout, *COLUMNS)?;
         }
 
         if count > 0 {

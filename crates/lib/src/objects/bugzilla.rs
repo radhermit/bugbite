@@ -140,24 +140,6 @@ impl From<Bug> for Item {
 }
 
 impl Bug {
-    pub fn search_display(&self) -> String {
-        let id = self.id;
-        match (self.assigned_to.as_deref(), self.summary.as_deref()) {
-            (Some(assignee), Some(summary)) => format!("{id:<8} {assignee:<20} {summary}"),
-            (Some(assignee), None) => format!("{id:<8} {assignee}"),
-            (None, Some(summary)) => format!("{id:<8} {summary}"),
-            (None, None) => format!("{id}"),
-        }
-    }
-
-    pub fn id(&self) -> u64 {
-        self.id
-    }
-
-    pub fn reporter(&self) -> Option<&str> {
-        self.reporter.as_deref()
-    }
-
     pub fn events(&self) -> impl Iterator<Item = Modification> {
         let comments = self.comments.iter().map(Modification::Comment);
         let history = self.history.iter().map(Modification::Event);

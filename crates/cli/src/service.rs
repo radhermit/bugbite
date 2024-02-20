@@ -31,3 +31,8 @@ where
 pub(crate) trait Render {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()>;
 }
+
+/// Render an object in search context for output to the terminal.
+pub(crate) trait RenderSearch {
+    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()>;
+}

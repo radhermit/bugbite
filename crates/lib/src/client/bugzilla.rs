@@ -108,7 +108,7 @@ mod tests {
         let bugs = client.get(&[12345], false, false, false).await.unwrap();
         assert_eq!(bugs.len(), 1);
         let bug = &bugs[0];
-        assert_eq!(bug.id(), 12345);
+        assert_eq!(bug.id, 12345);
 
         server.reset().await;
 
