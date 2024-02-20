@@ -155,6 +155,25 @@ impl Render for Modification<'_> {
     }
 }
 
+/// Output an iterable field in wrapped CSV format.
+fn wrapped_csv<W, I, S>(f: &mut W, name: &str, data: I, width: usize) -> std::io::Result<()>
+where
+    W: std::io::Write,
+    I: IntoIterator<Item = S>,
+    S: std::fmt::Display,
+{
+    let data = data.into_iter().join(", ");
+    if data.len() + name.len() + 2 <= width {
+        writeln!(f, "{name}: {data}")
+    } else {
+        let options = textwrap::Options::new(width)
+            .initial_indent("  ")
+            .subsequent_indent("  ");
+        let wrapped = textwrap::wrap(&data, &options);
+        writeln!(f, "{name}:\n{}", wrapped.iter().join("\n"))
+    }
+}
+
 impl Render for Bug {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         if let Some(data) = self.summary.as_deref() {
@@ -189,13 +208,13 @@ impl Render for Bug {
             writeln!(f, "Aliases: {}", self.aliases.iter().join(", "))?;
         }
         if !self.cc.is_empty() {
-            writeln!(f, "CC: {}", self.cc.iter().join(", "))?;
+            wrapped_csv(f, "CC", &self.cc, width)?;
         }
         if !self.blocks.is_empty() {
-            writeln!(f, "Blocks: {}", self.blocks.iter().join(", "))?;
+            wrapped_csv(f, "Blocks", &self.blocks, width)?;
         }
         if !self.depends.is_empty() {
-            writeln!(f, "Depends on: {}", self.depends.iter().join(", "))?;
+            wrapped_csv(f, "Depends on", &self.depends, width)?;
         }
         if !self.urls.is_empty() {
             writeln!(f, "See also: {}", self.urls.iter().join(", "))?;
