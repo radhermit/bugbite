@@ -21,27 +21,22 @@ impl CommentsRequest {
     where
         S: std::fmt::Display,
     {
-        let mut params = vec![];
-        let mut url = match ids {
-            [id, ids @ ..] => {
-                // Note that multiple request support is missing from upstream's REST API
-                // documentation, but exists in older RPC-based docs.
-                for id in ids {
-                    params.push(("ids", id.to_string()));
-                }
-                service.base().join(&format!("/rest/bug/{id}/comment"))?
-            }
-            _ => return Err(Error::InvalidValue("invalid comments ID state".to_string())),
+        let [id, remaining @ ..] = ids else {
+            return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
+
+        let mut url = service.base().join(&format!("/rest/bug/{id}/comment"))?;
+
+        // Note that multiple request support is missing from upstream's REST API
+        // documentation, but exists in older RPC-based docs.
+        for id in remaining {
+            url.query_pairs_mut().append_pair("ids", &id.to_string());
+        }
 
         if let Some(interval) = created {
             let datetime = Utc::now() - interval.delta();
             let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
-            params.push(("new_since", target));
-        }
-
-        if !params.is_empty() {
-            url = Url::parse_with_params(url.as_str(), params)?;
+            url.query_pairs_mut().append_pair("new_since", &target);
         }
 
         Ok(Self {

@@ -11,6 +11,8 @@ pub enum Error {
     #[error("invalid URL: {0}")]
     InvalidUrl(url::ParseError),
     #[error("{0}")]
+    InvalidRequest(String),
+    #[error("{0}")]
     InvalidValue(String),
     #[error("{0}")]
     IO(String),
