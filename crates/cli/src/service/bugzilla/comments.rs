@@ -1,4 +1,4 @@
-use std::io::stdout;
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -34,13 +34,16 @@ impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         let ids: Vec<_> = self.ids.iter().flatten().collect();
         let created = self.options.created.as_ref();
-        let events = async_block!(client.comments(&ids, created))?;
+        let comments = async_block!(client.comments(&ids, created))?;
         let mut stdout = stdout().lock();
 
         // text wrap width
         let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
-        for e in events.iter().flatten() {
-            e.render(&mut stdout, width)?;
+        for c in comments.iter().flatten() {
+            if c.count != 0 {
+                writeln!(stdout)?;
+            }
+            c.render(&mut stdout, width)?;
         }
 
         Ok(ExitCode::SUCCESS)
