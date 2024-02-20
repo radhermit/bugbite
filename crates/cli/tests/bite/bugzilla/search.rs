@@ -65,10 +65,12 @@ async fn ids_only() {
     server.respond(200, TEST_PATH.join("search/ids.json")).await;
     let expected = fs::read_to_string(TEST_PATH.join("search/ids.expected")).unwrap();
 
-    cmd("bite search")
-        .args(["-F", "id", "test"])
-        .assert()
-        .stdout(predicate::str::diff(expected.clone()))
-        .stderr("")
-        .success();
+    for opt in ["-f", "--fields"] {
+        cmd("bite search")
+            .args([opt, "id", "test"])
+            .assert()
+            .stdout(predicate::str::diff(expected.clone()))
+            .stderr("")
+            .success();
+    }
 }

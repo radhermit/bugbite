@@ -25,7 +25,7 @@ use crate::utils::{truncate, COLUMNS};
 struct Params {
     /// fields to output
     #[arg(
-        short = 'F',
+        short,
         long,
         help_heading = "Search related",
         value_name = "FIELD[,FIELD,...]",
