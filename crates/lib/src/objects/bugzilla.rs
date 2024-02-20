@@ -159,9 +159,13 @@ impl Bug {
     }
 }
 
-macro_rules! str_or_none {
+macro_rules! stringify {
     ($field:expr) => {
-        $field.as_deref().unwrap_or("None")
+        if let Some(value) = $field.as_ref() {
+            value.to_string()
+        } else {
+            "None".to_string()
+        }
     };
 }
 
@@ -170,14 +174,16 @@ impl RenderSearch<BugField> for Bug {
         let field_to_string = |field: &BugField| -> String {
             match field {
                 BugField::Id => format!("{:<8}", self.id),
-                BugField::AssignedTo => format!("{:<20}", str_or_none!(self.assigned_to)),
-                BugField::Summary => str_or_none!(self.summary).to_string(),
-                BugField::Reporter => format!("{:<20}", str_or_none!(self.reporter)),
-                BugField::Status => format!("{:<20}", str_or_none!(self.status)),
-                BugField::Resolution => format!("{:<20}", str_or_none!(self.resolution)),
-                BugField::Whiteboard => format!("{:<20}", str_or_none!(self.whiteboard)),
-                BugField::Product => format!("{:<20}", str_or_none!(self.product)),
-                BugField::Component => format!("{:<20}", str_or_none!(self.component)),
+                BugField::AssignedTo => format!("{:<20}", stringify!(self.assigned_to)),
+                BugField::Summary => stringify!(self.summary),
+                BugField::Reporter => format!("{:<20}", stringify!(self.reporter)),
+                BugField::Created => stringify!(self.created),
+                BugField::Updated => stringify!(self.updated),
+                BugField::Status => format!("{:<20}", stringify!(self.status)),
+                BugField::Resolution => format!("{:<20}", stringify!(self.resolution)),
+                BugField::Whiteboard => format!("{:<20}", stringify!(self.whiteboard)),
+                BugField::Product => format!("{:<20}", stringify!(self.product)),
+                BugField::Component => format!("{:<20}", stringify!(self.component)),
             }
         };
 
