@@ -4,6 +4,7 @@
 
 set -e
 
+REPO_DIR=${PWD}
 PACKAGE=$1
 ARCHIVE=$2
 
@@ -37,10 +38,5 @@ replace-with = "vendored-sources"
 directory = "vendor"
 EOF
 
-# ${RELEASE}
-popd >/dev/null
-# target/package
-popd >/dev/null
-
 # create release tarball
-tar -C target/package -cv -f ${ARCHIVE}.tar ${RELEASE}
+tar -cvf ${REPO_DIR}/${ARCHIVE}.tar *
