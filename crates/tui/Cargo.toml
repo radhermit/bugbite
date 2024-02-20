@@ -14,9 +14,8 @@ rust-version.workspace = true
 workspace = true
 
 [[bin]]
-bench = false
+name = "chew"
 path = "src/main.rs"
-name = "bugbite"
 
 [dependencies]
 anyhow = "1.0.79"
