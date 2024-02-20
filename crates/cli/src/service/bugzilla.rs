@@ -159,13 +159,13 @@ where
     if !data.is_empty() {
         let rendered = data.iter().join(", ");
         if rendered.len() + name.len() + 2 <= width {
-            writeln!(f, "{name}: {rendered}")?;
+            writeln!(f, "{name:<12} : {rendered}")?;
         } else {
             let options = textwrap::Options::new(width)
                 .initial_indent("  ")
                 .subsequent_indent("  ");
             let wrapped = textwrap::wrap(&rendered, &options);
-            writeln!(f, "{name}:\n{}", wrapped.iter().join("\n"))?;
+            writeln!(f, "{name:<12} :\n{}", wrapped.iter().join("\n"))?;
         }
     }
     Ok(())
@@ -179,53 +179,39 @@ where
 {
     match data {
         [] => Ok(()),
-        [value] => writeln!(f, "{name}: {}", truncate(value.as_ref(), width)),
+        [value] => writeln!(f, "{name:<12} : {}", truncate(value.as_ref(), width)),
         values => {
             let list = values
                 .iter()
                 .map(|s| truncate(s.as_ref(), width - 2))
                 .join("\n  ");
-            writeln!(f, "{name}:\n  {list}")
+            writeln!(f, "{name:<12} :\n  {list}")
         }
     }
 }
 
+macro_rules! output_field {
+    ($fmt:expr, $name:expr, $value:expr) => {
+        if let Some(value) = $value {
+            writeln!($fmt, "{:<12} : {value}", $name)?;
+        }
+    };
+}
+
 impl Render for Bug {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        if let Some(value) = &self.summary {
-            writeln!(f, "Summary: {value}")?;
-        }
-        if let Some(value) = &self.assigned_to {
-            writeln!(f, "Assignee: {value}")?;
-        }
-        if let Some(value) = &self.reporter {
-            writeln!(f, "Reporter: {value}")?;
-        }
-        if let Some(value) = &self.created {
-            writeln!(f, "Reported: {value}")?;
-        }
-        if let Some(value) = &self.updated {
-            writeln!(f, "Updated: {value}")?;
-        }
-        if let Some(value) = &self.status {
-            writeln!(f, "Status: {value}")?;
-        }
-        if let Some(value) = &self.resolution {
-            writeln!(f, "Resolution: {value}")?;
-        }
-        if let Some(value) = &self.duplicate_of {
-            writeln!(f, "Duplicate of: {value}")?;
-        }
-        if let Some(value) = &self.whiteboard {
-            writeln!(f, "Whiteboard: {value}")?;
-        }
-        if let Some(value) = &self.product {
-            writeln!(f, "Product: {value}")?;
-        }
-        if let Some(value) = &self.component {
-            writeln!(f, "Component: {value}")?;
-        }
-        writeln!(f, "ID: {}", self.id)?;
+        output_field!(f, "Summary", &self.summary);
+        output_field!(f, "Assignee", &self.assigned_to);
+        output_field!(f, "Reporter", &self.reporter);
+        output_field!(f, "Created", &self.created);
+        output_field!(f, "Updated", &self.updated);
+        output_field!(f, "Status", &self.status);
+        output_field!(f, "Resolution", &self.resolution);
+        output_field!(f, "Duplicate of", &self.duplicate_of);
+        output_field!(f, "Whiteboard", &self.whiteboard);
+        output_field!(f, "Product", &self.product);
+        output_field!(f, "Component", &self.component);
+        writeln!(f, "{:<12} : {}", "ID", self.id)?;
         wrapped_csv(f, "Aliases", &self.aliases, width)?;
         wrapped_csv(f, "CC", &self.cc, width)?;
         wrapped_csv(f, "Blocks", &self.blocks, width)?;
@@ -234,13 +220,13 @@ impl Render for Bug {
             truncated_list(f, "See also", &self.urls, width)?;
         }
 
-        // Don't count the bug description as a comment.
+        // don't count the bug description as a comment
         if self.comments.len() > 1 {
-            writeln!(f, "Comments: {}", self.comments.len() - 1)?;
+            writeln!(f, "{:<12} : {}", "Comments", self.comments.len() - 1)?;
         }
 
         if !self.attachments.is_empty() {
-            writeln!(f, "Attachments: {}\n", self.attachments.len())?;
+            writeln!(f, "{:<12} : {}\n", "Attachment", self.attachments.len())?;
             for attachment in &self.attachments {
                 attachment.render(f, width)?;
             }

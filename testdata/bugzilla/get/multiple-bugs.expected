@@ -1,32 +1,33 @@
-Summary: summary
-Assignee: assignee
-Reporter: person
-Reported: 2010-04-21 21:28:20 UTC
-Updated: 2024-01-18 18:37:44 UTC
-Status: CONFIRMED
-Whiteboard: whiteboard
-Product: product
-Component: component
-ID: 12345
-Aliases: alias
-CC: person1, person2
+Summary      : summary
+Assignee     : assignee
+Reporter     : person
+Created      : 2010-04-21 21:28:20 UTC
+Updated      : 2024-01-18 18:37:44 UTC
+Status       : CONFIRMED
+Whiteboard   : whiteboard
+Product      : product
+Component    : component
+ID           : 12345
+Aliases      : alias
+CC           : person1, person2
 ================================================================================
-Summary: summary1
-Assignee: person2
-Reporter: person
-Reported: 2010-04-21 21:28:20 UTC
-Updated: 2024-01-18 18:37:44 UTC
-Status: RESOLVED
-Product: product1
-Component: component1
-ID: 23456
+Summary      : summary1
+Assignee     : person2
+Reporter     : person
+Created      : 2010-04-21 21:28:20 UTC
+Updated      : 2024-01-18 18:37:44 UTC
+Status       : RESOLVED
+Resolution   : FIXED
+Product      : product1
+Component    : component1
+ID           : 23456
 ================================================================================
-Summary: summary1
-Assignee: person3
-Reporter: person
-Reported: 2015-03-19 21:28:20 UTC
-Updated: 2020-01-18 18:37:44 UTC
-Status: RESOLVED
-Product: product1
-Component: component2
-ID: 34567
+Summary      : summary1
+Assignee     : person3
+Reporter     : person
+Created      : 2015-03-19 21:28:20 UTC
+Updated      : 2020-01-18 18:37:44 UTC
+Status       : RESOLVED
+Product      : product1
+Component    : component2
+ID           : 34567
