@@ -1,13 +1,14 @@
-use std::io::{stdout, Write};
+use std::io::stdout;
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::time::TimeDelta;
 use clap::Args;
-use itertools::Itertools;
 
 use crate::macros::async_block;
+use crate::service::Render;
+use crate::utils::COLUMNS;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "History options")]
@@ -35,7 +36,13 @@ impl Command {
         let created = self.options.created.as_ref();
         let events = async_block!(client.history(&ids, created))?;
         let mut stdout = stdout().lock();
-        write!(stdout, "{}", events.iter().flatten().join("\n"))?;
+
+        // text wrap width
+        let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
+        for e in events.iter().flatten() {
+            e.render(&mut stdout, width)?;
+        }
+
         Ok(ExitCode::SUCCESS)
     }
 }

@@ -1,9 +1,12 @@
+use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::io;
 use std::process::{Child, Command};
 
 use crossterm::terminal;
+use itertools::Itertools;
 use once_cell::sync::Lazy;
+use unicode_segmentation::UnicodeSegmentation;
 
 #[allow(dead_code)]
 pub(crate) fn launch_browser<I, S>(urls: I) -> io::Result<Child>
@@ -23,3 +26,13 @@ pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {
         cols.into()
     }
 });
+
+/// Truncate a string to the requested width of graphemes.
+pub(crate) fn truncate(data: &str, width: usize) -> Cow<'_, str> {
+    if data.len() > width {
+        let mut iter = UnicodeSegmentation::graphemes(data, true).take(*COLUMNS);
+        Cow::Owned(iter.join(""))
+    } else {
+        Cow::Borrowed(data)
+    }
+}

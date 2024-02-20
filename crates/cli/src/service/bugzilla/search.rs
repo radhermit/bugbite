@@ -1,4 +1,4 @@
-use std::io::{stdout, Write};
+use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -10,13 +10,11 @@ use bugbite::service::bugzilla::{
 use bugbite::time::TimeDelta;
 use clap::builder::BoolishValueParser;
 use clap::Args;
-use itertools::Itertools;
 use strum::VariantNames;
 use tracing::info;
-use unicode_segmentation::UnicodeSegmentation;
 
 use crate::macros::async_block;
-use crate::utils::COLUMNS;
+use crate::utils::{truncate, COLUMNS};
 
 /// Available search parameters.
 ///
@@ -258,10 +256,8 @@ impl Command {
         for bug in bugs {
             count += 1;
             let line = bug.search_display();
-            if line.len() > *COLUMNS {
-                // truncate line to the terminal width of graphemes
-                let mut iter = UnicodeSegmentation::graphemes(line.as_str(), true).take(*COLUMNS);
-                writeln!(stdout, "{}", iter.join(""))?;
+            if stdout.is_terminal() {
+                writeln!(stdout, "{}", truncate(&line, *COLUMNS))?;
             } else {
                 writeln!(stdout, "{line}")?;
             }

@@ -8,6 +8,8 @@ use camino::Utf8PathBuf;
 use clap::Args;
 
 use crate::macros::async_block;
+use crate::service::Render;
+use crate::utils::COLUMNS;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attachments options")]
@@ -77,7 +79,7 @@ impl Command {
 
         if self.options.list {
             for attachment in attachments.iter().flatten() {
-                write!(stdout, "{attachment}")?;
+                attachment.render(&mut stdout, *COLUMNS)?;
             }
         } else if self.options.view {
             for attachment in attachments.iter().flatten() {

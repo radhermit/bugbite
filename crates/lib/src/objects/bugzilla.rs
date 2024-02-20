@@ -1,9 +1,7 @@
 use std::cmp::Ordering;
-use std::fmt;
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::serde::{non_empty_str, null_empty_vec};
@@ -32,25 +30,13 @@ impl Attachment {
         &self.data.0
     }
 
+    pub fn human_size(&self) -> String {
+        format_size(self.size, BINARY)
+    }
+
     pub fn read(&self) -> std::borrow::Cow<str> {
         // TODO: auto-decompress standard archive formats
         String::from_utf8_lossy(&self.data.0)
-    }
-}
-
-impl fmt::Display for Attachment {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(
-            f,
-            "Attachment: [{}] [{}] ({}, {}) by {}, {}",
-            self.id,
-            self.file_name,
-            format_size(self.size, BINARY),
-            self.content_type,
-            self.creator,
-            self.updated
-        )?;
-        Ok(())
     }
 }
 
@@ -81,191 +67,75 @@ impl PartialOrd for Modification<'_> {
     }
 }
 
-impl fmt::Display for Modification<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Comment(comment) => write!(f, "{comment}"),
-            Self::Event(event) => write!(f, "{event}"),
-        }
-    }
-}
-
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Comment {
-    id: u64,
-    bug_id: u64,
-    attachment_id: Option<u64>,
-    count: u64,
-    text: String,
-    creator: String,
+    pub id: u64,
+    pub bug_id: u64,
+    pub attachment_id: Option<u64>,
+    pub count: u64,
+    pub text: String,
+    pub creator: String,
     #[serde(rename = "creation_time")]
-    created: DateTime<Utc>,
-}
-
-impl fmt::Display for Comment {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.count != 0 {
-            write!(f, "Comment #{} ", self.count)?;
-        } else {
-            write!(f, "Description ")?;
-        }
-        writeln!(f, "by {}, {}", self.creator, self.created)?;
-        // TODO: pass in COLUMNS value?
-        writeln!(f, "{}", "-".repeat(80))?;
-        writeln!(f, "{}", self.text.trim())?;
-        Ok(())
-    }
+    pub created: DateTime<Utc>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Event {
-    who: String,
-    when: DateTime<Utc>,
-    changes: Vec<Change>,
-}
-
-impl fmt::Display for Event {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if !self.changes.is_empty() {
-            writeln!(f, "Changes made by {}, {}", self.who, self.when)?;
-            // TODO: pass in COLUMNS value?
-            writeln!(f, "{}", "-".repeat(80))?;
-            for change in &self.changes {
-                writeln!(f, "{change}")?;
-            }
-        }
-        Ok(())
-    }
+    pub who: String,
+    pub when: DateTime<Utc>,
+    pub changes: Vec<Change>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Change {
-    field_name: String,
+    pub field_name: String,
     #[serde(deserialize_with = "non_empty_str")]
-    removed: Option<String>,
+    pub removed: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
-    added: Option<String>,
-    attachment_id: Option<u64>,
-}
-
-impl fmt::Display for Change {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let name = &self.field_name;
-        match (self.removed.as_deref(), self.added.as_deref()) {
-            (Some(removed), None) => write!(f, "{name}: -{removed}"),
-            (Some(removed), Some(added)) => write!(f, "{name}: {removed} -> {added}"),
-            (None, Some(added)) => write!(f, "{name}: +{added}"),
-            (None, None) => panic!("invalid change"),
-        }
-    }
+    pub added: Option<String>,
+    pub attachment_id: Option<u64>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 #[serde(default)]
 pub struct Bug {
-    id: u64,
+    pub id: u64,
     #[serde(deserialize_with = "non_empty_str")]
-    assigned_to: Option<String>,
+    pub assigned_to: Option<String>,
     #[serde(rename = "creator", deserialize_with = "non_empty_str")]
-    reporter: Option<String>,
+    pub reporter: Option<String>,
     #[serde(rename = "creation_time")]
-    created: Option<DateTime<Utc>>,
+    pub created: Option<DateTime<Utc>>,
     #[serde(rename = "last_change_time")]
-    updated: Option<DateTime<Utc>>,
+    pub updated: Option<DateTime<Utc>>,
     #[serde(rename = "alias", deserialize_with = "null_empty_vec")]
-    aliases: Vec<String>,
+    pub aliases: Vec<String>,
     #[serde(deserialize_with = "non_empty_str")]
-    summary: Option<String>,
+    pub summary: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
-    status: Option<String>,
+    pub status: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
-    whiteboard: Option<String>,
+    pub whiteboard: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
-    product: Option<String>,
+    pub product: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
-    component: Option<String>,
+    pub component: Option<String>,
     #[serde(deserialize_with = "null_empty_vec")]
-    cc: Vec<String>,
+    pub cc: Vec<String>,
     #[serde(deserialize_with = "null_empty_vec")]
-    blocks: Vec<u64>,
+    pub blocks: Vec<u64>,
     #[serde(rename = "depends_on", deserialize_with = "null_empty_vec")]
-    depends: Vec<u64>,
+    pub depends: Vec<u64>,
     #[serde(rename = "see_also", deserialize_with = "null_empty_vec")]
-    urls: Vec<String>,
-    pub(crate) comments: Vec<Comment>,
-    pub(crate) attachments: Vec<Attachment>,
-    pub(crate) history: Vec<Event>,
+    pub urls: Vec<String>,
+    pub comments: Vec<Comment>,
+    pub attachments: Vec<Attachment>,
+    pub history: Vec<Event>,
 }
 
 impl From<Bug> for Item {
     fn from(value: Bug) -> Self {
         Item::Bugzilla(Box::new(value))
-    }
-}
-
-impl fmt::Display for Bug {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if let Some(data) = self.summary.as_deref() {
-            writeln!(f, "Summary: {data}")?;
-        }
-        if let Some(data) = self.assigned_to.as_deref() {
-            writeln!(f, "Assignee: {data}")?;
-        }
-        if let Some(data) = self.reporter.as_deref() {
-            writeln!(f, "Reporter: {data}")?;
-        }
-        if let Some(data) = &self.created {
-            writeln!(f, "Reported: {data}")?;
-        }
-        if let Some(data) = &self.updated {
-            writeln!(f, "Updated: {data}")?;
-        }
-        if let Some(data) = self.status.as_deref() {
-            writeln!(f, "Status: {data}")?;
-        }
-        if let Some(data) = self.whiteboard.as_deref() {
-            writeln!(f, "Whiteboard: {data}")?;
-        }
-        if let Some(data) = self.product.as_deref() {
-            writeln!(f, "Product: {data}")?;
-        }
-        if let Some(data) = self.component.as_deref() {
-            writeln!(f, "Component: {data}")?;
-        }
-        writeln!(f, "ID: {}", self.id)?;
-        if !self.aliases.is_empty() {
-            writeln!(f, "Aliases: {}", self.aliases.iter().join(", "))?;
-        }
-        if !self.cc.is_empty() {
-            writeln!(f, "CC: {}", self.cc.iter().join(", "))?;
-        }
-        if !self.blocks.is_empty() {
-            writeln!(f, "Blocks: {}", self.blocks.iter().join(", "))?;
-        }
-        if !self.depends.is_empty() {
-            writeln!(f, "Depends on: {}", self.depends.iter().join(", "))?;
-        }
-        if !self.urls.is_empty() {
-            writeln!(f, "See also: {}", self.urls.iter().join(", "))?;
-        }
-
-        // Don't count the bug description as a comment.
-        if self.comments.len() > 1 {
-            writeln!(f, "Comments: {}", self.comments.len() - 1)?;
-        }
-
-        if !self.attachments.is_empty() {
-            writeln!(f, "Attachments: {}\n", self.attachments.len())?;
-            for attachment in &self.attachments {
-                write!(f, "{attachment}")?;
-            }
-        }
-
-        for e in self.events() {
-            write!(f, "\n{e}")?;
-        }
-
-        Ok(())
     }
 }
 

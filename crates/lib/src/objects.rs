@@ -64,15 +64,6 @@ pub enum Item {
     Github(Box<github::Issue>),
 }
 
-impl fmt::Display for Item {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Bugzilla(value) => value.fmt(f),
-            Self::Github(value) => value.fmt(f),
-        }
-    }
-}
-
 /// Raw binary data encoded as Base64.
 #[derive(DeserializeFromStr, SerializeDisplay, Default, Debug, Eq, PartialEq)]
 pub(crate) struct Base64(Vec<u8>);

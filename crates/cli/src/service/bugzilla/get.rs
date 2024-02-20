@@ -5,9 +5,9 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use clap::builder::BoolishValueParser;
 use clap::Args;
-use itertools::Itertools;
 
 use crate::macros::async_block;
+use crate::service::Render;
 use crate::utils::COLUMNS;
 
 #[derive(Debug, Args)]
@@ -79,9 +79,7 @@ impl Command {
         let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
 
         while let Some(bug) = bugs.next() {
-            let text = bug.to_string();
-            let wrapped = textwrap::wrap(&text, width);
-            write!(stdout, "{}", wrapped.iter().join("\n"))?;
+            bug.render(&mut stdout, width)?;
             if bugs.peek().is_some() {
                 writeln!(stdout, "{}", "=".repeat(width))?;
             }

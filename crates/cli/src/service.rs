@@ -26,3 +26,8 @@ where
     // TODO: force authentication
     func()
 }
+
+/// Render an object for output to the terminal.
+pub(crate) trait Render {
+    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()>;
+}
