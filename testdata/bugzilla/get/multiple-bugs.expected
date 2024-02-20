@@ -10,7 +10,7 @@ Component    : component
 ID           : 12345
 Aliases      : alias
 CC           : person1, person2
-================================================================================
+==========================================================================================
 Summary      : summary1
 Assignee     : person2
 Reporter     : person
@@ -21,7 +21,7 @@ Resolution   : FIXED
 Product      : product1
 Component    : component1
 ID           : 23456
-================================================================================
+==========================================================================================
 Summary      : summary1
 Assignee     : person3
 Reporter     : person

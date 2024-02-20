@@ -1,4 +1,4 @@
-use std::io::{stdout, Write};
+use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -76,7 +76,11 @@ impl Command {
         let mut stdout = stdout().lock();
 
         // text wrap width
-        let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
+        let width = if stdout.is_terminal() && *COLUMNS <= 90 && *COLUMNS >= 50 {
+            *COLUMNS
+        } else {
+            90
+        };
 
         while let Some(bug) = bugs.next() {
             bug.render(&mut stdout, width)?;

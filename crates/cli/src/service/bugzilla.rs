@@ -4,6 +4,7 @@ use bugbite::client::{bugzilla::Client, ClientBuilder};
 use bugbite::objects::bugzilla::*;
 use bugbite::service::ServiceKind;
 use itertools::Itertools;
+use once_cell::sync::Lazy;
 use tracing::info;
 
 use crate::utils::truncate;
@@ -150,6 +151,9 @@ impl Render for Modification<'_> {
     }
 }
 
+// indentation for text-wrapping header field values
+static INDENT: Lazy<String> = Lazy::new(|| " ".repeat(15));
+
 /// Output an iterable field in wrapped CSV format.
 fn wrapped_csv<W, S>(f: &mut W, name: &str, data: &[S], width: usize) -> std::io::Result<()>
 where
@@ -158,14 +162,12 @@ where
 {
     if !data.is_empty() {
         let rendered = data.iter().join(", ");
-        if rendered.len() + name.len() + 2 <= width {
+        if rendered.len() + 15 <= width {
             writeln!(f, "{name:<12} : {rendered}")?;
         } else {
-            let options = textwrap::Options::new(width)
-                .initial_indent("  ")
-                .subsequent_indent("  ");
+            let options = textwrap::Options::new(width - 15).subsequent_indent(&INDENT);
             let wrapped = textwrap::wrap(&rendered, &options);
-            writeln!(f, "{name:<12} :\n{}", wrapped.iter().join("\n"))?;
+            writeln!(f, "{name:<12} : {}", wrapped.iter().join("\n"))?;
         }
     }
     Ok(())
@@ -179,7 +181,7 @@ where
 {
     match data {
         [] => Ok(()),
-        [value] => writeln!(f, "{name:<12} : {}", truncate(value.as_ref(), width)),
+        [value] => writeln!(f, "{name:<12} : {}", truncate(value.as_ref(), width - 15)),
         values => {
             let list = values
                 .iter()
@@ -198,9 +200,20 @@ macro_rules! output_field {
     };
 }
 
+macro_rules! output_field_wrapped {
+    ($fmt:expr, $name:expr, $value:expr, $width:expr) => {
+        if let Some(value) = $value {
+            let options = textwrap::Options::new($width - 15).subsequent_indent(&INDENT);
+            let wrapped = textwrap::wrap(value, &options);
+            let data = wrapped.iter().join("\n");
+            writeln!($fmt, "{:<12} : {data}", $name)?;
+        }
+    };
+}
+
 impl Render for Bug {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        output_field!(f, "Summary", &self.summary);
+        output_field_wrapped!(f, "Summary", &self.summary, width);
         output_field!(f, "Assignee", &self.assigned_to);
         output_field!(f, "Reporter", &self.reporter);
         output_field!(f, "Created", &self.created);
