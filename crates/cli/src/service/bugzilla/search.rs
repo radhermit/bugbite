@@ -5,10 +5,10 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
     search::{QueryBuilder, SearchOrder, SearchTerm},
-    FilterField,
+    BugField, FilterField, GroupField,
 };
 use bugbite::time::TimeDelta;
-use clap::builder::BoolishValueParser;
+use clap::builder::{BoolishValueParser, PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
 use tracing::info;
@@ -29,7 +29,10 @@ struct Params {
         long,
         help_heading = "Search related",
         value_name = "FIELD[,FIELD,...]",
-        value_delimiter = ','
+        value_delimiter = ',',
+        value_parser = PossibleValuesParser::new(
+            BugField::VARIANTS.iter().chain(GroupField::VARIANTS))
+                .map(|s| s.parse::<FilterField>().unwrap()),
     )]
     fields: Option<Vec<FilterField>>,
 
