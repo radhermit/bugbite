@@ -9,6 +9,7 @@ use super::{start_server, TEST_PATH};
 
 #[test]
 fn aliases() {
+    env::set_var("BUGBITE_BASE", "fake://bugbite");
     for subcmd in ["s", "search"] {
         for opt in ["-h", "--help"] {
             cmd("bite")
@@ -24,10 +25,7 @@ fn aliases() {
 
 #[test]
 fn no_search_terms() {
-    // TODO: only allow default service usage when manually set in user config
-    env::set_var("BUGBITE_BASE", "http://bugbite");
-    env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
-
+    env::set_var("BUGBITE_BASE", "fake://bugbite");
     cmd("bite search")
         .assert()
         .stdout("")
@@ -38,6 +36,7 @@ fn no_search_terms() {
 
 #[test]
 fn invalid_ids() {
+    env::set_var("BUGBITE_BASE", "fake://bugbite");
     cmd("bite search")
         .args(["--id", "id"])
         .assert()
@@ -49,6 +48,7 @@ fn invalid_ids() {
 
 #[test]
 fn multiple_stdin() {
+    env::set_var("BUGBITE_BASE", "fake://bugbite");
     cmd("bite search --id - -")
         .write_stdin("12345\n")
         .assert()
