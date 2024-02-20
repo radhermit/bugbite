@@ -1,4 +1,3 @@
-use std::io::{stdout, IsTerminal};
 use std::process::ExitCode;
 
 use bugbite::client::{bugzilla::Client, ClientBuilder};
@@ -98,11 +97,7 @@ impl Render for Attachment {
             self.updated
         );
 
-        if stdout().is_terminal() {
-            writeln!(f, "{}", truncate(&line, width))
-        } else {
-            writeln!(f, "{line}")
-        }
+        writeln!(f, "{}", truncate(&line, width))
     }
 }
 
@@ -251,10 +246,6 @@ impl RenderSearch for Bug {
             (None, None) => format!("{id}"),
         };
 
-        if stdout().is_terminal() {
-            writeln!(f, "{}", truncate(&line, width))
-        } else {
-            writeln!(f, "{line}")
-        }
+        writeln!(f, "{}", truncate(&line, width))
     }
 }

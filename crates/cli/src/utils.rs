@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use std::ffi::OsStr;
-use std::io;
+use std::io::{self, stdout, IsTerminal};
 use std::process::{Child, Command};
 
 use crossterm::terminal;
@@ -29,7 +29,7 @@ pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {
 
 /// Truncate a string to the requested width of graphemes.
 pub(crate) fn truncate(data: &str, width: usize) -> Cow<'_, str> {
-    if data.len() > width {
+    if data.len() > width && stdout().is_terminal() {
         let mut iter = UnicodeSegmentation::graphemes(data, true).take(*COLUMNS);
         Cow::Owned(iter.join(""))
     } else {
