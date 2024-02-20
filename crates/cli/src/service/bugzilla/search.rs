@@ -91,20 +91,42 @@ struct Params {
     )]
     quicksearch: Option<String>,
 
-    /// person the bug is assigned to
-    #[arg(short, long, help_heading = "Person related")]
+    /// user the bug is assigned to
+    #[arg(
+        short,
+        long,
+        help_heading = "User related",
+        value_name = "USER[,USER,...]",
+        value_delimiter = ','
+    )]
     assigned_to: Option<Vec<String>>,
 
-    /// person who reported
-    #[arg(short, long, help_heading = "Person related")]
+    /// user who reported
+    #[arg(
+        short,
+        long,
+        help_heading = "User related",
+        value_name = "USER[,USER,...]",
+        value_delimiter = ','
+    )]
     reporter: Option<Vec<String>>,
 
-    /// person in the CC list
-    #[arg(long, help_heading = "Person related")]
+    /// user in the CC list
+    #[arg(
+        long,
+        help_heading = "User related",
+        value_name = "USER[,USER,...]",
+        value_delimiter = ','
+    )]
     cc: Option<Vec<String>>,
 
-    /// person who commented
-    #[arg(long, help_heading = "Person related")]
+    /// user who commented
+    #[arg(
+        long,
+        help_heading = "User related",
+        value_name = "USER[,USER,...]",
+        value_delimiter = ','
+    )]
     commenter: Option<Vec<String>>,
 
     /// restrict by alias
