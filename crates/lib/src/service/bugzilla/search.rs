@@ -15,7 +15,8 @@ use crate::Error;
 use super::{BugField, FilterField};
 
 // default fields to return for searches
-static DEFAULT_FIELDS: &[BugField] = &[BugField::Id, BugField::AssignedTo, BugField::Summary];
+static DEFAULT_SEARCH_FIELDS: &[BugField] =
+    &[BugField::Id, BugField::AssignedTo, BugField::Summary];
 
 #[derive(Debug)]
 pub(crate) struct SearchRequest(url::Url);
@@ -131,12 +132,12 @@ impl QueryBuilder {
         }
     }
 
-    pub fn fields<'a, I>(&mut self, fields: I)
+    pub fn fields<I>(&mut self, fields: I)
     where
-        I: IntoIterator<Item = &'a FilterField>,
+        I: IntoIterator<Item = FilterField>,
     {
         // always include the bug ID field
-        let include_fields: IndexSet<_> = [&FilterField::Bug(BugField::Id)]
+        let include_fields: IndexSet<_> = [FilterField::Bug(BugField::Id)]
             .into_iter()
             .chain(fields)
             .collect();
@@ -177,7 +178,10 @@ impl QueryBuilder {
 impl Query for QueryBuilder {
     fn is_empty(&self) -> bool {
         // TODO: move the keys to skip into a trait attribute
-        !self.query.keys().any(|k| k != "order")
+        !self
+            .query
+            .keys()
+            .any(|k| k != "order" && k != "include_fields")
     }
 
     fn params(&mut self) -> crate::Result<String> {
@@ -198,7 +202,7 @@ impl Query for QueryBuilder {
         if !self.query.contains_key("include_fields") {
             self.insert(
                 "include_fields",
-                DEFAULT_FIELDS.iter().map(|f| f.api()).join(","),
+                DEFAULT_SEARCH_FIELDS.iter().map(|f| f.api()).join(","),
             );
         }
 

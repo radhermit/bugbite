@@ -8,7 +8,7 @@ use tracing::info;
 
 use crate::utils::truncate;
 
-use super::{login_retry, Render, RenderSearch};
+use super::{login_retry, Render};
 
 mod attachments;
 mod comments;
@@ -252,19 +252,5 @@ impl Render for Bug {
         }
 
         Ok(())
-    }
-}
-
-impl RenderSearch for Bug {
-    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        let id = self.id;
-        let line = match (self.assigned_to.as_deref(), self.summary.as_deref()) {
-            (Some(assignee), Some(summary)) => format!("{id:<8} {assignee:<20} {summary}"),
-            (Some(assignee), None) => format!("{id:<8} {assignee}"),
-            (None, Some(summary)) => format!("{id:<8} {summary}"),
-            (None, None) => format!("{id}"),
-        };
-
-        writeln!(f, "{}", truncate(&line, width))
     }
 }

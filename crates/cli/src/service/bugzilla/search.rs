@@ -1,21 +1,21 @@
-use std::io::stdout;
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
     search::{QueryBuilder, SearchOrder, SearchTerm},
-    BugField, FilterField,
+    BugField,
 };
 use bugbite::time::TimeDelta;
+use bugbite::traits::RenderSearch;
 use clap::builder::{BoolishValueParser, PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
 use tracing::info;
 
 use crate::macros::async_block;
-use crate::service::RenderSearch;
-use crate::utils::COLUMNS;
+use crate::utils::{truncate, COLUMNS};
 
 /// Available search parameters.
 ///
@@ -30,13 +30,14 @@ struct Params {
         help_heading = "Search related",
         value_name = "FIELD[,FIELD,...]",
         value_delimiter = ',',
+        default_value = "id,assigned-to,summary",
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(BugField::VARIANTS)
-                .map(|s| s.parse::<FilterField>().unwrap()),
+                .map(|s| s.parse::<BugField>().unwrap()),
         long_help = indoc::formatdoc! {"
             Restrict the data fields returned by the query.
 
-            By default, only the ID, assignee, and summary fields of a bug are
+            By default, only the id, assignee, and summary fields of a bug are
             returned. This can be altered by specifying a custom list of fields
             instead which will also change the output format to a space
             separated list of the field values for each bug.
@@ -44,7 +45,7 @@ struct Params {
             possible values:
             {}", BugField::VARIANTS.join(", ")}
     )]
-    fields: Option<Vec<FilterField>>,
+    fields: Vec<BugField>,
 
     /// sorting order for search query
     #[arg(
@@ -213,9 +214,6 @@ impl Command {
         if let Some(value) = params.attachments {
             query.attachments(value);
         }
-        if let Some(value) = params.fields.as_ref() {
-            query.fields(value);
-        }
 
         // strings
         if let Some(value) = params.quicksearch.as_ref() {
@@ -263,13 +261,17 @@ impl Command {
             query.extend("summary", values.iter().flatten());
         }
 
+        let fields = &params.fields;
+        query.fields(fields.iter().copied().map(Into::into));
+
         let bugs = async_block!(client.search(query))?;
         let mut stdout = stdout().lock();
         let mut count = 0;
 
         for bug in bugs {
             count += 1;
-            bug.render(&mut stdout, *COLUMNS)?;
+            let line = bug.render(fields);
+            writeln!(stdout, "{}", truncate(&line, *COLUMNS))?;
         }
 
         if count > 0 {

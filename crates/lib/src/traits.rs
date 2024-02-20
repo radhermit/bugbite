@@ -12,6 +12,11 @@ pub trait Query {
     fn params(&mut self) -> crate::Result<String>;
 }
 
+/// Render an object in search context into a formatted string using the given fields.
+pub trait RenderSearch<T> {
+    fn render(&self, fields: &[T]) -> String;
+}
+
 /// Encode a type into the expected API name.
 pub(crate) trait Api {
     type Output: std::fmt::Display;

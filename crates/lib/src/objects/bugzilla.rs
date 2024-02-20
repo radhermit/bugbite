@@ -2,9 +2,12 @@ use std::cmp::Ordering;
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::serde::{non_empty_str, null_empty_vec};
+use crate::service::bugzilla::BugField;
+use crate::traits::RenderSearch;
 
 use super::{Base64, Item};
 
@@ -149,5 +152,30 @@ impl Bug {
         let mut events: Vec<_> = comments.chain(history).collect();
         events.sort();
         events.into_iter()
+    }
+}
+
+macro_rules! str_or_none {
+    ($field:expr) => {
+        $field.as_deref().unwrap_or("None")
+    };
+}
+
+impl RenderSearch<BugField> for Bug {
+    fn render(&self, fields: &[BugField]) -> String {
+        let field_to_string = |field: &BugField| -> String {
+            match field {
+                BugField::Id => format!("{:<8}", self.id),
+                BugField::AssignedTo => format!("{:<20}", str_or_none!(self.assigned_to)),
+                BugField::Summary => str_or_none!(self.summary).to_string(),
+                BugField::Reporter => format!("{:<20}", str_or_none!(self.reporter)),
+            }
+        };
+
+        match fields {
+            [] => panic!("no fields defined"),
+            [field] => field_to_string(field).trim().to_string(),
+            fields => fields.iter().map(field_to_string).join(" "),
+        }
     }
 }

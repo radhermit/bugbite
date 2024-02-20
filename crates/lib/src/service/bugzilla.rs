@@ -175,6 +175,12 @@ pub enum GroupField {
     Custom,
 }
 
+impl From<GroupField> for FilterField {
+    fn from(value: GroupField) -> Self {
+        Self::Group(value)
+    }
+}
+
 impl Api for GroupField {
     type Output = &'static str;
     fn api(&self) -> Self::Output {
@@ -193,6 +199,13 @@ pub enum BugField {
     Id,
     AssignedTo,
     Summary,
+    Reporter,
+}
+
+impl From<BugField> for FilterField {
+    fn from(value: BugField) -> Self {
+        Self::Bug(value)
+    }
 }
 
 impl Api for BugField {
@@ -202,6 +215,7 @@ impl Api for BugField {
             Self::Id => "id",
             Self::AssignedTo => "assigned_to",
             Self::Summary => "summary",
+            Self::Reporter => "creator",
         }
     }
 }

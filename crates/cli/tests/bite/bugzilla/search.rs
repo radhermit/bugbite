@@ -1,4 +1,4 @@
-use std::fs;
+use std::{env, fs};
 
 use predicates::prelude::*;
 use predicates::str::contains;
@@ -24,6 +24,10 @@ fn aliases() {
 
 #[test]
 fn no_search_terms() {
+    // TODO: only allow default service usage when manually set in user config
+    env::set_var("BUGBITE_BASE", "http://bugbite");
+    env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
+
     cmd("bite search")
         .assert()
         .stdout("")
