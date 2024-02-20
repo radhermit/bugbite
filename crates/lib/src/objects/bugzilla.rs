@@ -121,6 +121,8 @@ pub struct Bug {
     #[serde(deserialize_with = "non_empty_str")]
     pub status: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
+    pub resolution: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
     pub whiteboard: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub product: Option<String>,
@@ -169,6 +171,11 @@ impl RenderSearch<BugField> for Bug {
                 BugField::AssignedTo => format!("{:<20}", str_or_none!(self.assigned_to)),
                 BugField::Summary => str_or_none!(self.summary).to_string(),
                 BugField::Reporter => format!("{:<20}", str_or_none!(self.reporter)),
+                BugField::Status => format!("{:<20}", str_or_none!(self.status)),
+                BugField::Resolution => format!("{:<20}", str_or_none!(self.resolution)),
+                BugField::Whiteboard => format!("{:<20}", str_or_none!(self.whiteboard)),
+                BugField::Product => format!("{:<20}", str_or_none!(self.product)),
+                BugField::Component => format!("{:<20}", str_or_none!(self.component)),
             }
         };
 

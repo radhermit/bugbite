@@ -200,6 +200,11 @@ pub enum BugField {
     AssignedTo,
     Summary,
     Reporter,
+    Status,
+    Resolution,
+    Whiteboard,
+    Product,
+    Component,
 }
 
 impl From<BugField> for FilterField {
@@ -216,6 +221,11 @@ impl Api for BugField {
             Self::AssignedTo => "assigned_to",
             Self::Summary => "summary",
             Self::Reporter => "creator",
+            Self::Status => "status",
+            Self::Resolution => "resolution",
+            Self::Whiteboard => "whiteboard",
+            Self::Product => "product",
+            Self::Component => "component",
         }
     }
 }
