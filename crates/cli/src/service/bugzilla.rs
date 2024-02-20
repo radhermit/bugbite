@@ -169,6 +169,25 @@ where
     }
 }
 
+/// Output an iterable field in truncated list format.
+fn truncated_list<W, S>(f: &mut W, name: &str, data: &[S], width: usize) -> std::io::Result<()>
+where
+    W: std::io::Write,
+    S: AsRef<str>,
+{
+    match data {
+        [] => Ok(()),
+        [value] => writeln!(f, "{name}: {}", truncate(value.as_ref(), width)),
+        values => {
+            let list = values
+                .iter()
+                .map(|s| truncate(s.as_ref(), width - 2))
+                .join("\n  ");
+            writeln!(f, "{name}:\n  {list}")
+        }
+    }
+}
+
 impl Render for Bug {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         if let Some(data) = self.summary.as_deref() {
@@ -212,7 +231,7 @@ impl Render for Bug {
             wrapped_csv(f, "Depends on", &self.depends, width)?;
         }
         if !self.urls.is_empty() {
-            writeln!(f, "See also: {}", self.urls.iter().join(", "))?;
+            truncated_list(f, "See also", &self.urls, width)?;
         }
 
         // Don't count the bug description as a comment.
