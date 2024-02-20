@@ -213,6 +213,9 @@ impl Render for Bug {
         if let Some(value) = &self.resolution {
             writeln!(f, "Resolution: {value}")?;
         }
+        if let Some(value) = &self.duplicate_of {
+            writeln!(f, "Duplicate of: {value}")?;
+        }
         if let Some(value) = &self.whiteboard {
             writeln!(f, "Whiteboard: {value}")?;
         }
