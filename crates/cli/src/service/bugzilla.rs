@@ -138,9 +138,9 @@ impl Render for Change {
     fn render<W: std::io::Write>(&self, f: &mut W, _width: usize) -> std::io::Result<()> {
         let name = &self.field_name;
         match (self.removed.as_deref(), self.added.as_deref()) {
-            (Some(removed), None) => write!(f, "{name}: -{removed}"),
-            (Some(removed), Some(added)) => write!(f, "{name}: {removed} -> {added}"),
-            (None, Some(added)) => write!(f, "{name}: +{added}"),
+            (Some(removed), None) => writeln!(f, "{name}: -{removed}"),
+            (Some(removed), Some(added)) => writeln!(f, "{name}: {removed} -> {added}"),
+            (None, Some(added)) => writeln!(f, "{name}: +{added}"),
             (None, None) => panic!("invalid change"),
         }
     }

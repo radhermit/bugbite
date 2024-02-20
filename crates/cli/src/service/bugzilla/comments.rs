@@ -35,15 +35,16 @@ impl Command {
         let ids: Vec<_> = self.ids.iter().flatten().collect();
         let created = self.options.created.as_ref();
         let comments = async_block!(client.comments(&ids, created))?;
+        let mut comments = comments.iter().flatten().peekable();
         let mut stdout = stdout().lock();
 
         // text wrap width
         let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
-        for c in comments.iter().flatten() {
-            if c.count != 0 {
+        while let Some(comment) = comments.next() {
+            comment.render(&mut stdout, width)?;
+            if comments.peek().is_some() {
                 writeln!(stdout)?;
             }
-            c.render(&mut stdout, width)?;
         }
 
         Ok(ExitCode::SUCCESS)
