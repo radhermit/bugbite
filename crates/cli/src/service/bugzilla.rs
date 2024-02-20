@@ -200,7 +200,7 @@ impl Render for Bug {
         }
         writeln!(f, "ID: {}", self.id)?;
         if !self.aliases.is_empty() {
-            writeln!(f, "Aliases: {}", self.aliases.iter().join(", "))?;
+            wrapped_csv(f, "Aliases", &self.aliases, width)?;
         }
         if !self.cc.is_empty() {
             wrapped_csv(f, "CC", &self.cc, width)?;
