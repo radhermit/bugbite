@@ -190,32 +190,35 @@ where
 
 impl Render for Bug {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        if let Some(data) = self.summary.as_deref() {
-            writeln!(f, "Summary: {data}")?;
+        if let Some(value) = &self.summary {
+            writeln!(f, "Summary: {value}")?;
         }
-        if let Some(data) = self.assigned_to.as_deref() {
-            writeln!(f, "Assignee: {data}")?;
+        if let Some(value) = &self.assigned_to {
+            writeln!(f, "Assignee: {value}")?;
         }
-        if let Some(data) = self.reporter.as_deref() {
-            writeln!(f, "Reporter: {data}")?;
+        if let Some(value) = &self.reporter {
+            writeln!(f, "Reporter: {value}")?;
         }
-        if let Some(data) = &self.created {
-            writeln!(f, "Reported: {data}")?;
+        if let Some(value) = &self.created {
+            writeln!(f, "Reported: {value}")?;
         }
-        if let Some(data) = &self.updated {
-            writeln!(f, "Updated: {data}")?;
+        if let Some(value) = &self.updated {
+            writeln!(f, "Updated: {value}")?;
         }
-        if let Some(data) = self.status.as_deref() {
-            writeln!(f, "Status: {data}")?;
+        if let Some(value) = &self.status {
+            writeln!(f, "Status: {value}")?;
         }
-        if let Some(data) = self.whiteboard.as_deref() {
-            writeln!(f, "Whiteboard: {data}")?;
+        if let Some(value) = &self.resolution {
+            writeln!(f, "Resolution: {value}")?;
         }
-        if let Some(data) = self.product.as_deref() {
-            writeln!(f, "Product: {data}")?;
+        if let Some(value) = &self.whiteboard {
+            writeln!(f, "Whiteboard: {value}")?;
         }
-        if let Some(data) = self.component.as_deref() {
-            writeln!(f, "Component: {data}")?;
+        if let Some(value) = &self.product {
+            writeln!(f, "Product: {value}")?;
+        }
+        if let Some(value) = &self.component {
+            writeln!(f, "Component: {value}")?;
         }
         writeln!(f, "ID: {}", self.id)?;
         if !self.aliases.is_empty() {
