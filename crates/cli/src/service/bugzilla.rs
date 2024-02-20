@@ -151,22 +151,24 @@ impl Render for Modification<'_> {
 }
 
 /// Output an iterable field in wrapped CSV format.
-fn wrapped_csv<W, I, S>(f: &mut W, name: &str, data: I, width: usize) -> std::io::Result<()>
+fn wrapped_csv<W, S>(f: &mut W, name: &str, data: &[S], width: usize) -> std::io::Result<()>
 where
     W: std::io::Write,
-    I: IntoIterator<Item = S>,
     S: std::fmt::Display,
 {
-    let data = data.into_iter().join(", ");
-    if data.len() + name.len() + 2 <= width {
-        writeln!(f, "{name}: {data}")
-    } else {
-        let options = textwrap::Options::new(width)
-            .initial_indent("  ")
-            .subsequent_indent("  ");
-        let wrapped = textwrap::wrap(&data, &options);
-        writeln!(f, "{name}:\n{}", wrapped.iter().join("\n"))
+    if !data.is_empty() {
+        let rendered = data.iter().join(", ");
+        if rendered.len() + name.len() + 2 <= width {
+            writeln!(f, "{name}: {rendered}")?;
+        } else {
+            let options = textwrap::Options::new(width)
+                .initial_indent("  ")
+                .subsequent_indent("  ");
+            let wrapped = textwrap::wrap(&rendered, &options);
+            writeln!(f, "{name}:\n{}", wrapped.iter().join("\n"))?;
+        }
     }
+    Ok(())
 }
 
 /// Output an iterable field in truncated list format.
@@ -221,18 +223,10 @@ impl Render for Bug {
             writeln!(f, "Component: {value}")?;
         }
         writeln!(f, "ID: {}", self.id)?;
-        if !self.aliases.is_empty() {
-            wrapped_csv(f, "Aliases", &self.aliases, width)?;
-        }
-        if !self.cc.is_empty() {
-            wrapped_csv(f, "CC", &self.cc, width)?;
-        }
-        if !self.blocks.is_empty() {
-            wrapped_csv(f, "Blocks", &self.blocks, width)?;
-        }
-        if !self.depends.is_empty() {
-            wrapped_csv(f, "Depends on", &self.depends, width)?;
-        }
+        wrapped_csv(f, "Aliases", &self.aliases, width)?;
+        wrapped_csv(f, "CC", &self.cc, width)?;
+        wrapped_csv(f, "Blocks", &self.blocks, width)?;
+        wrapped_csv(f, "Depends on", &self.depends, width)?;
         if !self.urls.is_empty() {
             truncated_list(f, "See also", &self.urls, width)?;
         }
@@ -249,6 +243,7 @@ impl Render for Bug {
             }
         }
 
+        // render both comments and changes in order of occurrence if either exist
         for e in self.events() {
             writeln!(f)?;
             e.render(f, width)?;
