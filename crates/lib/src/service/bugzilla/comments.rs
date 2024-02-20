@@ -21,7 +21,7 @@ impl CommentsRequest {
     where
         S: std::fmt::Display,
     {
-        let [id, remaining @ ..] = ids else {
+        let [id, remaining_ids @ ..] = ids else {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
@@ -29,7 +29,7 @@ impl CommentsRequest {
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
-        for id in remaining {
+        for id in remaining_ids {
             url.query_pairs_mut().append_pair("ids", &id.to_string());
         }
 
