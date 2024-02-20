@@ -13,35 +13,29 @@ pub(crate) struct AttachmentsRequest {
 
 impl AttachmentsRequest {
     pub(crate) fn new(service: &super::Service, ids: Ids, data: bool) -> crate::Result<Self> {
-        let mut params = vec![];
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
         let mut url = match ids.as_slice() {
-            IdsSlice::Item([id, ids @ ..]) => {
-                for id in ids {
-                    params.push(("ids", id.as_str()));
+            IdsSlice::Item([id, remaining_ids @ ..]) => {
+                let mut url = service.base().join(&format!("/rest/bug/{id}/attachment"))?;
+                for id in remaining_ids {
+                    url.query_pairs_mut().append_pair("ids", id.as_str());
                 }
-                service.base().join(&format!("/rest/bug/{id}/attachment"))?
+                url
             }
-            IdsSlice::Object([id, ids @ ..]) => {
-                for id in ids {
-                    params.push(("attachment_ids", id.as_str()));
+            IdsSlice::Object([id, remaining_ids @ ..]) => {
+                let mut url = service.base().join(&format!("/rest/bug/attachment/{id}"))?;
+                for id in remaining_ids {
+                    url.query_pairs_mut()
+                        .append_pair("attachment_ids", id.as_str());
                 }
-                service.base().join(&format!("/rest/bug/attachment/{id}"))?
+                url
             }
-            _ => {
-                return Err(Error::InvalidValue(
-                    "bug or attachment IDs not specified".to_string(),
-                ))
-            }
+            _ => return Err(Error::InvalidRequest("no IDs specified".to_string())),
         };
 
         if !data {
-            params.push(("exclude_fields", "data"));
-        }
-
-        if !params.is_empty() {
-            url = Url::parse_with_params(url.as_str(), params)?;
+            url.query_pairs_mut().append_pair("exclude_fields", "data");
         }
 
         Ok(AttachmentsRequest { ids, url })
