@@ -35,6 +35,25 @@ fn invalid_ids() {
 }
 
 #[tokio::test]
+async fn nonexistent_bug() {
+    let server = start_server().await;
+
+    server
+        .respond(404, TEST_PATH.join("errors/nonexistent-bug.json"))
+        .await;
+
+    for opt in ["-i", "--item-id"] {
+        cmd("bite attachments")
+            .arg("1")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr("bite: error: bugzilla: Bug #1 does not exist.\n")
+            .failure();
+    }
+}
+
+#[tokio::test]
 async fn list_single_without_data() {
     let server = start_server().await;
 
@@ -179,20 +198,34 @@ async fn multiple_bugs_with_no_attachments() {
 }
 
 #[tokio::test]
-async fn nonexistent_bug() {
+async fn save_multiple_with_plain_text() {
     let server = start_server().await;
-
     server
-        .respond(404, TEST_PATH.join("errors/nonexistent-bug.json"))
+        .respond(
+            200,
+            TEST_PATH.join("attachments/bugs-with-attachments.json"),
+        )
         .await;
+    let expected =
+        fs::read_to_string(TEST_PATH.join("attachments/single-plain-text.expected")).unwrap();
 
-    for opt in ["-i", "--item-id"] {
-        cmd("bite attachments")
-            .arg("1")
-            .arg(opt)
-            .assert()
-            .stdout("")
-            .stderr("bite: error: bugzilla: Bug #1 does not exist.\n")
-            .failure();
+    let dir = tempdir().unwrap();
+    let dir_path = dir.path().to_str().unwrap();
+    // save files to the current working directory
+    env::set_current_dir(dir_path).unwrap();
+
+    let ids = ["12345", "23456", "34567"];
+    cmd("bite attachments -i")
+        .args(ids)
+        .assert()
+        .stdout(predicate::str::is_empty().not())
+        .stderr("")
+        .success();
+
+    // verify file content
+    for id in ids {
+        let file = dir.path().join(format!("{id}/test.txt"));
+        let data = fs::read_to_string(file).unwrap();
+        assert_eq!(&data, &expected);
     }
 }
