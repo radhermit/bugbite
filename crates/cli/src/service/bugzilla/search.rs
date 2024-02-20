@@ -5,7 +5,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
     search::{QueryBuilder, SearchOrder, SearchTerm},
-    BugField, FilterField, GroupField,
+    BugField, FilterField,
 };
 use bugbite::time::TimeDelta;
 use clap::builder::{BoolishValueParser, PossibleValuesParser, TypedValueParser};
@@ -30,9 +30,19 @@ struct Params {
         help_heading = "Search related",
         value_name = "FIELD[,FIELD,...]",
         value_delimiter = ',',
-        value_parser = PossibleValuesParser::new(
-            BugField::VARIANTS.iter().chain(GroupField::VARIANTS))
+        hide_possible_values = true,
+        value_parser = PossibleValuesParser::new(BugField::VARIANTS)
                 .map(|s| s.parse::<FilterField>().unwrap()),
+        long_help = indoc::formatdoc! {"
+            Restrict the data fields returned by the query.
+
+            By default, only the ID, assignee, and summary fields of a bug are
+            returned. This can be altered by specifying a custom list of fields
+            instead which will also change the output format to a space
+            separated list of the field values for each bug.
+
+            possible values:
+            {}", BugField::VARIANTS.join(", ")}
     )]
     fields: Option<Vec<FilterField>>,
 
@@ -44,7 +54,7 @@ struct Params {
         value_name = "TERM[,TERM,...]",
         value_delimiter = ',',
         long_help = indoc::formatdoc! {"
-            Perform server-side sorting on the given query.
+            Perform server-side sorting on the query.
 
             Sorting in descending order can be done by prefixing a given term
             with '-'; otherwise, sorting is performed in ascending order by
