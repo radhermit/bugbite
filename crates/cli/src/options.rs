@@ -8,7 +8,7 @@ use bugbite::service::ServiceKind;
 use bugbite::services::SERVICES;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
-use clap::{Args, Parser};
+use clap::{Args, Parser, ValueHint};
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
 use itertools::Itertools;
 use strum::{IntoEnumIterator, VariantNames};
@@ -190,7 +190,7 @@ struct ServiceOpts {
 #[clap(next_help_heading = "Bite options")]
 struct BiteOpts {
     /// load config from a custom path
-    #[arg(long)]
+    #[arg(long, value_hint = ValueHint::FilePath)]
     config: Option<Utf8PathBuf>,
     /// ignore invalid service certificates
     #[arg(long)]
