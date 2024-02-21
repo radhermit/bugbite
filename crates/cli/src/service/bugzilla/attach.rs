@@ -54,7 +54,7 @@ impl Command {
         let ids: Vec<_> = self.ids.iter().flatten().copied().collect();
         let mut stdout = stdout().lock();
 
-        let mut attachment = CreateAttachment::new(ids, &self.path)?;
+        let mut attachment = CreateAttachment::new(&ids, &self.path)?;
         if let Some(value) = self.options.summary.as_ref() {
             attachment.summary = value.clone()
         }
@@ -71,9 +71,9 @@ impl Command {
             attachment.is_private = value;
         }
 
-        let ids = async_block!(client.attach(attachment))?;
+        async_block!(client.attach(attachment))?;
         let ids = ids.iter().map(|x| x.to_string()).join(", ");
-        writeln!(stdout, "{} attached to: {ids}", self.path)?;
+        writeln!(stdout, "Attached file: {}: {ids}", self.path)?;
 
         Ok(ExitCode::SUCCESS)
     }

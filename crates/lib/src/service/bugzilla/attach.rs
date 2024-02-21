@@ -21,7 +21,7 @@ pub struct CreateAttachment {
 }
 
 impl CreateAttachment {
-    pub fn new<P>(ids: Vec<u64>, path: P) -> crate::Result<Self>
+    pub fn new<P>(ids: &[u64], path: P) -> crate::Result<Self>
     where
         P: AsRef<Utf8Path>,
     {
@@ -37,7 +37,7 @@ impl CreateAttachment {
         let mime_type = kind.map(|k| k.mime_type()).unwrap_or("text/plain");
 
         Ok(Self {
-            ids,
+            ids: ids.to_vec(),
             data: Base64(data),
             file_name: file_name.to_string(),
             content_type: mime_type.to_string(),
