@@ -5,11 +5,10 @@ use predicates::str::contains;
 
 use crate::command::cmd;
 
-use super::{set_fake_env, start_server, TEST_PATH};
+use super::{start_server, TEST_PATH};
 
 #[test]
 fn aliases() {
-    set_fake_env();
     for subcmd in ["g", "get"] {
         for opt in ["-h", "--help"] {
             cmd("bite")
@@ -25,7 +24,6 @@ fn aliases() {
 
 #[test]
 fn missing_ids() {
-    set_fake_env();
     cmd("bite get")
         .assert()
         .stdout("")
@@ -36,7 +34,6 @@ fn missing_ids() {
 
 #[test]
 fn invalid_ids() {
-    set_fake_env();
     cmd("bite get")
         .arg("id")
         .assert()

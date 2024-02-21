@@ -1,3 +1,5 @@
+use std::env;
+
 use bugbite::test::build_path;
 use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
@@ -10,6 +12,13 @@ use command::cmd;
 
 pub(crate) static TESTDATA_PATH: Lazy<Utf8PathBuf> =
     Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
+
+/// Initialization for all test executables.
+#[ctor::ctor]
+fn initialize() {
+    // set fake base by default to avoid connection errors
+    env::set_var("BUGBITE_BASE", "fake://bugbite");
+}
 
 #[test]
 fn help() {

@@ -6,11 +6,10 @@ use tempfile::tempdir;
 
 use crate::command::cmd;
 
-use super::{set_fake_env, start_server, TEST_PATH};
+use super::{start_server, TEST_PATH};
 
 #[test]
 fn aliases() {
-    set_fake_env();
     for subcmd in ["a", "attachments"] {
         for opt in ["-h", "--help"] {
             cmd("bite")
@@ -26,7 +25,6 @@ fn aliases() {
 
 #[test]
 fn invalid_ids() {
-    set_fake_env();
     cmd("bite attachments")
         .arg("id")
         .assert()

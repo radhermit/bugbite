@@ -3,11 +3,8 @@ use predicates::str::contains;
 
 use crate::command::cmd;
 
-use super::set_fake_env;
-
 #[test]
 fn missing_ids() {
-    set_fake_env();
     cmd("bite comments")
         .assert()
         .stdout("")
@@ -18,7 +15,6 @@ fn missing_ids() {
 
 #[test]
 fn invalid_ids() {
-    set_fake_env();
     cmd("bite comments")
         .arg("id")
         .assert()
