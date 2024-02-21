@@ -10,7 +10,6 @@ pub mod bugzilla;
 pub mod github;
 
 use crate::traits::WebService;
-use crate::Error;
 
 /// Supported service variants
 #[derive(
@@ -36,45 +35,37 @@ pub enum ServiceKind {
     /// Targets the REST API v1 provided by bugzilla-5.0 and up.
     /// API docs: https://bugzilla.readthedocs.io/en/latest/api/core/v1/
     #[default]
-    BugzillaRestV1,
+    Bugzilla,
 
     /// Targets the GitHub REST API version 2022-11-28.
     /// API docs: https://docs.github.com/en/rest/about-the-rest-api
     Github,
 }
 
-impl ServiceKind {
-    /// Create a new service using a given base URL.
-    pub fn create(self, base: &str) -> crate::Result<Config> {
-        let base = Url::parse(base)
-            .map_err(|e| Error::InvalidValue(format!("invalid {self} URL: {base}: {e}")))?;
-
-        let config = match self {
-            Self::BugzillaRestV1 => Config::BugzillaRestV1(bugzilla::Config::new(base)),
-            Self::Github => Config::Github(github::Config::new(base)),
-        };
-
-        Ok(config)
-    }
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(EnumAsInner, Deserialize, Serialize, Debug, Clone)]
 pub enum Config {
-    BugzillaRestV1(bugzilla::Config),
+    Bugzilla(bugzilla::Config),
     Github(github::Config),
 }
 
 impl Config {
+    pub fn new(kind: ServiceKind, base: &str) -> crate::Result<Self> {
+        match kind {
+            ServiceKind::Bugzilla => Ok(Config::Bugzilla(bugzilla::Config::new(base)?)),
+            ServiceKind::Github => Ok(Config::Github(github::Config::new(base)?)),
+        }
+    }
+
     pub fn base(&self) -> &Url {
         match self {
-            Self::BugzillaRestV1(config) => config.base(),
+            Self::Bugzilla(config) => config.base(),
             Self::Github(config) => config.base(),
         }
     }
 
     pub fn kind(&self) -> ServiceKind {
         match self {
-            Self::BugzillaRestV1(config) => config.kind(),
+            Self::Bugzilla(config) => config.kind(),
             Self::Github(config) => config.kind(),
         }
     }
@@ -82,7 +73,7 @@ impl Config {
 
 impl fmt::Display for Config {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Service: {} -- {}", self.base(), self.kind())
+        write!(f, "Service: {} -- {}", self.kind(), self.base())
     }
 }
 

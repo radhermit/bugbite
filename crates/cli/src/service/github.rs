@@ -1,8 +1,7 @@
 use std::process::ExitCode;
 
 use bugbite::client::{github::Client, ClientBuilder};
-use bugbite::service::ServiceKind;
-use tracing::info;
+use bugbite::service::github::Config;
 
 mod get;
 mod search;
@@ -30,18 +29,16 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn run(
-        self,
-        kind: ServiceKind,
-        base: String,
-        client: ClientBuilder,
-    ) -> anyhow::Result<ExitCode> {
-        let service = match self.project {
-            Some(project) => kind.create(&format!("https://github.com/{project}"))?,
-            None => kind.create(&base)?,
+    pub(crate) fn run(self, base: String, builder: ClientBuilder) -> anyhow::Result<ExitCode> {
+        let base = match self.project.as_ref() {
+            Some(project) => format!("https://github.com/{project}"),
+            None => base,
         };
-        info!("{service}");
-        let client = client.build(service)?.into_github().unwrap();
+
+        let mut config = Config::new(&base)?;
+        config.token = self.auth.token;
+
+        let client = Client::new(config, builder.build())?;
         self.cmd.run(client)
     }
 }

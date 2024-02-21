@@ -16,7 +16,10 @@ impl TryFrom<bugbite::config::Config> for Config {
     fn try_from(config: bugbite::config::Config) -> anyhow::Result<Self> {
         let mut connections = IndexMap::new();
         for c in config.connections() {
-            connections.insert(c.name().to_string(), c.service()?);
+            connections.insert(
+                c.name().to_string(),
+                service::Config::new(c.kind(), c.base())?,
+            );
         }
 
         Ok(Self {

@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::fmt;
 use std::str::FromStr;
 
+use reqwest::{ClientBuilder, RequestBuilder};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, VariantNames};
 use tracing::{debug, trace};
@@ -23,25 +24,24 @@ pub mod search;
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
+    pub user: Option<String>,
+    pub password: Option<String>,
+    pub api_key: Option<String>,
     cache: ServiceCache,
 }
 
 impl Config {
-    pub(super) fn new(base: Url) -> Self {
-        Self {
-            base,
-            cache: Default::default(),
-        }
-    }
+    pub fn new(base: &str) -> crate::Result<Self> {
+        let base = Url::parse(base)
+            .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
 
-    pub(crate) fn service(self, client: reqwest::Client) -> Service {
-        Service {
-            config: self,
+        Ok(Self {
+            base,
             user: None,
             password: None,
             api_key: None,
-            client,
-        }
+            cache: Default::default(),
+        })
     }
 
     pub fn base(&self) -> &Url {
@@ -49,22 +49,30 @@ impl Config {
     }
 
     pub fn kind(&self) -> ServiceKind {
-        ServiceKind::BugzillaRestV1
+        ServiceKind::Bugzilla
     }
 }
 
-// TODO: remove this once authentication support is added
-#[allow(dead_code)]
+impl fmt::Display for Config {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Service: {} -- {}", self.kind(), self.base())
+    }
+}
+
 #[derive(Debug)]
 pub struct Service {
     config: Config,
-    user: Option<String>,
-    password: Option<String>,
-    api_key: Option<String>,
     client: reqwest::Client,
 }
 
 impl Service {
+    pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+        Ok(Self {
+            config,
+            client: builder.build()?,
+        })
+    }
+
     pub(crate) fn attach_request(
         &self,
         attachment: attach::CreateAttachment,
@@ -134,6 +142,17 @@ impl WebService for Service {
 
     fn client(&self) -> &reqwest::Client {
         &self.client
+    }
+
+    fn inject_auth(&self, request: RequestBuilder) -> crate::Result<RequestBuilder> {
+        let config = &self.config;
+        if let Some(key) = config.api_key.as_ref() {
+            Ok(request.query(&[("Bugzilla_api_key", key)]))
+        } else if let (Some(user), Some(pass)) = (&config.user, &config.password) {
+            Ok(request.query(&[("Bugzilla_login", user), ("Bugzilla_password", pass)]))
+        } else {
+            Err(Error::Auth)
+        }
     }
 
     async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response> {

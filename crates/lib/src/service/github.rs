@@ -1,7 +1,11 @@
+use std::fmt;
+
+use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::traits::WebService;
+use crate::Error;
 
 use super::ServiceKind;
 
@@ -11,23 +15,20 @@ pub mod search;
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
+    pub token: Option<String>,
     cache: ServiceCache,
 }
 
 impl Config {
-    pub(super) fn new(base: Url) -> Self {
-        Self {
-            base,
-            cache: Default::default(),
-        }
-    }
+    pub fn new(base: &str) -> crate::Result<Self> {
+        let base = Url::parse(base)
+            .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
 
-    pub(crate) fn service(self, client: reqwest::Client) -> Service {
-        Service {
-            config: self,
+        Ok(Self {
+            base,
             token: None,
-            client,
-        }
+            cache: Default::default(),
+        })
     }
 
     pub fn base(&self) -> &Url {
@@ -39,13 +40,26 @@ impl Config {
     }
 }
 
+impl fmt::Display for Config {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Service: {} -- {}", self.kind(), self.base())
+    }
+}
+
 // TODO: remove this once authentication support is added
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Service {
     config: Config,
-    token: Option<String>,
     client: reqwest::Client,
+}
+
+impl Service {
+    pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+        Ok(Self {
+            config,
+            client: builder.build()?,
+        })
+    }
 }
 
 impl WebService for Service {

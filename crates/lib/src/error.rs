@@ -2,8 +2,8 @@ use std::io;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("{0}")]
-    Auth(String),
+    #[error("authentication required")]
+    Auth,
     #[error("{0}")]
     Config(String),
     #[error("no search terms specified")]

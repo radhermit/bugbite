@@ -11,7 +11,7 @@ use super::{start_server, TEST_PATH};
 fn aliases() {
     for subcmd in ["g", "get"] {
         for opt in ["-h", "--help"] {
-            cmd("bite")
+            cmd("bite bugzilla")
                 .arg(subcmd)
                 .arg(opt)
                 .assert()
@@ -24,7 +24,7 @@ fn aliases() {
 
 #[test]
 fn missing_ids() {
-    cmd("bite get")
+    cmd("bite bugzilla get")
         .assert()
         .stdout("")
         .stderr(predicate::str::is_empty().not())
@@ -34,7 +34,7 @@ fn missing_ids() {
 
 #[test]
 fn invalid_ids() {
-    cmd("bite get")
+    cmd("bite bugzilla get")
         .arg("id")
         .assert()
         .stdout("")
@@ -52,7 +52,7 @@ async fn single_bug() {
         .await;
     let expected = fs::read_to_string(TEST_PATH.join("get/single-bug.expected")).unwrap();
 
-    cmd("bite get")
+    cmd("bite bugzilla get")
         .arg("12345")
         .args(["-A", "no", "-C", "no", "-H", "no"])
         .assert()
@@ -61,7 +61,7 @@ async fn single_bug() {
         .success();
 
     // pull id from stdin
-    cmd("bite get -")
+    cmd("bite bugzilla get -")
         .write_stdin("12345\n")
         .args(["-A", "no", "-C", "no", "-H", "no"])
         .assert()
@@ -78,7 +78,7 @@ async fn nonexistent_bug() {
         .respond(404, TEST_PATH.join("errors/nonexistent-bug.json"))
         .await;
 
-    cmd("bite get")
+    cmd("bite bugzilla get")
         .arg("1")
         .assert()
         .stdout("")
@@ -95,7 +95,7 @@ async fn multiple_bugs() {
         .await;
     let expected = fs::read_to_string(TEST_PATH.join("get/multiple-bugs.expected")).unwrap();
 
-    cmd("bite get")
+    cmd("bite bugzilla get")
         .args(["12345", "23456", "34567"])
         .args(["-A", "no", "-C", "no", "-H", "no"])
         .assert()
@@ -104,7 +104,7 @@ async fn multiple_bugs() {
         .success();
 
     // pull ids from stdin
-    cmd("bite get -")
+    cmd("bite bugzilla get -")
         .write_stdin("12345\n23456\n34567\n")
         .args(["-A", "no", "-C", "no", "-H", "no"])
         .assert()

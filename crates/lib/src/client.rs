@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use enum_as_inner::EnumAsInner;
 
-use crate::service::Config;
+use crate::service::ServiceKind;
 
 pub mod bugzilla;
 pub mod github;
@@ -26,23 +26,14 @@ impl ClientBuilder {
         self
     }
 
-    pub fn build(self, config: Config) -> crate::Result<Client> {
-        let builder = reqwest::Client::builder()
+    pub fn build(self) -> reqwest::ClientBuilder {
+        reqwest::Client::builder()
             .use_rustls_tls()
             .user_agent(USER_AGENT)
             // TODO: switch to cookie_provider() once cookie (de)serialization is supported
             .cookie_store(true)
             .timeout(Duration::from_secs(self.timeout))
-            .danger_accept_invalid_certs(self.insecure);
-
-        let client = match config {
-            Config::BugzillaRestV1(config) => {
-                Client::Bugzilla(bugzilla::Client::new(config, builder)?)
-            }
-            Config::Github(config) => Client::Github(github::Client::new(config, builder)?),
-        };
-
-        Ok(client)
+            .danger_accept_invalid_certs(self.insecure)
     }
 }
 
@@ -53,6 +44,20 @@ pub enum Client {
 }
 
 impl Client {
+    pub fn new(kind: ServiceKind, base: &str) -> crate::Result<Self> {
+        let builder = Client::builder().build();
+        match kind {
+            ServiceKind::Bugzilla => {
+                let config = crate::service::bugzilla::Config::new(base)?;
+                Ok(Self::Bugzilla(bugzilla::Client::new(config, builder)?))
+            }
+            ServiceKind::Github => {
+                let config = crate::service::github::Config::new(base)?;
+                Ok(Self::Github(github::Client::new(config, builder)?))
+            }
+        }
+    }
+
     pub fn builder() -> ClientBuilder {
         ClientBuilder::default().timeout(30)
     }

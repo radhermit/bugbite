@@ -1,4 +1,4 @@
-use std::fs;
+use std::{env, fs};
 
 use predicates::prelude::*;
 use predicates::str::contains;
@@ -11,7 +11,7 @@ use super::{start_server, TEST_PATH};
 fn aliases() {
     for subcmd in ["s", "search"] {
         for opt in ["-h", "--help"] {
-            cmd("bite")
+            cmd("bite bugzilla")
                 .arg(subcmd)
                 .arg(opt)
                 .assert()
@@ -24,8 +24,11 @@ fn aliases() {
 
 #[test]
 fn no_search_terms() {
+    env::set_var("BUGBITE_BASE", "fake://bugbite");
+    env::set_var("BUGBITE_SERVICE", "bugzilla");
+
     for opts in [vec![], vec!["-f", "id"], vec!["-S", "id"]] {
-        cmd("bite search")
+        cmd("bite bugzilla search")
             .args(opts)
             .assert()
             .stdout("")
@@ -37,7 +40,7 @@ fn no_search_terms() {
 
 #[test]
 fn invalid_ids() {
-    cmd("bite search")
+    cmd("bite bugzilla search")
         .args(["--id", "id"])
         .assert()
         .stdout("")
@@ -48,7 +51,7 @@ fn invalid_ids() {
 
 #[test]
 fn multiple_stdin() {
-    cmd("bite search --id - -")
+    cmd("bite bugzilla search --id - -")
         .write_stdin("12345\n")
         .assert()
         .stdout("")
@@ -65,7 +68,7 @@ async fn ids_only() {
     let expected = fs::read_to_string(TEST_PATH.join("search/ids.expected")).unwrap();
 
     for opt in ["-f", "--fields"] {
-        cmd("bite search")
+        cmd("bite bugzilla search")
             .args([opt, "id", "test"])
             .assert()
             .stdout(predicate::str::diff(expected.clone()))

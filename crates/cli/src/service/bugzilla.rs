@@ -2,14 +2,13 @@ use std::process::ExitCode;
 
 use bugbite::client::{bugzilla::Client, ClientBuilder};
 use bugbite::objects::bugzilla::*;
-use bugbite::service::ServiceKind;
+use bugbite::service::bugzilla::Config;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
-use tracing::info;
 
 use crate::utils::truncate;
 
-use super::{login_retry, Render};
+use super::{auth_required, auth_retry, Render};
 
 mod attach;
 mod attachments;
@@ -26,11 +25,11 @@ struct Authentication {
     api_key: Option<String>,
 
     /// Bugzilla username
-    #[arg(short, long, conflicts_with = "api_key")]
+    #[arg(short, long, requires = "password", conflicts_with = "api_key")]
     user: Option<String>,
 
     /// Bugzilla password
-    #[arg(short, long, conflicts_with = "api_key")]
+    #[arg(short, long, requires = "user", conflicts_with = "api_key")]
     password: Option<String>,
 }
 
@@ -45,16 +44,14 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn run(
-        self,
-        kind: ServiceKind,
-        base: String,
-        client: ClientBuilder,
-    ) -> anyhow::Result<ExitCode> {
-        let service = kind.create(&base)?;
-        info!("{service}");
-        let client = client.build(service)?.into_bugzilla().unwrap();
-        Ok(login_retry(|| self.cmd.run(&client))?)
+    pub(crate) fn run(self, base: String, builder: ClientBuilder) -> anyhow::Result<ExitCode> {
+        let mut config = Config::new(&base)?;
+        config.api_key = self.auth.api_key;
+        config.user = self.auth.user;
+        config.password = self.auth.password;
+
+        let mut client = Client::new(config, builder.build())?;
+        Ok(auth_retry(|| self.cmd.run(&mut client))?)
     }
 }
 
@@ -79,9 +76,9 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+    fn run(&self, client: &mut Client) -> Result<ExitCode, bugbite::Error> {
         match self {
-            Self::Attach(cmd) => cmd.run(client),
+            Self::Attach(cmd) => auth_required(|| cmd.run(client)),
             Self::Attachments(cmd) => cmd.run(client),
             Self::Comments(cmd) => cmd.run(client),
             Self::Get(cmd) => cmd.run(client),

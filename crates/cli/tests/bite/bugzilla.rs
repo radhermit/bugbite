@@ -15,6 +15,6 @@ static TEST_PATH: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TESTDATA_PATH.join("bu
 async fn start_server() -> TestServer {
     let server = TestServer::new().await;
     env::set_var("BUGBITE_BASE", server.uri());
-    env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
+    env::set_var("BUGBITE_SERVICE", "bugzilla");
     server
 }

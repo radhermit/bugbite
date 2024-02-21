@@ -17,10 +17,10 @@ pub(crate) static TESTDATA_PATH: Lazy<Utf8PathBuf> =
 /// Initialization for all test executables.
 #[ctor::ctor]
 fn initialize() {
+    // wipe environment variables that affect connections
     env::remove_var("BUGBITE_CONNECTION");
-    // set fake base by default to avoid connection errors
-    env::set_var("BUGBITE_BASE", "fake://bugbite");
-    env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
+    env::remove_var("BUGBITE_BASE");
+    env::remove_var("BUGBITE_SERVICE");
 }
 
 // verify help support isn't mangled by service subcommand injection

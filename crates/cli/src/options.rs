@@ -57,7 +57,7 @@ pub(super) struct ServiceCommand {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service() -> anyhow::Result<(ServiceKind, String, Vec<String>)> {
+    pub(crate) fn service() -> anyhow::Result<(String, Vec<String>)> {
         // parse pre-subcommand options with main command parsing failure fallback
         let Ok(cmd) = Self::try_parse() else {
             Command::parse();
@@ -123,17 +123,13 @@ impl ServiceCommand {
 
         // inject subcommand for requested service type if missing
         if !subcmds.contains(arg) {
-            let subcmd = match &selected {
-                ServiceKind::BugzillaRestV1 => "bugzilla",
-                ServiceKind::Github => "github",
-            };
-            args.push(subcmd.to_string());
+            args.push(selected.to_string());
         }
 
         // append the remaining unparsed args
         args.extend(remaining.iter().map(|s| s.to_string()));
 
-        Ok((selected, base, args))
+        Ok((base, args))
     }
 }
 
@@ -258,7 +254,7 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, kind: ServiceKind, base: String) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(self, base: String) -> anyhow::Result<ExitCode> {
         if self.options.verbosity.is_present() {
             enable_logging(self.options.verbosity.log_level_filter());
         }
@@ -267,6 +263,6 @@ impl Command {
             .insecure(self.options.bite.insecure)
             .timeout(self.options.bite.timeout);
 
-        self.subcmd.run(kind, base, client)
+        self.subcmd.run(base, client)
     }
 }

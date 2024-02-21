@@ -1,4 +1,5 @@
 use reqwest::ClientBuilder;
+use tracing::info;
 
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::attach::CreateAttachment;
@@ -12,10 +13,10 @@ pub struct Client {
 }
 
 impl Client {
-    pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
-        let client = builder.build()?;
+    pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+        info!("{config}");
         Ok(Self {
-            service: config.service(client),
+            service: Service::new(config, builder)?,
         })
     }
 
@@ -106,7 +107,7 @@ mod tests {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let client = server
-            .client(ServiceKind::BugzillaRestV1)
+            .client(ServiceKind::Bugzilla)
             .into_bugzilla()
             .unwrap();
 
@@ -130,7 +131,7 @@ mod tests {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let client = server
-            .client(ServiceKind::BugzillaRestV1)
+            .client(ServiceKind::Bugzilla)
             .into_bugzilla()
             .unwrap();
 

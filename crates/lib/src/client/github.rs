@@ -1,4 +1,5 @@
 use reqwest::ClientBuilder;
+use tracing::info;
 
 use crate::objects::github::Issue;
 use crate::service::github::{Config, Service};
@@ -10,10 +11,10 @@ pub struct Client {
 }
 
 impl Client {
-    pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
-        let client = builder.build()?;
+    pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+        info!("{config}");
         Ok(Self {
-            service: config.service(client),
+            service: Service::new(config, builder)?,
         })
     }
 

@@ -5,7 +5,7 @@ use crate::command::cmd;
 
 #[test]
 fn missing_ids() {
-    cmd("bite comments")
+    cmd("bite bugzilla comments")
         .assert()
         .stdout("")
         .stderr(predicate::str::is_empty().not())
@@ -15,7 +15,7 @@ fn missing_ids() {
 
 #[test]
 fn invalid_ids() {
-    cmd("bite comments")
+    cmd("bite bugzilla comments")
         .arg("id")
         .assert()
         .stdout("")

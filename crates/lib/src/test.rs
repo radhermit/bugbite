@@ -34,8 +34,7 @@ impl TestServer {
     }
 
     pub fn client(&self, kind: ServiceKind) -> Client {
-        let service = kind.create(self.uri()).unwrap();
-        Client::builder().build(service).unwrap()
+        Client::new(kind, self.uri()).unwrap()
     }
 
     pub fn server(&self) -> &MockServer {

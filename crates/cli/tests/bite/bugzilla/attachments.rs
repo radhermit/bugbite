@@ -12,7 +12,7 @@ use super::{start_server, TEST_PATH};
 fn aliases() {
     for subcmd in ["a", "attachments"] {
         for opt in ["-h", "--help"] {
-            cmd("bite")
+            cmd("bite bugzilla")
                 .arg(subcmd)
                 .arg(opt)
                 .assert()
@@ -25,7 +25,7 @@ fn aliases() {
 
 #[test]
 fn invalid_ids() {
-    cmd("bite attachments")
+    cmd("bite bugzilla attachments")
         .arg("id")
         .assert()
         .stdout("")
@@ -43,7 +43,7 @@ async fn nonexistent_bug() {
         .await;
 
     for opt in ["-i", "--item-id"] {
-        cmd("bite attachments")
+        cmd("bite bugzilla attachments")
             .arg("1")
             .arg(opt)
             .assert()
@@ -64,7 +64,7 @@ async fn list_single_without_data() {
         fs::read_to_string(TEST_PATH.join("attachments/single-without-data.expected")).unwrap();
 
     for opt in ["-l", "--list"] {
-        cmd("bite attachments")
+        cmd("bite bugzilla attachments")
             .arg("123")
             .arg(opt)
             .assert()
@@ -84,7 +84,7 @@ async fn view_single_with_plain_text() {
         fs::read_to_string(TEST_PATH.join("attachments/single-plain-text.expected")).unwrap();
 
     for opt in ["-V", "--view"] {
-        cmd("bite attachments")
+        cmd("bite bugzilla attachments")
             .arg("123")
             .arg(opt)
             .assert()
@@ -108,7 +108,7 @@ async fn save_single_with_plain_text() {
     // save files to the current working directory
     env::set_current_dir(dir_path).unwrap();
 
-    cmd("bite attachments")
+    cmd("bite bugzilla attachments")
         .arg("123")
         .assert()
         .stdout(predicate::str::diff("Saving attachment: ./test.txt\n"))
@@ -131,7 +131,7 @@ async fn save_single_existing_error() {
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
 
-    cmd("bite attachments")
+    cmd("bite bugzilla attachments")
         .arg("123")
         .args(["-d", dir_path])
         .assert()
@@ -142,7 +142,7 @@ async fn save_single_existing_error() {
         .success();
 
     // re-running causes a file existence failure
-    cmd("bite attachments")
+    cmd("bite bugzilla attachments")
         .arg("123")
         .args(["-d", dir_path])
         .assert()
@@ -165,7 +165,7 @@ async fn single_bug_with_no_attachments() {
         .await;
 
     for opt in ["-i", "--item-id"] {
-        cmd("bite attachments")
+        cmd("bite bugzilla attachments")
             .arg("12345")
             .arg(opt)
             .assert()
@@ -187,7 +187,7 @@ async fn multiple_bugs_with_no_attachments() {
         .await;
 
     for opt in ["-i", "--item-id"] {
-        cmd("bite attachments")
+        cmd("bite bugzilla attachments")
             .args(["12345", "23456", "34567"])
             .arg(opt)
             .assert()
@@ -215,7 +215,7 @@ async fn save_multiple_with_plain_text() {
     env::set_current_dir(dir_path).unwrap();
 
     let ids = ["12345", "23456", "34567"];
-    cmd("bite attachments -i")
+    cmd("bite bugzilla attachments -i")
         .args(ids)
         .assert()
         .stdout(predicate::str::is_empty().not())

@@ -75,12 +75,9 @@ impl Request for AttachRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let response = service
-            .client()
-            .post(self.url)
-            .json(&self.attachment)
-            .send()
-            .await?;
+        let request = service.client().post(self.url).json(&self.attachment);
+        let request = service.inject_auth(request)?;
+        let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let data = data["ids"].take();
         Ok(serde_json::from_value(data)?)

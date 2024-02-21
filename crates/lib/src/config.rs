@@ -3,7 +3,7 @@ use std::fs;
 use camino::Utf8Path;
 use serde::Deserialize;
 
-use crate::service::{self, ServiceKind};
+use crate::service::ServiceKind;
 use crate::Error;
 
 /// Config support
@@ -56,10 +56,5 @@ impl Connection {
     /// Get the connection's service type.
     pub fn kind(&self) -> ServiceKind {
         self.service
-    }
-
-    /// Create a service config from the connection.
-    pub fn service(&self) -> crate::Result<service::Config> {
-        self.service.create(&self.base)
     }
 }

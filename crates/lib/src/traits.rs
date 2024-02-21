@@ -1,3 +1,4 @@
+use reqwest::RequestBuilder;
 use url::Url;
 
 use crate::service::ServiceKind;
@@ -54,6 +55,12 @@ pub(crate) trait WebService {
     fn kind(&self) -> ServiceKind;
     /// Return the service client.
     fn client(&self) -> &reqwest::Client;
+
+    /// Inject authentication into a request before it's sent.
+    fn inject_auth(&self, request: RequestBuilder) -> crate::Result<RequestBuilder> {
+        Ok(request)
+    }
+
     /// Parse a raw response into a service response.
     async fn parse_response(&self, _response: reqwest::Response) -> crate::Result<Self::Response> {
         Err(Error::Unsupported(format!(
