@@ -37,15 +37,17 @@ impl Config {
         }
     }
 
+    /// Return a pre-configured service by its connection name.
     pub(crate) fn get(&self, name: &str) -> anyhow::Result<(ServiceKind, String)> {
         match (self.connections.get(name), SERVICES.get(name)) {
             (Some(service), _) | (_, Some(service)) => {
                 Ok((service.kind(), service.base().to_string()))
             }
-            _ => Err(anyhow!("unknown service: {name}")),
+            _ => Err(anyhow!("unknown connection: {name}")),
         }
     }
 
+    /// Get the default connection if it exists.
     pub(crate) fn get_default(&self) -> anyhow::Result<(ServiceKind, String)> {
         let name = self
             .default

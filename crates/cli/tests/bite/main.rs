@@ -18,6 +18,7 @@ pub(crate) static TESTDATA_PATH: Lazy<Utf8PathBuf> =
 fn initialize() {
     // set fake base by default to avoid connection errors
     env::set_var("BUGBITE_BASE", "fake://bugbite");
+    env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
 }
 
 #[test]

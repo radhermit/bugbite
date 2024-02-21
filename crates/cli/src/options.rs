@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::env;
 use std::io::stderr;
 use std::process::ExitCode;
@@ -8,29 +8,52 @@ use bugbite::service::ServiceKind;
 use bugbite::services::SERVICES;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser};
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
 use itertools::Itertools;
 use strum::{IntoEnumIterator, VariantNames};
 use tracing_log::AsTrace;
 
 use crate::config::Config;
-use crate::subcmds;
+use crate::subcmds::Subcommand;
 use crate::utils::COLUMNS;
+
+fn enable_logging(verbosity: LevelFilter) {
+    // Simplify log output when using info level since bugbite uses it for information messages
+    // that shouldn't be prefixed. The downside is warning and error level messages will also
+    // be non-prefixed, but they shouldn't occur during info level runs in most situations.
+    let format = if verbosity == LevelFilter::Info {
+        tracing_subscriber::fmt::format()
+            .with_level(false)
+            .with_target(false)
+            .without_time()
+            .compact()
+    } else {
+        tracing_subscriber::fmt::format()
+            .with_level(true)
+            .with_target(true)
+            .without_time()
+            .compact()
+    };
+
+    tracing_subscriber::fmt()
+        .event_format(format)
+        .with_max_level(verbosity.as_trace())
+        .with_writer(stderr)
+        .init();
+}
 
 #[derive(Debug, Parser)]
 #[command(disable_help_flag = true)]
 pub(super) struct ServiceCommand {
     #[clap(flatten)]
     options: Options,
-    #[command(subcommand)]
-    subcmd: Remaining,
-}
-
-#[derive(Debug, Subcommand)]
-enum Remaining {
-    #[command(external_subcommand)]
-    Args(Vec<String>),
+    #[arg(
+        num_args = ..,
+        trailing_var_arg = true,
+        allow_hyphen_values = true,
+    )]
+    remaining: Vec<String>,
 }
 
 impl ServiceCommand {
@@ -41,58 +64,72 @@ impl ServiceCommand {
             panic!("command parsing should have exited");
         };
 
-        // create mapping for service kind to subcommand names
-        let subcmds: HashMap<ServiceKind, String> = ServiceKind::iter()
-            .map(|x| match x.as_ref().split_once('-') {
-                Some(vals) => (x, vals.0.into()),
-                None => (x, x.to_string()),
-            })
-            .collect();
+        // pull the first remaining, unparsed arg
+        let arg = cmd
+            .remaining
+            .first()
+            .map(|x| x.as_str())
+            .unwrap_or_default();
+
+        // handle invalid commands and exiting options such as -h/--help/-V/--version
+        if arg.starts_with('-') {
+            Command::parse();
+            panic!("command parsing should have exited");
+        }
+
+        if cmd.options.verbosity.is_present() {
+            enable_logging(cmd.options.verbosity.log_level_filter());
+        }
 
         let config = Config::load(cmd.options.bite.config.as_deref())?;
         let connection = &cmd.options.service.connection;
         let base = &cmd.options.service.base;
         let service = &cmd.options.service.service;
-        let Remaining::Args(remaining) = cmd.subcmd;
-        let subcmd = remaining.first().map(|s| s.as_str()).unwrap_or_default();
-        let subcmd_kind = subcmds
-            .iter()
-            .find(|(_, v)| v.as_str() == subcmd)
-            .map(|(k, _)| k);
+        let subcmds: HashSet<_> = Subcommand::VARIANTS.iter().copied().collect();
 
         // determine service type
         let (selected, base) = match (connection, base, service) {
             (Some(name), None, None) => config.get(name)?,
             (None, Some(base), Some(service)) => (*service, base.clone()),
-            (None, Some(base), None) => (ServiceKind::default(), base.clone()),
-            (None, None, None) => match subcmd_kind {
-                // use default service from config if it exists
-                None => config.get_default()?,
-                // TODO: use default service for type from config if it exists?
-                Some(_) => {
+            // use default service from config if it exists
+            (None, None, None) => {
+                let service_subcmds: HashSet<_> = ServiceKind::iter()
+                    .map(|x| match x.as_ref().split_once('-') {
+                        Some(vals) => vals.0.to_string(),
+                        None => x.to_string(),
+                    })
+                    .collect();
+                if !arg.starts_with('-') && !subcmds.contains(arg) {
+                    // use default service from config if it exists
+                    config.get_default()?
+                } else if service_subcmds.contains(arg) {
                     Command::parse();
-                    anyhow::bail!("no default connection configured for {subcmd}");
+                    anyhow::bail!("no {arg} connection specified");
+                } else if subcmds.contains(arg) {
+                    // fallback for non-service subcommands
+                    Default::default()
+                } else {
+                    panic!("command parsing should have previously exited");
                 }
-            },
+            }
             _ => panic!("misconfigured service option restrictions"),
         };
 
         // construct new args for the main command to parse
-        let mut args: Vec<_> = env::args().take_while(|x| x != subcmd).collect();
+        let mut args = vec![env::args().next().unwrap_or_default()];
 
-        if let Some(kind) = subcmd_kind {
-            if kind != &selected {
-                // output help in case `-h/--help` is specified
-                Command::parse();
-                anyhow::bail!("{subcmd} not compatible with service: {selected}");
-            }
-        } else if !subcmds::Subcommand::VARIANTS.iter().any(|s| *s == subcmd) {
-            // inject subcommand for requested service type if missing
-            let cmd = subcmds.get(&selected).unwrap();
-            args.push(cmd.clone());
+        // inject subcommand for requested service type if missing
+        if !subcmds.contains(arg) {
+            let subcmd = match &selected {
+                ServiceKind::BugzillaRestV1 => "bugzilla",
+                ServiceKind::Github => "github",
+            };
+            args.push(subcmd.to_string());
         }
 
-        args.extend(remaining);
+        // append the remaining unparsed args
+        args.extend(cmd.remaining);
+
         Ok((selected, base, args))
     }
 }
@@ -122,6 +159,7 @@ struct ServiceOpts {
         short,
         long,
         env = "BUGBITE_BASE",
+        requires = "service",
         long_help = indoc::indoc! {"
             Specify the service URL to connect to.
 
@@ -194,11 +232,11 @@ pub(crate) struct Options {
 
         {usage-heading} {usage}
 
-        Bite automatically injects service subcommands so they can be dropped for quicker
-        command-line access if desired. In addition, most common service action subcommands can be
-        run by their aliases consisting of their first letter. For example, the command `bite
-        bugzilla search test` is equivalent to `bite s test` when targeting the default bugzilla
-        connection.
+        Bite automatically injects service subcommands so they shouldn't be
+        specified for quicker command-line access if desired. In general they
+        aren't necessary except when trying to view the service specific help
+        options via -h/--help. In addition, common service action subcommands
+        are aliased to their first letter.
 
         {all-args}{after-help}
     "},
@@ -208,35 +246,14 @@ pub(crate) struct Command {
     options: Options,
 
     #[command(subcommand)]
-    subcmd: subcmds::Subcommand,
+    subcmd: Subcommand,
 }
 
 impl Command {
     pub(super) fn run(self, kind: ServiceKind, base: String) -> anyhow::Result<ExitCode> {
-        let verbosity = self.options.verbosity.log_level_filter();
-
-        // Simplify log output when using info level since bugbite uses it for information messages
-        // that shouldn't be prefixed. The downside is warning and error level messages will also
-        // be non-prefixed, but they shouldn't occur during info level runs in most situations.
-        let format = if verbosity == LevelFilter::Info {
-            tracing_subscriber::fmt::format()
-                .with_level(false)
-                .with_target(false)
-                .without_time()
-                .compact()
-        } else {
-            tracing_subscriber::fmt::format()
-                .with_level(true)
-                .with_target(true)
-                .without_time()
-                .compact()
-        };
-
-        tracing_subscriber::fmt()
-            .event_format(format)
-            .with_max_level(verbosity.as_trace())
-            .with_writer(stderr)
-            .init();
+        if self.options.verbosity.is_present() {
+            enable_logging(self.options.verbosity.log_level_filter());
+        }
 
         let client = Client::builder()
             .insecure(self.options.bite.insecure)
