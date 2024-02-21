@@ -21,25 +21,27 @@ fn initialize() {
     env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
 }
 
+// verify help support isn't mangled by service subcommand injection
 #[test]
 fn help() {
     for opt in ["-h", "--help"] {
         cmd("bite")
             .arg(opt)
             .assert()
-            .stdout(predicate::str::is_empty().not())
+            .stdout(predicate::str::starts_with("bite"))
             .stderr("")
             .success();
     }
 }
 
+// verify version support isn't mangled by service subcommand injection
 #[test]
 fn version() {
     for opt in ["-V", "--version"] {
         cmd("bite")
             .arg(opt)
             .assert()
-            .stdout(predicate::str::is_empty().not())
+            .stdout(predicate::str::starts_with("bite"))
             .stderr("")
             .success();
     }
