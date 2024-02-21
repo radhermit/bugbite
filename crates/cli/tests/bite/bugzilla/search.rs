@@ -24,12 +24,15 @@ fn aliases() {
 
 #[test]
 fn no_search_terms() {
-    cmd("bite search")
-        .assert()
-        .stdout("")
-        .stderr("bite: error: no search terms specified\n")
-        .failure()
-        .code(2);
+    for opts in [vec![], vec!["-f", "id"], vec!["-S", "id"]] {
+        cmd("bite search")
+            .args(opts)
+            .assert()
+            .stdout("")
+            .stderr("bite: error: no search terms specified\n")
+            .failure()
+            .code(2);
+    }
 }
 
 #[test]
