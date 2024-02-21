@@ -17,6 +17,7 @@ pub(crate) static TESTDATA_PATH: Lazy<Utf8PathBuf> =
 /// Initialization for all test executables.
 #[ctor::ctor]
 fn initialize() {
+    env::remove_var("BUGBITE_CONNECTION");
     // set fake base by default to avoid connection errors
     env::set_var("BUGBITE_BASE", "fake://bugbite");
     env::set_var("BUGBITE_SERVICE", "bugzilla-rest-v1");
