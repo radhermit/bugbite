@@ -7,6 +7,7 @@ use predicates::prelude::*;
 
 mod bugzilla;
 mod command;
+mod show;
 
 use command::cmd;
 
