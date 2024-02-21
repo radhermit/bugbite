@@ -31,14 +31,16 @@ impl CreateAttachment {
         let file_name = path
             .file_name()
             .ok_or_else(|| Error::InvalidValue(format!("attachment missing file name: {path}")))?;
-        let kind = infer::get(&data)
-            .ok_or_else(|| Error::InvalidValue(format!("unknown attachment format: {path}")))?;
+
+        // try to detect data content type falling back to text/plain on failure
+        let kind = infer::get(&data);
+        let mime_type = kind.map(|k| k.mime_type()).unwrap_or("text/plain");
 
         Ok(Self {
             ids,
             data: Base64(data),
             file_name: file_name.to_string(),
-            content_type: kind.mime_type().to_string(),
+            content_type: mime_type.to_string(),
             summary: file_name.to_string(),
             comment: Default::default(),
             is_patch: Default::default(),
