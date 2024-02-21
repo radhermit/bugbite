@@ -173,8 +173,7 @@ struct ServiceOpts {
             Specify the service URL to connect to.
 
             For example, a bugzilla service would use `https://bugzilla.kernel.org`
-            and a github service would use `https://github.com/radhermit/bugbite`.
-        "}
+            and a github service would use `https://github.com/radhermit/bugbite`."}
     )]
     base: Option<String>,
     /// service type
@@ -186,8 +185,8 @@ struct ServiceOpts {
         long_help = indoc::formatdoc! {"
             Specify the service type to use.
 
-            Possible values: {}
-        ", ServiceKind::VARIANTS.join(", ")},
+            Possible values: {}",
+            ServiceKind::VARIANTS.join(", ")},
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(ServiceKind::VARIANTS)
             .map(|s| s.parse::<ServiceKind>().unwrap()),
