@@ -11,6 +11,7 @@ use crate::utils::truncate;
 
 use super::{login_retry, Render};
 
+mod attach;
 mod attachments;
 mod comments;
 mod get;
@@ -59,6 +60,8 @@ impl Command {
 
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
+    /// Create attachments
+    Attach(attach::Command),
     /// Get attachments
     Attachments(attachments::Command),
     /// Get comments
@@ -74,6 +77,7 @@ enum Subcommand {
 impl Subcommand {
     fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         match self {
+            Self::Attach(cmd) => cmd.run(client),
             Self::Attachments(cmd) => cmd.run(client),
             Self::Comments(cmd) => cmd.run(client),
             Self::Get(cmd) => cmd.run(client),

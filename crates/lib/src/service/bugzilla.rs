@@ -13,6 +13,7 @@ use crate::time::TimeDelta;
 use crate::traits::{Api, Query, WebService};
 use crate::Error;
 
+pub mod attach;
 mod attachments;
 mod comments;
 mod get;
@@ -64,6 +65,13 @@ pub struct Service {
 }
 
 impl Service {
+    pub(crate) fn attach_request(
+        &self,
+        attachment: attach::CreateAttachment,
+    ) -> crate::Result<attach::AttachRequest> {
+        attach::AttachRequest::new(self, attachment)
+    }
+
     pub(crate) fn attachments_request<S>(
         &self,
         ids: &[S],

@@ -1,6 +1,7 @@
 use reqwest::ClientBuilder;
 
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
+use crate::service::bugzilla::attach::CreateAttachment;
 use crate::service::bugzilla::{Config, Service};
 use crate::time::TimeDelta;
 use crate::traits::{Query, Request, WebService};
@@ -20,6 +21,11 @@ impl Client {
 
     pub fn service(&self) -> &Service {
         &self.service
+    }
+
+    pub async fn attach(&self, attachment: CreateAttachment) -> crate::Result<Vec<u64>> {
+        let request = self.service.attach_request(attachment)?;
+        request.send(&self.service).await
     }
 
     pub async fn attachments<S>(&self, ids: &[S], data: bool) -> crate::Result<Vec<Vec<Attachment>>>
