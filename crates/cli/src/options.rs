@@ -65,11 +65,8 @@ impl ServiceCommand {
         };
 
         // pull the first remaining, unparsed arg
-        let arg = cmd
-            .remaining
-            .first()
-            .map(|x| x.as_str())
-            .unwrap_or_default();
+        let mut remaining = &cmd.remaining[..];
+        let arg = remaining.first().map(|x| x.as_str()).unwrap_or_default();
 
         // handle invalid commands and exiting options such as -h/--help/-V/--version
         if arg.starts_with('-') {
@@ -82,15 +79,21 @@ impl ServiceCommand {
         }
 
         let config = Config::load(cmd.options.bite.config.as_deref())?;
-        let connection = &cmd.options.service.connection;
-        let base = &cmd.options.service.base;
-        let service = &cmd.options.service.service;
+        let mut connection = cmd.options.service.connection.as_deref();
+        let base = cmd.options.service.base.as_deref();
+        let service = cmd.options.service.service;
         let subcmds: HashSet<_> = Subcommand::VARIANTS.iter().copied().collect();
+
+        // connection name used as subcommand overrides environment and option
+        if !subcmds.contains(arg) && config.get(arg).is_ok() {
+            connection = Some(arg);
+            remaining = &cmd.remaining[1..];
+        }
 
         // determine service type
         let (selected, base) = match (connection, base, service) {
             (Some(name), None, None) => config.get(name)?,
-            (None, Some(base), Some(service)) => (*service, base.clone()),
+            (None, Some(base), Some(service)) => (service, base.to_string()),
             // use default service from config if it exists
             (None, None, None) => {
                 let service_subcmds: HashSet<_> = ServiceKind::iter()
@@ -128,7 +131,7 @@ impl ServiceCommand {
         }
 
         // append the remaining unparsed args
-        args.extend(cmd.remaining);
+        args.extend(remaining.iter().map(|s| s.to_string()));
 
         Ok((selected, base, args))
     }
@@ -146,12 +149,18 @@ struct ServiceOpts {
         long_help = indoc::formatdoc! {"
             Use a pre-configured connection by its alias.
 
-            Connections can be defined in the user config and bugbite bundles
-            many for well known projects (and bugbite itself). Note that user
-            defined service aliases will take priority over bundled variants.
+            Connections can be defined in the user config. The precendence order
+            when overlapping connection names exist or when multiple locations
+            are defined is as follows from lowest to highest: internal, user
+            config, environment, command option, and subcommand.
 
-            Bundled services: {}
-        ", SERVICES.iter().map(|(name, _)| name).sorted().join(", ")}
+            The following connections are defined internally in bugbite
+            for ease of use: {}.
+
+            It's also possible to specify a target connection via subcommand,
+            e.g. `bite mozilla get 10` would try to get bug #10 from Mozilla's
+            bugtracker, as well as using the environment variable seen below.",
+            SERVICES.iter().map(|(name, _)| name).sorted().join(", ")}
     )]
     connection: Option<String>,
     /// base service URL
