@@ -34,7 +34,7 @@ struct Authentication {
 }
 
 #[derive(Debug, clap::Args)]
-#[clap(next_help_heading = "Bugzilla")]
+#[clap(infer_subcommands = true, next_help_heading = "Bugzilla")]
 pub(crate) struct Command {
     #[clap(flatten)]
     auth: Authentication,
@@ -60,17 +60,14 @@ impl Command {
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
     /// Get attachments
-    #[command(visible_alias = "a")]
     Attachments(attachments::Command),
     /// Get comments
     Comments(comments::Command),
     /// Get bugs
-    #[command(visible_alias = "g")]
     Get(get::Command),
     /// Get bug history
     History(history::Command),
     /// Search bugs
-    #[command(visible_alias = "s")]
     Search(search::Command),
 }
 

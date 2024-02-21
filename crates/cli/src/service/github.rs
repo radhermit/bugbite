@@ -16,7 +16,7 @@ struct Authentication {
 }
 
 #[derive(Debug, clap::Args)]
-#[clap(next_help_heading = "GitHub")]
+#[clap(infer_subcommands = true, next_help_heading = "GitHub")]
 pub(crate) struct Command {
     /// project to target
     #[arg(short, long)]
@@ -49,10 +49,8 @@ impl Command {
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
     /// Get issues
-    #[command(visible_alias = "g")]
     Get(get::Command),
     /// Search issues
-    #[command(visible_alias = "s")]
     Search(search::Command),
 }
 
