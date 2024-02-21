@@ -75,7 +75,7 @@ jobs:
 
         REPO=${{ github.repository }}
         BRANCH=${{ github.ref }}
-        KEY=${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-rust-
+        KEY=${{ github.workflow }}-${{ github.job }}-
 
         # find matching caches
         mapfile -t cache_keys < <( gh actions-cache list -R $REPO -B $BRANCH --key $KEY --sort created-at --order desc | cut -f 1 )
