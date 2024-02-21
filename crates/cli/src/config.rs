@@ -1,10 +1,10 @@
 use anyhow::anyhow;
 use bugbite::service::{self, ServiceKind};
-use bugbite::services::{DEFAULT, SERVICES};
+use bugbite::services::SERVICES;
 use camino::Utf8Path;
 use indexmap::IndexMap;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub(crate) struct Config {
     pub(crate) default: Option<String>,
     pub(crate) connections: IndexMap<String, service::Config>,
@@ -23,15 +23,6 @@ impl TryFrom<bugbite::config::Config> for Config {
             default: config.default().map(|s| s.to_string()),
             connections,
         })
-    }
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            default: Some(DEFAULT.to_string()),
-            connections: Default::default(),
-        }
     }
 }
 

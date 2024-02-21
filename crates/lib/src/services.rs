@@ -3,9 +3,6 @@ use once_cell::sync::Lazy;
 
 use crate::service::{Config, ServiceKind};
 
-/// The default connection to use.
-pub static DEFAULT: &str = "gentoo";
-
 /// Pre-defined services.
 #[rustfmt::skip]
 pub static SERVICES: Lazy<IndexMap<String, Config>> = Lazy::new(|| {
