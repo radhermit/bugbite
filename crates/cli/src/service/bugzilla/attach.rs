@@ -1,4 +1,3 @@
-use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -7,6 +6,7 @@ use bugbite::service::bugzilla::attach::CreateAttachment;
 use camino::Utf8PathBuf;
 use clap::Args;
 use itertools::Itertools;
+use tracing::info;
 
 use crate::macros::async_block;
 
@@ -52,8 +52,6 @@ pub(super) struct Command {
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         let ids: Vec<_> = self.ids.iter().flatten().copied().collect();
-        let mut stdout = stdout().lock();
-
         let mut attachment = CreateAttachment::new(&ids, &self.path)?;
         if let Some(value) = self.options.summary.as_ref() {
             attachment.summary = value.clone()
@@ -72,8 +70,11 @@ impl Command {
         }
 
         async_block!(client.attach(attachment))?;
-        let ids = ids.iter().map(|x| x.to_string()).join(", ");
-        writeln!(stdout, "Attached file: {}: {ids}", self.path)?;
+        info!(
+            "{}: attached to: {}",
+            self.path,
+            ids.iter().map(|x| x.to_string()).join(", ")
+        );
 
         Ok(ExitCode::SUCCESS)
     }
