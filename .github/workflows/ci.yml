@@ -94,7 +94,7 @@ jobs:
       uses: taiki-e/install-action@nextest
 
     - name: Build and run tests
-      run: cargo nextest run --all-features --workspace --tests
+      run: cargo nextest run --features test --workspace --tests
 
     - name: Save cache
       if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
