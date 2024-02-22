@@ -6,6 +6,7 @@ use url::Url;
 
 use crate::objects::Base64;
 use crate::traits::{Request, WebService};
+use crate::utils::get_mime_type;
 use crate::Error;
 
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
@@ -32,20 +33,23 @@ impl CreateAttachment {
             .file_name()
             .ok_or_else(|| Error::InvalidValue(format!("attachment missing file name: {path}")))?;
 
-        // try to detect data content type falling back to generic text-based vs binary data
-        let mime_type = if let Some(kind) = infer::get(&data) {
-            kind.mime_type()
+        // Try to detect data content type use `file` then via `infer, and finally falling back to
+        // generic text-based vs binary data.
+        let mime_type = if let Ok(value) = get_mime_type(path) {
+            value
+        } else if let Some(kind) = infer::get(&data) {
+            kind.mime_type().to_string()
         } else if str::from_utf8(&data).is_ok() {
-            "text/plain"
+            "text/plain".to_string()
         } else {
-            "application/octet-stream"
+            "application/octet-stream".to_string()
         };
 
         Ok(Self {
             ids: ids.to_vec(),
             data: Base64(data),
             file_name: file_name.to_string(),
-            content_type: mime_type.to_string(),
+            content_type: mime_type,
             summary: file_name.to_string(),
             comment: Default::default(),
             is_patch: Default::default(),
