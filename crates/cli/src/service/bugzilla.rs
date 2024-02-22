@@ -57,7 +57,7 @@ impl Command {
 
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
-    /// Create attachments
+    /// Attach files to bugs
     #[command(alias = "at")]
     Attach(attach::Command),
     /// Get attachments
