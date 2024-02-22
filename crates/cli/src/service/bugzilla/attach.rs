@@ -4,7 +4,7 @@ use bugbite::args::Csv;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::attach::CreateAttachment;
 use camino::Utf8PathBuf;
-use clap::Args;
+use clap::{Args, ValueHint};
 use itertools::Itertools;
 use tracing::info;
 
@@ -40,10 +40,19 @@ pub(super) struct Command {
     options: Options,
 
     /// bug IDs
-    #[clap(required = true, help_heading = "Arguments")]
+    #[clap(
+        required = true,
+        value_name = "ID[,ID,...]",
+        help_heading = "Arguments"
+    )]
     ids: Csv<u64>,
 
-    #[clap(required = true, help_heading = "Arguments")]
+    /// attachment paths
+    #[clap(
+        required = true,
+        value_hint = ValueHint::FilePath,
+        help_heading = "Arguments"
+    )]
     files: Vec<Utf8PathBuf>,
 }
 
