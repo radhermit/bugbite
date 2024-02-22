@@ -72,11 +72,18 @@ impl ServiceCommand {
             enable_logging(cmd.options.verbosity.log_level_filter());
         }
 
+        let subcmds: HashSet<_> = Subcommand::VARIANTS.iter().copied().collect();
+        let services: HashSet<_> = ServiceKind::VARIANTS.iter().copied().collect();
+
+        // early return for non-service subcommands
+        if subcmds.contains(arg) && !services.contains(arg) {
+            return Ok((Default::default(), env::args().collect()));
+        }
+
         let config = Config::load(cmd.options.bite.config.as_deref())?;
         let mut connection = cmd.options.service.connection.as_deref();
         let base = cmd.options.service.base.as_deref();
         let service = cmd.options.service.service;
-        let subcmds: HashSet<_> = Subcommand::VARIANTS.iter().copied().collect();
 
         // connection name used as subcommand overrides environment and option
         if !subcmds.contains(arg) && config.get(arg).is_ok() {
@@ -86,7 +93,13 @@ impl ServiceCommand {
 
         // determine service type
         let (selected, base) = match (connection, base, service) {
-            (Some(name), _, _) => config.get(name)?,
+            (Some(name), _, _) => {
+                let (kind, base) = config.get(name)?;
+                if services.contains(arg) && kind.as_ref() != arg {
+                    anyhow::bail!("{arg} not compatible with connection: {name}");
+                }
+                (kind, base)
+            }
             (None, Some(base), Some(service)) => (service, base.to_string()),
             // use default service from config if it exists
             (None, None, None) => {
