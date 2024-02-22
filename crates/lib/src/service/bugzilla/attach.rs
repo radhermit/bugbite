@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, str};
 
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
@@ -32,9 +32,14 @@ impl CreateAttachment {
             .file_name()
             .ok_or_else(|| Error::InvalidValue(format!("attachment missing file name: {path}")))?;
 
-        // try to detect data content type falling back to text/plain on failure
-        let kind = infer::get(&data);
-        let mime_type = kind.map(|k| k.mime_type()).unwrap_or("text/plain");
+        // try to detect data content type falling back to generic text-based vs binary data
+        let mime_type = if let Some(kind) = infer::get(&data) {
+            kind.mime_type()
+        } else if str::from_utf8(&data).is_ok() {
+            "text/plain"
+        } else {
+            "application/octet-stream"
+        };
 
         Ok(Self {
             ids: ids.to_vec(),
