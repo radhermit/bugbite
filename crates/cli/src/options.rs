@@ -11,7 +11,7 @@ use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, Parser, ValueHint};
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
 use itertools::Itertools;
-use strum::{IntoEnumIterator, VariantNames};
+use strum::VariantNames;
 use tracing_log::AsTrace;
 
 use crate::config::Config;
@@ -101,23 +101,13 @@ impl ServiceCommand {
                 (kind, base)
             }
             (None, Some(base), Some(service)) => (service, base.to_string()),
-            // use default service from config if it exists
             (None, None, None) => {
-                let service_subcmds: HashSet<_> = ServiceKind::iter()
-                    .map(|x| match x.as_ref().split_once('-') {
-                        Some(vals) => vals.0.to_string(),
-                        None => x.to_string(),
-                    })
-                    .collect();
                 if !arg.starts_with('-') && !subcmds.contains(arg) {
                     // use default service from config if it exists
                     config.get_default()?
-                } else if service_subcmds.contains(arg) {
+                } else if services.contains(arg) {
                     Command::parse();
                     anyhow::bail!("no {arg} connection specified");
-                } else if subcmds.contains(arg) {
-                    // fallback for non-service subcommands
-                    Default::default()
                 } else {
                     Command::parse();
                     panic!("command parsing should have previously exited");
