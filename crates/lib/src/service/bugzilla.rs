@@ -75,9 +75,9 @@ impl Service {
 
     pub(crate) fn attach_request(
         &self,
-        attachment: attach::CreateAttachment,
+        attachments: Vec<attach::CreateAttachment>,
     ) -> crate::Result<attach::AttachRequest> {
-        attach::AttachRequest::new(self, attachment)
+        attach::AttachRequest::new(self, attachments)
     }
 
     pub(crate) fn attachments_request<S>(
@@ -144,14 +144,14 @@ impl WebService for Service {
         &self.client
     }
 
-    fn inject_auth(&self, request: RequestBuilder) -> crate::Result<RequestBuilder> {
+    fn inject_auth(&self, request: RequestBuilder) -> RequestBuilder {
         let config = &self.config;
         if let Some(key) = config.api_key.as_ref() {
-            Ok(request.query(&[("Bugzilla_api_key", key)]))
+            request.query(&[("Bugzilla_api_key", key)])
         } else if let (Some(user), Some(pass)) = (&config.user, &config.password) {
-            Ok(request.query(&[("Bugzilla_login", user), ("Bugzilla_password", pass)]))
+            request.query(&[("Bugzilla_login", user), ("Bugzilla_password", pass)])
         } else {
-            Err(Error::Auth)
+            request
         }
     }
 

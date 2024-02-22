@@ -24,8 +24,8 @@ impl Client {
         &self.service
     }
 
-    pub async fn attach(&self, attachment: CreateAttachment) -> crate::Result<Vec<u64>> {
-        let request = self.service.attach_request(attachment)?;
+    pub async fn attach(&self, attachments: Vec<CreateAttachment>) -> crate::Result<Vec<Vec<u64>>> {
+        let request = self.service.attach_request(attachments)?;
         request.send(&self.service).await
     }
 

@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::args::MaybeStdinVec;
+use bugbite::args::Csv;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::attach::CreateAttachment;
 use camino::Utf8PathBuf;
@@ -39,42 +39,45 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
-    #[clap(required = true, help_heading = "Arguments")]
-    path: Utf8PathBuf,
-
-    // TODO: rework stdin support once clap supports custom containers
-    // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs
     #[clap(required = true, help_heading = "Arguments")]
-    ids: Vec<MaybeStdinVec<u64>>,
+    ids: Csv<u64>,
+
+    #[clap(required = true, help_heading = "Arguments")]
+    files: Vec<Utf8PathBuf>,
 }
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
-        let ids: Vec<_> = self.ids.iter().flatten().copied().collect();
-        let mut attachment = CreateAttachment::new(&ids, &self.path)?;
-        if let Some(value) = self.options.summary.as_ref() {
-            attachment.summary = value.clone()
-        }
-        if let Some(value) = self.options.comment.as_ref() {
-            attachment.comment = value.clone()
-        }
-        if let Some(value) = self.options.mime.as_ref() {
-            attachment.content_type = value.clone()
-        }
-        if let Some(value) = self.options.patch {
-            attachment.is_patch = value;
-        }
-        if let Some(value) = self.options.private {
-            attachment.is_private = value;
+        let ids: Vec<_> = self.ids.iter().copied().collect();
+        let mut attachments = vec![];
+        for file in &self.files {
+            let mut attachment = CreateAttachment::new(&ids, file)?;
+            if let Some(value) = self.options.summary.as_ref() {
+                attachment.summary = value.clone()
+            }
+            if let Some(value) = self.options.comment.as_ref() {
+                attachment.comment = value.clone()
+            }
+            if let Some(value) = self.options.mime.as_ref() {
+                attachment.content_type = value.clone()
+            }
+            if let Some(value) = self.options.patch {
+                attachment.is_patch = value;
+            }
+            if let Some(value) = self.options.private {
+                attachment.is_private = value;
+            }
+            attachments.push(attachment);
         }
 
-        async_block!(client.attach(attachment))?;
-        info!(
-            "{}: attached to: {}",
-            self.path,
-            ids.iter().map(|x| x.to_string()).join(", ")
-        );
+        let attachment_ids = async_block!(client.attach(attachments))?;
+
+        let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
+        for (file, ids) in self.files.iter().zip(attachment_ids.iter()) {
+            let ids = ids.iter().map(|x| x.to_string()).join(", ");
+            info!("{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})");
+        }
 
         Ok(ExitCode::SUCCESS)
     }

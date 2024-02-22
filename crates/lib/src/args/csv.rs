@@ -37,6 +37,12 @@ where
     }
 }
 
+impl<T: fmt::Display + FromStr> Csv<T> {
+    pub fn iter(&self) -> std::slice::Iter<T> {
+        self.into_iter()
+    }
+}
+
 impl<T: fmt::Display + FromStr> fmt::Display for Csv<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.values.iter().join(","))

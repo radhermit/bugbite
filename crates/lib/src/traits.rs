@@ -57,8 +57,8 @@ pub(crate) trait WebService {
     fn client(&self) -> &reqwest::Client;
 
     /// Inject authentication into a request before it's sent.
-    fn inject_auth(&self, request: RequestBuilder) -> crate::Result<RequestBuilder> {
-        Ok(request)
+    fn inject_auth(&self, request: RequestBuilder) -> RequestBuilder {
+        request
     }
 
     /// Parse a raw response into a service response.

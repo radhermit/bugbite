@@ -52,34 +52,53 @@ impl CreateAttachment {
 #[derive(Debug)]
 pub(crate) struct AttachRequest {
     url: Url,
-    attachment: CreateAttachment,
+    attachments: Vec<CreateAttachment>,
 }
 
 impl AttachRequest {
     pub(crate) fn new(
         service: &super::Service,
-        attachment: CreateAttachment,
+        attachments: Vec<CreateAttachment>,
     ) -> crate::Result<Self> {
-        let [id, _remaining_ids @ ..] = &attachment.ids[..] else {
+        let [attachment, ..] = &attachments[..] else {
+            return Err(Error::InvalidRequest(
+                "no attachments specified".to_string(),
+            ));
+        };
+
+        let [id, ..] = &attachment.ids[..] else {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
         let url = service.base().join(&format!("/rest/bug/{id}/attachment"))?;
 
-        Ok(Self { url, attachment })
+        Ok(Self { url, attachments })
     }
 }
 
 impl Request for AttachRequest {
-    type Output = Vec<u64>;
+    type Output = Vec<Vec<u64>>;
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().post(self.url).json(&self.attachment);
-        let request = service.inject_auth(request)?;
-        let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
-        let data = data["ids"].take();
-        Ok(serde_json::from_value(data)?)
+        let futures: Vec<_> = self
+            .attachments
+            .into_iter()
+            .map(|x| {
+                let request = service.client().post(self.url.as_str()).json(&x);
+                let request = service.inject_auth(request);
+                request.send()
+            })
+            .collect();
+
+        let mut attachment_ids = vec![];
+        for future in futures {
+            let response = future.await?;
+            let mut data = service.parse_response(response).await?;
+            let data = data["ids"].take();
+            attachment_ids.push(serde_json::from_value(data)?);
+        }
+
+        Ok(attachment_ids)
     }
 }
