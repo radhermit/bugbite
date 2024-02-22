@@ -68,12 +68,6 @@ impl ServiceCommand {
         let mut remaining = &cmd.remaining[..];
         let arg = remaining.first().map(|x| x.as_str()).unwrap_or_default();
 
-        // handle invalid commands and exiting options such as -h/--help/-V/--version
-        if arg.starts_with('-') {
-            Command::parse();
-            panic!("command parsing should have exited");
-        }
-
         if cmd.options.verbosity.is_present() {
             enable_logging(cmd.options.verbosity.log_level_filter());
         }
@@ -112,6 +106,7 @@ impl ServiceCommand {
                     // fallback for non-service subcommands
                     Default::default()
                 } else {
+                    Command::parse();
                     panic!("command parsing should have previously exited");
                 }
             }
