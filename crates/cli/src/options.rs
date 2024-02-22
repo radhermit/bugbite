@@ -92,7 +92,7 @@ impl ServiceCommand {
 
         // determine service type
         let (selected, base) = match (connection, base, service) {
-            (Some(name), None, None) => config.get(name)?,
+            (Some(name), _, _) => config.get(name)?,
             (None, Some(base), Some(service)) => (service, base.to_string()),
             // use default service from config if it exists
             (None, None, None) => {
