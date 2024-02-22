@@ -27,11 +27,11 @@ struct Options {
 
     /// attachment is a patch
     #[arg(short, long, conflicts_with = "mime")]
-    patch: Option<bool>,
+    patch: bool,
 
     /// attachment is private
     #[arg(short = 'P', long)]
-    private: Option<bool>,
+    private: bool,
 }
 
 #[derive(Debug, Args)]
@@ -62,12 +62,8 @@ impl Command {
             if let Some(value) = self.options.mime.as_ref() {
                 attachment.content_type = value.clone()
             }
-            if let Some(value) = self.options.patch {
-                attachment.is_patch = value;
-            }
-            if let Some(value) = self.options.private {
-                attachment.is_private = value;
-            }
+            attachment.is_patch = self.options.patch;
+            attachment.is_private = self.options.private;
             attachments.push(attachment);
         }
 
