@@ -57,7 +57,7 @@ pub(super) struct ServiceCommand {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service() -> anyhow::Result<(String, Vec<String>)> {
+    pub(crate) fn service() -> anyhow::Result<(String, Vec<String>, LevelFilter)> {
         // parse pre-subcommand options with main command parsing failure fallback
         let Ok(cmd) = Self::try_parse() else {
             Command::parse();
@@ -67,17 +67,13 @@ impl ServiceCommand {
         // pull the first remaining, unparsed arg
         let mut remaining = &cmd.remaining[..];
         let arg = remaining.first().map(|x| x.as_str()).unwrap_or_default();
-
-        if cmd.options.verbosity.is_present() {
-            enable_logging(cmd.options.verbosity.log_level_filter());
-        }
-
+        let log_level = cmd.options.verbosity.log_level_filter();
         let subcmds: HashSet<_> = Subcommand::VARIANTS.iter().copied().collect();
         let services: HashSet<_> = ServiceKind::VARIANTS.iter().copied().collect();
 
         // early return for non-service subcommands
         if subcmds.contains(arg) && !services.contains(arg) {
-            return Ok((Default::default(), env::args().collect()));
+            return Ok((Default::default(), env::args().collect(), log_level));
         }
 
         let config = Config::load(cmd.options.bite.config.as_deref())?;
@@ -127,7 +123,7 @@ impl ServiceCommand {
         // append the remaining unparsed args
         args.extend(remaining.iter().map(|s| s.to_string()));
 
-        Ok((base, args))
+        Ok((base, args, log_level))
     }
 }
 
@@ -252,10 +248,17 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, base: String) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(
+        self,
+        default_log_level: LevelFilter,
+        base: String,
+    ) -> anyhow::Result<ExitCode> {
+        // enable logging
         if self.options.verbosity.is_present() {
             enable_logging(self.options.verbosity.log_level_filter());
-        }
+        } else {
+            enable_logging(default_log_level);
+        };
 
         let client = Client::builder()
             .insecure(self.options.bite.insecure)

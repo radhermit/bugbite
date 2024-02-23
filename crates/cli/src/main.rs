@@ -18,12 +18,12 @@ fn err_exit(err: anyhow::Error) -> anyhow::Result<ExitCode> {
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
     // parse service options to determine the service type
-    let (base, args) = match options::ServiceCommand::service() {
+    let (base, args, default_log_level) = match options::ServiceCommand::service() {
         Ok(value) => value,
         Err(e) => return err_exit(e),
     };
 
     // parse remaining args and run command
     let cmd = options::Command::parse_from(args);
-    cmd.run(base).or_else(err_exit)
+    cmd.run(default_log_level, base).or_else(err_exit)
 }
