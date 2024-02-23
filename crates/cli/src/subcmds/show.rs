@@ -2,6 +2,7 @@ use std::process::ExitCode;
 
 use clap::Args;
 
+mod connections;
 mod services;
 
 #[derive(Debug, Args)]
@@ -18,6 +19,8 @@ impl Command {
 
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
+    /// Show available connections
+    Connections(connections::Subcommand),
     /// Show available services
     Services(services::Subcommand),
 }
@@ -25,6 +28,7 @@ enum Subcommand {
 impl Subcommand {
     fn run(self) -> anyhow::Result<ExitCode> {
         match self {
+            Self::Connections(cmd) => cmd.run(),
             Self::Services(cmd) => cmd.run(),
         }
     }
