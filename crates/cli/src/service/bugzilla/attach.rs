@@ -1,6 +1,5 @@
 use std::process::ExitCode;
 
-use bugbite::args::Csv;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::attach::CreateAttachment;
 use camino::Utf8PathBuf;
@@ -42,10 +41,11 @@ pub(super) struct Command {
     /// bug IDs
     #[clap(
         required = true,
+        value_delimiter = ',',
         value_name = "ID[,ID,...]",
         help_heading = "Arguments"
     )]
-    ids: Csv<u64>,
+    ids: Vec<u64>,
 
     /// attachment paths
     #[clap(
