@@ -1,4 +1,5 @@
 use std::fmt;
+use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 use itertools::Itertools;
@@ -37,32 +38,22 @@ where
     }
 }
 
-impl<T: fmt::Display + FromStr> Csv<T> {
-    pub fn iter(&self) -> std::slice::Iter<T> {
-        self.into_iter()
-    }
-}
-
 impl<T: fmt::Display + FromStr> fmt::Display for Csv<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.values.iter().join(","))
     }
 }
 
-impl<T: fmt::Display + FromStr> IntoIterator for Csv<T> {
-    type Item = T;
-    type IntoIter = std::vec::IntoIter<T>;
+impl<T: fmt::Display + FromStr> Deref for Csv<T> {
+    type Target = [T];
 
-    fn into_iter(self) -> Self::IntoIter {
-        self.values.into_iter()
+    fn deref(&self) -> &[T] {
+        self.values.deref()
     }
 }
 
-impl<'a, T: fmt::Display + FromStr> IntoIterator for &'a Csv<T> {
-    type Item = &'a T;
-    type IntoIter = std::slice::Iter<'a, T>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.values.iter()
+impl<T: fmt::Display + FromStr> DerefMut for Csv<T> {
+    fn deref_mut(&mut self) -> &mut [T] {
+        self.values.deref_mut()
     }
 }
