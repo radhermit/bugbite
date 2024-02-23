@@ -41,6 +41,15 @@ struct Params {
     )]
     fields: Vec<IssueField>,
 
+    /// restrict by status
+    #[arg(
+        short,
+        long,
+        help_heading = "Attribute related",
+        value_parser = ["open", "closed", "all"],
+    )]
+    status: Option<String>,
+
     /// created at this time or later
     #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
     created: Option<TimeDelta>,
@@ -64,6 +73,9 @@ impl Command {
     pub(super) fn run(&self, client: Client) -> anyhow::Result<ExitCode> {
         let mut query = QueryBuilder::new();
         let params = &self.params;
+        if let Some(value) = params.status.as_ref() {
+            query.status(value)?;
+        }
         if let Some(value) = params.created.as_ref() {
             query.created_after(value);
         }

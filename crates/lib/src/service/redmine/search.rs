@@ -4,6 +4,7 @@ use ordered_multimap::ListOrderedMultimap;
 use crate::objects::redmine::Issue;
 use crate::time::TimeDelta;
 use crate::traits::{Query, Request, WebService};
+use crate::Error;
 
 /// Construct a search query.
 #[derive(Debug, Default)]
@@ -14,6 +15,16 @@ pub struct QueryBuilder {
 impl QueryBuilder {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn status(&mut self, value: &str) -> crate::Result<()> {
+        match value {
+            "open" => self.append("status_id", "open"),
+            "closed" => self.append("status_id", "closed"),
+            "all" => self.append("status_id", "*"),
+            _ => return Err(Error::InvalidValue(format!("invalid status: {value}"))),
+        }
+        Ok(())
     }
 
     pub fn created_after(&mut self, interval: &TimeDelta) {
