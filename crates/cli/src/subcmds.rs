@@ -15,6 +15,8 @@ pub(crate) enum Subcommand {
     Bugzilla(bugzilla::Command),
     /// github service support
     Github(github::Command),
+    /// redmine service support
+    Redmine(redmine::Command),
 
     // regular subcommands
     /// show various bite-related information
@@ -26,6 +28,7 @@ impl Subcommand {
         match self {
             Self::Bugzilla(cmd) => cmd.run(base, client),
             Self::Github(cmd) => cmd.run(base, client),
+            Self::Redmine(cmd) => cmd.run(base, client),
             Self::Show(cmd) => cmd.run(),
         }
     }

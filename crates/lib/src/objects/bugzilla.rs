@@ -9,7 +9,7 @@ use crate::serde::{non_empty_str, null_empty_vec};
 use crate::service::bugzilla::BugField;
 use crate::traits::RenderSearch;
 
-use super::{Base64, Item};
+use super::{stringify, Base64, Item};
 
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Attachment {
@@ -157,16 +157,6 @@ impl Bug {
         events.sort();
         events.into_iter()
     }
-}
-
-macro_rules! stringify {
-    ($field:expr) => {
-        if let Some(value) = $field.as_ref() {
-            value.to_string()
-        } else {
-            "None".to_string()
-        }
-    };
 }
 
 impl RenderSearch<BugField> for Bug {

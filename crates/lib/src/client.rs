@@ -6,6 +6,7 @@ use crate::service::ServiceKind;
 
 pub mod bugzilla;
 pub mod github;
+pub mod redmine;
 
 static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"));
 
@@ -41,6 +42,7 @@ impl ClientBuilder {
 pub enum Client {
     Bugzilla(bugzilla::Client),
     Github(github::Client),
+    Redmine(redmine::Client),
 }
 
 impl Client {
@@ -52,6 +54,10 @@ impl Client {
                 Ok(Self::Bugzilla(bugzilla::Client::new(config, builder)?))
             }
             ServiceKind::Github => {
+                let config = crate::service::github::Config::new(base)?;
+                Ok(Self::Github(github::Client::new(config, builder)?))
+            }
+            ServiceKind::Redmine => {
                 let config = crate::service::github::Config::new(base)?;
                 Ok(Self::Github(github::Client::new(config, builder)?))
             }

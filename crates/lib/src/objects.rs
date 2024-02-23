@@ -8,6 +8,7 @@ use crate::Error;
 
 pub mod bugzilla;
 pub mod github;
+pub mod redmine;
 
 /// ID type used in requests.
 ///
@@ -62,6 +63,7 @@ pub(crate) enum IdsSlice<'a> {
 pub enum Item {
     Bugzilla(Box<bugzilla::Bug>),
     Github(Box<github::Issue>),
+    Redmine(Box<redmine::Issue>),
 }
 
 /// Raw binary data encoded as Base64.
@@ -84,3 +86,14 @@ impl fmt::Display for Base64 {
         write!(f, "{}", BASE64_STANDARD.encode(&self.0))
     }
 }
+
+macro_rules! stringify {
+    ($field:expr) => {
+        if let Some(value) = $field.as_ref() {
+            value.to_string()
+        } else {
+            "None".to_string()
+        }
+    };
+}
+use stringify;

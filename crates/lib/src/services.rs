@@ -17,6 +17,9 @@ pub static SERVICES: Lazy<IndexMap<String, Config>> = Lazy::new(|| {
         (Bugzilla, "mozilla", "https://bugzilla.mozilla.org/"),
         (Bugzilla, "redhat", "https://bugzilla.redhat.com/"),
         (Github, "bugbite", "https://github.com/radhermit/bugbite/"),
+        (Redmine, "ceph", "https://tracker.ceph.com/projects/ceph/"),
+        (Redmine, "pfsense", "https://redmine.pfsense.org/projects/pfsense/"),
+        (Redmine, "ruby", "https://bugs.ruby-lang.org/projects/ruby-master/"),
     ]
     .into_iter()
     .map(|(kind, name, base)| {

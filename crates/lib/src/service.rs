@@ -8,6 +8,7 @@ use url::Url;
 
 pub mod bugzilla;
 pub mod github;
+pub mod redmine;
 
 use crate::traits::WebService;
 
@@ -40,12 +41,17 @@ pub enum ServiceKind {
     /// Targets the GitHub REST API version 2022-11-28.
     /// API docs: https://docs.github.com/en/rest/about-the-rest-api
     Github,
+
+    /// Targets the REST API using the JSON format.
+    /// API docs: https://www.redmine.org/projects/redmine/wiki/rest_api
+    Redmine,
 }
 
 #[derive(EnumAsInner, Deserialize, Serialize, Debug, Clone)]
 pub enum Config {
     Bugzilla(bugzilla::Config),
     Github(github::Config),
+    Redmine(redmine::Config),
 }
 
 impl Config {
@@ -53,6 +59,7 @@ impl Config {
         match kind {
             ServiceKind::Bugzilla => Ok(Config::Bugzilla(bugzilla::Config::new(base)?)),
             ServiceKind::Github => Ok(Config::Github(github::Config::new(base)?)),
+            ServiceKind::Redmine => Ok(Config::Redmine(redmine::Config::new(base)?)),
         }
     }
 
@@ -60,6 +67,7 @@ impl Config {
         match self {
             Self::Bugzilla(config) => config.base(),
             Self::Github(config) => config.base(),
+            Self::Redmine(config) => config.base(),
         }
     }
 
@@ -67,6 +75,7 @@ impl Config {
         match self {
             Self::Bugzilla(config) => config.kind(),
             Self::Github(config) => config.kind(),
+            Self::Redmine(config) => config.kind(),
         }
     }
 }
@@ -81,6 +90,7 @@ impl fmt::Display for Config {
 pub enum Service {
     Bugzilla(bugzilla::Service),
     Github(github::Service),
+    Redmine(redmine::Service),
 }
 
 impl Service {
@@ -88,6 +98,7 @@ impl Service {
         match self {
             Self::Bugzilla(service) => service.base(),
             Self::Github(service) => service.base(),
+            Self::Redmine(service) => service.base(),
         }
     }
 
@@ -95,6 +106,7 @@ impl Service {
         match self {
             Self::Bugzilla(service) => service.kind(),
             Self::Github(service) => service.kind(),
+            Self::Redmine(service) => service.kind(),
         }
     }
 }
