@@ -74,7 +74,10 @@ impl QueryBuilder {
 impl Query for QueryBuilder {
     fn params(&mut self) -> crate::Result<String> {
         let mut params = url::form_urlencoded::Serializer::new(String::new());
-        // TODO: limit to open issues by default?
+        // limit to open issues by default
+        if !self.query.contains_key("status_id") {
+            self.append("status_id", "open");
+        }
 
         // most instances restrict queries to 100 results
         self.append("limit", 100);
