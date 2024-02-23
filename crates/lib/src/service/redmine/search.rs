@@ -18,6 +18,7 @@ impl QueryBuilder {
     }
 
     pub fn status(&mut self, value: &str) -> crate::Result<()> {
+        // TODO: move valid status search values to an enum
         match value {
             "open" => self.append("status_id", "open"),
             "closed" => self.append("status_id", "closed"),
