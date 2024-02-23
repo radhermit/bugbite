@@ -58,10 +58,9 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
-        let ids: Vec<_> = self.ids.iter().copied().collect();
         let mut attachments = vec![];
         for file in &self.files {
-            let mut attachment = CreateAttachment::new(&ids, file)?;
+            let mut attachment = CreateAttachment::new(file)?;
             if let Some(value) = self.options.summary.as_ref() {
                 attachment.summary = value.clone()
             }
@@ -76,9 +75,9 @@ impl Command {
             attachments.push(attachment);
         }
 
-        let attachment_ids = async_block!(client.attach(attachments))?;
+        let attachment_ids = async_block!(client.attach(&self.ids, attachments))?;
 
-        let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
+        let item_ids = self.ids.iter().map(|x| x.to_string()).join(", ");
         for (file, ids) in self.files.iter().zip(attachment_ids.iter()) {
             let ids = ids.iter().map(|x| x.to_string()).join(", ");
             info!("{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})");

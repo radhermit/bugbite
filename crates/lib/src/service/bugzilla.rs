@@ -75,9 +75,10 @@ impl Service {
 
     pub(crate) fn attach_request(
         &self,
+        ids: &[u64],
         attachments: Vec<attach::CreateAttachment>,
     ) -> crate::Result<attach::AttachRequest> {
-        attach::AttachRequest::new(self, attachments)
+        attach::AttachRequest::new(self, ids, attachments)
     }
 
     pub(crate) fn attachments_request<S>(

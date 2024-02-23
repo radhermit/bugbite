@@ -22,7 +22,7 @@ pub struct CreateAttachment {
 }
 
 impl CreateAttachment {
-    pub fn new<P>(ids: &[u64], path: P) -> crate::Result<Self>
+    pub fn new<P>(path: P) -> crate::Result<Self>
     where
         P: AsRef<Utf8Path>,
     {
@@ -46,7 +46,7 @@ impl CreateAttachment {
         };
 
         Ok(Self {
-            ids: ids.to_vec(),
+            ids: Default::default(),
             data: Base64(data),
             file_name: file_name.to_string(),
             content_type: mime_type,
@@ -67,19 +67,24 @@ pub(crate) struct AttachRequest {
 impl AttachRequest {
     pub(crate) fn new(
         service: &super::Service,
-        attachments: Vec<CreateAttachment>,
+        ids: &[u64],
+        mut attachments: Vec<CreateAttachment>,
     ) -> crate::Result<Self> {
-        let [attachment, ..] = &attachments[..] else {
+        if attachments.is_empty() {
             return Err(Error::InvalidRequest(
                 "no attachments specified".to_string(),
             ));
         };
 
-        let [id, ..] = &attachment.ids[..] else {
+        let [id, ..] = &ids else {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
         let url = service.base().join(&format!("/rest/bug/{id}/attachment"))?;
+
+        for attachment in &mut attachments {
+            attachment.ids = ids.to_vec();
+        }
 
         Ok(Self { url, attachments })
     }
