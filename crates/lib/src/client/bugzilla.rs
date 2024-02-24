@@ -24,6 +24,15 @@ impl Client {
         &self.service
     }
 
+    /// Return the website URL for a bug ID.
+    pub fn item_url<S>(&self, id: S) -> String
+    where
+        S: std::fmt::Display,
+    {
+        let base = self.service.base().as_str().trim_end_matches('/');
+        format!("{base}/show_bug.cgi?id={id}")
+    }
+
     pub async fn attach(
         &self,
         ids: &[u64],
