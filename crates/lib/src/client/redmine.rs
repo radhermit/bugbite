@@ -27,7 +27,7 @@ impl Client {
     where
         S: std::fmt::Display,
     {
-        let base = &self.service.config.web_base;
+        let base = self.service.config.web_base.trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
 
