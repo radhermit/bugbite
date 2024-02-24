@@ -31,7 +31,7 @@ impl GetRequest {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
-        let mut url = service.base().join(&format!("/rest/bug/{id}"))?;
+        let mut url = service.base().join(&format!("rest/bug/{id}"))?;
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.

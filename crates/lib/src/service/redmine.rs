@@ -28,7 +28,8 @@ impl Config {
             return Err(Error::InvalidValue(format!("invalid project base: {base}")));
         };
 
-        let base = Url::parse(base)
+        let base = base.trim_end_matches('/');
+        let base = Url::parse(&format!("{base}/"))
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
 
         Ok(Self {

@@ -23,7 +23,7 @@ impl GetRequest {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
-        let mut url = service.base().join("/issues.json")?;
+        let mut url = service.base().join("issues.json")?;
         url.query_pairs_mut()
             .append_pair("issue_id", &ids.iter().join(","));
         // force closed issues to be returned

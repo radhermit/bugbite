@@ -80,7 +80,7 @@ impl AttachRequest {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
-        let url = service.base().join(&format!("/rest/bug/{id}/attachment"))?;
+        let url = service.base().join(&format!("rest/bug/{id}/attachment"))?;
 
         for attachment in &mut attachments {
             attachment.ids = ids.to_vec();
