@@ -24,7 +24,7 @@ impl Client {
         &self.service
     }
 
-    /// Return the website URL for a bug ID.
+    /// Return the website URL for an item ID.
     pub fn item_url<S>(&self, id: S) -> String
     where
         S: std::fmt::Display,

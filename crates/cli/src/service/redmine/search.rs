@@ -70,7 +70,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut query = QueryBuilder::new();
         let params = &self.params;
         if let Some(value) = params.status.as_ref() {

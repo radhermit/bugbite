@@ -34,8 +34,8 @@ impl Command {
         let mut config = Config::new(&base)?;
         config.api_key = self.auth.api_key;
 
-        let client = Client::new(config, builder.build())?;
-        self.cmd.run(client)
+        let mut client = Client::new(config, builder.build())?;
+        self.cmd.run(&mut client)
     }
 }
 
@@ -48,7 +48,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+    fn run(self, client: &mut Client) -> anyhow::Result<ExitCode> {
         match self {
             Self::Get(cmd) => cmd.run(client),
             Self::Search(cmd) => cmd.run(client),

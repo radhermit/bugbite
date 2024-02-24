@@ -17,17 +17,23 @@ pub mod search;
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
+    pub(crate) web_base: String,
     pub api_key: Option<String>,
     cache: ServiceCache,
 }
 
 impl Config {
     pub fn new(base: &str) -> crate::Result<Self> {
+        let Some((web_base, _project)) = base.split_once("/projects/") else {
+            return Err(Error::InvalidValue(format!("invalid project base: {base}")));
+        };
+
         let base = Url::parse(base)
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
 
         Ok(Self {
             base,
+            web_base: web_base.to_string(),
             api_key: None,
             cache: Default::default(),
         })
@@ -51,7 +57,7 @@ impl fmt::Display for Config {
 // TODO: remove this once authentication support is added
 #[derive(Debug)]
 pub struct Service {
-    config: Config,
+    pub(crate) config: Config,
     client: reqwest::Client,
 }
 

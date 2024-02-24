@@ -22,6 +22,15 @@ impl Client {
         &self.service
     }
 
+    /// Return the website URL for an item ID.
+    pub fn item_url<S>(&self, id: S) -> String
+    where
+        S: std::fmt::Display,
+    {
+        let base = &self.service.config.web_base;
+        format!("{base}/issues/{id}")
+    }
+
     pub async fn get<S>(&self, ids: &[S], attachments: bool) -> crate::Result<Vec<Issue>>
     where
         S: std::fmt::Display,
