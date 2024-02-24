@@ -50,8 +50,8 @@ impl Command {
         config.user = self.auth.user;
         config.password = self.auth.password;
 
-        let mut client = Client::new(config, builder.build())?;
-        Ok(auth_retry(|| self.cmd.run(&mut client))?)
+        let client = Client::new(config, builder.build())?;
+        Ok(auth_retry(|| self.cmd.run(&client))?)
     }
 }
 
@@ -76,7 +76,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(&self, client: &mut Client) -> Result<ExitCode, bugbite::Error> {
+    fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         match self {
             Self::Attach(cmd) => auth_required(|| cmd.run(client)),
             Self::Attachments(cmd) => cmd.run(client),
