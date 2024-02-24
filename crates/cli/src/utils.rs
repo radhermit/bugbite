@@ -1,20 +1,22 @@
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::io::{self, stdout, IsTerminal};
-use std::process::{Child, Command};
+use std::process::Command;
 
 use crossterm::terminal;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use unicode_segmentation::UnicodeSegmentation;
 
-#[allow(dead_code)]
-pub(crate) fn launch_browser<I, S>(urls: I) -> io::Result<Child>
+pub(crate) fn launch_browser<I, S>(urls: I) -> io::Result<()>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    Command::new("xdg-open").args(urls).spawn()
+    for url in urls {
+        Command::new("xdg-open").arg(url).spawn()?;
+    }
+    Ok(())
 }
 
 pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {

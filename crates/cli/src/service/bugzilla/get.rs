@@ -8,7 +8,7 @@ use clap::Args;
 
 use crate::macros::async_block;
 use crate::service::Render;
-use crate::utils::COLUMNS;
+use crate::utils::{launch_browser, COLUMNS};
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
@@ -51,6 +51,10 @@ struct Options {
         hide_possible_values = true,
     )]
     history: Option<bool>,
+
+    /// launch in browser
+    #[arg(short, long, default_value_t = false)]
+    browser: bool,
 }
 
 #[derive(Debug, Args)]
@@ -68,24 +72,30 @@ pub(super) struct Command {
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         let ids: Vec<_> = self.ids.iter().flatten().collect();
-        let attachments = self.options.attachments.unwrap_or_default();
-        let comments = self.options.comments.unwrap_or_default();
-        let history = self.options.history.unwrap_or_default();
-        let bugs = async_block!(client.get(&ids, attachments, comments, history))?;
-        let mut bugs = bugs.into_iter().peekable();
-        let mut stdout = stdout().lock();
 
-        // text wrap width
-        let width = if stdout.is_terminal() && *COLUMNS <= 90 && *COLUMNS >= 50 {
-            *COLUMNS
+        if self.options.browser {
+            let urls = ids.iter().map(|id| client.item_url(id));
+            launch_browser(urls)?;
         } else {
-            90
-        };
+            let attachments = self.options.attachments.unwrap_or_default();
+            let comments = self.options.comments.unwrap_or_default();
+            let history = self.options.history.unwrap_or_default();
+            let bugs = async_block!(client.get(&ids, attachments, comments, history))?;
+            let mut bugs = bugs.into_iter().peekable();
+            let mut stdout = stdout().lock();
 
-        while let Some(bug) = bugs.next() {
-            bug.render(&mut stdout, width)?;
-            if bugs.peek().is_some() {
-                writeln!(stdout, "{}", "=".repeat(width))?;
+            // text wrap width
+            let width = if stdout.is_terminal() && *COLUMNS <= 90 && *COLUMNS >= 50 {
+                *COLUMNS
+            } else {
+                90
+            };
+
+            while let Some(bug) = bugs.next() {
+                bug.render(&mut stdout, width)?;
+                if bugs.peek().is_some() {
+                    writeln!(stdout, "{}", "=".repeat(width))?;
+                }
             }
         }
 
