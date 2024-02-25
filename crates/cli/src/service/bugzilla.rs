@@ -181,7 +181,7 @@ impl Render for Bug {
         }
 
         if !self.attachments.is_empty() {
-            writeln!(f, "{:<12} : {}\n", "Attachment", self.attachments.len())?;
+            writeln!(f, "{:<12} : {}\n", "Attachments", self.attachments.len())?;
             for attachment in &self.attachments {
                 attachment.render(f, width)?;
             }
