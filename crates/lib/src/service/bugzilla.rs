@@ -158,6 +158,7 @@ impl WebService for Service {
     }
 
     async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response> {
+        let response = response.error_for_status()?;
         trace!("{response:?}");
         let data: serde_json::Value = response.json().await?;
         debug!("{data}");
