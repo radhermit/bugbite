@@ -3,7 +3,6 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
-use clap::builder::BoolishValueParser;
 use clap::Args;
 
 use crate::macros::async_block;
@@ -13,18 +12,9 @@ use crate::utils::{launch_browser, COLUMNS};
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
 struct Options {
-    /// enable/disable comments
-    #[arg(
-        short = 'C',
-        long,
-        value_name = "BOOL",
-        default_value = "true",
-        num_args = 0..=1,
-        default_missing_value = "true",
-        value_parser = BoolishValueParser::new(),
-        hide_possible_values = true,
-    )]
-    comments: Option<bool>,
+    /// disable comments
+    #[arg(short = 'C', long)]
+    no_comments: bool,
 
     /// launch in browser
     #[arg(short, long, default_value_t = false)]
@@ -51,7 +41,7 @@ impl Command {
             let urls = ids.iter().map(|id| client.item_url(id));
             launch_browser(urls)?;
         } else {
-            let comments = self.options.comments.unwrap_or_default();
+            let comments = !self.options.no_comments;
             let issues = async_block!(client.get(&ids, false, comments))?;
             let mut issues = issues.into_iter().peekable();
             let mut stdout = stdout().lock();
