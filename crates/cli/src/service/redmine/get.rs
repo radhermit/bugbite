@@ -3,6 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
+use clap::builder::BoolishValueParser;
 use clap::Args;
 
 use crate::macros::async_block;
@@ -10,10 +11,30 @@ use crate::service::Render;
 use crate::utils::{launch_browser, COLUMNS};
 
 #[derive(Debug, Args)]
-pub(super) struct Command {
+#[clap(next_help_heading = "Get options")]
+struct Options {
+    /// enable/disable comments
+    #[arg(
+        short = 'C',
+        long,
+        value_name = "BOOL",
+        default_value = "true",
+        num_args = 0..=1,
+        default_missing_value = "true",
+        value_parser = BoolishValueParser::new(),
+        hide_possible_values = true,
+    )]
+    comments: Option<bool>,
+
     /// launch in browser
     #[arg(short, long, default_value_t = false)]
     browser: bool,
+}
+
+#[derive(Debug, Args)]
+pub(super) struct Command {
+    #[clap(flatten)]
+    options: Options,
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
@@ -26,11 +47,12 @@ impl Command {
     pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids: Vec<_> = self.ids.iter().flatten().collect();
 
-        if self.browser {
+        if self.options.browser {
             let urls = ids.iter().map(|id| client.item_url(id));
             launch_browser(urls)?;
         } else {
-            let issues = async_block!(client.get(&ids, false))?;
+            let comments = self.options.comments.unwrap_or_default();
+            let issues = async_block!(client.get(&ids, false, comments))?;
             let mut issues = issues.into_iter().peekable();
             let mut stdout = stdout().lock();
 

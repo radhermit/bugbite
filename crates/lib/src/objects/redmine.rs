@@ -55,9 +55,13 @@ pub struct Comment {
     /// The number of the comment local to the issue.
     ///
     /// The description is 0, comments start at 1.
+    #[serde(default)]
     pub count: u64,
+    #[serde(rename = "notes")]
     pub text: String,
+    #[serde(rename = "user")]
     pub creator: Person,
+    #[serde(rename = "created_on")]
     pub created: DateTime<Utc>,
 }
 

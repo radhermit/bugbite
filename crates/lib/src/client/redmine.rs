@@ -27,15 +27,22 @@ impl Client {
     where
         S: std::fmt::Display,
     {
-        let base = self.service.config.web_base.trim_end_matches('/');
+        let base = self.service.config.web_base.as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
 
-    pub async fn get<S>(&self, ids: &[S], attachments: bool) -> crate::Result<Vec<Issue>>
+    pub async fn get<S>(
+        &self,
+        ids: &[S],
+        attachments: bool,
+        comments: bool,
+    ) -> crate::Result<Vec<Issue>>
     where
         S: std::fmt::Display,
     {
-        let request = self.service.get_request(ids, attachments, false, false)?;
+        let request = self
+            .service
+            .get_request(ids, attachments, comments, false)?;
         request.send(&self.service).await
     }
 

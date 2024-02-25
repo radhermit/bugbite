@@ -17,7 +17,7 @@ pub mod search;
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
-    pub(crate) web_base: String,
+    pub(crate) web_base: Url,
     pub api_key: Option<String>,
     cache: ServiceCache,
 }
@@ -31,10 +31,12 @@ impl Config {
         let base = base.trim_end_matches('/');
         let base = Url::parse(&format!("{base}/"))
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
+        let web_base = Url::parse(web_base)
+            .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
 
         Ok(Self {
             base,
-            web_base: web_base.to_string(),
+            web_base,
             api_key: None,
             cache: Default::default(),
         })
@@ -107,13 +109,13 @@ impl WebService for Service {
         &self,
         ids: &[S],
         attachments: bool,
-        _comments: bool,
+        comments: bool,
         _history: bool,
     ) -> crate::Result<Self::GetRequest>
     where
         S: std::fmt::Display,
     {
-        get::GetRequest::new(self, ids, attachments)
+        get::GetRequest::new(self, ids, attachments, comments)
     }
 
     fn search_request<Q: Query>(&self, query: Q) -> crate::Result<Self::SearchRequest> {
