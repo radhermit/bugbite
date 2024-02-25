@@ -20,10 +20,10 @@ where
 }
 
 pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {
-    let (cols, _rows) = terminal::size().unwrap_or((80, 24));
+    let (cols, _rows) = terminal::size().unwrap_or((90, 24));
     // use a static width when testing is enabled
     if cfg!(feature = "test") {
-        80
+        90
     } else {
         cols.into()
     }
