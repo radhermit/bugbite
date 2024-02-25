@@ -94,7 +94,7 @@ impl Command {
             while let Some(bug) = bugs.next() {
                 bug.render(&mut stdout, width)?;
                 if bugs.peek().is_some() {
-                    writeln!(stdout, "{}", "=".repeat(*COLUMNS))?;
+                    writeln!(stdout, "{}", "=".repeat(width))?;
                 }
             }
         }

@@ -5,7 +5,7 @@ use bugbite::objects::bugzilla::*;
 use bugbite::service::bugzilla::Config;
 use itertools::Itertools;
 
-use crate::utils::{truncate, COLUMNS};
+use crate::utils::truncate;
 
 use super::output::*;
 use super::{auth_required, auth_retry, Render};
@@ -112,7 +112,7 @@ impl Render for Comment {
             write!(f, "Description ")?;
         }
         writeln!(f, "by {}, {}", self.creator, self.created)?;
-        writeln!(f, "{}", "-".repeat(*COLUMNS))?;
+        writeln!(f, "{}", "-".repeat(width))?;
         // wrap comment text
         let wrapped = textwrap::wrap(self.text.trim(), width);
         writeln!(f, "{}", wrapped.iter().join("\n"))
@@ -123,7 +123,7 @@ impl Render for Event {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         if !self.changes.is_empty() {
             writeln!(f, "Changes made by {}, {}", self.who, self.when)?;
-            writeln!(f, "{}", "-".repeat(*COLUMNS))?;
+            writeln!(f, "{}", "-".repeat(width))?;
             for change in &self.changes {
                 change.render(f, width)?;
             }
