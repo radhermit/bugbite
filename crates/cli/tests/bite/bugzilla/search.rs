@@ -5,7 +5,7 @@ use predicates::str::contains;
 
 use crate::command::cmd;
 
-use super::{start_server, TEST_PATH};
+use super::*;
 
 #[test]
 fn aliases() {
@@ -64,8 +64,8 @@ fn multiple_stdin() {
 async fn ids_only() {
     let server = start_server().await;
 
-    server.respond(200, TEST_PATH.join("search/ids.json")).await;
-    let expected = fs::read_to_string(TEST_PATH.join("search/ids.expected")).unwrap();
+    server.respond(200, TEST_DATA.join("search/ids.json")).await;
+    let expected = fs::read_to_string(TEST_OUTPUT.join("search/ids")).unwrap();
 
     for opt in ["-f", "--fields"] {
         cmd("bite bugzilla search")

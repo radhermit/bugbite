@@ -6,7 +6,7 @@ use tempfile::tempdir;
 
 use crate::command::cmd;
 
-use super::{start_server, TEST_PATH};
+use super::*;
 
 #[test]
 fn aliases() {
@@ -39,7 +39,7 @@ async fn nonexistent_bug() {
     let server = start_server().await;
 
     server
-        .respond(404, TEST_PATH.join("errors/nonexistent-bug.json"))
+        .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
         .await;
 
     for opt in ["-i", "--item-id"] {
@@ -58,10 +58,9 @@ async fn list_single_without_data() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_PATH.join("attachments/single-without-data.json"))
+        .respond(200, TEST_DATA.join("attachments/single-without-data.json"))
         .await;
-    let expected =
-        fs::read_to_string(TEST_PATH.join("attachments/single-without-data.expected")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("attachments/single-without-data")).unwrap();
 
     for opt in ["-l", "--list"] {
         cmd("bite bugzilla attachments")
@@ -78,10 +77,9 @@ async fn list_single_without_data() {
 async fn view_single_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(200, TEST_PATH.join("attachments/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachments/single-plain-text.json"))
         .await;
-    let expected =
-        fs::read_to_string(TEST_PATH.join("attachments/single-plain-text.expected")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("attachments/single-plain-text")).unwrap();
 
     for opt in ["-V", "--view"] {
         cmd("bite bugzilla attachments")
@@ -98,10 +96,9 @@ async fn view_single_with_plain_text() {
 async fn save_single_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(200, TEST_PATH.join("attachments/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachments/single-plain-text.json"))
         .await;
-    let expected =
-        fs::read_to_string(TEST_PATH.join("attachments/single-plain-text.expected")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("attachments/single-plain-text")).unwrap();
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
@@ -125,7 +122,7 @@ async fn save_single_with_plain_text() {
 async fn save_single_existing_error() {
     let server = start_server().await;
     server
-        .respond(200, TEST_PATH.join("attachments/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachments/single-plain-text.json"))
         .await;
 
     let dir = tempdir().unwrap();
@@ -160,7 +157,7 @@ async fn single_bug_with_no_attachments() {
     server
         .respond(
             200,
-            TEST_PATH.join("attachments/bug-with-no-attachments.json"),
+            TEST_DATA.join("attachments/bug-with-no-attachments.json"),
         )
         .await;
 
@@ -182,7 +179,7 @@ async fn multiple_bugs_with_no_attachments() {
     server
         .respond(
             200,
-            TEST_PATH.join("attachments/bugs-with-no-attachments.json"),
+            TEST_DATA.join("attachments/bugs-with-no-attachments.json"),
         )
         .await;
 
@@ -203,11 +200,10 @@ async fn save_multiple_with_plain_text() {
     server
         .respond(
             200,
-            TEST_PATH.join("attachments/bugs-with-attachments.json"),
+            TEST_DATA.join("attachments/bugs-with-attachments.json"),
         )
         .await;
-    let expected =
-        fs::read_to_string(TEST_PATH.join("attachments/single-plain-text.expected")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("attachments/single-plain-text")).unwrap();
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();

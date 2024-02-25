@@ -5,7 +5,7 @@ use predicates::str::contains;
 
 use crate::command::cmd;
 
-use super::{start_server, TEST_PATH};
+use super::*;
 
 #[test]
 fn aliases() {
@@ -48,9 +48,9 @@ async fn single_bug() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_PATH.join("get/single-bug.json"))
+        .respond(200, TEST_DATA.join("get/single-bug.json"))
         .await;
-    let expected = fs::read_to_string(TEST_PATH.join("get/single-bug.expected")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug")).unwrap();
 
     cmd("bite bugzilla get")
         .arg("12345")
@@ -75,7 +75,7 @@ async fn nonexistent_bug() {
     let server = start_server().await;
 
     server
-        .respond(404, TEST_PATH.join("errors/nonexistent-bug.json"))
+        .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
         .await;
 
     cmd("bite bugzilla get")
@@ -91,9 +91,9 @@ async fn multiple_bugs() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_PATH.join("get/multiple-bugs.json"))
+        .respond(200, TEST_DATA.join("get/multiple-bugs.json"))
         .await;
-    let expected = fs::read_to_string(TEST_PATH.join("get/multiple-bugs.expected")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("get/multiple-bugs")).unwrap();
 
     cmd("bite bugzilla get")
         .args(["12345", "23456", "34567"])

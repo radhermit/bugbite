@@ -11,7 +11,7 @@ mod show;
 
 use command::cmd;
 
-pub(crate) static TESTDATA_PATH: Lazy<Utf8PathBuf> =
+pub(crate) static TEST_DATA_PATH: Lazy<Utf8PathBuf> =
     Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
 
 /// Initialization for all test executables.
