@@ -5,6 +5,8 @@ use bugbite::objects::redmine::*;
 use bugbite::service::redmine::Config;
 use itertools::Itertools;
 
+use crate::utils::COLUMNS;
+
 use super::output::*;
 use super::Render;
 
@@ -64,7 +66,7 @@ impl Render for Comment {
             write!(f, "Description ")?;
         }
         writeln!(f, "by {}, {}", self.creator, self.created)?;
-        writeln!(f, "{}", "-".repeat(width))?;
+        writeln!(f, "{}", "-".repeat(*COLUMNS))?;
         // wrap comment text
         let wrapped = textwrap::wrap(self.text.trim(), width);
         writeln!(f, "{}", wrapped.iter().join("\n"))
