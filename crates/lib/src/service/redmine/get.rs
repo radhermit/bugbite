@@ -65,12 +65,14 @@ impl Request for GetRequest {
 
             if self.comments {
                 let mut count = 0;
-                issue.comments.push(Comment {
-                    count,
-                    text: issue.description.take().unwrap(),
-                    creator: issue.creator.clone().unwrap(),
-                    created: issue.created.unwrap(),
-                });
+                if let Some(text) = issue.description.take() {
+                    issue.comments.push(Comment {
+                        count,
+                        text,
+                        creator: issue.creator.clone().unwrap(),
+                        created: issue.created.unwrap(),
+                    });
+                }
 
                 // TODO: handle parsing changes within journal data
                 if let serde_json::Value::Array(values) = journals {
