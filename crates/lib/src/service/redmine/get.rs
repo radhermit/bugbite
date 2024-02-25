@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use reqwest::StatusCode;
 use url::Url;
 
 use crate::objects::redmine::{Comment, Issue};
@@ -7,6 +8,7 @@ use crate::Error;
 
 #[derive(Debug)]
 pub(crate) struct GetRequest {
+    ids: Vec<String>,
     urls: Vec<Url>,
     comments: bool,
 }
@@ -25,7 +27,9 @@ impl GetRequest {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
+        let mut request_ids = vec![];
         let mut urls = vec![];
+
         for id in ids {
             let mut url = service.config.web_base.join(&format!("issues/{id}.json"))?;
             // conditionally request additional data fields
@@ -37,10 +41,15 @@ impl GetRequest {
                 url.query_pairs_mut()
                     .append_pair("include", &fields.iter().join(","));
             }
+            request_ids.push(id.to_string());
             urls.push(url);
         }
 
-        Ok(Self { urls, comments })
+        Ok(Self {
+            ids: request_ids,
+            urls,
+            comments,
+        })
     }
 }
 
@@ -56,9 +65,17 @@ impl Request for GetRequest {
             .collect();
 
         let mut issues = vec![];
-        for future in futures {
+        for (future, id) in futures.into_iter().zip(self.ids.into_iter()) {
             let response = future.await?;
-            let mut data = service.parse_response(response).await?;
+            let mut data = service
+                .parse_response(response)
+                .await
+                .map_err(|e| match e {
+                    Error::Request(e) if e.status() == Some(StatusCode::NOT_FOUND) => {
+                        Error::Redmine(format!("nonexistent issue: {id}"))
+                    }
+                    _ => e,
+                })?;
             let mut data = data["issue"].take();
             let journals = data["journals"].take();
             let mut issue: Issue = serde_json::from_value(data)?;

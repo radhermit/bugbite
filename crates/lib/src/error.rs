@@ -20,6 +20,8 @@ pub enum Error {
     Json(serde_json::Error),
     #[error("bugzilla: {message}")]
     Bugzilla { code: i64, message: String },
+    #[error("redmine: {0}")]
+    Redmine(String),
     #[error("{0}")]
     Request(reqwest::Error),
     #[error("{0}")]

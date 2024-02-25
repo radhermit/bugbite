@@ -93,16 +93,32 @@ impl WebService for Service {
     }
 
     async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response> {
-        let response = response.error_for_status()?;
         trace!("{response:?}");
-        let data: serde_json::Value = response.json().await?;
-        debug!("{data}");
-        if data.get("error").is_some() {
-            let code = data["code"].as_i64().unwrap();
-            let message = data["message"].as_str().unwrap().to_string();
-            Err(Error::Bugzilla { code, message })
-        } else {
-            Ok(data)
+        match response.error_for_status_ref() {
+            Ok(_) => {
+                let mut data: serde_json::Value = response.json().await?;
+                debug!("{data}");
+                let errors = data["errors"].take();
+                if !errors.is_null() {
+                    let errors: Vec<_> = serde_json::from_value(errors)?;
+                    let error = errors.into_iter().next().unwrap();
+                    Err(Error::Redmine(error))
+                } else {
+                    Ok(data)
+                }
+            }
+            Err(e) => {
+                if let Ok(mut data) = response.json::<serde_json::Value>().await {
+                    debug!("{data}");
+                    let errors = data["errors"].take();
+                    if !errors.is_null() {
+                        let errors: Vec<_> = serde_json::from_value(errors)?;
+                        let error = errors.into_iter().next().unwrap();
+                        return Err(Error::Redmine(error));
+                    }
+                }
+                Err(e.into())
+            }
         }
     }
 
