@@ -1,6 +1,7 @@
 use std::io::{stdout, Write};
 use std::process::ExitCode;
 
+use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
 use bugbite::service::redmine::search::QueryBuilder;
 use bugbite::service::redmine::IssueField;
@@ -41,6 +42,10 @@ struct Params {
     )]
     fields: Vec<IssueField>,
 
+    /// restrict by ID
+    #[arg(long, help_heading = "Attribute related")]
+    ids: Option<Vec<MaybeStdinVec<u64>>>,
+
     /// restrict by status
     #[arg(
         short,
@@ -73,6 +78,9 @@ impl Command {
     pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut query = QueryBuilder::new();
         let params = &self.params;
+        if let Some(values) = params.ids.as_ref() {
+            query.ids(values.iter().flatten());
+        }
         if let Some(value) = params.status.as_ref() {
             query.status(value)?;
         }

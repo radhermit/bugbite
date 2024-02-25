@@ -1,4 +1,5 @@
 use chrono::offset::Utc;
+use itertools::Itertools;
 use ordered_multimap::ListOrderedMultimap;
 
 use crate::objects::redmine::Issue;
@@ -15,6 +16,14 @@ pub struct QueryBuilder {
 impl QueryBuilder {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn ids<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: std::fmt::Display,
+    {
+        self.insert("issue_id", values.into_iter().join(","));
     }
 
     pub fn status(&mut self, value: &str) -> crate::Result<()> {
