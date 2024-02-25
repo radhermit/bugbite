@@ -92,7 +92,7 @@ impl Query for QueryBuilder {
         // most instances restrict queries to 100 results
         self.append("limit", 100);
 
-        // return only open issues by default
+        // sort by ascending issue ID by default
         if !self.query.contains_key("sort") {
             self.append("sort", "id:asc");
         }
