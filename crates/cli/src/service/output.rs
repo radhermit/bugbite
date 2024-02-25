@@ -1,7 +1,10 @@
+use std::io::{stdout, IsTerminal, Write};
+
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 
-use crate::utils::truncate;
+use crate::service::Render;
+use crate::utils::{truncate, COLUMNS};
 
 // indentation for text-wrapping header field values
 pub(crate) static INDENT: Lazy<String> = Lazy::new(|| " ".repeat(15));
@@ -27,6 +30,31 @@ where
             writeln!(f, "{name:<12} : {}", wrapped.iter().join("\n"))?;
         }
     }
+    Ok(())
+}
+
+pub(crate) fn render_items<I, R>(items: I) -> Result<(), bugbite::Error>
+where
+    I: IntoIterator<Item = R>,
+    R: Render,
+{
+    let mut items = items.into_iter().peekable();
+    let mut stdout = stdout().lock();
+
+    // text wrap width
+    let width = if stdout.is_terminal() && *COLUMNS <= 90 && *COLUMNS >= 50 {
+        *COLUMNS
+    } else {
+        90
+    };
+
+    while let Some(item) = items.next() {
+        item.render(&mut stdout, width)?;
+        if items.peek().is_some() {
+            writeln!(stdout, "{}", "=".repeat(width))?;
+        }
+    }
+
     Ok(())
 }
 

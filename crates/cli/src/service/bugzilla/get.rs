@@ -1,4 +1,3 @@
-use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -6,8 +5,8 @@ use bugbite::client::bugzilla::Client;
 use clap::Args;
 
 use crate::macros::async_block;
-use crate::service::Render;
-use crate::utils::{launch_browser, COLUMNS};
+use crate::service::output::render_items;
+use crate::utils::launch_browser;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
@@ -53,22 +52,7 @@ impl Command {
             let comments = !self.options.no_comments;
             let history = !self.options.no_history;
             let bugs = async_block!(client.get(&ids, attachments, comments, history))?;
-            let mut bugs = bugs.into_iter().peekable();
-            let mut stdout = stdout().lock();
-
-            // text wrap width
-            let width = if stdout.is_terminal() && *COLUMNS <= 90 && *COLUMNS >= 50 {
-                *COLUMNS
-            } else {
-                90
-            };
-
-            while let Some(bug) = bugs.next() {
-                bug.render(&mut stdout, width)?;
-                if bugs.peek().is_some() {
-                    writeln!(stdout, "{}", "=".repeat(width))?;
-                }
-            }
+            render_items(bugs)?;
         }
 
         Ok(ExitCode::SUCCESS)

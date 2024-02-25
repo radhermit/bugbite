@@ -1,4 +1,3 @@
-use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -6,8 +5,8 @@ use bugbite::client::redmine::Client;
 use clap::Args;
 
 use crate::macros::async_block;
-use crate::service::Render;
-use crate::utils::{launch_browser, COLUMNS};
+use crate::service::output::render_items;
+use crate::utils::launch_browser;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
@@ -43,22 +42,7 @@ impl Command {
         } else {
             let comments = !self.options.no_comments;
             let issues = async_block!(client.get(&ids, false, comments))?;
-            let mut issues = issues.into_iter().peekable();
-            let mut stdout = stdout().lock();
-
-            // text wrap width
-            let width = if stdout.is_terminal() && *COLUMNS <= 90 && *COLUMNS >= 50 {
-                *COLUMNS
-            } else {
-                90
-            };
-
-            while let Some(issue) = issues.next() {
-                issue.render(&mut stdout, width)?;
-                if issues.peek().is_some() {
-                    writeln!(stdout, "{}", "=".repeat(width))?;
-                }
-            }
+            render_items(issues)?;
         }
 
         Ok(ExitCode::SUCCESS)
