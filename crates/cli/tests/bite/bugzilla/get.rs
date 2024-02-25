@@ -52,18 +52,16 @@ async fn single_bug() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug")).unwrap();
 
-    cmd("bite bugzilla get")
+    cmd("bite bugzilla get -ACH")
         .arg("12345")
-        .args(["-A", "no", "-C", "no", "-H", "no"])
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
         .success();
 
     // pull id from stdin
-    cmd("bite bugzilla get -")
+    cmd("bite bugzilla get -ACH -")
         .write_stdin("12345\n")
-        .args(["-A", "no", "-C", "no", "-H", "no"])
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
@@ -95,18 +93,16 @@ async fn multiple_bugs() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/multiple-bugs")).unwrap();
 
-    cmd("bite bugzilla get")
+    cmd("bite bugzilla get -ACH")
         .args(["12345", "23456", "34567"])
-        .args(["-A", "no", "-C", "no", "-H", "no"])
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
         .success();
 
     // pull ids from stdin
-    cmd("bite bugzilla get -")
+    cmd("bite bugzilla get -ACH -")
         .write_stdin("12345\n23456\n34567\n")
-        .args(["-A", "no", "-C", "no", "-H", "no"])
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")

@@ -3,7 +3,6 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
-use clap::builder::BoolishValueParser;
 use clap::Args;
 
 use crate::macros::async_block;
@@ -13,47 +12,20 @@ use crate::utils::{launch_browser, COLUMNS};
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
 struct Options {
-    /// enable/disable attachments
-    #[arg(
-        short = 'A',
-        long,
-        value_name = "BOOL",
-        default_value = "true",
-        num_args = 0..=1,
-        default_missing_value = "true",
-        value_parser = BoolishValueParser::new(),
-        hide_possible_values = true,
-    )]
-    attachments: Option<bool>,
+    /// disable attachments
+    #[arg(short = 'A', long)]
+    no_attachments: bool,
 
-    /// enable/disable comments
-    #[arg(
-        short = 'C',
-        long,
-        value_name = "BOOL",
-        default_value = "true",
-        num_args = 0..=1,
-        default_missing_value = "true",
-        value_parser = BoolishValueParser::new(),
-        hide_possible_values = true,
-    )]
-    comments: Option<bool>,
+    /// disable comments
+    #[arg(short = 'C', long)]
+    no_comments: bool,
 
-    /// enable/disable history
-    #[arg(
-        short = 'H',
-        long,
-        value_name = "BOOL",
-        default_value = "false",
-        num_args = 0..=1,
-        default_missing_value = "true",
-        value_parser = BoolishValueParser::new(),
-        hide_possible_values = true,
-    )]
-    history: Option<bool>,
+    /// disable history
+    #[arg(short = 'H', long)]
+    no_history: bool,
 
-    /// launch in browser
-    #[arg(short, long, default_value_t = false)]
+    /// open bugs in browser
+    #[arg(short, long)]
     browser: bool,
 }
 
@@ -77,9 +49,9 @@ impl Command {
             let urls = ids.iter().map(|id| client.item_url(id));
             launch_browser(urls)?;
         } else {
-            let attachments = self.options.attachments.unwrap_or_default();
-            let comments = self.options.comments.unwrap_or_default();
-            let history = self.options.history.unwrap_or_default();
+            let attachments = !self.options.no_attachments;
+            let comments = !self.options.no_comments;
+            let history = !self.options.no_history;
             let bugs = async_block!(client.get(&ids, attachments, comments, history))?;
             let mut bugs = bugs.into_iter().peekable();
             let mut stdout = stdout().lock();
