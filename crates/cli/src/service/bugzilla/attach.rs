@@ -40,6 +40,7 @@ pub(super) struct Command {
 
     /// bug IDs
     #[clap(
+        num_args = 1,
         required = true,
         value_delimiter = ',',
         value_name = "ID[,ID,...]",
