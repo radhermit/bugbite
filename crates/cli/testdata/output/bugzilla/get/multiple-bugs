@@ -1,6 +1,6 @@
 Summary      : summary
 Assignee     : assignee
-Reporter     : person
+Creator      : person
 Created      : 2010-04-21 21:28:20 UTC
 Updated      : 2024-01-18 18:37:44 UTC
 Status       : CONFIRMED
@@ -13,7 +13,7 @@ CC           : person1, person2
 ==========================================================================================
 Summary      : summary1
 Assignee     : person2
-Reporter     : person
+Creator      : person
 Created      : 2010-04-21 21:28:20 UTC
 Updated      : 2024-01-18 18:37:44 UTC
 Status       : RESOLVED
@@ -24,7 +24,7 @@ ID           : 23456
 ==========================================================================================
 Summary      : summary1
 Assignee     : person3
-Reporter     : person
+Creator      : person
 Created      : 2015-03-19 21:28:20 UTC
 Updated      : 2020-01-18 18:37:44 UTC
 Status       : RESOLVED
