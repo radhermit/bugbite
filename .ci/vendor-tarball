@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Create a vendored rust release tarball.
-# Requires two arguments, a target package name and the target archive name.
+# Requires a single argument of the target package name.
 
 set -e
 
 REPO_DIR=${PWD}
 PACKAGE=$1
-ARCHIVE=$2
 
 # build crate
 cargo package -p ${PACKAGE}
@@ -39,4 +38,4 @@ directory = "vendor"
 EOF
 
 # create release tarball
-tar -cvf ${REPO_DIR}/${ARCHIVE}.tar *
+tar -cvf ${REPO_DIR}/${RELEASE}.tar *
