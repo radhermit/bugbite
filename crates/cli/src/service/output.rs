@@ -1,7 +1,9 @@
 use std::io::{stdout, IsTerminal, Write};
 
+use bugbite::traits::RenderSearch;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
+use tracing::info;
 
 use crate::service::Render;
 use crate::utils::{truncate, COLUMNS};
@@ -30,6 +32,27 @@ where
             writeln!(f, "{name:<12} : {}", wrapped.iter().join("\n"))?;
         }
     }
+    Ok(())
+}
+
+pub(crate) fn render_search<I, R, T>(items: I, fields: &[T]) -> Result<(), bugbite::Error>
+where
+    I: IntoIterator<Item = R>,
+    R: RenderSearch<T>,
+{
+    let mut stdout = stdout().lock();
+    let mut count = 0;
+
+    for item in items {
+        count += 1;
+        let line = item.render(fields);
+        writeln!(stdout, "{}", truncate(&line, *COLUMNS))?;
+    }
+
+    if count > 0 {
+        info!(" * {count} found");
+    }
+
     Ok(())
 }
 

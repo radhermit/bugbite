@@ -1,4 +1,3 @@
-use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -6,14 +5,12 @@ use bugbite::client::redmine::Client;
 use bugbite::service::redmine::search::QueryBuilder;
 use bugbite::service::redmine::IssueField;
 use bugbite::time::TimeDelta;
-use bugbite::traits::RenderSearch;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
-use tracing::info;
 
 use crate::macros::async_block;
-use crate::utils::{truncate, COLUMNS};
+use crate::service::output::render_search;
 
 /// Available search parameters.
 #[derive(Debug, Args)]
@@ -96,18 +93,7 @@ impl Command {
         let fields = &params.fields;
 
         let issues = async_block!(client.search(query))?;
-        let mut stdout = stdout().lock();
-        let mut count = 0;
-
-        for issue in issues {
-            count += 1;
-            let line = issue.render(fields);
-            writeln!(stdout, "{}", truncate(&line, *COLUMNS))?;
-        }
-
-        if count > 0 {
-            info!(" * {count} found");
-        }
+        render_search(issues, fields)?;
 
         Ok(ExitCode::SUCCESS)
     }

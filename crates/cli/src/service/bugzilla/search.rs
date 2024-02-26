@@ -1,4 +1,3 @@
-use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -8,14 +7,12 @@ use bugbite::service::bugzilla::{
     BugField,
 };
 use bugbite::time::TimeDelta;
-use bugbite::traits::RenderSearch;
 use clap::builder::{BoolishValueParser, PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
-use tracing::info;
 
 use crate::macros::async_block;
-use crate::utils::{truncate, COLUMNS};
+use crate::service::output::render_search;
 
 /// Available search parameters.
 ///
@@ -294,18 +291,7 @@ impl Command {
         query.fields(fields.iter().copied())?;
 
         let bugs = async_block!(client.search(query))?;
-        let mut stdout = stdout().lock();
-        let mut count = 0;
-
-        for bug in bugs {
-            count += 1;
-            let line = bug.render(fields);
-            writeln!(stdout, "{}", truncate(&line, *COLUMNS))?;
-        }
-
-        if count > 0 {
-            info!(" * {count} found");
-        }
+        render_search(bugs, fields)?;
 
         Ok(ExitCode::SUCCESS)
     }
