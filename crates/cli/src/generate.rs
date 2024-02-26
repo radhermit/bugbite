@@ -13,13 +13,19 @@ mod service;
 mod subcmds;
 mod utils;
 
-fn main() -> io::Result<()> {
+fn main() -> anyhow::Result<()> {
     let args: Vec<_> = env::args().collect();
-    let out_dir = PathBuf::from(args.get(1).map(|x| x.as_str()).unwrap_or("shell"));
-    fs::create_dir_all(&out_dir).expect("failed creating output directory");
     let mut cmd = options::Command::command();
+
+    // generate shell completions
+    fs::create_dir_all("shell").expect("failed creating output directory");
     for &shell in Shell::value_variants() {
-        clap_complete::generate_to(shell, &mut cmd, "bite", &out_dir)?;
+        clap_complete::generate_to(shell, &mut cmd, "bite", "shell")?;
     }
+
+    // generate man pages
+    fs::create_dir_all("man").expect("failed creating output directory");
+    clap_mangen::generate_to(cmd, "man")?;
+
     Ok(())
 }

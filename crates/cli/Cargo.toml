@@ -18,24 +18,17 @@ name = "bite"
 path = "src/main.rs"
 
 [[bin]]
-name = "compgen"
-path = "src/compgen.rs"
-required-features = ["shell"]
-
-[[bin]]
-name = "mangen"
-path = "src/mangen.rs"
-required-features = ["doc"]
+name = "generate"
+path = "src/generate.rs"
+required-features = ["generate"]
 
 [[test]]
 name = "bite"
 
 [features]
 default = []
-# build documentation
-doc = ["dep:clap_mangen"]
-# build shell completion
-shell = ["dep:clap_complete"]
+# build documentation and shell completion
+generate = ["dep:clap_complete", "dep:clap_mangen"]
 # test support
 test = ["bugbite/test"]
 
