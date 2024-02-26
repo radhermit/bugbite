@@ -108,8 +108,8 @@ pub struct Bug {
     pub id: u64,
     #[serde(deserialize_with = "non_empty_str")]
     pub assigned_to: Option<String>,
-    #[serde(rename = "creator", deserialize_with = "non_empty_str")]
-    pub reporter: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
+    pub creator: Option<String>,
     #[serde(rename = "creation_time")]
     pub created: Option<DateTime<Utc>>,
     #[serde(rename = "last_change_time")]
@@ -166,7 +166,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Id => format!("{:<8}", self.id),
                 BugField::AssignedTo => format!("{:<20}", stringify!(self.assigned_to)),
                 BugField::Summary => stringify!(self.summary),
-                BugField::Reporter => format!("{:<20}", stringify!(self.reporter)),
+                BugField::Creator => format!("{:<20}", stringify!(self.creator)),
                 BugField::Created => stringify!(self.created),
                 BugField::Updated => stringify!(self.updated),
                 BugField::Status => format!("{:<20}", stringify!(self.status)),
