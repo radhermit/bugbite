@@ -60,7 +60,7 @@ struct Params {
     #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
     modified: Option<TimeDelta>,
 
-    /// strings to search for in the summary
+    /// string to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
     summary: Option<String>,
 }
