@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::env;
-use std::io::stderr;
+use std::io::{stderr, stdin, stdout, IsTerminal};
 use std::process::ExitCode;
 
 use bugbite::client::Client;
@@ -9,7 +9,7 @@ use bugbite::services::SERVICES;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, Parser, ValueHint};
-use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
+use clap_verbosity_flag::{Level, LevelFilter, LogLevel, Verbosity};
 use itertools::Itertools;
 use strum::VariantNames;
 use tracing_log::AsTrace;
@@ -198,10 +198,23 @@ struct BiteOpts {
     timeout: u64,
 }
 
+#[derive(Copy, Clone, Debug, Default)]
+struct DefaultLevel;
+
+impl LogLevel for DefaultLevel {
+    fn default() -> Option<Level> {
+        if stdin().is_terminal() && stdout().is_terminal() {
+            Some(Level::Info)
+        } else {
+            Some(Level::Warn)
+        }
+    }
+}
+
 #[derive(Debug, Args)]
 pub(crate) struct Options {
     #[command(flatten)]
-    verbosity: Verbosity<WarnLevel>,
+    verbosity: Verbosity<DefaultLevel>,
     #[clap(flatten)]
     bite: BiteOpts,
     #[clap(flatten)]
