@@ -142,7 +142,6 @@ macro_rules! return_if_error {
     }};
 }
 
-use stringify;
 impl WebService for Service {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
