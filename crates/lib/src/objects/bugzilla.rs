@@ -102,10 +102,35 @@ pub struct Change {
     pub attachment_id: Option<u64>,
 }
 
+// Support deserializing alias field from string or array, the current Bugzilla 5.0
+// webservice API returns alias arrays while Mozilla upstream uses string values which
+// is what Bugzilla is moving to in the future (see
+// https://bugzilla.mozilla.org/show_bug.cgi?id=1534305).
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[serde(untagged)]
+pub enum Alias {
+    List(Vec<String>),
+    String(String),
+}
+
+impl Alias {
+    /// Return the main, non-empty alias if it exists.
+    pub fn display(&self) -> Option<&str> {
+        match self {
+            Self::String(value) if !value.is_empty() => Some(value.as_str()),
+            Self::List(values) if !values.is_empty() && !values[0].is_empty() => {
+                Some(values[0].as_str())
+            }
+            _ => None,
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 #[serde(default)]
 pub struct Bug {
     pub id: u64,
+    pub alias: Option<Alias>,
     #[serde(deserialize_with = "non_empty_str")]
     pub assigned_to: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
@@ -114,8 +139,6 @@ pub struct Bug {
     pub created: Option<DateTime<Utc>>,
     #[serde(rename = "last_change_time")]
     pub updated: Option<DateTime<Utc>>,
-    #[serde(rename = "alias", deserialize_with = "null_empty_vec")]
-    pub aliases: Vec<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub summary: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]

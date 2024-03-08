@@ -167,7 +167,7 @@ impl Render for Bug {
         output_field!(f, "Product", &self.product);
         output_field!(f, "Component", &self.component);
         writeln!(f, "{:<12} : {}", "ID", self.id)?;
-        wrapped_csv(f, "Aliases", &self.aliases, width)?;
+        output_field!(f, "Alias", self.alias.as_ref().and_then(|x| x.display()));
         wrapped_csv(f, "CC", &self.cc, width)?;
         wrapped_csv(f, "Blocks", &self.blocks, width)?;
         wrapped_csv(f, "Depends on", &self.depends, width)?;

@@ -8,7 +8,7 @@ Whiteboard   : whiteboard
 Product      : product
 Component    : component
 ID           : 12345
-Aliases      : alias
+Alias        : alias
 CC           : person1, person2
 ==========================================================================================
 Summary      : summary1
