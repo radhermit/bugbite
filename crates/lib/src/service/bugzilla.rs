@@ -127,6 +127,22 @@ impl Service {
     }
 }
 
+/// Return a bugzilla error if one is returned in the response data.
+macro_rules! return_if_error {
+    ($data:expr) => {{
+        if $data.get("error").is_some() {
+            let code = $data["code"].as_i64().unwrap_or_default();
+            let message = if let Some(value) = $data["message"].as_str() {
+                value.to_string()
+            } else {
+                format!("unknown error: {code}")
+            };
+            return Err(Error::Bugzilla { code, message });
+        }
+    }};
+}
+
+use stringify;
 impl WebService for Service {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
@@ -159,34 +175,18 @@ impl WebService for Service {
 
     async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response> {
         trace!("{response:?}");
+
         match response.error_for_status_ref() {
             Ok(_) => {
                 let data: serde_json::Value = response.json().await?;
                 debug!("{data}");
-                if data.get("error").is_some() {
-                    let code = data["code"].as_i64().unwrap_or_default();
-                    let message = if let Some(value) = data["message"].as_str() {
-                        value.to_string()
-                    } else {
-                        format!("unknown error: {code}")
-                    };
-                    Err(Error::Bugzilla { code, message })
-                } else {
-                    Ok(data)
-                }
+                return_if_error!(&data);
+                Ok(data)
             }
             Err(e) => {
                 if let Ok(data) = response.json::<serde_json::Value>().await {
                     debug!("{data}");
-                    if data.get("error").is_some() {
-                        let code = data["code"].as_i64().unwrap_or_default();
-                        let message = if let Some(value) = data["message"].as_str() {
-                            value.to_string()
-                        } else {
-                            format!("unknown error: {code}")
-                        };
-                        return Err(Error::Bugzilla { code, message });
-                    }
+                    return_if_error!(&data);
                 }
                 Err(e.into())
             }
