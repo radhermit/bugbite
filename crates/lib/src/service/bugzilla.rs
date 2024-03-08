@@ -164,8 +164,12 @@ impl WebService for Service {
                 let data: serde_json::Value = response.json().await?;
                 debug!("{data}");
                 if data.get("error").is_some() {
-                    let code = data["code"].as_i64().unwrap();
-                    let message = data["message"].as_str().unwrap().to_string();
+                    let code = data["code"].as_i64().unwrap_or_default();
+                    let message = if let Some(value) = data["message"].as_str() {
+                        value.to_string()
+                    } else {
+                        format!("unknown error: {code}")
+                    };
                     Err(Error::Bugzilla { code, message })
                 } else {
                     Ok(data)
@@ -175,8 +179,12 @@ impl WebService for Service {
                 if let Ok(data) = response.json::<serde_json::Value>().await {
                     debug!("{data}");
                     if data.get("error").is_some() {
-                        let code = data["code"].as_i64().unwrap();
-                        let message = data["message"].as_str().unwrap().to_string();
+                        let code = data["code"].as_i64().unwrap_or_default();
+                        let message = if let Some(value) = data["message"].as_str() {
+                            value.to_string()
+                        } else {
+                            format!("unknown error: {code}")
+                        };
                         return Err(Error::Bugzilla { code, message });
                     }
                 }
