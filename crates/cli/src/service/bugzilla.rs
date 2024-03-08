@@ -180,6 +180,10 @@ impl Render for Bug {
             writeln!(f, "{:<12} : {}", "Comments", self.comments.len() - 1)?;
         }
 
+        if !self.history.is_empty() {
+            writeln!(f, "{:<12} : {}", "Changes", self.history.len())?;
+        }
+
         if !self.attachments.is_empty() {
             writeln!(f, "{:<12} : {}\n", "Attachments", self.attachments.len())?;
             for attachment in &self.attachments {
