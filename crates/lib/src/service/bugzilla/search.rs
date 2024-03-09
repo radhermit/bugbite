@@ -261,8 +261,11 @@ impl FromStr for SearchOrder {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
-        let term = s.strip_prefix('-').unwrap_or(s);
-        let descending = term != s;
+        let (descending, term) = if let Some(value) = s.strip_prefix('-') {
+            (true, value)
+        } else {
+            (false, s.strip_prefix('+').unwrap_or(s))
+        };
         let term = term
             .parse()
             .map_err(|_| Error::InvalidValue(format!("unknown search term: {term}")))?;
