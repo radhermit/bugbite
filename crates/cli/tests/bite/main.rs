@@ -4,12 +4,13 @@ use bugbite::test::build_path;
 use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
 use predicates::prelude::*;
+use predicates::str::contains;
+
+use command::cmd;
 
 mod bugzilla;
 mod command;
 mod show;
-
-use command::cmd;
 
 pub(crate) static TEST_DATA_PATH: Lazy<Utf8PathBuf> =
     Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
@@ -46,5 +47,17 @@ fn version() {
             .stdout(predicate::str::starts_with("bite"))
             .stderr("")
             .success();
+    }
+}
+
+#[test]
+fn unknown_connection() {
+    for opt in ["-c", "--connection"] {
+        cmd("bite")
+            .args([opt, "unknown", "--help"])
+            .assert()
+            .stdout("")
+            .stderr(contains("unknown connection: unknown"))
+            .failure();
     }
 }
