@@ -258,6 +258,7 @@ pub enum BugField {
     Whiteboard,
     Product,
     Component,
+    DependsOn,
 }
 
 impl From<BugField> for FilterField {
@@ -281,6 +282,7 @@ impl Api for BugField {
             Self::Whiteboard => "whiteboard",
             Self::Product => "product",
             Self::Component => "component",
+            Self::DependsOn => "depends_on",
         }
     }
 }
