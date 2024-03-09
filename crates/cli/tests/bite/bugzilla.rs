@@ -35,3 +35,15 @@ fn incompatible_connection() {
             .failure();
     }
 }
+
+#[test]
+fn no_connection() {
+    for action in ["s", "search"] {
+        cmd("bite bugzilla")
+            .args([action, "-c", "1d"])
+            .assert()
+            .stdout("")
+            .stderr(contains("no bugzilla connection specified"))
+            .failure();
+    }
+}
