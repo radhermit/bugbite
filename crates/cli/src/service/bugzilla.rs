@@ -170,7 +170,7 @@ impl Render for Bug {
         output_field!(f, "Alias", self.alias.as_ref().and_then(|x| x.display()));
         wrapped_csv(f, "CC", &self.cc, width)?;
         wrapped_csv(f, "Blocks", &self.blocks, width)?;
-        wrapped_csv(f, "Depends on", &self.depends, width)?;
+        wrapped_csv(f, "Depends on", &self.depends_on, width)?;
         if !self.urls.is_empty() {
             truncated_list(f, "See also", &self.urls, width)?;
         }

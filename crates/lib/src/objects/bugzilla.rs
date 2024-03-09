@@ -155,8 +155,8 @@ pub struct Bug {
     pub cc: Vec<String>,
     #[serde(deserialize_with = "null_empty_vec")]
     pub blocks: Vec<u64>,
-    #[serde(rename = "depends_on", deserialize_with = "null_empty_vec")]
-    pub depends: Vec<u64>,
+    #[serde(deserialize_with = "null_empty_vec")]
+    pub depends_on: Vec<u64>,
     #[serde(rename = "dupe_of")]
     pub duplicate_of: Option<u64>,
     #[serde(rename = "see_also", deserialize_with = "null_empty_vec")]
