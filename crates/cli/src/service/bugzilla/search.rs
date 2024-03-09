@@ -239,6 +239,9 @@ impl Command {
         if let Some(values) = params.id.as_ref() {
             query.id(values.iter().flatten());
         }
+        if let Some(values) = params.summary.as_ref() {
+            query.summary(values.iter().flatten());
+        }
 
         // strings
         if let Some(value) = params.quicksearch.as_ref() {
@@ -281,9 +284,6 @@ impl Command {
         }
         if let Some(values) = params.depends.as_ref() {
             query.extend("depends_on", values.iter().flatten());
-        }
-        if let Some(values) = params.summary.as_ref() {
-            query.extend("summary", values.iter().flatten());
         }
 
         let fields = &params.fields;

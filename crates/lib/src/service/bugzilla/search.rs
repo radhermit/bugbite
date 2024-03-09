@@ -66,6 +66,20 @@ impl QueryBuilder {
         self.extend("id", values);
     }
 
+    pub fn summary<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        for value in values {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "short_desc");
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
+        }
+    }
+
     pub fn created_after(&mut self, interval: &TimeDelta) {
         let datetime = Utc::now() - interval.delta();
         let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
