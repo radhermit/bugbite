@@ -152,6 +152,8 @@ pub struct Bug {
     #[serde(deserialize_with = "non_empty_str")]
     pub component: Option<String>,
     #[serde(deserialize_with = "null_empty_vec")]
+    pub keywords: Vec<String>,
+    #[serde(deserialize_with = "null_empty_vec")]
     pub cc: Vec<String>,
     #[serde(deserialize_with = "null_empty_vec")]
     pub blocks: Vec<u64>,
@@ -198,6 +200,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Product => format!("{:<20}", stringify!(self.product)),
                 BugField::Component => format!("{:<20}", stringify!(self.component)),
                 BugField::DependsOn => format!("{:<20}", self.depends_on.iter().join(",")),
+                BugField::Keywords => format!("{:<20}", self.keywords.iter().join(",")),
             }
         };
 
