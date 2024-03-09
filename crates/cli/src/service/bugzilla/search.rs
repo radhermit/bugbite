@@ -49,26 +49,25 @@ struct Params {
         short = 'S',
         long,
         help_heading = "Search related",
-        value_name = "TERM[,TERM,...]",
+        value_name = "FIELD[,FIELD,...]",
         value_delimiter = ',',
         long_help = indoc::formatdoc! {"
             Perform server-side sorting on the query.
 
-            Sorting in descending order can be done by prefixing a given term
+            Sorting in descending order can be done by prefixing a given field
             with '-'; otherwise, sorting is performed in ascending order by
             default. Note that using a single descending order argument requires
             using '=' between the option and value such as `-S=-status` or
             `--sort=-summary`.
 
-            Multiple terms are supported in a comma-separated list which will
-            cause the data response to be sorted by the each term in order. For
-            example, the value `reporter,-status` will sort by the bug reporter
-            in ascending order and then by status in descending order.
+            Multiple fields are supported via comma-separated lists which sort
+            the data response by the each field in order. For example, the value
+            `reporter,-status` will sort by the bug reporter in ascending order
+            and then by status in descending order.
 
-            Note that if an invalid sorting request is made, bugzilla will fall
-            back to its default which is sorting by bug ID. Also, some sorting
-            methods such as last-visited require an authenticated session to
-            work properly.
+            Note that if an invalid sorting request is made, sorting will
+            fallback to bug ID. Also, some sorting methods such as last-visited
+            require an authenticated session to work properly.
 
             possible values:
             {}", SearchTerm::VARIANTS.join(", ")}
