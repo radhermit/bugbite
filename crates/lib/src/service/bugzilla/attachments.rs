@@ -47,7 +47,8 @@ impl Request for AttachmentsRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let response = service.client().get(self.url).send().await?;
+        let request = service.client().get(self.url);
+        let response = service.send(request).await?;
         let mut data = service.parse_response(response).await?;
         match self.ids {
             Ids::Item(ids) => {

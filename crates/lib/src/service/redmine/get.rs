@@ -61,7 +61,8 @@ impl Request for GetRequest {
         let futures: Vec<_> = self
             .urls
             .into_iter()
-            .map(|u| service.client().get(u).send())
+            .map(|u| service.client().get(u))
+            .map(|r| service.send(r))
             .collect();
 
         let mut issues = vec![];

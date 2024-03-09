@@ -26,7 +26,8 @@ impl Request for SearchRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let response = service.client().get(self.0).send().await?;
+        let request = service.client().get(self.0);
+        let response = service.send(request).await?;
         let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
         Ok(serde_json::from_value(data)?)

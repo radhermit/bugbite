@@ -51,7 +51,8 @@ impl Request for CommentsRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let response = service.client().get(self.url).send().await?;
+        let request = service.client().get(self.url);
+        let response = service.send(request).await?;
         let mut data = service.parse_response(response).await?;
         let mut data = data["bugs"].take();
         let mut comments = vec![];

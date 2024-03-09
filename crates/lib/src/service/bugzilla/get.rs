@@ -69,8 +69,9 @@ impl Request for GetRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+        let request = service.client().get(self.url);
         let (bugs, attachments, comments, history) = (
-            service.client().get(self.url).send(),
+            service.send(request),
             self.attachments.map(|r| r.send(service)),
             self.comments.map(|r| r.send(service)),
             self.history.map(|r| r.send(service)),
