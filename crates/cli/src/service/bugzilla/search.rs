@@ -237,6 +237,9 @@ impl Command {
         if let Some(value) = params.attachments {
             query.attachments(value);
         }
+        if let Some(values) = params.id.as_ref() {
+            query.id(values.iter().flatten());
+        }
 
         // strings
         if let Some(value) = params.quicksearch.as_ref() {
@@ -264,9 +267,6 @@ impl Command {
         }
         if let Some(values) = params.alias.as_ref() {
             query.extend("alias", values);
-        }
-        if let Some(values) = params.id.as_ref() {
-            query.extend("id", values.iter().flatten());
         }
         if let Some(values) = params.keywords.as_ref() {
             query.extend("keywords", values);

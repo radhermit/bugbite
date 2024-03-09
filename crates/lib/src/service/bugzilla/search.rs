@@ -58,6 +58,14 @@ impl QueryBuilder {
         Self::default()
     }
 
+    pub fn id<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("id", values);
+    }
+
     pub fn created_after(&mut self, interval: &TimeDelta) {
         let datetime = Utc::now() - interval.delta();
         let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
