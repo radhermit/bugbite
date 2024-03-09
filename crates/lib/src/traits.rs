@@ -1,3 +1,5 @@
+use std::future::Future;
+
 use reqwest::RequestBuilder;
 use url::Url;
 
@@ -59,6 +61,14 @@ pub(crate) trait WebService {
     /// Inject authentication into a request before it's sent.
     fn inject_auth(&self, request: RequestBuilder) -> RequestBuilder {
         request
+    }
+
+    /// Send a given request to the service.
+    fn send(
+        &self,
+        request: RequestBuilder,
+    ) -> impl Future<Output = Result<reqwest::Response, reqwest::Error>> {
+        self.inject_auth(request).send()
     }
 
     /// Parse a raw response into a service response.

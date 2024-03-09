@@ -100,8 +100,7 @@ impl Request for AttachRequest {
             .into_iter()
             .map(|x| {
                 let request = service.client().post(self.url.clone()).json(&x);
-                let request = service.inject_auth(request);
-                request.send()
+                service.send(request)
             })
             .collect();
 
