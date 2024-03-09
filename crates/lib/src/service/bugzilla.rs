@@ -260,6 +260,8 @@ pub enum BugField {
     Component,
     DependsOn,
     Keywords,
+    Blocks,
+    Cc,
 }
 
 impl From<BugField> for FilterField {
@@ -285,6 +287,8 @@ impl Api for BugField {
             Self::Component => "component",
             Self::DependsOn => "depends_on",
             Self::Keywords => "keywords",
+            Self::Blocks => "blocks",
+            Self::Cc => "cc",
         }
     }
 }

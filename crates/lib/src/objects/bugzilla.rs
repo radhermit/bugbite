@@ -201,6 +201,8 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Component => format!("{:<20}", stringify!(self.component)),
                 BugField::DependsOn => format!("{:<20}", self.depends_on.iter().join(",")),
                 BugField::Keywords => format!("{:<20}", self.keywords.iter().join(",")),
+                BugField::Blocks => format!("{:<20}", self.blocks.iter().join(",")),
+                BugField::Cc => format!("{:<20}", self.cc.iter().join(",")),
             }
         };
 
