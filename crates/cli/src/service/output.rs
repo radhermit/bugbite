@@ -46,7 +46,9 @@ where
     for item in items {
         count += 1;
         let line = item.render(fields);
-        writeln!(stdout, "{}", truncate(&line, *COLUMNS))?;
+        if !line.is_empty() {
+            writeln!(stdout, "{}", truncate(&line, *COLUMNS))?;
+        }
     }
 
     if count > 0 {
