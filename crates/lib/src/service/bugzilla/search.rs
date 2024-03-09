@@ -106,7 +106,7 @@ impl QueryBuilder {
         self.insert("last_change_time", target);
     }
 
-    pub fn sort<'a, I>(&mut self, terms: I)
+    pub fn order<'a, I>(&mut self, terms: I)
     where
         I: IntoIterator<Item = &'a SearchOrder>,
     {

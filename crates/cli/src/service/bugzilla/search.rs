@@ -44,9 +44,9 @@ struct Params {
     )]
     fields: Vec<BugField>,
 
-    /// sorting order for search query
+    /// order query results
     #[arg(
-        short = 'S',
+        short,
         long,
         help_heading = "Search related",
         value_name = "FIELD[,FIELD,...]",
@@ -72,7 +72,7 @@ struct Params {
             possible values:
             {}", SearchTerm::VARIANTS.join(", ")}
     )]
-    sort: Option<Vec<SearchOrder>>,
+    order: Option<Vec<SearchOrder>>,
 
     /// search using quicksearch syntax
     #[arg(
@@ -222,8 +222,8 @@ impl Command {
         if let Some(value) = params.modified.as_ref() {
             query.modified_after(value);
         }
-        if let Some(value) = params.sort.as_ref() {
-            query.sort(value);
+        if let Some(value) = params.order.as_ref() {
+            query.order(value);
         }
         if let Some(value) = params.commenter.as_ref() {
             query.commenter(value);
