@@ -250,10 +250,16 @@ impl Query for QueryBuilder {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+enum OrderType {
+    Ascending,
+    Descending,
+}
+
 /// Invertable search order sorting term.
 #[derive(Debug, Clone, Copy)]
 pub struct SearchOrder {
-    descending: bool,
+    order: OrderType,
     term: SearchTerm,
 }
 
@@ -261,25 +267,24 @@ impl FromStr for SearchOrder {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
-        let (descending, term) = if let Some(value) = s.strip_prefix('-') {
-            (true, value)
+        let (order, term) = if let Some(value) = s.strip_prefix('-') {
+            (OrderType::Descending, value)
         } else {
-            (false, s.strip_prefix('+').unwrap_or(s))
+            (OrderType::Ascending, s.strip_prefix('+').unwrap_or(s))
         };
         let term = term
             .parse()
             .map_err(|_| Error::InvalidValue(format!("unknown search term: {term}")))?;
-        Ok(Self { descending, term })
+        Ok(Self { order, term })
     }
 }
 
 impl fmt::Display for SearchOrder {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let name = self.term.api();
-        if self.descending {
-            write!(f, "-{name}")
-        } else {
-            write!(f, "{name}")
+        match self.order {
+            OrderType::Descending => write!(f, "-{name}"),
+            OrderType::Ascending => write!(f, "{name}"),
         }
     }
 }
@@ -289,10 +294,9 @@ impl Api for SearchOrder {
     /// Translate a search order variant into the expected REST API v1 name.
     fn api(&self) -> Self::Output {
         let name = self.term.api();
-        if self.descending {
-            format!("{name} DESC")
-        } else {
-            format!("{name} ASC")
+        match self.order {
+            OrderType::Descending => format!("{name} DESC"),
+            OrderType::Ascending => format!("{name} ASC"),
         }
     }
 }
