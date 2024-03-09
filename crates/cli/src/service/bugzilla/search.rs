@@ -74,9 +74,13 @@ struct Params {
     )]
     order: Option<Vec<SearchOrder>>,
 
+    /// search using query grammar
+    #[arg(short = 'Q', long, help_heading = "Search related")]
+    query: Option<String>,
+
     /// search using quicksearch syntax
     #[arg(
-        short = 'Q',
+        short = 'S',
         long,
         help_heading = "Search related",
         long_help = indoc::indoc! {"
