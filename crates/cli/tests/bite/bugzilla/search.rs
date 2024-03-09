@@ -27,7 +27,7 @@ fn no_search_terms() {
     env::set_var("BUGBITE_BASE", "fake://bugbite");
     env::set_var("BUGBITE_SERVICE", "bugzilla");
 
-    for opts in [vec![], vec!["-f", "id"], vec!["-S", "id"]] {
+    for opts in [vec![], vec!["-f", "id"], vec!["-o", "id"]] {
         cmd("bite bugzilla search")
             .args(opts)
             .assert()
