@@ -194,6 +194,10 @@ struct Params {
     #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
     modified: Option<TimeDelta>,
 
+    /// strings to search for in comments
+    #[clap(long, value_name = "TERM", help_heading = "Content related")]
+    comment: Option<Vec<MaybeStdinVec<String>>>,
+
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
     summary: Option<Vec<MaybeStdinVec<String>>>,
@@ -238,6 +242,9 @@ impl Command {
         }
         if let Some(values) = params.id.as_ref() {
             query.id(values.iter().flatten());
+        }
+        if let Some(values) = params.comment.as_ref() {
+            query.comment(values.iter().flatten());
         }
         if let Some(values) = params.summary.as_ref() {
             query.summary(values.iter().flatten());

@@ -66,6 +66,20 @@ impl QueryBuilder {
         self.extend("id", values);
     }
 
+    pub fn comment<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        for value in values {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "longdesc");
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
+        }
+    }
+
     pub fn summary<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
