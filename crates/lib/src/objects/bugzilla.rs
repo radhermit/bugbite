@@ -111,6 +111,7 @@ pub struct Change {
 enum Alias {
     List(Vec<String>),
     String(String),
+    None,
 }
 
 /// Deserialize an alias field to a string.
@@ -131,6 +132,7 @@ fn alias_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error
             }
             None
         }
+        Alias::None => None,
     })
 }
 
