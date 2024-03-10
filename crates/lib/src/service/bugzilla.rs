@@ -234,6 +234,7 @@ impl Api for GroupField {
 #[strum(serialize_all = "kebab-case")]
 pub enum BugField {
     Id,
+    Alias,
     AssignedTo,
     Summary,
     Creator,
@@ -264,6 +265,7 @@ impl Api for BugField {
     fn api(&self) -> Self::Output {
         match self {
             Self::Id => "id",
+            Self::Alias => "alias",
             Self::AssignedTo => "assigned_to",
             Self::Summary => "summary",
             Self::Creator => "creator",

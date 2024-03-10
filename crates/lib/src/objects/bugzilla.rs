@@ -203,6 +203,7 @@ impl RenderSearch<BugField> for Bug {
         let field_to_string = |field: &BugField| -> String {
             match field {
                 BugField::Id => format!("{:<9}", self.id),
+                BugField::Alias => format!("{:<20}", stringify!(self.alias)),
                 BugField::AssignedTo => format!("{:<20}", stringify!(self.assigned_to)),
                 BugField::Summary => stringify!(self.summary),
                 BugField::Creator => format!("{:<20}", stringify!(self.creator)),
