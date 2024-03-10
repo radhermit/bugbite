@@ -129,10 +129,6 @@ struct Params {
     )]
     commenter: Option<Vec<String>>,
 
-    /// restrict by alias
-    #[arg(long, help_heading = "Attribute related")]
-    alias: Option<Vec<String>>,
-
     /// restrict by ID
     #[arg(long, help_heading = "Attribute related")]
     id: Option<Vec<MaybeStdinVec<u64>>>,
@@ -277,9 +273,6 @@ impl Command {
         }
         if let Some(values) = params.commenter.as_ref() {
             query.extend("commenter", values);
-        }
-        if let Some(values) = params.alias.as_ref() {
-            query.extend("alias", values);
         }
         if let Some(values) = params.keywords.as_ref() {
             query.extend("keywords", values);
