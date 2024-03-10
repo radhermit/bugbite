@@ -1,4 +1,5 @@
 use std::fmt;
+use std::num::NonZeroU64;
 
 use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
@@ -124,7 +125,7 @@ impl WebService for Service {
 
     fn get_request(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         attachments: bool,
         comments: bool,
         _history: bool,

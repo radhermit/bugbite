@@ -1,4 +1,5 @@
 use std::io::{stdout, Write};
+use std::num::NonZeroU64;
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -27,7 +28,7 @@ pub(super) struct Command {
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs
     #[clap(required = true, help_heading = "Arguments")]
-    ids: Vec<MaybeStdinVec<u64>>,
+    ids: Vec<MaybeStdinVec<NonZeroU64>>,
 }
 
 impl Command {

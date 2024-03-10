@@ -1,4 +1,5 @@
 use std::future::Future;
+use std::num::NonZeroU64;
 
 use reqwest::RequestBuilder;
 use url::Url;
@@ -82,7 +83,7 @@ pub(crate) trait WebService {
     /// Create a request for bugs, issues, or tickets by their IDs.
     fn get_request(
         &self,
-        _ids: &[u64],
+        _ids: &[NonZeroU64],
         _attachments: bool,
         _comments: bool,
         _history: bool,

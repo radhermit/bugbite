@@ -1,3 +1,4 @@
+use std::num::NonZeroU64;
 use std::{fs, str};
 
 use camino::Utf8Path;
@@ -11,7 +12,7 @@ use crate::Error;
 
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct CreateAttachment {
-    ids: Vec<u64>,
+    ids: Vec<NonZeroU64>,
     data: Base64,
     file_name: String,
     pub content_type: String,
@@ -67,7 +68,7 @@ pub(crate) struct AttachRequest {
 impl AttachRequest {
     pub(crate) fn new(
         service: &super::Service,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         mut attachments: Vec<CreateAttachment>,
     ) -> crate::Result<Self> {
         if attachments.is_empty() {
@@ -91,7 +92,7 @@ impl AttachRequest {
 }
 
 impl Request for AttachRequest {
-    type Output = Vec<Vec<u64>>;
+    type Output = Vec<Vec<NonZeroU64>>;
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {

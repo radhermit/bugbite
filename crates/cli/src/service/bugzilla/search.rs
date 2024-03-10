@@ -136,7 +136,7 @@ struct Params {
 
     /// restrict by ID
     #[arg(long, help_heading = "Attribute related")]
-    id: Option<Vec<MaybeStdinVec<u64>>>,
+    id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by component
     #[arg(short = 'C', long, help_heading = "Attribute related")]
@@ -185,11 +185,11 @@ struct Params {
 
     /// restrict by blockers
     #[arg(short = 'B', long, help_heading = "Attribute related")]
-    blocks: Option<Vec<MaybeStdinVec<u64>>>,
+    blocks: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by dependencies
     #[arg(short = 'D', long, help_heading = "Attribute related")]
-    depends: Option<Vec<MaybeStdinVec<u64>>>,
+    depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// created at this time or later
     #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
@@ -249,7 +249,7 @@ impl Command {
             query.attachments(value);
         }
         if let Some(values) = params.id.as_ref() {
-            query.id(values.iter().flatten());
+            query.id(values.iter().flatten().copied());
         }
         if let Some(values) = params.comment.as_ref() {
             query.comment(values.iter().flatten());

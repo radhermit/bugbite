@@ -1,3 +1,5 @@
+use std::num::NonZeroU64;
+
 use reqwest::ClientBuilder;
 use tracing::info;
 
@@ -23,14 +25,14 @@ impl Client {
     }
 
     /// Return the website URL for an item ID.
-    pub fn item_url(&self, id: u64) -> String {
+    pub fn item_url(&self, id: NonZeroU64) -> String {
         let base = self.service.config.web_base.as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
 
     pub async fn get(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         attachments: bool,
         comments: bool,
     ) -> crate::Result<Vec<Issue>> {

@@ -1,3 +1,5 @@
+use std::num::NonZeroU64;
+
 use url::Url;
 
 use crate::objects::bugzilla::Bug;
@@ -19,7 +21,7 @@ pub(crate) struct GetRequest {
 impl GetRequest {
     pub(super) fn new(
         service: &super::Service,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         attachments: bool,
         comments: bool,
         history: bool,

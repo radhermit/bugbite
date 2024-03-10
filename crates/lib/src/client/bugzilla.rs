@@ -1,3 +1,5 @@
+use std::num::NonZeroU64;
+
 use reqwest::ClientBuilder;
 use tracing::info;
 
@@ -6,6 +8,7 @@ use crate::service::bugzilla::attach::CreateAttachment;
 use crate::service::bugzilla::{Config, Service};
 use crate::time::TimeDelta;
 use crate::traits::{Query, Request, WebService};
+use crate::Error;
 
 #[derive(Debug)]
 pub struct Client {
@@ -25,23 +28,23 @@ impl Client {
     }
 
     /// Return the website URL for an item ID.
-    pub fn item_url(&self, id: u64) -> String {
+    pub fn item_url(&self, id: NonZeroU64) -> String {
         let base = self.service.base().as_str().trim_end_matches('/');
         format!("{base}/show_bug.cgi?id={id}")
     }
 
     pub async fn attach(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         attachments: Vec<CreateAttachment>,
-    ) -> crate::Result<Vec<Vec<u64>>> {
+    ) -> crate::Result<Vec<Vec<NonZeroU64>>> {
         let request = self.service.attach_request(ids, attachments)?;
         request.send(&self.service).await
     }
 
     pub async fn attachments(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         data: bool,
     ) -> crate::Result<Vec<Vec<Attachment>>> {
         let request = self.service.attachments_request(ids, data)?;
@@ -50,7 +53,7 @@ impl Client {
 
     pub async fn item_attachments(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         data: bool,
     ) -> crate::Result<Vec<Vec<Attachment>>> {
         let request = self.service.item_attachments_request(ids, data)?;
@@ -59,29 +62,40 @@ impl Client {
 
     pub async fn comments(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         created: Option<&TimeDelta>,
     ) -> crate::Result<Vec<Vec<Comment>>> {
         let request = self.service.comments_request(ids, created)?;
         request.send(&self.service).await
     }
 
-    pub async fn get(
+    pub async fn get<N>(
         &self,
-        ids: &[u64],
+        ids: &[N],
         attachments: bool,
         comments: bool,
         history: bool,
-    ) -> crate::Result<Vec<Bug>> {
+    ) -> crate::Result<Vec<Bug>>
+    where
+        N: TryInto<NonZeroU64> + Copy,
+        <N as TryInto<NonZeroU64>>::Error: std::fmt::Display,
+    {
+        // TODO: move ID conversion support to a macro
+        let ids = ids
+            .iter()
+            .copied()
+            .map(|x| x.try_into())
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| Error::InvalidValue(format!("invalid ID: {e}")))?;
         let request = self
             .service
-            .get_request(ids, attachments, comments, history)?;
+            .get_request(&ids, attachments, comments, history)?;
         request.send(&self.service).await
     }
 
     pub async fn history(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         created: Option<&TimeDelta>,
     ) -> crate::Result<Vec<Vec<Event>>> {
         let request = self.service.history_request(ids, created)?;

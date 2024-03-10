@@ -1,3 +1,4 @@
+use std::num::NonZeroU64;
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -49,7 +50,7 @@ pub(super) struct Command {
         value_name = "ID[,ID,...]",
         help_heading = "Arguments"
     )]
-    ids: Vec<MaybeStdinVec<u64>>,
+    ids: Vec<MaybeStdinVec<NonZeroU64>>,
 
     /// attachment paths
     #[clap(

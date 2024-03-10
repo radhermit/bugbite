@@ -59,10 +59,9 @@ impl QueryBuilder {
         Self::default()
     }
 
-    pub fn id<I, S>(&mut self, values: I)
+    pub fn id<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator<Item = NonZeroU64>,
     {
         self.extend("id", values);
     }

@@ -1,3 +1,5 @@
+use std::num::NonZeroU64;
+
 use chrono::offset::Utc;
 use serde_json::Value;
 use url::Url;
@@ -13,7 +15,7 @@ pub(crate) struct HistoryRequest(Url);
 impl HistoryRequest {
     pub(super) fn new(
         service: &super::Service,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         created: Option<&TimeDelta>,
     ) -> crate::Result<Self> {
         let [id, remaining_ids @ ..] = ids else {

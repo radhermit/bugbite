@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::fmt;
+use std::num::NonZeroU64;
 use std::str::FromStr;
 
 use reqwest::{ClientBuilder, RequestBuilder};
@@ -76,7 +77,7 @@ impl Service {
 
     pub(crate) fn attach_request(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         attachments: Vec<attach::CreateAttachment>,
     ) -> crate::Result<attach::AttachRequest> {
         attach::AttachRequest::new(self, ids, attachments)
@@ -84,7 +85,7 @@ impl Service {
 
     pub(crate) fn attachments_request(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         data: bool,
     ) -> crate::Result<attachments::AttachmentsRequest> {
         attachments::AttachmentsRequest::new(self, Ids::object(ids), data)
@@ -92,7 +93,7 @@ impl Service {
 
     pub(crate) fn item_attachments_request(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         data: bool,
     ) -> crate::Result<attachments::AttachmentsRequest> {
         attachments::AttachmentsRequest::new(self, Ids::item(ids), data)
@@ -100,7 +101,7 @@ impl Service {
 
     pub(crate) fn comments_request(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         created: Option<&TimeDelta>,
     ) -> crate::Result<comments::CommentsRequest> {
         comments::CommentsRequest::new(self, ids, created)
@@ -108,7 +109,7 @@ impl Service {
 
     pub(crate) fn history_request(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         created: Option<&TimeDelta>,
     ) -> crate::Result<history::HistoryRequest> {
         history::HistoryRequest::new(self, ids, created)
@@ -182,7 +183,7 @@ impl WebService for Service {
 
     fn get_request(
         &self,
-        ids: &[u64],
+        ids: &[NonZeroU64],
         attachments: bool,
         comments: bool,
         history: bool,
