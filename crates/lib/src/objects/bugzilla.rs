@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::serde::{non_empty_str, null_empty_vec};
 use crate::service::bugzilla::BugField;
@@ -108,29 +108,38 @@ pub struct Change {
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1534305).
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 #[serde(untagged)]
-pub enum Alias {
+enum Alias {
     List(Vec<String>),
     String(String),
 }
 
-impl Alias {
-    /// Return the main, non-empty alias if it exists.
-    pub fn display(&self) -> Option<&str> {
-        match self {
-            Self::String(value) if !value.is_empty() => Some(value.as_str()),
-            Self::List(values) if !values.is_empty() && !values[0].is_empty() => {
-                Some(values[0].as_str())
+/// Deserialize an alias field to a string.
+fn alias_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error> {
+    Alias::deserialize(d).map(|o| match o {
+        Alias::String(value) => {
+            if !value.is_empty() {
+                Some(value)
+            } else {
+                None
             }
-            _ => None,
         }
-    }
+        Alias::List(values) => {
+            if let Some(value) = values.into_iter().next() {
+                if !value.is_empty() {
+                    return Some(value);
+                }
+            }
+            None
+        }
+    })
 }
 
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 #[serde(default)]
 pub struct Bug {
     pub id: u64,
-    pub alias: Option<Alias>,
+    #[serde(deserialize_with = "alias_str")]
+    pub alias: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub assigned_to: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]

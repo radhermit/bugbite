@@ -170,7 +170,7 @@ impl Render for Bug {
         output_field!(f, "Platform", &self.platform);
         output_field!(f, "OS", &self.op_sys);
         writeln!(f, "{:<12} : {}", "ID", self.id)?;
-        output_field!(f, "Alias", self.alias.as_ref().and_then(|x| x.display()));
+        output_field!(f, "Alias", &self.alias);
         wrapped_csv(f, "Keywords", &self.keywords, width)?;
         wrapped_csv(f, "CC", &self.cc, width)?;
         wrapped_csv(f, "Blocks", &self.blocks, width)?;
