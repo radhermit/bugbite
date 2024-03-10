@@ -57,23 +57,26 @@ pub(super) struct ServiceCommand {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service() -> anyhow::Result<(String, Vec<String>, LevelFilter)> {
+    pub(crate) fn service() -> anyhow::Result<(String, Vec<String>)> {
         // parse pre-subcommand options with main command parsing failure fallback
         let Ok(cmd) = Self::try_parse() else {
             Command::parse();
             panic!("command parsing should have exited");
         };
 
-        // pull the first remaining, unparsed arg
         let mut remaining = &cmd.remaining[..];
-        let arg = remaining.first().map(|x| x.as_str()).unwrap_or_default();
-        let log_level = cmd.options.verbosity.log_level_filter();
+        // pull the first, remaining, non-option argument
+        let subcmd = remaining
+            .iter()
+            .find(|x| !x.starts_with('-'))
+            .map(|x| x.as_str())
+            .unwrap_or_default();
         let subcmds: HashSet<_> = Subcommand::VARIANTS.iter().copied().collect();
         let services: HashSet<_> = ServiceKind::VARIANTS.iter().copied().collect();
 
         // early return for non-service subcommands
-        if subcmds.contains(arg) && !services.contains(arg) {
-            return Ok((Default::default(), env::args().collect(), log_level));
+        if subcmds.contains(subcmd) && !services.contains(subcmd) {
+            return Ok((Default::default(), env::args().collect()));
         }
 
         let config = Config::load(cmd.options.bite.config.as_deref())?;
@@ -82,8 +85,8 @@ impl ServiceCommand {
         let service = cmd.options.service.service;
 
         // connection name used as subcommand overrides environment and option
-        if !subcmds.contains(arg) && config.get(arg).is_ok() {
-            connection = Some(arg);
+        if !subcmds.contains(subcmd) && config.get(subcmd).is_ok() {
+            connection = Some(subcmd);
             remaining = &cmd.remaining[1..];
         }
 
@@ -91,19 +94,19 @@ impl ServiceCommand {
         let (selected, base) = match (connection, base, service) {
             (Some(name), _, _) => {
                 let (kind, base) = config.get(name)?;
-                if services.contains(arg) && kind.as_ref() != arg {
-                    anyhow::bail!("{arg} not compatible with connection: {name}");
+                if services.contains(subcmd) && kind.as_ref() != subcmd {
+                    anyhow::bail!("{subcmd} not compatible with connection: {name}");
                 }
                 (kind, base)
             }
             (None, Some(base), Some(service)) => (service, base.to_string()),
             (None, None, None) => {
-                if !arg.starts_with('-') && !subcmds.contains(arg) {
+                if !subcmd.is_empty() && !subcmds.contains(subcmd) {
                     // use default service from config if it exists
                     config.get_default()?
-                } else if services.contains(arg) {
+                } else if services.contains(subcmd) {
                     Command::parse();
-                    anyhow::bail!("no {arg} connection specified");
+                    anyhow::bail!("no {subcmd} connection specified");
                 } else {
                     Command::parse();
                     panic!("command parsing should have previously exited");
@@ -116,14 +119,14 @@ impl ServiceCommand {
         let mut args = vec![env::args().next().unwrap_or_default()];
 
         // inject subcommand for requested service type if missing
-        if !subcmds.contains(arg) {
+        if !subcmds.contains(subcmd) {
             args.push(selected.to_string());
         }
 
         // append the remaining unparsed args
         args.extend(remaining.iter().map(|s| s.to_string()));
 
-        Ok((base, args, log_level))
+        Ok((base, args))
     }
 }
 
@@ -213,8 +216,6 @@ impl LogLevel for DefaultLevel {
 
 #[derive(Debug, Args)]
 pub(crate) struct Options {
-    #[command(flatten)]
-    verbosity: Verbosity<DefaultLevel>,
     #[clap(flatten)]
     bite: BiteOpts,
     #[clap(flatten)]
@@ -254,6 +255,9 @@ pub(crate) struct Options {
 )]
 pub(crate) struct Command {
     #[clap(flatten)]
+    verbosity: Verbosity<DefaultLevel>,
+
+    #[clap(flatten)]
     options: Options,
 
     #[command(subcommand)]
@@ -261,17 +265,8 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(
-        self,
-        default_log_level: LevelFilter,
-        base: String,
-    ) -> anyhow::Result<ExitCode> {
-        // enable logging
-        if self.options.verbosity.is_present() {
-            enable_logging(self.options.verbosity.log_level_filter());
-        } else {
-            enable_logging(default_log_level);
-        };
+    pub(super) fn run(self, base: String) -> anyhow::Result<ExitCode> {
+        enable_logging(self.verbosity.log_level_filter());
 
         let client = Client::builder()
             .insecure(self.options.bite.insecure)
