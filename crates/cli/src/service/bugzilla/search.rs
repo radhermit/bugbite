@@ -27,7 +27,7 @@ struct Params {
         help_heading = "Search related",
         value_name = "FIELD[,FIELD,...]",
         value_delimiter = ',',
-        default_value = "id,assigned-to,summary",
+        default_value = "id,summary",
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(BugField::VARIANTS)
                 .map(|s| s.parse::<BugField>().unwrap()),
