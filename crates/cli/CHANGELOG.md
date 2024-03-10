@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.0.3
+
+### Added
+
+#### Bugzilla
+- attach: Support pulling bug IDs from stdin.
+- get: Add support for the keywords, platform, deadline, and OS bug fields.
+- search: Add support for the alias, keywords, depends, blocks, and cc fields.
+- search: Support ordering search results by resolution, depends, and deadline.
+- search: Drop assigned-to from default fields.
+- search: Drop support for searching aliases.
+- search: Rename -S/--sort option to -o/--order.
+- search: Support `+` prefixes for ascending order with search order values.
+- search: Support initial comment content searching.
+
 ## 0.0.2
 
 ### Added
