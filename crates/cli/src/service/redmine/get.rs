@@ -34,14 +34,14 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
-        let ids: Vec<_> = self.ids.iter().flatten().copied().collect();
+        let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
 
         if self.options.browser {
             let urls = ids.iter().map(|id| client.item_url(*id));
             launch_browser(urls)?;
         } else {
             let comments = !self.options.no_comments;
-            let issues = async_block!(client.get(&ids, false, comments))?;
+            let issues = async_block!(client.get(ids, false, comments))?;
             render_items(issues)?;
         }
 

@@ -42,7 +42,7 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
-        let ids: Vec<_> = self.ids.iter().flatten().copied().collect();
+        let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
 
         if self.options.browser {
             let urls = ids.iter().map(|id| client.item_url(*id));
@@ -51,7 +51,7 @@ impl Command {
             let attachments = !self.options.no_attachments;
             let comments = !self.options.no_comments;
             let history = !self.options.no_history;
-            let bugs = async_block!(client.get(&ids, attachments, comments, history))?;
+            let bugs = async_block!(client.get(ids, attachments, comments, history))?;
             render_items(bugs)?;
         }
 
