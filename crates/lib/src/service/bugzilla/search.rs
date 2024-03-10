@@ -1,4 +1,5 @@
 use std::fmt;
+use std::num::NonZeroU64;
 use std::str::FromStr;
 
 use chrono::offset::Utc;
@@ -112,6 +113,10 @@ impl QueryBuilder {
     {
         let order = terms.into_iter().map(|x| x.api()).join(",");
         self.insert("order", order);
+    }
+
+    pub fn limit(&mut self, value: NonZeroU64) {
+        self.insert("limit", value);
     }
 
     pub fn commenter<I, S>(&mut self, values: I)

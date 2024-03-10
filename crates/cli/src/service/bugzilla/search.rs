@@ -1,3 +1,4 @@
+use std::num::NonZeroU64;
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -43,6 +44,10 @@ struct Params {
             {}", BugField::VARIANTS.join(", ")}
     )]
     fields: Vec<BugField>,
+
+    /// limit the number of bugs returned
+    #[arg(short, long, help_heading = "Search related")]
+    limit: Option<NonZeroU64>,
 
     /// order query results
     #[arg(
@@ -216,6 +221,9 @@ impl Command {
         let params = &self.params;
 
         // custom
+        if let Some(value) = params.limit.as_ref() {
+            query.limit(*value);
+        }
         if let Some(value) = params.created.as_ref() {
             query.created_after(value);
         }
