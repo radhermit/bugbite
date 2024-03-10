@@ -7,6 +7,7 @@ Status       : CONFIRMED
 Whiteboard   : whiteboard
 Component    : component
 Product      : product
+Platform     : All
 OS           : Linux
 ID           : 12345
 Alias        : alias
@@ -21,6 +22,7 @@ Status       : RESOLVED
 Resolution   : FIXED
 Component    : component1
 Product      : product1
+Platform     : All
 OS           : Linux
 ID           : 23456
 ==========================================================================================
@@ -32,5 +34,6 @@ Updated      : 2020-01-18 18:37:44 UTC
 Status       : RESOLVED
 Component    : component2
 Product      : product1
+Platform     : All
 OS           : Linux
 ID           : 34567

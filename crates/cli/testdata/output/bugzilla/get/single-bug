@@ -7,6 +7,7 @@ Status       : CONFIRMED
 Whiteboard   : whiteboard
 Component    : component
 Product      : product
+Platform     : All
 OS           : Linux
 ID           : 12345
 Alias        : alias
