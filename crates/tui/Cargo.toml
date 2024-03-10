@@ -19,6 +19,6 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0.80"
-bugbite = { path = "../lib", version = "0.0.2" }
+bugbite = { path = "../lib", version = "0.0.3" }
 crossterm = "0.27.0"
 ratatui = "0.26.1"
