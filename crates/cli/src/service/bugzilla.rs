@@ -160,6 +160,7 @@ impl Render for Bug {
         output_field!(f, "Creator", &self.creator);
         output_field!(f, "Created", &self.created);
         output_field!(f, "Updated", &self.updated);
+        output_field!(f, "Deadline", &self.deadline);
         output_field!(f, "Status", &self.status);
         output_field!(f, "Resolution", &self.resolution);
         output_field!(f, "Duplicate of", &self.duplicate_of);

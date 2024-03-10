@@ -139,6 +139,7 @@ pub struct Bug {
     pub created: Option<DateTime<Utc>>,
     #[serde(rename = "last_change_time")]
     pub updated: Option<DateTime<Utc>>,
+    pub deadline: Option<NaiveDate>,
     #[serde(deserialize_with = "non_empty_str")]
     pub summary: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
@@ -196,6 +197,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Creator => format!("{:<20}", stringify!(self.creator)),
                 BugField::Created => stringify!(self.created),
                 BugField::Updated => stringify!(self.updated),
+                BugField::Deadline => stringify!(self.deadline),
                 BugField::Status => format!("{:<20}", stringify!(self.status)),
                 BugField::Resolution => format!("{:<20}", stringify!(self.resolution)),
                 BugField::Whiteboard => format!("{:<20}", stringify!(self.whiteboard)),
