@@ -164,8 +164,9 @@ impl Render for Bug {
         output_field!(f, "Resolution", &self.resolution);
         output_field!(f, "Duplicate of", &self.duplicate_of);
         output_field!(f, "Whiteboard", &self.whiteboard);
-        output_field!(f, "Product", &self.product);
         output_field!(f, "Component", &self.component);
+        output_field!(f, "Product", &self.product);
+        output_field!(f, "OS", &self.op_sys);
         writeln!(f, "{:<12} : {}", "ID", self.id)?;
         output_field!(f, "Alias", self.alias.as_ref().and_then(|x| x.display()));
         wrapped_csv(f, "Keywords", &self.keywords, width)?;

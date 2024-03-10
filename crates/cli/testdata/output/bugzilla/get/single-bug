@@ -5,8 +5,9 @@ Created      : 2010-04-21 21:28:20 UTC
 Updated      : 2024-01-18 18:37:44 UTC
 Status       : CONFIRMED
 Whiteboard   : whiteboard
-Product      : product
 Component    : component
+Product      : product
+OS           : Linux
 ID           : 12345
 Alias        : alias
 CC           : person1, person2
