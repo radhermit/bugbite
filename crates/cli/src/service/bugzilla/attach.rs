@@ -1,5 +1,6 @@
 use std::process::ExitCode;
 
+use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::attach::CreateAttachment;
 use camino::Utf8PathBuf;
@@ -38,6 +39,8 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
+    // TODO: rework stdin support once clap supports custom containers
+    // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs
     #[clap(
         num_args = 1,
@@ -46,7 +49,7 @@ pub(super) struct Command {
         value_name = "ID[,ID,...]",
         help_heading = "Arguments"
     )]
-    ids: Vec<u64>,
+    ids: Vec<MaybeStdinVec<u64>>,
 
     /// attachment paths
     #[clap(
@@ -76,9 +79,10 @@ impl Command {
             attachments.push(attachment);
         }
 
-        let attachment_ids = async_block!(client.attach(&self.ids, attachments))?;
+        let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
+        let attachment_ids = async_block!(client.attach(ids, attachments))?;
 
-        let item_ids = self.ids.iter().map(|x| x.to_string()).join(", ");
+        let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
         for (file, ids) in self.files.iter().zip(attachment_ids.iter()) {
             let ids = ids.iter().map(|x| x.to_string()).join(", ");
             info!("{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})");
