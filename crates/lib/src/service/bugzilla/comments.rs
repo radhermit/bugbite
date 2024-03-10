@@ -13,14 +13,11 @@ pub(crate) struct CommentsRequest {
 }
 
 impl CommentsRequest {
-    pub(super) fn new<S>(
+    pub(super) fn new(
         service: &super::Service,
-        ids: &[S],
+        ids: &[u64],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<Self>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Self> {
         let [id, remaining_ids @ ..] = ids else {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };

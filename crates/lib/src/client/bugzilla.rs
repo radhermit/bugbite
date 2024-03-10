@@ -25,10 +25,7 @@ impl Client {
     }
 
     /// Return the website URL for an item ID.
-    pub fn item_url<S>(&self, id: S) -> String
-    where
-        S: std::fmt::Display,
-    {
+    pub fn item_url(&self, id: u64) -> String {
         let base = self.service.base().as_str().trim_end_matches('/');
         format!("{base}/show_bug.cgi?id={id}")
     }
@@ -42,62 +39,51 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn attachments<S>(&self, ids: &[S], data: bool) -> crate::Result<Vec<Vec<Attachment>>>
-    where
-        S: std::fmt::Display,
-    {
+    pub async fn attachments(
+        &self,
+        ids: &[u64],
+        data: bool,
+    ) -> crate::Result<Vec<Vec<Attachment>>> {
         let request = self.service.attachments_request(ids, data)?;
         request.send(&self.service).await
     }
 
-    pub async fn item_attachments<S>(
+    pub async fn item_attachments(
         &self,
-        ids: &[S],
+        ids: &[u64],
         data: bool,
-    ) -> crate::Result<Vec<Vec<Attachment>>>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Vec<Vec<Attachment>>> {
         let request = self.service.item_attachments_request(ids, data)?;
         request.send(&self.service).await
     }
 
-    pub async fn comments<S>(
+    pub async fn comments(
         &self,
-        ids: &[S],
+        ids: &[u64],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<Vec<Vec<Comment>>>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Vec<Vec<Comment>>> {
         let request = self.service.comments_request(ids, created)?;
         request.send(&self.service).await
     }
 
-    pub async fn get<S>(
+    pub async fn get(
         &self,
-        ids: &[S],
+        ids: &[u64],
         attachments: bool,
         comments: bool,
         history: bool,
-    ) -> crate::Result<Vec<Bug>>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Vec<Bug>> {
         let request = self
             .service
             .get_request(ids, attachments, comments, history)?;
         request.send(&self.service).await
     }
 
-    pub async fn history<S>(
+    pub async fn history(
         &self,
-        ids: &[S],
+        ids: &[u64],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<Vec<Vec<Event>>>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Vec<Vec<Event>>> {
         let request = self.service.history_request(ids, created)?;
         request.send(&self.service).await
     }

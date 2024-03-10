@@ -22,16 +22,13 @@ impl Client {
         &self.service
     }
 
-    pub async fn get<S>(
+    pub async fn get(
         &self,
-        ids: &[S],
+        ids: &[u64],
         attachments: bool,
         comments: bool,
         history: bool,
-    ) -> crate::Result<Vec<Issue>>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Vec<Issue>> {
         let request = self
             .service
             .get_request(ids, attachments, comments, history)?;

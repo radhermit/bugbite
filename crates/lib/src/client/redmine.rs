@@ -23,23 +23,17 @@ impl Client {
     }
 
     /// Return the website URL for an item ID.
-    pub fn item_url<S>(&self, id: S) -> String
-    where
-        S: std::fmt::Display,
-    {
+    pub fn item_url(&self, id: u64) -> String {
         let base = self.service.config.web_base.as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
 
-    pub async fn get<S>(
+    pub async fn get(
         &self,
-        ids: &[S],
+        ids: &[u64],
         attachments: bool,
         comments: bool,
-    ) -> crate::Result<Vec<Issue>>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Vec<Issue>> {
         let request = self
             .service
             .get_request(ids, attachments, comments, false)?;

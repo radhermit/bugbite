@@ -80,16 +80,13 @@ pub(crate) trait WebService {
     }
 
     /// Create a request for bugs, issues, or tickets by their IDs.
-    fn get_request<S>(
+    fn get_request(
         &self,
-        _ids: &[S],
+        _ids: &[u64],
         _attachments: bool,
         _comments: bool,
         _history: bool,
-    ) -> crate::Result<Self::GetRequest>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Self::GetRequest> {
         Err(Error::Unsupported(format!(
             "{}: get requests unsupported",
             self.kind()

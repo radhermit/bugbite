@@ -82,47 +82,35 @@ impl Service {
         attach::AttachRequest::new(self, ids, attachments)
     }
 
-    pub(crate) fn attachments_request<S>(
+    pub(crate) fn attachments_request(
         &self,
-        ids: &[S],
+        ids: &[u64],
         data: bool,
-    ) -> crate::Result<attachments::AttachmentsRequest>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<attachments::AttachmentsRequest> {
         attachments::AttachmentsRequest::new(self, Ids::object(ids), data)
     }
 
-    pub(crate) fn item_attachments_request<S>(
+    pub(crate) fn item_attachments_request(
         &self,
-        ids: &[S],
+        ids: &[u64],
         data: bool,
-    ) -> crate::Result<attachments::AttachmentsRequest>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<attachments::AttachmentsRequest> {
         attachments::AttachmentsRequest::new(self, Ids::item(ids), data)
     }
 
-    pub(crate) fn comments_request<S>(
+    pub(crate) fn comments_request(
         &self,
-        ids: &[S],
+        ids: &[u64],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<comments::CommentsRequest>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<comments::CommentsRequest> {
         comments::CommentsRequest::new(self, ids, created)
     }
 
-    pub(crate) fn history_request<S>(
+    pub(crate) fn history_request(
         &self,
-        ids: &[S],
+        ids: &[u64],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<history::HistoryRequest>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<history::HistoryRequest> {
         history::HistoryRequest::new(self, ids, created)
     }
 }
@@ -192,16 +180,13 @@ impl WebService for Service {
         }
     }
 
-    fn get_request<S>(
+    fn get_request(
         &self,
-        ids: &[S],
+        ids: &[u64],
         attachments: bool,
         comments: bool,
         history: bool,
-    ) -> crate::Result<Self::GetRequest>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Self::GetRequest> {
         get::GetRequest::new(self, ids, attachments, comments, history)
     }
 

@@ -70,7 +70,7 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
-        let ids: Vec<_> = self.ids.iter().flatten().collect();
+        let ids: Vec<_> = self.ids.iter().flatten().copied().collect();
         let mut stdout = stdout().lock();
         let get_data = !self.options.list;
         let multiple_bugs = ids.len() > 1 && self.options.item_id;
