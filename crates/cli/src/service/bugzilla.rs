@@ -156,30 +156,30 @@ impl Render for Modification<'_> {
 impl Render for Bug {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         output_field_wrapped!(f, "Summary", &self.summary, width);
-        output_field!(f, "Assignee", &self.assigned_to);
-        output_field!(f, "Creator", &self.creator);
-        output_field!(f, "Created", &self.created);
-        output_field!(f, "Updated", &self.updated);
-        output_field!(f, "Deadline", &self.deadline);
-        output_field!(f, "Status", &self.status);
-        output_field!(f, "Resolution", &self.resolution);
-        output_field!(f, "Duplicate of", &self.duplicate_of);
-        output_field!(f, "Whiteboard", &self.whiteboard);
-        output_field!(f, "Component", &self.component);
-        output_field!(f, "Version", &self.version);
-        output_field!(f, "Target", &self.target);
-        output_field!(f, "Product", &self.product);
-        output_field!(f, "Platform", &self.platform);
-        output_field!(f, "OS", &self.op_sys);
-        output_field!(f, "Priority", &self.priority);
-        output_field!(f, "Severity", &self.severity);
+        output_field!(f, "Assignee", &self.assigned_to, width);
+        output_field!(f, "Creator", &self.creator, width);
+        output_field!(f, "Created", &self.created, width);
+        output_field!(f, "Updated", &self.updated, width);
+        output_field!(f, "Deadline", &self.deadline, width);
+        output_field!(f, "Status", &self.status, width);
+        output_field!(f, "Resolution", &self.resolution, width);
+        output_field!(f, "Duplicate of", &self.duplicate_of, width);
+        output_field!(f, "Whiteboard", &self.whiteboard, width);
+        output_field!(f, "Component", &self.component, width);
+        output_field!(f, "Version", &self.version, width);
+        output_field!(f, "Target", &self.target, width);
+        output_field!(f, "Product", &self.product, width);
+        output_field!(f, "Platform", &self.platform, width);
+        output_field!(f, "OS", &self.op_sys, width);
+        output_field!(f, "Priority", &self.priority, width);
+        output_field!(f, "Severity", &self.severity, width);
         writeln!(f, "{:<12} : {}", "ID", self.id)?;
-        output_field!(f, "Alias", &self.alias);
+        output_field!(f, "Alias", &self.alias, width);
         wrapped_csv(f, "Keywords", &self.keywords, width)?;
         wrapped_csv(f, "CC", &self.cc, width)?;
         wrapped_csv(f, "Blocks", &self.blocks, width)?;
         wrapped_csv(f, "Depends on", &self.depends_on, width)?;
-        output_field!(f, "URL", &self.url);
+        output_field!(f, "URL", &self.url, width);
         if !self.see_also.is_empty() {
             truncated_list(f, "See also", &self.see_also, width)?;
         }

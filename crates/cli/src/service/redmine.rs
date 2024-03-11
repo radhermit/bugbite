@@ -74,9 +74,9 @@ impl Render for Comment {
 impl Render for Issue {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         output_field_wrapped!(f, "Summary", &self.summary, width);
-        output_field!(f, "Reporter", &self.creator);
-        output_field!(f, "Created", &self.created);
-        output_field!(f, "Updated", &self.updated);
+        output_field!(f, "Reporter", &self.creator, width);
+        output_field!(f, "Created", &self.created, width);
+        output_field!(f, "Updated", &self.updated, width);
         writeln!(f, "{:<12} : {}", "ID", self.id)?;
 
         // don't count the description as a comment

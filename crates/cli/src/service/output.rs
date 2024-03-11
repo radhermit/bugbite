@@ -47,7 +47,8 @@ where
         count += 1;
         let line = item.render(fields);
         if !line.is_empty() {
-            writeln!(stdout, "{}", truncate(&line, *COLUMNS))?;
+            let data = truncate(&line, *COLUMNS);
+            writeln!(stdout, "{data}")?;
         }
     }
 
@@ -108,9 +109,11 @@ where
 }
 
 macro_rules! output_field {
-    ($fmt:expr, $name:expr, $value:expr) => {
+    ($fmt:expr, $name:expr, $value:expr, $width:expr) => {
         if let Some(value) = $value {
-            writeln!($fmt, "{:<12} : {value}", $name)?;
+            let line = format!("{:<12} : {value}", $name);
+            let data = $crate::utils::truncate(&line, *$crate::utils::COLUMNS);
+            writeln!($fmt, "{data}")?;
         }
     };
 }
