@@ -136,6 +136,11 @@ fn alias_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error
     })
 }
 
+/// Deserialize a version string setting the bugzilla default of `unspecified` to None.
+pub(crate) fn default_version_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error> {
+    non_empty_str(d).map(|o| o.filter(|s| s != "unspecified"))
+}
+
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 #[serde(default)]
 pub struct Bug {
@@ -163,6 +168,8 @@ pub struct Bug {
     pub product: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub component: Option<String>,
+    #[serde(deserialize_with = "default_version_str")]
+    pub version: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub platform: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
@@ -217,6 +224,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Whiteboard => format!("{:<20}", stringify!(self.whiteboard)),
                 BugField::Product => format!("{:<20}", stringify!(self.product)),
                 BugField::Component => format!("{:<20}", stringify!(self.component)),
+                BugField::Version => format!("{:<20}", stringify!(self.version)),
                 BugField::Platform => format!("{:<20}", stringify!(self.platform)),
                 BugField::Os => format!("{:<20}", stringify!(self.op_sys)),
                 BugField::DependsOn => format!("{:<20}", self.depends_on.iter().join(",")),
