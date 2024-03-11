@@ -167,6 +167,7 @@ impl Render for Bug {
         output_field!(f, "Whiteboard", &self.whiteboard);
         output_field!(f, "Component", &self.component);
         output_field!(f, "Version", &self.version);
+        output_field!(f, "Target", &self.target);
         output_field!(f, "Product", &self.product);
         output_field!(f, "Platform", &self.platform);
         output_field!(f, "OS", &self.op_sys);

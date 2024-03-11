@@ -15,7 +15,7 @@ use super::{stringify, Base64, Item};
 
 /// Common default values used for unset fields.
 pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
-    ["unspecified", "Unspecified"]
+    ["unspecified", "Unspecified", "---"]
         .iter()
         .map(|s| s.to_string())
         .collect()
@@ -184,6 +184,8 @@ pub struct Bug {
     pub platform: Option<String>,
     #[serde(deserialize_with = "unset_value_str")]
     pub op_sys: Option<String>,
+    #[serde(rename = "target_milestone", deserialize_with = "unset_value_str")]
+    pub target: Option<String>,
     #[serde(deserialize_with = "null_empty_vec")]
     pub keywords: Vec<String>,
     #[serde(deserialize_with = "null_empty_vec")]
@@ -235,6 +237,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Product => format!("{:<20}", stringify!(self.product)),
                 BugField::Component => format!("{:<20}", stringify!(self.component)),
                 BugField::Version => format!("{:<20}", stringify!(self.version)),
+                BugField::Target => format!("{:<20}", stringify!(self.target)),
                 BugField::Platform => format!("{:<20}", stringify!(self.platform)),
                 BugField::Os => format!("{:<20}", stringify!(self.op_sys)),
                 BugField::DependsOn => format!("{:<20}", self.depends_on.iter().join(",")),

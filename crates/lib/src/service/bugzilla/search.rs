@@ -330,6 +330,7 @@ pub enum SearchTerm {
     Severity,
     Status,
     Summary,
+    Target,
     Version,
     Votes,
 }
@@ -360,6 +361,7 @@ impl Api for SearchTerm {
             Self::Severity => "bug_severity",
             Self::Status => "bug_status",
             Self::Summary => "short_desc",
+            Self::Target => "target_milestone",
             Self::Version => "version",
             Self::Votes => "votes",
         }
