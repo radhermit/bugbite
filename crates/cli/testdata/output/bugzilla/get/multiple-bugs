@@ -9,6 +9,8 @@ Component    : component
 Product      : product
 Platform     : All
 OS           : Linux
+Priority     : High
+Severity     : normal
 ID           : 12345
 Alias        : alias
 CC           : person1, person2
@@ -24,6 +26,8 @@ Component    : component1
 Product      : product1
 Platform     : All
 OS           : Linux
+Priority     : High
+Severity     : high
 ID           : 23456
 ==========================================================================================
 Summary      : summary1
@@ -36,4 +40,6 @@ Component    : component2
 Product      : product1
 Platform     : All
 OS           : Linux
+Priority     : High
+Severity     : high
 ID           : 34567

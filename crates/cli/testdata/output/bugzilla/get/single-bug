@@ -9,6 +9,8 @@ Component    : component
 Product      : product
 Platform     : All
 OS           : Linux
+Priority     : High
+Severity     : normal
 ID           : 12345
 Alias        : alias
 CC           : person1, person2
