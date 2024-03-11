@@ -93,26 +93,30 @@ pub(crate) fn truncated_list<W, S>(
 ) -> std::io::Result<()>
 where
     W: std::io::Write,
-    S: AsRef<str>,
+    S: std::fmt::Display,
 {
     match data {
-        [] => Ok(()),
-        [value] => writeln!(f, "{name:<12} : {}", truncate(value.as_ref(), width - 15)),
+        [] => (),
+        [value] => {
+            let line = format!("{name:<12} : {value}");
+            writeln!(f, "{}", truncate(&line, width))?;
+        }
         values => {
-            let list = values
-                .iter()
-                .map(|s| truncate(s.as_ref(), width - 2))
-                .join("\n  ");
-            writeln!(f, "{name:<12} :\n  {list}")
+            writeln!(f, "{name:<12} :")?;
+            for value in values {
+                let line = format!("  {value}");
+                writeln!(f, "{}", truncate(&line, width))?;
+            }
         }
     }
+    Ok(())
 }
 
 macro_rules! output_field {
     ($fmt:expr, $name:expr, $value:expr, $width:expr) => {
         if let Some(value) = $value {
             let line = format!("{:<12} : {value}", $name);
-            let data = $crate::utils::truncate(&line, *$crate::utils::COLUMNS);
+            let data = $crate::utils::truncate(&line, $width);
             writeln!($fmt, "{data}")?;
         }
     };
