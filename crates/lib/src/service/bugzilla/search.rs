@@ -16,8 +16,7 @@ use crate::Error;
 use super::{BugField, FilterField};
 
 // default fields to return for searches
-static DEFAULT_SEARCH_FIELDS: &[BugField] =
-    &[BugField::Id, BugField::AssignedTo, BugField::Summary];
+static DEFAULT_SEARCH_FIELDS: &[BugField] = &[BugField::Id, BugField::Summary];
 
 #[derive(Debug)]
 pub(crate) struct SearchRequest(url::Url);
