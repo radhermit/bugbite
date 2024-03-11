@@ -254,6 +254,7 @@ pub enum BugField {
     Summary,
     Target,
     Updated,
+    Url,
     Version,
     Whiteboard,
 }
@@ -288,6 +289,7 @@ impl Api for BugField {
             Self::Status => "status",
             Self::Summary => "summary",
             Self::Target => "target_milestone",
+            Self::Url => "url",
             Self::Updated => "last_change_time",
             Self::Version => "version",
             Self::Whiteboard => "whiteboard",

@@ -179,8 +179,9 @@ impl Render for Bug {
         wrapped_csv(f, "CC", &self.cc, width)?;
         wrapped_csv(f, "Blocks", &self.blocks, width)?;
         wrapped_csv(f, "Depends on", &self.depends_on, width)?;
-        if !self.urls.is_empty() {
-            truncated_list(f, "See also", &self.urls, width)?;
+        output_field!(f, "URL", &self.url);
+        if !self.see_also.is_empty() {
+            truncated_list(f, "See also", &self.see_also, width)?;
         }
 
         // don't count the bug description as a comment

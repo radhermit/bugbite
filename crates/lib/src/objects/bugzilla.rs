@@ -200,8 +200,10 @@ pub struct Bug {
     pub depends_on: Vec<u64>,
     #[serde(rename = "dupe_of")]
     pub duplicate_of: Option<u64>,
-    #[serde(rename = "see_also", deserialize_with = "null_empty_vec")]
-    pub urls: Vec<String>,
+    #[serde(deserialize_with = "null_empty_vec")]
+    pub see_also: Vec<String>,
+    #[serde(deserialize_with = "non_empty_str")]
+    pub url: Option<String>,
     pub comments: Vec<Comment>,
     pub attachments: Vec<Attachment>,
     pub history: Vec<Event>,
@@ -248,6 +250,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Summary => stringify!(self.summary),
                 BugField::Target => format!("{:<20}", stringify!(self.target)),
                 BugField::Updated => stringify!(self.updated),
+                BugField::Url => format!("{:<20}", stringify!(self.url)),
                 BugField::Version => format!("{:<20}", stringify!(self.version)),
                 BugField::Whiteboard => format!("{:<20}", stringify!(self.whiteboard)),
             }
