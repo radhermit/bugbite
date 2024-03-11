@@ -11,6 +11,9 @@ use crate::traits::RenderSearch;
 
 use super::{stringify, Base64, Item};
 
+/// Default version used by bugzilla.
+pub(crate) const DEFAULT_VERSION: &'static str = "unspecified";
+
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Attachment {
     pub id: u64,
@@ -136,9 +139,9 @@ fn alias_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error
     })
 }
 
-/// Deserialize a version string setting the bugzilla default of `unspecified` to None.
+/// Deserialize a version string setting the bugzilla default to None.
 pub(crate) fn default_version_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error> {
-    non_empty_str(d).map(|o| o.filter(|s| s != "unspecified"))
+    non_empty_str(d).map(|o| o.filter(|s| s != DEFAULT_VERSION))
 }
 
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
