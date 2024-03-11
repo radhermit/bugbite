@@ -1,8 +1,10 @@
 use std::cmp::Ordering;
+use std::collections::HashSet;
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
 use itertools::Itertools;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::serde::{non_empty_str, null_empty_vec};
@@ -11,8 +13,13 @@ use crate::traits::RenderSearch;
 
 use super::{stringify, Base64, Item};
 
-/// Default version used by bugzilla.
-pub(crate) const DEFAULT_VERSION: &'static str = "unspecified";
+/// Common default values used for unset fields.
+pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
+    ["unspecified", "Unspecified"]
+        .iter()
+        .map(|s| s.to_string())
+        .collect()
+});
 
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Attachment {
@@ -139,9 +146,9 @@ fn alias_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error
     })
 }
 
-/// Deserialize a version string setting the bugzilla default to None.
-pub(crate) fn default_version_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error> {
-    non_empty_str(d).map(|o| o.filter(|s| s != DEFAULT_VERSION))
+/// Deserialize a string field value setting common unset values to None.
+pub(crate) fn unset_value_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error> {
+    non_empty_str(d).map(|o| o.filter(|s| !UNSET_VALUES.contains(s)))
 }
 
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
@@ -171,11 +178,11 @@ pub struct Bug {
     pub product: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub component: Option<String>,
-    #[serde(deserialize_with = "default_version_str")]
+    #[serde(deserialize_with = "unset_value_str")]
     pub version: Option<String>,
-    #[serde(deserialize_with = "non_empty_str")]
+    #[serde(deserialize_with = "unset_value_str")]
     pub platform: Option<String>,
-    #[serde(deserialize_with = "non_empty_str")]
+    #[serde(deserialize_with = "unset_value_str")]
     pub op_sys: Option<String>,
     #[serde(deserialize_with = "null_empty_vec")]
     pub keywords: Vec<String>,
