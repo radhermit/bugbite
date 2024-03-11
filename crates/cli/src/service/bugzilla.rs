@@ -171,6 +171,8 @@ impl Render for Bug {
         output_field!(f, "Product", &self.product);
         output_field!(f, "Platform", &self.platform);
         output_field!(f, "OS", &self.op_sys);
+        output_field!(f, "Priority", &self.priority);
+        output_field!(f, "Severity", &self.severity);
         writeln!(f, "{:<12} : {}", "ID", self.id)?;
         output_field!(f, "Alias", &self.alias);
         wrapped_csv(f, "Keywords", &self.keywords, width)?;

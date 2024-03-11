@@ -15,7 +15,7 @@ use super::{stringify, Base64, Item};
 
 /// Common default values used for unset fields.
 pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
-    ["unspecified", "Unspecified", "---"]
+    ["unspecified", "Unspecified", "---", "--", "-"]
         .iter()
         .map(|s| s.to_string())
         .collect()
@@ -186,6 +186,10 @@ pub struct Bug {
     pub op_sys: Option<String>,
     #[serde(rename = "target_milestone", deserialize_with = "unset_value_str")]
     pub target: Option<String>,
+    #[serde(deserialize_with = "unset_value_str")]
+    pub priority: Option<String>,
+    #[serde(deserialize_with = "unset_value_str")]
+    pub severity: Option<String>,
     #[serde(deserialize_with = "null_empty_vec")]
     pub keywords: Vec<String>,
     #[serde(deserialize_with = "null_empty_vec")]
@@ -240,6 +244,8 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Target => format!("{:<20}", stringify!(self.target)),
                 BugField::Platform => format!("{:<20}", stringify!(self.platform)),
                 BugField::Os => format!("{:<20}", stringify!(self.op_sys)),
+                BugField::Priority => format!("{:<12}", stringify!(self.priority)),
+                BugField::Severity => format!("{:<12}", stringify!(self.severity)),
                 BugField::DependsOn => format!("{:<20}", self.depends_on.iter().join(",")),
                 BugField::Keywords => format!("{:<20}", self.keywords.iter().join(",")),
                 BugField::Blocks => format!("{:<20}", self.blocks.iter().join(",")),
