@@ -177,14 +177,15 @@ impl QueryBuilder {
         I: IntoIterator<Item = F>,
         F: Into<FilterField>,
     {
-        let include_fields: IndexSet<_> = fields.into_iter().map(Into::into).collect();
-        if include_fields.is_empty() {
+        let mut fields: IndexSet<_> = fields.into_iter().map(Into::into).collect();
+        if fields.is_empty() {
             return Err(Error::InvalidValue("fields cannot be empty".to_string()));
         }
-        self.insert(
-            "include_fields",
-            include_fields.iter().map(|f| f.api()).join(","),
-        );
+
+        // always include bug IDs in field requests
+        fields.insert(FilterField::Bug(BugField::Id));
+
+        self.insert("include_fields", fields.iter().map(|f| f.api()).join(","));
         Ok(())
     }
 
