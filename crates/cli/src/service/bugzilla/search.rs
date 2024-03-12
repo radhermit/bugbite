@@ -23,14 +23,14 @@ use crate::utils::launch_browser;
 #[derive(Debug, Args)]
 struct Params {
     /// open bugs in browser
-    #[arg(short, long)]
+    #[arg(short, long, help_heading = "Search options")]
     browser: bool,
 
     /// fields to output
     #[arg(
         short,
         long,
-        help_heading = "Search related",
+        help_heading = "Search options",
         value_name = "FIELD[,FIELD,...]",
         value_delimiter = ',',
         default_value = "id,summary",
@@ -51,14 +51,14 @@ struct Params {
     fields: Vec<BugField>,
 
     /// limit the number of bugs returned
-    #[arg(short, long, help_heading = "Search related")]
+    #[arg(short, long, help_heading = "Search options")]
     limit: Option<NonZeroU64>,
 
     /// order query results
     #[arg(
         short,
         long,
-        help_heading = "Search related",
+        help_heading = "Search options",
         value_name = "FIELD[,FIELD,...]",
         value_delimiter = ',',
         long_help = indoc::formatdoc! {"
@@ -85,14 +85,14 @@ struct Params {
     order: Option<Vec<SearchOrder>>,
 
     /// search using query grammar
-    #[arg(short = 'Q', long, help_heading = "Search related")]
+    #[arg(short = 'Q', long, help_heading = "Search options")]
     query: Option<String>,
 
     /// search using quicksearch syntax
     #[arg(
         short = 'S',
         long,
-        help_heading = "Search related",
+        help_heading = "Search options",
         long_help = indoc::indoc! {"
             Search for bugs using quicksearch syntax.
 
@@ -106,7 +106,7 @@ struct Params {
     #[arg(
         short,
         long,
-        help_heading = "User related",
+        help_heading = "User options",
         value_name = "USER[,USER,...]",
         value_delimiter = ','
     )]
@@ -115,7 +115,7 @@ struct Params {
     /// user in the CC list
     #[arg(
         long,
-        help_heading = "User related",
+        help_heading = "User options",
         value_name = "USER[,USER,...]",
         value_delimiter = ','
     )]
@@ -124,7 +124,7 @@ struct Params {
     /// user who commented
     #[arg(
         long,
-        help_heading = "User related",
+        help_heading = "User options",
         value_name = "USER[,USER,...]",
         value_delimiter = ','
     )]
@@ -134,7 +134,7 @@ struct Params {
     #[arg(
         short,
         long,
-        help_heading = "User related",
+        help_heading = "User options",
         value_name = "USER[,USER,...]",
         value_delimiter = ','
     )]
@@ -144,7 +144,7 @@ struct Params {
     #[arg(
         short = 'A',
         long,
-        help_heading = "Attribute related",
+        help_heading = "Attribute options",
         value_name = "BOOL",
         num_args = 0..=1,
         default_missing_value = "true",
@@ -154,75 +154,75 @@ struct Params {
     attachments: Option<bool>,
 
     /// restrict by blockers
-    #[arg(short = 'B', long, help_heading = "Attribute related")]
+    #[arg(short = 'B', long, help_heading = "Attribute options")]
     blocks: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// specified range of comments
-    #[arg(long, help_heading = "Attribute related")]
+    #[arg(long, help_heading = "Attribute options")]
     comments: Option<u32>,
 
     /// restrict by component
-    #[arg(short = 'C', long, help_heading = "Attribute related")]
+    #[arg(short = 'C', long, help_heading = "Attribute options")]
     component: Option<String>,
 
     /// restrict by dependencies
-    #[arg(short = 'D', long, help_heading = "Attribute related")]
+    #[arg(short = 'D', long, help_heading = "Attribute options")]
     depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by ID
-    #[arg(long, help_heading = "Attribute related")]
+    #[arg(long, help_heading = "Attribute options")]
     id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by keyword
-    #[arg(short = 'K', long, help_heading = "Attribute related")]
+    #[arg(short = 'K', long, help_heading = "Attribute options")]
     keywords: Option<Vec<String>>,
 
     /// restrict by OS
-    #[arg(long, help_heading = "Attribute related")]
+    #[arg(long, help_heading = "Attribute options")]
     os: Option<String>,
 
     /// restrict by platform
-    #[arg(long, help_heading = "Attribute related")]
+    #[arg(long, help_heading = "Attribute options")]
     platform: Option<String>,
 
     /// restrict by product
-    #[arg(short = 'P', long, help_heading = "Attribute related")]
+    #[arg(short = 'P', long, help_heading = "Attribute options")]
     product: Option<String>,
 
     /// restrict by resolution
-    #[arg(short = 'R', long, help_heading = "Attribute related")]
+    #[arg(short = 'R', long, help_heading = "Attribute options")]
     resolution: Option<Vec<String>>,
 
     /// restrict by status
-    #[arg(short, long, help_heading = "Attribute related")]
+    #[arg(short, long, help_heading = "Attribute options")]
     status: Option<Vec<String>>,
 
     /// restrict by URL
-    #[arg(short = 'U', long, help_heading = "Attribute related")]
+    #[arg(short = 'U', long, help_heading = "Attribute options")]
     url: Option<Vec<String>>,
 
     /// restrict by version
-    #[arg(short = 'V', long, help_heading = "Attribute related")]
+    #[arg(short = 'V', long, help_heading = "Attribute options")]
     version: Option<String>,
 
     /// specified range of votes
-    #[arg(long, help_heading = "Attribute related")]
+    #[arg(long, help_heading = "Attribute options")]
     votes: Option<u32>,
 
     /// restrict by whiteboard
-    #[arg(short = 'W', long, help_heading = "Attribute related")]
+    #[arg(short = 'W', long, help_heading = "Attribute options")]
     whiteboard: Option<String>,
 
     /// created at this time or later
-    #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
+    #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
     created: Option<TimeDelta>,
 
     /// modified at this time or later
-    #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
+    #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
     modified: Option<TimeDelta>,
 
     /// strings to search for in comments
-    #[clap(long, value_name = "TERM", help_heading = "Content related")]
+    #[clap(long, value_name = "TERM", help_heading = "Content options")]
     comment: Option<Vec<MaybeStdinVec<String>>>,
 
     /// strings to search for in the summary
