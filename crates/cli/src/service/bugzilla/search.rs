@@ -92,7 +92,8 @@ struct Params {
             Search for bugs using quicksearch syntax.
 
             For more information see:
-            https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html"}
+            https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
+        "}
     )]
     quicksearch: Option<String>,
 
