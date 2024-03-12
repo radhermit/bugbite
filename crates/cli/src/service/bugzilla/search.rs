@@ -150,6 +150,14 @@ struct Params {
     #[arg(short = 'V', long, help_heading = "Attribute related")]
     version: Option<String>,
 
+    /// restrict by platform
+    #[arg(long, help_heading = "Attribute related")]
+    platform: Option<String>,
+
+    /// restrict by OS
+    #[arg(long, help_heading = "Attribute related")]
+    os: Option<String>,
+
     /// restrict by URL
     #[arg(short = 'U', long, help_heading = "Attribute related")]
     url: Option<Vec<String>>,
@@ -274,6 +282,12 @@ impl Command {
         }
         if let Some(value) = params.version.as_ref() {
             query.insert("version", value);
+        }
+        if let Some(value) = params.platform.as_ref() {
+            query.insert("platform", value);
+        }
+        if let Some(value) = params.os.as_ref() {
+            query.insert("op_sys", value);
         }
 
         // vectors
