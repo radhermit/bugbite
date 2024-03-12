@@ -37,7 +37,16 @@ pub(super) struct Command {
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs
-    #[clap(required = true, help_heading = "Arguments")]
+    #[clap(
+        required = true,
+        help_heading = "Arguments",
+        long_help = indoc::indoc! {"
+            IDs of bugs to fetch.
+
+            Taken from standard input when `-`. The following example fetches
+            all matching results: `bite s bugbite -f id | bite g -`.
+        "}
+    )]
     ids: Vec<MaybeStdinVec<NonZeroU64>>,
 }
 
