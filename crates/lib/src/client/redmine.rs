@@ -25,7 +25,7 @@ impl Client {
     }
 
     /// Return the website URL for an item ID.
-    pub fn item_url(&self, id: NonZeroU64) -> String {
+    pub fn item_url<I: Into<u64> + std::fmt::Display>(&self, id: I) -> String {
         let base = self.service.config.web_base.as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }

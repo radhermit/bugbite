@@ -14,6 +14,7 @@ use strum::VariantNames;
 
 use crate::macros::async_block;
 use crate::service::output::render_search;
+use crate::utils::launch_browser;
 
 /// Available search parameters.
 ///
@@ -21,6 +22,10 @@ use crate::service::output::render_search;
 /// information.
 #[derive(Debug, Args)]
 struct Params {
+    /// open bugs in browser
+    #[arg(short, long)]
+    browser: bool,
+
     /// fields to output
     #[arg(
         short,
@@ -331,7 +336,13 @@ impl Command {
         query.fields(fields.iter().copied())?;
 
         let bugs = async_block!(client.search(query))?;
-        render_search(bugs, fields)?;
+
+        if params.browser {
+            let urls = bugs.iter().map(|b| client.item_url(b.id));
+            launch_browser(urls)?;
+        } else {
+            render_search(bugs, fields)?;
+        }
 
         Ok(ExitCode::SUCCESS)
     }
