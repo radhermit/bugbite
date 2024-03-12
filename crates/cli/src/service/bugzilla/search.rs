@@ -146,6 +146,10 @@ struct Params {
     #[arg(short = 'P', long, help_heading = "Attribute related")]
     product: Option<String>,
 
+    /// restrict by version
+    #[arg(short = 'V', long, help_heading = "Attribute related")]
+    version: Option<String>,
+
     /// restrict by URL
     #[arg(short = 'U', long, help_heading = "Attribute related")]
     url: Option<Vec<String>>,
@@ -267,6 +271,9 @@ impl Command {
         }
         if let Some(value) = params.product.as_ref() {
             query.insert("product", value);
+        }
+        if let Some(value) = params.version.as_ref() {
+            query.insert("version", value);
         }
 
         // vectors
