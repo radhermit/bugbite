@@ -203,6 +203,10 @@ struct Params {
     #[arg(long, help_heading = "Attribute related")]
     votes: Option<u32>,
 
+    /// restrict by whiteboard
+    #[arg(short = 'W', long, help_heading = "Attribute related")]
+    whiteboard: Option<String>,
+
     /// created at this time or later
     #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
     created: Option<TimeDelta>,
@@ -288,6 +292,9 @@ impl Command {
         }
         if let Some(value) = params.os.as_ref() {
             query.insert("op_sys", value);
+        }
+        if let Some(value) = params.whiteboard.as_ref() {
+            query.insert("whiteboard", value);
         }
 
         // vectors
