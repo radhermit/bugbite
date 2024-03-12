@@ -22,8 +22,17 @@ use crate::utils::launch_browser;
 /// information.
 #[derive(Debug, Args)]
 struct Params {
-    /// open bugs in browser
-    #[arg(short, long, help_heading = "Search options")]
+    #[arg(
+        short,
+        long,
+        help_heading = "Search options",
+        long_help = indoc::indoc! {"
+            Open bugs in a browser.
+
+            This functionality requires xdg-open with a valid, preferred browser
+            set for http(s) URLs.
+        "}
+    )]
     browser: bool,
 
     /// fields to output

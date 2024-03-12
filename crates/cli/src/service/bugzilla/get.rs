@@ -25,7 +25,16 @@ struct Options {
     no_history: bool,
 
     /// open bugs in browser
-    #[arg(short, long)]
+    #[arg(
+        short,
+        long,
+        long_help = indoc::indoc! {"
+            Open bugs in a browser.
+
+            This functionality requires xdg-open with a valid, preferred browser
+            set for http(s) URLs.
+        "}
+    )]
     browser: bool,
 }
 
