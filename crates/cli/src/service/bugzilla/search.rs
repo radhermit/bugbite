@@ -171,7 +171,7 @@ struct Params {
     status: Option<Vec<String>>,
 
     /// restrict by resolution
-    #[arg(long, help_heading = "Attribute related")]
+    #[arg(short = 'R', long, help_heading = "Attribute related")]
     resolution: Option<Vec<String>>,
 
     /// specified range of votes
