@@ -106,16 +106,6 @@ struct Params {
     )]
     assigned_to: Option<Vec<String>>,
 
-    /// user who reported
-    #[arg(
-        short,
-        long,
-        help_heading = "User related",
-        value_name = "USER[,USER,...]",
-        value_delimiter = ','
-    )]
-    reporter: Option<Vec<String>>,
-
     /// user in the CC list
     #[arg(
         long,
@@ -134,53 +124,15 @@ struct Params {
     )]
     commenter: Option<Vec<String>>,
 
-    /// restrict by ID
-    #[arg(long, help_heading = "Attribute related")]
-    id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
-
-    /// restrict by component
-    #[arg(short = 'C', long, help_heading = "Attribute related")]
-    component: Option<String>,
-
-    /// restrict by product
-    #[arg(short = 'P', long, help_heading = "Attribute related")]
-    product: Option<String>,
-
-    /// restrict by version
-    #[arg(short = 'V', long, help_heading = "Attribute related")]
-    version: Option<String>,
-
-    /// restrict by platform
-    #[arg(long, help_heading = "Attribute related")]
-    platform: Option<String>,
-
-    /// restrict by OS
-    #[arg(long, help_heading = "Attribute related")]
-    os: Option<String>,
-
-    /// restrict by URL
-    #[arg(short = 'U', long, help_heading = "Attribute related")]
-    url: Option<Vec<String>>,
-
-    /// restrict by keyword
-    #[arg(short = 'K', long, help_heading = "Attribute related")]
-    keywords: Option<Vec<String>>,
-
-    /// restrict by status
-    #[arg(short, long, help_heading = "Attribute related")]
-    status: Option<Vec<String>>,
-
-    /// restrict by resolution
-    #[arg(short = 'R', long, help_heading = "Attribute related")]
-    resolution: Option<Vec<String>>,
-
-    /// specified range of votes
-    #[arg(long, help_heading = "Attribute related")]
-    votes: Option<u32>,
-
-    /// specified range of comments
-    #[arg(long, help_heading = "Attribute related")]
-    comments: Option<u32>,
+    /// user who reported
+    #[arg(
+        short,
+        long,
+        help_heading = "User related",
+        value_name = "USER[,USER,...]",
+        value_delimiter = ','
+    )]
+    reporter: Option<Vec<String>>,
 
     /// restrict by attachment status
     #[arg(
@@ -199,9 +151,57 @@ struct Params {
     #[arg(short = 'B', long, help_heading = "Attribute related")]
     blocks: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
+    /// specified range of comments
+    #[arg(long, help_heading = "Attribute related")]
+    comments: Option<u32>,
+
+    /// restrict by component
+    #[arg(short = 'C', long, help_heading = "Attribute related")]
+    component: Option<String>,
+
     /// restrict by dependencies
     #[arg(short = 'D', long, help_heading = "Attribute related")]
     depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+
+    /// restrict by ID
+    #[arg(long, help_heading = "Attribute related")]
+    id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+
+    /// restrict by keyword
+    #[arg(short = 'K', long, help_heading = "Attribute related")]
+    keywords: Option<Vec<String>>,
+
+    /// restrict by OS
+    #[arg(long, help_heading = "Attribute related")]
+    os: Option<String>,
+
+    /// restrict by platform
+    #[arg(long, help_heading = "Attribute related")]
+    platform: Option<String>,
+
+    /// restrict by product
+    #[arg(short = 'P', long, help_heading = "Attribute related")]
+    product: Option<String>,
+
+    /// restrict by resolution
+    #[arg(short = 'R', long, help_heading = "Attribute related")]
+    resolution: Option<Vec<String>>,
+
+    /// restrict by status
+    #[arg(short, long, help_heading = "Attribute related")]
+    status: Option<Vec<String>>,
+
+    /// restrict by URL
+    #[arg(short = 'U', long, help_heading = "Attribute related")]
+    url: Option<Vec<String>>,
+
+    /// restrict by version
+    #[arg(short = 'V', long, help_heading = "Attribute related")]
+    version: Option<String>,
+
+    /// specified range of votes
+    #[arg(long, help_heading = "Attribute related")]
+    votes: Option<u32>,
 
     /// created at this time or later
     #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
