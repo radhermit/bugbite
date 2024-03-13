@@ -98,7 +98,7 @@ pub struct Comment {
 impl Comment {
     /// Format a comment into a reply string.
     pub fn reply(&self) -> String {
-        // TODO: pull real user name for creator?
+        // TODO: pull real name for creator?
         let creator = self
             .creator
             .split_once('@')
