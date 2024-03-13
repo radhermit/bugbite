@@ -47,6 +47,10 @@ struct AttributeOptions {
     #[arg(short = 'D', long)]
     depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
+    /// restrict by group
+    #[arg(short = 'G', long)]
+    groups: Option<Vec<String>>,
+
     /// restrict by ID
     #[arg(long)]
     id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
@@ -294,6 +298,9 @@ impl Command {
         }
         if let Some(values) = params.summary.as_ref() {
             query.summary(values.iter().flatten());
+        }
+        if let Some(values) = params.attr.groups.as_ref() {
+            query.groups(values);
         }
 
         // strings

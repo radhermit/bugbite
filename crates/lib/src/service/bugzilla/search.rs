@@ -172,6 +172,14 @@ impl QueryBuilder {
         }
     }
 
+    pub fn groups<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("bug_group", values);
+    }
+
     pub fn fields<I, F>(&mut self, fields: I) -> crate::Result<()>
     where
         I: IntoIterator<Item = F>,
