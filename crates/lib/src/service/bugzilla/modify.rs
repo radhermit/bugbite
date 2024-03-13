@@ -36,7 +36,7 @@ impl ModifyRequest {
         };
 
         let mut params = params.build()?;
-        params.ids = ids.iter().copied().collect();
+        params.ids = ids.to_vec();
 
         Ok(Self {
             url: service.base().join(&format!("rest/bug/{id}"))?,
@@ -53,6 +53,7 @@ struct Params {
     component: Option<String>,
     status: Option<String>,
     resolution: Option<String>,
+    dupe_of: Option<NonZeroU64>,
 }
 
 /// Construct bug modification parameters.
@@ -90,6 +91,10 @@ impl ModifyParams {
 
     pub fn resolution(&mut self, value: &str) {
         self.params.resolution = Some(value.to_string());
+    }
+
+    pub fn duplicate(&mut self, value: NonZeroU64) {
+        self.params.dupe_of = Some(value);
     }
 
     fn build(self) -> crate::Result<Params> {

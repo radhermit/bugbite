@@ -19,6 +19,10 @@ struct Options {
     #[arg(short = 'R', long)]
     resolution: Option<String>,
 
+    /// mark bug as duplicate
+    #[arg(short, long, conflicts_with_all = ["status", "resolution"])]
+    duplicate: Option<NonZeroU64>,
+
     /// set component
     #[arg(short = 'C', long)]
     component: Option<String>,
@@ -57,6 +61,9 @@ impl Command {
         }
         if let Some(value) = self.options.resolution.as_ref() {
             params.resolution(value);
+        }
+        if let Some(value) = self.options.duplicate {
+            params.duplicate(value);
         }
         if let Some(value) = self.options.component.as_ref() {
             params.component(value);
