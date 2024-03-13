@@ -70,9 +70,7 @@ struct Params {
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
 /// information.
-pub struct ModifyParams {
-    params: Params,
-}
+pub struct ModifyParams(Params);
 
 impl Default for ModifyParams {
     fn default() -> Self {
@@ -82,9 +80,7 @@ impl Default for ModifyParams {
 
 impl ModifyParams {
     pub fn new() -> Self {
-        Self {
-            params: Params::default(),
-        }
+        Self(Params::default())
     }
 
     pub fn load(path: &Utf8Path) -> crate::Result<Self> {
@@ -92,33 +88,31 @@ impl ModifyParams {
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         let params = toml::from_str(&data)
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))?;
-        Ok(Self {
-            params,
-        })
+        Ok(Self(params))
     }
 
     pub fn product(&mut self, value: &str) {
-        self.params.product = Some(value.to_string());
+        self.0.product = Some(value.to_string());
     }
 
     pub fn component(&mut self, value: &str) {
-        self.params.component = Some(value.to_string());
+        self.0.component = Some(value.to_string());
     }
 
     pub fn status(&mut self, value: &str) {
-        self.params.status = Some(value.to_string());
+        self.0.status = Some(value.to_string());
     }
 
     pub fn resolution(&mut self, value: &str) {
-        self.params.resolution = Some(value.to_string());
+        self.0.resolution = Some(value.to_string());
     }
 
     pub fn duplicate(&mut self, value: NonZeroU64) {
-        self.params.dupe_of = Some(value);
+        self.0.dupe_of = Some(value);
     }
 
     pub fn summary(&mut self, value: &str) {
-        self.params.summary = Some(value.to_string());
+        self.0.summary = Some(value.to_string());
     }
 
     pub fn comment(&mut self, value: &str) {
@@ -126,14 +120,14 @@ impl ModifyParams {
             body: value.to_string(),
             is_private: false,
         };
-        self.params.comment = Some(comment);
+        self.0.comment = Some(comment);
     }
 
     fn build(self) -> crate::Result<Params> {
-        if self.params == Params::default() {
+        if self.0 == Params::default() {
             Err(Error::EmptyParams)
         } else {
-            Ok(self.params)
+            Ok(self.0)
         }
     }
 }
