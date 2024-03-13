@@ -159,6 +159,7 @@ struct Params {
     blocks: Option<SetChanges<NonZeroU64>>,
     depends_on: Option<SetChanges<NonZeroU64>>,
     cc: Option<Changes<String>>,
+    groups: Option<Changes<String>>,
     keywords: Option<SetChanges<String>>,
 }
 
@@ -208,6 +209,13 @@ impl ModifyParams {
         I: IntoIterator<Item = Change<String>>,
     {
         self.0.cc = Some(values.into_iter().collect());
+    }
+
+    pub fn groups<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = Change<String>>,
+    {
+        self.0.groups = Some(values.into_iter().collect());
     }
 
     pub fn keywords<I>(&mut self, values: I)

@@ -30,6 +30,10 @@ struct Options {
     #[arg(long, value_delimiter = ',')]
     cc: Option<Vec<Change<String>>>,
 
+    /// add/remove groups
+    #[arg(short = 'G', long, value_delimiter = ',')]
+    groups: Option<Vec<Change<String>>>,
+
     /// add/remove/set keywords
     #[arg(short = 'K', long, value_delimiter = ',')]
     keywords: Option<Vec<Change<String>>>,
@@ -136,6 +140,9 @@ impl Command {
         }
         if let Some(values) = options.cc {
             params.cc(values);
+        }
+        if let Some(values) = options.groups {
+            params.groups(values);
         }
         if let Some(values) = options.keywords {
             params.keywords(values);
