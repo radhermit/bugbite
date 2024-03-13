@@ -9,8 +9,10 @@ use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
 use serde::Deserialize;
+use tempfile::NamedTempFile;
 
 use crate::macros::async_block;
+use crate::utils::{confirm, launch_editor};
 
 #[derive(Debug, Args, Deserialize, Clone)]
 #[serde(deny_unknown_fields)]
@@ -119,6 +121,7 @@ impl Command {
             params.summary(value);
         }
 
+        // pull comments to interactively create a reply
         if let Some(values) = self.reply.as_ref() {
             if ids.len() > 1 {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
@@ -141,8 +144,22 @@ impl Command {
                 data.push(comment);
             }
             let data = data.iter().map(|x| x.reply()).join("\n\n");
-            // TODO: interactively edit the comment
-            params.comment(&data);
+
+            // interactively edit the comment
+            let temp_file = NamedTempFile::new()?;
+            fs::write(&temp_file, &data)?;
+            loop {
+                let status = launch_editor(&temp_file)?;
+                if !status.success() {
+                    anyhow::bail!("failed editing reply content");
+                }
+                let comment = fs::read_to_string(&temp_file)?;
+                if comment != data || confirm("No changes made to comment, submit anyway?", false)?
+                {
+                    params.comment(comment.trim());
+                    break;
+                }
+            }
         }
 
         async_block!(client.modify(ids, params))?;
