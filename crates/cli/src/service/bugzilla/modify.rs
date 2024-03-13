@@ -45,6 +45,18 @@ struct Options {
     /// modify summary
     #[arg(short, long)]
     title: Option<String>,
+
+    /// modify URL
+    #[arg(short = 'U', long)]
+    url: Option<String>,
+
+    /// modify version
+    #[arg(short = 'V', long)]
+    version: Option<String>,
+
+    /// modify whiteboard
+    #[arg(short = 'W', long)]
+    whiteboard: Option<String>,
 }
 
 #[derive(Debug, Args)]
@@ -120,6 +132,15 @@ impl Command {
         }
         if let Some(value) = options.title.as_ref() {
             params.summary(value);
+        }
+        if let Some(value) = options.url.as_ref() {
+            params.url(value);
+        }
+        if let Some(value) = options.version.as_ref() {
+            params.version(value);
+        }
+        if let Some(value) = options.whiteboard.as_ref() {
+            params.whiteboard(value);
         }
 
         // pull comments to interactively create a reply

@@ -65,6 +65,9 @@ struct Params {
     resolution: Option<String>,
     dupe_of: Option<NonZeroU64>,
     summary: Option<String>,
+    url: Option<String>,
+    version: Option<String>,
+    whiteboard: Option<String>,
 }
 
 /// Construct bug modification parameters.
@@ -114,6 +117,18 @@ impl ModifyParams {
 
     pub fn summary(&mut self, value: &str) {
         self.0.summary = Some(value.to_string());
+    }
+
+    pub fn url(&mut self, value: &str) {
+        self.0.url = Some(value.to_string());
+    }
+
+    pub fn version(&mut self, value: &str) {
+        self.0.version = Some(value.to_string());
+    }
+
+    pub fn whiteboard(&mut self, value: &str) {
+        self.0.whiteboard = Some(value.to_string());
     }
 
     pub fn comment(&mut self, value: &str) {
