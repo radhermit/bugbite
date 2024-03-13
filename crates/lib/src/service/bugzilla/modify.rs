@@ -108,7 +108,7 @@ impl ModifyParams {
         self.0.resolution = Some(value.to_string());
     }
 
-    pub fn duplicate(&mut self, value: NonZeroU64) {
+    pub fn duplicate_of(&mut self, value: NonZeroU64) {
         self.0.dupe_of = Some(value);
     }
 
