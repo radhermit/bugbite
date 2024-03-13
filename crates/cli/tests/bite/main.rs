@@ -22,6 +22,8 @@ fn initialize() {
     env::remove_var("BUGBITE_CONNECTION");
     env::remove_var("BUGBITE_BASE");
     env::remove_var("BUGBITE_SERVICE");
+    env::remove_var("BUGBITE_USER");
+    env::remove_var("BUGBITE_PASS");
 }
 
 // verify help support isn't mangled by service subcommand injection
