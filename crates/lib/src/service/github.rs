@@ -4,7 +4,7 @@ use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::traits::WebService;
+use crate::traits::{NullRequest, WebService};
 use crate::Error;
 
 use super::ServiceKind;
@@ -67,6 +67,8 @@ impl WebService for Service {
     const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
     type GetRequest = get::GetRequest;
+    type ModifyRequest = NullRequest;
+    type ModifyParams = ();
     type SearchRequest = search::SearchRequest;
     type SearchQuery = search::QueryBuilder;
 

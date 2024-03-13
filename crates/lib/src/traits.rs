@@ -49,6 +49,8 @@ pub(crate) trait WebService {
     const API_VERSION: &'static str;
     type Response;
     type GetRequest: Request;
+    type ModifyRequest: Request;
+    type ModifyParams: Default;
     type SearchRequest: Request;
     type SearchQuery: Query + Default;
 
@@ -92,6 +94,23 @@ pub(crate) trait WebService {
             "{}: get requests unsupported",
             self.kind()
         )))
+    }
+
+    /// Create a modify request for bugs, issues, or tickets.
+    fn modify_request(
+        &self,
+        _ids: &[NonZeroU64],
+        _params: Self::ModifyParams,
+    ) -> crate::Result<Self::ModifyRequest> {
+        Err(Error::Unsupported(format!(
+            "{}: modify requests unsupported",
+            self.kind()
+        )))
+    }
+
+    /// Create a modification params builder for the service.
+    fn modify_params(&self) -> Self::ModifyParams {
+        Default::default()
     }
 
     /// Create a search request for bugs, issues, or tickets.

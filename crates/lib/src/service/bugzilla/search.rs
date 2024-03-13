@@ -228,7 +228,7 @@ impl Query for QueryBuilder {
 
     fn params(&mut self) -> crate::Result<String> {
         if self.is_empty() {
-            return Err(Error::EmptyQuery);
+            return Err(Error::EmptyParams);
         }
 
         // TODO: Move this parameter to the service struct since it's configurable on the server

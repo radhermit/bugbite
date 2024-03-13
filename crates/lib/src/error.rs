@@ -6,8 +6,8 @@ pub enum Error {
     Auth,
     #[error("{0}")]
     Config(String),
-    #[error("no search terms specified")]
-    EmptyQuery,
+    #[error("no parameters specified")]
+    EmptyParams,
     #[error("invalid URL: {0}")]
     InvalidUrl(url::ParseError),
     #[error("{0}")]

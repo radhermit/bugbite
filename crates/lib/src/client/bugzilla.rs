@@ -5,6 +5,7 @@ use tracing::info;
 
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::attach::CreateAttachment;
+use crate::service::bugzilla::modify::ModifyParams;
 use crate::service::bugzilla::{Config, Service};
 use crate::time::TimeDelta;
 use crate::traits::{Query, Request, WebService};
@@ -99,6 +100,11 @@ impl Client {
         created: Option<&TimeDelta>,
     ) -> crate::Result<Vec<Vec<Event>>> {
         let request = self.service.history_request(ids, created)?;
+        request.send(&self.service).await
+    }
+
+    pub async fn modify(&self, ids: &[NonZeroU64], params: ModifyParams) -> crate::Result<()> {
+        let request = self.service.modify_request(ids, params)?;
         request.send(&self.service).await
     }
 

@@ -20,6 +20,7 @@ mod attachments;
 mod comments;
 mod get;
 mod history;
+pub mod modify;
 pub mod search;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -135,6 +136,8 @@ impl WebService for Service {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
     type GetRequest = get::GetRequest;
+    type ModifyRequest = modify::ModifyRequest;
+    type ModifyParams = modify::ModifyParams;
     type SearchRequest = search::SearchRequest;
     type SearchQuery = search::QueryBuilder;
 
@@ -189,6 +192,14 @@ impl WebService for Service {
         history: bool,
     ) -> crate::Result<Self::GetRequest> {
         get::GetRequest::new(self, ids, attachments, comments, history)
+    }
+
+    fn modify_request(
+        &self,
+        ids: &[NonZeroU64],
+        params: Self::ModifyParams,
+    ) -> crate::Result<Self::ModifyRequest> {
+        modify::ModifyRequest::new(self, ids, params)
     }
 
     fn search_request<Q: Query>(&self, query: Q) -> crate::Result<Self::SearchRequest> {
