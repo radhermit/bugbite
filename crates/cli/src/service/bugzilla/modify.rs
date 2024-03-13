@@ -58,6 +58,7 @@ pub(super) struct Command {
 
     /// load options from a template
     #[arg(
+        short = 'T',
         long,
         help_heading = "Modify options",
         value_name = "PATH",
