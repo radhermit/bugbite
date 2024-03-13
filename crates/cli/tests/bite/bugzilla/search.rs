@@ -32,7 +32,7 @@ fn no_search_terms() {
             .args(opts)
             .assert()
             .stdout("")
-            .stderr("bite: error: no search terms specified\n")
+            .stderr("bite: error: no parameters specified\n")
             .failure()
             .code(2);
     }
