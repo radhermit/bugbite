@@ -65,17 +65,17 @@ impl ServiceCommand {
         };
 
         let mut remaining = &cmd.remaining[..];
-        // pull the first, remaining, non-option argument
-        let subcmd = remaining
+        // pull the first, remaining argument
+        let arg = remaining
             .iter()
-            .find(|x| !x.starts_with('-'))
+            .next()
             .map(|x| x.as_str())
             .unwrap_or_default();
         let subcmds: HashSet<_> = Subcommand::VARIANTS.iter().copied().collect();
         let services: HashSet<_> = ServiceKind::VARIANTS.iter().copied().collect();
 
         // early return for non-service subcommands
-        if subcmds.contains(subcmd) && !services.contains(subcmd) {
+        if subcmds.contains(arg) && !services.contains(arg) {
             return Ok((Default::default(), env::args().collect()));
         }
 
@@ -85,8 +85,8 @@ impl ServiceCommand {
         let service = cmd.options.service.service;
 
         // connection name used as subcommand overrides environment and option
-        if !subcmds.contains(subcmd) && config.get(subcmd).is_ok() {
-            connection = Some(subcmd);
+        if !subcmds.contains(arg) && config.get(arg).is_ok() {
+            connection = Some(arg);
             remaining = &cmd.remaining[1..];
         }
 
@@ -94,19 +94,19 @@ impl ServiceCommand {
         let (selected, base) = match (connection, base, service) {
             (Some(name), _, _) => {
                 let (kind, base) = config.get(name)?;
-                if services.contains(subcmd) && kind.as_ref() != subcmd {
-                    anyhow::bail!("{subcmd} not compatible with connection: {name}");
+                if services.contains(arg) && kind.as_ref() != arg {
+                    anyhow::bail!("{arg} not compatible with connection: {name}");
                 }
                 (kind, base)
             }
             (None, Some(base), Some(service)) => (service, base.to_string()),
             (None, None, None) => {
-                if !subcmd.is_empty() && !subcmds.contains(subcmd) {
+                if !arg.is_empty() && !subcmds.contains(arg) && !arg.starts_with('-') {
                     // use default service from config if it exists
                     config.get_default()?
-                } else if services.contains(subcmd) {
+                } else if services.contains(arg) {
                     Command::parse();
-                    anyhow::bail!("no {subcmd} connection specified");
+                    anyhow::bail!("no {arg} connection specified");
                 } else {
                     Command::parse();
                     panic!("command parsing should have previously exited");
@@ -119,7 +119,7 @@ impl ServiceCommand {
         let mut args = vec![env::args().next().unwrap_or_default()];
 
         // inject subcommand for requested service type if missing
-        if !subcmds.contains(subcmd) {
+        if !subcmds.contains(arg) {
             args.push(selected.to_string());
         }
 
