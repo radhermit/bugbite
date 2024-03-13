@@ -22,16 +22,16 @@ impl QueryBuilder {
 
     pub fn append<K, V>(&mut self, key: K, value: V)
     where
-        K: ToString,
-        V: ToString,
+        K: fmt::Display,
+        V: fmt::Display,
     {
         self.query.append(key.to_string(), value.to_string());
     }
 
     pub fn insert<K, V>(&mut self, key: K, value: V)
     where
-        K: ToString,
-        V: ToString,
+        K: fmt::Display,
+        V: fmt::Display,
     {
         self.query.insert(key.to_string(), value.to_string());
     }
