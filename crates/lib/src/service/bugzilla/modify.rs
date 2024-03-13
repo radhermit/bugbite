@@ -1,5 +1,6 @@
 use std::fs;
 use std::num::NonZeroU64;
+use std::str::FromStr;
 
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
@@ -47,7 +48,94 @@ impl ModifyRequest {
     }
 }
 
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
+pub enum Change<T: FromStr + Clone> {
+    Add(T),
+    Remove(T),
+    Set(T),
+}
+
+impl<T: FromStr + Clone> FromStr for Change<T> {
+    type Err = Error;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        if let Some(value) = s.strip_prefix('+') {
+            let value = value
+                .parse()
+                .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
+            Ok(Change::Add(value))
+        } else if let Some(value) = s.strip_prefix('-') {
+            let value = value
+                .parse()
+                .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
+            Ok(Change::Remove(value))
+        } else {
+            let value = s
+                .parse()
+                .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
+            Ok(Change::Set(value))
+        }
+    }
+}
+
+#[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
+struct SetChanges<T> {
+    add: Option<Vec<T>>,
+    remove: Option<Vec<T>>,
+    set: Option<Vec<T>>,
+}
+
+impl<T: FromStr + Clone> FromIterator<Change<T>> for SetChanges<T> {
+    fn from_iter<I: IntoIterator<Item = Change<T>>>(iterable: I) -> Self {
+        let (mut add, mut remove, mut set) = (vec![], vec![], vec![]);
+        for change in iterable {
+            match change {
+                Change::Add(value) => add.push(value),
+                Change::Remove(value) => remove.push(value),
+                Change::Set(value) => set.push(value),
+            }
+        }
+
+        let set = if !set.is_empty() || (add.is_empty() && remove.is_empty()) {
+            Some(set)
+        } else {
+            None
+        };
+
+        Self {
+            add: Some(add),
+            remove: Some(remove),
+            set,
+        }
+    }
+}
+
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
+struct Changes<T> {
+    add: Option<Vec<T>>,
+    remove: Option<Vec<T>>,
+}
+
+impl<T: FromStr + Clone> FromIterator<Change<T>> for Changes<T> {
+    fn from_iter<I: IntoIterator<Item = Change<T>>>(iterable: I) -> Self {
+        let (mut add, mut remove) = (vec![], vec![]);
+        for change in iterable {
+            match change {
+                Change::Add(value) | Change::Set(value) => add.push(value),
+                Change::Remove(value) => remove.push(value),
+            }
+        }
+
+        Self {
+            add: Some(add),
+            remove: Some(remove),
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 struct Comment {
     body: String,
     is_private: bool,
@@ -68,6 +156,8 @@ struct Params {
     url: Option<String>,
     version: Option<String>,
     whiteboard: Option<String>,
+    depends_on: Option<SetChanges<NonZeroU64>>,
+    cc: Option<Changes<String>>,
 }
 
 /// Construct bug modification parameters.
@@ -109,6 +199,20 @@ impl ModifyParams {
 
     pub fn resolution(&mut self, value: &str) {
         self.0.resolution = Some(value.to_string());
+    }
+
+    pub fn cc<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = Change<String>>,
+    {
+        self.0.cc = Some(values.into_iter().collect());
+    }
+
+    pub fn depends_on<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = Change<NonZeroU64>>,
+    {
+        self.0.depends_on = Some(values.into_iter().collect());
     }
 
     pub fn duplicate_of(&mut self, value: NonZeroU64) {

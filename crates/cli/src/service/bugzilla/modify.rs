@@ -4,7 +4,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
-use bugbite::service::bugzilla::modify::ModifyParams;
+use bugbite::service::bugzilla::modify::{Change, ModifyParams};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
@@ -25,6 +25,14 @@ struct Options {
     /// modify resolution
     #[arg(short = 'R', long)]
     resolution: Option<String>,
+
+    /// add/remove CC users
+    #[arg(long, value_delimiter = ',')]
+    cc: Option<Vec<Change<String>>>,
+
+    /// add/remove/set dependencies
+    #[arg(short = 'D', long, num_args = 0..=1, value_delimiter = ',')]
+    depends_on: Option<Vec<Change<NonZeroU64>>>,
 
     /// mark bug as duplicate
     #[arg(short, long, value_name = "ID", conflicts_with_all = ["status", "resolution"])]
@@ -62,7 +70,7 @@ struct Options {
 #[derive(Debug, Args)]
 pub(super) struct Command {
     #[clap(flatten)]
-    options: Options,
+    options: Box<Options>,
 
     /// reply to specific comment(s)
     #[arg(short, long, value_delimiter = ',', help_heading = "Modify options")]
@@ -117,6 +125,12 @@ impl Command {
         }
         if let Some(value) = options.resolution.as_ref() {
             params.resolution(value);
+        }
+        if let Some(values) = options.cc {
+            params.cc(values);
+        }
+        if let Some(values) = options.depends_on {
+            params.depends_on(values);
         }
         if let Some(value) = options.duplicate_of {
             params.duplicate_of(value);
