@@ -95,6 +95,26 @@ pub struct Comment {
     pub created: DateTime<Utc>,
 }
 
+impl Comment {
+    /// Format a comment into a reply string.
+    pub fn reply(&self) -> String {
+        // TODO: pull real user name for creator?
+        let creator = self
+            .creator
+            .split_once('@')
+            .map(|x| x.0)
+            .unwrap_or(&self.creator);
+        let mut data = vec![format!(
+            "(In reply to {} from comment #{})",
+            creator, self.count
+        )];
+        for line in self.text.lines() {
+            data.push(format!("> {line}"));
+        }
+        data.iter().join("\n")
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Event {
     pub who: String,

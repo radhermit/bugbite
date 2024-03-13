@@ -7,13 +7,14 @@ use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::modify::ModifyParams;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
+use itertools::Itertools;
 use serde::Deserialize;
 
 use crate::macros::async_block;
 
 #[derive(Debug, Args, Deserialize, Clone)]
 #[serde(deny_unknown_fields)]
-#[clap(next_help_heading = "Modify options")]
+#[clap(next_help_heading = "Attribute options")]
 struct Options {
     /// modify status
     #[arg(short, long)]
@@ -49,8 +50,17 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
+    /// reply to specific comment(s)
+    #[arg(short, long, value_delimiter = ',', help_heading = "Modify options")]
+    reply: Option<Vec<usize>>,
+
     /// load options from a template
-    #[arg(long, value_name = "PATH", value_hint = ValueHint::FilePath)]
+    #[arg(
+        long,
+        help_heading = "Modify options",
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+    )]
     template: Option<Utf8PathBuf>,
 
     // TODO: rework stdin support once clap supports custom containers
@@ -107,6 +117,32 @@ impl Command {
         }
         if let Some(value) = options.title.as_ref() {
             params.summary(value);
+        }
+
+        if let Some(values) = self.reply.as_ref() {
+            if ids.len() > 1 {
+                anyhow::bail!("reply invalid, targeting multiple bugs");
+            }
+            let id = ids[0];
+
+            let comments = async_block!(client.comments(&[id], None))?
+                .into_iter()
+                .next()
+                .expect("invalid comments response");
+            if comments.is_empty() {
+                anyhow::bail!("reply invalid, bug #{id} has no comments")
+            }
+
+            let mut data = vec![];
+            for i in values {
+                let Some(comment) = comments.get(*i) else {
+                    anyhow::bail!("reply invalid, nonexistent comment #{i}");
+                };
+                data.push(comment);
+            }
+            let data = data.iter().map(|x| x.reply()).join("\n\n");
+            // TODO: interactively edit the comment
+            params.comment(&data);
         }
 
         async_block!(client.modify(ids, params))?;
