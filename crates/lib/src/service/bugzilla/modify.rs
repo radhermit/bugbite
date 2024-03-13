@@ -45,12 +45,19 @@ impl ModifyRequest {
     }
 }
 
+#[derive(Serialize, Debug, Default, Eq, PartialEq)]
+struct Comment {
+    body: String,
+    is_private: bool,
+}
+
 #[skip_serializing_none]
 #[derive(Serialize, Debug, Default, Eq, PartialEq)]
 struct Params {
     ids: Vec<NonZeroU64>,
     product: Option<String>,
     component: Option<String>,
+    comment: Option<Comment>,
     status: Option<String>,
     resolution: Option<String>,
     dupe_of: Option<NonZeroU64>,
@@ -95,6 +102,14 @@ impl ModifyParams {
 
     pub fn duplicate(&mut self, value: NonZeroU64) {
         self.params.dupe_of = Some(value);
+    }
+
+    pub fn comment(&mut self, value: &str) {
+        let comment = Comment {
+            body: value.to_string(),
+            is_private: false,
+        };
+        self.params.comment = Some(comment);
     }
 
     fn build(self) -> crate::Result<Params> {

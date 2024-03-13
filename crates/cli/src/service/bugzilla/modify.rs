@@ -11,11 +11,11 @@ use crate::macros::async_block;
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Modify options")]
 struct Options {
-    /// set new status
+    /// modify status
     #[arg(short, long)]
     status: Option<String>,
 
-    /// set new resolution
+    /// modify resolution
     #[arg(short = 'R', long)]
     resolution: Option<String>,
 
@@ -23,13 +23,17 @@ struct Options {
     #[arg(short, long, conflicts_with_all = ["status", "resolution"])]
     duplicate: Option<NonZeroU64>,
 
-    /// set component
+    /// modify component
     #[arg(short = 'C', long)]
     component: Option<String>,
 
-    /// set product
+    /// modify product
     #[arg(short = 'P', long)]
     product: Option<String>,
+
+    /// add a comment
+    #[arg(short = 'c', long)]
+    comment: Option<String>,
 }
 
 #[derive(Debug, Args)]
@@ -70,6 +74,9 @@ impl Command {
         }
         if let Some(value) = self.options.product.as_ref() {
             params.product(value);
+        }
+        if let Some(value) = self.options.comment.as_ref() {
+            params.comment(value);
         }
 
         async_block!(client.modify(ids, params))?;
