@@ -211,6 +211,8 @@ pub struct Bug {
     #[serde(deserialize_with = "unset_value_str")]
     pub severity: Option<String>,
     #[serde(deserialize_with = "null_empty_vec")]
+    pub groups: Vec<String>,
+    #[serde(deserialize_with = "null_empty_vec")]
     pub keywords: Vec<String>,
     #[serde(deserialize_with = "null_empty_vec")]
     pub cc: Vec<String>,
