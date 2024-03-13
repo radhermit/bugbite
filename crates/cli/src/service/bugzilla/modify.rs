@@ -4,7 +4,8 @@ use std::process::ExitCode;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::modify::ModifyParams;
-use clap::Args;
+use camino::Utf8PathBuf;
+use clap::{Args, ValueHint};
 
 use crate::macros::async_block;
 
@@ -45,6 +46,10 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
+    /// load options from a template
+    #[arg(long, value_hint = ValueHint::FilePath)]
+    template: Option<Utf8PathBuf>,
+
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs
@@ -63,7 +68,13 @@ pub(super) struct Command {
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
-        let mut params = ModifyParams::new();
+
+        let mut params = if let Some(path) = self.template.as_ref() {
+            ModifyParams::load(path)?
+        } else {
+            ModifyParams::new()
+        };
+
         if let Some(value) = self.options.status.as_ref() {
             params.status(value);
         }

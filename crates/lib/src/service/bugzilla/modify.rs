@@ -1,6 +1,8 @@
+use std::fs;
 use std::num::NonZeroU64;
 
-use serde::Serialize;
+use camino::Utf8Path;
+use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::traits::{Request, WebService};
@@ -45,14 +47,14 @@ impl ModifyRequest {
     }
 }
 
-#[derive(Serialize, Debug, Default, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 struct Comment {
     body: String,
     is_private: bool,
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Debug, Default, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 struct Params {
     ids: Vec<NonZeroU64>,
     product: Option<String>,
@@ -83,6 +85,16 @@ impl ModifyParams {
         Self {
             params: Params::default(),
         }
+    }
+
+    pub fn load(path: &Utf8Path) -> crate::Result<Self> {
+        let data = fs::read_to_string(path)
+            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
+        let params = toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))?;
+        Ok(Self {
+            params,
+        })
     }
 
     pub fn product(&mut self, value: &str) {
