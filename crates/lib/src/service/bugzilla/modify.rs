@@ -159,6 +159,7 @@ struct Params {
     blocks: Option<SetChanges<NonZeroU64>>,
     depends_on: Option<SetChanges<NonZeroU64>>,
     cc: Option<Changes<String>>,
+    keywords: Option<SetChanges<String>>,
 }
 
 /// Construct bug modification parameters.
@@ -207,6 +208,13 @@ impl ModifyParams {
         I: IntoIterator<Item = Change<String>>,
     {
         self.0.cc = Some(values.into_iter().collect());
+    }
+
+    pub fn keywords<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = Change<String>>,
+    {
+        self.0.keywords = Some(values.into_iter().collect());
     }
 
     pub fn blocks<I>(&mut self, values: I)

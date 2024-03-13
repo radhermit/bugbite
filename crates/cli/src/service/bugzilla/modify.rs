@@ -30,6 +30,10 @@ struct Options {
     #[arg(long, value_delimiter = ',')]
     cc: Option<Vec<Change<String>>>,
 
+    /// add/remove/set keywords
+    #[arg(short = 'K', long, value_delimiter = ',')]
+    keywords: Option<Vec<Change<String>>>,
+
     /// add/remove/set blockers
     #[arg(short = 'B', long, num_args = 0..=1, value_delimiter = ',')]
     blocks: Option<Vec<Change<NonZeroU64>>>,
@@ -132,6 +136,9 @@ impl Command {
         }
         if let Some(values) = options.cc {
             params.cc(values);
+        }
+        if let Some(values) = options.keywords {
+            params.keywords(values);
         }
         if let Some(values) = options.blocks {
             params.blocks(values);
