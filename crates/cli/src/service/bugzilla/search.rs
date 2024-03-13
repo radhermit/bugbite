@@ -16,6 +16,82 @@ use crate::macros::async_block;
 use crate::service::output::render_search;
 use crate::utils::launch_browser;
 
+#[derive(Debug, Args)]
+#[clap(next_help_heading = "Attribute options")]
+struct AttributeOptions {
+    /// restrict by attachment status
+    #[arg(
+        short = 'A',
+        long,
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "true",
+        value_parser = BoolishValueParser::new(),
+        hide_possible_values = true,
+    )]
+    attachments: Option<bool>,
+
+    /// restrict by blockers
+    #[arg(short = 'B', long)]
+    blocks: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+
+    /// specified range of comments
+    #[arg(long)]
+    comments: Option<u32>,
+
+    /// restrict by component
+    #[arg(short = 'C', long)]
+    component: Option<String>,
+
+    /// restrict by dependencies
+    #[arg(short = 'D', long)]
+    depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+
+    /// restrict by ID
+    #[arg(long)]
+    id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+
+    /// restrict by keyword
+    #[arg(short = 'K', long)]
+    keywords: Option<Vec<String>>,
+
+    /// restrict by OS
+    #[arg(long)]
+    os: Option<String>,
+
+    /// restrict by platform
+    #[arg(long)]
+    platform: Option<String>,
+
+    /// restrict by product
+    #[arg(short = 'P', long)]
+    product: Option<String>,
+
+    /// restrict by resolution
+    #[arg(short = 'R', long)]
+    resolution: Option<Vec<String>>,
+
+    /// restrict by status
+    #[arg(short, long)]
+    status: Option<Vec<String>>,
+
+    /// restrict by URL
+    #[arg(short = 'U', long)]
+    url: Option<Vec<String>>,
+
+    /// restrict by version
+    #[arg(short = 'V', long)]
+    version: Option<String>,
+
+    /// specified range of votes
+    #[arg(long)]
+    votes: Option<u32>,
+
+    /// restrict by whiteboard
+    #[arg(short = 'W', long)]
+    whiteboard: Option<String>,
+}
+
 /// Available search parameters.
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
@@ -150,78 +226,8 @@ struct Params {
     )]
     reporter: Option<Vec<String>>,
 
-    /// restrict by attachment status
-    #[arg(
-        short = 'A',
-        long,
-        help_heading = "Attribute options",
-        value_name = "BOOL",
-        num_args = 0..=1,
-        default_missing_value = "true",
-        value_parser = BoolishValueParser::new(),
-        hide_possible_values = true,
-    )]
-    attachments: Option<bool>,
-
-    /// restrict by blockers
-    #[arg(short = 'B', long, help_heading = "Attribute options")]
-    blocks: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
-
-    /// specified range of comments
-    #[arg(long, help_heading = "Attribute options")]
-    comments: Option<u32>,
-
-    /// restrict by component
-    #[arg(short = 'C', long, help_heading = "Attribute options")]
-    component: Option<String>,
-
-    /// restrict by dependencies
-    #[arg(short = 'D', long, help_heading = "Attribute options")]
-    depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
-
-    /// restrict by ID
-    #[arg(long, help_heading = "Attribute options")]
-    id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
-
-    /// restrict by keyword
-    #[arg(short = 'K', long, help_heading = "Attribute options")]
-    keywords: Option<Vec<String>>,
-
-    /// restrict by OS
-    #[arg(long, help_heading = "Attribute options")]
-    os: Option<String>,
-
-    /// restrict by platform
-    #[arg(long, help_heading = "Attribute options")]
-    platform: Option<String>,
-
-    /// restrict by product
-    #[arg(short = 'P', long, help_heading = "Attribute options")]
-    product: Option<String>,
-
-    /// restrict by resolution
-    #[arg(short = 'R', long, help_heading = "Attribute options")]
-    resolution: Option<Vec<String>>,
-
-    /// restrict by status
-    #[arg(short, long, help_heading = "Attribute options")]
-    status: Option<Vec<String>>,
-
-    /// restrict by URL
-    #[arg(short = 'U', long, help_heading = "Attribute options")]
-    url: Option<Vec<String>>,
-
-    /// restrict by version
-    #[arg(short = 'V', long, help_heading = "Attribute options")]
-    version: Option<String>,
-
-    /// specified range of votes
-    #[arg(long, help_heading = "Attribute options")]
-    votes: Option<u32>,
-
-    /// restrict by whiteboard
-    #[arg(short = 'W', long, help_heading = "Attribute options")]
-    whiteboard: Option<String>,
+    #[clap(flatten)]
+    attr: AttributeOptions,
 
     /// created at this time or later
     #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
@@ -268,19 +274,19 @@ impl Command {
         if let Some(value) = params.commenter.as_ref() {
             query.commenter(value);
         }
-        if let Some(values) = params.url.as_ref() {
+        if let Some(values) = params.attr.url.as_ref() {
             query.url(values);
         }
-        if let Some(value) = params.votes {
+        if let Some(value) = params.attr.votes {
             query.votes(value);
         }
-        if let Some(value) = params.comments {
+        if let Some(value) = params.attr.comments {
             query.comments(value);
         }
-        if let Some(value) = params.attachments {
+        if let Some(value) = params.attr.attachments {
             query.attachments(value);
         }
-        if let Some(values) = params.id.as_ref() {
+        if let Some(values) = params.attr.id.as_ref() {
             query.id(values.iter().flatten().copied());
         }
         if let Some(values) = params.comment.as_ref() {
@@ -294,22 +300,22 @@ impl Command {
         if let Some(value) = params.quicksearch.as_ref() {
             query.insert("quicksearch", value);
         }
-        if let Some(value) = params.component.as_ref() {
+        if let Some(value) = params.attr.component.as_ref() {
             query.insert("component", value);
         }
-        if let Some(value) = params.product.as_ref() {
+        if let Some(value) = params.attr.product.as_ref() {
             query.insert("product", value);
         }
-        if let Some(value) = params.version.as_ref() {
+        if let Some(value) = params.attr.version.as_ref() {
             query.insert("version", value);
         }
-        if let Some(value) = params.platform.as_ref() {
+        if let Some(value) = params.attr.platform.as_ref() {
             query.insert("platform", value);
         }
-        if let Some(value) = params.os.as_ref() {
+        if let Some(value) = params.attr.os.as_ref() {
             query.insert("op_sys", value);
         }
-        if let Some(value) = params.whiteboard.as_ref() {
+        if let Some(value) = params.attr.whiteboard.as_ref() {
             query.insert("whiteboard", value);
         }
 
@@ -326,19 +332,19 @@ impl Command {
         if let Some(values) = params.commenter.as_ref() {
             query.extend("commenter", values);
         }
-        if let Some(values) = params.keywords.as_ref() {
+        if let Some(values) = params.attr.keywords.as_ref() {
             query.extend("keywords", values);
         }
-        if let Some(values) = params.status.as_ref() {
+        if let Some(values) = params.attr.status.as_ref() {
             query.extend("status", values);
         }
-        if let Some(values) = params.resolution.as_ref() {
+        if let Some(values) = params.attr.resolution.as_ref() {
             query.extend("resolution", values);
         }
-        if let Some(values) = params.blocks.as_ref() {
+        if let Some(values) = params.attr.blocks.as_ref() {
             query.extend("blocks", values.iter().flatten());
         }
-        if let Some(values) = params.depends.as_ref() {
+        if let Some(values) = params.attr.depends.as_ref() {
             query.extend("depends_on", values.iter().flatten());
         }
 
