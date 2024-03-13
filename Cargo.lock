@@ -261,6 +261,7 @@ dependencies = [
  "tempfile",
  "textwrap",
  "tokio",
+ "toml",
  "tracing",
  "tracing-log",
  "tracing-subscriber",

@@ -1,3 +1,4 @@
+use std::fs;
 use std::num::NonZeroU64;
 use std::process::ExitCode;
 
@@ -6,10 +7,12 @@ use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::modify::ModifyParams;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
+use serde::Deserialize;
 
 use crate::macros::async_block;
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
 #[clap(next_help_heading = "Modify options")]
 struct Options {
     /// modify status
@@ -68,32 +71,43 @@ pub(super) struct Command {
 impl Command {
     pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
+        let mut options = self.options.clone();
+        let mut params = ModifyParams::new();
 
-        let mut params = if let Some(path) = self.template.as_ref() {
-            ModifyParams::load(path)?
-        } else {
-            ModifyParams::new()
+        // Try to load a template as modify parameters with a fallback to loading as modify options
+        // on failure.
+        if let Some(path) = self.template.as_ref() {
+            if let Ok(value) = ModifyParams::load(path) {
+                params = value;
+            } else {
+                let data = fs::read_to_string(path).map_err(|e| {
+                    bugbite::Error::InvalidValue(format!("failed loading template: {path}: {e}"))
+                })?;
+                options = toml::from_str(&data).map_err(|e| {
+                    bugbite::Error::InvalidValue(format!("failed parsing template: {path}: {e}"))
+                })?;
+            }
         };
 
-        if let Some(value) = self.options.status.as_ref() {
+        if let Some(value) = options.status.as_ref() {
             params.status(value);
         }
-        if let Some(value) = self.options.resolution.as_ref() {
+        if let Some(value) = options.resolution.as_ref() {
             params.resolution(value);
         }
-        if let Some(value) = self.options.duplicate {
+        if let Some(value) = options.duplicate {
             params.duplicate(value);
         }
-        if let Some(value) = self.options.component.as_ref() {
+        if let Some(value) = options.component.as_ref() {
             params.component(value);
         }
-        if let Some(value) = self.options.product.as_ref() {
+        if let Some(value) = options.product.as_ref() {
             params.product(value);
         }
-        if let Some(value) = self.options.comment.as_ref() {
+        if let Some(value) = options.comment.as_ref() {
             params.comment(value);
         }
-        if let Some(value) = self.options.title.as_ref() {
+        if let Some(value) = options.title.as_ref() {
             params.summary(value);
         }
 

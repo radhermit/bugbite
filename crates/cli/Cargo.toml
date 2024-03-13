@@ -52,6 +52,7 @@ serde_with = { version = "3.6.1", default-features = false, features = ["macros"
 strum = { version = "0.26.2", features = ["derive"] }
 textwrap = "0.16.1"
 tokio = { version = "1.36.0", features = ["full"] }
+toml = "0.8.10"
 tracing = "0.1.40"
 tracing-log = "0.2.0"
 tracing-subscriber = "0.3.18"
