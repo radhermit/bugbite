@@ -38,7 +38,7 @@ impl ModifyRequest {
         };
 
         let mut params = params.build()?;
-        params.ids = ids.to_vec();
+        params.ids = Some(ids.to_vec());
 
         Ok(Self {
             url: service.base().join(&format!("rest/bug/{id}"))?,
@@ -55,8 +55,9 @@ struct Comment {
 
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
+#[serde(deny_unknown_fields)]
 struct Params {
-    ids: Vec<NonZeroU64>,
+    ids: Option<Vec<NonZeroU64>>,
     product: Option<String>,
     component: Option<String>,
     comment: Option<Comment>,
