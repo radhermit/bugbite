@@ -62,7 +62,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut attachments = vec![];
         for file in &self.files {
             let mut attachment = CreateAttachment::new(file)?;

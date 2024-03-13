@@ -70,7 +70,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
         let mut stdout = stdout().lock();
         let get_data = !self.options.list;
@@ -106,7 +106,7 @@ impl Command {
 
                 // TODO: confirm overwriting file (with a -f/--force option?)
                 if path.exists() {
-                    return Err(bugbite::Error::IO(format!("file already exists: {path}")));
+                    anyhow::bail!("file already exists: {path}");
                 }
 
                 writeln!(stdout, "Saving attachment: {path}")?;

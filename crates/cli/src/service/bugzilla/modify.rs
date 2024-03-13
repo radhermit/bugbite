@@ -69,7 +69,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
         let mut options = self.options.clone();
         let mut params = ModifyParams::new();
@@ -80,12 +80,10 @@ impl Command {
             if let Ok(value) = ModifyParams::load(path) {
                 params = value;
             } else {
-                let data = fs::read_to_string(path).map_err(|e| {
-                    bugbite::Error::InvalidValue(format!("failed loading template: {path}: {e}"))
-                })?;
-                options = toml::from_str(&data).map_err(|e| {
-                    bugbite::Error::InvalidValue(format!("failed parsing template: {path}: {e}"))
-                })?;
+                let data = fs::read_to_string(path)
+                    .map_err(|e| anyhow::anyhow!("failed loading template: {path}: {e}"))?;
+                options = toml::from_str(&data)
+                    .map_err(|e| anyhow::anyhow!("failed parsing template: {path}: {e}"))?;
             }
         };
 

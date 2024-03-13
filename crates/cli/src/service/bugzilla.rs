@@ -8,7 +8,7 @@ use itertools::Itertools;
 use crate::utils::truncate;
 
 use super::output::*;
-use super::{auth_required, auth_retry, Render};
+use super::Render;
 
 mod attach;
 mod attachments;
@@ -64,7 +64,7 @@ impl Command {
         config.password = self.auth.password;
 
         let client = Client::new(config, builder.build())?;
-        Ok(auth_retry(|| self.cmd.run(&client))?)
+        self.cmd.run(&client)
     }
 }
 
@@ -92,9 +92,9 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+    fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Attach(cmd) => auth_required(|| cmd.run(client)),
+            Self::Attach(cmd) => cmd.run(client),
             Self::Attachments(cmd) => cmd.run(client),
             Self::Comments(cmd) => cmd.run(client),
             Self::Get(cmd) => cmd.run(client),

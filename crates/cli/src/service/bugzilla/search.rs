@@ -253,7 +253,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> Result<ExitCode, bugbite::Error> {
+    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         // TODO: implement a custom serde serializer to convert structs to URL parameters
         let mut query = QueryBuilder::new();
         let params = &self.params;
