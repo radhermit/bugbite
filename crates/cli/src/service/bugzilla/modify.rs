@@ -30,6 +30,10 @@ struct Options {
     #[arg(long, value_delimiter = ',')]
     cc: Option<Vec<Change<String>>>,
 
+    /// add/remove/set blockers
+    #[arg(short = 'B', long, num_args = 0..=1, value_delimiter = ',')]
+    blocks: Option<Vec<Change<NonZeroU64>>>,
+
     /// add/remove/set dependencies
     #[arg(short = 'D', long, num_args = 0..=1, value_delimiter = ',')]
     depends_on: Option<Vec<Change<NonZeroU64>>>,
@@ -128,6 +132,9 @@ impl Command {
         }
         if let Some(values) = options.cc {
             params.cc(values);
+        }
+        if let Some(values) = options.blocks {
+            params.blocks(values);
         }
         if let Some(values) = options.depends_on {
             params.depends_on(values);

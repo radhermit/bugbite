@@ -156,6 +156,7 @@ struct Params {
     url: Option<String>,
     version: Option<String>,
     whiteboard: Option<String>,
+    blocks: Option<SetChanges<NonZeroU64>>,
     depends_on: Option<SetChanges<NonZeroU64>>,
     cc: Option<Changes<String>>,
 }
@@ -206,6 +207,13 @@ impl ModifyParams {
         I: IntoIterator<Item = Change<String>>,
     {
         self.0.cc = Some(values.into_iter().collect());
+    }
+
+    pub fn blocks<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = Change<NonZeroU64>>,
+    {
+        self.0.blocks = Some(values.into_iter().collect());
     }
 
     pub fn depends_on<I>(&mut self, values: I)
