@@ -61,6 +61,7 @@ struct Params {
     status: Option<String>,
     resolution: Option<String>,
     dupe_of: Option<NonZeroU64>,
+    summary: Option<String>,
 }
 
 /// Construct bug modification parameters.
@@ -102,6 +103,10 @@ impl ModifyParams {
 
     pub fn duplicate(&mut self, value: NonZeroU64) {
         self.params.dupe_of = Some(value);
+    }
+
+    pub fn summary(&mut self, value: &str) {
+        self.params.summary = Some(value.to_string());
     }
 
     pub fn comment(&mut self, value: &str) {

@@ -34,6 +34,10 @@ struct Options {
     /// add a comment
     #[arg(short = 'c', long)]
     comment: Option<String>,
+
+    /// modify summary
+    #[arg(short, long)]
+    title: Option<String>,
 }
 
 #[derive(Debug, Args)]
@@ -77,6 +81,9 @@ impl Command {
         }
         if let Some(value) = self.options.comment.as_ref() {
             params.comment(value);
+        }
+        if let Some(value) = self.options.title.as_ref() {
+            params.summary(value);
         }
 
         async_block!(client.modify(ids, params))?;
