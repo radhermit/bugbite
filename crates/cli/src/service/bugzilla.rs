@@ -92,7 +92,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         match self {
             Self::Attach(cmd) => cmd.run(client),
             Self::Attachments(cmd) => cmd.run(client),

@@ -69,9 +69,9 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
-        let mut options = self.options.clone();
+        let mut options = self.options;
         let mut params = ModifyParams::new();
 
         // Try to load a template as modify parameters with a fallback to loading as modify options
