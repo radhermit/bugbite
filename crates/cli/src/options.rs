@@ -58,9 +58,18 @@ pub(super) struct ServiceCommand {
 
 impl ServiceCommand {
     pub(crate) fn service() -> anyhow::Result<(String, Vec<String>)> {
-        // parse pre-subcommand options with main command parsing failure fallback
+        // parse service options
         let Ok(cmd) = Self::try_parse() else {
-            Command::parse();
+            // use main command parser if first arg is an option (e.g. --help or --version)
+            if env::args()
+                .nth(1)
+                .map(|x| x.starts_with('-'))
+                .unwrap_or(true)
+            {
+                Command::parse();
+            }
+            // fallback to service parser to handle service restriction failures
+            Self::parse();
             panic!("command parsing should have exited");
         };
 
