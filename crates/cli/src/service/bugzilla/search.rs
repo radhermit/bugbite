@@ -48,7 +48,7 @@ struct AttributeOptions {
     depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by group
-    #[arg(short = 'G', long)]
+    #[arg(short = 'G', long, num_args = 0..=1, value_delimiter = ',')]
     groups: Option<Vec<String>>,
 
     /// restrict by ID

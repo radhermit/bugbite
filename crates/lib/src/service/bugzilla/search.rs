@@ -172,12 +172,24 @@ impl QueryBuilder {
         }
     }
 
-    pub fn groups<I, S>(&mut self, values: I)
+    pub fn groups<S>(&mut self, values: &[S])
     where
-        I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        self.extend("bug_group", values);
+        if values.is_empty() {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "bug_group");
+            self.insert(format!("o{num}"), "isempty");
+        } else {
+            for value in values {
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), "bug_group");
+                self.insert(format!("o{num}"), "substring");
+                self.insert(format!("v{num}"), value);
+            }
+        }
     }
 
     pub fn fields<I, F>(&mut self, fields: I) -> crate::Result<()>
