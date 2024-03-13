@@ -219,7 +219,7 @@ struct Params {
         value_name = "USER[,USER,...]",
         value_delimiter = ','
     )]
-    commenter: Option<Vec<String>>,
+    commenters: Option<Vec<String>>,
 
     /// user who reported
     #[arg(
@@ -276,8 +276,8 @@ impl Command {
         if let Some(value) = params.order.as_ref() {
             query.order(value);
         }
-        if let Some(value) = params.commenter.as_ref() {
-            query.commenter(value);
+        if let Some(values) = params.commenters.as_ref() {
+            query.commenters(values);
         }
         if let Some(values) = params.attr.url.as_ref() {
             query.url(values);
@@ -339,9 +339,6 @@ impl Command {
         }
         if let Some(values) = params.reporter.as_ref() {
             query.extend("creator", values);
-        }
-        if let Some(values) = params.commenter.as_ref() {
-            query.extend("commenter", values);
         }
         if let Some(values) = params.attr.status.as_ref() {
             query.extend("status", values);

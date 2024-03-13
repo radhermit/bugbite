@@ -117,9 +117,8 @@ impl QueryBuilder {
         self.insert("limit", value);
     }
 
-    pub fn commenter<I, S>(&mut self, values: I)
+    pub fn commenters<S>(&mut self, values: &[S])
     where
-        I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
         for value in values {
