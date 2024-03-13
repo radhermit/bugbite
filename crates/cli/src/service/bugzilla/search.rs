@@ -207,6 +207,7 @@ struct Params {
         long,
         help_heading = "User options",
         value_name = "USER[,USER,...]",
+        num_args = 0..=1,
         value_delimiter = ','
     )]
     cc: Option<Vec<String>>,
@@ -305,6 +306,9 @@ impl Command {
         if let Some(values) = params.attr.keywords.as_ref() {
             query.keywords(values);
         }
+        if let Some(values) = params.cc.as_ref() {
+            query.cc(values);
+        }
 
         // strings
         if let Some(value) = params.quicksearch.as_ref() {
@@ -335,9 +339,6 @@ impl Command {
         }
         if let Some(values) = params.reporter.as_ref() {
             query.extend("creator", values);
-        }
-        if let Some(values) = params.cc.as_ref() {
-            query.extend("cc", values);
         }
         if let Some(values) = params.commenter.as_ref() {
             query.extend("commenter", values);

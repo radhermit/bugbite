@@ -212,6 +212,26 @@ impl QueryBuilder {
         }
     }
 
+    pub fn cc<S>(&mut self, values: &[S])
+    where
+        S: fmt::Display,
+    {
+        if values.is_empty() {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "cc");
+            self.insert(format!("o{num}"), "isempty");
+        } else {
+            for value in values {
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), "cc");
+                self.insert(format!("o{num}"), "substring");
+                self.insert(format!("v{num}"), value);
+            }
+        }
+    }
+
     pub fn fields<I, F>(&mut self, fields: I) -> crate::Result<()>
     where
         I: IntoIterator<Item = F>,
