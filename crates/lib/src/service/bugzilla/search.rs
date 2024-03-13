@@ -95,13 +95,13 @@ impl QueryBuilder {
 
     pub fn created_after(&mut self, interval: &TimeDelta) {
         let datetime = Utc::now() - interval.delta();
-        let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
+        let target = datetime.format("%Y-%m-%dT%H:%M:%SZ");
         self.insert("creation_time", target);
     }
 
     pub fn modified_after(&mut self, interval: &TimeDelta) {
         let datetime = Utc::now() - interval.delta();
-        let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
+        let target = datetime.format("%Y-%m-%dT%H:%M:%SZ");
         self.insert("last_change_time", target);
     }
 
@@ -150,7 +150,7 @@ impl QueryBuilder {
         let num = self.advanced_count;
         self.insert(format!("f{num}"), "votes");
         self.insert(format!("o{num}"), "greaterthaneq");
-        self.insert(format!("v{num}"), format!("{value}"));
+        self.insert(format!("v{num}"), value);
     }
 
     pub fn comments(&mut self, value: u32) {
@@ -158,7 +158,7 @@ impl QueryBuilder {
         let num = self.advanced_count;
         self.insert(format!("f{num}"), "longdescs.count");
         self.insert(format!("o{num}"), "greaterthaneq");
-        self.insert(format!("v{num}"), format!("{value}"));
+        self.insert(format!("v{num}"), value);
     }
 
     pub fn attachments(&mut self, value: bool) {
