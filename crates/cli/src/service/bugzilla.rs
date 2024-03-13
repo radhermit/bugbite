@@ -22,7 +22,7 @@ mod search;
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
     /// Bugzilla API key
-    #[arg(short = 'k', long)]
+    #[arg(short = 'k', long, env = "BUGBITE_KEY")]
     api_key: Option<String>,
 
     /// Bugzilla username

@@ -18,12 +18,12 @@ pub(crate) static TEST_DATA_PATH: Lazy<Utf8PathBuf> =
 /// Initialization for all test executables.
 #[ctor::ctor]
 fn initialize() {
-    // wipe environment variables that affect connections
-    env::remove_var("BUGBITE_CONNECTION");
-    env::remove_var("BUGBITE_BASE");
-    env::remove_var("BUGBITE_SERVICE");
-    env::remove_var("BUGBITE_USER");
-    env::remove_var("BUGBITE_PASS");
+    // wipe bugbite-related environment variables
+    for (key, _value) in env::vars() {
+        if key.starts_with("BUGBITE_") {
+            env::remove_var(key);
+        }
+    }
 }
 
 // verify help support isn't mangled by service subcommand injection
