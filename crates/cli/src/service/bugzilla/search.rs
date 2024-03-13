@@ -56,7 +56,7 @@ struct AttributeOptions {
     id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by keyword
-    #[arg(short = 'K', long)]
+    #[arg(short = 'K', long, num_args = 0..=1, value_delimiter = ',')]
     keywords: Option<Vec<String>>,
 
     /// restrict by OS
@@ -302,6 +302,9 @@ impl Command {
         if let Some(values) = params.attr.groups.as_ref() {
             query.groups(values);
         }
+        if let Some(values) = params.attr.keywords.as_ref() {
+            query.keywords(values);
+        }
 
         // strings
         if let Some(value) = params.quicksearch.as_ref() {
@@ -338,9 +341,6 @@ impl Command {
         }
         if let Some(values) = params.commenter.as_ref() {
             query.extend("commenter", values);
-        }
-        if let Some(values) = params.attr.keywords.as_ref() {
-            query.extend("keywords", values);
         }
         if let Some(values) = params.attr.status.as_ref() {
             query.extend("status", values);
