@@ -191,7 +191,7 @@ struct ServiceOpts {
 #[clap(next_help_heading = "Bite options")]
 struct BiteOpts {
     /// load config from a custom path
-    #[arg(long, value_hint = ValueHint::FilePath)]
+    #[arg(long, value_name = "PATH", value_hint = ValueHint::FilePath)]
     config: Option<Utf8PathBuf>,
     /// ignore invalid service certificates
     #[arg(long)]

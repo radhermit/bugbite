@@ -47,7 +47,7 @@ pub(super) struct Command {
     options: Options,
 
     /// load options from a template
-    #[arg(long, value_hint = ValueHint::FilePath)]
+    #[arg(long, value_name = "PATH", value_hint = ValueHint::FilePath)]
     template: Option<Utf8PathBuf>,
 
     // TODO: rework stdin support once clap supports custom containers
