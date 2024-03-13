@@ -22,6 +22,7 @@ use crate::utils::launch_browser;
 /// information.
 #[derive(Debug, Args)]
 struct Params {
+    /// open bugs in a browser
     #[arg(
         short,
         long,
