@@ -200,6 +200,14 @@ impl QueryBuilder {
         self.extend("op_sys", values);
     }
 
+    pub fn target<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("target_milestone", values);
+    }
+
     pub fn whiteboard<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,

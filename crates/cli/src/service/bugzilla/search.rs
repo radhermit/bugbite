@@ -118,6 +118,10 @@ struct AttributeOptions {
     #[arg(short, long, value_delimiter = ',')]
     status: Option<Vec<String>>,
 
+    /// restrict by target
+    #[arg(short = 'T', long, value_delimiter = ',')]
+    target: Option<Vec<String>>,
+
     /// restrict by URL
     #[arg(short = 'U', long, num_args = 0..=1, default_missing_value = "true")]
     url: Option<ExistsOrArray<String>>,
@@ -338,6 +342,9 @@ impl Command {
         }
         if let Some(values) = params.attr.os {
             query.os(values);
+        }
+        if let Some(values) = params.attr.target {
+            query.target(values);
         }
         if let Some(values) = params.attr.whiteboard {
             match values {
