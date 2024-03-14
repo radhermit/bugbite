@@ -8,13 +8,15 @@ use bugbite::service::bugzilla::modify::{Change, ModifyParams};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use tempfile::NamedTempFile;
 
 use crate::macros::async_block;
 use crate::utils::{confirm, launch_editor};
 
-#[derive(Debug, Args, Deserialize, Default, Clone)]
+#[skip_serializing_none]
+#[derive(Debug, Args, Deserialize, Serialize, Default, Clone)]
 #[serde(deny_unknown_fields)]
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
