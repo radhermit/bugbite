@@ -82,6 +82,7 @@ struct Options {
 }
 
 impl Options {
+    /// Merge two Option structs together, prioritizing values from the first.
     fn merge(self, other: Self) -> Self {
         Self {
             blocks: self.blocks.or(other.blocks),
@@ -151,10 +152,10 @@ impl Command {
             } else {
                 let data = fs::read_to_string(path)
                     .map_err(|e| anyhow::anyhow!("failed loading template: {path}: {e}"))?;
-                let template_options = toml::from_str(&data)
+                let template = toml::from_str(&data)
                     .map_err(|e| anyhow::anyhow!("failed parsing template: {path}: {e}"))?;
                 // command-line options override template options
-                options = options.merge(template_options);
+                options = options.merge(template);
             }
         };
 
