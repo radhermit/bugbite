@@ -23,6 +23,12 @@ struct Options {
     /// disable history
     #[arg(short = 'H', long)]
     no_history: bool,
+}
+
+#[derive(Debug, Args)]
+pub(super) struct Command {
+    #[clap(flatten)]
+    options: Options,
 
     /// open bugs in browser
     #[arg(
@@ -36,12 +42,6 @@ struct Options {
         "}
     )]
     browser: bool,
-}
-
-#[derive(Debug, Args)]
-pub(super) struct Command {
-    #[clap(flatten)]
-    options: Options,
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
@@ -63,7 +63,7 @@ impl Command {
     pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
 
-        if self.options.browser {
+        if self.browser {
             let urls = ids.iter().map(|id| client.item_url(*id));
             launch_browser(urls)?;
         } else {

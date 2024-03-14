@@ -145,20 +145,6 @@ struct AttributeOptions {
 /// information.
 #[derive(Debug, Args)]
 struct Params {
-    /// open bugs in a browser
-    #[arg(
-        short,
-        long,
-        help_heading = "Search options",
-        long_help = indoc::indoc! {"
-            Open bugs in a browser.
-
-            This functionality requires xdg-open with a valid, preferred browser
-            set for http(s) URLs.
-        "}
-    )]
-    browser: bool,
-
     /// fields to output
     #[arg(
         short,
@@ -298,6 +284,20 @@ struct Params {
 pub(super) struct Command {
     #[clap(flatten)]
     params: Box<Params>,
+
+    /// open bugs in a browser
+    #[arg(
+        short,
+        long,
+        help_heading = "Search options",
+        long_help = indoc::indoc! {"
+            Open bugs in a browser.
+
+            This functionality requires xdg-open with a valid, preferred browser
+            set for http(s) URLs.
+        "}
+    )]
+    browser: bool,
 }
 
 impl Command {
@@ -431,7 +431,7 @@ impl Command {
 
         let bugs = async_block!(client.search(query))?;
 
-        if params.browser {
+        if self.browser {
             let urls = bugs.iter().map(|b| client.item_url(b.id));
             launch_browser(urls)?;
         } else {
