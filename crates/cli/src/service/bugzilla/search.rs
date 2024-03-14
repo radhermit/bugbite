@@ -5,7 +5,7 @@ use std::str::FromStr;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
-    search::{ArrayField, QueryBuilder, SearchOrder, SearchTerm},
+    search::{ExistsField, QueryBuilder, SearchOrder, SearchTerm},
     BugField,
 };
 use bugbite::time::TimeDelta;
@@ -131,8 +131,8 @@ struct AttributeOptions {
     votes: Option<u32>,
 
     /// restrict by whiteboard
-    #[arg(short = 'W', long)]
-    whiteboard: Option<String>,
+    #[arg(short = 'W', long, num_args = 0..=1, default_missing_value = "true")]
+    whiteboard: Option<ExistsOrArray<String>>,
 }
 
 /// Available search parameters.
@@ -327,9 +327,15 @@ impl Command {
         if let Some(values) = params.attr.version {
             query.version(values);
         }
+        if let Some(values) = params.attr.whiteboard {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Whiteboard, value),
+                ExistsOrArray::Array(values) => query.whiteboard(&values),
+            }
+        }
         if let Some(values) = params.attr.url {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ArrayField::Url, value),
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Url, value),
                 ExistsOrArray::Array(values) => query.url(&values),
             }
         }
@@ -340,7 +346,7 @@ impl Command {
             query.comments(value);
         }
         if let Some(value) = params.attr.attachments {
-            query.exists(ArrayField::Attachments, value);
+            query.exists(ExistsField::Attachments, value);
         }
         if let Some(values) = params.attr.id {
             query.id(values.into_iter().flatten());
@@ -353,31 +359,31 @@ impl Command {
         }
         if let Some(values) = params.attr.groups {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ArrayField::Groups, value),
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Groups, value),
                 ExistsOrArray::Array(values) => query.groups(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.attr.keywords {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ArrayField::Keywords, value),
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Keywords, value),
                 ExistsOrArray::Array(values) => query.keywords(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.cc {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ArrayField::Cc, value),
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Cc, value),
                 ExistsOrArray::Array(values) => query.cc(&values),
             }
         }
         if let Some(values) = params.attr.blocks {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ArrayField::Blocks, value),
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Blocks, value),
                 ExistsOrArray::Array(values) => query.blocks(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.attr.depends_on {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ArrayField::DependsOn, value),
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::DependsOn, value),
                 ExistsOrArray::Array(values) => query.depends_on(values.into_iter().flatten()),
             }
         }
@@ -397,9 +403,6 @@ impl Command {
         }
         if let Some(value) = params.attr.os {
             query.insert("op_sys", value);
-        }
-        if let Some(value) = params.attr.whiteboard {
-            query.insert("whiteboard", value);
         }
 
         // vectors

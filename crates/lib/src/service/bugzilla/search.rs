@@ -168,6 +168,14 @@ impl QueryBuilder {
         self.extend("version", values);
     }
 
+    pub fn whiteboard<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("whiteboard", values);
+    }
+
     pub fn votes(&mut self, value: u32) {
         self.advanced_count += 1;
         let num = self.advanced_count;
@@ -185,7 +193,7 @@ impl QueryBuilder {
     }
 
     /// Match bugs with conditionally existent array field values.
-    pub fn exists(&mut self, field: ArrayField, status: bool) {
+    pub fn exists(&mut self, field: ExistsField, status: bool) {
         self.advanced_count += 1;
         let num = self.advanced_count;
         let status = if status { "isnotempty" } else { "isempty" };
@@ -333,7 +341,7 @@ impl Query for QueryBuilder {
 /// Bug fields composed of value arrays.
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
-pub enum ArrayField {
+pub enum ExistsField {
     Attachments,
     Blocks,
     Cc,
@@ -341,9 +349,10 @@ pub enum ArrayField {
     Groups,
     Keywords,
     Url,
+    Whiteboard,
 }
 
-impl Api for ArrayField {
+impl Api for ExistsField {
     type Output = &'static str;
     fn api(&self) -> Self::Output {
         match self {
@@ -354,6 +363,7 @@ impl Api for ArrayField {
             Self::Groups => "bug_group",
             Self::Keywords => "keywords",
             Self::Url => "bug_file_loc",
+            Self::Whiteboard => "status_whiteboard",
         }
     }
 }
