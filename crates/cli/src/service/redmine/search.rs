@@ -2,9 +2,9 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
-use bugbite::service::redmine::search::QueryBuilder;
 use bugbite::service::redmine::IssueField;
 use bugbite::time::TimeDelta;
+use bugbite::traits::WebClient;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
@@ -73,7 +73,7 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
-        let mut query = QueryBuilder::new();
+        let mut query = client.service().search_query();
         let params = &self.params;
         if let Some(values) = params.ids.as_ref() {
             query.ids(values.iter().flatten());

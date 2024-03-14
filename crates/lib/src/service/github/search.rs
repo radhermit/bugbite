@@ -6,20 +6,28 @@ use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::github::Issue;
-use crate::traits::{Query, Request};
+use crate::traits::{Query, Request, ServiceParams};
 use crate::Error;
 
 /// Construct a search query.
-#[derive(Debug, Default)]
-pub struct QueryBuilder {
+#[derive(Debug)]
+pub struct QueryBuilder<'a> {
+    _service: &'a super::Service,
     query: ListOrderedMultimap<String, String>,
 }
 
-impl QueryBuilder {
-    pub fn new() -> Self {
-        Self::default()
-    }
+impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
+    type Service = super::Service;
 
+    fn new(_service: &'a Self::Service) -> Self {
+        Self {
+            _service,
+            query: Default::default(),
+        }
+    }
+}
+
+impl QueryBuilder<'_> {
     pub fn append<K, V>(&mut self, key: K, value: V)
     where
         K: fmt::Display,
@@ -46,7 +54,7 @@ impl QueryBuilder {
     }
 }
 
-impl Query for QueryBuilder {
+impl Query for QueryBuilder<'_> {
     fn params(&mut self) -> crate::Result<String> {
         let mut params = url::form_urlencoded::Serializer::new(String::new());
         params.extend_pairs(self.query.iter());

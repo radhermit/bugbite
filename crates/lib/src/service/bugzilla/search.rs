@@ -10,7 +10,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::bugzilla::Bug;
 use crate::time::TimeDelta;
-use crate::traits::{Api, Query, Request, WebService};
+use crate::traits::{Api, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -47,17 +47,26 @@ impl SearchRequest {
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
 /// information.
-#[derive(Debug, Default)]
-pub struct QueryBuilder {
+#[derive(Debug)]
+pub struct QueryBuilder<'a> {
+    _service: &'a super::Service,
     query: ListOrderedMultimap<String, String>,
     advanced_count: u64,
 }
 
-impl QueryBuilder {
-    pub fn new() -> Self {
-        Self::default()
-    }
+impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
+    type Service = super::Service;
 
+    fn new(_service: &'a Self::Service) -> Self {
+        Self {
+            _service,
+            query: Default::default(),
+            advanced_count: Default::default(),
+        }
+    }
+}
+
+impl QueryBuilder<'_> {
     pub fn id<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = NonZeroU64>,
@@ -355,7 +364,7 @@ impl QueryBuilder {
     }
 }
 
-impl Query for QueryBuilder {
+impl Query for QueryBuilder<'_> {
     fn is_empty(&self) -> bool {
         // TODO: move the keys to skip into a trait attribute
         !self

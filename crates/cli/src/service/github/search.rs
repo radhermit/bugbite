@@ -3,7 +3,8 @@ use std::process::ExitCode;
 
 use bugbite::args::Csv;
 use bugbite::client::github::Client;
-use bugbite::service::github::search::{QueryBuilder, SearchOrder, SearchTerm};
+use bugbite::service::github::search::{SearchOrder, SearchTerm};
+use bugbite::traits::WebClient;
 use clap::Args;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -55,8 +56,8 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(mut self, client: Client) -> anyhow::Result<ExitCode> {
-        let mut query = QueryBuilder::new();
+    pub(super) fn run(mut self, client: &Client) -> anyhow::Result<ExitCode> {
+        let mut query = client.service().search_query();
 
         if let Some(value) = self.params.sort.take() {
             query.sort(value);

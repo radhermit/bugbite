@@ -39,7 +39,7 @@ impl Command {
         config.token = self.auth.token;
 
         let client = Client::new(config, builder.build())?;
-        self.cmd.run(client)
+        self.cmd.run(&client)
     }
 }
 
@@ -52,7 +52,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(self, client: Client) -> anyhow::Result<ExitCode> {
+    fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         match self {
             Self::Get(cmd) => cmd.run(client),
             Self::Search(cmd) => cmd.run(client),

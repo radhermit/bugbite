@@ -16,6 +16,11 @@ pub trait Query {
     fn params(&mut self) -> crate::Result<String>;
 }
 
+pub trait ServiceParams<'a> {
+    type Service;
+    fn new(service: &'a Self::Service) -> Self;
+}
+
 /// Render an object in search context into a formatted string using the given fields.
 pub trait RenderSearch<T> {
     fn render(&self, fields: &[T]) -> String;
@@ -45,14 +50,27 @@ impl Request for NullRequest {
     }
 }
 
-pub(crate) trait WebService {
+pub trait WebClient<'a> {
+    type Service;
+    type ModifyParams: ServiceParams<'a>;
+    type SearchQuery: Query + ServiceParams<'a>;
+
+    /// Return the service,
+    fn service(&'a self) -> &'a Self::Service;
+
+    /// Create a modification params builder for the service.
+    fn modify_params(&'a self) -> Self::ModifyParams;
+
+    /// Create a search query builder for the service.
+    fn search_query(&'a self) -> Self::SearchQuery;
+}
+
+pub(crate) trait WebService<'a>: WebClient<'a> {
     const API_VERSION: &'static str;
     type Response;
     type GetRequest: Request;
     type ModifyRequest: Request;
-    type ModifyParams: Default;
     type SearchRequest: Request;
-    type SearchQuery: Query + Default;
 
     /// Return the base URL for a service.
     fn base(&self) -> &Url;
@@ -60,6 +78,10 @@ pub(crate) trait WebService {
     fn kind(&self) -> ServiceKind;
     /// Return the service client.
     fn client(&self) -> &reqwest::Client;
+    /// Return the current service user if one exists.
+    fn user(&self) -> Option<&str> {
+        None
+    }
 
     /// Inject authentication into a request before it's sent.
     fn inject_auth(&self, request: RequestBuilder) -> RequestBuilder {
@@ -108,21 +130,11 @@ pub(crate) trait WebService {
         )))
     }
 
-    /// Create a modification params builder for the service.
-    fn modify_params(&self) -> Self::ModifyParams {
-        Default::default()
-    }
-
     /// Create a search request for bugs, issues, or tickets.
     fn search_request<Q: Query>(&self, _query: Q) -> crate::Result<Self::SearchRequest> {
         Err(Error::Unsupported(format!(
             "{}: search requests unsupported",
             self.kind()
         )))
-    }
-
-    /// Create a search query builder for the service.
-    fn search_query(&self) -> Self::SearchQuery {
-        Default::default()
     }
 }

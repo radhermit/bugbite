@@ -7,7 +7,7 @@ use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 
-use crate::traits::{Request, WebService};
+use crate::traits::{Request, ServiceParams, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -187,51 +187,55 @@ struct Params {
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
 /// information.
-pub struct ModifyParams(Params);
+pub struct ModifyParams<'a> {
+    _service: &'a super::Service,
+    params: Params,
+}
 
-impl Default for ModifyParams {
-    fn default() -> Self {
-        Self::new()
+impl<'a> ServiceParams<'a> for ModifyParams<'a> {
+    type Service = super::Service;
+
+    fn new(_service: &'a Self::Service) -> Self {
+        Self {
+            _service,
+            params: Default::default(),
+        }
     }
 }
 
-impl ModifyParams {
-    pub fn new() -> Self {
-        Self(Params::default())
-    }
-
-    pub fn load(path: &Utf8Path) -> crate::Result<Self> {
+impl<'a> ModifyParams<'a> {
+    pub fn load(path: &Utf8Path, _service: &'a super::Service) -> crate::Result<Self> {
         let data = fs::read_to_string(path)
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         let params = toml::from_str(&data)
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))?;
-        Ok(Self(params))
+        Ok(Self { _service, params })
     }
 
     fn build(self) -> crate::Result<Params> {
-        if self.0 == Params::default() {
+        if self.params == Params::default() {
             Err(Error::EmptyParams)
         } else {
-            Ok(self.0)
+            Ok(self.params)
         }
     }
 
     pub fn assigned_to(&mut self, value: &str) {
-        self.0.assigned_to = Some(value.into());
+        self.params.assigned_to = Some(value.into());
     }
 
     pub fn blocks<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = Change<NonZeroU64>>,
     {
-        self.0.blocks = Some(values.into_iter().collect());
+        self.params.blocks = Some(values.into_iter().collect());
     }
 
     pub fn cc<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = Change<String>>,
     {
-        self.0.cc = Some(values.into_iter().collect());
+        self.params.cc = Some(values.into_iter().collect());
     }
 
     pub fn comment(&mut self, value: &str) {
@@ -239,22 +243,22 @@ impl ModifyParams {
             body: value.into(),
             is_private: false,
         };
-        self.0.comment = Some(comment);
+        self.params.comment = Some(comment);
     }
 
     pub fn component(&mut self, value: &str) {
-        self.0.component = Some(value.into());
+        self.params.component = Some(value.into());
     }
 
     pub fn depends_on<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = Change<NonZeroU64>>,
     {
-        self.0.depends_on = Some(values.into_iter().collect());
+        self.params.depends_on = Some(values.into_iter().collect());
     }
 
     pub fn duplicate_of(&mut self, value: NonZeroU64) {
-        self.0.dupe_of = Some(value);
+        self.params.dupe_of = Some(value);
     }
 
     pub fn custom_fields<I, K, V>(&mut self, values: I)
@@ -263,7 +267,7 @@ impl ModifyParams {
         K: Into<String>,
         V: Into<String>,
     {
-        self.0.custom_fields = Some(
+        self.params.custom_fields = Some(
             values
                 .into_iter()
                 .map(|(k, v)| (k.into(), v.into()))
@@ -275,68 +279,68 @@ impl ModifyParams {
     where
         I: IntoIterator<Item = Change<String>>,
     {
-        self.0.groups = Some(values.into_iter().collect());
+        self.params.groups = Some(values.into_iter().collect());
     }
 
     pub fn keywords<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = Change<String>>,
     {
-        self.0.keywords = Some(values.into_iter().collect());
+        self.params.keywords = Some(values.into_iter().collect());
     }
 
     pub fn os(&mut self, value: &str) {
-        self.0.op_sys = Some(value.into());
+        self.params.op_sys = Some(value.into());
     }
 
     pub fn platform(&mut self, value: &str) {
-        self.0.platform = Some(value.into());
+        self.params.platform = Some(value.into());
     }
 
     pub fn priority(&mut self, value: &str) {
-        self.0.priority = Some(value.into());
+        self.params.priority = Some(value.into());
     }
 
     pub fn product(&mut self, value: &str) {
-        self.0.product = Some(value.into());
+        self.params.product = Some(value.into());
     }
 
     pub fn resolution(&mut self, value: &str) {
-        self.0.resolution = Some(value.into());
+        self.params.resolution = Some(value.into());
     }
 
     pub fn see_also<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = Change<String>>,
     {
-        self.0.see_also = Some(values.into_iter().collect());
+        self.params.see_also = Some(values.into_iter().collect());
     }
 
     pub fn severity(&mut self, value: &str) {
-        self.0.severity = Some(value.into());
+        self.params.severity = Some(value.into());
     }
 
     pub fn status(&mut self, value: &str) {
-        self.0.status = Some(value.into());
+        self.params.status = Some(value.into());
     }
 
     pub fn summary(&mut self, value: &str) {
-        self.0.summary = Some(value.into());
+        self.params.summary = Some(value.into());
     }
 
     pub fn target(&mut self, value: &str) {
-        self.0.target_milestone = Some(value.into());
+        self.params.target_milestone = Some(value.into());
     }
 
     pub fn url(&mut self, value: &str) {
-        self.0.url = Some(value.into());
+        self.params.url = Some(value.into());
     }
 
     pub fn version(&mut self, value: &str) {
-        self.0.version = Some(value.into());
+        self.params.version = Some(value.into());
     }
 
     pub fn whiteboard(&mut self, value: &str) {
-        self.0.whiteboard = Some(value.into());
+        self.params.whiteboard = Some(value.into());
     }
 }

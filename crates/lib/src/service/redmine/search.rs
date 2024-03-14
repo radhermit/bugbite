@@ -6,20 +6,28 @@ use ordered_multimap::ListOrderedMultimap;
 
 use crate::objects::redmine::Issue;
 use crate::time::TimeDelta;
-use crate::traits::{Query, Request, WebService};
+use crate::traits::{Query, Request, ServiceParams, WebService};
 use crate::Error;
 
 /// Construct a search query.
-#[derive(Debug, Default)]
-pub struct QueryBuilder {
+#[derive(Debug)]
+pub struct QueryBuilder<'a> {
+    _service: &'a super::Service,
     query: ListOrderedMultimap<String, String>,
 }
 
-impl QueryBuilder {
-    pub fn new() -> Self {
-        Self::default()
-    }
+impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
+    type Service = super::Service;
 
+    fn new(_service: &'a Self::Service) -> Self {
+        Self {
+            _service,
+            query: Default::default(),
+        }
+    }
+}
+
+impl QueryBuilder<'_> {
     pub fn ids<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
@@ -83,7 +91,7 @@ impl QueryBuilder {
     }
 }
 
-impl Query for QueryBuilder {
+impl Query for QueryBuilder<'_> {
     fn params(&mut self) -> crate::Result<String> {
         let mut params = url::form_urlencoded::Serializer::new(String::new());
         // limit to open issues by default

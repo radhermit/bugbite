@@ -103,7 +103,11 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn modify(&self, ids: &[NonZeroU64], params: ModifyParams) -> crate::Result<()> {
+    pub async fn modify<'a>(
+        &'a self,
+        ids: &[NonZeroU64],
+        params: ModifyParams<'a>,
+    ) -> crate::Result<()> {
         let request = self.service.modify_request(ids, params)?;
         request.send(&self.service).await
     }
@@ -118,8 +122,7 @@ impl Client {
 mod tests {
     use crate::service::ServiceKind;
     use crate::test::{TestServer, TESTDATA_PATH};
-
-    use super::*;
+    use crate::traits::WebClient;
 
     #[tokio::test]
     async fn get() {

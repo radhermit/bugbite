@@ -4,12 +4,13 @@ use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::traits::{NullRequest, WebService};
+use crate::traits::{NullRequest, ServiceParams, WebClient, WebService};
 use crate::Error;
 
 use super::ServiceKind;
 
 mod get;
+pub mod modify;
 pub mod search;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -63,14 +64,30 @@ impl Service {
     }
 }
 
-impl WebService for Service {
+impl<'a> WebClient<'a> for Service {
+    type Service = Self;
+    type ModifyParams = modify::ModifyParams<'a>;
+    type SearchQuery = search::QueryBuilder<'a>;
+
+    fn service(&self) -> &Self::Service {
+        self
+    }
+
+    fn modify_params(&'a self) -> Self::ModifyParams {
+        Self::ModifyParams::new(self.service())
+    }
+
+    fn search_query(&'a self) -> Self::SearchQuery {
+        Self::SearchQuery::new(self.service())
+    }
+}
+
+impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
     type GetRequest = get::GetRequest;
     type ModifyRequest = NullRequest;
-    type ModifyParams = ();
     type SearchRequest = search::SearchRequest;
-    type SearchQuery = search::QueryBuilder;
 
     fn base(&self) -> &Url {
         self.config.base()

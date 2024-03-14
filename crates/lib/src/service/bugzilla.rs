@@ -12,7 +12,7 @@ use url::Url;
 use crate::objects::Ids;
 use crate::service::ServiceKind;
 use crate::time::TimeDelta;
-use crate::traits::{Api, Query, WebService};
+use crate::traits::{Api, Query, ServiceParams, WebClient, WebService};
 use crate::Error;
 
 pub mod attach;
@@ -132,17 +132,37 @@ macro_rules! return_if_error {
     }};
 }
 
-impl WebService for Service {
+impl<'a> WebClient<'a> for Service {
+    type Service = Self;
+    type ModifyParams = modify::ModifyParams<'a>;
+    type SearchQuery = search::QueryBuilder<'a>;
+
+    fn service(&self) -> &Self::Service {
+        self
+    }
+
+    fn modify_params(&'a self) -> Self::ModifyParams {
+        Self::ModifyParams::new(self.service())
+    }
+
+    fn search_query(&'a self) -> Self::SearchQuery {
+        Self::SearchQuery::new(self.service())
+    }
+}
+
+impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
     type GetRequest = get::GetRequest;
     type ModifyRequest = modify::ModifyRequest;
-    type ModifyParams = modify::ModifyParams;
     type SearchRequest = search::SearchRequest;
-    type SearchQuery = search::QueryBuilder;
 
     fn base(&self) -> &Url {
         self.config.base()
+    }
+
+    fn user(&self) -> Option<&str> {
+        self.config.user.as_deref()
     }
 
     fn kind(&self) -> ServiceKind {

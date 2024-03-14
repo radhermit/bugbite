@@ -5,10 +5,11 @@ use std::str::FromStr;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
-    search::{ExistsField, QueryBuilder, SearchOrder, SearchTerm},
+    search::{ExistsField, SearchOrder, SearchTerm},
     BugField,
 };
 use bugbite::time::TimeDelta;
+use bugbite::traits::WebClient;
 use clap::builder::{BoolValueParser, PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
@@ -307,7 +308,7 @@ pub(super) struct Command {
 impl Command {
     pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         // TODO: implement a custom serde serializer to convert structs to URL parameters
-        let mut query = QueryBuilder::new();
+        let mut query = client.service().search_query();
         let params = self.params;
 
         // custom

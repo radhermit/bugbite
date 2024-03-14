@@ -6,6 +6,7 @@ use std::{fmt, fs};
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::modify::{Change, ModifyParams};
+use bugbite::traits::WebClient;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
@@ -220,12 +221,12 @@ impl Command {
     pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
         let mut options = self.options;
-        let mut params = ModifyParams::new();
+        let mut params = client.service().modify_params();
 
         // Try to load a template as modify parameters with a fallback to loading as modify options
         // on failure.
         if let Some(path) = self.template.as_ref() {
-            if let Ok(value) = ModifyParams::load(path) {
+            if let Ok(value) = ModifyParams::load(path, client.service()) {
                 params = value;
             } else {
                 let data = fs::read_to_string(path)
