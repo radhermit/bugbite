@@ -123,8 +123,8 @@ struct AttributeOptions {
     url: Option<ExistsOrArray<String>>,
 
     /// restrict by version
-    #[arg(short = 'V', long)]
-    version: Option<String>,
+    #[arg(short = 'V', long, value_delimiter = ',')]
+    version: Option<Vec<String>>,
 
     /// specified range of votes
     #[arg(long)]
@@ -324,6 +324,9 @@ impl Command {
         if let Some(values) = params.attr.severity {
             query.severity(values);
         }
+        if let Some(values) = params.attr.version {
+            query.version(values);
+        }
         if let Some(values) = params.attr.url {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ArrayField::Url, value),
@@ -388,9 +391,6 @@ impl Command {
         }
         if let Some(value) = params.attr.product {
             query.insert("product", value);
-        }
-        if let Some(value) = params.attr.version {
-            query.insert("version", value);
         }
         if let Some(value) = params.attr.platform {
             query.insert("platform", value);

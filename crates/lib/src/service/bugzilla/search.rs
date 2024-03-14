@@ -172,6 +172,14 @@ impl QueryBuilder {
         }
     }
 
+    pub fn version<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("version", values);
+    }
+
     pub fn votes(&mut self, value: u32) {
         self.advanced_count += 1;
         let num = self.advanced_count;
