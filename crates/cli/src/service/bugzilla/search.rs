@@ -71,8 +71,8 @@ struct AttributeOptions {
     comments: Option<u32>,
 
     /// restrict by component
-    #[arg(short = 'C', long)]
-    component: Option<String>,
+    #[arg(short = 'C', long, value_delimiter = ',')]
+    component: Option<Vec<String>>,
 
     /// restrict by dependencies
     #[arg(short = 'D', long, num_args = 0..=1, default_missing_value = "true")]
@@ -91,20 +91,20 @@ struct AttributeOptions {
     keywords: Option<ExistsOrArray<MaybeStdinVec<String>>>,
 
     /// restrict by OS
-    #[arg(long)]
-    os: Option<String>,
+    #[arg(long, value_delimiter = ',')]
+    os: Option<Vec<String>>,
 
     /// restrict by platform
-    #[arg(long)]
-    platform: Option<String>,
+    #[arg(long, value_delimiter = ',')]
+    platform: Option<Vec<String>>,
 
     /// restrict by priority
     #[arg(long, value_delimiter = ',')]
     priority: Option<Vec<String>>,
 
     /// restrict by product
-    #[arg(short = 'P', long)]
-    product: Option<String>,
+    #[arg(short = 'P', long, value_delimiter = ',')]
+    product: Option<Vec<String>>,
 
     /// restrict by resolution
     #[arg(short = 'R', long, value_delimiter = ',')]
@@ -327,6 +327,18 @@ impl Command {
         if let Some(values) = params.attr.version {
             query.version(values);
         }
+        if let Some(values) = params.attr.component {
+            query.component(values);
+        }
+        if let Some(values) = params.attr.product {
+            query.product(values);
+        }
+        if let Some(values) = params.attr.platform {
+            query.platform(values);
+        }
+        if let Some(values) = params.attr.os {
+            query.os(values);
+        }
         if let Some(values) = params.attr.whiteboard {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Whiteboard, value),
@@ -391,18 +403,6 @@ impl Command {
         // strings
         if let Some(value) = params.quicksearch {
             query.insert("quicksearch", value);
-        }
-        if let Some(value) = params.attr.component {
-            query.insert("component", value);
-        }
-        if let Some(value) = params.attr.product {
-            query.insert("product", value);
-        }
-        if let Some(value) = params.attr.platform {
-            query.insert("platform", value);
-        }
-        if let Some(value) = params.attr.os {
-            query.insert("op_sys", value);
         }
 
         // vectors

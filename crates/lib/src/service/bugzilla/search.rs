@@ -168,6 +168,38 @@ impl QueryBuilder {
         self.extend("version", values);
     }
 
+    pub fn component<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("component", values);
+    }
+
+    pub fn product<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("product", values);
+    }
+
+    pub fn platform<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("platform", values);
+    }
+
+    pub fn os<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("op_sys", values);
+    }
+
     pub fn whiteboard<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
