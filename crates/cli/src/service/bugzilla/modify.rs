@@ -123,6 +123,15 @@ pub(super) struct Command {
     )]
     template: Option<Utf8PathBuf>,
 
+    /// write options to a template file
+    #[arg(
+        long,
+        help_heading = "Modify options",
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+    )]
+    to_template: Option<Utf8PathBuf>,
+
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs
@@ -158,6 +167,14 @@ impl Command {
                 options = options.merge(template);
             }
         };
+
+        // write command-line options to a template file
+        if let Some(path) = self.to_template.as_ref() {
+            if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
+                let data = toml::to_string(&options)?;
+                fs::write(path, data)?;
+            }
+        }
 
         if let Some(value) = options.status.as_ref() {
             params.status(value);
