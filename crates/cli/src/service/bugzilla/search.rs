@@ -110,6 +110,10 @@ struct AttributeOptions {
     #[arg(short = 'R', long, value_delimiter = ',')]
     resolution: Option<Vec<String>>,
 
+    /// restrict by external URLs
+    #[arg(long, num_args = 0..=1, default_missing_value = "true")]
+    see_also: Option<ExistsOrArray<String>>,
+
     /// restrict by severity
     #[arg(long, value_delimiter = ',')]
     severity: Option<Vec<String>>,
@@ -123,12 +127,8 @@ struct AttributeOptions {
     target: Option<Vec<String>>,
 
     /// restrict by URL
-    #[arg(short = 'u', long, num_args = 0..=1, default_missing_value = "true")]
-    url: Option<ExistsOrArray<String>>,
-
-    /// restrict by external URLs
     #[arg(short = 'U', long, num_args = 0..=1, default_missing_value = "true")]
-    urls: Option<ExistsOrArray<String>>,
+    url: Option<ExistsOrArray<String>>,
 
     /// restrict by version
     #[arg(short = 'V', long, value_delimiter = ',')]
@@ -347,6 +347,12 @@ impl Command {
         if let Some(values) = params.attr.os {
             query.os(values);
         }
+        if let Some(values) = params.attr.see_also {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::SeeAlso, value),
+                ExistsOrArray::Array(values) => query.see_also(&values),
+            }
+        }
         if let Some(values) = params.attr.target {
             query.target(values);
         }
@@ -360,12 +366,6 @@ impl Command {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Url, value),
                 ExistsOrArray::Array(values) => query.url(&values),
-            }
-        }
-        if let Some(values) = params.attr.urls {
-            match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::SeeAlso, value),
-                ExistsOrArray::Array(values) => query.see_also(&values),
             }
         }
         if let Some(value) = params.attr.votes {
