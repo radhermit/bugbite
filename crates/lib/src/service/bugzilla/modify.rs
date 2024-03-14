@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::num::NonZeroU64;
 use std::str::FromStr;
 use std::{fmt, fs};
@@ -153,7 +154,6 @@ struct Comment {
 
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
-#[serde(deny_unknown_fields)]
 struct Params {
     assigned_to: Option<String>,
     blocks: Option<SetChanges<NonZeroU64>>,
@@ -177,6 +177,9 @@ struct Params {
     url: Option<String>,
     version: Option<String>,
     whiteboard: Option<String>,
+
+    #[serde(flatten)]
+    custom_fields: Option<HashMap<String, String>>,
 }
 
 /// Construct bug modification parameters.
@@ -251,6 +254,20 @@ impl ModifyParams {
 
     pub fn duplicate_of(&mut self, value: NonZeroU64) {
         self.0.dupe_of = Some(value);
+    }
+
+    pub fn custom_fields<I, K, V>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: Into<String>,
+        V: Into<String>,
+    {
+        self.0.custom_fields = Some(
+            values
+                .into_iter()
+                .map(|(k, v)| (k.into(), v.into()))
+                .collect(),
+        );
     }
 
     pub fn groups<I>(&mut self, values: I)

@@ -1,6 +1,7 @@
-use std::fs;
 use std::num::NonZeroU64;
 use std::process::ExitCode;
+use std::str::FromStr;
+use std::{fmt, fs};
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
@@ -9,14 +10,42 @@ use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
+use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 use tempfile::NamedTempFile;
 
 use crate::macros::async_block;
 use crate::utils::{confirm, launch_editor};
 
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
+struct CustomField {
+    name: String,
+    // TODO: support array values
+    value: String,
+}
+
+impl FromStr for CustomField {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> anyhow::Result<Self> {
+        if let Some((name, value)) = s.split_once('=') {
+            Ok(Self {
+                name: name.into(),
+                value: value.into(),
+            })
+        } else {
+            anyhow::bail!("invalid custom field: {s}")
+        }
+    }
+}
+
+impl fmt::Display for CustomField {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}={}", self.name, self.value)
+    }
+}
+
 #[skip_serializing_none]
-#[derive(Debug, Args, Deserialize, Serialize, Default, Clone)]
+#[derive(Args, Deserialize, Serialize, Debug, Default, Clone)]
 #[serde(deny_unknown_fields)]
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
@@ -39,6 +68,10 @@ struct Options {
     /// modify component
     #[arg(short = 'C', long)]
     component: Option<String>,
+
+    /// modify custom fields
+    #[arg(short = 'f', long = "field", value_name = "NAME=VALUE")]
+    custom_fields: Option<Vec<CustomField>>,
 
     /// add/remove/set dependencies
     #[arg(short = 'D', long, num_args = 0..=1, value_delimiter = ',')]
@@ -114,6 +147,7 @@ impl Options {
             cc: self.cc.or(other.cc),
             comment: self.comment.or(other.comment),
             component: self.component.or(other.component),
+            custom_fields: self.custom_fields.or(other.custom_fields),
             depends_on: self.depends_on.or(other.depends_on),
             duplicate_of: self.duplicate_of.or(other.duplicate_of),
             groups: self.groups.or(other.groups),
@@ -224,6 +258,10 @@ impl Command {
 
         if let Some(value) = options.component.as_ref() {
             params.component(value);
+        }
+
+        if let Some(values) = options.custom_fields {
+            params.custom_fields(values.into_iter().map(|f| (f.name, f.value)));
         }
 
         if let Some(values) = options.depends_on {
