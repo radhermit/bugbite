@@ -3,6 +3,8 @@ use std::fmt;
 use std::num::NonZeroU64;
 use std::str::FromStr;
 
+use indexmap::IndexSet;
+use once_cell::sync::Lazy;
 use reqwest::{ClientBuilder, RequestBuilder};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, VariantNames};
@@ -22,6 +24,20 @@ mod get;
 mod history;
 pub mod modify;
 pub mod search;
+
+pub(crate) static DEFAULT_OPEN_STATUSES: Lazy<IndexSet<String>> = Lazy::new(|| {
+    ["UNCONFIRMED", "CONFIRMED", "IN_PROGRESS"]
+        .iter()
+        .map(|s| s.to_string())
+        .collect()
+});
+
+pub(crate) static DEFAULT_CLOSED_STATUSES: Lazy<IndexSet<String>> = Lazy::new(|| {
+    ["RESOLVED", "UNVERIFIED"]
+        .iter()
+        .map(|s| s.to_string())
+        .collect()
+});
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
@@ -74,6 +90,16 @@ impl Service {
             config,
             client: builder.build()?,
         })
+    }
+
+    // TODO: pull from cache before default fallback
+    pub(crate) fn open_statuses(&self) -> &IndexSet<String> {
+        &DEFAULT_OPEN_STATUSES
+    }
+
+    // TODO: pull from cache before default fallback
+    pub(crate) fn closed_statuses(&self) -> &IndexSet<String> {
+        &DEFAULT_CLOSED_STATUSES
     }
 
     pub(crate) fn attach_request(

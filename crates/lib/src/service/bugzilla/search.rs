@@ -49,7 +49,7 @@ impl SearchRequest {
 /// information.
 #[derive(Debug)]
 pub struct QueryBuilder<'a> {
-    _service: &'a super::Service,
+    service: &'a super::Service,
     query: ListOrderedMultimap<String, String>,
     advanced_count: u64,
 }
@@ -57,9 +57,9 @@ pub struct QueryBuilder<'a> {
 impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
     type Service = super::Service;
 
-    fn new(_service: &'a Self::Service) -> Self {
+    fn new(service: &'a Self::Service) -> Self {
         Self {
-            _service,
+            service,
             query: Default::default(),
             advanced_count: Default::default(),
         }
@@ -167,6 +167,21 @@ impl QueryBuilder<'_> {
         S: fmt::Display,
     {
         self.extend("bug_severity", values);
+    }
+
+    pub fn status<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        // replace @me alias with current service user if one exists
+        for value in values {
+            match value.as_ref() {
+                "@open" => self.extend("status", self.service.open_statuses()),
+                "@closed" => self.extend("status", self.service.closed_statuses()),
+                s => self.append("status", s),
+            }
+        }
     }
 
     pub fn version<I, S>(&mut self, values: I)
@@ -378,13 +393,9 @@ impl Query for QueryBuilder<'_> {
             return Err(Error::EmptyParams);
         }
 
-        // TODO: Move this parameter to the service struct since it's configurable on the server
-        // and can be queried for the supported values.
         // only return open bugs by default
         if !self.query.contains_key("status") {
-            for value in ["UNCONFIRMED", "CONFIRMED", "IN_PROGRESS"] {
-                self.append("status", value);
-            }
+            self.status(["@open"]);
         }
 
         // limit requested fields by default to decrease bandwidth and speed up response

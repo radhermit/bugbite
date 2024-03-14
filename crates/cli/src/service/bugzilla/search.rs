@@ -120,7 +120,18 @@ struct AttributeOptions {
     severity: Option<Vec<String>>,
 
     /// restrict by status
-    #[arg(short, long, value_delimiter = ',')]
+    #[arg(
+        short,
+        long,
+        value_name = "STATUS[,STATUS,...]",
+        value_delimiter = ',',
+        long_help = indoc::indoc! {"
+            Restrict bugs by status.
+
+            The aliases `@open` and `@closed` can be used to search for all open
+            or closed bugs, respectively.
+        "}
+    )]
     status: Option<Vec<String>>,
 
     /// restrict by target
@@ -354,6 +365,9 @@ impl Command {
                 ExistsOrArray::Array(values) => query.see_also(&values),
             }
         }
+        if let Some(values) = params.attr.status {
+            query.status(values);
+        }
         if let Some(values) = params.attr.target {
             query.target(values);
         }
@@ -429,9 +443,6 @@ impl Command {
         }
         if let Some(values) = params.reporter {
             query.extend("creator", values);
-        }
-        if let Some(values) = params.attr.status {
-            query.extend("status", values);
         }
         if let Some(values) = params.attr.resolution {
             query.extend("resolution", values);
