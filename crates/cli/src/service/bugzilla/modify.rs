@@ -115,8 +115,8 @@ struct Options {
     #[arg(short = 'K', long, value_delimiter = ',')]
     keywords: Option<Vec<Change<String>>>,
 
-    /// modify OS
-    #[arg(long)]
+    /// modify operating system
+    #[arg(short = 'O', long)]
     os: Option<String>,
 
     /// modify platform
