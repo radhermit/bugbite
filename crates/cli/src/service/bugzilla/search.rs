@@ -32,7 +32,7 @@ struct AttributeOptions {
     attachments: Option<bool>,
 
     /// restrict by blockers
-    #[arg(short = 'B', long)]
+    #[arg(short = 'B', long, num_args = 0..=1, value_delimiter = ',')]
     blocks: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// specified range of comments
@@ -309,6 +309,10 @@ impl Command {
         if let Some(values) = params.cc.as_ref() {
             query.cc(values);
         }
+        if let Some(values) = params.attr.blocks.as_ref() {
+            let values: Vec<_> = values.iter().flatten().copied().collect();
+            query.blocks(&values);
+        }
         if let Some(values) = params.attr.depends_on.as_ref() {
             let values: Vec<_> = values.iter().flatten().copied().collect();
             query.depends_on(&values);
@@ -349,9 +353,6 @@ impl Command {
         }
         if let Some(values) = params.attr.resolution.as_ref() {
             query.extend("resolution", values);
-        }
-        if let Some(values) = params.attr.blocks.as_ref() {
-            query.extend("blocks", values.iter().flatten());
         }
 
         let fields = &params.fields;
