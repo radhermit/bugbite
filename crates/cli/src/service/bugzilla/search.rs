@@ -1,10 +1,11 @@
 use std::num::NonZeroU64;
 use std::process::ExitCode;
+use std::str::FromStr;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
-    search::{QueryBuilder, SearchOrder, SearchTerm},
+    search::{ArrayField, QueryBuilder, SearchOrder, SearchTerm},
     BugField,
 };
 use bugbite::time::TimeDelta;
@@ -15,6 +16,36 @@ use strum::VariantNames;
 use crate::macros::async_block;
 use crate::service::output::render_search;
 use crate::utils::launch_browser;
+
+#[derive(Debug, Clone)]
+enum ExistsOrArray<T> {
+    Exists(bool),
+    Array(Vec<T>),
+}
+
+impl<T> FromStr for ExistsOrArray<T>
+where
+    T: FromStr,
+    <T as FromStr>::Err: std::fmt::Display,
+{
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "true" => Ok(ExistsOrArray::Exists(true)),
+            "false" => Ok(ExistsOrArray::Exists(false)),
+            value => Ok(ExistsOrArray::Array(
+                value
+                    .split(',')
+                    .map(|x| {
+                        x.parse()
+                            .map_err(|e| anyhow::anyhow!("failed parsing: {e}"))
+                    })
+                    .collect::<Result<_, _>>()?,
+            )),
+        }
+    }
+}
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attribute options")]
@@ -32,8 +63,8 @@ struct AttributeOptions {
     attachments: Option<bool>,
 
     /// restrict by blockers
-    #[arg(short = 'B', long, num_args = 0..=1, value_delimiter = ',')]
-    blocks: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+    #[arg(short = 'B', long, num_args = 0..=1, default_missing_value = "true")]
+    blocks: Option<ExistsOrArray<MaybeStdinVec<NonZeroU64>>>,
 
     /// specified range of comments
     #[arg(long)]
@@ -44,20 +75,20 @@ struct AttributeOptions {
     component: Option<String>,
 
     /// restrict by dependencies
-    #[arg(short = 'D', long, num_args = 0..=1, value_delimiter = ',')]
-    depends_on: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+    #[arg(short = 'D', long, num_args = 0..=1, default_missing_value = "true")]
+    depends_on: Option<ExistsOrArray<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by group
-    #[arg(short = 'G', long, num_args = 0..=1, value_delimiter = ',')]
-    groups: Option<Vec<String>>,
+    #[arg(short = 'G', long, num_args = 0..=1, default_missing_value = "true")]
+    groups: Option<ExistsOrArray<MaybeStdinVec<String>>>,
 
     /// restrict by ID
     #[arg(long)]
     id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by keyword
-    #[arg(short = 'K', long, num_args = 0..=1, value_delimiter = ',')]
-    keywords: Option<Vec<String>>,
+    #[arg(short = 'K', long, num_args = 0..=1, default_missing_value = "true")]
+    keywords: Option<ExistsOrArray<MaybeStdinVec<String>>>,
 
     /// restrict by OS
     #[arg(long)]
@@ -208,9 +239,9 @@ struct Params {
         help_heading = "User options",
         value_name = "USER[,USER,...]",
         num_args = 0..=1,
-        value_delimiter = ','
+        default_missing_value = "true",
     )]
-    cc: Option<Vec<String>>,
+    cc: Option<ExistsOrArray<String>>,
 
     /// user who commented
     #[arg(

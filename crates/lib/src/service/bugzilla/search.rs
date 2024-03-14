@@ -160,48 +160,32 @@ impl QueryBuilder {
         self.insert(format!("v{num}"), value);
     }
 
-    pub fn attachments(&mut self, value: bool) {
+    /// Match bugs with conditionally existent array field values.
+    pub fn exists(&mut self, field: ArrayField, status: bool) {
         self.advanced_count += 1;
         let num = self.advanced_count;
-        self.insert(format!("f{num}"), "attach_data.thedata");
-        if value {
-            self.insert(format!("o{num}"), "isnotempty");
-        } else {
-            self.insert(format!("o{num}"), "isempty");
-        }
+        let status = if status { "isnotempty" } else { "isempty" };
+        self.insert(format!("f{num}"), field.api());
+        self.insert(format!("o{num}"), status);
     }
 
     pub fn blocks(&mut self, values: &[NonZeroU64]) {
-        if values.is_empty() {
+        for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "blocked");
-            self.insert(format!("o{num}"), "isempty");
-        } else {
-            for value in values {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), "blocked");
-                self.insert(format!("o{num}"), "equals");
-                self.insert(format!("v{num}"), value);
-            }
+            self.insert(format!("o{num}"), "equals");
+            self.insert(format!("v{num}"), value);
         }
     }
 
     pub fn depends_on(&mut self, values: &[NonZeroU64]) {
-        if values.is_empty() {
+        for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "dependson");
-            self.insert(format!("o{num}"), "isempty");
-        } else {
-            for value in values {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), "dependson");
-                self.insert(format!("o{num}"), "equals");
-                self.insert(format!("v{num}"), value);
-            }
+            self.insert(format!("o{num}"), "equals");
+            self.insert(format!("v{num}"), value);
         }
     }
 
@@ -209,19 +193,12 @@ impl QueryBuilder {
     where
         S: fmt::Display,
     {
-        if values.is_empty() {
+        for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "bug_group");
-            self.insert(format!("o{num}"), "isempty");
-        } else {
-            for value in values {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), "bug_group");
-                self.insert(format!("o{num}"), "substring");
-                self.insert(format!("v{num}"), value);
-            }
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
         }
     }
 
@@ -229,19 +206,12 @@ impl QueryBuilder {
     where
         S: fmt::Display,
     {
-        if values.is_empty() {
+        for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "keywords");
-            self.insert(format!("o{num}"), "isempty");
-        } else {
-            for value in values {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), "keywords");
-                self.insert(format!("o{num}"), "substring");
-                self.insert(format!("v{num}"), value);
-            }
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
         }
     }
 
@@ -249,19 +219,12 @@ impl QueryBuilder {
     where
         S: fmt::Display,
     {
-        if values.is_empty() {
+        for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "cc");
-            self.insert(format!("o{num}"), "isempty");
-        } else {
-            for value in values {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), "cc");
-                self.insert(format!("o{num}"), "substring");
-                self.insert(format!("v{num}"), value);
-            }
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
         }
     }
 
@@ -344,6 +307,32 @@ impl Query for QueryBuilder {
         let mut params = url::form_urlencoded::Serializer::new(String::new());
         params.extend_pairs(self.query.iter());
         Ok(params.finish())
+    }
+}
+
+/// Bug fields composed of value arrays.
+#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
+#[strum(serialize_all = "kebab-case")]
+pub enum ArrayField {
+    Attachments,
+    Blocks,
+    Cc,
+    DependsOn,
+    Groups,
+    Keywords,
+}
+
+impl Api for ArrayField {
+    type Output = &'static str;
+    fn api(&self) -> Self::Output {
+        match self {
+            Self::Attachments => "attach_data.thedata",
+            Self::Blocks => "blocked",
+            Self::Cc => "cc",
+            Self::DependsOn => "dependson",
+            Self::Groups => "bug_group",
+            Self::Keywords => "keywords",
+        }
     }
 }
 
