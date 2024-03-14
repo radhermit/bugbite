@@ -4,7 +4,7 @@ use std::str::FromStr;
 
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
+use serde_with::{skip_serializing_none, DeserializeFromStr};
 
 use crate::traits::{Request, WebService};
 use crate::Error;
@@ -48,7 +48,7 @@ impl ModifyRequest {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(DeserializeFromStr, Debug, Eq, PartialEq, Clone)]
 pub enum Change<T: FromStr + Clone> {
     Add(T),
     Remove(T),
