@@ -289,29 +289,29 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         // TODO: implement a custom serde serializer to convert structs to URL parameters
         let mut query = QueryBuilder::new();
-        let params = &self.params;
+        let params = self.params;
 
         // custom
-        if let Some(value) = params.limit.as_ref() {
-            query.limit(*value);
+        if let Some(value) = params.limit {
+            query.limit(value);
         }
-        if let Some(value) = params.created.as_ref() {
-            query.created_after(value);
+        if let Some(value) = params.created {
+            query.created_after(&value);
         }
-        if let Some(value) = params.modified.as_ref() {
-            query.modified_after(value);
+        if let Some(value) = params.modified {
+            query.modified_after(&value);
         }
-        if let Some(value) = params.order.as_ref() {
-            query.order(value);
+        if let Some(values) = params.order {
+            query.order(values);
         }
-        if let Some(values) = params.commenters.as_ref() {
-            query.commenters(values);
+        if let Some(values) = params.commenters {
+            query.commenters(&values);
         }
-        if let Some(values) = params.attr.url.as_ref() {
-            query.url(values);
+        if let Some(values) = params.attr.url {
+            query.url(&values);
         }
         if let Some(value) = params.attr.votes {
             query.votes(value);
@@ -320,69 +320,94 @@ impl Command {
             query.comments(value);
         }
         if let Some(value) = params.attr.attachments {
-            query.attachments(value);
+            query.exists(ArrayField::Attachments, value);
         }
-        if let Some(values) = params.attr.id.as_ref() {
-            query.id(values.iter().flatten().copied());
+        if let Some(values) = params.attr.id {
+            query.id(values.into_iter().flatten());
         }
-        if let Some(values) = params.comment.as_ref() {
-            query.comment(values.iter().flatten());
+        if let Some(values) = params.comment {
+            query.comment(values.into_iter().flatten());
         }
-        if let Some(values) = params.summary.as_ref() {
-            query.summary(values.iter().flatten());
+        if let Some(values) = params.summary {
+            query.summary(values.into_iter().flatten());
         }
-        if let Some(values) = params.attr.groups.as_ref() {
-            query.groups(values);
+        if let Some(values) = params.attr.groups {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ArrayField::Groups, value),
+                ExistsOrArray::Array(values) => {
+                    let values: Vec<_> = values.iter().flatten().collect();
+                    query.groups(&values)
+                }
+            }
         }
-        if let Some(values) = params.attr.keywords.as_ref() {
-            query.keywords(values);
+        if let Some(values) = params.attr.keywords {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ArrayField::Keywords, value),
+                ExistsOrArray::Array(values) => {
+                    let values: Vec<_> = values.iter().flatten().collect();
+                    query.keywords(&values)
+                }
+            }
         }
-        if let Some(values) = params.cc.as_ref() {
-            query.cc(values);
+        if let Some(values) = params.cc {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ArrayField::Cc, value),
+                ExistsOrArray::Array(values) => query.cc(&values),
+            }
         }
-        if let Some(values) = params.attr.blocks.as_ref() {
-            let values: Vec<_> = values.iter().flatten().copied().collect();
-            query.blocks(&values);
+        if let Some(values) = params.attr.blocks {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ArrayField::Blocks, value),
+                ExistsOrArray::Array(values) => {
+                    let values: Vec<_> = values.iter().flatten().copied().collect();
+                    query.blocks(&values)
+                }
+            }
         }
-        if let Some(values) = params.attr.depends_on.as_ref() {
-            let values: Vec<_> = values.iter().flatten().copied().collect();
-            query.depends_on(&values);
+        if let Some(values) = params.attr.depends_on {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ArrayField::DependsOn, value),
+                ExistsOrArray::Array(values) => {
+                    let values: Vec<_> = values.iter().flatten().copied().collect();
+                    query.depends_on(&values)
+                }
+            }
         }
 
         // strings
-        if let Some(value) = params.quicksearch.as_ref() {
+        if let Some(value) = params.quicksearch {
             query.insert("quicksearch", value);
         }
-        if let Some(value) = params.attr.component.as_ref() {
+        if let Some(value) = params.attr.component {
             query.insert("component", value);
         }
-        if let Some(value) = params.attr.product.as_ref() {
+        if let Some(value) = params.attr.product {
             query.insert("product", value);
         }
-        if let Some(value) = params.attr.version.as_ref() {
+        if let Some(value) = params.attr.version {
             query.insert("version", value);
         }
-        if let Some(value) = params.attr.platform.as_ref() {
+        if let Some(value) = params.attr.platform {
             query.insert("platform", value);
         }
-        if let Some(value) = params.attr.os.as_ref() {
+        if let Some(value) = params.attr.os {
             query.insert("op_sys", value);
         }
-        if let Some(value) = params.attr.whiteboard.as_ref() {
+        if let Some(value) = params.attr.whiteboard {
             query.insert("whiteboard", value);
         }
 
         // vectors
-        if let Some(values) = params.assigned_to.as_ref() {
+        if let Some(values) = params.assigned_to {
             query.extend("assigned_to", values);
         }
-        if let Some(values) = params.reporter.as_ref() {
+        if let Some(values) = params.reporter {
             query.extend("creator", values);
         }
-        if let Some(values) = params.attr.status.as_ref() {
+        if let Some(values) = params.attr.status {
             query.extend("status", values);
         }
-        if let Some(values) = params.attr.resolution.as_ref() {
+        if let Some(values) = params.attr.resolution {
             query.extend("resolution", values);
         }
 

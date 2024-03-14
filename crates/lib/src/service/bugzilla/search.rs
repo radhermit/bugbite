@@ -105,9 +105,9 @@ impl QueryBuilder {
         self.insert("last_change_time", target);
     }
 
-    pub fn order<'a, I>(&mut self, terms: I)
+    pub fn order<I>(&mut self, terms: I)
     where
-        I: IntoIterator<Item = &'a SearchOrder>,
+        I: IntoIterator<Item = SearchOrder>,
     {
         let order = terms.into_iter().map(|x| x.api()).join(",");
         self.insert("order", order);

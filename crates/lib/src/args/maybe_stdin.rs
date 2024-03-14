@@ -218,6 +218,15 @@ impl<T> std::ops::DerefMut for MaybeStdinVec<T> {
     }
 }
 
+impl<T> IntoIterator for MaybeStdinVec<T> {
+    type Item = T;
+    type IntoIter = std::vec::IntoIter<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.inner.into_iter()
+    }
+}
+
 impl<'a, T> IntoIterator for &'a MaybeStdinVec<T> {
     type Item = &'a T;
     type IntoIter = std::slice::Iter<'a, T>;
