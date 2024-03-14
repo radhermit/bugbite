@@ -184,48 +184,63 @@ impl Command {
         if let Some(value) = options.assigned_to {
             params.assigned_to(value);
         }
+
         if let Some(values) = options.blocks {
             params.blocks(values);
         }
-        if let Some(value) = options.status.as_ref() {
-            params.status(value);
-        }
-        if let Some(value) = options.resolution.as_ref() {
-            params.resolution(value);
-        }
+
         if let Some(values) = options.cc {
             params.cc(values);
         }
-        if let Some(values) = options.groups {
-            params.groups(values);
-        }
-        if let Some(values) = options.keywords {
-            params.keywords(values);
-        }
-        if let Some(values) = options.depends_on {
-            params.depends_on(values);
-        }
-        if let Some(value) = options.duplicate_of {
-            params.duplicate_of(value);
-        }
-        if let Some(value) = options.component.as_ref() {
-            params.component(value);
-        }
-        if let Some(value) = options.product.as_ref() {
-            params.product(value);
-        }
+
         if let Some(value) = options.comment.as_ref() {
             params.comment(value);
         }
+
+        if let Some(value) = options.component.as_ref() {
+            params.component(value);
+        }
+
+        if let Some(values) = options.depends_on {
+            params.depends_on(values);
+        }
+
+        if let Some(value) = options.duplicate_of {
+            params.duplicate_of(value);
+        }
+
+        if let Some(values) = options.groups {
+            params.groups(values);
+        }
+
+        if let Some(values) = options.keywords {
+            params.keywords(values);
+        }
+
+        if let Some(value) = options.product.as_ref() {
+            params.product(value);
+        }
+
+        if let Some(value) = options.resolution.as_ref() {
+            params.resolution(value);
+        }
+
+        if let Some(value) = options.status.as_ref() {
+            params.status(value);
+        }
+
         if let Some(value) = options.title.as_ref() {
             params.summary(value);
         }
+
         if let Some(value) = options.url.as_ref() {
             params.url(value);
         }
+
         if let Some(value) = options.version.as_ref() {
             params.version(value);
         }
+
         if let Some(value) = options.whiteboard.as_ref() {
             params.whiteboard(value);
         }

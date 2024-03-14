@@ -155,23 +155,23 @@ struct Comment {
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 #[serde(deny_unknown_fields)]
 struct Params {
-    ids: Option<Vec<NonZeroU64>>,
-    product: Option<String>,
-    component: Option<String>,
+    assigned_to: Option<String>,
+    blocks: Option<SetChanges<NonZeroU64>>,
+    cc: Option<Changes<String>>,
     comment: Option<Comment>,
-    status: Option<String>,
-    resolution: Option<String>,
+    component: Option<String>,
+    depends_on: Option<SetChanges<NonZeroU64>>,
     dupe_of: Option<NonZeroU64>,
+    groups: Option<Changes<String>>,
+    ids: Option<Vec<NonZeroU64>>,
+    keywords: Option<SetChanges<String>>,
+    product: Option<String>,
+    resolution: Option<String>,
+    status: Option<String>,
     summary: Option<String>,
     url: Option<String>,
     version: Option<String>,
     whiteboard: Option<String>,
-    assigned_to: Option<String>,
-    blocks: Option<SetChanges<NonZeroU64>>,
-    depends_on: Option<SetChanges<NonZeroU64>>,
-    cc: Option<Changes<String>>,
-    groups: Option<Changes<String>>,
-    keywords: Option<SetChanges<String>>,
 }
 
 /// Construct bug modification parameters.
@@ -199,20 +199,23 @@ impl ModifyParams {
         Ok(Self(params))
     }
 
-    pub fn product(&mut self, value: &str) {
-        self.0.product = Some(value.to_string());
+    fn build(self) -> crate::Result<Params> {
+        if self.0 == Params::default() {
+            Err(Error::EmptyParams)
+        } else {
+            Ok(self.0)
+        }
     }
 
-    pub fn component(&mut self, value: &str) {
-        self.0.component = Some(value.to_string());
+    pub fn assigned_to<S: Into<String>>(&mut self, value: S) {
+        self.0.assigned_to = Some(value.into());
     }
 
-    pub fn status(&mut self, value: &str) {
-        self.0.status = Some(value.to_string());
-    }
-
-    pub fn resolution(&mut self, value: &str) {
-        self.0.resolution = Some(value.to_string());
+    pub fn blocks<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = Change<NonZeroU64>>,
+    {
+        self.0.blocks = Some(values.into_iter().collect());
     }
 
     pub fn cc<I>(&mut self, values: I)
@@ -220,6 +223,29 @@ impl ModifyParams {
         I: IntoIterator<Item = Change<String>>,
     {
         self.0.cc = Some(values.into_iter().collect());
+    }
+
+    pub fn comment(&mut self, value: &str) {
+        let comment = Comment {
+            body: value.to_string(),
+            is_private: false,
+        };
+        self.0.comment = Some(comment);
+    }
+
+    pub fn component(&mut self, value: &str) {
+        self.0.component = Some(value.to_string());
+    }
+
+    pub fn depends_on<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = Change<NonZeroU64>>,
+    {
+        self.0.depends_on = Some(values.into_iter().collect());
+    }
+
+    pub fn duplicate_of(&mut self, value: NonZeroU64) {
+        self.0.dupe_of = Some(value);
     }
 
     pub fn groups<I>(&mut self, values: I)
@@ -236,26 +262,16 @@ impl ModifyParams {
         self.0.keywords = Some(values.into_iter().collect());
     }
 
-    pub fn assigned_to<S: Into<String>>(&mut self, value: S) {
-        self.0.assigned_to = Some(value.into());
+    pub fn product(&mut self, value: &str) {
+        self.0.product = Some(value.to_string());
     }
 
-    pub fn blocks<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = Change<NonZeroU64>>,
-    {
-        self.0.blocks = Some(values.into_iter().collect());
+    pub fn resolution(&mut self, value: &str) {
+        self.0.resolution = Some(value.to_string());
     }
 
-    pub fn depends_on<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = Change<NonZeroU64>>,
-    {
-        self.0.depends_on = Some(values.into_iter().collect());
-    }
-
-    pub fn duplicate_of(&mut self, value: NonZeroU64) {
-        self.0.dupe_of = Some(value);
+    pub fn status(&mut self, value: &str) {
+        self.0.status = Some(value.to_string());
     }
 
     pub fn summary(&mut self, value: &str) {
@@ -272,21 +288,5 @@ impl ModifyParams {
 
     pub fn whiteboard(&mut self, value: &str) {
         self.0.whiteboard = Some(value.to_string());
-    }
-
-    pub fn comment(&mut self, value: &str) {
-        let comment = Comment {
-            body: value.to_string(),
-            is_private: false,
-        };
-        self.0.comment = Some(comment);
-    }
-
-    fn build(self) -> crate::Result<Params> {
-        if self.0 == Params::default() {
-            Err(Error::EmptyParams)
-        } else {
-            Ok(self.0)
-        }
     }
 }
