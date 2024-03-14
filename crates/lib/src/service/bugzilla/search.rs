@@ -501,6 +501,7 @@ pub enum SearchTerm {
     Status,
     Summary,
     Target,
+    Url,
     Version,
     Votes,
 }
@@ -532,6 +533,7 @@ impl Api for SearchTerm {
             Self::Status => "bug_status",
             Self::Summary => "short_desc",
             Self::Target => "target_milestone",
+            Self::Url => "bug_file_loc",
             Self::Version => "version",
             Self::Votes => "votes",
         }
