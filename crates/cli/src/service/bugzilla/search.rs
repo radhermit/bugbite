@@ -103,11 +103,11 @@ struct AttributeOptions {
     product: Option<String>,
 
     /// restrict by resolution
-    #[arg(short = 'R', long)]
+    #[arg(short = 'R', long, value_delimiter = ',')]
     resolution: Option<Vec<String>>,
 
     /// restrict by status
-    #[arg(short, long)]
+    #[arg(short, long, value_delimiter = ',')]
     status: Option<Vec<String>>,
 
     /// restrict by URL
