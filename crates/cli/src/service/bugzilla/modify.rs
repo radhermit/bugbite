@@ -82,7 +82,7 @@ struct Options {
 #[derive(Debug, Args)]
 pub(super) struct Command {
     #[clap(flatten)]
-    options: Box<Options>,
+    options: Options,
 
     /// reply to specific comment(s)
     #[arg(short, long, value_delimiter = ',', help_heading = "Modify options")]

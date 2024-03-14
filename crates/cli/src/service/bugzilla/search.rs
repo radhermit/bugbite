@@ -283,7 +283,7 @@ struct Params {
 #[derive(Debug, Args)]
 pub(super) struct Command {
     #[clap(flatten)]
-    params: Box<Params>,
+    params: Params,
 
     /// open bugs in a browser
     #[arg(

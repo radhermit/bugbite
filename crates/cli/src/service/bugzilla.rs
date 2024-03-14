@@ -85,10 +85,10 @@ enum Subcommand {
     History(history::Command),
     /// Modify bugs
     #[command(alias = "m")]
-    Modify(modify::Command),
+    Modify(Box<modify::Command>),
     /// Search bugs
     #[command(alias = "s")]
-    Search(search::Command),
+    Search(Box<search::Command>),
 }
 
 impl Subcommand {
