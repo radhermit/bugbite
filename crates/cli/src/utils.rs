@@ -10,7 +10,10 @@ use itertools::Itertools;
 use once_cell::sync::Lazy;
 use unicode_segmentation::UnicodeSegmentation;
 
-pub(crate) fn confirm(prompt: &str, default: bool) -> io::Result<bool> {
+pub(crate) fn confirm<S>(prompt: S, default: bool) -> io::Result<bool>
+where
+    S: std::fmt::Display,
+{
     let mut answer = String::new();
     let mut stdout = stdout().lock();
     loop {
@@ -22,12 +25,13 @@ pub(crate) fn confirm(prompt: &str, default: bool) -> io::Result<bool> {
 
         stdout.flush()?;
         stdin().read_line(&mut answer)?;
+        let value = answer.trim();
 
-        if answer.trim().is_empty() {
+        if value.is_empty() {
             return Ok(default);
-        } else if &answer == "Y" || &answer == "y" {
+        } else if value == "Y" || value == "y" {
             return Ok(true);
-        } else if &answer == "N" || &answer == "n" {
+        } else if value == "N" || value == "n" {
             return Ok(false);
         } else {
             writeln!(stdout, "please answer y or n")?;
