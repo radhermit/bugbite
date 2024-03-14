@@ -207,7 +207,7 @@ impl ModifyParams {
         }
     }
 
-    pub fn assigned_to<S: Into<String>>(&mut self, value: S) {
+    pub fn assigned_to(&mut self, value: &str) {
         self.0.assigned_to = Some(value.into());
     }
 
@@ -227,14 +227,14 @@ impl ModifyParams {
 
     pub fn comment(&mut self, value: &str) {
         let comment = Comment {
-            body: value.to_string(),
+            body: value.into(),
             is_private: false,
         };
         self.0.comment = Some(comment);
     }
 
     pub fn component(&mut self, value: &str) {
-        self.0.component = Some(value.to_string());
+        self.0.component = Some(value.into());
     }
 
     pub fn depends_on<I>(&mut self, values: I)
@@ -263,30 +263,30 @@ impl ModifyParams {
     }
 
     pub fn product(&mut self, value: &str) {
-        self.0.product = Some(value.to_string());
+        self.0.product = Some(value.into());
     }
 
     pub fn resolution(&mut self, value: &str) {
-        self.0.resolution = Some(value.to_string());
+        self.0.resolution = Some(value.into());
     }
 
     pub fn status(&mut self, value: &str) {
-        self.0.status = Some(value.to_string());
+        self.0.status = Some(value.into());
     }
 
     pub fn summary(&mut self, value: &str) {
-        self.0.summary = Some(value.to_string());
+        self.0.summary = Some(value.into());
     }
 
     pub fn url(&mut self, value: &str) {
-        self.0.url = Some(value.to_string());
+        self.0.url = Some(value.into());
     }
 
     pub fn version(&mut self, value: &str) {
-        self.0.version = Some(value.to_string());
+        self.0.version = Some(value.into());
     }
 
     pub fn whiteboard(&mut self, value: &str) {
-        self.0.whiteboard = Some(value.to_string());
+        self.0.whiteboard = Some(value.into());
     }
 }

@@ -181,7 +181,7 @@ impl Command {
             }
         }
 
-        if let Some(value) = options.assigned_to {
+        if let Some(value) = options.assigned_to.as_ref() {
             params.assigned_to(value);
         }
 
