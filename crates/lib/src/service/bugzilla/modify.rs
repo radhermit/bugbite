@@ -4,6 +4,7 @@ use std::str::FromStr;
 use std::{fmt, fs};
 
 use camino::Utf8Path;
+use itertools::Either;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 
@@ -188,28 +189,28 @@ struct Params {
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
 /// information.
 pub struct ModifyParams<'a> {
-    _service: &'a super::Service,
+    service: &'a super::Service,
     params: Params,
 }
 
 impl<'a> ServiceParams<'a> for ModifyParams<'a> {
     type Service = super::Service;
 
-    fn new(_service: &'a Self::Service) -> Self {
+    fn new(service: &'a Self::Service) -> Self {
         Self {
-            _service,
+            service,
             params: Default::default(),
         }
     }
 }
 
 impl<'a> ModifyParams<'a> {
-    pub fn load(path: &Utf8Path, _service: &'a super::Service) -> crate::Result<Self> {
+    pub fn load(path: &Utf8Path, service: &'a super::Service) -> crate::Result<Self> {
         let data = fs::read_to_string(path)
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         let params = toml::from_str(&data)
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))?;
-        Ok(Self { _service, params })
+        Ok(Self { service, params })
     }
 
     fn build(self) -> crate::Result<Params> {
@@ -235,7 +236,19 @@ impl<'a> ModifyParams<'a> {
     where
         I: IntoIterator<Item = Change<String>>,
     {
-        self.params.cc = Some(values.into_iter().collect());
+        // replace @me alias with current service user if one exists
+        let iter = if let Some(user) = self.service.user() {
+            Either::Left(values.into_iter().map(|c| match c {
+                Change::Add(value) if value == "@me" => Change::Add(user.into()),
+                Change::Remove(value) if value == "@me" => Change::Remove(user.into()),
+                Change::Set(value) if value == "@me" => Change::Set(user.into()),
+                c => c,
+            }))
+        } else {
+            Either::Right(values.into_iter())
+        };
+
+        self.params.cc = Some(iter.collect());
     }
 
     pub fn comment(&mut self, value: &str) {
