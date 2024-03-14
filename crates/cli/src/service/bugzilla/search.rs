@@ -8,7 +8,7 @@ use bugbite::service::bugzilla::{
     BugField,
 };
 use bugbite::time::TimeDelta;
-use clap::builder::{BoolishValueParser, PossibleValuesParser, TypedValueParser};
+use clap::builder::{BoolValueParser, PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
 
@@ -26,7 +26,7 @@ struct AttributeOptions {
         value_name = "BOOL",
         num_args = 0..=1,
         default_missing_value = "true",
-        value_parser = BoolishValueParser::new(),
+        value_parser = BoolValueParser::new(),
         hide_possible_values = true,
     )]
     attachments: Option<bool>,
