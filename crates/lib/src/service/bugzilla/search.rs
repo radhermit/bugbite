@@ -149,13 +149,7 @@ impl QueryBuilder {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        for value in values {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "priority");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
-        }
+        self.extend("priority", values);
     }
 
     pub fn severity<I, S>(&mut self, values: I)
@@ -163,13 +157,7 @@ impl QueryBuilder {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        for value in values {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "bug_severity");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
-        }
+        self.extend("bug_severity", values);
     }
 
     pub fn version<I, S>(&mut self, values: I)
@@ -236,13 +224,7 @@ impl QueryBuilder {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        for value in values {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "bug_group");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
-        }
+        self.extend("bug_group", values);
     }
 
     pub fn keywords<I, S>(&mut self, values: I)
@@ -250,13 +232,7 @@ impl QueryBuilder {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        for value in values {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "keywords");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
-        }
+        self.extend("keywords", values);
     }
 
     pub fn cc<S>(&mut self, values: &[S])
