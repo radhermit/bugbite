@@ -44,8 +44,8 @@ struct AttributeOptions {
     component: Option<String>,
 
     /// restrict by dependencies
-    #[arg(short = 'D', long)]
-    depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+    #[arg(short = 'D', long, num_args = 0..=1, value_delimiter = ',')]
+    depends_on: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by group
     #[arg(short = 'G', long, num_args = 0..=1, value_delimiter = ',')]
@@ -309,6 +309,10 @@ impl Command {
         if let Some(values) = params.cc.as_ref() {
             query.cc(values);
         }
+        if let Some(values) = params.attr.depends_on.as_ref() {
+            let values: Vec<_> = values.iter().flatten().copied().collect();
+            query.depends_on(&values);
+        }
 
         // strings
         if let Some(value) = params.quicksearch.as_ref() {
@@ -348,9 +352,6 @@ impl Command {
         }
         if let Some(values) = params.attr.blocks.as_ref() {
             query.extend("blocks", values.iter().flatten());
-        }
-        if let Some(values) = params.attr.depends.as_ref() {
-            query.extend("depends_on", values.iter().flatten());
         }
 
         let fields = &params.fields;

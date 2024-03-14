@@ -171,6 +171,23 @@ impl QueryBuilder {
         }
     }
 
+    pub fn depends_on(&mut self, values: &[NonZeroU64]) {
+        if values.is_empty() {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "dependson");
+            self.insert(format!("o{num}"), "isempty");
+        } else {
+            for value in values {
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), "dependson");
+                self.insert(format!("o{num}"), "equals");
+                self.insert(format!("v{num}"), value);
+            }
+        }
+    }
+
     pub fn groups<S>(&mut self, values: &[S])
     where
         S: fmt::Display,
