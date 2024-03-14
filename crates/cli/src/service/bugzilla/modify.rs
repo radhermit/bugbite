@@ -136,7 +136,7 @@ struct Options {
     resolution: Option<String>,
 
     /// modify external URLs
-    #[arg(long, value_delimiter = ',')]
+    #[arg(short = 'U', long, value_delimiter = ',')]
     see_also: Option<Vec<Change<String>>>,
 
     /// modify severity
@@ -156,7 +156,7 @@ struct Options {
     title: Option<String>,
 
     /// modify URL
-    #[arg(short = 'U', long)]
+    #[arg(short = 'u', long)]
     url: Option<String>,
 
     /// modify version

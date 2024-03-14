@@ -112,7 +112,7 @@ struct AttributeOptions {
     resolution: Option<Vec<String>>,
 
     /// restrict by external URLs
-    #[arg(long, num_args = 0..=1, default_missing_value = "true")]
+    #[arg(short = 'U', long, num_args = 0..=1, default_missing_value = "true")]
     see_also: Option<ExistsOrArray<String>>,
 
     /// restrict by severity
@@ -139,7 +139,7 @@ struct AttributeOptions {
     target: Option<Vec<String>>,
 
     /// restrict by URL
-    #[arg(short = 'U', long, num_args = 0..=1, default_missing_value = "true")]
+    #[arg(short = 'u', long, num_args = 0..=1, default_missing_value = "true")]
     url: Option<ExistsOrArray<String>>,
 
     /// restrict by version
