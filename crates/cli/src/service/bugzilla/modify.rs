@@ -14,33 +14,25 @@ use tempfile::NamedTempFile;
 use crate::macros::async_block;
 use crate::utils::{confirm, launch_editor};
 
-#[derive(Debug, Args, Deserialize, Clone)]
+#[derive(Debug, Args, Deserialize, Default, Clone)]
 #[serde(deny_unknown_fields)]
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
-    /// modify status
-    #[arg(short, long)]
-    status: Option<String>,
-
-    /// modify resolution
-    #[arg(short = 'R', long)]
-    resolution: Option<String>,
+    /// add/remove/set blockers
+    #[arg(short = 'B', long, num_args = 0..=1, value_delimiter = ',')]
+    blocks: Option<Vec<Change<NonZeroU64>>>,
 
     /// add/remove CC users
     #[arg(long, value_delimiter = ',')]
     cc: Option<Vec<Change<String>>>,
 
-    /// add/remove groups
-    #[arg(short = 'G', long, value_delimiter = ',')]
-    groups: Option<Vec<Change<String>>>,
+    /// add a comment
+    #[arg(short = 'c', long)]
+    comment: Option<String>,
 
-    /// add/remove/set keywords
-    #[arg(short = 'K', long, value_delimiter = ',')]
-    keywords: Option<Vec<Change<String>>>,
-
-    /// add/remove/set blockers
-    #[arg(short = 'B', long, num_args = 0..=1, value_delimiter = ',')]
-    blocks: Option<Vec<Change<NonZeroU64>>>,
+    /// modify component
+    #[arg(short = 'C', long)]
+    component: Option<String>,
 
     /// add/remove/set dependencies
     #[arg(short = 'D', long, num_args = 0..=1, value_delimiter = ',')]
@@ -50,17 +42,25 @@ struct Options {
     #[arg(short, long, value_name = "ID", conflicts_with_all = ["status", "resolution"])]
     duplicate_of: Option<NonZeroU64>,
 
-    /// modify component
-    #[arg(short = 'C', long)]
-    component: Option<String>,
+    /// add/remove groups
+    #[arg(short = 'G', long, value_delimiter = ',')]
+    groups: Option<Vec<Change<String>>>,
+
+    /// add/remove/set keywords
+    #[arg(short = 'K', long, value_delimiter = ',')]
+    keywords: Option<Vec<Change<String>>>,
 
     /// modify product
     #[arg(short = 'P', long)]
     product: Option<String>,
 
-    /// add a comment
-    #[arg(short = 'c', long)]
-    comment: Option<String>,
+    /// modify resolution
+    #[arg(short = 'R', long)]
+    resolution: Option<String>,
+
+    /// modify status
+    #[arg(short, long)]
+    status: Option<String>,
 
     /// modify summary
     #[arg(short, long)]
