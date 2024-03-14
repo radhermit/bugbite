@@ -111,8 +111,8 @@ struct AttributeOptions {
     status: Option<Vec<String>>,
 
     /// restrict by URL
-    #[arg(short = 'U', long)]
-    url: Option<Vec<String>>,
+    #[arg(short = 'U', long, num_args = 0..=1, default_missing_value = "true")]
+    url: Option<ExistsOrArray<String>>,
 
     /// restrict by version
     #[arg(short = 'V', long)]
@@ -311,7 +311,10 @@ impl Command {
             query.commenters(&values);
         }
         if let Some(values) = params.attr.url {
-            query.url(&values);
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ArrayField::Url, value),
+                ExistsOrArray::Array(values) => query.url(&values),
+            }
         }
         if let Some(value) = params.attr.votes {
             query.votes(value);

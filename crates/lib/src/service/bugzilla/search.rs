@@ -320,6 +320,7 @@ pub enum ArrayField {
     DependsOn,
     Groups,
     Keywords,
+    Url,
 }
 
 impl Api for ArrayField {
@@ -332,6 +333,7 @@ impl Api for ArrayField {
             Self::DependsOn => "dependson",
             Self::Groups => "bug_group",
             Self::Keywords => "keywords",
+            Self::Url => "bug_file_loc",
         }
     }
 }
