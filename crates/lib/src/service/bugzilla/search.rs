@@ -169,7 +169,10 @@ impl QueryBuilder {
         self.insert(format!("o{num}"), status);
     }
 
-    pub fn blocks(&mut self, values: &[NonZeroU64]) {
+    pub fn blocks<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = NonZeroU64>,
+    {
         for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
@@ -179,7 +182,10 @@ impl QueryBuilder {
         }
     }
 
-    pub fn depends_on(&mut self, values: &[NonZeroU64]) {
+    pub fn depends_on<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = NonZeroU64>,
+    {
         for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
@@ -189,8 +195,9 @@ impl QueryBuilder {
         }
     }
 
-    pub fn groups<S>(&mut self, values: &[S])
+    pub fn groups<I, S>(&mut self, values: I)
     where
+        I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
         for value in values {
@@ -202,8 +209,9 @@ impl QueryBuilder {
         }
     }
 
-    pub fn keywords<S>(&mut self, values: &[S])
+    pub fn keywords<I, S>(&mut self, values: I)
     where
+        I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
         for value in values {

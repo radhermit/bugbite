@@ -337,19 +337,13 @@ impl Command {
         if let Some(values) = params.attr.groups {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ArrayField::Groups, value),
-                ExistsOrArray::Array(values) => {
-                    let values: Vec<_> = values.iter().flatten().collect();
-                    query.groups(&values)
-                }
+                ExistsOrArray::Array(values) => query.groups(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.attr.keywords {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ArrayField::Keywords, value),
-                ExistsOrArray::Array(values) => {
-                    let values: Vec<_> = values.iter().flatten().collect();
-                    query.keywords(&values)
-                }
+                ExistsOrArray::Array(values) => query.keywords(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.cc {
@@ -361,19 +355,13 @@ impl Command {
         if let Some(values) = params.attr.blocks {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ArrayField::Blocks, value),
-                ExistsOrArray::Array(values) => {
-                    let values: Vec<_> = values.iter().flatten().copied().collect();
-                    query.blocks(&values)
-                }
+                ExistsOrArray::Array(values) => query.blocks(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.attr.depends_on {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ArrayField::DependsOn, value),
-                ExistsOrArray::Array(values) => {
-                    let values: Vec<_> = values.iter().flatten().copied().collect();
-                    query.depends_on(&values)
-                }
+                ExistsOrArray::Array(values) => query.depends_on(values.into_iter().flatten()),
             }
         }
 
