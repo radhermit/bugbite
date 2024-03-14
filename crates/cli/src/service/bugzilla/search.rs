@@ -98,6 +98,10 @@ struct AttributeOptions {
     #[arg(long)]
     platform: Option<String>,
 
+    /// restrict by priority
+    #[arg(long, value_delimiter = ',')]
+    priority: Option<Vec<String>>,
+
     /// restrict by product
     #[arg(short = 'P', long)]
     product: Option<String>,
@@ -105,6 +109,10 @@ struct AttributeOptions {
     /// restrict by resolution
     #[arg(short = 'R', long, value_delimiter = ',')]
     resolution: Option<Vec<String>>,
+
+    /// restrict by severity
+    #[arg(long, value_delimiter = ',')]
+    severity: Option<Vec<String>>,
 
     /// restrict by status
     #[arg(short, long, value_delimiter = ',')]
@@ -309,6 +317,12 @@ impl Command {
         }
         if let Some(values) = params.commenters {
             query.commenters(&values);
+        }
+        if let Some(values) = params.attr.priority {
+            query.priority(values);
+        }
+        if let Some(values) = params.attr.severity {
+            query.severity(values);
         }
         if let Some(values) = params.attr.url {
             match values {

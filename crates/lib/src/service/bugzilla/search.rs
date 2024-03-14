@@ -144,6 +144,34 @@ impl QueryBuilder {
         }
     }
 
+    pub fn priority<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        for value in values {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "priority");
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
+        }
+    }
+
+    pub fn severity<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        for value in values {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "bug_severity");
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
+        }
+    }
+
     pub fn votes(&mut self, value: u32) {
         self.advanced_count += 1;
         let num = self.advanced_count;
