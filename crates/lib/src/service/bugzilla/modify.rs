@@ -1,10 +1,10 @@
-use std::fs;
 use std::num::NonZeroU64;
 use std::str::FromStr;
+use std::{fmt, fs};
 
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
-use serde_with::{skip_serializing_none, DeserializeFromStr};
+use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 
 use crate::traits::{Request, WebService};
 use crate::Error;
@@ -48,8 +48,8 @@ impl ModifyRequest {
     }
 }
 
-#[derive(DeserializeFromStr, Debug, Eq, PartialEq, Clone)]
-pub enum Change<T: FromStr + Clone> {
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, Eq, PartialEq, Clone)]
+pub enum Change<T: Clone> {
     Add(T),
     Remove(T),
     Set(T),
@@ -74,6 +74,16 @@ impl<T: FromStr + Clone> FromStr for Change<T> {
                 .parse()
                 .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
             Ok(Change::Set(value))
+        }
+    }
+}
+
+impl<T: FromStr + Clone + fmt::Display> fmt::Display for Change<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Add(value) => value.fmt(f),
+            Self::Remove(value) => value.fmt(f),
+            Self::Set(value) => value.fmt(f),
         }
     }
 }
