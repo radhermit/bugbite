@@ -222,7 +222,13 @@ impl<'a> ModifyParams<'a> {
     }
 
     pub fn assigned_to(&mut self, value: &str) {
-        self.params.assigned_to = Some(value.into());
+        if value == "@me" {
+            if let Some(user) = self.service.user() {
+                self.params.assigned_to = Some(user.into());
+            }
+        } else {
+            self.params.assigned_to = Some(value.into());
+        }
     }
 
     pub fn blocks<I>(&mut self, values: I)
