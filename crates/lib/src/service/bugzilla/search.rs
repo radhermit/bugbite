@@ -200,6 +200,20 @@ impl QueryBuilder {
         self.extend("op_sys", values);
     }
 
+    pub fn see_also<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        for value in values {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "see_also");
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
+        }
+    }
+
     pub fn target<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
@@ -388,6 +402,7 @@ pub enum ExistsField {
     DependsOn,
     Groups,
     Keywords,
+    SeeAlso,
     Url,
     Whiteboard,
 }
@@ -402,6 +417,7 @@ impl Api for ExistsField {
             Self::DependsOn => "dependson",
             Self::Groups => "bug_group",
             Self::Keywords => "keywords",
+            Self::SeeAlso => "see_also",
             Self::Url => "bug_file_loc",
             Self::Whiteboard => "status_whiteboard",
         }

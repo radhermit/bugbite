@@ -267,6 +267,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Priority => format!("{:<12}", stringify!(self.priority)),
                 BugField::Product => format!("{:<20}", stringify!(self.product)),
                 BugField::Resolution => format!("{:<20}", stringify!(self.resolution)),
+                BugField::SeeAlso => format!("{:<20}", self.see_also.iter().join(",")),
                 BugField::Severity => format!("{:<12}", stringify!(self.severity)),
                 BugField::Status => format!("{:<20}", stringify!(self.status)),
                 BugField::Summary => stringify!(self.summary),
