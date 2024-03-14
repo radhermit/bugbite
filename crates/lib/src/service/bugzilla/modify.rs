@@ -170,6 +170,7 @@ struct Params {
     priority: Option<String>,
     product: Option<String>,
     resolution: Option<String>,
+    see_also: Option<Changes<String>>,
     severity: Option<String>,
     status: Option<String>,
     summary: Option<String>,
@@ -302,6 +303,13 @@ impl ModifyParams {
 
     pub fn resolution(&mut self, value: &str) {
         self.0.resolution = Some(value.into());
+    }
+
+    pub fn see_also<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = Change<String>>,
+    {
+        self.0.see_also = Some(values.into_iter().collect());
     }
 
     pub fn severity(&mut self, value: &str) {

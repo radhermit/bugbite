@@ -109,6 +109,10 @@ struct Options {
     #[arg(short = 'R', long)]
     resolution: Option<String>,
 
+    /// modify external URLs
+    #[arg(long, value_delimiter = ',')]
+    see_also: Option<Vec<Change<String>>>,
+
     /// modify severity
     #[arg(long)]
     severity: Option<String>,
@@ -157,6 +161,7 @@ impl Options {
             priority: self.priority.or(other.priority),
             product: self.product.or(other.product),
             resolution: self.resolution.or(other.resolution),
+            see_also: self.see_also.or(other.see_also),
             status: self.status.or(other.status),
             severity: self.severity.or(other.severity),
             target: self.target.or(other.target),
@@ -298,6 +303,10 @@ impl Command {
 
         if let Some(value) = options.resolution.as_ref() {
             params.resolution(value);
+        }
+
+        if let Some(values) = options.see_also {
+            params.see_also(values);
         }
 
         if let Some(value) = options.severity.as_ref() {
