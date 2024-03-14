@@ -128,8 +128,8 @@ struct AttributeOptions {
         long_help = indoc::indoc! {"
             Restrict bugs by status.
 
-            The aliases `@open` and `@closed` can be used to search for all open
-            or closed bugs, respectively.
+            The aliases `@open`, `@closed`, and `@all` can be used to search for
+            open, closed, and all bugs, respectively.
         "}
     )]
     status: Option<Vec<String>>,

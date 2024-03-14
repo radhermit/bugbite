@@ -178,6 +178,7 @@ impl QueryBuilder<'_> {
             match value.as_ref() {
                 "@open" => self.append("status", "__open__"),
                 "@closed" => self.append("status", "__closed__"),
+                "@all" => self.append("status", "__all__"),
                 s => self.append("status", s),
             }
         }
