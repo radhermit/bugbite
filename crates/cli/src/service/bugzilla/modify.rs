@@ -20,6 +20,10 @@ use crate::utils::{confirm, launch_editor};
 #[serde(deny_unknown_fields)]
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
+    /// assign to a user
+    #[arg(short, long, value_name = "USER")]
+    assigned_to: Option<String>,
+
     /// add/remove/set blockers
     #[arg(short = 'B', long, num_args = 0..=1, value_delimiter = ',')]
     blocks: Option<Vec<Change<NonZeroU64>>>,
@@ -85,6 +89,7 @@ impl Options {
     /// Merge two Option structs together, prioritizing values from the first.
     fn merge(self, other: Self) -> Self {
         Self {
+            assigned_to: self.assigned_to.or(other.assigned_to),
             blocks: self.blocks.or(other.blocks),
             cc: self.cc.or(other.cc),
             comment: self.comment.or(other.comment),
@@ -176,6 +181,12 @@ impl Command {
             }
         }
 
+        if let Some(value) = options.assigned_to {
+            params.assigned_to(value);
+        }
+        if let Some(values) = options.blocks {
+            params.blocks(values);
+        }
         if let Some(value) = options.status.as_ref() {
             params.status(value);
         }
@@ -190,9 +201,6 @@ impl Command {
         }
         if let Some(values) = options.keywords {
             params.keywords(values);
-        }
-        if let Some(values) = options.blocks {
-            params.blocks(values);
         }
         if let Some(values) = options.depends_on {
             params.depends_on(values);

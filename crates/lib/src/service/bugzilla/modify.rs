@@ -166,6 +166,7 @@ struct Params {
     url: Option<String>,
     version: Option<String>,
     whiteboard: Option<String>,
+    assigned_to: Option<String>,
     blocks: Option<SetChanges<NonZeroU64>>,
     depends_on: Option<SetChanges<NonZeroU64>>,
     cc: Option<Changes<String>>,
@@ -233,6 +234,10 @@ impl ModifyParams {
         I: IntoIterator<Item = Change<String>>,
     {
         self.0.keywords = Some(values.into_iter().collect());
+    }
+
+    pub fn assigned_to<S: Into<String>>(&mut self, value: S) {
+        self.0.assigned_to = Some(value.into());
     }
 
     pub fn blocks<I>(&mut self, values: I)
