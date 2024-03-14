@@ -56,6 +56,14 @@ struct Options {
     #[arg(short = 'K', long, value_delimiter = ',')]
     keywords: Option<Vec<Change<String>>>,
 
+    /// modify platform
+    #[arg(long)]
+    platform: Option<String>,
+
+    /// modify priority
+    #[arg(long)]
+    priority: Option<String>,
+
     /// modify product
     #[arg(short = 'P', long)]
     product: Option<String>,
@@ -63,6 +71,10 @@ struct Options {
     /// modify resolution
     #[arg(short = 'R', long)]
     resolution: Option<String>,
+
+    /// modify severity
+    #[arg(long)]
+    severity: Option<String>,
 
     /// modify status
     #[arg(short, long)]
@@ -98,9 +110,12 @@ impl Options {
             duplicate_of: self.duplicate_of.or(other.duplicate_of),
             groups: self.groups.or(other.groups),
             keywords: self.keywords.or(other.keywords),
+            platform: self.platform.or(other.platform),
+            priority: self.priority.or(other.priority),
             product: self.product.or(other.product),
             resolution: self.resolution.or(other.resolution),
             status: self.status.or(other.status),
+            severity: self.severity.or(other.severity),
             title: self.title.or(other.title),
             url: self.url.or(other.url),
             version: self.version.or(other.version),
@@ -217,12 +232,24 @@ impl Command {
             params.keywords(values);
         }
 
+        if let Some(value) = options.platform.as_ref() {
+            params.platform(value);
+        }
+
+        if let Some(value) = options.priority.as_ref() {
+            params.priority(value);
+        }
+
         if let Some(value) = options.product.as_ref() {
             params.product(value);
         }
 
         if let Some(value) = options.resolution.as_ref() {
             params.resolution(value);
+        }
+
+        if let Some(value) = options.severity.as_ref() {
+            params.severity(value);
         }
 
         if let Some(value) = options.status.as_ref() {

@@ -165,8 +165,11 @@ struct Params {
     groups: Option<Changes<String>>,
     ids: Option<Vec<NonZeroU64>>,
     keywords: Option<SetChanges<String>>,
+    platform: Option<String>,
+    priority: Option<String>,
     product: Option<String>,
     resolution: Option<String>,
+    severity: Option<String>,
     status: Option<String>,
     summary: Option<String>,
     url: Option<String>,
@@ -262,12 +265,24 @@ impl ModifyParams {
         self.0.keywords = Some(values.into_iter().collect());
     }
 
+    pub fn platform(&mut self, value: &str) {
+        self.0.platform = Some(value.into());
+    }
+
+    pub fn priority(&mut self, value: &str) {
+        self.0.priority = Some(value.into());
+    }
+
     pub fn product(&mut self, value: &str) {
         self.0.product = Some(value.into());
     }
 
     pub fn resolution(&mut self, value: &str) {
         self.0.resolution = Some(value.into());
+    }
+
+    pub fn severity(&mut self, value: &str) {
+        self.0.severity = Some(value.into());
     }
 
     pub fn status(&mut self, value: &str) {
