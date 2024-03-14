@@ -79,6 +79,28 @@ struct Options {
     whiteboard: Option<String>,
 }
 
+impl Options {
+    fn merge(self, other: Self) -> Self {
+        Self {
+            blocks: self.blocks.or(other.blocks),
+            cc: self.cc.or(other.cc),
+            comment: self.comment.or(other.comment),
+            component: self.component.or(other.component),
+            depends_on: self.depends_on.or(other.depends_on),
+            duplicate_of: self.duplicate_of.or(other.duplicate_of),
+            groups: self.groups.or(other.groups),
+            keywords: self.keywords.or(other.keywords),
+            product: self.product.or(other.product),
+            resolution: self.resolution.or(other.resolution),
+            status: self.status.or(other.status),
+            title: self.title.or(other.title),
+            url: self.url.or(other.url),
+            version: self.version.or(other.version),
+            whiteboard: self.whiteboard.or(other.whiteboard),
+        }
+    }
+}
+
 #[derive(Debug, Args)]
 pub(super) struct Command {
     #[clap(flatten)]
@@ -127,8 +149,10 @@ impl Command {
             } else {
                 let data = fs::read_to_string(path)
                     .map_err(|e| anyhow::anyhow!("failed loading template: {path}: {e}"))?;
-                options = toml::from_str(&data)
+                let template_options = toml::from_str(&data)
                     .map_err(|e| anyhow::anyhow!("failed parsing template: {path}: {e}"))?;
+                // command-line options override template options
+                options = options.merge(template_options);
             }
         };
 
