@@ -81,8 +81,8 @@ impl<T: FromStr + Clone> FromStr for Change<T> {
 impl<T: FromStr + Clone + fmt::Display> fmt::Display for Change<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Add(value) => value.fmt(f),
-            Self::Remove(value) => value.fmt(f),
+            Self::Add(value) => write!(f, "+{value}"),
+            Self::Remove(value) => write!(f, "-{value}"),
             Self::Set(value) => value.fmt(f),
         }
     }
