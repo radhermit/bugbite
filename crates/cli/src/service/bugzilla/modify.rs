@@ -51,7 +51,18 @@ impl fmt::Display for CustomField {
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
     /// assign to a user
-    #[arg(short, long, value_name = "USER")]
+    #[arg(
+        short,
+        long,
+        value_name = "USER",
+        long_help = indoc::indoc! {"
+            Assign a bug to a user.
+
+            The value must be the full email address for a user. The alias
+            `@me` can also be used for the service's configured user if one
+            exists.
+        "}
+    )]
     assigned_to: Option<String>,
 
     /// add/remove/set blockers
@@ -59,7 +70,21 @@ struct Options {
     blocks: Option<Vec<Change<NonZeroU64>>>,
 
     /// add/remove CC users
-    #[arg(long, value_delimiter = ',')]
+    #[arg(
+        long,
+        value_delimiter = ',',
+        long_help = indoc::indoc! {"
+            Add or remove users from the CC list.
+
+            The values must be full email addresses for users. The alias
+            `@me` can also be used for the service's configured user if one
+            exists.
+
+            In addition, values can be prefixed with `+` or `-` to add and
+            remove users from the list, respectively. Unprefixed values will be
+            added to the list.
+        "}
+    )]
     cc: Option<Vec<Change<String>>>,
 
     /// add a comment
