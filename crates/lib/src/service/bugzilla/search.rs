@@ -49,7 +49,7 @@ impl SearchRequest {
 /// information.
 #[derive(Debug)]
 pub struct QueryBuilder<'a> {
-    service: &'a super::Service,
+    _service: &'a super::Service,
     query: ListOrderedMultimap<String, String>,
     advanced_count: u64,
 }
@@ -57,9 +57,9 @@ pub struct QueryBuilder<'a> {
 impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
     type Service = super::Service;
 
-    fn new(service: &'a Self::Service) -> Self {
+    fn new(_service: &'a Self::Service) -> Self {
         Self {
-            service,
+            _service,
             query: Default::default(),
             advanced_count: Default::default(),
         }
@@ -174,11 +174,10 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
-        // replace @me alias with current service user if one exists
         for value in values {
             match value.as_ref() {
-                "@open" => self.extend("status", self.service.open_statuses()),
-                "@closed" => self.extend("status", self.service.closed_statuses()),
+                "@open" => self.append("status", "__open__"),
+                "@closed" => self.append("status", "__closed__"),
                 s => self.append("status", s),
             }
         }
