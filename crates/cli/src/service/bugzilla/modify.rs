@@ -1,7 +1,7 @@
+use std::collections::HashMap;
+use std::fs;
 use std::num::NonZeroU64;
 use std::process::ExitCode;
-use std::str::FromStr;
-use std::{fmt, fs};
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
@@ -11,43 +11,13 @@ use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
+use serde_with::skip_serializing_none;
 use tempfile::NamedTempFile;
 
 use crate::macros::async_block;
 use crate::utils::{confirm, launch_editor};
 
-#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
-struct CustomField {
-    name: String,
-    // TODO: support array values
-    value: String,
-}
-
-impl FromStr for CustomField {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> anyhow::Result<Self> {
-        if let Some((name, value)) = s.split_once('=') {
-            Ok(Self {
-                name: name.into(),
-                value: value.into(),
-            })
-        } else {
-            anyhow::bail!("invalid custom field: {s}")
-        }
-    }
-}
-
-impl fmt::Display for CustomField {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}={}", self.name, self.value)
-    }
-}
-
-#[skip_serializing_none]
-#[derive(Args, Deserialize, Serialize, Debug, Default, Clone)]
-#[serde(deny_unknown_fields)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
     /// assign to a user
@@ -96,8 +66,8 @@ struct Options {
     component: Option<String>,
 
     /// modify custom fields
-    #[arg(short = 'f', long = "field", value_name = "NAME=VALUE")]
-    custom_fields: Option<Vec<CustomField>>,
+    #[arg(long = "cf", num_args = 2, value_names = ["NAME", "VALUE"])]
+    custom_fields: Option<Vec<String>>,
 
     /// add/remove/set dependencies
     #[arg(short = 'D', long, num_args = 0..=1, value_delimiter = ',')]
@@ -168,8 +138,37 @@ struct Options {
     whiteboard: Option<String>,
 }
 
-impl Options {
-    /// Merge two Option structs together, prioritizing values from the first.
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+struct Attributes {
+    assigned_to: Option<String>,
+    blocks: Option<Vec<Change<NonZeroU64>>>,
+    cc: Option<Vec<Change<String>>>,
+    comment: Option<String>,
+    component: Option<String>,
+    depends_on: Option<Vec<Change<NonZeroU64>>>,
+    duplicate_of: Option<NonZeroU64>,
+    groups: Option<Vec<Change<String>>>,
+    keywords: Option<Vec<Change<String>>>,
+    os: Option<String>,
+    platform: Option<String>,
+    priority: Option<String>,
+    product: Option<String>,
+    resolution: Option<String>,
+    see_also: Option<Vec<Change<String>>>,
+    severity: Option<String>,
+    status: Option<String>,
+    summary: Option<String>,
+    target: Option<String>,
+    url: Option<String>,
+    version: Option<String>,
+    whiteboard: Option<String>,
+
+    #[serde(flatten)]
+    custom_fields: Option<HashMap<String, String>>,
+}
+
+impl Attributes {
     fn merge(self, other: Self) -> Self {
         Self {
             assigned_to: self.assigned_to.or(other.assigned_to),
@@ -177,7 +176,6 @@ impl Options {
             cc: self.cc.or(other.cc),
             comment: self.comment.or(other.comment),
             component: self.component.or(other.component),
-            custom_fields: self.custom_fields.or(other.custom_fields),
             depends_on: self.depends_on.or(other.depends_on),
             duplicate_of: self.duplicate_of.or(other.duplicate_of),
             groups: self.groups.or(other.groups),
@@ -195,6 +193,139 @@ impl Options {
             url: self.url.or(other.url),
             version: self.version.or(other.version),
             whiteboard: self.whiteboard.or(other.whiteboard),
+
+            custom_fields: self.custom_fields.or(other.custom_fields),
+        }
+    }
+
+    fn into_params(self, client: &Client) -> ModifyParams {
+        let mut params = client.service().modify_params();
+
+        if let Some(value) = self.assigned_to.as_ref() {
+            params.assigned_to(value);
+        }
+
+        if let Some(values) = self.blocks {
+            params.blocks(values);
+        }
+
+        if let Some(values) = self.cc {
+            params.cc(values);
+        }
+
+        if let Some(value) = self.comment.as_ref() {
+            params.comment(value);
+        }
+
+        if let Some(value) = self.component.as_ref() {
+            params.component(value);
+        }
+
+        if let Some(values) = self.custom_fields {
+            params.custom_fields(values);
+        }
+
+        if let Some(values) = self.depends_on {
+            params.depends_on(values);
+        }
+
+        if let Some(value) = self.duplicate_of {
+            params.duplicate_of(value);
+        }
+
+        if let Some(values) = self.groups {
+            params.groups(values);
+        }
+
+        if let Some(values) = self.keywords {
+            params.keywords(values);
+        }
+
+        if let Some(value) = self.os.as_ref() {
+            params.os(value);
+        }
+
+        if let Some(value) = self.platform.as_ref() {
+            params.platform(value);
+        }
+
+        if let Some(value) = self.priority.as_ref() {
+            params.priority(value);
+        }
+
+        if let Some(value) = self.product.as_ref() {
+            params.product(value);
+        }
+
+        if let Some(value) = self.resolution.as_ref() {
+            params.resolution(value);
+        }
+
+        if let Some(values) = self.see_also {
+            params.see_also(values);
+        }
+
+        if let Some(value) = self.severity.as_ref() {
+            params.severity(value);
+        }
+
+        if let Some(value) = self.status.as_ref() {
+            params.status(value);
+        }
+
+        if let Some(value) = self.target.as_ref() {
+            params.target(value);
+        }
+
+        if let Some(value) = self.summary.as_ref() {
+            params.summary(value);
+        }
+
+        if let Some(value) = self.url.as_ref() {
+            params.url(value);
+        }
+
+        if let Some(value) = self.version.as_ref() {
+            params.version(value);
+        }
+
+        if let Some(value) = self.whiteboard.as_ref() {
+            params.whiteboard(value);
+        }
+
+        params
+    }
+}
+
+impl From<Options> for Attributes {
+    fn from(value: Options) -> Self {
+        Self {
+            assigned_to: value.assigned_to,
+            blocks: value.blocks,
+            cc: value.cc,
+            comment: value.comment,
+            component: value.component,
+            depends_on: value.depends_on,
+            duplicate_of: value.duplicate_of,
+            groups: value.groups,
+            keywords: value.keywords,
+            os: value.os,
+            platform: value.platform,
+            priority: value.priority,
+            product: value.product,
+            resolution: value.resolution,
+            see_also: value.see_also,
+            status: value.status,
+            severity: value.severity,
+            target: value.target,
+            summary: value.summary,
+            url: value.url,
+            version: value.version,
+            whiteboard: value.whiteboard,
+
+            custom_fields: value
+                .custom_fields
+                .map(|x| x.into_iter().tuples().collect()),
         }
     }
 }
@@ -242,166 +373,72 @@ pub(super) struct Command {
     ids: Vec<MaybeStdinVec<NonZeroU64>>,
 }
 
+// interactively create a reply
+fn get_comment(client: &Client, id: NonZeroU64, comment_ids: &[usize]) -> anyhow::Result<String> {
+    let comments = async_block!(client.comments(&[id], None))?
+        .into_iter()
+        .next()
+        .expect("invalid comments response");
+    if comments.is_empty() {
+        anyhow::bail!("reply invalid, bug #{id} has no comments")
+    }
+
+    let mut data = vec![];
+    for id in comment_ids {
+        let Some(comment) = comments.get(*id) else {
+            anyhow::bail!("reply invalid, nonexistent comment #{id}");
+        };
+        data.push(comment);
+    }
+    let data = data.iter().map(|x| x.reply()).join("\n\n");
+
+    // interactively edit the comment
+    let temp_file = NamedTempFile::new()?;
+    fs::write(&temp_file, &data)?;
+    loop {
+        let status = launch_editor(&temp_file)?;
+        if !status.success() {
+            anyhow::bail!("failed editing reply content");
+        }
+        let comment = fs::read_to_string(&temp_file)?;
+        if comment != data || confirm("No changes made to comment, submit anyway?", false)? {
+            return Ok(comment);
+        }
+    }
+}
+
 impl Command {
     pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
-        let mut options = self.options;
-        let mut params = client.service().modify_params();
+        let mut attrs: Attributes = self.options.into();
 
-        // Try to load a template as modify parameters with a fallback to loading as modify options
-        // on failure.
+        // load fallback attribute values from template
         if let Some(path) = self.template.as_ref() {
-            if let Ok(value) = ModifyParams::load(path, client.service()) {
-                params = value;
-            } else {
-                let data = fs::read_to_string(path)
-                    .map_err(|e| anyhow::anyhow!("failed loading template: {path}: {e}"))?;
-                let template = toml::from_str(&data)
-                    .map_err(|e| anyhow::anyhow!("failed parsing template: {path}: {e}"))?;
-                // command-line options override template options
-                options = options.merge(template);
-            }
+            let data = fs::read_to_string(path)
+                .map_err(|e| anyhow::anyhow!("failed loading template: {path}: {e}"))?;
+            let template = toml::from_str(&data)
+                .map_err(|e| anyhow::anyhow!("failed parsing template: {path}: {e}"))?;
+            // command-line options override template options
+            attrs = attrs.merge(template);
         };
 
         // write command-line options to a template file
         if let Some(path) = self.to_template.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                let data = toml::to_string(&options)?;
+                let data = toml::to_string(&attrs)?;
                 fs::write(path, data)?;
             }
         }
 
-        if let Some(value) = options.assigned_to.as_ref() {
-            params.assigned_to(value);
-        }
-
-        if let Some(values) = options.blocks {
-            params.blocks(values);
-        }
-
-        if let Some(values) = options.cc {
-            params.cc(values);
-        }
-
-        if let Some(value) = options.comment.as_ref() {
-            params.comment(value);
-        }
-
-        if let Some(value) = options.component.as_ref() {
-            params.component(value);
-        }
-
-        if let Some(values) = options.custom_fields {
-            params.custom_fields(values.into_iter().map(|f| (f.name, f.value)));
-        }
-
-        if let Some(values) = options.depends_on {
-            params.depends_on(values);
-        }
-
-        if let Some(value) = options.duplicate_of {
-            params.duplicate_of(value);
-        }
-
-        if let Some(values) = options.groups {
-            params.groups(values);
-        }
-
-        if let Some(values) = options.keywords {
-            params.keywords(values);
-        }
-
-        if let Some(value) = options.os.as_ref() {
-            params.os(value);
-        }
-
-        if let Some(value) = options.platform.as_ref() {
-            params.platform(value);
-        }
-
-        if let Some(value) = options.priority.as_ref() {
-            params.priority(value);
-        }
-
-        if let Some(value) = options.product.as_ref() {
-            params.product(value);
-        }
-
-        if let Some(value) = options.resolution.as_ref() {
-            params.resolution(value);
-        }
-
-        if let Some(values) = options.see_also {
-            params.see_also(values);
-        }
-
-        if let Some(value) = options.severity.as_ref() {
-            params.severity(value);
-        }
-
-        if let Some(value) = options.status.as_ref() {
-            params.status(value);
-        }
-
-        if let Some(value) = options.target.as_ref() {
-            params.target(value);
-        }
-
-        if let Some(value) = options.summary.as_ref() {
-            params.summary(value);
-        }
-
-        if let Some(value) = options.url.as_ref() {
-            params.url(value);
-        }
-
-        if let Some(value) = options.version.as_ref() {
-            params.version(value);
-        }
-
-        if let Some(value) = options.whiteboard.as_ref() {
-            params.whiteboard(value);
-        }
+        let mut params = attrs.into_params(client);
 
         // pull comments to interactively create a reply
         if let Some(values) = self.reply.as_ref() {
             if ids.len() > 1 {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
             }
-            let id = ids[0];
-
-            let comments = async_block!(client.comments(&[id], None))?
-                .into_iter()
-                .next()
-                .expect("invalid comments response");
-            if comments.is_empty() {
-                anyhow::bail!("reply invalid, bug #{id} has no comments")
-            }
-
-            let mut data = vec![];
-            for i in values {
-                let Some(comment) = comments.get(*i) else {
-                    anyhow::bail!("reply invalid, nonexistent comment #{i}");
-                };
-                data.push(comment);
-            }
-            let data = data.iter().map(|x| x.reply()).join("\n\n");
-
-            // interactively edit the comment
-            let temp_file = NamedTempFile::new()?;
-            fs::write(&temp_file, &data)?;
-            loop {
-                let status = launch_editor(&temp_file)?;
-                if !status.success() {
-                    anyhow::bail!("failed editing reply content");
-                }
-                let comment = fs::read_to_string(&temp_file)?;
-                if comment != data || confirm("No changes made to comment, submit anyway?", false)?
-                {
-                    params.comment(comment.trim());
-                    break;
-                }
-            }
+            let comment = get_comment(client, ids[0], values)?;
+            params.comment(comment.trim());
         }
 
         async_block!(client.modify(ids, params))?;
