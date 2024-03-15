@@ -36,12 +36,19 @@ struct Options {
     assigned_to: Option<String>,
 
     /// add/remove/set blockers
-    #[arg(short = 'B', long, num_args = 0..=1, value_delimiter = ',')]
+    #[arg(
+        short = 'B',
+        long,
+        num_args = 0..=1,
+        value_name = "ID[,-ID,+ID,...]",
+        value_delimiter = ',',
+    )]
     blocks: Option<Vec<Change<NonZeroU64>>>,
 
     /// add/remove CC users
     #[arg(
         long,
+        value_name = "USER[,-USER,+USER,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Add or remove users from the CC list.
@@ -65,12 +72,18 @@ struct Options {
     #[arg(short = 'C', long)]
     component: Option<String>,
 
-    /// modify custom fields
+    /// modify custom field
     #[arg(long = "cf", num_args = 2, value_names = ["NAME", "VALUE"])]
     custom_fields: Option<Vec<String>>,
 
     /// add/remove/set dependencies
-    #[arg(short = 'D', long, num_args = 0..=1, value_delimiter = ',')]
+    #[arg(
+        short = 'D',
+        long,
+        num_args = 0..=1,
+        value_name = "ID[,-ID,+ID,...]",
+        value_delimiter = ',',
+    )]
     depends_on: Option<Vec<Change<NonZeroU64>>>,
 
     /// mark bug as duplicate
@@ -78,11 +91,21 @@ struct Options {
     duplicate_of: Option<NonZeroU64>,
 
     /// add/remove groups
-    #[arg(short = 'G', long, value_delimiter = ',')]
+    #[arg(
+        short = 'G',
+        long,
+        value_name = "GROUP[,-GROUP,+GROUP,...]",
+        value_delimiter = ',',
+    )]
     groups: Option<Vec<Change<String>>>,
 
     /// add/remove/set keywords
-    #[arg(short = 'K', long, value_delimiter = ',')]
+    #[arg(
+        short = 'K',
+        long,
+        value_name = "KEYWORD[,-KEYWORD,+KEYWORD,...]",
+        value_delimiter = ',',
+    )]
     keywords: Option<Vec<Change<String>>>,
 
     /// modify operating system
@@ -106,7 +129,12 @@ struct Options {
     resolution: Option<String>,
 
     /// modify external URLs
-    #[arg(short = 'U', long, value_delimiter = ',')]
+    #[arg(
+        short = 'U',
+        long,
+        value_name = "URL[,-URL,+URL,...]",
+        value_delimiter = ',',
+    )]
     see_also: Option<Vec<Change<String>>>,
 
     /// modify severity
@@ -122,7 +150,7 @@ struct Options {
     summary: Option<String>,
 
     /// modify target milestone
-    #[arg(short = 'T', long)]
+    #[arg(short = 'T', long, value_name = "MILESTONE")]
     target: Option<String>,
 
     /// modify URL
