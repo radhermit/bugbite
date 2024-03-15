@@ -1,15 +1,60 @@
-use std::collections::HashMap;
 use std::num::NonZeroU64;
 use std::str::FromStr;
 use std::{fmt, fs};
 
 use camino::Utf8Path;
+use indexmap::IndexMap;
 use itertools::Either;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 
+use crate::serde::non_empty_str;
 use crate::traits::{Request, ServiceParams, WebService};
 use crate::Error;
+
+/// Changes made to a field.
+#[derive(Deserialize, Debug, Eq, PartialEq)]
+pub struct FieldChange {
+    #[serde(deserialize_with = "non_empty_str")]
+    added: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
+    removed: Option<String>,
+}
+
+impl fmt::Display for FieldChange {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match (self.removed.as_ref(), self.added.as_ref()) {
+            (Some(removed), Some(added)) => write!(f, "{removed} -> {added}"),
+            (Some(removed), None) => write!(f, "-{removed}"),
+            (None, Some(added)) => write!(f, "+{added}"),
+            (None, None) => panic!("invalid FieldChange"),
+        }
+    }
+}
+
+/// Changes made to a bug.
+#[derive(Deserialize, Debug, Eq, PartialEq)]
+pub struct BugChange {
+    pub id: NonZeroU64,
+    changes: IndexMap<String, FieldChange>,
+}
+
+impl fmt::Display for BugChange {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Bug #{}: ", self.id)?;
+        if self.changes.is_empty() {
+            write!(f, "no changes made")?;
+        } else if self.changes.len() == 1 {
+            let (name, change) = self.changes.iter().next().unwrap();
+            write!(f, "{name}: {change}")?;
+        } else {
+            for (name, change) in &self.changes {
+                write!(f, "\n  {name}: {change}")?;
+            }
+        }
+        Ok(())
+    }
+}
 
 #[derive(Debug)]
 pub(crate) struct ModifyRequest {
@@ -18,15 +63,15 @@ pub(crate) struct ModifyRequest {
 }
 
 impl Request for ModifyRequest {
-    type Output = ();
+    type Output = Vec<BugChange>;
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
         let request = service.client().put(self.url).json(&self.params);
         let response = service.send(request).await?;
         let mut data = service.parse_response(response).await?;
-        let _data = data["bugs"].take();
-        Ok(())
+        let data = data["bugs"].take();
+        Ok(serde_json::from_value(data)?)
     }
 }
 
@@ -182,7 +227,7 @@ struct Params {
     whiteboard: Option<String>,
 
     #[serde(flatten)]
-    custom_fields: Option<HashMap<String, String>>,
+    custom_fields: Option<IndexMap<String, String>>,
 }
 
 /// Construct bug modification parameters.

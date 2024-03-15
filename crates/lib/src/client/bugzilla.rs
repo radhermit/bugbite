@@ -5,7 +5,7 @@ use tracing::info;
 
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::attach::CreateAttachment;
-use crate::service::bugzilla::modify::ModifyParams;
+use crate::service::bugzilla::modify::{BugChange, ModifyParams};
 use crate::service::bugzilla::{Config, Service};
 use crate::time::TimeDelta;
 use crate::traits::{Query, Request, WebService};
@@ -107,7 +107,7 @@ impl Client {
         &'a self,
         ids: &[NonZeroU64],
         params: ModifyParams<'a>,
-    ) -> crate::Result<()> {
+    ) -> crate::Result<Vec<BugChange>> {
         let request = self.service.modify_request(ids, params)?;
         request.send(&self.service).await
     }

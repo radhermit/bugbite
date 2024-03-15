@@ -13,6 +13,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use tempfile::NamedTempFile;
+use tracing::info;
 
 use crate::macros::async_block;
 use crate::utils::{confirm, launch_editor};
@@ -560,7 +561,10 @@ impl Command {
         }
 
         if !self.dry_run {
-            async_block!(client.modify(ids, params))?;
+            let changes = async_block!(client.modify(ids, params))?;
+            for change in changes {
+                info!("{change}");
+            }
         }
 
         Ok(ExitCode::SUCCESS)
