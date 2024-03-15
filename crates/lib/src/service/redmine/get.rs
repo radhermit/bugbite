@@ -3,7 +3,7 @@ use reqwest::StatusCode;
 use url::Url;
 
 use crate::objects::redmine::{Comment, Issue};
-use crate::traits::{Request, WebService};
+use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -58,11 +58,12 @@ impl Request for GetRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let futures: Vec<_> = self
+        let futures = self
             .urls
             .into_iter()
-            .map(|u| service.send(service.client().get(u)))
-            .collect();
+            .map(|u| service.client().get(u))
+            .map(|r| r.inject_auth(service, false).map(|r| r.send()))
+            .collect::<Result<Vec<_>, _>>()?;
 
         let mut issues = vec![];
         for (future, id) in futures.into_iter().zip(self.ids.into_iter()) {

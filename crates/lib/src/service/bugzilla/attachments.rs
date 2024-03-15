@@ -2,7 +2,7 @@ use url::Url;
 
 use crate::objects::bugzilla::Attachment;
 use crate::objects::{Ids, IdsSlice};
-use crate::traits::{Request, WebService};
+use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -47,8 +47,8 @@ impl Request for AttachmentsRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.url);
-        let response = service.send(request).await?;
+        let request = service.client().get(self.url).inject_auth(service, false)?;
+        let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         match self.ids {
             Ids::Item(ids) => {

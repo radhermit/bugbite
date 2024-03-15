@@ -10,7 +10,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::bugzilla::Bug;
 use crate::time::TimeDelta;
-use crate::traits::{Api, Query, Request, ServiceParams, WebService};
+use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -26,8 +26,8 @@ impl Request for SearchRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.0);
-        let response = service.send(request).await?;
+        let request = service.client().get(self.0).inject_auth(service, false)?;
+        let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
         Ok(serde_json::from_value(data)?)

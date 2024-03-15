@@ -173,14 +173,20 @@ impl<'a> WebService<'a> for Service {
         &self.client
     }
 
-    fn inject_auth(&self, request: RequestBuilder) -> RequestBuilder {
+    fn inject_auth(
+        &self,
+        request: RequestBuilder,
+        required: bool,
+    ) -> crate::Result<RequestBuilder> {
         let config = &self.config;
         if let Some(key) = config.api_key.as_ref() {
-            request.query(&[("Bugzilla_api_key", key)])
+            Ok(request.query(&[("Bugzilla_api_key", key)]))
         } else if let (Some(user), Some(pass)) = (&config.user, &config.password) {
-            request.query(&[("Bugzilla_login", user), ("Bugzilla_password", pass)])
+            Ok(request.query(&[("Bugzilla_login", user), ("Bugzilla_password", pass)]))
+        } else if !required {
+            Ok(request)
         } else {
-            request
+            Err(Error::Auth)
         }
     }
 

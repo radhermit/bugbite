@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 
 use crate::serde::non_empty_str;
-use crate::traits::{Request, ServiceParams, WebService};
+use crate::traits::{InjectAuth, Request, ServiceParams, WebService};
 use crate::Error;
 
 /// Changes made to a field.
@@ -72,8 +72,12 @@ impl Request for ModifyRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().put(self.url).json(&self.params);
-        let response = service.send(request).await?;
+        let request = service
+            .client()
+            .put(self.url)
+            .json(&self.params)
+            .inject_auth(service, true)?;
+        let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
         let mut changes: Vec<BugChange> = serde_json::from_value(data)?;

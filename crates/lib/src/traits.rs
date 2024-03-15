@@ -1,4 +1,3 @@
-use std::future::Future;
 use std::num::NonZeroU64;
 
 use reqwest::RequestBuilder;
@@ -65,6 +64,24 @@ pub trait WebClient<'a> {
     fn search_query(&'a self) -> Self::SearchQuery;
 }
 
+pub(crate) trait InjectAuth: Sized {
+    fn inject_auth<'a, W: WebService<'a>>(
+        self,
+        service: &'a W,
+        required: bool,
+    ) -> crate::Result<Self>;
+}
+
+impl InjectAuth for RequestBuilder {
+    fn inject_auth<'a, W: WebService<'a>>(
+        self,
+        service: &'a W,
+        required: bool,
+    ) -> crate::Result<Self> {
+        service.inject_auth(self, required)
+    }
+}
+
 pub(crate) trait WebService<'a>: WebClient<'a> {
     const API_VERSION: &'static str;
     type Response;
@@ -84,16 +101,12 @@ pub(crate) trait WebService<'a>: WebClient<'a> {
     }
 
     /// Inject authentication into a request before it's sent.
-    fn inject_auth(&self, request: RequestBuilder) -> RequestBuilder {
-        request
-    }
-
-    /// Send a given request to the service.
-    fn send(
+    fn inject_auth(
         &self,
         request: RequestBuilder,
-    ) -> impl Future<Output = Result<reqwest::Response, reqwest::Error>> {
-        self.inject_auth(request).send()
+        _required: bool,
+    ) -> crate::Result<RequestBuilder> {
+        Ok(request)
     }
 
     /// Parse a raw response into a service response.

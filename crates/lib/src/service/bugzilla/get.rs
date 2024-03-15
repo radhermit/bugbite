@@ -3,7 +3,7 @@ use std::num::NonZeroU64;
 use url::Url;
 
 use crate::objects::bugzilla::Bug;
-use crate::traits::{Request, WebService};
+use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 use super::attachments::AttachmentsRequest;
@@ -68,9 +68,9 @@ impl Request for GetRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.url);
+        let request = service.client().get(self.url).inject_auth(service, false)?;
         let (bugs, attachments, comments, history) = (
-            service.send(request),
+            request.send(),
             self.attachments.map(|r| r.send(service)),
             self.comments.map(|r| r.send(service)),
             self.history.map(|r| r.send(service)),

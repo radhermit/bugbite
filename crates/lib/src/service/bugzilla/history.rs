@@ -6,7 +6,7 @@ use url::Url;
 
 use crate::objects::bugzilla::Event;
 use crate::time::TimeDelta;
-use crate::traits::{Request, WebService};
+use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -45,8 +45,8 @@ impl Request for HistoryRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.0);
-        let response = service.send(request).await?;
+        let request = service.client().get(self.0).inject_auth(service, false)?;
+        let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let Value::Array(bugs) = data["bugs"].take() else {
             return Err(Error::InvalidValue(

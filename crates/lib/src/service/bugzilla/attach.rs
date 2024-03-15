@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::objects::Base64;
-use crate::traits::{Request, WebService};
+use crate::traits::{InjectAuth, Request, WebService};
 use crate::utils::get_mime_type;
 use crate::Error;
 
@@ -99,11 +99,9 @@ impl Request for AttachRequest {
         let futures: Vec<_> = self
             .attachments
             .into_iter()
-            .map(|x| {
-                let request = service.client().post(self.url.clone()).json(&x);
-                service.send(request)
-            })
-            .collect();
+            .map(|x| service.client().post(self.url.clone()).json(&x))
+            .map(|r| r.inject_auth(service, true).map(|r| r.send()))
+            .collect::<Result<Vec<_>, _>>()?;
 
         let mut attachment_ids = vec![];
         for future in futures {

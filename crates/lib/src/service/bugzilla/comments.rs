@@ -5,7 +5,7 @@ use url::Url;
 
 use crate::objects::bugzilla::Comment;
 use crate::time::TimeDelta;
-use crate::traits::{Request, WebService};
+use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -50,8 +50,8 @@ impl Request for CommentsRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.url);
-        let response = service.send(request).await?;
+        let request = service.client().get(self.url).inject_auth(service, false)?;
+        let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let mut data = data["bugs"].take();
         let mut comments = vec![];

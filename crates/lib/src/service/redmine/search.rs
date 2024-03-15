@@ -6,7 +6,7 @@ use ordered_multimap::ListOrderedMultimap;
 
 use crate::objects::redmine::Issue;
 use crate::time::TimeDelta;
-use crate::traits::{Query, Request, ServiceParams, WebService};
+use crate::traits::{InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
 /// Construct a search query.
@@ -129,8 +129,8 @@ impl Request for SearchRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.0);
-        let response = service.send(request).await?;
+        let request = service.client().get(self.0).inject_auth(service, false)?;
+        let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let data = data["issues"].take();
         Ok(serde_json::from_value(data)?)
