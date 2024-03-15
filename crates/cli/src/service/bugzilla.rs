@@ -26,22 +26,11 @@ struct Authentication {
     api_key: Option<String>,
 
     /// Bugzilla username
-    #[arg(
-        short,
-        long,
-        requires = "password",
-        env = "BUGBITE_USER",
-    )]
+    #[arg(short, long, requires = "password", env = "BUGBITE_USER")]
     user: Option<String>,
 
     /// Bugzilla password
-    #[arg(
-        short,
-        long,
-        requires = "user",
-        env = "BUGBITE_PASS",
-        conflicts_with = "api_key"
-    )]
+    #[arg(short, long, requires = "user", env = "BUGBITE_PASS")]
     password: Option<String>,
 }
 
