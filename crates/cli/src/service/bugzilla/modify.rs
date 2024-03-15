@@ -413,6 +413,10 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
+    /// skip service interaction
+    #[arg(short = 'n', long, help_heading = "Modify options")]
+    dry_run: bool,
+
     /// reply to specific comments
     #[arg(
         short,
@@ -537,7 +541,10 @@ impl Command {
             params.comment(comment.trim());
         }
 
-        async_block!(client.modify(ids, params))?;
+        if !self.dry_run {
+            async_block!(client.modify(ids, params))?;
+        }
+
         Ok(ExitCode::SUCCESS)
     }
 }
