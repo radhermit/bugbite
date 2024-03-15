@@ -373,7 +373,7 @@ pub(super) struct Command {
     ids: Vec<MaybeStdinVec<NonZeroU64>>,
 }
 
-// interactively create a reply
+/// Interactively create a reply, pulling specified comments for pre-population.
 fn get_comment(client: &Client, id: NonZeroU64, comment_ids: &[usize]) -> anyhow::Result<String> {
     let comments = async_block!(client.comments(&[id], None))?
         .into_iter()
@@ -432,7 +432,7 @@ impl Command {
 
         let mut params = attrs.into_params(client);
 
-        // pull comments to interactively create a reply
+        // interactively create a reply
         if let Some(values) = self.reply.as_ref() {
             if ids.len() > 1 {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
