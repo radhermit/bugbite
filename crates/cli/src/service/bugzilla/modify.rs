@@ -122,7 +122,7 @@ struct Options {
     summary: Option<String>,
 
     /// modify target milestone
-    #[arg(short, long)]
+    #[arg(short = 'T', long)]
     target: Option<String>,
 
     /// modify URL
@@ -341,7 +341,7 @@ pub(super) struct Command {
 
     /// load options from a template
     #[arg(
-        short = 'T',
+        short,
         long,
         help_heading = "Modify options",
         value_name = "PATH",
