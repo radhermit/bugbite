@@ -413,7 +413,7 @@ pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
 
-    /// reply to specific comment(s)
+    /// reply to specific comments
     #[arg(
         short,
         long,
