@@ -434,7 +434,7 @@ pub(super) struct Command {
     )]
     reply: Option<Vec<usize>>,
 
-    /// load options from a template
+    /// read attributes from a template
     #[arg(
         short,
         long,
@@ -442,16 +442,17 @@ pub(super) struct Command {
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
     )]
-    template: Option<Utf8PathBuf>,
+    from: Option<Utf8PathBuf>,
 
-    /// write options to a template file
+    /// write attributes to a template
     #[arg(
+        short,
         long,
         help_heading = "Modify options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
     )]
-    to_template: Option<Utf8PathBuf>,
+    to: Option<Utf8PathBuf>,
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
@@ -508,7 +509,7 @@ impl Command {
         let mut attrs: Attributes = self.options.into();
 
         // load fallback attribute values from template
-        if let Some(path) = self.template.as_ref() {
+        if let Some(path) = self.from.as_ref() {
             let data = fs::read_to_string(path)
                 .map_err(|e| anyhow::anyhow!("failed loading template: {path}: {e}"))?;
             let template = toml::from_str(&data)
@@ -518,7 +519,7 @@ impl Command {
         };
 
         // write command-line options to a template file
-        if let Some(path) = self.to_template.as_ref() {
+        if let Some(path) = self.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&attrs)?;
                 fs::write(path, data)?;
