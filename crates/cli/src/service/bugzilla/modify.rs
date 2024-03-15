@@ -445,6 +445,16 @@ pub(super) struct Command {
         help_heading = "Modify options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
+        long_help = indoc::indoc! {"
+            Read modification attributes from a template.
+
+            Value must be the path to a valid attributes template file.
+            Templates use the TOML format and generally map long option names
+            relating to bug fields to values.
+
+            Fields that don't match known bug field names are used for custom
+            field modifications.
+        "}
     )]
     from: Option<Utf8PathBuf>,
 
@@ -455,6 +465,14 @@ pub(super) struct Command {
         help_heading = "Modify options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
+        long_help = indoc::indoc! {"
+            Write modification attributes to a template.
+
+            Value is the file path where the TOML template file will be written.
+
+            Combining this option with -n/--dry-run allows creating bug
+            modification templates without changing any bugs.
+        "}
     )]
     to: Option<Utf8PathBuf>,
 
@@ -512,7 +530,7 @@ impl Command {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
         let mut attrs: Attributes = self.options.into();
 
-        // load fallback attribute values from template
+        // read modification attributes from a template
         if let Some(path) = self.from.as_ref() {
             let data = fs::read_to_string(path)
                 .map_err(|e| anyhow::anyhow!("failed loading template: {path}: {e}"))?;
@@ -522,7 +540,7 @@ impl Command {
             attrs = attrs.merge(template);
         };
 
-        // write command-line options to a template file
+        // write modification attributes to a template
         if let Some(path) = self.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&attrs)?;
