@@ -133,7 +133,7 @@ struct Options {
         short = 'K',
         long,
         num_args = 0..=1,
-        value_name = "KEYWORD[,+KEYWORD,-KEYWORD,...]",
+        value_name = "KW[,+KW,-KW,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Add, remove, or set keywords.
