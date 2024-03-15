@@ -414,7 +414,24 @@ pub(super) struct Command {
     options: Options,
 
     /// reply to specific comment(s)
-    #[arg(short, long, value_delimiter = ',', help_heading = "Modify options")]
+    #[arg(
+        short,
+        long,
+        value_name = "ID[,ID,...]",
+        value_delimiter = ',',
+        help_heading = "Modify options",
+        long_help = indoc::indoc! {"
+            Reply to specific comments for a given bug.
+
+            Values must be valid comment IDs for the bug, starting at 0 for the
+            description.
+
+            This option forces interactive usage, launching an editor
+            pre-populated with the selected comments allowing the user to
+            respond in a style reminiscent of threaded messages on a mailing
+            list. On completion, the data is used to create a new bug comment.
+        "}
+    )]
     reply: Option<Vec<usize>>,
 
     /// load options from a template
