@@ -13,7 +13,7 @@ use crate::traits::{Request, ServiceParams, WebService};
 use crate::Error;
 
 /// Changes made to a field.
-#[derive(Deserialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Debug, Eq, PartialEq, Hash)]
 pub struct FieldChange {
     #[serde(deserialize_with = "non_empty_str")]
     added: Option<String>,
@@ -35,23 +35,28 @@ impl fmt::Display for FieldChange {
 /// Changes made to a bug.
 #[derive(Deserialize, Debug, Eq, PartialEq)]
 pub struct BugChange {
-    pub id: NonZeroU64,
+    id: NonZeroU64,
+    comment: Option<Comment>,
     changes: IndexMap<String, FieldChange>,
 }
 
 impl fmt::Display for BugChange {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Bug #{}: ", self.id)?;
-        if self.changes.is_empty() {
-            write!(f, "no changes made")?;
-        } else if self.changes.len() == 1 {
-            let (name, change) = self.changes.iter().next().unwrap();
-            write!(f, "{name}: {change}")?;
-        } else {
+        write!(f, "=== Bug #{} ===", self.id)?;
+        if !self.changes.is_empty() {
+            write!(f, "\n--- Modified fields ---")?;
             for (name, change) in &self.changes {
-                write!(f, "\n  {name}: {change}")?;
+                write!(f, "\n{name}: {change}")?;
             }
+        } else {
+            write!(f, "\nNo field changes")?;
         }
+
+        if let Some(comment) = self.comment.as_ref() {
+            write!(f, "\n--- Added comment ---")?;
+            write!(f, "\n{comment}")?;
+        }
+
         Ok(())
     }
 }
@@ -71,7 +76,13 @@ impl Request for ModifyRequest {
         let response = service.send(request).await?;
         let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
-        Ok(serde_json::from_value(data)?)
+        let mut changes: Vec<BugChange> = serde_json::from_value(data)?;
+        if let Some(comment) = self.params.comment.as_ref() {
+            for change in changes.iter_mut() {
+                change.comment = Some(comment.clone());
+            }
+        }
+        Ok(changes)
     }
 }
 
@@ -193,10 +204,16 @@ impl<T: FromStr + Clone> FromIterator<SetChange<T>> for Changes<T> {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
 struct Comment {
     body: String,
     is_private: bool,
+}
+
+impl fmt::Display for Comment {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.body)
+    }
 }
 
 #[skip_serializing_none]
