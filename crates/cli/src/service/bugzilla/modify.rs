@@ -5,7 +5,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
-use bugbite::service::bugzilla::modify::{Change, ModifyParams};
+use bugbite::service::bugzilla::modify::{ModifyParams, SetChange};
 use bugbite::traits::WebClient;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
@@ -54,7 +54,7 @@ struct Options {
             Specifying the option with no arguments removes the entire list.
         "}
     )]
-    blocks: Option<Vec<Change<NonZeroU64>>>,
+    blocks: Option<Vec<SetChange<NonZeroU64>>>,
 
     /// add/remove CC users
     #[arg(
@@ -72,7 +72,7 @@ struct Options {
             list, respectively. Unprefixed values will be added to the list.
         "}
     )]
-    cc: Option<Vec<Change<String>>>,
+    cc: Option<Vec<SetChange<String>>>,
 
     /// add a comment
     #[arg(short = 'c', long)]
@@ -105,7 +105,7 @@ struct Options {
             Specifying the option with no arguments removes the entire list.
         "}
     )]
-    depends_on: Option<Vec<Change<NonZeroU64>>>,
+    depends_on: Option<Vec<SetChange<NonZeroU64>>>,
 
     /// mark bug as duplicate
     #[arg(short, long, value_name = "ID", conflicts_with_all = ["status", "resolution"])]
@@ -126,7 +126,7 @@ struct Options {
             list, respectively. Unprefixed values will be added to the list.
         "}
     )]
-    groups: Option<Vec<Change<String>>>,
+    groups: Option<Vec<SetChange<String>>>,
 
     /// add/remove/set keywords
     #[arg(
@@ -147,7 +147,7 @@ struct Options {
             Specifying the option with no arguments removes the entire list.
         "}
     )]
-    keywords: Option<Vec<Change<String>>>,
+    keywords: Option<Vec<SetChange<String>>>,
 
     /// modify operating system
     #[arg(short = 'O', long)]
@@ -185,7 +185,7 @@ struct Options {
             list, respectively. Unprefixed values will be added to the list.
         "}
     )]
-    see_also: Option<Vec<Change<String>>>,
+    see_also: Option<Vec<SetChange<String>>>,
 
     /// modify severity
     #[arg(long)]
@@ -220,20 +220,20 @@ struct Options {
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 struct Attributes {
     assigned_to: Option<String>,
-    blocks: Option<Vec<Change<NonZeroU64>>>,
-    cc: Option<Vec<Change<String>>>,
+    blocks: Option<Vec<SetChange<NonZeroU64>>>,
+    cc: Option<Vec<SetChange<String>>>,
     comment: Option<String>,
     component: Option<String>,
-    depends_on: Option<Vec<Change<NonZeroU64>>>,
+    depends_on: Option<Vec<SetChange<NonZeroU64>>>,
     duplicate_of: Option<NonZeroU64>,
-    groups: Option<Vec<Change<String>>>,
-    keywords: Option<Vec<Change<String>>>,
+    groups: Option<Vec<SetChange<String>>>,
+    keywords: Option<Vec<SetChange<String>>>,
     os: Option<String>,
     platform: Option<String>,
     priority: Option<String>,
     product: Option<String>,
     resolution: Option<String>,
-    see_also: Option<Vec<Change<String>>>,
+    see_also: Option<Vec<SetChange<String>>>,
     severity: Option<String>,
     status: Option<String>,
     summary: Option<String>,

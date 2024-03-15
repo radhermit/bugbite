@@ -50,14 +50,15 @@ impl ModifyRequest {
     }
 }
 
+/// Supported change variants for set-based fields.
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Eq, PartialEq, Clone)]
-pub enum Change<T: Clone> {
+pub enum SetChange<T: Clone> {
     Add(T),
     Remove(T),
     Set(T),
 }
 
-impl<T: FromStr + Clone> FromStr for Change<T> {
+impl<T: FromStr + Clone> FromStr for SetChange<T> {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
@@ -65,22 +66,22 @@ impl<T: FromStr + Clone> FromStr for Change<T> {
             let value = value
                 .parse()
                 .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
-            Ok(Change::Add(value))
+            Ok(Self::Add(value))
         } else if let Some(value) = s.strip_prefix('-') {
             let value = value
                 .parse()
                 .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
-            Ok(Change::Remove(value))
+            Ok(Self::Remove(value))
         } else {
             let value = s
                 .parse()
                 .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
-            Ok(Change::Set(value))
+            Ok(Self::Set(value))
         }
     }
 }
 
-impl<T: FromStr + Clone + fmt::Display> fmt::Display for Change<T> {
+impl<T: FromStr + Clone + fmt::Display> fmt::Display for SetChange<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Add(value) => write!(f, "+{value}"),
@@ -98,14 +99,14 @@ struct SetChanges<T> {
     set: Option<Vec<T>>,
 }
 
-impl<T: FromStr + Clone> FromIterator<Change<T>> for SetChanges<T> {
-    fn from_iter<I: IntoIterator<Item = Change<T>>>(iterable: I) -> Self {
+impl<T: FromStr + Clone> FromIterator<SetChange<T>> for SetChanges<T> {
+    fn from_iter<I: IntoIterator<Item = SetChange<T>>>(iterable: I) -> Self {
         let (mut add, mut remove, mut set) = (vec![], vec![], vec![]);
         for change in iterable {
             match change {
-                Change::Add(value) => add.push(value),
-                Change::Remove(value) => remove.push(value),
-                Change::Set(value) => set.push(value),
+                SetChange::Add(value) => add.push(value),
+                SetChange::Remove(value) => remove.push(value),
+                SetChange::Set(value) => set.push(value),
             }
         }
 
@@ -130,13 +131,13 @@ struct Changes<T> {
     remove: Option<Vec<T>>,
 }
 
-impl<T: FromStr + Clone> FromIterator<Change<T>> for Changes<T> {
-    fn from_iter<I: IntoIterator<Item = Change<T>>>(iterable: I) -> Self {
+impl<T: FromStr + Clone> FromIterator<SetChange<T>> for Changes<T> {
+    fn from_iter<I: IntoIterator<Item = SetChange<T>>>(iterable: I) -> Self {
         let (mut add, mut remove) = (vec![], vec![]);
         for change in iterable {
             match change {
-                Change::Add(value) | Change::Set(value) => add.push(value),
-                Change::Remove(value) => remove.push(value),
+                SetChange::Add(value) | SetChange::Set(value) => add.push(value),
+                SetChange::Remove(value) => remove.push(value),
             }
         }
 
@@ -234,21 +235,21 @@ impl<'a> ModifyParams<'a> {
 
     pub fn blocks<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = Change<NonZeroU64>>,
+        I: IntoIterator<Item = SetChange<NonZeroU64>>,
     {
         self.params.blocks = Some(values.into_iter().collect());
     }
 
     pub fn cc<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = Change<String>>,
+        I: IntoIterator<Item = SetChange<String>>,
     {
         // replace @me alias with current service user if one exists
         let iter = if let Some(user) = self.service.user() {
             Either::Left(values.into_iter().map(|c| match c {
-                Change::Add(value) if value == "@me" => Change::Add(user.into()),
-                Change::Remove(value) if value == "@me" => Change::Remove(user.into()),
-                Change::Set(value) if value == "@me" => Change::Set(user.into()),
+                SetChange::Add(value) if value == "@me" => SetChange::Add(user.into()),
+                SetChange::Remove(value) if value == "@me" => SetChange::Remove(user.into()),
+                SetChange::Set(value) if value == "@me" => SetChange::Set(user.into()),
                 c => c,
             }))
         } else {
@@ -272,7 +273,7 @@ impl<'a> ModifyParams<'a> {
 
     pub fn depends_on<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = Change<NonZeroU64>>,
+        I: IntoIterator<Item = SetChange<NonZeroU64>>,
     {
         self.params.depends_on = Some(values.into_iter().collect());
     }
@@ -300,14 +301,14 @@ impl<'a> ModifyParams<'a> {
 
     pub fn groups<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = Change<String>>,
+        I: IntoIterator<Item = SetChange<String>>,
     {
         self.params.groups = Some(values.into_iter().collect());
     }
 
     pub fn keywords<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = Change<String>>,
+        I: IntoIterator<Item = SetChange<String>>,
     {
         self.params.keywords = Some(values.into_iter().collect());
     }
@@ -334,7 +335,7 @@ impl<'a> ModifyParams<'a> {
 
     pub fn see_also<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = Change<String>>,
+        I: IntoIterator<Item = SetChange<String>>,
     {
         self.params.see_also = Some(values.into_iter().collect());
     }
