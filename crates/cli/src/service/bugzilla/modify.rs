@@ -151,8 +151,8 @@ struct Options {
     #[arg(short = 'S', long)]
     summary: Option<String>,
 
-    /// modify target
-    #[arg(long)]
+    /// modify target milestone
+    #[arg(short, long)]
     target: Option<String>,
 
     /// modify URL
