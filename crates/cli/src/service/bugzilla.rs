@@ -31,7 +31,6 @@ struct Authentication {
         long,
         requires = "password",
         env = "BUGBITE_USER",
-        conflicts_with = "api_key"
     )]
     user: Option<String>,
 
