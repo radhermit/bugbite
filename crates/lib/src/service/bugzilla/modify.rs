@@ -222,6 +222,7 @@ impl<'a> ModifyParams<'a> {
     }
 
     pub fn assigned_to(&mut self, value: &str) {
+        // replace @me alias with current service user if one exists
         if value == "@me" {
             if let Some(user) = self.service.user() {
                 self.params.assigned_to = Some(user.into());
