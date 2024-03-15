@@ -283,13 +283,16 @@ impl<'a> ModifyParams<'a> {
     pub fn custom_fields<I, K, V>(&mut self, values: I)
     where
         I: IntoIterator<Item = (K, V)>,
-        K: Into<String>,
+        K: AsRef<str>,
         V: Into<String>,
     {
         self.params.custom_fields = Some(
             values
                 .into_iter()
-                .map(|(k, v)| (k.into(), v.into()))
+                .map(|(k, v)| match k.as_ref() {
+                    k if k.starts_with("cf_") => (k.into(), v.into()),
+                    k => (format!("cf_{k}"), v.into()),
+                })
                 .collect(),
         );
     }
