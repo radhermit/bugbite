@@ -147,13 +147,13 @@ struct Options {
     #[arg(short, long)]
     status: Option<String>,
 
+    /// modify summary
+    #[arg(short = 'S', long)]
+    summary: Option<String>,
+
     /// modify target
     #[arg(long)]
     target: Option<String>,
-
-    /// modify summary
-    #[arg(short, long)]
-    title: Option<String>,
 
     /// modify URL
     #[arg(short = 'u', long)]
@@ -191,7 +191,7 @@ impl Options {
             status: self.status.or(other.status),
             severity: self.severity.or(other.severity),
             target: self.target.or(other.target),
-            title: self.title.or(other.title),
+            summary: self.summary.or(other.summary),
             url: self.url.or(other.url),
             version: self.version.or(other.version),
             whiteboard: self.whiteboard.or(other.whiteboard),
@@ -347,7 +347,7 @@ impl Command {
             params.target(value);
         }
 
-        if let Some(value) = options.title.as_ref() {
+        if let Some(value) = options.summary.as_ref() {
             params.summary(value);
         }
 
