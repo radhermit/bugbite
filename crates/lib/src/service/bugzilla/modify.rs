@@ -42,14 +42,14 @@ pub struct BugChange {
 
 impl fmt::Display for BugChange {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "=== Bug #{} ===", self.id)?;
+        writeln!(f, "=== Bug #{} ===", self.id)?;
+        write!(f, "--- Modified fields ---")?;
         if !self.changes.is_empty() {
-            write!(f, "\n--- Modified fields ---")?;
             for (name, change) in &self.changes {
                 write!(f, "\n{name}: {change}")?;
             }
         } else {
-            write!(f, "\nNo field changes")?;
+            write!(f, "\nNone")?;
         }
 
         if let Some(comment) = self.comment.as_ref() {
