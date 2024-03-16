@@ -68,7 +68,7 @@ struct AttributeOptions {
 
     /// restrict by blockers
     #[arg(
-        short = 'B',
+        short,
         long,
         num_args = 0..=1,
         value_name = "ID[,...]",
@@ -90,7 +90,7 @@ struct AttributeOptions {
 
     /// restrict by dependencies
     #[arg(
-        short = 'D',
+        short,
         long,
         num_args = 0..=1,
         value_name = "ID[,...]",
@@ -100,7 +100,7 @@ struct AttributeOptions {
 
     /// restrict by group
     #[arg(
-        short = 'G',
+        short,
         long,
         num_args = 0..=1,
         value_name = "VALUE[,...]",
@@ -114,7 +114,7 @@ struct AttributeOptions {
 
     /// restrict by keyword
     #[arg(
-        short = 'K',
+        short,
         long,
         num_args = 0..=1,
         value_name = "VALUE[,...]",
@@ -135,11 +135,11 @@ struct AttributeOptions {
     priority: Option<Vec<String>>,
 
     /// restrict by product
-    #[arg(short = 'P', long, value_delimiter = ',')]
+    #[arg(short, long, value_delimiter = ',')]
     product: Option<Vec<String>>,
 
     /// restrict by resolution
-    #[arg(short = 'R', long, value_delimiter = ',')]
+    #[arg(short, long, value_delimiter = ',')]
     resolution: Option<Vec<String>>,
 
     /// restrict by external URLs
@@ -195,7 +195,7 @@ struct AttributeOptions {
 
     /// restrict by whiteboard
     #[arg(
-        short = 'W',
+        short,
         long,
         num_args = 0..=1,
         value_name = "VALUE[,...]",
@@ -328,7 +328,7 @@ struct Params {
 
     /// user who reported
     #[arg(
-        short,
+        short = 'R',
         long,
         help_heading = "User options",
         value_name = "USER[,...]",
@@ -363,7 +363,7 @@ pub(super) struct Command {
 
     /// open bugs in a browser
     #[arg(
-        short,
+        short = 'B',
         long,
         help_heading = "Search options",
         long_help = indoc::indoc! {"

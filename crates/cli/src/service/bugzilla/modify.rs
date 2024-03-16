@@ -41,7 +41,7 @@ struct Options {
 
     /// add/remove/set blockers
     #[arg(
-        short = 'B',
+        short,
         long,
         num_args = 0..=1,
         value_name = "ID[,...]",
@@ -99,7 +99,7 @@ struct Options {
 
     /// add/remove/set dependencies
     #[arg(
-        short = 'D',
+        short,
         long,
         num_args = 0..=1,
         value_name = "ID[,...]",
@@ -120,12 +120,12 @@ struct Options {
     depends_on: Option<Vec<SetChange<NonZeroU64>>>,
 
     /// mark bug as duplicate
-    #[arg(short, long, value_name = "ID", conflicts_with_all = ["status", "resolution"])]
+    #[arg(short = 'D', long, value_name = "ID", conflicts_with_all = ["status", "resolution"])]
     duplicate_of: Option<NonZeroU64>,
 
     /// add/remove groups
     #[arg(
-        short = 'G',
+        short,
         long,
         value_name = "GROUP[,...]",
         value_delimiter = ',',
@@ -144,7 +144,7 @@ struct Options {
 
     /// add/remove/set keywords
     #[arg(
-        short = 'K',
+        short,
         long,
         num_args = 0..=1,
         value_name = "KW[,...]",
@@ -165,7 +165,7 @@ struct Options {
     keywords: Option<Vec<SetChange<String>>>,
 
     /// modify operating system
-    #[arg(short = 'O', long)]
+    #[arg(long)]
     os: Option<String>,
 
     /// modify platform
@@ -177,11 +177,11 @@ struct Options {
     priority: Option<String>,
 
     /// modify product
-    #[arg(short = 'P', long)]
+    #[arg(short, long)]
     product: Option<String>,
 
     /// modify resolution
-    #[arg(short = 'R', long)]
+    #[arg(short, long)]
     resolution: Option<String>,
 
     /// add/remove external bug URLs
@@ -229,7 +229,7 @@ struct Options {
     version: Option<String>,
 
     /// modify whiteboard
-    #[arg(short = 'W', long)]
+    #[arg(short, long)]
     whiteboard: Option<String>,
 }
 
