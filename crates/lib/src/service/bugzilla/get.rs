@@ -38,6 +38,9 @@ impl GetRequest {
             url.query_pairs_mut().append_pair("ids", &id.to_string());
         }
 
+        // drop useless token that is injected for authenticated requests
+        url.query_pairs_mut().append_pair("exclude_fields", "update_token");
+
         let attachments = if attachments {
             Some(service.item_attachments_request(ids, false)?)
         } else {
