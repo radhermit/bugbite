@@ -144,28 +144,28 @@ where
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some(caps) = RANGE_RE.captures(s) {
-            let (start, op, finish) = caps.iter().skip(1).collect_tuple().unwrap();
-            let start = start.map(|x| x.as_str().parse().unwrap());
-            let op = op.unwrap().as_str();
-            let finish = finish.map(|x| x.as_str().parse().unwrap());
-            match (start, op, finish) {
-                (Some(start), "..", Some(finish)) => {
-                    if start != finish {
-                        Ok(Range::Between(start, finish))
-                    } else {
-                        Err(Error::InvalidValue(format!("empty range: {s}")))
-                    }
+        let Some(caps) = RANGE_RE.captures(s) else {
+            return Err(Error::InvalidValue(format!("invalid range: {s}")));
+        };
+
+        let (start, op, finish) = caps.iter().skip(1).collect_tuple().unwrap();
+        let start = start.map(|x| x.as_str().parse().unwrap());
+        let op = op.unwrap().as_str();
+        let finish = finish.map(|x| x.as_str().parse().unwrap());
+        match (start, op, finish) {
+            (Some(start), "..", Some(finish)) => {
+                if start != finish {
+                    Ok(Range::Between(start, finish))
+                } else {
+                    Err(Error::InvalidValue(format!("empty range: {s}")))
                 }
-                (Some(start), "..", None) => Ok(Range::From(start)),
-                (None, "..", Some(finish)) => Ok(Range::To(finish)),
-                (None, "..", None) => Ok(Range::Full),
-                (Some(start), "..=", Some(finish)) => Ok(Range::Inclusive(start, finish)),
-                (None, "..=", Some(finish)) => Ok(Range::ToInclusive(finish)),
-                _ => Err(Error::InvalidValue(format!("invalid range: {s}"))),
             }
-        } else {
-            Err(Error::InvalidValue(format!("invalid range: {s}")))
+            (Some(start), "..", None) => Ok(Range::From(start)),
+            (None, "..", Some(finish)) => Ok(Range::To(finish)),
+            (None, "..", None) => Ok(Range::Full),
+            (Some(start), "..=", Some(finish)) => Ok(Range::Inclusive(start, finish)),
+            (None, "..=", Some(finish)) => Ok(Range::ToInclusive(finish)),
+            _ => Err(Error::InvalidValue(format!("invalid range: {s}"))),
         }
     }
 }
