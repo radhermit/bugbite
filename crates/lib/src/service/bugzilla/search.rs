@@ -153,6 +153,25 @@ impl QueryBuilder<'_> {
         }
     }
 
+    pub fn custom_fields<I, K, V>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: AsRef<str>,
+        V: fmt::Display,
+    {
+        for (name, value) in values {
+            let name = match name.as_ref() {
+                k if k.starts_with("cf_") => k.into(),
+                k => format!("cf_{k}"),
+            };
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), name);
+            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("v{num}"), value);
+        }
+    }
+
     pub fn priority<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,

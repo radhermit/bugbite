@@ -12,6 +12,7 @@ use bugbite::time::TimeDelta;
 use bugbite::traits::WebClient;
 use clap::builder::{BoolValueParser, PossibleValuesParser, TypedValueParser};
 use clap::Args;
+use itertools::Itertools;
 use strum::VariantNames;
 
 use crate::macros::async_block;
@@ -74,6 +75,10 @@ struct AttributeOptions {
     /// restrict by component
     #[arg(short = 'C', long, value_delimiter = ',')]
     component: Option<Vec<String>>,
+
+    /// restrict by custom field
+    #[arg(long = "cf", num_args = 2, value_names = ["NAME", "VALUE"])]
+    custom_fields: Option<Vec<String>>,
 
     /// restrict by dependencies
     #[arg(short = 'D', long, num_args = 0..=1, default_missing_value = "true")]
@@ -337,6 +342,9 @@ impl Command {
         }
         if let Some(values) = params.commenters {
             query.commenters(&values);
+        }
+        if let Some(values) = params.attr.custom_fields {
+            query.custom_fields(values.into_iter().tuples());
         }
         if let Some(values) = params.attr.priority {
             query.priority(values);
