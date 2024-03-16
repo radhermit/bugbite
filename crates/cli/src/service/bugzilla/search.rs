@@ -256,7 +256,7 @@ struct Params {
     #[arg(
         long,
         help_heading = "User options",
-        value_name = "USER[,!USER,...]",
+        value_name = "USER[,USER,...]",
         num_args = 0..=1,
         default_missing_value = "true",
     )]
@@ -266,7 +266,7 @@ struct Params {
     #[arg(
         long,
         help_heading = "User options",
-        value_name = "USER[,!USER,...]",
+        value_name = "USER[,USER,...]",
         value_delimiter = ','
     )]
     commenters: Option<Vec<Substring>>,

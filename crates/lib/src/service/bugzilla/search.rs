@@ -48,16 +48,41 @@ impl SearchRequest {
 pub enum Substring {
     Contains(String),
     Not(String),
+    Regex(String),
+    NotRegex(String),
+}
+
+impl Substring {
+    fn op(&self) -> &str {
+        match self {
+            Self::Contains(_) => "substring",
+            Self::Not(_) => "notsubstring",
+            Self::Regex(_) => "regexp",
+            Self::NotRegex(_) => "notregexp",
+        }
+    }
+}
+
+impl fmt::Display for Substring {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Contains(value) => value.fmt(f),
+            Self::Not(value) => value.fmt(f),
+            Self::Regex(value) => value.fmt(f),
+            Self::NotRegex(value) => value.fmt(f),
+        }
+    }
 }
 
 impl FromStr for Substring {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some(value) = s.strip_prefix('!') {
-            Ok(Self::Not(value.into()))
-        } else {
-            Ok(Self::Contains(s.into()))
+        match s.split_once('#') {
+            Some(("!", value)) => Ok(Self::Not(value.into())),
+            Some(("r", value)) => Ok(Self::Regex(value.into())),
+            Some(("!r", value)) => Ok(Self::NotRegex(value.into())),
+            _ => Ok(Self::Contains(s.into())),
         }
     }
 }
@@ -104,20 +129,12 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Substring>,
     {
-        for value in values {
+        for value in values.into_iter().map(Into::into) {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "longdesc");
-            match value.into() {
-                Substring::Contains(value) => {
-                    self.insert(format!("o{num}"), "substring");
-                    self.insert(format!("v{num}"), value);
-                }
-                Substring::Not(value) => {
-                    self.insert(format!("o{num}"), "notsubstring");
-                    self.insert(format!("v{num}"), value);
-                }
-            }
+            self.insert(format!("o{num}"), value.op());
+            self.insert(format!("v{num}"), value);
         }
     }
 
@@ -126,20 +143,12 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Substring>,
     {
-        for value in values {
+        for value in values.into_iter().map(Into::into) {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "short_desc");
-            match value.into() {
-                Substring::Contains(value) => {
-                    self.insert(format!("o{num}"), "substring");
-                    self.insert(format!("v{num}"), value);
-                }
-                Substring::Not(value) => {
-                    self.insert(format!("o{num}"), "notsubstring");
-                    self.insert(format!("v{num}"), value);
-                }
-            }
+            self.insert(format!("o{num}"), value.op());
+            self.insert(format!("v{num}"), value);
         }
     }
 
@@ -172,20 +181,12 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Substring>,
     {
-        for value in values {
+        for value in values.into_iter().map(Into::into) {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "commenter");
-            match value.into() {
-                Substring::Contains(value) => {
-                    self.insert(format!("o{num}"), "substring");
-                    self.insert(format!("v{num}"), value);
-                }
-                Substring::Not(value) => {
-                    self.insert(format!("o{num}"), "notsubstring");
-                    self.insert(format!("v{num}"), value);
-                }
-            }
+            self.insert(format!("o{num}"), value.op());
+            self.insert(format!("v{num}"), value);
         }
     }
 
@@ -395,20 +396,12 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Substring>,
     {
-        for value in values {
+        for value in values.into_iter().map(Into::into) {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "cc");
-            match value.into() {
-                Substring::Contains(value) => {
-                    self.insert(format!("o{num}"), "substring");
-                    self.insert(format!("v{num}"), value);
-                }
-                Substring::Not(value) => {
-                    self.insert(format!("o{num}"), "notsubstring");
-                    self.insert(format!("v{num}"), value);
-                }
-            }
+            self.insert(format!("o{num}"), value.op());
+            self.insert(format!("v{num}"), value);
         }
     }
 
