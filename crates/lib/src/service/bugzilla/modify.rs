@@ -289,7 +289,7 @@ impl<'a> ModifyParams<'a> {
     }
 
     pub fn assigned_to(&mut self, value: &str) {
-        // replace @me alias with current service user if one exists
+        // TODO: support pulling aliases from the config?
         if value == "@me" {
             if let Some(user) = self.service.user() {
                 self.params.assigned_to = Some(user.into());
@@ -310,7 +310,7 @@ impl<'a> ModifyParams<'a> {
     where
         I: IntoIterator<Item = SetChange<String>>,
     {
-        // replace @me alias with current service user if one exists
+        // TODO: support pulling aliases from the config?
         let iter = if let Some(user) = self.service.user() {
             Either::Left(values.into_iter().map(|c| match c {
                 SetChange::Add(value) if value == "@me" => SetChange::Add(user.into()),
