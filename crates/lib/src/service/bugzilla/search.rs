@@ -43,16 +43,16 @@ impl SearchRequest {
     }
 }
 
-/// Variants for substring matching.
+/// Variants for matching types.
 #[derive(Debug, Clone)]
-pub enum Substring {
+pub enum Match {
     Contains(String),
     Not(String),
     Regex(String),
     NotRegex(String),
 }
 
-impl Substring {
+impl Match {
     fn op(&self) -> &str {
         match self {
             Self::Contains(_) => "substring",
@@ -63,7 +63,7 @@ impl Substring {
     }
 }
 
-impl fmt::Display for Substring {
+impl fmt::Display for Match {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Contains(value) => value.fmt(f),
@@ -74,7 +74,7 @@ impl fmt::Display for Substring {
     }
 }
 
-impl FromStr for Substring {
+impl FromStr for Match {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -87,7 +87,7 @@ impl FromStr for Substring {
     }
 }
 
-impl<T: AsRef<str>> From<T> for Substring {
+impl<T: AsRef<str>> From<T> for Match {
     fn from(s: T) -> Self {
         s.as_ref().parse().unwrap()
     }
@@ -127,7 +127,7 @@ impl QueryBuilder<'_> {
     pub fn comment<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: Into<Substring>,
+        S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
             self.advanced_count += 1;
@@ -141,7 +141,7 @@ impl QueryBuilder<'_> {
     pub fn summary<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: Into<Substring>,
+        S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
             self.advanced_count += 1;
@@ -179,7 +179,7 @@ impl QueryBuilder<'_> {
     pub fn commenters<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: Into<Substring>,
+        S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
             self.advanced_count += 1;
@@ -208,7 +208,7 @@ impl QueryBuilder<'_> {
     where
         I: IntoIterator<Item = (K, V)>,
         K: AsRef<str>,
-        V: Into<Substring>,
+        V: Into<Match>,
     {
         for (name, value) in values {
             let name = match name.as_ref() {
@@ -395,7 +395,7 @@ impl QueryBuilder<'_> {
     pub fn cc<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: Into<Substring>,
+        S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
             self.advanced_count += 1;

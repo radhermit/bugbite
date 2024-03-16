@@ -5,7 +5,7 @@ use std::str::FromStr;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
-    search::{ExistsField, SearchOrder, SearchTerm, Substring},
+    search::{ExistsField, Match, SearchOrder, SearchTerm},
     BugField,
 };
 use bugbite::time::TimeDelta;
@@ -260,7 +260,7 @@ struct Params {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    cc: Option<ExistsOrArray<Substring>>,
+    cc: Option<ExistsOrArray<Match>>,
 
     /// user who commented
     #[arg(
@@ -269,7 +269,7 @@ struct Params {
         value_name = "USER[,USER,...]",
         value_delimiter = ','
     )]
-    commenters: Option<Vec<Substring>>,
+    commenters: Option<Vec<Match>>,
 
     /// user who reported
     #[arg(
@@ -294,11 +294,11 @@ struct Params {
 
     /// strings to search for in comments
     #[clap(long, value_name = "TERM", help_heading = "Content options")]
-    comment: Option<Vec<MaybeStdinVec<Substring>>>,
+    comment: Option<Vec<MaybeStdinVec<Match>>>,
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
-    summary: Option<Vec<MaybeStdinVec<Substring>>>,
+    summary: Option<Vec<MaybeStdinVec<Match>>>,
 }
 
 #[derive(Debug, Args)]
