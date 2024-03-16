@@ -132,6 +132,30 @@ impl QueryBuilder<'_> {
         self.extend("id", values);
     }
 
+    pub fn assigned_to<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("assigned_to", values);
+    }
+
+    pub fn creator<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("creator", values);
+    }
+
+    pub fn resolution<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        self.extend("resolution", values);
+    }
+
     pub fn comment<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
@@ -182,6 +206,10 @@ impl QueryBuilder<'_> {
 
     pub fn limit(&mut self, value: u64) {
         self.insert("limit", value);
+    }
+
+    pub fn quicksearch(&mut self, value: String) {
+        self.insert("quicksearch", value);
     }
 
     pub fn commenters<I, S>(&mut self, values: I)
@@ -431,7 +459,7 @@ impl QueryBuilder<'_> {
         Ok(())
     }
 
-    pub fn extend<K, I, V>(&mut self, key: K, values: I)
+    fn extend<K, I, V>(&mut self, key: K, values: I)
     where
         I: IntoIterator<Item = V>,
         K: fmt::Display,
@@ -442,7 +470,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn append<K, V>(&mut self, key: K, value: V)
+    fn append<K, V>(&mut self, key: K, value: V)
     where
         K: fmt::Display,
         V: fmt::Display,
@@ -450,7 +478,7 @@ impl QueryBuilder<'_> {
         self.query.append(key.to_string(), value.to_string());
     }
 
-    pub fn insert<K, V>(&mut self, key: K, value: V)
+    fn insert<K, V>(&mut self, key: K, value: V)
     where
         K: fmt::Display,
         V: fmt::Display,

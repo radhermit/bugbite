@@ -376,7 +376,9 @@ impl Command {
         let mut query = client.service().search_query();
         let params = self.params;
 
-        // custom
+        if let Some(values) = params.assigned_to {
+            query.assigned_to(values);
+        }
         if let Some(value) = params.limit {
             query.limit(value);
         }
@@ -421,6 +423,12 @@ impl Command {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::SeeAlso, value),
                 ExistsOrArray::Array(values) => query.see_also(&values),
             }
+        }
+        if let Some(values) = params.reporter {
+            query.creator(values);
+        }
+        if let Some(values) = params.attr.resolution {
+            query.resolution(values);
         }
         if let Some(values) = params.attr.status {
             query.status(values);
@@ -488,21 +496,8 @@ impl Command {
                 ExistsOrArray::Array(values) => query.depends_on(values.into_iter().flatten()),
             }
         }
-
-        // strings
         if let Some(value) = params.quicksearch {
-            query.insert("quicksearch", value);
-        }
-
-        // vectors
-        if let Some(values) = params.assigned_to {
-            query.extend("assigned_to", values);
-        }
-        if let Some(values) = params.reporter {
-            query.extend("creator", values);
-        }
-        if let Some(values) = params.attr.resolution {
-            query.extend("resolution", values);
+            query.quicksearch(value);
         }
 
         let fields = &params.fields;

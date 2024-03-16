@@ -159,7 +159,7 @@ mod tests {
 
         server.respond(200, path.join("search/ids.json")).await;
         let mut query = client.service().search_query();
-        query.insert("summary", "test");
+        query.summary(["test"]);
         let bugs = client.search(query).await.unwrap();
         assert_eq!(bugs.len(), 5);
     }
