@@ -130,7 +130,7 @@ struct AttributeOptions {
     #[arg(
         short,
         long,
-        value_name = "STATUS[,STATUS,...]",
+        value_name = "STATUS[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Restrict bugs by status.
@@ -173,7 +173,7 @@ struct Params {
         short,
         long,
         help_heading = "Search options",
-        value_name = "FIELD[,FIELD,...]",
+        value_name = "FIELD[,...]",
         value_delimiter = ',',
         default_value = "id,summary",
         hide_possible_values = true,
@@ -212,7 +212,7 @@ struct Params {
         short,
         long,
         help_heading = "Search options",
-        value_name = "FIELD[,FIELD,...]",
+        value_name = "FIELD[,...]",
         value_delimiter = ',',
         long_help = indoc::formatdoc! {"
             Perform server-side sorting on the query.
@@ -260,7 +260,7 @@ struct Params {
         short,
         long,
         help_heading = "User options",
-        value_name = "USER[,USER,...]",
+        value_name = "USER[,...]",
         value_delimiter = ','
     )]
     assigned_to: Option<Vec<String>>,
@@ -269,7 +269,7 @@ struct Params {
     #[arg(
         long,
         help_heading = "User options",
-        value_name = "USER[,USER,...]",
+        value_name = "USER[,...]",
         num_args = 0..=1,
         default_missing_value = "true",
     )]
@@ -279,7 +279,7 @@ struct Params {
     #[arg(
         long,
         help_heading = "User options",
-        value_name = "USER[,USER,...]",
+        value_name = "USER[,...]",
         value_delimiter = ','
     )]
     commenters: Option<Vec<Match>>,
@@ -289,7 +289,7 @@ struct Params {
         short,
         long,
         help_heading = "User options",
-        value_name = "USER[,USER,...]",
+        value_name = "USER[,...]",
         value_delimiter = ','
     )]
     reporter: Option<Vec<String>>,
