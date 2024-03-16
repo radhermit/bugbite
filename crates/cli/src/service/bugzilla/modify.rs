@@ -41,7 +41,7 @@ struct Options {
         short = 'B',
         long,
         num_args = 0..=1,
-        value_name = "ID[,+ID,-ID,...]",
+        value_name = "ID[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Add, remove, or set blockers.
@@ -52,7 +52,8 @@ struct Options {
             respectively. Unprefixed values are treated as set values and
             override the entire list, ignoring any prefixed values.
 
-            Specifying the option with no arguments removes the entire list.
+            Multiple arguments can be specified in a comma-separated list while
+            no arguments removes the entire list.
         "}
     )]
     blocks: Option<Vec<SetChange<NonZeroU64>>>,
@@ -60,7 +61,7 @@ struct Options {
     /// add/remove CC users
     #[arg(
         long,
-        value_name = "USER[,+USER,-USER,...]",
+        value_name = "USER[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Add or remove users from the CC list.
@@ -71,6 +72,8 @@ struct Options {
 
             Prefixing values with `+` or `-` adds or removes users from the
             list, respectively. Unprefixed values will be added to the list.
+
+            Multiple arguments can be specified in a comma-separated list.
         "}
     )]
     cc: Option<Vec<SetChange<String>>>,
@@ -92,7 +95,7 @@ struct Options {
         short = 'D',
         long,
         num_args = 0..=1,
-        value_name = "ID[,+ID,-ID,...]",
+        value_name = "ID[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Add, remove, or set dependencies.
@@ -103,7 +106,8 @@ struct Options {
             respectively. Unprefixed values are treated as set values and
             override the entire list, ignoring any prefixed values.
 
-            Specifying the option with no arguments removes the entire list.
+            Multiple arguments can be specified in a comma-separated list while
+            no arguments removes the entire list.
         "}
     )]
     depends_on: Option<Vec<SetChange<NonZeroU64>>>,
@@ -116,7 +120,7 @@ struct Options {
     #[arg(
         short = 'G',
         long,
-        value_name = "GROUP[,+GROUP,-GROUP,...]",
+        value_name = "GROUP[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Add or remove groups.
@@ -125,6 +129,8 @@ struct Options {
 
             Prefixing groups with `+` or `-` adds or removes groups from the
             list, respectively. Unprefixed values will be added to the list.
+
+            Multiple arguments can be specified in a comma-separated list.
         "}
     )]
     groups: Option<Vec<SetChange<String>>>,
@@ -134,7 +140,7 @@ struct Options {
         short = 'K',
         long,
         num_args = 0..=1,
-        value_name = "KW[,+KW,-KW,...]",
+        value_name = "KW[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Add, remove, or set keywords.
@@ -145,7 +151,8 @@ struct Options {
             respectively. Unprefixed values are treated as set values and
             override the entire list, ignoring any prefixed values.
 
-            Specifying the option with no arguments removes the entire list.
+            Multiple arguments can be specified in a comma-separated list while
+            no arguments removes the entire list.
         "}
     )]
     keywords: Option<Vec<SetChange<String>>>,
@@ -174,7 +181,7 @@ struct Options {
     #[arg(
         short = 'U',
         long,
-        value_name = "URL[,+URL,-URL,...]",
+        value_name = "URL[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Add or remove URLs to bugs in external trackers.
@@ -184,6 +191,8 @@ struct Options {
 
             Prefixing values with `+` or `-` adds or removes URLs from the
             list, respectively. Unprefixed values will be added to the list.
+
+            Multiple arguments can be specified in a comma-separated list.
         "}
     )]
     see_also: Option<Vec<SetChange<String>>>,
@@ -422,7 +431,7 @@ pub(super) struct Command {
     #[arg(
         short,
         long,
-        value_name = "ID[,ID,...]",
+        value_name = "ID[,...]",
         value_delimiter = ',',
         help_heading = "Modify options",
         long_help = indoc::indoc! {"
@@ -435,6 +444,8 @@ pub(super) struct Command {
             pre-populated with the selected comments allowing the user to
             respond in a style reminiscent of threaded messages on a mailing
             list. On completion, the data is used to create a new bug comment.
+
+            Multiple arguments can be specified in a comma-separated list.
         "}
     )]
     reply: Option<Vec<usize>>,
