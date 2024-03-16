@@ -117,6 +117,15 @@ impl Render for Comment {
             write!(f, "Description ")?;
         }
         writeln!(f, "by {}, {}", self.creator, self.created)?;
+        if self.is_private || !self.tags.is_empty() {
+            writeln!(f, "{}", "-".repeat(width))?;
+            writeln!(
+                f,
+                "Private: {}, Tags: {}",
+                self.is_private,
+                self.tags.iter().join(", ")
+            )?;
+        }
         writeln!(f, "{}", "-".repeat(width))?;
         // wrap comment text
         let wrapped = textwrap::wrap(self.text.trim(), width);
