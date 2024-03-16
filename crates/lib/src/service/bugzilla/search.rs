@@ -43,6 +43,31 @@ impl SearchRequest {
     }
 }
 
+/// Variants for substring matching.
+#[derive(Debug, Clone)]
+pub enum Substring {
+    Contains(String),
+    Not(String),
+}
+
+impl FromStr for Substring {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some(value) = s.strip_prefix('!') {
+            Ok(Self::Not(value.into()))
+        } else {
+            Ok(Self::Contains(s.into()))
+        }
+    }
+}
+
+impl<T: AsRef<str>> From<T> for Substring {
+    fn from(s: T) -> Self {
+        s.as_ref().parse().unwrap()
+    }
+}
+
 /// Construct a search query.
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
@@ -77,28 +102,44 @@ impl QueryBuilder<'_> {
     pub fn comment<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Substring>,
     {
         for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "longdesc");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
+            match value.into() {
+                Substring::Contains(value) => {
+                    self.insert(format!("o{num}"), "substring");
+                    self.insert(format!("v{num}"), value);
+                }
+                Substring::Not(value) => {
+                    self.insert(format!("o{num}"), "notsubstring");
+                    self.insert(format!("v{num}"), value);
+                }
+            }
         }
     }
 
     pub fn summary<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Substring>,
     {
         for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "short_desc");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
+            match value.into() {
+                Substring::Contains(value) => {
+                    self.insert(format!("o{num}"), "substring");
+                    self.insert(format!("v{num}"), value);
+                }
+                Substring::Not(value) => {
+                    self.insert(format!("o{num}"), "notsubstring");
+                    self.insert(format!("v{num}"), value);
+                }
+            }
         }
     }
 
@@ -126,16 +167,25 @@ impl QueryBuilder<'_> {
         self.insert("limit", value);
     }
 
-    pub fn commenters<S>(&mut self, values: &[S])
+    pub fn commenters<I, S>(&mut self, values: I)
     where
-        S: fmt::Display,
+        I: IntoIterator<Item = S>,
+        S: Into<Substring>,
     {
         for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "commenter");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
+            match value.into() {
+                Substring::Contains(value) => {
+                    self.insert(format!("o{num}"), "substring");
+                    self.insert(format!("v{num}"), value);
+                }
+                Substring::Not(value) => {
+                    self.insert(format!("o{num}"), "notsubstring");
+                    self.insert(format!("v{num}"), value);
+                }
+            }
         }
     }
 
@@ -340,16 +390,25 @@ impl QueryBuilder<'_> {
         self.extend("keywords", values);
     }
 
-    pub fn cc<S>(&mut self, values: &[S])
+    pub fn cc<I, S>(&mut self, values: I)
     where
-        S: fmt::Display,
+        I: IntoIterator<Item = S>,
+        S: Into<Substring>,
     {
         for value in values {
             self.advanced_count += 1;
             let num = self.advanced_count;
             self.insert(format!("f{num}"), "cc");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
+            match value.into() {
+                Substring::Contains(value) => {
+                    self.insert(format!("o{num}"), "substring");
+                    self.insert(format!("v{num}"), value);
+                }
+                Substring::Not(value) => {
+                    self.insert(format!("o{num}"), "notsubstring");
+                    self.insert(format!("v{num}"), value);
+                }
+            }
         }
     }
 

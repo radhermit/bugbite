@@ -5,7 +5,7 @@ use std::str::FromStr;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::{
-    search::{ExistsField, SearchOrder, SearchTerm},
+    search::{ExistsField, SearchOrder, SearchTerm, Substring},
     BugField,
 };
 use bugbite::time::TimeDelta;
@@ -256,20 +256,20 @@ struct Params {
     #[arg(
         long,
         help_heading = "User options",
-        value_name = "USER[,USER,...]",
+        value_name = "USER[,!USER,...]",
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    cc: Option<ExistsOrArray<String>>,
+    cc: Option<ExistsOrArray<Substring>>,
 
     /// user who commented
     #[arg(
         long,
         help_heading = "User options",
-        value_name = "USER[,USER,...]",
+        value_name = "USER[,!USER,...]",
         value_delimiter = ','
     )]
-    commenters: Option<Vec<String>>,
+    commenters: Option<Vec<Substring>>,
 
     /// user who reported
     #[arg(
@@ -294,11 +294,11 @@ struct Params {
 
     /// strings to search for in comments
     #[clap(long, value_name = "TERM", help_heading = "Content options")]
-    comment: Option<Vec<MaybeStdinVec<String>>>,
+    comment: Option<Vec<MaybeStdinVec<Substring>>>,
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
-    summary: Option<Vec<MaybeStdinVec<String>>>,
+    summary: Option<Vec<MaybeStdinVec<Substring>>>,
 }
 
 #[derive(Debug, Args)]
@@ -341,7 +341,7 @@ impl Command {
             query.order(values);
         }
         if let Some(values) = params.commenters {
-            query.commenters(&values);
+            query.commenters(values);
         }
         if let Some(values) = params.attr.custom_fields {
             query.custom_fields(values.into_iter().tuples());
@@ -424,7 +424,7 @@ impl Command {
         if let Some(values) = params.cc {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Cc, value),
-                ExistsOrArray::Array(values) => query.cc(&values),
+                ExistsOrArray::Array(values) => query.cc(values),
             }
         }
         if let Some(values) = params.attr.blocks {
