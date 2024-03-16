@@ -449,9 +449,8 @@ pub(super) struct Command {
         long_help = indoc::indoc! {"
             Read modification attributes from a template.
 
-            Value must be the path to a valid attributes template file.
-            Templates use the TOML format and generally map long option names
-            relating to bug fields to values.
+            Value must be the path to a valid modify template file. Templates
+            use the TOML format and generally map long option names to values.
 
             Fields that don't match known bug field names are used for custom
             field modifications.
@@ -471,8 +470,8 @@ pub(super) struct Command {
 
             Value is the file path where the TOML template file will be written.
 
-            Combining this option with -n/--dry-run allows creating bug
-            modification templates without changing any bugs.
+            Combining this option with -n/--dry-run allows creating modify
+            templates without any service interaction.
         "}
     )]
     to: Option<Utf8PathBuf>,

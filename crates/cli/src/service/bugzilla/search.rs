@@ -10,8 +10,9 @@ use bugbite::service::bugzilla::{
 };
 use bugbite::time::TimeDelta;
 use bugbite::traits::WebClient;
+use camino::Utf8PathBuf;
 use clap::builder::{BoolValueParser, PossibleValuesParser, TypedValueParser};
-use clap::Args;
+use clap::{Args, ValueHint};
 use itertools::Itertools;
 use strum::VariantNames;
 
@@ -330,6 +331,45 @@ pub(super) struct Command {
         "}
     )]
     browser: bool,
+
+    /// skip service interaction
+    #[arg(short = 'n', long, help_heading = "Search options")]
+    dry_run: bool,
+
+    /// read attributes from a template
+    #[arg(
+        short,
+        long,
+        help_heading = "Search options",
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+        long_help = indoc::indoc! {"
+            Read search attributes from a template.
+
+            Value must be the path to a valid search template file.
+            Templates use the TOML format and generally map long option names to
+            values.
+        "}
+    )]
+    from: Option<Utf8PathBuf>,
+
+    /// write attributes to a template
+    #[arg(
+        short,
+        long,
+        help_heading = "Search options",
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+        long_help = indoc::indoc! {"
+            Write search attributes to a template.
+
+            Value is the file path where the TOML template file will be written.
+
+            Combining this option with -n/--dry-run allows creating search
+            templates without any service interaction.
+        "}
+    )]
+    to: Option<Utf8PathBuf>,
 }
 
 impl Command {
@@ -470,13 +510,15 @@ impl Command {
         let fields = &params.fields;
         query.fields(fields.iter().copied())?;
 
-        let bugs = async_block!(client.search(query))?;
+        if !self.dry_run {
+            let bugs = async_block!(client.search(query))?;
 
-        if self.browser {
-            let urls = bugs.iter().map(|b| client.item_url(b.id));
-            launch_browser(urls)?;
-        } else {
-            render_search(bugs, fields)?;
+            if self.browser {
+                let urls = bugs.iter().map(|b| client.item_url(b.id));
+                launch_browser(urls)?;
+            } else {
+                render_search(bugs, fields)?;
+            }
         }
 
         Ok(ExitCode::SUCCESS)
