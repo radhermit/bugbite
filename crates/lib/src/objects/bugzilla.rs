@@ -82,13 +82,20 @@ impl PartialOrd for Modification<'_> {
 
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Comment {
+    /// Globally unique ID for the comment.
+    pub id: u64,
+
+    /// Bug ID the comment is on.
+    pub bug_id: u64,
+
+    /// Attachment ID related to the comment.
+    pub attachment_id: Option<u64>,
+
     /// The number of the comment local to the bug.
     ///
     /// The description is 0, comments start at 1.
-    pub id: u64,
-    pub bug_id: u64,
-    pub attachment_id: Option<u64>,
     pub count: u64,
+
     pub text: String,
     pub creator: String,
     #[serde(rename = "creation_time")]
