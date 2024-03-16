@@ -180,7 +180,7 @@ impl QueryBuilder<'_> {
         self.insert("order", order);
     }
 
-    pub fn limit(&mut self, value: NonZeroU64) {
+    pub fn limit(&mut self, value: u64) {
         self.insert("limit", value);
     }
 

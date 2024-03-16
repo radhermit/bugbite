@@ -191,8 +191,19 @@ struct Params {
     fields: Vec<BugField>,
 
     /// limit the number of bugs returned
-    #[arg(short, long, help_heading = "Search options")]
-    limit: Option<NonZeroU64>,
+    #[arg(
+        short,
+        long,
+        help_heading = "Search options",
+        long_help = indoc::formatdoc! {"
+            Limit the number of bugs returned.
+
+            If the value is higher than the maximum service limit that value is
+            used instead. If the limit is set to zero, all matching results are
+            returned.
+        "}
+    )]
+    limit: Option<u64>,
 
     /// order query results
     #[arg(
