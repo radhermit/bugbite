@@ -32,6 +32,9 @@ struct Options {
             The value must be an email address for a service user. The alias
             `@me` can also be used for the service's configured user if one
             exists.
+
+            Example:
+              - assign to yourself: bite m -a @me
         "}
     )]
     assigned_to: Option<String>,
@@ -74,6 +77,10 @@ struct Options {
             list, respectively. Unprefixed values will be added to the list.
 
             Multiple arguments can be specified in a comma-separated list.
+
+            Examples:
+              - add yourself to the CC list: bite m --cc @me
+              - remove yourself from the CC list: bite m --cc=-@me
         "}
     )]
     cc: Option<Vec<SetChange<String>>>,
