@@ -47,18 +47,22 @@ impl SearchRequest {
 #[derive(Debug, Clone)]
 pub enum Match {
     Contains(String),
-    Not(String),
+    ContainsNot(String),
+    Equals(String),
+    EqualsNot(String),
     Regex(String),
-    NotRegex(String),
+    RegexNot(String),
 }
 
 impl Match {
     fn op(&self) -> &str {
         match self {
             Self::Contains(_) => "substring",
-            Self::Not(_) => "notsubstring",
+            Self::ContainsNot(_) => "notsubstring",
+            Self::Equals(_) => "equals",
+            Self::EqualsNot(_) => "notequals",
             Self::Regex(_) => "regexp",
-            Self::NotRegex(_) => "notregexp",
+            Self::RegexNot(_) => "notregexp",
         }
     }
 }
@@ -67,9 +71,11 @@ impl fmt::Display for Match {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Contains(value) => value.fmt(f),
-            Self::Not(value) => value.fmt(f),
+            Self::ContainsNot(value) => value.fmt(f),
+            Self::Equals(value) => value.fmt(f),
+            Self::EqualsNot(value) => value.fmt(f),
             Self::Regex(value) => value.fmt(f),
-            Self::NotRegex(value) => value.fmt(f),
+            Self::RegexNot(value) => value.fmt(f),
         }
     }
 }
@@ -79,9 +85,11 @@ impl FromStr for Match {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.split_once('#') {
-            Some(("!", value)) => Ok(Self::Not(value.into())),
+            Some(("!", value)) => Ok(Self::ContainsNot(value.into())),
+            Some(("=", value)) => Ok(Self::Equals(value.into())),
+            Some(("!=", value)) => Ok(Self::EqualsNot(value.into())),
             Some(("r", value)) => Ok(Self::Regex(value.into())),
-            Some(("!r", value)) => Ok(Self::NotRegex(value.into())),
+            Some(("!r", value)) => Ok(Self::RegexNot(value.into())),
             _ => Ok(Self::Contains(s.into())),
         }
     }
