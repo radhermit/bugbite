@@ -101,6 +101,28 @@ macro_rules! stringify {
 }
 use stringify;
 
+#[derive(Debug, Clone)]
+pub enum RangeOrEqual<T> {
+    Equal(T),
+    Range(Range<T>),
+}
+
+impl<T> FromStr for RangeOrEqual<T>
+where
+    T: FromStr + Eq,
+    <T as FromStr>::Err: std::fmt::Display + std::fmt::Debug,
+{
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(value) = s.parse() {
+            Ok(RangeOrEqual::Equal(value))
+        } else {
+            Ok(RangeOrEqual::Range(s.parse()?))
+        }
+    }
+}
+
 // TODO: replace regex-based parsing with parser combinator (winnow)
 static RANGE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\d+)?(..=?)(\d+)?").unwrap());
 
@@ -122,9 +144,7 @@ where
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Ok(value) = s.parse() {
-            Ok(Range::From(value))
-        } else if let Some(caps) = RANGE_RE.captures(s) {
+        if let Some(caps) = RANGE_RE.captures(s) {
             let (start, op, finish) = caps.iter().skip(1).collect_tuple().unwrap();
             let start = start.map(|x| x.as_str().parse().unwrap());
             let op = op.unwrap().as_str();
