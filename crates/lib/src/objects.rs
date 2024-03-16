@@ -101,6 +101,7 @@ macro_rules! stringify {
 }
 use stringify;
 
+// TODO: replace regex-based parsing with parser combinator (winnow)
 static RANGE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\d+)?(..=?)(\d+)?").unwrap());
 
 #[derive(Debug, Clone)]
