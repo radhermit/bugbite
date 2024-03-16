@@ -116,7 +116,7 @@ pub enum Range<T> {
 
 impl<T> FromStr for Range<T>
 where
-    T: FromStr,
+    T: FromStr + Eq,
     <T as FromStr>::Err: std::fmt::Display + std::fmt::Debug,
 {
     type Err = Error;
@@ -130,7 +130,13 @@ where
             let op = op.unwrap().as_str();
             let finish = finish.map(|x| x.as_str().parse().unwrap());
             match (start, op, finish) {
-                (Some(start), "..", Some(finish)) => Ok(Range::Between(start, finish)),
+                (Some(start), "..", Some(finish)) => {
+                    if start != finish {
+                        Ok(Range::Between(start, finish))
+                    } else {
+                        Err(Error::InvalidValue(format!("empty range: {s}")))
+                    }
+                }
                 (Some(start), "..", None) => Ok(Range::From(start)),
                 (None, "..", Some(finish)) => Ok(Range::To(finish)),
                 (None, "..", None) => Ok(Range::Full),
