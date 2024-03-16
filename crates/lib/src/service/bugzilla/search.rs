@@ -9,6 +9,7 @@ use ordered_multimap::ListOrderedMultimap;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::bugzilla::Bug;
+use crate::objects::Range;
 use crate::time::TimeDelta;
 use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
@@ -361,20 +362,12 @@ impl QueryBuilder<'_> {
         self.extend("whiteboard", values);
     }
 
-    pub fn votes(&mut self, value: u32) {
-        self.advanced_count += 1;
-        let num = self.advanced_count;
-        self.insert(format!("f{num}"), "votes");
-        self.insert(format!("o{num}"), "greaterthaneq");
-        self.insert(format!("v{num}"), value);
+    pub fn votes(&mut self, value: Range<u64>) {
+        self.range("votes", value)
     }
 
-    pub fn comments(&mut self, value: u32) {
-        self.advanced_count += 1;
-        let num = self.advanced_count;
-        self.insert(format!("f{num}"), "longdescs.count");
-        self.insert(format!("o{num}"), "greaterthaneq");
-        self.insert(format!("v{num}"), value);
+    pub fn comments(&mut self, value: Range<u64>) {
+        self.range("longdescs.count", value)
     }
 
     /// Match bugs with conditionally existent array field values.
@@ -457,6 +450,59 @@ impl QueryBuilder<'_> {
 
         self.insert("include_fields", fields.iter().map(|f| f.api()).join(","));
         Ok(())
+    }
+
+    fn range(&mut self, field: &str, value: Range<u64>) {
+        match value {
+            Range::Between(start, finish) => {
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), field);
+                self.insert(format!("o{num}"), "greaterthaneq");
+                self.insert(format!("v{num}"), start);
+
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), field);
+                self.insert(format!("o{num}"), "lessthan");
+                self.insert(format!("v{num}"), finish);
+            }
+            Range::Inclusive(start, finish) => {
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), field);
+                self.insert(format!("o{num}"), "greaterthaneq");
+                self.insert(format!("v{num}"), start);
+
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), field);
+                self.insert(format!("o{num}"), "lessthaneq");
+                self.insert(format!("v{num}"), finish);
+            }
+            Range::To(value) => {
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), field);
+                self.insert(format!("o{num}"), "lessthan");
+                self.insert(format!("v{num}"), value);
+            }
+            Range::ToInclusive(value) => {
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), field);
+                self.insert(format!("o{num}"), "lessthaneq");
+                self.insert(format!("v{num}"), value);
+            }
+            Range::From(value) => {
+                self.advanced_count += 1;
+                let num = self.advanced_count;
+                self.insert(format!("f{num}"), field);
+                self.insert(format!("o{num}"), "greaterthaneq");
+                self.insert(format!("v{num}"), value);
+            }
+            Range::Full => (),
+        }
     }
 
     fn extend<K, I, V>(&mut self, key: K, values: I)

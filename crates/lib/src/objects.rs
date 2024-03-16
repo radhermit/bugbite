@@ -2,6 +2,9 @@ use std::fmt;
 use std::str::FromStr;
 
 use base64::prelude::*;
+use itertools::Itertools;
+use once_cell::sync::Lazy;
+use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::Error;
@@ -97,3 +100,45 @@ macro_rules! stringify {
     };
 }
 use stringify;
+
+static RANGE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\d+)?(..=?)(\d+)?").unwrap());
+
+#[derive(Debug, Clone)]
+pub enum Range<T> {
+    Between(T, T),   // 0..1
+    Inclusive(T, T), // 0..=1
+    To(T),           // ..1
+    ToInclusive(T),  // ..=1
+    From(T),         // 0..
+    Full,            // ..
+}
+
+impl<T> FromStr for Range<T>
+where
+    T: FromStr,
+    <T as FromStr>::Err: std::fmt::Display + std::fmt::Debug,
+{
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(value) = s.parse() {
+            Ok(Range::From(value))
+        } else if let Some(caps) = RANGE_RE.captures(s) {
+            let (start, op, finish) = caps.iter().skip(1).collect_tuple().unwrap();
+            let start = start.map(|x| x.as_str().parse().unwrap());
+            let op = op.unwrap().as_str();
+            let finish = finish.map(|x| x.as_str().parse().unwrap());
+            match (start, op, finish) {
+                (Some(start), "..", Some(finish)) => Ok(Range::Between(start, finish)),
+                (Some(start), "..", None) => Ok(Range::From(start)),
+                (None, "..", Some(finish)) => Ok(Range::To(finish)),
+                (None, "..", None) => Ok(Range::Full),
+                (Some(start), "..=", Some(finish)) => Ok(Range::Inclusive(start, finish)),
+                (None, "..=", Some(finish)) => Ok(Range::ToInclusive(finish)),
+                _ => Err(Error::InvalidValue(format!("invalid range: {s}"))),
+            }
+        } else {
+            Err(Error::InvalidValue(format!("invalid range: {s}")))
+        }
+    }
+}

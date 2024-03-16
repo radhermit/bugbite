@@ -4,6 +4,7 @@ use std::str::FromStr;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::objects::Range;
 use bugbite::service::bugzilla::{
     search::{ExistsField, Match, SearchOrder, SearchTerm},
     BugField,
@@ -71,7 +72,7 @@ struct AttributeOptions {
 
     /// specified range of comments
     #[arg(long)]
-    comments: Option<u32>,
+    comments: Option<Range<u64>>,
 
     /// restrict by component
     #[arg(short = 'C', long, value_delimiter = ',')]
@@ -154,7 +155,7 @@ struct AttributeOptions {
 
     /// specified range of votes
     #[arg(long)]
-    votes: Option<u32>,
+    votes: Option<Range<u64>>,
 
     /// restrict by whiteboard
     #[arg(short = 'W', long, num_args = 0..=1, default_missing_value = "true")]
