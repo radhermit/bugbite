@@ -208,7 +208,7 @@ impl QueryBuilder<'_> {
     where
         I: IntoIterator<Item = (K, V)>,
         K: AsRef<str>,
-        V: fmt::Display,
+        V: Into<Substring>,
     {
         for (name, value) in values {
             let name = match name.as_ref() {
@@ -217,8 +217,9 @@ impl QueryBuilder<'_> {
             };
             self.advanced_count += 1;
             let num = self.advanced_count;
+            let value = value.into();
             self.insert(format!("f{num}"), name);
-            self.insert(format!("o{num}"), "substring");
+            self.insert(format!("o{num}"), value.op());
             self.insert(format!("v{num}"), value);
         }
     }
