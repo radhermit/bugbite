@@ -7,7 +7,7 @@ use predicates::str::contains;
 
 use crate::command::cmd;
 
-mod attachments;
+mod attachment;
 mod comment;
 mod get;
 mod history;
