@@ -35,7 +35,7 @@ impl Command {
     pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
         let created = self.options.created.as_ref();
-        let comments = async_block!(client.comments(ids, created))?;
+        let comments = async_block!(client.comment(ids, created))?;
         let mut comments = comments.iter().flatten().peekable();
         let mut stdout = stdout().lock();
 

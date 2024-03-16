@@ -7,14 +7,14 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 use super::attachment::AttachmentRequest;
-use super::comments::CommentsRequest;
+use super::comment::CommentRequest;
 use super::history::HistoryRequest;
 
 #[derive(Debug)]
 pub(crate) struct GetRequest {
     url: Url,
     attachments: Option<AttachmentRequest>,
-    comments: Option<CommentsRequest>,
+    comments: Option<CommentRequest>,
     history: Option<HistoryRequest>,
 }
 
@@ -48,7 +48,7 @@ impl GetRequest {
             None
         };
         let comments = if comments {
-            Some(CommentsRequest::new(service, ids, None)?)
+            Some(CommentRequest::new(service, ids, None)?)
         } else {
             None
         };

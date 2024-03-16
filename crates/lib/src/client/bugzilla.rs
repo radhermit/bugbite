@@ -61,12 +61,12 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn comments(
+    pub async fn comment(
         &self,
         ids: &[NonZeroU64],
         created: Option<&TimeDelta>,
     ) -> crate::Result<Vec<Vec<Comment>>> {
-        let request = self.service.comments_request(ids, created)?;
+        let request = self.service.comment_request(ids, created)?;
         request.send(&self.service).await
     }
 

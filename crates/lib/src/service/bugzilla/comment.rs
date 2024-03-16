@@ -9,12 +9,12 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct CommentsRequest {
+pub(crate) struct CommentRequest {
     ids: Vec<String>,
     url: Url,
 }
 
-impl CommentsRequest {
+impl CommentRequest {
     pub(super) fn new(
         service: &super::Service,
         ids: &[NonZeroU64],
@@ -45,7 +45,7 @@ impl CommentsRequest {
     }
 }
 
-impl Request for CommentsRequest {
+impl Request for CommentRequest {
     type Output = Vec<Vec<Comment>>;
     type Service = super::Service;
 

@@ -17,7 +17,7 @@ use crate::Error;
 
 pub mod attach;
 mod attachment;
-mod comments;
+mod comment;
 mod get;
 mod history;
 pub mod modify;
@@ -100,12 +100,12 @@ impl Service {
         attachment::AttachmentRequest::new(self, Ids::item(ids), data)
     }
 
-    pub(crate) fn comments_request(
+    pub(crate) fn comment_request(
         &self,
         ids: &[NonZeroU64],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<comments::CommentsRequest> {
-        comments::CommentsRequest::new(self, ids, created)
+    ) -> crate::Result<comment::CommentRequest> {
+        comment::CommentRequest::new(self, ids, created)
     }
 
     pub(crate) fn history_request(

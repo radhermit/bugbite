@@ -12,7 +12,7 @@ use super::Render;
 
 mod attach;
 mod attachment;
-mod comments;
+mod comment;
 mod get;
 mod history;
 mod modify;
@@ -65,7 +65,7 @@ enum Subcommand {
     #[command(alias = "a")]
     Attachment(attachment::Command),
     /// Get comments
-    Comments(comments::Command),
+    Comment(comment::Command),
     /// Get bugs
     #[command(alias = "g")]
     Get(get::Command),
@@ -84,7 +84,7 @@ impl Subcommand {
         match self {
             Self::Attach(cmd) => cmd.run(client),
             Self::Attachment(cmd) => cmd.run(client),
-            Self::Comments(cmd) => cmd.run(client),
+            Self::Comment(cmd) => cmd.run(client),
             Self::Get(cmd) => cmd.run(client),
             Self::History(cmd) => cmd.run(client),
             Self::Modify(cmd) => cmd.run(client),

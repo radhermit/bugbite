@@ -509,7 +509,7 @@ pub(super) struct Command {
 
 /// Interactively create a reply, pulling specified comments for pre-population.
 fn get_comment(client: &Client, id: NonZeroU64, comment_ids: &[usize]) -> anyhow::Result<String> {
-    let comments = async_block!(client.comments(&[id], None))?
+    let comments = async_block!(client.comment(&[id], None))?
         .into_iter()
         .next()
         .expect("invalid comments response");
