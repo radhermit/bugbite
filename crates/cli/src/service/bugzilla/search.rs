@@ -141,7 +141,7 @@ struct AttributeOptions {
     status: Option<Vec<String>>,
 
     /// restrict by target
-    #[arg(short = 'T', long, value_delimiter = ',')]
+    #[arg(short, long, value_delimiter = ',')]
     target: Option<Vec<String>>,
 
     /// restrict by URL
@@ -338,7 +338,6 @@ pub(super) struct Command {
 
     /// read attributes from a template
     #[arg(
-        short,
         long,
         help_heading = "Search options",
         value_name = "PATH",
@@ -355,7 +354,6 @@ pub(super) struct Command {
 
     /// write attributes to a template
     #[arg(
-        short,
         long,
         help_heading = "Search options",
         value_name = "PATH",

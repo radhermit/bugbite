@@ -201,7 +201,7 @@ struct Options {
     summary: Option<String>,
 
     /// modify target milestone
-    #[arg(short = 'T', long, value_name = "MILESTONE")]
+    #[arg(short, long, value_name = "MILESTONE")]
     target: Option<String>,
 
     /// modify URL
@@ -441,7 +441,6 @@ pub(super) struct Command {
 
     /// read attributes from a template
     #[arg(
-        short,
         long,
         help_heading = "Modify options",
         value_name = "PATH",
@@ -460,7 +459,6 @@ pub(super) struct Command {
 
     /// write attributes to a template
     #[arg(
-        short,
         long,
         help_heading = "Modify options",
         value_name = "PATH",
