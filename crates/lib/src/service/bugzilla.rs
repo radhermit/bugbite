@@ -28,7 +28,7 @@ pub struct Config {
     base: Url,
     pub user: Option<String>,
     pub password: Option<String>,
-    pub api_key: Option<String>,
+    pub key: Option<String>,
     cache: ServiceCache,
 }
 
@@ -42,7 +42,7 @@ impl Config {
             base,
             user: None,
             password: None,
-            api_key: None,
+            key: None,
             cache: Default::default(),
         })
     }
@@ -179,7 +179,7 @@ impl<'a> WebService<'a> for Service {
         required: bool,
     ) -> crate::Result<RequestBuilder> {
         let config = &self.config;
-        if let Some(key) = config.api_key.as_ref() {
+        if let Some(key) = config.key.as_ref() {
             Ok(request.query(&[("Bugzilla_api_key", key)]))
         } else if let (Some(user), Some(pass)) = (&config.user, &config.password) {
             Ok(request.query(&[("Bugzilla_login", user), ("Bugzilla_password", pass)]))

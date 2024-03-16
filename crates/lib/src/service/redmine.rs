@@ -1,7 +1,7 @@
 use std::fmt;
 use std::num::NonZeroU64;
 
-use reqwest::ClientBuilder;
+use reqwest::{ClientBuilder, RequestBuilder};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, VariantNames};
 use tracing::{debug, trace};
@@ -20,7 +20,9 @@ pub mod search;
 pub struct Config {
     base: Url,
     pub(crate) web_base: Url,
-    pub api_key: Option<String>,
+    pub user: Option<String>,
+    pub password: Option<String>,
+    pub key: Option<String>,
     cache: ServiceCache,
 }
 
@@ -39,7 +41,9 @@ impl Config {
         Ok(Self {
             base,
             web_base,
-            api_key: None,
+            user: None,
+            password: None,
+            key: None,
             cache: Default::default(),
         })
     }
@@ -110,6 +114,23 @@ impl<'a> WebService<'a> for Service {
 
     fn client(&self) -> &reqwest::Client {
         &self.client
+    }
+
+    fn inject_auth(
+        &self,
+        request: RequestBuilder,
+        required: bool,
+    ) -> crate::Result<RequestBuilder> {
+        let config = &self.config;
+        if let Some(key) = config.key.as_ref() {
+            Ok(request.header("X-Redmine-API-Key", key))
+        } else if let (Some(user), Some(pass)) = (&config.user, &config.password) {
+            Ok(request.basic_auth(user, Some(pass)))
+        } else if !required {
+            Ok(request)
+        } else {
+            Err(Error::Auth)
+        }
     }
 
     async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response> {

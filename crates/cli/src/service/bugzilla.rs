@@ -21,15 +21,15 @@ mod search;
 #[derive(Debug, clap::Args)]
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
-    /// Bugzilla API key
+    /// key or token
     #[arg(short = 'k', long, env = "BUGBITE_KEY")]
-    api_key: Option<String>,
+    key: Option<String>,
 
-    /// Bugzilla username
+    /// username
     #[arg(short, long, requires = "password", env = "BUGBITE_USER")]
     user: Option<String>,
 
-    /// Bugzilla password
+    /// password
     #[arg(short, long, requires = "user", env = "BUGBITE_PASS")]
     password: Option<String>,
 }
@@ -47,7 +47,7 @@ pub(crate) struct Command {
 impl Command {
     pub(crate) fn run(self, base: String, builder: ClientBuilder) -> anyhow::Result<ExitCode> {
         let mut config = Config::new(&base)?;
-        config.api_key = self.auth.api_key;
+        config.key = self.auth.key;
         config.user = self.auth.user;
         config.password = self.auth.password;
 

@@ -14,9 +14,17 @@ mod search;
 #[derive(Debug, clap::Args)]
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
-    /// Redmine API key
-    #[arg(short = 'k', long)]
-    api_key: Option<String>,
+    /// key or token
+    #[arg(short, long, env = "BUGBITE_KEY")]
+    key: Option<String>,
+
+    /// username
+    #[arg(short, long, requires = "password", env = "BUGBITE_USER")]
+    user: Option<String>,
+
+    /// password
+    #[arg(short, long, requires = "user", env = "BUGBITE_PASS")]
+    password: Option<String>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -32,7 +40,9 @@ pub(crate) struct Command {
 impl Command {
     pub(crate) fn run(self, base: String, builder: ClientBuilder) -> anyhow::Result<ExitCode> {
         let mut config = Config::new(&base)?;
-        config.api_key = self.auth.api_key;
+        config.key = self.auth.key;
+        config.user = self.auth.user;
+        config.password = self.auth.password;
 
         let client = Client::new(config, builder.build())?;
         self.cmd.run(&client)
