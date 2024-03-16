@@ -93,6 +93,8 @@ pub struct Comment {
     pub creator: String,
     #[serde(rename = "creation_time")]
     pub created: DateTime<Utc>,
+    pub is_private: bool,
+    pub tags: Vec<String>,
 }
 
 impl Comment {
