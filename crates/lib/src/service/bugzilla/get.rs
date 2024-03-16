@@ -6,14 +6,14 @@ use crate::objects::bugzilla::Bug;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
-use super::attachments::AttachmentsRequest;
+use super::attachment::AttachmentRequest;
 use super::comments::CommentsRequest;
 use super::history::HistoryRequest;
 
 #[derive(Debug)]
 pub(crate) struct GetRequest {
     url: Url,
-    attachments: Option<AttachmentsRequest>,
+    attachments: Option<AttachmentRequest>,
     comments: Option<CommentsRequest>,
     history: Option<HistoryRequest>,
 }
@@ -39,10 +39,11 @@ impl GetRequest {
         }
 
         // drop useless token that is injected for authenticated requests
-        url.query_pairs_mut().append_pair("exclude_fields", "update_token");
+        url.query_pairs_mut()
+            .append_pair("exclude_fields", "update_token");
 
         let attachments = if attachments {
-            Some(service.item_attachments_request(ids, false)?)
+            Some(service.item_attachment_request(ids, false)?)
         } else {
             None
         };

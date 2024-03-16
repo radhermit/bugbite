@@ -77,9 +77,9 @@ impl Command {
         let multiple_bugs = ids.len() > 1 && self.options.item_id;
 
         let attachments = if self.options.item_id {
-            async_block!(client.item_attachments(ids, get_data))
+            async_block!(client.item_attachment(ids, get_data))
         } else {
-            async_block!(client.attachments(ids, get_data))
+            async_block!(client.attachment(ids, get_data))
         }?;
 
         if self.options.list {

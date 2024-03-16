@@ -16,7 +16,7 @@ use crate::traits::{Api, Query, ServiceParams, WebClient, WebService};
 use crate::Error;
 
 pub mod attach;
-mod attachments;
+mod attachment;
 mod comments;
 mod get;
 mod history;
@@ -84,20 +84,20 @@ impl Service {
         attach::AttachRequest::new(self, ids, attachments)
     }
 
-    pub(crate) fn attachments_request(
+    pub(crate) fn attachment_request(
         &self,
         ids: &[NonZeroU64],
         data: bool,
-    ) -> crate::Result<attachments::AttachmentsRequest> {
-        attachments::AttachmentsRequest::new(self, Ids::object(ids), data)
+    ) -> crate::Result<attachment::AttachmentRequest> {
+        attachment::AttachmentRequest::new(self, Ids::object(ids), data)
     }
 
-    pub(crate) fn item_attachments_request(
+    pub(crate) fn item_attachment_request(
         &self,
         ids: &[NonZeroU64],
         data: bool,
-    ) -> crate::Result<attachments::AttachmentsRequest> {
-        attachments::AttachmentsRequest::new(self, Ids::item(ids), data)
+    ) -> crate::Result<attachment::AttachmentRequest> {
+        attachment::AttachmentRequest::new(self, Ids::item(ids), data)
     }
 
     pub(crate) fn comments_request(

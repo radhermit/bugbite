@@ -43,21 +43,21 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn attachments(
+    pub async fn attachment(
         &self,
         ids: &[NonZeroU64],
         data: bool,
     ) -> crate::Result<Vec<Vec<Attachment>>> {
-        let request = self.service.attachments_request(ids, data)?;
+        let request = self.service.attachment_request(ids, data)?;
         request.send(&self.service).await
     }
 
-    pub async fn item_attachments(
+    pub async fn item_attachment(
         &self,
         ids: &[NonZeroU64],
         data: bool,
     ) -> crate::Result<Vec<Vec<Attachment>>> {
-        let request = self.service.item_attachments_request(ids, data)?;
+        let request = self.service.item_attachment_request(ids, data)?;
         request.send(&self.service).await
     }
 

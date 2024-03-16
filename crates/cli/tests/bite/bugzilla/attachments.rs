@@ -10,7 +10,7 @@ use super::*;
 
 #[test]
 fn aliases() {
-    for subcmd in ["a", "attachments"] {
+    for subcmd in ["a", "attachment"] {
         for opt in ["-h", "--help"] {
             cmd("bite bugzilla")
                 .arg(subcmd)
@@ -25,7 +25,7 @@ fn aliases() {
 
 #[test]
 fn invalid_ids() {
-    cmd("bite bugzilla attachments")
+    cmd("bite bugzilla attachment")
         .arg("id")
         .assert()
         .stdout("")
@@ -43,7 +43,7 @@ async fn nonexistent_bug() {
         .await;
 
     for opt in ["-i", "--item-id"] {
-        cmd("bite bugzilla attachments")
+        cmd("bite bugzilla attachment")
             .arg("1")
             .arg(opt)
             .assert()
@@ -58,12 +58,12 @@ async fn list_single_without_data() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_DATA.join("attachments/single-without-data.json"))
+        .respond(200, TEST_DATA.join("attachment/single-without-data.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("attachments/single-without-data")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-without-data")).unwrap();
 
     for opt in ["-l", "--list"] {
-        cmd("bite bugzilla attachments")
+        cmd("bite bugzilla attachment")
             .arg("123")
             .arg(opt)
             .assert()
@@ -77,12 +77,12 @@ async fn list_single_without_data() {
 async fn view_single_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(200, TEST_DATA.join("attachments/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachment/single-plain-text.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("attachments/single-plain-text")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-plain-text")).unwrap();
 
     for opt in ["-V", "--view"] {
-        cmd("bite bugzilla attachments")
+        cmd("bite bugzilla attachment")
             .arg("123")
             .arg(opt)
             .assert()
@@ -96,16 +96,16 @@ async fn view_single_with_plain_text() {
 async fn save_single_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(200, TEST_DATA.join("attachments/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachment/single-plain-text.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("attachments/single-plain-text")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-plain-text")).unwrap();
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
     // save files to the current working directory
     env::set_current_dir(dir_path).unwrap();
 
-    cmd("bite bugzilla attachments")
+    cmd("bite bugzilla attachment")
         .arg("123")
         .assert()
         .stdout(predicate::str::diff("Saving attachment: ./test.txt\n"))
@@ -122,13 +122,13 @@ async fn save_single_with_plain_text() {
 async fn save_single_existing_error() {
     let server = start_server().await;
     server
-        .respond(200, TEST_DATA.join("attachments/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachment/single-plain-text.json"))
         .await;
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
 
-    cmd("bite bugzilla attachments")
+    cmd("bite bugzilla attachment")
         .arg("123")
         .args(["-d", dir_path])
         .assert()
@@ -139,7 +139,7 @@ async fn save_single_existing_error() {
         .success();
 
     // re-running causes a file existence failure
-    cmd("bite bugzilla attachments")
+    cmd("bite bugzilla attachment")
         .arg("123")
         .args(["-d", dir_path])
         .assert()
@@ -157,12 +157,12 @@ async fn single_bug_with_no_attachments() {
     server
         .respond(
             200,
-            TEST_DATA.join("attachments/bug-with-no-attachments.json"),
+            TEST_DATA.join("attachment/bug-with-no-attachments.json"),
         )
         .await;
 
     for opt in ["-i", "--item-id"] {
-        cmd("bite bugzilla attachments")
+        cmd("bite bugzilla attachment")
             .arg("12345")
             .arg(opt)
             .assert()
@@ -179,12 +179,12 @@ async fn multiple_bugs_with_no_attachments() {
     server
         .respond(
             200,
-            TEST_DATA.join("attachments/bugs-with-no-attachments.json"),
+            TEST_DATA.join("attachment/bugs-with-no-attachments.json"),
         )
         .await;
 
     for opt in ["-i", "--item-id"] {
-        cmd("bite bugzilla attachments")
+        cmd("bite bugzilla attachment")
             .args(["12345", "23456", "34567"])
             .arg(opt)
             .assert()
@@ -198,12 +198,9 @@ async fn multiple_bugs_with_no_attachments() {
 async fn save_multiple_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(
-            200,
-            TEST_DATA.join("attachments/bugs-with-attachments.json"),
-        )
+        .respond(200, TEST_DATA.join("attachment/bugs-with-attachments.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("attachments/single-plain-text")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-plain-text")).unwrap();
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
@@ -211,7 +208,7 @@ async fn save_multiple_with_plain_text() {
     env::set_current_dir(dir_path).unwrap();
 
     let ids = ["12345", "23456", "34567"];
-    cmd("bite bugzilla attachments -i")
+    cmd("bite bugzilla attachment -i")
         .args(ids)
         .assert()
         .stdout(predicate::str::is_empty().not())

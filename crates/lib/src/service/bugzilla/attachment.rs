@@ -6,12 +6,12 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct AttachmentsRequest {
+pub(crate) struct AttachmentRequest {
     ids: Ids,
     url: Url,
 }
 
-impl AttachmentsRequest {
+impl AttachmentRequest {
     pub(crate) fn new(service: &super::Service, ids: Ids, data: bool) -> crate::Result<Self> {
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
@@ -38,11 +38,11 @@ impl AttachmentsRequest {
             url.query_pairs_mut().append_pair("exclude_fields", "data");
         }
 
-        Ok(AttachmentsRequest { ids, url })
+        Ok(Self { ids, url })
     }
 }
 
-impl Request for AttachmentsRequest {
+impl Request for AttachmentRequest {
     type Output = Vec<Vec<Attachment>>;
     type Service = super::Service;
 

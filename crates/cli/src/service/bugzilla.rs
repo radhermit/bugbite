@@ -11,7 +11,7 @@ use super::output::*;
 use super::Render;
 
 mod attach;
-mod attachments;
+mod attachment;
 mod comments;
 mod get;
 mod history;
@@ -63,7 +63,7 @@ enum Subcommand {
     Attach(attach::Command),
     /// Get attachments
     #[command(alias = "a")]
-    Attachments(attachments::Command),
+    Attachment(attachment::Command),
     /// Get comments
     Comments(comments::Command),
     /// Get bugs
@@ -83,7 +83,7 @@ impl Subcommand {
     fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         match self {
             Self::Attach(cmd) => cmd.run(client),
-            Self::Attachments(cmd) => cmd.run(client),
+            Self::Attachment(cmd) => cmd.run(client),
             Self::Comments(cmd) => cmd.run(client),
             Self::Get(cmd) => cmd.run(client),
             Self::History(cmd) => cmd.run(client),
