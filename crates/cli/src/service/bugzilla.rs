@@ -190,9 +190,8 @@ impl Render for Bug {
             truncated_list(f, "See also", &self.see_also, width)?;
         }
 
-        // don't count the bug description as a comment
-        if self.comments.len() > 1 {
-            writeln!(f, "{:<12} : {}", "Comments", self.comments.len() - 1)?;
+        if !self.comments.is_empty() {
+            writeln!(f, "{:<12} : {}", "Comments", self.comments.len())?;
         }
 
         if !self.history.is_empty() {
