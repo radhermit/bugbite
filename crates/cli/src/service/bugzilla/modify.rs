@@ -427,9 +427,6 @@ impl From<Options> for Attributes {
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
-    #[clap(flatten)]
-    options: Options,
-
     /// skip service interaction
     #[arg(short = 'n', long, help_heading = "Modify options")]
     dry_run: bool,
@@ -491,6 +488,9 @@ pub(super) struct Command {
         "}
     )]
     to: Option<Utf8PathBuf>,
+
+    #[clap(flatten)]
+    options: Options,
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114

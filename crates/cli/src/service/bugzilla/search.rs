@@ -358,9 +358,6 @@ struct Params {
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
-    #[clap(flatten)]
-    params: Params,
-
     /// open bugs in a browser
     #[arg(
         short = 'B',
@@ -411,6 +408,9 @@ pub(super) struct Command {
         "}
     )]
     to: Option<Utf8PathBuf>,
+
+    #[clap(flatten)]
+    params: Params,
 }
 
 impl Command {
