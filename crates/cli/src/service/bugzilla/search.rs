@@ -67,7 +67,13 @@ struct AttributeOptions {
     attachments: Option<bool>,
 
     /// restrict by blockers
-    #[arg(short = 'B', long, num_args = 0..=1, default_missing_value = "true")]
+    #[arg(
+        short = 'B',
+        long,
+        num_args = 0..=1,
+        value_name = "ID[,...]",
+        default_missing_value = "true",
+    )]
     blocks: Option<ExistsOrArray<MaybeStdinVec<NonZeroU64>>>,
 
     /// specified range of comments
@@ -83,11 +89,23 @@ struct AttributeOptions {
     custom_fields: Option<Vec<String>>,
 
     /// restrict by dependencies
-    #[arg(short = 'D', long, num_args = 0..=1, default_missing_value = "true")]
+    #[arg(
+        short = 'D',
+        long,
+        num_args = 0..=1,
+        value_name = "ID[,...]",
+        default_missing_value = "true",
+    )]
     depends_on: Option<ExistsOrArray<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by group
-    #[arg(short = 'G', long, num_args = 0..=1, default_missing_value = "true")]
+    #[arg(
+        short = 'G',
+        long,
+        num_args = 0..=1,
+        value_name = "VALUE[,...]",
+        default_missing_value = "true",
+    )]
     groups: Option<ExistsOrArray<MaybeStdinVec<String>>>,
 
     /// restrict by ID
@@ -95,7 +113,13 @@ struct AttributeOptions {
     id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// restrict by keyword
-    #[arg(short = 'K', long, num_args = 0..=1, default_missing_value = "true")]
+    #[arg(
+        short = 'K',
+        long,
+        num_args = 0..=1,
+        value_name = "VALUE[,...]",
+        default_missing_value = "true",
+    )]
     keywords: Option<ExistsOrArray<MaybeStdinVec<String>>>,
 
     /// restrict by OS
@@ -119,7 +143,13 @@ struct AttributeOptions {
     resolution: Option<Vec<String>>,
 
     /// restrict by external URLs
-    #[arg(short = 'U', long, num_args = 0..=1, default_missing_value = "true")]
+    #[arg(
+        short = 'U',
+        long,
+        num_args = 0..=1,
+        value_name = "VALUE[,...]",
+        default_missing_value = "true",
+    )]
     see_also: Option<ExistsOrArray<String>>,
 
     /// restrict by severity
@@ -146,7 +176,13 @@ struct AttributeOptions {
     target: Option<Vec<String>>,
 
     /// restrict by URL
-    #[arg(short = 'u', long, num_args = 0..=1, default_missing_value = "true")]
+    #[arg(
+        short = 'u',
+        long,
+        num_args = 0..=1,
+        value_name = "VALUE[,...]",
+        default_missing_value = "true",
+    )]
     url: Option<ExistsOrArray<String>>,
 
     /// restrict by version
@@ -158,7 +194,13 @@ struct AttributeOptions {
     votes: Option<Range<u64>>,
 
     /// restrict by whiteboard
-    #[arg(short = 'W', long, num_args = 0..=1, default_missing_value = "true")]
+    #[arg(
+        short = 'W',
+        long,
+        num_args = 0..=1,
+        value_name = "VALUE[,...]",
+        default_missing_value = "true",
+    )]
     whiteboard: Option<ExistsOrArray<String>>,
 }
 
