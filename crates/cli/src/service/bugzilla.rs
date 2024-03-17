@@ -26,7 +26,7 @@ struct Authentication {
     key: Option<String>,
 
     /// username
-    #[arg(short, long, requires = "password", env = "BUGBITE_USER")]
+    #[arg(short, long, env = "BUGBITE_USER")]
     user: Option<String>,
 
     /// password
