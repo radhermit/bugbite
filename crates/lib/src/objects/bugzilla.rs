@@ -269,6 +269,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Creator => format!("{:<20}", stringify!(self.creator)),
                 BugField::Deadline => stringify!(self.deadline),
                 BugField::DependsOn => format!("{:<20}", self.depends_on.iter().join(",")),
+                BugField::DuplicateOf => format!("{:<9}", stringify!(self.duplicate_of)),
                 BugField::Id => format!("{:<9}", self.id),
                 BugField::Keywords => format!("{:<20}", self.keywords.iter().join(",")),
                 BugField::Os => format!("{:<20}", stringify!(self.op_sys)),
