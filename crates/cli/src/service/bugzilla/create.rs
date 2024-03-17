@@ -3,6 +3,7 @@ use std::fs;
 use std::num::NonZeroU64;
 use std::process::ExitCode;
 
+use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::create::CreateParams;
 use bugbite::traits::WebClient;
@@ -50,11 +51,11 @@ struct Options {
 
             Values must be valid IDs for existing bugs.
 
-            Multiple arguments can be specified in a comma-separated list while
-            no arguments removes the entire list.
+            Multiple arguments can be specified in a comma-separated list or are
+            taken from standard input when `-`.
         "}
     )]
-    blocks: Option<Vec<NonZeroU64>>,
+    blocks: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// set CC users
     #[arg(
@@ -91,11 +92,11 @@ struct Options {
 
             Values must be valid IDs for existing bugs.
 
-            Multiple arguments can be specified in a comma-separated list while
-            no arguments removes the entire list.
+            Multiple arguments can be specified in a comma-separated list or are
+            taken from standard input when `-`.
         "}
     )]
-    depends_on: Option<Vec<NonZeroU64>>,
+    depends_on: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// set description
     #[arg(short = 'D', long)]
@@ -364,10 +365,10 @@ impl From<Options> for Attributes {
         Self {
             alias: value.alias,
             assigned_to: value.assigned_to,
-            blocks: value.blocks,
+            blocks: value.blocks.map(|x| x.into_iter().flatten().collect()),
             cc: value.cc,
             component: value.component,
-            depends_on: value.depends_on,
+            depends_on: value.depends_on.map(|x| x.into_iter().flatten().collect()),
             description: value.description,
             groups: value.groups,
             keywords: value.keywords,
