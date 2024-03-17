@@ -58,7 +58,7 @@ impl Command {
 
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
-    /// Attach files to bugs
+    /// Create attachments
     #[command(alias = "at")]
     Attach(attach::Command),
     /// Get attachments
@@ -69,7 +69,7 @@ enum Subcommand {
     /// Get bugs
     #[command(alias = "g")]
     Get(get::Command),
-    /// Get bug history
+    /// Get changes
     History(history::Command),
     /// Modify bugs
     #[command(alias = "m")]
