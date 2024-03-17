@@ -51,11 +51,15 @@ impl Request for NullRequest {
 
 pub trait WebClient<'a> {
     type Service;
+    type CreateParams: ServiceParams<'a>;
     type ModifyParams: ServiceParams<'a>;
     type SearchQuery: Query + ServiceParams<'a>;
 
     /// Return the service,
     fn service(&'a self) -> &'a Self::Service;
+
+    /// Create a create params builder for the service.
+    fn create_params(&'a self) -> Self::CreateParams;
 
     /// Create a modification params builder for the service.
     fn modify_params(&'a self) -> Self::ModifyParams;
@@ -86,6 +90,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> {
     const API_VERSION: &'static str;
     type Response;
     type GetRequest: Request;
+    type CreateRequest: Request;
     type ModifyRequest: Request;
     type SearchRequest: Request;
 
@@ -127,6 +132,14 @@ pub(crate) trait WebService<'a>: WebClient<'a> {
     ) -> crate::Result<Self::GetRequest> {
         Err(Error::Unsupported(format!(
             "{}: get requests unsupported",
+            self.kind()
+        )))
+    }
+
+    /// Create a creation request for a bug, issue, or ticket.
+    fn create_request(&self, _params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
+        Err(Error::Unsupported(format!(
+            "{}: create requests unsupported",
             self.kind()
         )))
     }

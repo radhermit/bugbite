@@ -5,6 +5,7 @@ use tracing::info;
 
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::attach::CreateAttachment;
+use crate::service::bugzilla::create::CreateParams;
 use crate::service::bugzilla::modify::{BugChange, ModifyParams};
 use crate::service::bugzilla::{Config, Service};
 use crate::time::TimeDelta;
@@ -100,6 +101,11 @@ impl Client {
         created: Option<&TimeDelta>,
     ) -> crate::Result<Vec<Vec<Event>>> {
         let request = self.service.history_request(ids, created)?;
+        request.send(&self.service).await
+    }
+
+    pub async fn create<'a>(&'a self, params: CreateParams<'a>) -> crate::Result<NonZeroU64> {
+        let request = self.service.create_request(params)?;
         request.send(&self.service).await
     }
 

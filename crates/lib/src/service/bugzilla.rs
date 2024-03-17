@@ -18,6 +18,7 @@ use crate::Error;
 pub mod attach;
 mod attachment;
 mod comment;
+pub mod create;
 mod get;
 mod history;
 pub mod modify;
@@ -134,11 +135,16 @@ macro_rules! return_if_error {
 
 impl<'a> WebClient<'a> for Service {
     type Service = Self;
+    type CreateParams = create::CreateParams<'a>;
     type ModifyParams = modify::ModifyParams<'a>;
     type SearchQuery = search::QueryBuilder<'a>;
 
     fn service(&self) -> &Self::Service {
         self
+    }
+
+    fn create_params(&'a self) -> Self::CreateParams {
+        Self::CreateParams::new(self.service())
     }
 
     fn modify_params(&'a self) -> Self::ModifyParams {
@@ -154,6 +160,7 @@ impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
     type GetRequest = get::GetRequest;
+    type CreateRequest = create::CreateRequest;
     type ModifyRequest = modify::ModifyRequest;
     type SearchRequest = search::SearchRequest;
 
@@ -218,6 +225,10 @@ impl<'a> WebService<'a> for Service {
         history: bool,
     ) -> crate::Result<Self::GetRequest> {
         get::GetRequest::new(self, ids, attachments, comments, history)
+    }
+
+    fn create_request(&self, params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
+        create::CreateRequest::new(self, params)
     }
 
     fn modify_request(

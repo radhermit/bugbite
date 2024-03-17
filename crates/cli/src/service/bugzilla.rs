@@ -13,6 +13,7 @@ use super::Render;
 mod attach;
 mod attachment;
 mod comment;
+mod create;
 mod get;
 mod history;
 mod modify;
@@ -66,6 +67,9 @@ enum Subcommand {
     Attachment(attachment::Command),
     /// Get comments
     Comment(comment::Command),
+    /// Create bug
+    #[command(alias = "c")]
+    Create(Box<create::Command>),
     /// Get bugs
     #[command(alias = "g")]
     Get(get::Command),
@@ -85,6 +89,7 @@ impl Subcommand {
             Self::Attach(cmd) => cmd.run(client),
             Self::Attachment(cmd) => cmd.run(client),
             Self::Comment(cmd) => cmd.run(client),
+            Self::Create(cmd) => cmd.run(client),
             Self::Get(cmd) => cmd.run(client),
             Self::History(cmd) => cmd.run(client),
             Self::Modify(cmd) => cmd.run(client),

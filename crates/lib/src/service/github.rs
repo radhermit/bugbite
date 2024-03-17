@@ -9,6 +9,7 @@ use crate::Error;
 
 use super::ServiceKind;
 
+pub mod create;
 mod get;
 pub mod modify;
 pub mod search;
@@ -66,11 +67,16 @@ impl Service {
 
 impl<'a> WebClient<'a> for Service {
     type Service = Self;
+    type CreateParams = create::CreateParams<'a>;
     type ModifyParams = modify::ModifyParams<'a>;
     type SearchQuery = search::QueryBuilder<'a>;
 
     fn service(&self) -> &Self::Service {
         self
+    }
+
+    fn create_params(&'a self) -> Self::CreateParams {
+        Self::CreateParams::new(self.service())
     }
 
     fn modify_params(&'a self) -> Self::ModifyParams {
@@ -86,6 +92,7 @@ impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
     type GetRequest = get::GetRequest;
+    type CreateRequest = NullRequest;
     type ModifyRequest = NullRequest;
     type SearchRequest = search::SearchRequest;
 
