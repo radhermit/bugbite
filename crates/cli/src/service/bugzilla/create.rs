@@ -64,9 +64,7 @@ struct Options {
         long_help = indoc::indoc! {"
             Set users in the CC list.
 
-            Values must be email addresses for service users. The alias
-            `@me` can also be used for the service's configured user if one
-            exists.
+            Values must be email addresses for service users.
 
             Multiple arguments can be specified in a comma-separated list.
         "}
@@ -131,8 +129,7 @@ struct Options {
 
             Values must be valid keywords.
 
-            Multiple arguments can be specified in a comma-separated list while
-            no arguments removes the entire list.
+            Multiple arguments can be specified in a comma-separated list.
         "}
     )]
     keywords: Option<Vec<String>>,
