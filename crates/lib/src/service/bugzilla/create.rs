@@ -43,28 +43,31 @@ impl CreateRequest {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 struct Params {
+    // required fields
+    component: String,
+    description: String,
+    op_sys: String,
+    platform: String,
+    priority: String,
+    product: String,
+    severity: String,
+    summary: String,
+    version: String,
+
+    // optional fields
     alias: Option<String>,
     assigned_to: Option<String>,
     blocks: Option<Vec<NonZeroU64>>,
     cc: Option<String>,
-    component: Option<String>,
     depends_on: Option<Vec<NonZeroU64>>,
-    description: Option<String>,
     groups: Option<String>,
     ids: Option<Vec<NonZeroU64>>,
     keywords: Option<String>,
-    op_sys: Option<String>,
-    platform: Option<String>,
-    priority: Option<String>,
-    product: Option<String>,
     resolution: Option<String>,
     see_also: Option<String>,
-    severity: Option<String>,
     status: Option<String>,
-    summary: Option<String>,
     target_milestone: Option<String>,
     url: Option<String>,
-    version: Option<String>,
     whiteboard: Option<String>,
 
     #[serde(flatten)]
@@ -86,7 +89,14 @@ impl<'a> ServiceParams<'a> for CreateParams<'a> {
     fn new(service: &'a Self::Service) -> Self {
         Self {
             service,
-            params: Default::default(),
+            params: Params {
+                op_sys: "All".to_string(),
+                platform: "All".to_string(),
+                priority: "Normal".to_string(),
+                severity: "normal".to_string(),
+                version: "unspecified".to_string(),
+                ..Default::default()
+            },
         }
     }
 }
@@ -101,6 +111,7 @@ impl<'a> CreateParams<'a> {
     }
 
     fn build(self) -> crate::Result<Params> {
+        // TODO: verify all required fields are non-empty
         if self.params == Params::default() {
             Err(Error::EmptyParams)
         } else {
@@ -138,7 +149,7 @@ impl<'a> CreateParams<'a> {
     }
 
     pub fn component(&mut self, value: &str) {
-        self.params.component = Some(value.into());
+        self.params.component = value.into();
     }
 
     pub fn depends_on<I>(&mut self, values: I)
@@ -149,7 +160,7 @@ impl<'a> CreateParams<'a> {
     }
 
     pub fn description(&mut self, value: &str) {
-        self.params.description = Some(value.into());
+        self.params.description = value.into();
     }
 
     pub fn custom_fields<I, K, V>(&mut self, values: I)
@@ -184,19 +195,19 @@ impl<'a> CreateParams<'a> {
     }
 
     pub fn os(&mut self, value: &str) {
-        self.params.op_sys = Some(value.into());
+        self.params.op_sys = value.into();
     }
 
     pub fn platform(&mut self, value: &str) {
-        self.params.platform = Some(value.into());
+        self.params.platform = value.into();
     }
 
     pub fn priority(&mut self, value: &str) {
-        self.params.priority = Some(value.into());
+        self.params.priority = value.into();
     }
 
     pub fn product(&mut self, value: &str) {
-        self.params.product = Some(value.into());
+        self.params.product = value.into();
     }
 
     pub fn resolution(&mut self, value: &str) {
@@ -211,7 +222,7 @@ impl<'a> CreateParams<'a> {
     }
 
     pub fn severity(&mut self, value: &str) {
-        self.params.severity = Some(value.into());
+        self.params.severity = value.into();
     }
 
     pub fn status(&mut self, value: &str) {
@@ -219,7 +230,7 @@ impl<'a> CreateParams<'a> {
     }
 
     pub fn summary(&mut self, value: &str) {
-        self.params.summary = Some(value.into());
+        self.params.summary = value.into();
     }
 
     pub fn target(&mut self, value: &str) {
@@ -231,7 +242,7 @@ impl<'a> CreateParams<'a> {
     }
 
     pub fn version(&mut self, value: &str) {
-        self.params.version = Some(value.into());
+        self.params.version = value.into();
     }
 
     pub fn whiteboard(&mut self, value: &str) {
