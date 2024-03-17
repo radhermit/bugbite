@@ -24,6 +24,11 @@ required-features = ["generate"]
 
 [[test]]
 name = "bite"
+required-features = ["test"]
+
+[[test]]
+name = "bugzilla"
+required-features = ["test-bugzilla"]
 
 [features]
 default = []
@@ -31,6 +36,8 @@ default = []
 generate = ["dep:clap_complete", "dep:clap_mangen"]
 # test support
 test = ["bugbite/test"]
+# bugzilla integration tests that require a local instance
+test-bugzilla = ["bugbite/test"]
 
 [dependencies]
 anyhow = "1.0.81"
