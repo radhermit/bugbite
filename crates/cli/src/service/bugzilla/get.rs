@@ -52,8 +52,10 @@ pub(super) struct Command {
         long_help = indoc::indoc! {"
             IDs of bugs to fetch.
 
-            Taken from standard input when `-`. The following example fetches
-            all matching results: `bite s bugbite -f id | bite g -`.
+            Taken from standard input when `-`.
+
+            Example:
+              - fetch all matching bugs: bite s bugbite -f id | bite g -
         "}
     )]
     ids: Vec<MaybeStdinVec<NonZeroU64>>,
