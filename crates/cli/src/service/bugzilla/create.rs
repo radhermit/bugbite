@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
+use std::io::{stdout, IsTerminal, Write};
 use std::num::NonZeroU64;
 use std::process::ExitCode;
 
@@ -463,8 +464,13 @@ impl Command {
         let params = attrs.into_params(client);
 
         if !self.dry_run {
+            let mut stdout = stdout().lock();
             let id = async_block!(client.create(params))?;
-            info!("Created bug #{id}");
+            if stdout.is_terminal() {
+                info!("Created bug #{id}");
+            } else {
+                writeln!(stdout, "{id}")?;
+            }
         }
 
         Ok(ExitCode::SUCCESS)
