@@ -6,7 +6,6 @@ use indexmap::IndexMap;
 
 #[derive(Debug, Default)]
 pub(crate) struct Config {
-    pub(crate) default: Option<String>,
     pub(crate) connections: IndexMap<String, service::Config>,
 }
 
@@ -22,10 +21,7 @@ impl TryFrom<bugbite::config::Config> for Config {
             );
         }
 
-        Ok(Self {
-            default: config.default().map(|s| s.to_string()),
-            connections,
-        })
+        Ok(Self { connections })
     }
 }
 
@@ -48,14 +44,5 @@ impl Config {
             }
             _ => Err(anyhow!("unknown connection: {name}")),
         }
-    }
-
-    /// Get the default connection if it exists.
-    pub(crate) fn get_default(&self) -> anyhow::Result<(ServiceKind, String)> {
-        let name = self
-            .default
-            .as_ref()
-            .ok_or_else(|| anyhow!("no default connection configured"))?;
-        self.get(name)
     }
 }

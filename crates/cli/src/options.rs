@@ -70,7 +70,7 @@ impl ServiceCommand {
             }
             // fallback to service parser to handle service restriction failures
             Self::parse();
-            panic!("command parsing should have exited");
+            anyhow::bail!("failed parsing service options");
         };
 
         let mut remaining = &cmd.remaining[..];
@@ -109,19 +109,13 @@ impl ServiceCommand {
                 (kind, base)
             }
             (None, Some(base), Some(service)) => (service, base.to_string()),
-            (None, None, None) => {
-                if !arg.is_empty() && !subcmds.contains(arg) && !arg.starts_with('-') {
-                    // use default service from config if it exists
-                    config.get_default()?
-                } else if services.contains(arg) {
+            _ => {
+                if services.contains(arg) || arg.starts_with('-') {
                     Command::parse();
-                    anyhow::bail!("no {arg} connection specified");
-                } else {
-                    Command::parse();
-                    panic!("command parsing should have previously exited");
                 }
+
+                anyhow::bail!("no connection specified");
             }
-            _ => panic!("misconfigured service option restrictions"),
         };
 
         // construct new args for the main command to parse
@@ -147,14 +141,15 @@ struct ServiceOpts {
         short,
         long,
         env = "BUGBITE_CONNECTION",
-        conflicts_with_all = ["base", "service"],
         long_help = indoc::formatdoc! {"
             Use a pre-configured connection by its alias.
 
-            Connections can be defined in the user config. The precendence order
+            Connections can be defined in the user config. The precedence order
             when overlapping connection names exist or when multiple locations
             are defined is as follows from lowest to highest: internal, user
-            config, environment, command option, and subcommand.
+            config, environment, command option, and subcommand. In addition,
+            specifying a connection always overrides the manual --base and
+            --service settings.
 
             The following connections are defined internally in bugbite
             for ease of use: {}.
@@ -170,7 +165,6 @@ struct ServiceOpts {
         short,
         long,
         env = "BUGBITE_BASE",
-        requires = "service",
         long_help = indoc::indoc! {"
             Specify the service URL to connect to.
 
@@ -183,7 +177,6 @@ struct ServiceOpts {
         short,
         long,
         env = "BUGBITE_SERVICE",
-        requires = "base",
         long_help = indoc::formatdoc! {"
             Specify the service type to use.
 

@@ -9,7 +9,6 @@ use crate::Error;
 /// Config support
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    default: Option<String>,
     connections: Vec<Connection>,
 }
 
@@ -21,11 +20,6 @@ impl Config {
         let config = toml::from_str(&data)
             .map_err(|e| Error::Config(format!("failed parsing config: {path}: {e}")))?;
         Ok(config)
-    }
-
-    /// Get the config's default connection.
-    pub fn default(&self) -> Option<&str> {
-        self.default.as_deref()
     }
 
     /// Get all the config's connections.

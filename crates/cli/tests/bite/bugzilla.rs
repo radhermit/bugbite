@@ -43,7 +43,7 @@ fn no_connection() {
             .args([action, "-c", "1d"])
             .assert()
             .stdout("")
-            .stderr(contains("no bugzilla connection specified"))
+            .stderr(contains("no connection specified"))
             .failure();
     }
 }

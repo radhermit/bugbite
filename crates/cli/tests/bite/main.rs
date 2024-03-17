@@ -63,15 +63,3 @@ fn unknown_connection() {
             .failure();
     }
 }
-
-#[test]
-fn no_default_connection() {
-    for action in ["s", "search"] {
-        cmd("bite")
-            .args([action, "--help"])
-            .assert()
-            .stdout("")
-            .stderr(contains("no default connection configured"))
-            .failure();
-    }
-}
