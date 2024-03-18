@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.4
+
+### Added
+
+#### Bugzilla
+- Support creating and modifying bugs via `create` and `modify`.
+
 ## 0.0.3
 
 ### Added
