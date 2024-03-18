@@ -433,7 +433,7 @@ pub(super) struct Command {
 
     /// reply to specific comments
     #[arg(
-        short,
+        short = 'R',
         long,
         value_name = "ID[,...]",
         value_delimiter = ',',

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.5
+
+### Fixed
+
+#### Bugzilla
+- modify: Fixed overlapping short options for --reply and --resolution.
+
 ## 0.0.4
 
 ### Added
