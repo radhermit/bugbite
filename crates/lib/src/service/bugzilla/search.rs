@@ -133,6 +133,20 @@ impl QueryBuilder<'_> {
         self.extend("id", values);
     }
 
+    pub fn alias<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        for value in values.into_iter().map(Into::into) {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "alias");
+            self.insert(format!("o{num}"), value.op());
+            self.insert(format!("v{num}"), value);
+        }
+    }
+
     pub fn assigned_to<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
@@ -624,6 +638,7 @@ impl Query for QueryBuilder<'_> {
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum ExistsField {
+    Alias,
     Attachments,
     Blocks,
     Cc,
@@ -639,6 +654,7 @@ impl Api for ExistsField {
     type Output = &'static str;
     fn api(&self) -> Self::Output {
         match self {
+            Self::Alias => "alias",
             Self::Attachments => "attach_data.thedata",
             Self::Blocks => "blocked",
             Self::Cc => "cc",

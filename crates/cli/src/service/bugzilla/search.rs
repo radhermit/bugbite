@@ -54,6 +54,15 @@ where
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attribute options")]
 struct AttributeOptions {
+    /// restrict by alias
+    #[arg(
+        long,
+        num_args = 0..=1,
+        value_name = "VALUE[,...]",
+        default_missing_value = "true",
+    )]
+    alias: Option<ExistsOrArray<Match>>,
+
     /// restrict by attachments
     #[arg(
         short = 'A',
@@ -506,6 +515,12 @@ impl Command {
         }
         if let Some(value) = params.attr.comments {
             query.comments(value);
+        }
+        if let Some(values) = params.attr.alias {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Alias, value),
+                ExistsOrArray::Array(values) => query.alias(values),
+            }
         }
         if let Some(values) = params.attr.attachments {
             match values {
