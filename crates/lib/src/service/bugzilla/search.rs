@@ -44,7 +44,7 @@ impl SearchRequest {
     }
 }
 
-/// Variants for matching types.
+/// Advanced field matching operators.
 #[derive(Display, Debug, Clone, Copy)]
 #[strum(serialize_all = "lowercase")]
 enum MatchOp {
@@ -56,7 +56,7 @@ enum MatchOp {
     NotRegexp,
 }
 
-/// Variants for matching types.
+/// Advanced field match.
 #[derive(Debug, Clone)]
 pub struct Match {
     op: MatchOp,
