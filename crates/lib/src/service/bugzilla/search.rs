@@ -139,6 +139,11 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
+        self.advanced_count += 1;
+        let num = self.advanced_count;
+        self.insert(format!("f{num}"), "OP");
+        self.insert(format!("j{num}"), "OR");
+
         for value in values.into_iter().map(Into::into) {
             self.advanced_count += 1;
             let num = self.advanced_count;
@@ -146,6 +151,10 @@ impl QueryBuilder<'_> {
             self.insert(format!("o{num}"), value.op());
             self.insert(format!("v{num}"), value);
         }
+
+        self.advanced_count += 1;
+        let num = self.advanced_count;
+        self.insert(format!("f{num}"), "CP");
     }
 
     pub fn assigned_to<I, S>(&mut self, values: I)
