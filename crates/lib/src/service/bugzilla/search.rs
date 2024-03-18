@@ -56,7 +56,7 @@ pub enum Match {
 }
 
 impl Match {
-    fn op(&self) -> &str {
+    fn op(&self) -> &'static str {
         match self {
             Self::Contains(_) => "substring",
             Self::ContainsNot(_) => "notsubstring",
@@ -145,11 +145,7 @@ impl QueryBuilder<'_> {
         self.insert(format!("j{num}"), "OR");
 
         for value in values.into_iter().map(Into::into) {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "alias");
-            self.insert(format!("o{num}"), value.op());
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("alias", value.op(), value);
         }
 
         self.advanced_count += 1;
@@ -177,17 +173,8 @@ impl QueryBuilder<'_> {
         self.insert(format!("j{num}"), "OR");
 
         for value in values.into_iter().map(Into::into) {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "attachments.description");
-            self.insert(format!("o{num}"), value.op());
-            self.insert(format!("v{num}"), &value);
-
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "attachments.filename");
-            self.insert(format!("o{num}"), value.op());
-            self.insert(format!("v{num}"), &value);
+            self.advanced_field("attachments.description", value.op(), &value);
+            self.advanced_field("attachments.filename", value.op(), &value);
         }
 
         self.advanced_count += 1;
@@ -217,11 +204,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "longdesc");
-            self.insert(format!("o{num}"), value.op());
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("longdesc", value.op(), value);
         }
     }
 
@@ -231,11 +214,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "short_desc");
-            self.insert(format!("o{num}"), value.op());
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("short_desc", value.op(), value);
         }
     }
 
@@ -273,11 +252,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "attachments.submitter");
-            self.insert(format!("o{num}"), value.op());
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("attachments.submitter", value.op(), value);
         }
     }
 
@@ -287,11 +262,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "commenter");
-            self.insert(format!("o{num}"), value.op());
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("commenter", value.op(), value);
         }
     }
 
@@ -301,11 +272,7 @@ impl QueryBuilder<'_> {
         S: fmt::Display,
     {
         for value in values {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "bug_file_loc");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("bug_file_loc", "substring", value);
         }
     }
 
@@ -320,12 +287,8 @@ impl QueryBuilder<'_> {
                 k if k.starts_with("cf_") => k.into(),
                 k => format!("cf_{k}"),
             };
-            self.advanced_count += 1;
-            let num = self.advanced_count;
             let value = value.into();
-            self.insert(format!("f{num}"), name);
-            self.insert(format!("o{num}"), value.op());
-            self.insert(format!("v{num}"), value);
+            self.advanced_field(name, value.op(), value);
         }
     }
 
@@ -406,11 +369,7 @@ impl QueryBuilder<'_> {
         S: fmt::Display,
     {
         for value in values {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "see_also");
-            self.insert(format!("o{num}"), "substring");
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("see_also", "substring", value);
         }
     }
 
@@ -452,11 +411,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = NonZeroU64>,
     {
         for value in values {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "blocked");
-            self.insert(format!("o{num}"), "equals");
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("blocked", "equals", value);
         }
     }
 
@@ -465,11 +420,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = NonZeroU64>,
     {
         for value in values {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "dependson");
-            self.insert(format!("o{num}"), "equals");
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("dependson", "equals", value);
         }
     }
 
@@ -495,11 +446,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_count += 1;
-            let num = self.advanced_count;
-            self.insert(format!("f{num}"), "cc");
-            self.insert(format!("o{num}"), value.op());
-            self.insert(format!("v{num}"), value);
+            self.advanced_field("cc", value.op(), value);
         }
     }
 
@@ -525,59 +472,23 @@ impl QueryBuilder<'_> {
         T: fmt::Display,
     {
         match value {
-            RangeOrEqual::Equal(value) => {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), field);
-                self.insert(format!("o{num}"), "equals");
-                self.insert(format!("v{num}"), value);
-            }
+            RangeOrEqual::Equal(value) => self.advanced_field(field, "equals", value),
             RangeOrEqual::Range(Range::Between(start, finish)) => {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), field);
-                self.insert(format!("o{num}"), "greaterthaneq");
-                self.insert(format!("v{num}"), start);
-
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), field);
-                self.insert(format!("o{num}"), "lessthan");
-                self.insert(format!("v{num}"), finish);
+                self.advanced_field(field, "greaterthaneq", start);
+                self.advanced_field(field, "lessthan", finish);
             }
             RangeOrEqual::Range(Range::Inclusive(start, finish)) => {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), field);
-                self.insert(format!("o{num}"), "greaterthaneq");
-                self.insert(format!("v{num}"), start);
-
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), field);
-                self.insert(format!("o{num}"), "lessthaneq");
-                self.insert(format!("v{num}"), finish);
+                self.advanced_field(field, "greaterthaneq", start);
+                self.advanced_field(field, "lessthaneq", finish);
             }
             RangeOrEqual::Range(Range::To(value)) => {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), field);
-                self.insert(format!("o{num}"), "lessthan");
-                self.insert(format!("v{num}"), value);
+                self.advanced_field(field, "lessthan", value);
             }
             RangeOrEqual::Range(Range::ToInclusive(value)) => {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), field);
-                self.insert(format!("o{num}"), "lessthaneq");
-                self.insert(format!("v{num}"), value);
+                self.advanced_field(field, "lessthaneq", value);
             }
             RangeOrEqual::Range(Range::From(value)) => {
-                self.advanced_count += 1;
-                let num = self.advanced_count;
-                self.insert(format!("f{num}"), field);
-                self.insert(format!("o{num}"), "greaterthaneq");
-                self.insert(format!("v{num}"), value);
+                self.advanced_field(field, "greaterthaneq", value);
             }
             RangeOrEqual::Range(Range::Full) => (),
         }
@@ -608,6 +519,19 @@ impl QueryBuilder<'_> {
         V: fmt::Display,
     {
         self.query.insert(key.to_string(), value.to_string());
+    }
+
+    fn advanced_field<F, K, V>(&mut self, field: F, operator: K, value: V)
+    where
+        F: fmt::Display,
+        K: fmt::Display,
+        V: fmt::Display,
+    {
+        self.advanced_count += 1;
+        let num = self.advanced_count;
+        self.insert(format!("f{num}"), field);
+        self.insert(format!("o{num}"), operator);
+        self.insert(format!("v{num}"), value);
     }
 }
 
