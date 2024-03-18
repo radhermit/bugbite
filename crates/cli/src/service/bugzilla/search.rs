@@ -130,23 +130,23 @@ struct AttributeOptions {
     keywords: Option<ExistsOrArray<MaybeStdinVec<String>>>,
 
     /// restrict by OS
-    #[arg(long, value_delimiter = ',')]
+    #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
     os: Option<Vec<String>>,
 
     /// restrict by platform
-    #[arg(long, value_delimiter = ',')]
+    #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
     platform: Option<Vec<String>>,
 
     /// restrict by priority
-    #[arg(long, value_delimiter = ',')]
+    #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
     priority: Option<Vec<String>>,
 
     /// restrict by product
-    #[arg(short, long, value_delimiter = ',')]
+    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
     product: Option<Vec<String>>,
 
     /// restrict by resolution
-    #[arg(short, long, value_delimiter = ',')]
+    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
     resolution: Option<Vec<String>>,
 
     /// restrict by external URLs
@@ -160,14 +160,14 @@ struct AttributeOptions {
     see_also: Option<ExistsOrArray<String>>,
 
     /// restrict by severity
-    #[arg(long, value_delimiter = ',')]
+    #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
     severity: Option<Vec<String>>,
 
     /// restrict by status
     #[arg(
         short,
         long,
-        value_name = "STATUS[,...]",
+        value_name = "VALUE[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Restrict bugs by status.
@@ -179,7 +179,7 @@ struct AttributeOptions {
     status: Option<Vec<String>>,
 
     /// restrict by target
-    #[arg(short, long, value_delimiter = ',')]
+    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
     target: Option<Vec<String>>,
 
     /// restrict by URL
@@ -193,7 +193,7 @@ struct AttributeOptions {
     url: Option<ExistsOrArray<String>>,
 
     /// restrict by version
-    #[arg(short = 'V', long, value_delimiter = ',')]
+    #[arg(short = 'V', long, value_name = "VALUE[,...]", value_delimiter = ',')]
     version: Option<Vec<String>>,
 
     /// specified range of votes
