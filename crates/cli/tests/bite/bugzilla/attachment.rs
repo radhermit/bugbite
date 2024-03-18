@@ -42,10 +42,9 @@ async fn nonexistent_bug() {
         .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
         .await;
 
-    for opt in ["-i", "--item-id"] {
+    for opt in ["-i", "--item-ids"] {
         cmd("bite bugzilla attachment")
-            .arg("1")
-            .arg(opt)
+            .args([opt, "1"])
             .assert()
             .stdout("")
             .stderr("bite: error: bugzilla: Bug #1 does not exist.\n")
@@ -161,10 +160,9 @@ async fn single_bug_with_no_attachments() {
         )
         .await;
 
-    for opt in ["-i", "--item-id"] {
+    for opt in ["-i", "--item-ids"] {
         cmd("bite bugzilla attachment")
-            .arg("12345")
-            .arg(opt)
+            .args([opt, "12345"])
             .assert()
             .stdout("")
             .stderr("")
@@ -183,10 +181,9 @@ async fn multiple_bugs_with_no_attachments() {
         )
         .await;
 
-    for opt in ["-i", "--item-id"] {
+    for opt in ["-i", "--item-ids"] {
         cmd("bite bugzilla attachment")
-            .args(["12345", "23456", "34567"])
-            .arg(opt)
+            .args([opt, "12345", "23456", "34567"])
             .assert()
             .stdout("")
             .stderr("")
