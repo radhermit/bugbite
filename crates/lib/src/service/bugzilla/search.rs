@@ -45,39 +45,27 @@ impl SearchRequest {
 }
 
 /// Variants for matching types.
-#[derive(Debug, Clone)]
-pub enum Match {
-    Contains(String),
-    ContainsNot(String),
-    Equals(String),
-    EqualsNot(String),
-    Regex(String),
-    RegexNot(String),
+#[derive(Display, Debug, Clone, Copy)]
+#[strum(serialize_all = "lowercase")]
+enum MatchOp {
+    Substring,
+    NotSubstring,
+    Equals,
+    NotEquals,
+    Regexp,
+    NotRegexp,
 }
 
-impl Match {
-    fn op(&self) -> &'static str {
-        match self {
-            Self::Contains(_) => "substring",
-            Self::ContainsNot(_) => "notsubstring",
-            Self::Equals(_) => "equals",
-            Self::EqualsNot(_) => "notequals",
-            Self::Regex(_) => "regexp",
-            Self::RegexNot(_) => "notregexp",
-        }
-    }
+/// Variants for matching types.
+#[derive(Debug, Clone)]
+pub struct Match {
+    op: MatchOp,
+    value: String,
 }
 
 impl fmt::Display for Match {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Contains(value) => value.fmt(f),
-            Self::ContainsNot(value) => value.fmt(f),
-            Self::Equals(value) => value.fmt(f),
-            Self::EqualsNot(value) => value.fmt(f),
-            Self::Regex(value) => value.fmt(f),
-            Self::RegexNot(value) => value.fmt(f),
-        }
+        self.value.fmt(f)
     }
 }
 
@@ -89,17 +77,24 @@ impl FromStr for Match {
     }
 }
 
-impl<T: AsRef<str>> From<T> for Match {
-    fn from(s: T) -> Self {
-        let s = s.as_ref();
-        match s.split_once('#') {
-            Some(("!", value)) => Self::ContainsNot(value.into()),
-            Some(("=", value)) => Self::Equals(value.into()),
-            Some(("!=", value)) => Self::EqualsNot(value.into()),
-            Some(("r", value)) => Self::Regex(value.into()),
-            Some(("!r", value)) => Self::RegexNot(value.into()),
-            _ => Self::Contains(s.into()),
-        }
+impl From<&str> for Match {
+    fn from(s: &str) -> Self {
+        let (op, value) = match s.split_once('#') {
+            Some(("!", value)) => (MatchOp::NotSubstring, value.into()),
+            Some(("=", value)) => (MatchOp::Equals, value.into()),
+            Some(("!=", value)) => (MatchOp::NotEquals, value.into()),
+            Some(("r", value)) => (MatchOp::Regexp, value.into()),
+            Some(("!r", value)) => (MatchOp::NotRegexp, value.into()),
+            _ => (MatchOp::Substring, s.into()),
+        };
+
+        Self { op, value }
+    }
+}
+
+impl From<String> for Match {
+    fn from(s: String) -> Self {
+        s.as_str().into()
     }
 }
 
@@ -145,7 +140,7 @@ impl QueryBuilder<'_> {
         self.insert(format!("j{num}"), "OR");
 
         for value in values.into_iter().map(Into::into) {
-            self.advanced_field("alias", value.op(), value);
+            self.advanced_field("alias", value.op, value);
         }
 
         self.advanced_count += 1;
@@ -173,8 +168,8 @@ impl QueryBuilder<'_> {
         self.insert(format!("j{num}"), "OR");
 
         for value in values.into_iter().map(Into::into) {
-            self.advanced_field("attachments.description", value.op(), &value);
-            self.advanced_field("attachments.filename", value.op(), &value);
+            self.advanced_field("attachments.description", value.op, &value);
+            self.advanced_field("attachments.filename", value.op, &value);
         }
 
         self.advanced_count += 1;
@@ -204,7 +199,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_field("longdesc", value.op(), value);
+            self.advanced_field("longdesc", value.op, value);
         }
     }
 
@@ -214,7 +209,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_field("short_desc", value.op(), value);
+            self.advanced_field("short_desc", value.op, value);
         }
     }
 
@@ -252,7 +247,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_field("attachments.submitter", value.op(), value);
+            self.advanced_field("attachments.submitter", value.op, value);
         }
     }
 
@@ -262,7 +257,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_field("commenter", value.op(), value);
+            self.advanced_field("commenter", value.op, value);
         }
     }
 
@@ -288,7 +283,7 @@ impl QueryBuilder<'_> {
                 k => format!("cf_{k}"),
             };
             let value = value.into();
-            self.advanced_field(name, value.op(), value);
+            self.advanced_field(name, value.op, value);
         }
     }
 
@@ -446,7 +441,7 @@ impl QueryBuilder<'_> {
         S: Into<Match>,
     {
         for value in values.into_iter().map(Into::into) {
-            self.advanced_field("cc", value.op(), value);
+            self.advanced_field("cc", value.op, value);
         }
     }
 
