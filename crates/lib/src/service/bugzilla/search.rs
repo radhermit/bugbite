@@ -243,6 +243,20 @@ impl QueryBuilder<'_> {
         self.insert("quicksearch", value);
     }
 
+    pub fn attachers<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        for value in values.into_iter().map(Into::into) {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "attachments.submitter");
+            self.insert(format!("o{num}"), value.op());
+            self.insert(format!("v{num}"), value);
+        }
+    }
+
     pub fn commenters<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,

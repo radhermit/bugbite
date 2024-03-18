@@ -305,6 +305,15 @@ struct Params {
     )]
     assigned_to: Option<Vec<String>>,
 
+    /// user created attachment
+    #[arg(
+        long,
+        help_heading = "User options",
+        value_name = "USER[,...]",
+        value_delimiter = ','
+    )]
+    attachers: Option<Vec<Match>>,
+
     /// user in the CC list
     #[arg(
         long,
@@ -431,6 +440,9 @@ impl Command {
         }
         if let Some(values) = params.order {
             query.order(values);
+        }
+        if let Some(values) = params.attachers {
+            query.attachers(values);
         }
         if let Some(values) = params.commenters {
             query.commenters(values);
