@@ -1,5 +1,4 @@
 use std::fmt;
-use std::num::NonZeroU64;
 
 use reqwest::{ClientBuilder, RequestBuilder};
 use serde::{Deserialize, Serialize};
@@ -170,13 +169,16 @@ impl<'a> WebService<'a> for Service {
         }
     }
 
-    fn get_request(
+    fn get_request<S>(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[S],
         attachments: bool,
         comments: bool,
         _history: bool,
-    ) -> crate::Result<Self::GetRequest> {
+    ) -> crate::Result<Self::GetRequest>
+    where
+        S: std::fmt::Display,
+    {
         get::GetRequest::new(self, ids, attachments, comments)
     }
 

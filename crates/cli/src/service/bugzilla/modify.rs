@@ -494,7 +494,7 @@ pub(super) struct Command {
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
-    /// bug IDs
+    /// bug IDs or aliases
     #[clap(
         required = true,
         help_heading = "Arguments",
@@ -504,11 +504,11 @@ pub(super) struct Command {
             Taken from standard input when `-`.
         "}
     )]
-    ids: Vec<MaybeStdinVec<NonZeroU64>>,
+    ids: Vec<MaybeStdinVec<String>>,
 }
 
 /// Interactively create a reply, pulling specified comments for pre-population.
-fn get_comment(client: &Client, id: NonZeroU64, comment_ids: &[usize]) -> anyhow::Result<String> {
+fn get_comment(client: &Client, id: &str, comment_ids: &[usize]) -> anyhow::Result<String> {
     let comments = async_block!(client.comment(&[id], None))?
         .into_iter()
         .next()
@@ -543,7 +543,7 @@ fn get_comment(client: &Client, id: NonZeroU64, comment_ids: &[usize]) -> anyhow
 
 impl Command {
     pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
-        let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
+        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let mut attrs: Attributes = self.options.into();
 
         // read modification attributes from a template

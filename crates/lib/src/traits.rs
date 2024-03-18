@@ -1,5 +1,3 @@
-use std::num::NonZeroU64;
-
 use reqwest::RequestBuilder;
 use url::Url;
 
@@ -123,13 +121,16 @@ pub(crate) trait WebService<'a>: WebClient<'a> {
     }
 
     /// Create a request for bugs, issues, or tickets by their IDs.
-    fn get_request(
+    fn get_request<S>(
         &self,
-        _ids: &[NonZeroU64],
+        _ids: &[S],
         _attachments: bool,
         _comments: bool,
         _history: bool,
-    ) -> crate::Result<Self::GetRequest> {
+    ) -> crate::Result<Self::GetRequest>
+    where
+        S: std::fmt::Display,
+    {
         Err(Error::Unsupported(format!(
             "{}: get requests unsupported",
             self.kind()
@@ -145,11 +146,14 @@ pub(crate) trait WebService<'a>: WebClient<'a> {
     }
 
     /// Create a modify request for bugs, issues, or tickets.
-    fn modify_request(
+    fn modify_request<S>(
         &self,
-        _ids: &[NonZeroU64],
+        _ids: &[S],
         _params: Self::ModifyParams,
-    ) -> crate::Result<Self::ModifyRequest> {
+    ) -> crate::Result<Self::ModifyRequest>
+    where
+        S: std::fmt::Display,
+    {
         Err(Error::Unsupported(format!(
             "{}: modify requests unsupported",
             self.kind()

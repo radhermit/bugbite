@@ -91,17 +91,20 @@ impl Request for ModifyRequest {
 }
 
 impl ModifyRequest {
-    pub(super) fn new(
+    pub(super) fn new<S>(
         service: &super::Service,
-        ids: &[NonZeroU64],
+        ids: &[S],
         params: ModifyParams,
-    ) -> crate::Result<Self> {
+    ) -> crate::Result<Self>
+    where
+        S: fmt::Display,
+    {
         let [id, ..] = ids else {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
         let mut params = params.build()?;
-        params.ids = Some(ids.to_vec());
+        params.ids = Some(ids.iter().map(|x| x.to_string()).collect());
 
         Ok(Self {
             url: service.base().join(&format!("rest/bug/{id}"))?,
@@ -231,7 +234,7 @@ struct Params {
     depends_on: Option<SetChanges<NonZeroU64>>,
     dupe_of: Option<NonZeroU64>,
     groups: Option<Changes<String>>,
-    ids: Option<Vec<NonZeroU64>>,
+    ids: Option<Vec<String>>,
     keywords: Option<SetChanges<String>>,
     op_sys: Option<String>,
     platform: Option<String>,

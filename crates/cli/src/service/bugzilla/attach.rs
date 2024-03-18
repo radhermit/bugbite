@@ -1,4 +1,3 @@
-use std::num::NonZeroU64;
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -42,7 +41,7 @@ pub(super) struct Command {
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
-    /// bug IDs
+    /// bug IDs or aliases
     #[clap(
         num_args = 1,
         required = true,
@@ -50,7 +49,7 @@ pub(super) struct Command {
         value_name = "ID[,ID,...]",
         help_heading = "Arguments"
     )]
-    ids: Vec<MaybeStdinVec<NonZeroU64>>,
+    ids: Vec<MaybeStdinVec<String>>,
 
     /// attachment paths
     #[clap(
@@ -80,7 +79,7 @@ impl Command {
             attachments.push(attachment);
         }
 
-        let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
+        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let attachment_ids = async_block!(client.attach(ids, attachments))?;
 
         let item_ids = ids.iter().map(|x| x.to_string()).join(", ");

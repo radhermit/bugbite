@@ -51,12 +51,16 @@ impl Request for AttachmentRequest {
         let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         match self.ids {
-            Ids::Item(ids) => {
+            Ids::Item(_) => {
+                let data = data["bugs"].take();
+                let serde_json::value::Value::Object(data) = data else {
+                    panic!("invalid bugzilla attachment response");
+                };
+                // Bugzilla's response always uses bug IDs even if attachments were requested via
+                // alias so we assume the response is in the same order as the request.
                 let mut attachments = vec![];
-                let mut data = data["bugs"].take();
-                for id in ids {
-                    let data = data[&id].take();
-                    attachments.push(serde_json::from_value::<Vec<Attachment>>(data)?);
+                for (_id, values) in data {
+                    attachments.push(serde_json::from_value(values)?);
                 }
                 Ok(attachments)
             }

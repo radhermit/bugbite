@@ -1,5 +1,3 @@
-use std::num::NonZeroU64;
-
 use chrono::offset::Utc;
 use serde_json::Value;
 use url::Url;
@@ -13,11 +11,14 @@ use crate::Error;
 pub(crate) struct HistoryRequest(Url);
 
 impl HistoryRequest {
-    pub(super) fn new(
+    pub(super) fn new<S>(
         service: &super::Service,
-        ids: &[NonZeroU64],
+        ids: &[S],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<Self> {
+    ) -> crate::Result<Self>
+    where
+        S: std::fmt::Display,
+    {
         let [id, remaining_ids @ ..] = ids else {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };

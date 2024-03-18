@@ -1,5 +1,4 @@
 use std::io::{stdout, Write};
-use std::num::NonZeroU64;
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -26,14 +25,14 @@ pub(super) struct Command {
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
-    /// bug IDs
+    /// bug IDs or aliases
     #[clap(required = true, help_heading = "Arguments")]
-    ids: Vec<MaybeStdinVec<NonZeroU64>>,
+    ids: Vec<MaybeStdinVec<String>>,
 }
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
-        let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
+        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let created = self.options.created.as_ref();
         let events = async_block!(client.history(ids, created))?;
         let mut events = events.iter().flatten().peekable();

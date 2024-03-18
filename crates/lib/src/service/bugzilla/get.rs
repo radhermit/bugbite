@@ -1,5 +1,3 @@
-use std::num::NonZeroU64;
-
 use url::Url;
 
 use crate::objects::bugzilla::Bug;
@@ -9,6 +7,7 @@ use crate::Error;
 use super::attachment::AttachmentRequest;
 use super::comment::CommentRequest;
 use super::history::HistoryRequest;
+use super::IdOrAlias;
 
 #[derive(Debug)]
 pub(crate) struct GetRequest {
@@ -19,13 +18,16 @@ pub(crate) struct GetRequest {
 }
 
 impl GetRequest {
-    pub(super) fn new(
+    pub(super) fn new<S>(
         service: &super::Service,
-        ids: &[NonZeroU64],
+        ids: &[S],
         attachments: bool,
         comments: bool,
         history: bool,
-    ) -> crate::Result<Self> {
+    ) -> crate::Result<Self>
+    where
+        S: std::fmt::Display,
+    {
         if ids.is_empty() {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
@@ -33,7 +35,16 @@ impl GetRequest {
         let mut url = service.base().join("rest/bug")?;
 
         for id in ids {
-            url.query_pairs_mut().append_pair("id", &id.to_string());
+            let id = id.to_string();
+            let id_or_alias = IdOrAlias::from(id.as_str());
+            match id_or_alias {
+                IdOrAlias::Id(_) => {
+                    url.query_pairs_mut().append_pair("id", &id);
+                }
+                IdOrAlias::Alias(_) => {
+                    url.query_pairs_mut().append_pair("alias", &id);
+                }
+            }
         }
 
         // drop useless token that is injected for authenticated requests

@@ -1,4 +1,3 @@
-use std::num::NonZeroU64;
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -45,12 +44,12 @@ pub(super) struct Command {
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
-    /// bug IDs
+    /// bug IDs or aliases
     #[clap(
         required = true,
         help_heading = "Arguments",
         long_help = indoc::indoc! {"
-            IDs of bugs to fetch.
+            IDs or aliases of bugs to fetch.
 
             Taken from standard input when `-`.
 
@@ -58,12 +57,12 @@ pub(super) struct Command {
               - fetch all matching bugs: bite s bugbite -f id | bite g -
         "}
     )]
-    ids: Vec<MaybeStdinVec<NonZeroU64>>,
+    ids: Vec<MaybeStdinVec<String>>,
 }
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
-        let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
+        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
 
         if self.browser {
             let urls = ids.iter().map(|id| client.item_url(*id));

@@ -1,7 +1,4 @@
-use std::num::NonZeroU64;
-
 use chrono::offset::Utc;
-use url::Url;
 
 use crate::objects::bugzilla::Comment;
 use crate::time::TimeDelta;
@@ -9,17 +6,17 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct CommentRequest {
-    ids: Vec<String>,
-    url: Url,
-}
+pub(crate) struct CommentRequest(url::Url);
 
 impl CommentRequest {
-    pub(super) fn new(
+    pub(super) fn new<S>(
         service: &super::Service,
-        ids: &[NonZeroU64],
+        ids: &[S],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<Self> {
+    ) -> crate::Result<Self>
+    where
+        S: std::fmt::Display,
+    {
         let [id, remaining_ids @ ..] = ids else {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
@@ -38,10 +35,7 @@ impl CommentRequest {
             url.query_pairs_mut().append_pair("new_since", &target);
         }
 
-        Ok(Self {
-            ids: ids.iter().map(|s| s.to_string()).collect(),
-            url,
-        })
+        Ok(Self(url))
     }
 }
 
@@ -50,13 +44,18 @@ impl Request for CommentRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.url).inject_auth(service, false)?;
+        let request = service.client().get(self.0).inject_auth(service, false)?;
         let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
-        let mut data = data["bugs"].take();
+        let data = data["bugs"].take();
+        let serde_json::value::Value::Object(data) = data else {
+            panic!("invalid bugzilla comment response");
+        };
+        // Bugzilla's response always uses bug IDs even if attachments were requested via
+        // alias so we assume the response is in the same order as the request.
         let mut comments = vec![];
-        for id in self.ids {
-            let data = data[&id]["comments"].take();
+        for (_id, mut data) in data {
+            let data = data["comments"].take();
             comments.push(serde_json::from_value(data)?);
         }
         Ok(comments)

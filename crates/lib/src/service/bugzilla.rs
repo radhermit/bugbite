@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 use std::fmt;
-use std::num::NonZeroU64;
 use std::str::FromStr;
 
 use reqwest::{ClientBuilder, RequestBuilder};
@@ -77,43 +76,58 @@ impl Service {
         })
     }
 
-    pub(crate) fn attach_request(
+    pub(crate) fn attach_request<S>(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[S],
         attachments: Vec<attach::CreateAttachment>,
-    ) -> crate::Result<attach::AttachRequest> {
+    ) -> crate::Result<attach::AttachRequest>
+    where
+        S: std::fmt::Display,
+    {
         attach::AttachRequest::new(self, ids, attachments)
     }
 
-    pub(crate) fn attachment_request(
+    pub(crate) fn attachment_request<S>(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[S],
         data: bool,
-    ) -> crate::Result<attachment::AttachmentRequest> {
+    ) -> crate::Result<attachment::AttachmentRequest>
+    where
+        S: std::fmt::Display,
+    {
         attachment::AttachmentRequest::new(self, Ids::object(ids), data)
     }
 
-    pub(crate) fn item_attachment_request(
+    pub(crate) fn item_attachment_request<S>(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[S],
         data: bool,
-    ) -> crate::Result<attachment::AttachmentRequest> {
+    ) -> crate::Result<attachment::AttachmentRequest>
+    where
+        S: std::fmt::Display,
+    {
         attachment::AttachmentRequest::new(self, Ids::item(ids), data)
     }
 
-    pub(crate) fn comment_request(
+    pub(crate) fn comment_request<S>(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[S],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<comment::CommentRequest> {
+    ) -> crate::Result<comment::CommentRequest>
+    where
+        S: std::fmt::Display,
+    {
         comment::CommentRequest::new(self, ids, created)
     }
 
-    pub(crate) fn history_request(
+    pub(crate) fn history_request<S>(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[S],
         created: Option<&TimeDelta>,
-    ) -> crate::Result<history::HistoryRequest> {
+    ) -> crate::Result<history::HistoryRequest>
+    where
+        S: std::fmt::Display,
+    {
         history::HistoryRequest::new(self, ids, created)
     }
 }
@@ -217,13 +231,16 @@ impl<'a> WebService<'a> for Service {
         }
     }
 
-    fn get_request(
+    fn get_request<S>(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[S],
         attachments: bool,
         comments: bool,
         history: bool,
-    ) -> crate::Result<Self::GetRequest> {
+    ) -> crate::Result<Self::GetRequest>
+    where
+        S: std::fmt::Display,
+    {
         get::GetRequest::new(self, ids, attachments, comments, history)
     }
 
@@ -231,11 +248,14 @@ impl<'a> WebService<'a> for Service {
         create::CreateRequest::new(self, params)
     }
 
-    fn modify_request(
+    fn modify_request<S>(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[S],
         params: Self::ModifyParams,
-    ) -> crate::Result<Self::ModifyRequest> {
+    ) -> crate::Result<Self::ModifyRequest>
+    where
+        S: std::fmt::Display,
+    {
         modify::ModifyRequest::new(self, ids, params)
     }
 
@@ -275,6 +295,45 @@ impl Api for GroupField {
             Self::Extra => "_extra",
             Self::Custom => "_custom",
         }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+enum IdOrAlias {
+    Id(u64),
+    Alias(String),
+}
+
+impl fmt::Display for IdOrAlias {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Id(value) => value.fmt(f),
+            Self::Alias(value) => value.fmt(f),
+        }
+    }
+}
+
+impl FromStr for IdOrAlias {
+    type Err = Error;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        Ok(s.into())
+    }
+}
+
+impl From<&str> for IdOrAlias {
+    fn from(s: &str) -> Self {
+        if let Ok(value) = s.parse::<u64>() {
+            Self::Id(value)
+        } else {
+            Self::Alias(s.to_string())
+        }
+    }
+}
+
+impl From<u64> for IdOrAlias {
+    fn from(value: u64) -> Self {
+        Self::Id(value)
     }
 }
 

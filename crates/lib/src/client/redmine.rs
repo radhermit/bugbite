@@ -1,5 +1,3 @@
-use std::num::NonZeroU64;
-
 use reqwest::ClientBuilder;
 use tracing::info;
 
@@ -30,12 +28,15 @@ impl Client {
         format!("{base}/issues/{id}")
     }
 
-    pub async fn get(
+    pub async fn get<S>(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[S],
         attachments: bool,
         comments: bool,
-    ) -> crate::Result<Vec<Issue>> {
+    ) -> crate::Result<Vec<Issue>>
+    where
+        S: std::fmt::Display,
+    {
         let request = self
             .service
             .get_request(ids, attachments, comments, false)?;

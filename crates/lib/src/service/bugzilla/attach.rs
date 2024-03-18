@@ -1,4 +1,3 @@
-use std::num::NonZeroU64;
 use std::{fs, str};
 
 use camino::Utf8Path;
@@ -12,7 +11,7 @@ use crate::Error;
 
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct CreateAttachment {
-    ids: Vec<NonZeroU64>,
+    ids: Vec<String>,
     data: Base64,
     file_name: String,
     pub content_type: String,
@@ -66,11 +65,14 @@ pub(crate) struct AttachRequest {
 }
 
 impl AttachRequest {
-    pub(crate) fn new(
+    pub(crate) fn new<S>(
         service: &super::Service,
-        ids: &[NonZeroU64],
+        ids: &[S],
         mut attachments: Vec<CreateAttachment>,
-    ) -> crate::Result<Self> {
+    ) -> crate::Result<Self>
+    where
+        S: std::fmt::Display,
+    {
         if attachments.is_empty() {
             return Err(Error::InvalidRequest(
                 "no attachments specified".to_string(),
@@ -84,7 +86,7 @@ impl AttachRequest {
         let url = service.base().join(&format!("rest/bug/{id}/attachment"))?;
 
         for attachment in &mut attachments {
-            attachment.ids = ids.to_vec();
+            attachment.ids = ids.iter().map(|x| x.to_string()).collect();
         }
 
         Ok(Self { url, attachments })
@@ -92,7 +94,7 @@ impl AttachRequest {
 }
 
 impl Request for AttachRequest {
-    type Output = Vec<Vec<NonZeroU64>>;
+    type Output = Vec<Vec<u64>>;
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {

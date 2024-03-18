@@ -85,20 +85,21 @@ impl FromStr for Match {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.split_once('#') {
-            Some(("!", value)) => Ok(Self::ContainsNot(value.into())),
-            Some(("=", value)) => Ok(Self::Equals(value.into())),
-            Some(("!=", value)) => Ok(Self::EqualsNot(value.into())),
-            Some(("r", value)) => Ok(Self::Regex(value.into())),
-            Some(("!r", value)) => Ok(Self::RegexNot(value.into())),
-            _ => Ok(Self::Contains(s.into())),
-        }
+        Ok(s.into())
     }
 }
 
 impl<T: AsRef<str>> From<T> for Match {
     fn from(s: T) -> Self {
-        s.as_ref().parse().unwrap()
+        let s = s.as_ref();
+        match s.split_once('#') {
+            Some(("!", value)) => Self::ContainsNot(value.into()),
+            Some(("=", value)) => Self::Equals(value.into()),
+            Some(("!=", value)) => Self::EqualsNot(value.into()),
+            Some(("r", value)) => Self::Regex(value.into()),
+            Some(("!r", value)) => Self::RegexNot(value.into()),
+            _ => Self::Contains(s.into()),
+        }
     }
 }
 
