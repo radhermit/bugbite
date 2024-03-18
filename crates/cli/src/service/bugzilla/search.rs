@@ -12,7 +12,7 @@ use bugbite::service::bugzilla::{
 use bugbite::time::TimeDelta;
 use bugbite::traits::WebClient;
 use camino::Utf8PathBuf;
-use clap::builder::{BoolValueParser, PossibleValuesParser, TypedValueParser};
+use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};
 use itertools::Itertools;
 use strum::VariantNames;
@@ -54,17 +54,15 @@ where
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attribute options")]
 struct AttributeOptions {
-    /// restrict by attachment status
+    /// restrict by attachments
     #[arg(
         short = 'A',
         long,
-        value_name = "BOOL",
         num_args = 0..=1,
+        value_name = "VALUE[,...]",
         default_missing_value = "true",
-        value_parser = BoolValueParser::new(),
-        hide_possible_values = true,
     )]
-    attachments: Option<bool>,
+    attachments: Option<ExistsOrArray<Match>>,
 
     /// restrict by blockers
     #[arg(
@@ -497,8 +495,11 @@ impl Command {
         if let Some(value) = params.attr.comments {
             query.comments(value);
         }
-        if let Some(value) = params.attr.attachments {
-            query.exists(ExistsField::Attachments, value);
+        if let Some(values) = params.attr.attachments {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Attachments, value),
+                ExistsOrArray::Array(values) => query.attachments(values),
+            }
         }
         if let Some(values) = params.attr.id {
             query.id(values.into_iter().flatten());

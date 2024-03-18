@@ -141,6 +141,36 @@ impl QueryBuilder<'_> {
         self.extend("assigned_to", values);
     }
 
+    /// Search for attachments with matching descriptions or filenames.
+    pub fn attachments<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        self.advanced_count += 1;
+        let num = self.advanced_count;
+        self.insert(format!("f{num}"), "OP");
+        self.insert(format!("j{num}"), "OR");
+
+        for value in values.into_iter().map(Into::into) {
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "attachments.description");
+            self.insert(format!("o{num}"), value.op());
+            self.insert(format!("v{num}"), &value);
+
+            self.advanced_count += 1;
+            let num = self.advanced_count;
+            self.insert(format!("f{num}"), "attachments.filename");
+            self.insert(format!("o{num}"), value.op());
+            self.insert(format!("v{num}"), &value);
+        }
+
+        self.advanced_count += 1;
+        let num = self.advanced_count;
+        self.insert(format!("f{num}"), "CP");
+    }
+
     pub fn creator<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
