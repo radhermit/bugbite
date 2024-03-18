@@ -226,6 +226,7 @@ impl fmt::Display for Comment {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 struct Params {
+    alias: Option<String>,
     assigned_to: Option<String>,
     blocks: Option<SetChanges<NonZeroU64>>,
     cc: Option<Changes<String>>,
@@ -289,6 +290,10 @@ impl<'a> ModifyParams<'a> {
         } else {
             Ok(self.params)
         }
+    }
+
+    pub fn alias(&mut self, value: &str) {
+        self.params.alias = Some(value.into());
     }
 
     pub fn assigned_to(&mut self, value: &str) {

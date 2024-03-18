@@ -21,6 +21,10 @@ use crate::utils::{confirm, launch_editor};
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
+    /// modify alias
+    #[arg(long)]
+    alias: Option<String>,
+
     /// assign to a user
     #[arg(
         short,
@@ -236,6 +240,7 @@ struct Options {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 struct Attributes {
+    alias: Option<String>,
     assigned_to: Option<String>,
     blocks: Option<Vec<SetChange<NonZeroU64>>>,
     cc: Option<Vec<SetChange<String>>>,
@@ -266,6 +271,7 @@ struct Attributes {
 impl Attributes {
     fn merge(self, other: Self) -> Self {
         Self {
+            alias: self.alias.or(other.alias),
             assigned_to: self.assigned_to.or(other.assigned_to),
             blocks: self.blocks.or(other.blocks),
             cc: self.cc.or(other.cc),
@@ -295,6 +301,10 @@ impl Attributes {
 
     fn into_params(self, client: &Client) -> ModifyParams {
         let mut params = client.service().modify_params();
+
+        if let Some(value) = self.alias.as_ref() {
+            params.alias(value);
+        }
 
         if let Some(value) = self.assigned_to.as_ref() {
             params.assigned_to(value);
@@ -395,6 +405,7 @@ impl Attributes {
 impl From<Options> for Attributes {
     fn from(value: Options) -> Self {
         Self {
+            alias: value.alias,
             assigned_to: value.assigned_to,
             blocks: value.blocks,
             cc: value.cc,
