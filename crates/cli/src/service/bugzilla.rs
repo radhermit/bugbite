@@ -117,20 +117,17 @@ impl Render for Attachment {
 impl Render for Comment {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         if self.count != 0 {
-            write!(f, "Comment #{} ", self.count)?;
+            write!(f, "Comment #{}", self.count)?;
         } else {
-            write!(f, "Description ")?;
+            write!(f, "Description")?;
         }
-        writeln!(f, "by {}, {}", self.creator, self.created)?;
-        if self.is_private || !self.tags.is_empty() {
-            writeln!(f, "{}", "-".repeat(width))?;
-            writeln!(
-                f,
-                "Private: {}, Tags: {}",
-                self.is_private,
-                self.tags.iter().join(", ")
-            )?;
+        if !self.tags.is_empty() {
+            write!(f, " ({})", self.tags.iter().join(", "))?;
         }
+        if self.is_private {
+            write!(f, " (private)")?;
+        }
+        writeln!(f, " by {}, {}", self.creator, self.created)?;
         writeln!(f, "{}", "-".repeat(width))?;
         // wrap comment text
         let wrapped = textwrap::wrap(self.text.trim(), width);
