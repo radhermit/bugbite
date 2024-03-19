@@ -47,7 +47,7 @@ async fn nonexistent_bug() {
             .args([opt, "1"])
             .assert()
             .stdout("")
-            .stderr("bite: error: bugzilla: Bug #1 does not exist.\n")
+            .stderr("Error: bugzilla: Bug #1 does not exist.\n")
             .failure();
     }
 }
@@ -144,7 +144,7 @@ async fn save_single_existing_error() {
         .assert()
         .stdout("")
         .stderr(predicate::str::diff(format!(
-            "bite: error: file already exists: {dir_path}/test.txt\n"
+            "Error: file already exists: {dir_path}/test.txt\n"
         )))
         .failure();
 }

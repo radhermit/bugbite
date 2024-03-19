@@ -68,7 +68,7 @@ async fn nonexistent_bug() {
         .arg("1")
         .assert()
         .stdout("")
-        .stderr("bite: error: bugzilla: Bug #1 does not exist.\n")
+        .stderr("Error: bugzilla: Bug #1 does not exist.\n")
         .failure();
 }
 

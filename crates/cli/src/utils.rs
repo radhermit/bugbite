@@ -1,16 +1,17 @@
 use std::borrow::Cow;
 use std::env;
 use std::ffi::OsStr;
-use std::io::{self, stdin, stdout, IsTerminal, Write};
+use std::io::{stdin, stdout, IsTerminal, Write};
 use std::path::Path;
 use std::process::{Command, ExitStatus};
 
+use anyhow::{Context, Result};
 use crossterm::terminal;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use unicode_segmentation::UnicodeSegmentation;
 
-pub(crate) fn confirm<S>(prompt: S, default: bool) -> io::Result<bool>
+pub(crate) fn confirm<S>(prompt: S, default: bool) -> Result<bool>
 where
     S: std::fmt::Display,
 {
@@ -39,23 +40,32 @@ where
     }
 }
 
-pub(crate) fn launch_browser<I, S>(urls: I) -> io::Result<()>
+pub(crate) fn launch_browser<I, S>(urls: I) -> Result<()>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
     for url in urls {
-        Command::new("xdg-open").arg(url).spawn()?;
+        Command::new("xdg-open")
+            .arg(url)
+            .spawn()
+            .context("failed launching browser via xdg-open")?;
     }
     Ok(())
 }
 
-pub(crate) fn launch_editor<P: AsRef<Path>>(path: P) -> io::Result<ExitStatus> {
+pub(crate) fn launch_editor<P: AsRef<Path>>(path: P) -> Result<ExitStatus> {
     let path = path.as_ref();
     if let Ok(exe) = env::var("EDITOR") {
-        Command::new(exe).arg(path).status()
+        Command::new(&exe)
+            .arg(path)
+            .status()
+            .with_context(|| format!("failed launching editor: {exe}"))
     } else {
-        Command::new("xdg-open").arg(path).status()
+        Command::new("xdg-open")
+            .arg(path)
+            .status()
+            .context("failed launching editor via xdg-open")
     }
 }
 
