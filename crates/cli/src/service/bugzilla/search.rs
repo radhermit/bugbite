@@ -312,7 +312,7 @@ struct Params {
         value_name = "USER[,...]",
         value_delimiter = ','
     )]
-    assigned_to: Option<Vec<String>>,
+    assigned_to: Option<Vec<Match>>,
 
     /// user created attachment
     #[arg(
