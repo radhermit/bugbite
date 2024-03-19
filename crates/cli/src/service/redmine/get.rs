@@ -16,7 +16,7 @@ struct Options {
     #[arg(short = 'C', long)]
     no_comments: bool,
 
-    /// launch in browser
+    /// open issues in browser
     #[arg(short, long, default_value_t = false)]
     browser: bool,
 }

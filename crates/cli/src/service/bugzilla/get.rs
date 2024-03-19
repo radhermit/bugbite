@@ -31,7 +31,7 @@ pub(super) struct Command {
 
     /// open bugs in browser
     #[arg(
-        short = 'B',
+        short,
         long,
         long_help = indoc::indoc! {"
             Open bugs in a browser.

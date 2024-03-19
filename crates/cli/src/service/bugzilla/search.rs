@@ -75,7 +75,7 @@ struct AttributeOptions {
 
     /// restrict by blockers
     #[arg(
-        short,
+        short = 'B',
         long,
         num_args = 0..=1,
         value_name = "ID[,...]",
@@ -97,7 +97,7 @@ struct AttributeOptions {
 
     /// restrict by dependencies
     #[arg(
-        short,
+        short = 'D',
         long,
         num_args = 0..=1,
         value_name = "ID[,...]",
@@ -376,7 +376,7 @@ struct Params {
 pub(super) struct Command {
     /// open bugs in a browser
     #[arg(
-        short = 'B',
+        short,
         long,
         help_heading = "Search options",
         long_help = indoc::indoc! {"
