@@ -73,13 +73,9 @@ impl ServiceCommand {
             anyhow::bail!("failed parsing service options");
         };
 
-        let remaining = &cmd.remaining[..];
+        let remaining = cmd.remaining;
         // pull the first, remaining argument
-        let arg = remaining
-            .iter()
-            .next()
-            .map(|x| x.as_str())
-            .unwrap_or_default();
+        let arg = remaining.first().map(|x| x.as_str()).unwrap_or_default();
         let subcmds: HashSet<_> = Subcommand::VARIANTS.iter().copied().collect();
         let services: HashSet<_> = ServiceKind::VARIANTS.iter().copied().collect();
 
@@ -121,7 +117,7 @@ impl ServiceCommand {
         }
 
         // append the remaining unparsed args
-        args.extend(remaining.iter().map(|s| s.to_string()));
+        args.extend(remaining);
 
         Ok((base, args))
     }
