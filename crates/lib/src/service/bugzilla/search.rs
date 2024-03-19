@@ -134,18 +134,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.advanced_count += 1;
-        let num = self.advanced_count;
-        self.insert(format!("f{num}"), "OP");
-        self.insert(format!("j{num}"), "OR");
-
-        for value in values.into_iter().map(Into::into) {
-            self.advanced_field("alias", value.op, value);
-        }
-
-        self.advanced_count += 1;
-        let num = self.advanced_count;
-        self.insert(format!("f{num}"), "CP");
+        self.or("alias", values)
     }
 
     pub fn assigned_to<I, S>(&mut self, values: I)
@@ -198,9 +187,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        for value in values.into_iter().map(Into::into) {
-            self.advanced_field("longdesc", value.op, value);
-        }
+        self.and("longdesc", values)
     }
 
     pub fn summary<I, S>(&mut self, values: I)
@@ -208,9 +195,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        for value in values.into_iter().map(Into::into) {
-            self.advanced_field("short_desc", value.op, value);
-        }
+        self.and("short_desc", values)
     }
 
     pub fn created_after(&mut self, interval: &TimeDelta) {
@@ -246,9 +231,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        for value in values.into_iter().map(Into::into) {
-            self.advanced_field("attachments.submitter", value.op, value);
-        }
+        self.and("attachments.submitter", values)
     }
 
     pub fn commenters<I, S>(&mut self, values: I)
@@ -256,9 +239,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        for value in values.into_iter().map(Into::into) {
-            self.advanced_field("commenter", value.op, value);
-        }
+        self.and("commenter", values)
     }
 
     pub fn url<I, S>(&mut self, values: I)
@@ -432,9 +413,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        for value in values.into_iter().map(Into::into) {
-            self.advanced_field("keywords", value.op, value);
-        }
+        self.and("keywords", values)
     }
 
     pub fn cc<I, S>(&mut self, values: I)
@@ -442,9 +421,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        for value in values.into_iter().map(Into::into) {
-            self.advanced_field("cc", value.op, value);
-        }
+        self.and("cc", values)
     }
 
     pub fn fields<I, F>(&mut self, fields: I) -> crate::Result<()>
