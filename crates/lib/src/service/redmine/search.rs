@@ -36,6 +36,10 @@ impl QueryBuilder<'_> {
         self.insert("issue_id", values.into_iter().join(","));
     }
 
+    pub fn limit(&mut self, value: u64) {
+        self.insert("limit", value);
+    }
+
     pub fn status(&mut self, value: &str) -> crate::Result<()> {
         // TODO: move valid status search values to an enum
         match value {
@@ -99,8 +103,10 @@ impl Query for QueryBuilder<'_> {
             self.append("status_id", "open");
         }
 
-        // most instances restrict queries to 100 results
-        self.append("limit", 100);
+        // default to the common maximum limit, without this the default limit is used
+        if !self.query.contains_key("limit") {
+            self.limit(100);
+        }
 
         // sort by ascending issue ID by default
         if !self.query.contains_key("sort") {

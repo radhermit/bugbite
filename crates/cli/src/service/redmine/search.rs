@@ -39,6 +39,22 @@ struct Params {
     )]
     fields: Vec<IssueField>,
 
+    /// limit the number of issues returned
+    #[arg(
+        short,
+        long,
+        help_heading = "Search options",
+        long_help = indoc::formatdoc! {"
+            Limit the number of issues returned.
+
+            If the value is higher than the maximum limit that value is used
+            instead and if the limit is set to zero, the default limit is used.
+            Note that the maximum limit and default limit are generally not
+            equal, most instances default to 100 and 25, respectively.
+        "}
+    )]
+    limit: Option<u64>,
+
     /// restrict by ID
     #[arg(long, help_heading = "Attribute options")]
     ids: Option<Vec<MaybeStdinVec<u64>>>,
@@ -77,6 +93,9 @@ impl Command {
         let params = &self.params;
         if let Some(values) = params.ids.as_ref() {
             query.ids(values.iter().flatten());
+        }
+        if let Some(value) = params.limit {
+            query.limit(value);
         }
         if let Some(value) = params.status.as_ref() {
             query.status(value)?;
