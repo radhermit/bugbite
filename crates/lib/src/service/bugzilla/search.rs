@@ -166,12 +166,12 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), "CP");
     }
 
-    pub fn creator<I, S>(&mut self, values: I)
+    pub fn reporter<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("creator", values);
+        self.or("reporter", values);
     }
 
     pub fn resolution<I, S>(&mut self, values: I)

@@ -350,7 +350,7 @@ struct Params {
         value_name = "USER[,...]",
         value_delimiter = ','
     )]
-    reporter: Option<Vec<String>>,
+    reporter: Option<Vec<Match>>,
 
     #[clap(flatten)]
     attr: AttributeOptions,
@@ -487,7 +487,7 @@ impl Command {
             }
         }
         if let Some(values) = params.reporter {
-            query.creator(values);
+            query.reporter(values);
         }
         if let Some(values) = params.attr.resolution {
             query.resolution(values);
