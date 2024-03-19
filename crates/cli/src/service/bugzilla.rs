@@ -101,7 +101,7 @@ impl Subcommand {
 impl Render for Attachment {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         let line = format!(
-            "Attachment: [{}] [{}] ({}, {}) by {}, {}",
+            "{}: [{}] ({}, {}) by {}, {}",
             self.id,
             self.file_name,
             self.human_size(),
@@ -210,7 +210,8 @@ impl Render for Bug {
         }
 
         if !self.attachments.is_empty() {
-            writeln!(f, "{:<12} : {}\n", "Attachments", self.attachments.len())?;
+            writeln!(f, "\n{:<12} : {}", "Attachments", self.attachments.len())?;
+            writeln!(f, "{}", "-".repeat(width))?;
             for attachment in &self.attachments {
                 attachment.render(f, width)?;
             }
