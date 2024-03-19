@@ -82,6 +82,12 @@ struct AttributeOptions {
             Examples:
               - alias equals `value`: bite s --alias =#value
               - alias matches regex: bite s --alias r#test?.+
+
+            Multiple values can be specified in a comma-separated list and will
+            match if any of the specified values match.
+
+            Example:
+              - alias equals `test1` or `test2`: bite s --alias =#test1,=#test2
         "}
     )]
     alias: Option<ExistsOrArray<Match>>,
@@ -116,6 +122,12 @@ struct AttributeOptions {
             Examples:
               - attachment equals `value`: bite s -A =#value
               - attachment matches regex: bite s -A r#test?.+
+
+            Multiple values can be specified in a comma-separated list and will
+            match if any of the specified values match.
+
+            Example:
+              - attachments equal `test1` or `test2`: bite s -A =#test1,=#test2
         "}
     )]
     attachments: Option<ExistsOrArray<Match>>,
