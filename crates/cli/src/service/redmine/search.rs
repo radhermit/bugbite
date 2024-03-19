@@ -19,8 +19,8 @@ struct Params {
     #[arg(
         short,
         long,
-        help_heading = "Search related",
-        value_name = "FIELD[,FIELD,...]",
+        help_heading = "Search options",
+        value_name = "FIELD[,...]",
         value_delimiter = ',',
         default_value = "id,summary",
         hide_possible_values = true,
@@ -40,24 +40,24 @@ struct Params {
     fields: Vec<IssueField>,
 
     /// restrict by ID
-    #[arg(long, help_heading = "Attribute related")]
+    #[arg(long, help_heading = "Attribute options")]
     ids: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// restrict by status
     #[arg(
         short,
         long,
-        help_heading = "Attribute related",
+        help_heading = "Attribute options",
         value_parser = ["open", "closed", "all"],
     )]
     status: Option<String>,
 
     /// created at this time or later
-    #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
+    #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
     created: Option<TimeDelta>,
 
     /// modified at this time or later
-    #[arg(short, long, value_name = "TIME", help_heading = "Time related")]
+    #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
     modified: Option<TimeDelta>,
 
     /// string to search for in the summary
