@@ -6,6 +6,7 @@ use humansize::{format_size, BINARY};
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
+use serde_with::{serde_as, BoolFromInt};
 
 use crate::serde::{non_empty_str, null_empty_vec};
 use crate::service::bugzilla::BugField;
@@ -21,6 +22,7 @@ pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
         .collect()
 });
 
+#[serde_as]
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Attachment {
     pub id: u64,
@@ -30,6 +32,12 @@ pub struct Attachment {
     pub size: u64,
     pub creator: String,
     pub content_type: String,
+    #[serde_as(as = "BoolFromInt")]
+    pub is_private: bool,
+    #[serde_as(as = "BoolFromInt")]
+    pub is_obsolete: bool,
+    #[serde_as(as = "BoolFromInt")]
+    pub is_patch: bool,
     #[serde(rename = "creation_time")]
     pub created: DateTime<Utc>,
     #[serde(rename = "last_change_time")]
