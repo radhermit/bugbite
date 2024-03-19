@@ -127,7 +127,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    keywords: Option<ExistsOrArray<MaybeStdinVec<String>>>,
+    keywords: Option<ExistsOrArray<MaybeStdinVec<Match>>>,
 
     /// restrict by OS
     #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]

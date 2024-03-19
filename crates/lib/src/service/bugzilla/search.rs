@@ -430,9 +430,11 @@ impl QueryBuilder<'_> {
     pub fn keywords<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("keywords", values);
+        for value in values.into_iter().map(Into::into) {
+            self.advanced_field("keywords", value.op, value);
+        }
     }
 
     pub fn cc<I, S>(&mut self, values: I)
