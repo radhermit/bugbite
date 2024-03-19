@@ -60,6 +60,29 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
+        long_help = indoc::indoc! {"
+            Restrict query by an alias.
+
+            On a nonexistent value, all bugs with aliases are returned. If the
+            value is `true` or `false`, all bugs with or without aliases are
+            returned, respectively.
+
+            Examples:
+              - with aliases: bite s --alias
+              - without aliases: bite s --alias false
+
+            Regular values search for matching substrings.
+
+            Example:
+              - aliases match substring: bite s --alias CVE
+
+            Values can use string matching prefixes to alter their application
+            to queries.
+
+            Examples:
+              - alias equals `value`: bite s --alias =#value
+              - alias matches regex: bite s --alias r#test?.+
+        "}
     )]
     alias: Option<ExistsOrArray<Match>>,
 
@@ -70,6 +93,30 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
+        long_help = indoc::indoc! {"
+            Restrict query by attachments.
+
+            On a nonexistent value, all bugs with attachments are returned. If
+            the value is `true` or `false`, all bugs with or without attachments
+            are returned, respectively.
+
+            Examples:
+              - with attachments: bite s -A
+              - without attachments: bite s -A false
+
+            Regular string values search for matching substrings in an
+            attachment's description or file name.
+
+            Example:
+              - attachments match substring: bite s -A build.log
+
+            Values can use string matching prefixes to alter their application
+            to queries.
+
+            Examples:
+              - attachment equals `value`: bite s -A =#value
+              - attachment matches regex: bite s -A r#test?.+
+        "}
     )]
     attachments: Option<ExistsOrArray<Match>>,
 
