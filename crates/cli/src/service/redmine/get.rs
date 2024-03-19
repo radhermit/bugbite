@@ -17,7 +17,16 @@ struct Options {
     no_comments: bool,
 
     /// open issues in browser
-    #[arg(short, long, default_value_t = false)]
+    #[arg(
+        short,
+        long,
+        long_help = indoc::indoc! {"
+            Open issues in a browser.
+
+            This functionality requires xdg-open with a valid, preferred browser
+            set for http(s) URLs.
+        "}
+    )]
     browser: bool,
 }
 
