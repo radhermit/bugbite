@@ -153,18 +153,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.advanced_count += 1;
-        let num = self.advanced_count;
-        self.insert(format!("f{num}"), "OP");
-        self.insert(format!("j{num}"), "OR");
-
-        for value in values.into_iter().map(Into::into) {
-            self.advanced_field("assigned_to", value.op, value);
-        }
-
-        self.advanced_count += 1;
-        let num = self.advanced_count;
-        self.insert(format!("f{num}"), "CP");
+        self.or("assigned_to", values);
     }
 
     /// Search for attachments with matching descriptions or filenames.
@@ -540,6 +529,44 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), field);
         self.insert(format!("o{num}"), operator);
         self.insert(format!("v{num}"), value);
+    }
+
+    fn op<F, I, S>(&mut self, op: &str, field: F, values: I)
+    where
+        F: fmt::Display + Copy,
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        self.advanced_count += 1;
+        let num = self.advanced_count;
+        self.insert(format!("f{num}"), "OP");
+        self.insert(format!("j{num}"), op);
+
+        for value in values.into_iter().map(Into::into) {
+            self.advanced_field(field, value.op, value);
+        }
+
+        self.advanced_count += 1;
+        let num = self.advanced_count;
+        self.insert(format!("f{num}"), "CP");
+    }
+
+    fn and<F, I, S>(&mut self, field: F, values: I)
+    where
+        F: fmt::Display + Copy,
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        self.op("AND", field, values)
+    }
+
+    fn or<F, I, S>(&mut self, field: F, values: I)
+    where
+        F: fmt::Display + Copy,
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        self.op("OR", field, values)
     }
 }
 
