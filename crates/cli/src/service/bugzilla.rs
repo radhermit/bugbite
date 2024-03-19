@@ -4,6 +4,7 @@ use bugbite::client::{bugzilla::Client, ClientBuilder};
 use bugbite::objects::bugzilla::*;
 use bugbite::service::bugzilla::Config;
 use itertools::Itertools;
+use tracing::info;
 
 use crate::utils::truncate;
 
@@ -100,17 +101,21 @@ impl Subcommand {
 
 impl Render for Attachment {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
+        let line = format!("{}: {}", self.id, self.summary,);
+        writeln!(f, "{}", truncate(&line, width))?;
+
+        // output additional attachment info on request
         let line = format!(
-            "{}: [{}] ({}, {}) by {}, {}",
-            self.id,
+            "  {} ({}) {}, created by {}, {}",
             self.file_name,
-            self.human_size(),
             self.content_type,
+            self.human_size(),
             self.creator,
             self.updated
         );
+        info!("{line}");
 
-        writeln!(f, "{}", truncate(&line, width))
+        Ok(())
     }
 }
 

@@ -59,8 +59,10 @@ async fn list_single_without_data() {
     server
         .respond(200, TEST_DATA.join("attachment/single-without-data.json"))
         .await;
+
     let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-without-data")).unwrap();
 
+    // default output
     for opt in ["-l", "--list"] {
         cmd("bite bugzilla attachment")
             .arg("123")
@@ -68,6 +70,17 @@ async fn list_single_without_data() {
             .assert()
             .stdout(predicate::str::diff(expected.clone()))
             .stderr("")
+            .success();
+    }
+
+    // verbose output
+    for opt in ["-l", "--list"] {
+        cmd("bite bugzilla attachment -v")
+            .arg("123")
+            .arg(opt)
+            .assert()
+            .stdout(predicate::str::diff(expected.clone()))
+            .stderr(predicate::str::is_empty().not())
             .success();
     }
 }
