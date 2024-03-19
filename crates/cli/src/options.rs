@@ -73,7 +73,7 @@ impl ServiceCommand {
             anyhow::bail!("failed parsing service options");
         };
 
-        let mut remaining = &cmd.remaining[..];
+        let remaining = &cmd.remaining[..];
         // pull the first, remaining argument
         let arg = remaining
             .iter()
@@ -89,15 +89,9 @@ impl ServiceCommand {
         }
 
         let config = Config::load(cmd.options.bite.config.as_deref())?;
-        let mut connection = cmd.options.service.connection.as_deref();
+        let connection = cmd.options.service.connection.as_deref();
         let base = cmd.options.service.base.as_deref();
         let service = cmd.options.service.service;
-
-        // connection name used as subcommand overrides environment and option
-        if !subcmds.contains(arg) && config.get(arg).is_ok() {
-            connection = Some(arg);
-            remaining = &cmd.remaining[1..];
-        }
 
         // determine service type
         let (selected, base) = match (connection, base, service) {
