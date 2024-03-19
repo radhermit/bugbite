@@ -584,7 +584,7 @@ impl Api for ExistsField {
     fn api(&self) -> Self::Output {
         match self {
             Self::Alias => "alias",
-            Self::Attachments => "attach_data.thedata",
+            Self::Attachments => "attachments.submitter",
             Self::Blocks => "blocked",
             Self::Cc => "cc",
             Self::DependsOn => "dependson",
