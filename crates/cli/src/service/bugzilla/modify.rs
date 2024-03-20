@@ -450,10 +450,10 @@ pub(super) struct Command {
         value_delimiter = ',',
         help_heading = "Modify options",
         long_help = indoc::indoc! {"
-            Reply to specific comments for a given bug.
+            Interactively reply to specific comments for a given bug.
 
-            Values must be valid comment IDs for the bug, starting at 0 for the
-            description.
+            Values must be valid comment IDs specific to the bug, starting at 0
+            for the description.
 
             This option forces interactive usage, launching an editor
             pre-populated with the selected comments allowing the user to
@@ -461,6 +461,9 @@ pub(super) struct Command {
             list. On completion, the data is used to create a new bug comment.
 
             Multiple arguments can be specified in a comma-separated list.
+
+            Example:
+              - reply to comments 0, 1, and 2 on bug #123: bite m -R 0,4,5 123
         "}
     )]
     reply: Option<Vec<usize>>,
