@@ -18,7 +18,18 @@ struct Options {
     comment: Option<String>,
 
     /// specify the MIME type
-    #[arg(short, long, conflicts_with = "patch")]
+    #[arg(
+        short,
+        long,
+        conflicts_with = "patch",
+        long_help = indoc::indoc! {"
+            Specify the MIME type of the attachment.
+
+            This option should be unnecessary in regular usage due to the
+            automatic MIME type detection done using `file` with a fallback to
+            internal inference of common file types.
+        "}
+    )]
     mime: Option<String>,
 
     /// attachment is a patch
@@ -30,7 +41,15 @@ struct Options {
     private: bool,
 
     /// short description of the attachment
-    #[arg(short, long)]
+    #[arg(
+        short,
+        long,
+        long_help = indoc::indoc! {"
+            A short description of the attachment.
+
+            By default the file name is used when this is not specified.
+        "}
+    )]
     summary: Option<String>,
 }
 
