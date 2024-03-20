@@ -291,10 +291,10 @@ impl QueryBuilder<'_> {
     {
         for value in values {
             match value.as_ref() {
-                "@open" => self.append("status", "__open__"),
-                "@closed" => self.append("status", "__closed__"),
-                "@all" => self.append("status", "__all__"),
-                s => self.append("status", s),
+                "@open" => self.append("bug_status", "__open__"),
+                "@closed" => self.append("bug_status", "__closed__"),
+                "@all" => self.append("bug_status", "__all__"),
+                s => self.append("bug_status", s),
             }
         }
     }
@@ -562,7 +562,7 @@ impl Query for QueryBuilder<'_> {
         }
 
         // only return open bugs by default
-        if !self.query.contains_key("status") {
+        if !self.query.contains_key("bug_status") {
             self.status(["@open"]);
         }
 
