@@ -441,13 +441,13 @@ struct Params {
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
-    /// open bugs in a browser
+    /// open query in a browser
     #[arg(
         short,
         long,
         help_heading = "Search options",
         long_help = indoc::indoc! {"
-            Open bugs in a browser.
+            Open query in a browser.
 
             This functionality requires xdg-open with a valid, preferred browser
             set for http(s) URLs.
@@ -641,15 +641,12 @@ impl Command {
         let fields = &params.fields;
         query.fields(fields.iter().copied())?;
 
-        if !self.dry_run {
+        if self.browser {
+            let url = client.search_url(query)?;
+            launch_browser([url])?;
+        } else if !self.dry_run {
             let bugs = async_block!(client.search(query))?;
-
-            if self.browser {
-                let urls = bugs.iter().map(|b| client.item_url(b.id));
-                launch_browser(urls)?;
-            } else {
-                render_search(bugs, fields)?;
-            }
+            render_search(bugs, fields)?;
         }
 
         Ok(ExitCode::SUCCESS)

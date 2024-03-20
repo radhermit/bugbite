@@ -34,6 +34,13 @@ impl Client {
         format!("{base}/show_bug.cgi?id={id}")
     }
 
+    /// Return the website URL for a query.
+    pub fn search_url<Q: Query>(&self, mut query: Q) -> crate::Result<String> {
+        let base = self.service.base().as_str().trim_end_matches('/');
+        let params = query.params()?;
+        Ok(format!("{base}/buglist.cgi?{params}"))
+    }
+
     pub async fn attach<S>(
         &self,
         ids: &[S],
