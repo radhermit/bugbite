@@ -201,13 +201,13 @@ impl QueryBuilder<'_> {
     pub fn created_after(&mut self, interval: &TimeDelta) {
         let datetime = Utc::now() - interval.delta();
         let target = datetime.format("%Y-%m-%dT%H:%M:%SZ");
-        self.insert("creation_time", target);
+        self.advanced_field("creation_ts", "greaterthaneq", target);
     }
 
     pub fn modified_after(&mut self, interval: &TimeDelta) {
         let datetime = Utc::now() - interval.delta();
         let target = datetime.format("%Y-%m-%dT%H:%M:%SZ");
-        self.insert("last_change_time", target);
+        self.advanced_field("delta_ts", "greaterthaneq", target);
     }
 
     pub fn order<I>(&mut self, terms: I)
