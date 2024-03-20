@@ -462,6 +462,7 @@ pub(super) struct Command {
     #[arg(
         short = 'R',
         long,
+        num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
         conflicts_with = "comment",
@@ -470,7 +471,8 @@ pub(super) struct Command {
             Interactively reply to specific comments for a given bug.
 
             Values must be valid comment IDs specific to the bug, starting at 0
-            for the description.
+            for the description. No values may be specified which will cause the
+            last comment to be used.
 
             This option forces interactive usage, launching an editor
             pre-populated with the selected comments allowing the user to
@@ -539,13 +541,18 @@ pub(super) struct Command {
 }
 
 /// Interactively create a reply, pulling specified comments for pre-population.
-fn get_reply(client: &Client, id: &str, comment_ids: &[usize]) -> anyhow::Result<String> {
+fn get_reply(client: &Client, id: &str, comment_ids: &mut Vec<usize>) -> anyhow::Result<String> {
     let comments = async_block!(client.comment(&[id], None))?
         .into_iter()
         .next()
         .expect("invalid comments response");
     if comments.is_empty() {
         anyhow::bail!("reply invalid, bug #{id} has no comments")
+    }
+
+    // use the last comment if no IDs were specified
+    if comment_ids.is_empty() {
+        comment_ids.push(comments.len() - 1);
     }
 
     let mut data = vec![];
@@ -606,11 +613,11 @@ impl Command {
         let mut params = attrs.into_params(client)?;
 
         // interactively create a reply
-        if let Some(values) = self.reply.as_ref() {
+        if let Some(mut values) = self.reply {
             if ids.len() > 1 {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
             }
-            let comment = get_reply(client, ids[0], values)?;
+            let comment = get_reply(client, ids[0], &mut values)?;
             params.comment(comment.trim());
         }
 
