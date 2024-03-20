@@ -46,16 +46,29 @@ pub(super) struct Command {
         num_args = 1,
         required = true,
         value_delimiter = ',',
-        value_name = "ID[,ID,...]",
-        help_heading = "Arguments"
+        value_name = "ID[,...]",
+        help_heading = "Arguments",
+        long_help = indoc::indoc! {"
+            IDs or aliases of bugs to create attachments for.
+
+            Taken from standard input when `-`.
+
+            Example:
+              - attach file to all matching bugs: bite s bugbite -f id | bite at - path/to/file
+        "}
     )]
     ids: Vec<MaybeStdinVec<String>>,
 
-    /// attachment paths
+    /// files to attach
     #[clap(
         required = true,
         value_hint = ValueHint::FilePath,
-        help_heading = "Arguments"
+        help_heading = "Arguments",
+        long_help = indoc::indoc! {"
+            Paths to attachment files.
+
+            Multiple attachments can be created by specifying multiple paths.
+        "}
     )]
     files: Vec<Utf8PathBuf>,
 }
