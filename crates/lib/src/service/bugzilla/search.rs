@@ -637,7 +637,7 @@ enum OrderType {
 #[derive(Debug, Clone, Copy)]
 pub struct SearchOrder {
     order: OrderType,
-    term: SearchTerm,
+    field: SearchField,
 }
 
 impl TryFrom<&str> for SearchOrder {
@@ -652,21 +652,21 @@ impl FromStr for SearchOrder {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
-        let (order, term) = if let Some(value) = s.strip_prefix('-') {
+        let (order, field) = if let Some(value) = s.strip_prefix('-') {
             (OrderType::Descending, value)
         } else {
             (OrderType::Ascending, s.strip_prefix('+').unwrap_or(s))
         };
-        let term = term
+        let field = field
             .parse()
-            .map_err(|_| Error::InvalidValue(format!("unknown search term: {term}")))?;
-        Ok(Self { order, term })
+            .map_err(|_| Error::InvalidValue(format!("unknown search field: {field}")))?;
+        Ok(Self { order, field })
     }
 }
 
 impl fmt::Display for SearchOrder {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let name = self.term.api();
+        let name = self.field.api();
         match self.order {
             OrderType::Descending => write!(f, "-{name}"),
             OrderType::Ascending => write!(f, "{name}"),
@@ -678,7 +678,7 @@ impl Api for SearchOrder {
     type Output = String;
     /// Translate a search order variant into the expected REST API v1 name.
     fn api(&self) -> Self::Output {
-        let name = self.term.api();
+        let name = self.field.api();
         match self.order {
             OrderType::Descending => format!("{name} DESC"),
             OrderType::Ascending => format!("{name} ASC"),
@@ -689,7 +689,7 @@ impl Api for SearchOrder {
 /// Valid search order sorting terms.
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
-pub enum SearchTerm {
+pub enum SearchField {
     Alias,
     AssignedTo,
     Blocks,
@@ -717,7 +717,7 @@ pub enum SearchTerm {
     Votes,
 }
 
-impl Api for SearchTerm {
+impl Api for SearchField {
     type Output = &'static str;
     /// Translate a search order variant into the expected REST API v1 name.
     fn api(&self) -> Self::Output {
