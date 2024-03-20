@@ -515,7 +515,7 @@ impl Command {
             query.modified_after(&value);
         }
         if let Some(values) = params.order {
-            query.order(values);
+            query.order(values)?;
         }
         if let Some(values) = params.attachers {
             query.attachers(values);

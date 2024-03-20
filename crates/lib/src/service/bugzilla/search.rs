@@ -210,12 +210,20 @@ impl QueryBuilder<'_> {
         self.advanced_field("delta_ts", "greaterthaneq", target);
     }
 
-    pub fn order<I>(&mut self, terms: I)
+    pub fn order<I, T>(&mut self, values: I) -> crate::Result<()>
     where
-        I: IntoIterator<Item = SearchOrder>,
+        I: IntoIterator<Item = T>,
+        T: TryInto<SearchOrder>,
+        <T as TryInto<SearchOrder>>::Error: std::fmt::Display,
     {
-        let order = terms.into_iter().map(|x| x.api()).join(",");
-        self.insert("order", order);
+        let values = values
+            .into_iter()
+            .map(|x| x.try_into())
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| Error::InvalidValue(format!("{e}")))?;
+        let value = values.into_iter().map(|x| x.api()).join(",");
+        self.insert("order", value);
+        Ok(())
     }
 
     pub fn limit(&mut self, value: u64) {
@@ -625,6 +633,14 @@ enum OrderType {
 pub struct SearchOrder {
     order: OrderType,
     term: SearchTerm,
+}
+
+impl TryFrom<&str> for SearchOrder {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        value.parse()
+    }
 }
 
 impl FromStr for SearchOrder {
