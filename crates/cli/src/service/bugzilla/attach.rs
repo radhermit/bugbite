@@ -13,10 +13,6 @@ use crate::macros::async_block;
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attachments options")]
 struct Options {
-    /// short description of the attachment
-    #[arg(short, long)]
-    summary: Option<String>,
-
     /// comment to add with the attachment
     #[arg(short, long)]
     comment: Option<String>,
@@ -32,6 +28,10 @@ struct Options {
     /// attachment is private
     #[arg(short = 'P', long)]
     private: bool,
+
+    /// short description of the attachment
+    #[arg(short, long)]
+    summary: Option<String>,
 }
 
 #[derive(Debug, Args)]
