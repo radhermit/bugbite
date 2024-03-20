@@ -94,6 +94,7 @@ struct Options {
         short = 'c',
         long,
         num_args = 0..=1,
+        conflicts_with = "reply",
         default_missing_value = "",
     )]
     comment: Option<String>,
@@ -457,6 +458,7 @@ pub(super) struct Command {
         long,
         value_name = "ID[,...]",
         value_delimiter = ',',
+        conflicts_with = "comment",
         help_heading = "Modify options",
         long_help = indoc::indoc! {"
             Interactively reply to specific comments for a given bug.
