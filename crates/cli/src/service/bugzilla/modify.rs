@@ -522,7 +522,7 @@ pub(super) struct Command {
 }
 
 /// Interactively create a reply, pulling specified comments for pre-population.
-fn get_comment(client: &Client, id: &str, comment_ids: &[usize]) -> anyhow::Result<String> {
+fn get_reply(client: &Client, id: &str, comment_ids: &[usize]) -> anyhow::Result<String> {
     let comments = async_block!(client.comment(&[id], None))?
         .into_iter()
         .next()
@@ -541,8 +541,16 @@ fn get_comment(client: &Client, id: &str, comment_ids: &[usize]) -> anyhow::Resu
     let data = data.iter().map(|x| x.reply()).join("\n\n");
 
     // interactively edit the comment
+    get_comment(&data)
+}
+
+/// Interactively edit a comment.
+fn get_comment(data: &str) -> anyhow::Result<String> {
     let temp_file = NamedTempFile::new()?;
-    fs::write(&temp_file, &data)?;
+    if !data.is_empty() {
+        fs::write(&temp_file, data)?;
+    }
+
     loop {
         let status = launch_editor(&temp_file)?;
         if !status.success() {
@@ -585,7 +593,7 @@ impl Command {
             if ids.len() > 1 {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
             }
-            let comment = get_comment(client, ids[0], values)?;
+            let comment = get_reply(client, ids[0], values)?;
             params.comment(comment.trim());
         }
 
