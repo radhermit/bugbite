@@ -96,6 +96,12 @@ struct Options {
         num_args = 0..=1,
         conflicts_with = "reply",
         default_missing_value = "",
+        long_help = indoc::indoc! {"
+            Add a comment.
+
+            When no comment argument is specified, an editor is launched
+            allowing for interactive entry.
+        "}
     )]
     comment: Option<String>,
 
