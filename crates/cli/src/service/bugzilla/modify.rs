@@ -471,8 +471,8 @@ pub(super) struct Command {
             Interactively reply to specific comments for a given bug.
 
             Values must be valid comment IDs specific to the bug, starting at 0
-            for the description. No values may be specified which will cause the
-            last comment to be used.
+            for the description. If no value is specified the last comment will
+            be used.
 
             This option forces interactive usage, launching an editor
             pre-populated with the selected comments allowing the user to
@@ -482,7 +482,8 @@ pub(super) struct Command {
             Multiple arguments can be specified in a comma-separated list.
 
             Example:
-              - reply to comments 0, 1, and 2 on bug #123: bite m -R 0,4,5 123
+              - reply to comments 1 and 2 on bug #123: bite m -R 1,2 123
+              - reply to the last comment on bug #123: bite m 123 -R
         "}
     )]
     reply: Option<Vec<usize>>,
