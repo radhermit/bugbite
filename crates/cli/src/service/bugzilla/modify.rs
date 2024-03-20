@@ -90,7 +90,12 @@ struct Options {
     cc: Option<Vec<SetChange<String>>>,
 
     /// add a comment
-    #[arg(short = 'c', long)]
+    #[arg(
+        short = 'c',
+        long,
+        num_args = 0..=1,
+        default_missing_value = "",
+    )]
     comment: Option<String>,
 
     /// modify component
@@ -299,7 +304,7 @@ impl Attributes {
         }
     }
 
-    fn into_params(self, client: &Client) -> ModifyParams {
+    fn into_params(self, client: &Client) -> anyhow::Result<ModifyParams> {
         let mut params = client.service().modify_params();
 
         if let Some(value) = self.alias.as_ref() {
@@ -318,8 +323,12 @@ impl Attributes {
             params.cc(values);
         }
 
-        if let Some(value) = self.comment.as_ref() {
-            params.comment(value);
+        if let Some(mut value) = self.comment {
+            // interactively create a comment
+            if value.trim().is_empty() {
+                value = get_comment(value.trim())?;
+            }
+            params.comment(&value);
         }
 
         if let Some(value) = self.component.as_ref() {
@@ -398,7 +407,7 @@ impl Attributes {
             params.whiteboard(value);
         }
 
-        params
+        Ok(params)
     }
 }
 
@@ -586,7 +595,7 @@ impl Command {
             }
         }
 
-        let mut params = attrs.into_params(client);
+        let mut params = attrs.into_params(client)?;
 
         // interactively create a reply
         if let Some(values) = self.reply.as_ref() {
