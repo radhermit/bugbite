@@ -25,7 +25,7 @@ struct Options {
     #[arg(long)]
     alias: Option<String>,
 
-    /// assign to a user
+    /// modify assignee
     #[arg(
         short,
         long,
