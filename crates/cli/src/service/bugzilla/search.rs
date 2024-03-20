@@ -277,17 +277,13 @@ struct AttributeOptions {
     whiteboard: Option<ExistsOrArray<String>>,
 }
 
-/// Available search parameters.
-///
-/// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
-/// information.
 #[derive(Debug, Args)]
-struct Params {
+#[clap(next_help_heading = "Query options")]
+struct QueryOptions {
     /// fields to output
     #[arg(
         short,
         long,
-        help_heading = "Search options",
         value_name = "FIELD[,...]",
         value_delimiter = ',',
         default_value = "id,summary",
@@ -311,7 +307,6 @@ struct Params {
     #[arg(
         short,
         long,
-        help_heading = "Search options",
         long_help = indoc::formatdoc! {"
             Limit the number of bugs returned.
 
@@ -326,7 +321,6 @@ struct Params {
     #[arg(
         short,
         long,
-        help_heading = "Search options",
         value_name = "FIELD[,...]",
         value_delimiter = ',',
         long_help = indoc::formatdoc! {"
@@ -353,14 +347,13 @@ struct Params {
     order: Option<Vec<SearchOrder>>,
 
     /// search using query grammar
-    #[arg(short = 'Q', long, help_heading = "Search options")]
+    #[arg(short = 'Q', long)]
     query: Option<String>,
 
     /// search using quicksearch syntax
     #[arg(
         short = 'S',
         long,
-        help_heading = "Search options",
         long_help = indoc::indoc! {"
             Search for bugs using quicksearch syntax.
 
@@ -369,30 +362,34 @@ struct Params {
         "}
     )]
     quicksearch: Option<String>,
+}
 
+#[derive(Debug, Args)]
+#[clap(next_help_heading = "Time options")]
+struct TimeOptions {
+    /// created at this time or later
+    #[arg(short, long, value_name = "TIME")]
+    created: Option<TimeDelta>,
+
+    /// modified at this time or later
+    #[arg(short, long, value_name = "TIME")]
+    modified: Option<TimeDelta>,
+}
+
+#[derive(Debug, Args)]
+#[clap(next_help_heading = "User options")]
+struct UserOptions {
     /// user the bug is assigned to
-    #[arg(
-        short,
-        long,
-        help_heading = "User options",
-        value_name = "USER[,...]",
-        value_delimiter = ','
-    )]
+    #[arg(short, long, value_name = "USER[,...]", value_delimiter = ',')]
     assigned_to: Option<Vec<Match>>,
 
     /// user created attachment
-    #[arg(
-        long,
-        help_heading = "User options",
-        value_name = "USER[,...]",
-        value_delimiter = ','
-    )]
+    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
     attachers: Option<Vec<Match>>,
 
     /// user in the CC list
     #[arg(
         long,
-        help_heading = "User options",
         value_name = "USER[,...]",
         num_args = 0..=1,
         default_missing_value = "true",
@@ -400,34 +397,31 @@ struct Params {
     cc: Option<ExistsOrArray<Match>>,
 
     /// user who commented
-    #[arg(
-        long,
-        help_heading = "User options",
-        value_name = "USER[,...]",
-        value_delimiter = ','
-    )]
+    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
     commenters: Option<Vec<Match>>,
 
     /// user who reported
-    #[arg(
-        short = 'R',
-        long,
-        help_heading = "User options",
-        value_name = "USER[,...]",
-        value_delimiter = ','
-    )]
+    #[arg(short = 'R', long, value_name = "USER[,...]", value_delimiter = ',')]
     reporter: Option<Vec<Match>>,
+}
+
+/// Available search parameters.
+///
+/// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
+/// information.
+#[derive(Debug, Args)]
+struct Params {
+    #[clap(flatten)]
+    query: QueryOptions,
 
     #[clap(flatten)]
     attr: AttributeOptions,
 
-    /// created at this time or later
-    #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
-    created: Option<TimeDelta>,
+    #[clap(flatten)]
+    time: TimeOptions,
 
-    /// modified at this time or later
-    #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
-    modified: Option<TimeDelta>,
+    #[clap(flatten)]
+    user: UserOptions,
 
     /// strings to search for in comments
     #[clap(long, value_name = "TERM", help_heading = "Content options")]
@@ -501,25 +495,25 @@ impl Command {
         let mut query = client.service().search_query();
         let params = self.params;
 
-        if let Some(values) = params.assigned_to {
+        if let Some(values) = params.user.assigned_to {
             query.assigned_to(values);
         }
-        if let Some(value) = params.limit {
+        if let Some(value) = params.query.limit {
             query.limit(value);
         }
-        if let Some(value) = params.created {
+        if let Some(value) = params.time.created {
             query.created_after(&value);
         }
-        if let Some(value) = params.modified {
+        if let Some(value) = params.time.modified {
             query.modified_after(&value);
         }
-        if let Some(values) = params.order {
+        if let Some(values) = params.query.order {
             query.order(values)?;
         }
-        if let Some(values) = params.attachers {
+        if let Some(values) = params.user.attachers {
             query.attachers(values);
         }
-        if let Some(values) = params.commenters {
+        if let Some(values) = params.user.commenters {
             query.commenters(values);
         }
         if let Some(values) = params.attr.custom_fields {
@@ -552,7 +546,7 @@ impl Command {
                 ExistsOrArray::Array(values) => query.see_also(&values),
             }
         }
-        if let Some(values) = params.reporter {
+        if let Some(values) = params.user.reporter {
             query.reporter(values);
         }
         if let Some(values) = params.attr.resolution {
@@ -615,7 +609,7 @@ impl Command {
                 ExistsOrArray::Array(values) => query.keywords(values.into_iter().flatten()),
             }
         }
-        if let Some(values) = params.cc {
+        if let Some(values) = params.user.cc {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Cc, value),
                 ExistsOrArray::Array(values) => query.cc(values),
@@ -633,11 +627,11 @@ impl Command {
                 ExistsOrArray::Array(values) => query.depends_on(values.into_iter().flatten()),
             }
         }
-        if let Some(value) = params.quicksearch {
+        if let Some(value) = params.query.quicksearch {
             query.quicksearch(value);
         }
 
-        let fields = &params.fields;
+        let fields = &params.query.fields;
         query.fields(fields.iter().copied())?;
 
         if self.browser {
