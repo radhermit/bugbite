@@ -1,4 +1,3 @@
-use std::num::NonZeroU64;
 use std::process::ExitCode;
 use std::str::FromStr;
 
@@ -148,7 +147,7 @@ struct AttributeOptions {
         value_name = "ID[,...]",
         default_missing_value = "true",
     )]
-    blocks: Option<ExistsOrArray<MaybeStdinVec<NonZeroU64>>>,
+    blocks: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
     /// specified range of comments
     #[arg(long)]
@@ -170,7 +169,7 @@ struct AttributeOptions {
         value_name = "ID[,...]",
         default_missing_value = "true",
     )]
-    depends_on: Option<ExistsOrArray<MaybeStdinVec<NonZeroU64>>>,
+    depends_on: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
     /// restrict by group
     #[arg(
@@ -184,7 +183,7 @@ struct AttributeOptions {
 
     /// restrict by ID
     #[arg(long)]
-    id: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+    id: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// restrict by keyword
     #[arg(

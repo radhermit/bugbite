@@ -1,5 +1,4 @@
 use std::fmt;
-use std::num::NonZeroU64;
 use std::str::FromStr;
 
 use chrono::offset::Utc;
@@ -124,7 +123,7 @@ impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
 impl QueryBuilder<'_> {
     pub fn id<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = NonZeroU64>,
+        I: IntoIterator<Item = u64>,
     {
         self.extend("id", values);
     }
@@ -392,7 +391,7 @@ impl QueryBuilder<'_> {
 
     pub fn blocks<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = NonZeroU64>,
+        I: IntoIterator<Item = u64>,
     {
         for value in values {
             self.advanced_field("blocked", "equals", value);
@@ -401,7 +400,7 @@ impl QueryBuilder<'_> {
 
     pub fn depends_on<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = NonZeroU64>,
+        I: IntoIterator<Item = u64>,
     {
         for value in values {
             self.advanced_field("dependson", "equals", value);
