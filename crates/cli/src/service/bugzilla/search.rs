@@ -60,7 +60,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {"
+        long_help = indoc::indoc! {r#"
             Restrict query by an alias.
 
             On a nonexistent value, all bugs with aliases are returned. If the
@@ -68,27 +68,31 @@ struct AttributeOptions {
             returned, respectively.
 
             Examples:
-              - with aliases: bite s --alias
-              - without aliases: bite s --alias false
+              - existence: bite s --alias
+              - nonexistence: bite s --alias false
 
             Regular values search for matching substrings.
 
             Example:
-              - aliases match substring: bite s --alias CVE
+              - contains `value`: bite s --alias value
 
             Values can use string matching prefixes to alter their application
-            to queries.
+            to queries. Note that some match operators may need to be escaped
+            when used in the shell environment.
 
             Examples:
-              - alias equals `value`: bite s --alias =#value
-              - alias matches regex: bite s --alias r#test?.+
+              - doesn't contain `value`: bite s --alias !#value
+              - equals `value`: bite s --alias =#value
+              - doesn't equal `value`: bite s --alias !=#value
+              - matches regex: bite s --alias r#test?.+
+              - doesn't match regex: bite s --alias !r#test?.+
 
             Multiple values can be specified in a comma-separated list and will
             match if any of the specified values match.
 
             Example:
-              - alias equals `test1` or `test2`: bite s --alias =#test1,=#test2
-        "}
+              - equals `test1` or `test2`: bite s --alias =#test1,=#test2
+        "#}
     )]
     alias: Option<ExistsOrArray<Match>>,
 
@@ -99,7 +103,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {"
+        long_help = indoc::indoc! {r#"
             Restrict query by attachments.
 
             On a nonexistent value, all bugs with attachments are returned. If
@@ -107,28 +111,32 @@ struct AttributeOptions {
             are returned, respectively.
 
             Examples:
-              - with attachments: bite s -A
-              - without attachments: bite s -A false
+              - existence: bite s --attachments
+              - nonexistence: bite s --attachments false
 
             Regular string values search for matching substrings in an
             attachment's description or file name.
 
             Example:
-              - attachments match substring: bite s -A build.log
+              - contains `value`: bite s --attachments value
 
             Values can use string matching prefixes to alter their application
-            to queries.
+            to queries. Note that some match operators may need to be escaped
+            when used in the shell environment.
 
             Examples:
-              - attachment equals `value`: bite s -A =#value
-              - attachment matches regex: bite s -A r#test?.+
+              - doesn't contain `value`: bite s --attachments !#value
+              - equals `value`: bite s --attachments =#value
+              - doesn't equal `value`: bite s --attachments !=#value
+              - matches regex: bite s --attachments r#test?.+
+              - doesn't match regex: bite s --attachments !r#test?.+
 
             Multiple values can be specified in a comma-separated list and will
             match if any of the specified values match.
 
             Example:
-              - attachments equal `test1` or `test2`: bite s -A =#test1,=#test2
-        "}
+              - equals `test1` or `test2`: bite s --attachments =#test1,=#test2
+        "#}
     )]
     attachments: Option<ExistsOrArray<Match>>,
 
