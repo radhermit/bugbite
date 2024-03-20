@@ -38,7 +38,7 @@ struct Options {
             exists.
 
             Example:
-              - assign to yourself: bite m -a @me
+              - assign bug #123 to yourself: bite m -a @me 123
         "}
     )]
     assigned_to: Option<String>,
@@ -83,8 +83,8 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list.
 
             Examples:
-              - add yourself to the CC list: bite m --cc @me
-              - remove yourself from the CC list: bite m --cc=-@me
+              - add yourself to the CC list: bite m --cc @me 123
+              - remove yourself from the CC list: bite m --cc=-@me 123
         "}
     )]
     cc: Option<Vec<SetChange<String>>>,
