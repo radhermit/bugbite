@@ -79,6 +79,31 @@ impl FromStr for ChangedBy {
 }
 
 #[derive(Debug, Clone)]
+struct ChangedValue {
+    field: ChangeField,
+    value: String,
+}
+
+impl FromStr for ChangedValue {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let Some((field, value)) = s.split_once('=') else {
+            anyhow::bail!("missing value");
+        };
+
+        let field = field
+            .parse()
+            .map_err(|_| anyhow::anyhow!("invalid change field: {field}"))?;
+
+        Ok(Self {
+            field,
+            value: value.to_string(),
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
 enum ExistsOrArray<T> {
     Exists(bool),
     Array(Vec<T>),
@@ -346,12 +371,20 @@ struct AttributeOptions {
 #[clap(next_help_heading = "Change options")]
 struct ChangeOptions {
     /// fields changed at this time or later
-    #[arg(long, value_names = ["FIELD[,...]=TIME"])]
+    #[arg(long, value_name = "FIELD[,...]=TIME")]
     changed: Option<Vec<Changed>>,
 
     /// fields changed by users
-    #[arg(long, value_names = ["FIELD[,...]=USER[,...]"])]
+    #[arg(long, value_name = "FIELD[,...]=USER[,...]")]
     changed_by: Option<Vec<ChangedBy>>,
+
+    /// fields changed from a value
+    #[arg(long, value_name = "FIELD=VALUE")]
+    changed_from: Option<Vec<ChangedValue>>,
+
+    /// fields changed to a value
+    #[arg(long, value_name = "FIELD=VALUE")]
+    changed_to: Option<Vec<ChangedValue>>,
 }
 
 #[derive(Debug, Args)]
@@ -576,14 +609,20 @@ impl Command {
         let params = self.params;
 
         if let Some(values) = params.change.changed {
-            for value in values {
-                query.changed(value.fields.iter().map(|f| (*f, &value.interval)));
+            for change in values {
+                query.changed(change.fields.iter().map(|f| (*f, &change.interval)));
             }
         }
         if let Some(values) = params.change.changed_by {
-            for value in values {
-                query.changed_by(value.fields.iter().map(|f| (*f, &value.users)));
+            for change in values {
+                query.changed_by(change.fields.iter().map(|f| (*f, &change.users)));
             }
+        }
+        if let Some(values) = params.change.changed_from {
+            query.changed_from(values.into_iter().map(|c| (c.field, c.value)));
+        }
+        if let Some(values) = params.change.changed_to {
+            query.changed_to(values.into_iter().map(|c| (c.field, c.value)));
         }
         if let Some(values) = params.user.assigned_to {
             query.assigned_to(values);

@@ -283,6 +283,26 @@ impl QueryBuilder<'_> {
         }
     }
 
+    pub fn changed_from<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = (ChangeField, S)>,
+        S: fmt::Display,
+    {
+        for (field, value) in values {
+            self.advanced_field(field.api(), "changedfrom", value);
+        }
+    }
+
+    pub fn changed_to<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = (ChangeField, S)>,
+        S: fmt::Display,
+    {
+        for (field, value) in values {
+            self.advanced_field(field.api(), "changedto", value);
+        }
+    }
+
     pub fn custom_fields<I, K, V>(&mut self, values: I)
     where
         I: IntoIterator<Item = (K, V)>,
