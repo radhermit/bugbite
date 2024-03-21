@@ -62,6 +62,14 @@ impl FromStr for TimeDelta {
     }
 }
 
+impl TryFrom<&str> for TimeDelta {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+
 impl fmt::Display for TimeDelta {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.raw)

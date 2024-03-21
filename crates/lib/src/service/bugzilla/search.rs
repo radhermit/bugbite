@@ -259,6 +259,28 @@ impl QueryBuilder<'_> {
         }
     }
 
+    pub fn changed<I, K, V>(&mut self, values: I) -> crate::Result<()>
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: TryInto<ChangeField> + fmt::Display + Copy,
+        <K as TryInto<ChangeField>>::Error: std::fmt::Display,
+        V: TryInto<TimeDelta> + fmt::Display + Copy,
+        <V as TryInto<TimeDelta>>::Error: std::fmt::Display,
+    {
+        for (field, value) in values {
+            let field = field
+                .try_into()
+                .map_err(|_| Error::InvalidValue(format!("invalid change field: {field}")))?;
+            let interval = value
+                .try_into()
+                .map_err(|_| Error::InvalidValue(format!("invalid time delta: {value}")))?;
+            let datetime = Utc::now() - interval.delta();
+            let target = datetime.format("%Y-%m-%dT%H:%M:%SZ");
+            self.advanced_field(field.api(), "changedafter", target);
+        }
+        Ok(())
+    }
+
     pub fn changed_by<I, K, V>(&mut self, values: I) -> crate::Result<()>
     where
         I: IntoIterator<Item = (K, V)>,

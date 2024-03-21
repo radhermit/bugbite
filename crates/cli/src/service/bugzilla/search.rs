@@ -287,6 +287,10 @@ struct AttributeOptions {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Change options")]
 struct ChangeOptions {
+    /// field changed at this time or later
+    #[arg(long, num_args = 2, value_names = ["FIELD[,...]", "Time"])]
+    changed: Option<Vec<String>>,
+
     /// user changed a field value
     #[arg(long, num_args = 2, value_names = ["FIELD[,...]", "USER[,...]"])]
     changed_by: Option<Vec<String>>,
@@ -513,6 +517,13 @@ impl Command {
         let mut query = client.service().search_query();
         let params = self.params;
 
+        if let Some(values) = params.change.changed {
+            for (fields, value) in values.into_iter().tuples() {
+                for field in fields.split(',') {
+                    query.changed([(field, value.as_str())])?;
+                }
+            }
+        }
         if let Some(values) = params.change.changed_by {
             for (fields, users) in values.into_iter().tuples() {
                 for field in fields.split(',') {
