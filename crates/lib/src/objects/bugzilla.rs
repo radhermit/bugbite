@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::HashSet;
+use std::fmt;
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
@@ -149,6 +150,23 @@ pub struct Change {
     pub attachment_id: Option<u64>,
 }
 
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+pub struct Flag {
+    pub name: String,
+    pub status: String,
+    pub setter: String,
+    #[serde(rename = "creation_date")]
+    pub created: DateTime<Utc>,
+    #[serde(rename = "modification_date")]
+    pub updated: DateTime<Utc>,
+}
+
+impl fmt::Display for Flag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}{}", self.name, self.status)
+    }
+}
+
 // Support deserializing alias field from string or array, the current Bugzilla 5.0
 // webservice API returns alias arrays while Mozilla upstream uses string values which
 // is what Bugzilla is moving to in the future (see
@@ -240,6 +258,8 @@ pub struct Bug {
     #[serde(rename = "dupe_of")]
     pub duplicate_of: Option<u64>,
     #[serde(deserialize_with = "null_empty_vec")]
+    pub flags: Vec<Flag>,
+    #[serde(deserialize_with = "null_empty_vec")]
     pub see_also: Vec<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub url: Option<String>,
@@ -278,6 +298,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Deadline => stringify!(self.deadline),
                 BugField::DependsOn => format!("{:<20}", self.depends_on.iter().join(",")),
                 BugField::DuplicateOf => format!("{:<9}", stringify!(self.duplicate_of)),
+                BugField::Flags => format!("{:<20}", self.flags.iter().join(",")),
                 BugField::Id => format!("{:<9}", self.id),
                 BugField::Keywords => format!("{:<20}", self.keywords.iter().join(",")),
                 BugField::Os => format!("{:<20}", stringify!(self.op_sys)),

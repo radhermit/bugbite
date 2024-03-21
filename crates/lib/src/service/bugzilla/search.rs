@@ -407,6 +407,16 @@ impl QueryBuilder<'_> {
         }
     }
 
+    pub fn flags<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        for value in values {
+            self.advanced_field("flagtypes.name", "substring", value);
+        }
+    }
+
     pub fn groups<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
@@ -601,6 +611,7 @@ pub enum ExistsField {
     Blocks,
     Cc,
     DependsOn,
+    Flags,
     Groups,
     Keywords,
     SeeAlso,
@@ -617,6 +628,7 @@ impl Api for ExistsField {
             Self::Blocks => "blocked",
             Self::Cc => "cc",
             Self::DependsOn => "dependson",
+            Self::Flags => "flagtypes.name",
             Self::Groups => "bug_group",
             Self::Keywords => "keywords",
             Self::SeeAlso => "see_also",
@@ -697,6 +709,7 @@ pub enum SearchField {
     Created,
     Deadline,
     DependsOn,
+    Flags,
     Id,
     Keywords,
     LastVisit,
@@ -729,6 +742,7 @@ impl Api for SearchField {
             Self::Created => "creation_ts",
             Self::Deadline => "deadline",
             Self::DependsOn => "dependson",
+            Self::Flags => "flagtypes.name",
             Self::Id => "bug_id",
             Self::Keywords => "keywords",
             Self::LastVisit => "last_visit_ts",

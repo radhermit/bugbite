@@ -199,6 +199,7 @@ impl Render for Bug {
         wrapped_csv(f, "Groups", &self.groups, width)?;
         wrapped_csv(f, "Keywords", &self.keywords, width)?;
         wrapped_csv(f, "CC", &self.cc, width)?;
+        wrapped_csv(f, "Flags", &self.flags, width)?;
         wrapped_csv(f, "Blocks", &self.blocks, width)?;
         wrapped_csv(f, "Depends on", &self.depends_on, width)?;
         output_field!(f, "URL", &self.url, width);

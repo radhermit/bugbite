@@ -171,6 +171,10 @@ struct AttributeOptions {
     )]
     depends_on: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
+    /// restrict by flag
+    #[arg(short = 'F', long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    flags: Option<Vec<MaybeStdinVec<String>>>,
+
     /// restrict by group
     #[arg(
         short,
@@ -596,6 +600,9 @@ impl Command {
         }
         if let Some(values) = params.summary {
             query.summary(values.into_iter().flatten());
+        }
+        if let Some(values) = params.attr.flags {
+            query.flags(values.into_iter().flatten())
         }
         if let Some(values) = params.attr.groups {
             match values {
