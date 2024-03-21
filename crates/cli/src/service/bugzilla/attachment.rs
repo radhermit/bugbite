@@ -16,11 +16,11 @@ use crate::utils::COLUMNS;
 #[clap(next_help_heading = "Attachments options")]
 struct Options {
     /// list attachment metadata
-    #[arg(short, long, conflicts_with = "view")]
+    #[arg(short, long, conflicts_with_all = ["dir", "view"])]
     list: bool,
 
     /// output attachment data
-    #[arg(short = 'V', long, conflicts_with = "dir")]
+    #[arg(short = 'V', long, conflicts_with_all = ["dir", "list"])]
     view: bool,
 
     /// request attachments from bug IDs or aliases
