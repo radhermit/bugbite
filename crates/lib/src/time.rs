@@ -30,19 +30,19 @@ impl FromStr for TimeDelta {
     fn from_str(s: &str) -> crate::Result<Self> {
         let captures: Vec<_> = RELATIVE_TIME_RE.captures_iter(s).collect();
         if captures.is_empty() {
-            return Err(Error::InvalidValue(format!("invalid TimeDelta: {s}")));
+            return Err(Error::InvalidValue(format!("invalid time interval: {s}")));
         }
 
         let mut delta = RelativeDuration::zero();
         for cap in captures {
             let unit = cap.name("unit").map_or("", |m| m.as_str());
             let value = cap.name("value").map_or("", |m| m.as_str());
-            let value_i32: i32 = value
-                .parse()
-                .map_err(|_| Error::InvalidValue(format!("invalid TimeDelta value: {value}")))?;
-            let value_i64: i64 = value
-                .parse()
-                .map_err(|_| Error::InvalidValue(format!("invalid TimeDelta value: {value}")))?;
+            let value_i32: i32 = value.parse().map_err(|_| {
+                Error::InvalidValue(format!("invalid time interval value: {value}"))
+            })?;
+            let value_i64: i64 = value.parse().map_err(|_| {
+                Error::InvalidValue(format!("invalid time interval value: {value}"))
+            })?;
             match unit {
                 "y" => delta = delta + RelativeDuration::years(value_i32),
                 "m" => delta = delta + RelativeDuration::months(value_i32),
@@ -51,7 +51,7 @@ impl FromStr for TimeDelta {
                 "h" => delta = delta + RelativeDuration::hours(value_i64),
                 "min" => delta = delta + RelativeDuration::minutes(value_i64),
                 "s" => delta = delta + RelativeDuration::seconds(value_i64),
-                x => panic!("invalid TimeDelta unit: {x}"),
+                x => panic!("invalid time interval unit: {x}"),
             }
         }
 
