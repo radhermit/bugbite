@@ -5,7 +5,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::RangeOrEqual;
 use bugbite::service::bugzilla::{
-    search::{ExistsField, Match, Order, OrderField},
+    search::{ChangeField, ExistsField, Match, Order, OrderField},
     BugField,
 };
 use bugbite::time::TimeDelta;
@@ -19,6 +19,64 @@ use strum::VariantNames;
 use crate::macros::async_block;
 use crate::service::output::render_search;
 use crate::utils::launch_browser;
+
+#[derive(Debug, Clone)]
+struct Changed {
+    fields: Vec<ChangeField>,
+    interval: TimeDelta,
+}
+
+impl FromStr for Changed {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let Some((raw_fields, time)) = s.split_once('=') else {
+            anyhow::bail!("missing time interval");
+        };
+
+        let mut fields = vec![];
+        for s in raw_fields.split(',') {
+            let field = s
+                .parse()
+                .map_err(|_| anyhow::anyhow!("invalid change field: {s}"))?;
+            fields.push(field);
+        }
+
+        Ok(Self {
+            fields,
+            interval: time.parse()?,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
+struct ChangedBy {
+    fields: Vec<ChangeField>,
+    users: Vec<String>,
+}
+
+impl FromStr for ChangedBy {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let Some((raw_fields, users)) = s.split_once('=') else {
+            anyhow::bail!("missing users");
+        };
+
+        let mut fields = vec![];
+        for s in raw_fields.split(',') {
+            let field = s
+                .parse()
+                .map_err(|_| anyhow::anyhow!("invalid change field: {s}"))?;
+            fields.push(field);
+        }
+
+        Ok(Self {
+            fields,
+            users: users.split(',').map(|s| s.to_string()).collect(),
+        })
+    }
+}
 
 #[derive(Debug, Clone)]
 enum ExistsOrArray<T> {
@@ -287,13 +345,13 @@ struct AttributeOptions {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Change options")]
 struct ChangeOptions {
-    /// field changed at this time or later
-    #[arg(long, num_args = 2, value_names = ["FIELD[,...]", "Time"])]
-    changed: Option<Vec<String>>,
+    /// fields changed at this time or later
+    #[arg(long, value_names = ["FIELD[,...]=TIME"])]
+    changed: Option<Vec<Changed>>,
 
-    /// user changed a field value
-    #[arg(long, num_args = 2, value_names = ["FIELD[,...]", "USER[,...]"])]
-    changed_by: Option<Vec<String>>,
+    /// fields changed by users
+    #[arg(long, value_names = ["FIELD[,...]=USER[,...]"])]
+    changed_by: Option<Vec<ChangedBy>>,
 }
 
 #[derive(Debug, Args)]
@@ -518,19 +576,13 @@ impl Command {
         let params = self.params;
 
         if let Some(values) = params.change.changed {
-            for (fields, value) in values.into_iter().tuples() {
-                for field in fields.split(',') {
-                    query.changed([(field, value.as_str())])?;
-                }
+            for value in values {
+                query.changed(value.fields.iter().map(|f| (*f, &value.interval)));
             }
         }
         if let Some(values) = params.change.changed_by {
-            for (fields, users) in values.into_iter().tuples() {
-                for field in fields.split(',') {
-                    for user in users.split(',') {
-                        query.changed_by([(field, user)])?;
-                    }
-                }
+            for value in values {
+                query.changed_by(value.fields.iter().map(|f| (*f, &value.users)));
             }
         }
         if let Some(values) = params.user.assigned_to {
