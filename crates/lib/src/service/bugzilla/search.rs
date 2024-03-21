@@ -212,8 +212,8 @@ impl QueryBuilder<'_> {
     pub fn order<I, T>(&mut self, values: I) -> crate::Result<()>
     where
         I: IntoIterator<Item = T>,
-        T: TryInto<SearchOrder>,
-        <T as TryInto<SearchOrder>>::Error: std::fmt::Display,
+        T: TryInto<Order>,
+        <T as TryInto<Order>>::Error: std::fmt::Display,
     {
         let values = values
             .into_iter()
@@ -646,12 +646,12 @@ enum OrderType {
 
 /// Invertable search order sorting term.
 #[derive(Debug, Clone, Copy)]
-pub struct SearchOrder {
+pub struct Order {
     order: OrderType,
-    field: SearchField,
+    field: OrderField,
 }
 
-impl TryFrom<&str> for SearchOrder {
+impl TryFrom<&str> for Order {
     type Error = Error;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -659,7 +659,7 @@ impl TryFrom<&str> for SearchOrder {
     }
 }
 
-impl FromStr for SearchOrder {
+impl FromStr for Order {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
@@ -675,7 +675,7 @@ impl FromStr for SearchOrder {
     }
 }
 
-impl fmt::Display for SearchOrder {
+impl fmt::Display for Order {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let name = self.field.api();
         match self.order {
@@ -685,7 +685,7 @@ impl fmt::Display for SearchOrder {
     }
 }
 
-impl Api for SearchOrder {
+impl Api for Order {
     type Output = String;
     /// Translate a search order variant into the expected REST API v1 name.
     fn api(&self) -> Self::Output {
@@ -700,7 +700,7 @@ impl Api for SearchOrder {
 /// Valid search order sorting terms.
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
-pub enum SearchField {
+pub enum OrderField {
     Alias,
     AssignedTo,
     Blocks,
@@ -727,9 +727,10 @@ pub enum SearchField {
     Url,
     Version,
     Votes,
+    Whiteboard,
 }
 
-impl Api for SearchField {
+impl Api for OrderField {
     type Output = &'static str;
     /// Translate a search order variant into the expected REST API v1 name.
     fn api(&self) -> Self::Output {

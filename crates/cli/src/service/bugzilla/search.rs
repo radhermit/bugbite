@@ -5,7 +5,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::RangeOrEqual;
 use bugbite::service::bugzilla::{
-    search::{ExistsField, Match, SearchField, SearchOrder},
+    search::{ExistsField, Match, Order, OrderField},
     BugField,
 };
 use bugbite::time::TimeDelta;
@@ -349,9 +349,9 @@ struct QueryOptions {
             require an authenticated session to work properly.
 
             possible values:
-            {}", SearchField::VARIANTS.join(", ")}
+            {}", OrderField::VARIANTS.join(", ")}
     )]
-    order: Option<Vec<SearchOrder>>,
+    order: Option<Vec<Order>>,
 
     /// search using query grammar
     #[arg(short = 'Q', long)]
