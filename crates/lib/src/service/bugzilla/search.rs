@@ -66,6 +66,15 @@ pub struct Match {
     value: String,
 }
 
+impl Match {
+    fn equals<S: fmt::Display>(value: S) -> Self {
+        Self {
+            op: MatchOp::Equals,
+            value: value.to_string(),
+        }
+    }
+}
+
 impl fmt::Display for Match {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.value.fmt(f)
@@ -131,7 +140,7 @@ impl QueryBuilder<'_> {
     where
         I: IntoIterator<Item = u64>,
     {
-        self.extend("id", values);
+        self.or("bug_id", values.into_iter().map(Match::equals));
     }
 
     pub fn alias<I, S>(&mut self, values: I)
@@ -530,17 +539,6 @@ impl QueryBuilder<'_> {
                 self.advanced_field(field, "greaterthaneq", value);
             }
             RangeOrEqual::Range(Range::Full) => (),
-        }
-    }
-
-    fn extend<K, I, V>(&mut self, key: K, values: I)
-    where
-        I: IntoIterator<Item = V>,
-        K: fmt::Display,
-        V: fmt::Display,
-    {
-        for value in values {
-            self.query.append(key.to_string(), value.to_string());
         }
     }
 
