@@ -70,14 +70,17 @@ struct AttributeOptions {
               - existence: bite s --alias
               - nonexistence: bite s --alias false
 
-            Regular values search for matching substrings.
+            Regular values search for matching substrings and multiple values
+            can be specified in a comma-separated list, matching if any of the
+            specified values match.
 
-            Example:
+            Examples:
               - contains `value`: bite s --alias value
+              - contains `value1` or `value2`: bite s --alias value1,value1
 
-            Values can use string matching prefixes to alter their application
-            to queries. Note that some match operators may need to be escaped
-            when used in the shell environment.
+            Values can use match operator prefixes to alter their query
+            application. Note that some operators may need to be escaped when
+            used in the shell environment.
 
             Examples:
               - doesn't contain `value`: bite s --alias !#value
@@ -85,12 +88,6 @@ struct AttributeOptions {
               - doesn't equal `value`: bite s --alias !=#value
               - matches regex: bite s --alias r#test?.+
               - doesn't match regex: bite s --alias !r#test?.+
-
-            Multiple values can be specified in a comma-separated list and will
-            match if any of the specified values match.
-
-            Example:
-              - equals `test1` or `test2`: bite s --alias =#test1,=#test2
         "#}
     )]
     alias: Option<ExistsOrArray<Match>>,
