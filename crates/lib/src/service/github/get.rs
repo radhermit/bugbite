@@ -1,3 +1,5 @@
+use tracing::debug;
+
 use crate::objects::github::Issue;
 use crate::traits::Request;
 
@@ -8,6 +10,7 @@ impl Request for GetRequest {
     type Service = super::Service;
 
     async fn send(self, _service: &Self::Service) -> crate::Result<Self::Output> {
+        debug!("{:?}", self.0);
         todo!()
     }
 }

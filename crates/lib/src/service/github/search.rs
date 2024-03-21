@@ -4,6 +4,7 @@ use std::str::FromStr;
 use ordered_multimap::ListOrderedMultimap;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{Display, EnumIter, EnumString, VariantNames};
+use tracing::debug;
 
 use crate::objects::github::Issue;
 use crate::traits::{Query, Request, ServiceParams};
@@ -111,6 +112,7 @@ impl Request for SearchRequest {
     type Service = super::Service;
 
     async fn send(self, _service: &Self::Service) -> crate::Result<Self::Output> {
+        debug!("{:?}", self.0);
         todo!()
     }
 }
