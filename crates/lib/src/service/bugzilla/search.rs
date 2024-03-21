@@ -259,6 +259,22 @@ impl QueryBuilder<'_> {
         }
     }
 
+    pub fn changed_by<I, K, V>(&mut self, values: I) -> crate::Result<()>
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: TryInto<ChangeField> + fmt::Display + Copy,
+        <K as TryInto<ChangeField>>::Error: std::fmt::Display,
+        V: fmt::Display,
+    {
+        for (field, value) in values {
+            let field = field
+                .try_into()
+                .map_err(|_| Error::InvalidValue(format!("invalid change field: {field}")))?;
+            self.advanced_field(field.api(), "changedby", value);
+        }
+        Ok(())
+    }
+
     pub fn custom_fields<I, K, V>(&mut self, values: I)
     where
         I: IntoIterator<Item = (K, V)>,
@@ -761,6 +777,80 @@ impl Api for OrderField {
             Self::Url => "bug_file_loc",
             Self::Version => "version",
             Self::Votes => "votes",
+            Self::Whiteboard => "status_whiteboard",
         }
+    }
+}
+
+/// Valid change fields.
+#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
+#[strum(serialize_all = "kebab-case")]
+pub enum ChangeField {
+    Alias,
+    AssignedTo,
+    Blocks,
+    Component,
+    Cc,
+    Deadline,
+    DependsOn,
+    Flags,
+    Keywords,
+    Os,
+    Platform,
+    Priority,
+    Product,
+    Reporter,
+    Resolution,
+    SeeAlso,
+    Severity,
+    Status,
+    Summary,
+    Target,
+    Url,
+    Version,
+    Votes,
+    Whiteboard,
+}
+
+impl Api for ChangeField {
+    type Output = &'static str;
+    /// Translate a search order variant into the expected REST API v1 name.
+    fn api(&self) -> Self::Output {
+        match self {
+            Self::Alias => "alias",
+            Self::AssignedTo => "assigned_to",
+            Self::Blocks => "blocked",
+            Self::Component => "component",
+            Self::Cc => "cc",
+            Self::Deadline => "deadline",
+            Self::DependsOn => "dependson",
+            Self::Flags => "flagtypes.name",
+            Self::Keywords => "keywords",
+            Self::Os => "op_sys",
+            Self::Platform => "platform",
+            Self::Priority => "priority",
+            Self::Product => "product",
+            Self::Reporter => "reporter",
+            Self::Resolution => "resolution",
+            Self::SeeAlso => "see_also",
+            Self::Severity => "bug_severity",
+            Self::Status => "bug_status",
+            Self::Summary => "short_desc",
+            Self::Target => "target_milestone",
+            Self::Url => "bug_file_loc",
+            Self::Version => "version",
+            Self::Votes => "votes",
+            Self::Whiteboard => "status_whiteboard",
+        }
+    }
+}
+
+impl TryFrom<String> for ChangeField {
+    type Error = Error;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        value
+            .parse()
+            .map_err(|_| Error::InvalidValue(format!("unknown change field: {value}")))
     }
 }

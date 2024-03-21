@@ -285,6 +285,14 @@ struct AttributeOptions {
 }
 
 #[derive(Debug, Args)]
+#[clap(next_help_heading = "Change options")]
+struct ChangeOptions {
+    /// user changed a field value
+    #[arg(long, num_args = 2, value_names = ["FIELD[,...]", "USER[,...]"])]
+    changed_by: Option<Vec<String>>,
+}
+
+#[derive(Debug, Args)]
 #[clap(next_help_heading = "Query options")]
 struct QueryOptions {
     /// fields to output
@@ -425,6 +433,9 @@ struct Params {
     attr: AttributeOptions,
 
     #[clap(flatten)]
+    change: ChangeOptions,
+
+    #[clap(flatten)]
     time: TimeOptions,
 
     #[clap(flatten)]
@@ -502,6 +513,15 @@ impl Command {
         let mut query = client.service().search_query();
         let params = self.params;
 
+        if let Some(values) = params.change.changed_by {
+            for (fields, users) in values.into_iter().tuples() {
+                for field in fields.split(',') {
+                    for user in users.split(',') {
+                        query.changed_by([(field, user)])?;
+                    }
+                }
+            }
+        }
         if let Some(values) = params.user.assigned_to {
             query.assigned_to(values);
         }
