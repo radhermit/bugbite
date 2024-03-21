@@ -47,7 +47,11 @@ impl SearchRequest {
 #[derive(Display, Debug, Clone, Copy)]
 #[strum(serialize_all = "lowercase")]
 enum MatchOp {
+    /// case-sensitive substring matching
+    CaseSubstring,
+    /// case-insensitive substring matching
     Substring,
+    /// inverted, case-insensitive substring matching
     NotSubstring,
     Equals,
     NotEquals,
@@ -79,7 +83,9 @@ impl FromStr for Match {
 impl From<&str> for Match {
     fn from(s: &str) -> Self {
         let (op, value) = match s.split_once('#') {
-            Some(("!", value)) => (MatchOp::NotSubstring, value.into()),
+            Some(("is", value)) => (MatchOp::Substring, value.into()),
+            Some(("s", value)) => (MatchOp::CaseSubstring, value.into()),
+            Some(("!s", value)) => (MatchOp::NotSubstring, value.into()),
             Some(("=", value)) => (MatchOp::Equals, value.into()),
             Some(("!=", value)) => (MatchOp::NotEquals, value.into()),
             Some(("r", value)) => (MatchOp::Regexp, value.into()),
