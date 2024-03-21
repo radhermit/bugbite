@@ -61,6 +61,11 @@ struct Options {
 
             Multiple arguments can be specified in a comma-separated list while
             no arguments removes the entire list.
+
+            Examples:
+              - bug 10: add blockers 1 and 2: bite m -b +1,+2 10
+              - bug 10: add blocker 1 and remove 2: bite m -b +1,-2 10
+              - bug 10: set blockers to 3: bite m -b 3 10
         "}
     )]
     blocks: Option<Vec<SetChange<NonZeroU64>>>,
