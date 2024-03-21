@@ -63,9 +63,9 @@ struct Options {
             no arguments removes the entire list.
 
             Examples:
-              - bug 10: add blockers 1 and 2: bite m -b +1,+2 10
-              - bug 10: add blocker 1 and remove 2: bite m -b +1,-2 10
-              - bug 10: set blockers to 3: bite m -b 3 10
+              - bug 10: add 1: bite m -b 1 10
+              - bug 10: add 2 and remove 1: bite m -b +2,-1 10
+              - bug 10: set to 3: bite m -b 3 10
         "}
     )]
     blocks: Option<Vec<SetChange<NonZeroU64>>>,
@@ -136,6 +136,11 @@ struct Options {
 
             Multiple arguments can be specified in a comma-separated list while
             no arguments removes the entire list.
+
+            Examples:
+              - bug 10: add 1: bite m -d +1 10
+              - bug 10: add 2 and remove 1: bite m -d +2,-1 10
+              - bug 10: set to 3: bite m -d 3 10
         "}
     )]
     depends_on: Option<Vec<SetChange<NonZeroU64>>>,
@@ -159,6 +164,10 @@ struct Options {
             list, respectively. Unprefixed values will be added to the list.
 
             Multiple arguments can be specified in a comma-separated list.
+
+            Examples:
+              - bug 10: add `admin`: bite m -g +admin 10
+              - bug 10: add `test` and remove `admin`: bite m -g +test,-admin 10
         "}
     )]
     groups: Option<Vec<SetChange<String>>>,
@@ -181,6 +190,11 @@ struct Options {
 
             Multiple arguments can be specified in a comma-separated list while
             no arguments removes the entire list.
+
+            Examples:
+              - bug 10: add `key`: bite m -k +key 10
+              - bug 10: add `test` and remove `key`: bite m -k +test,-key 10
+              - bug 10: set to `verify`: bite m -k verify 10
         "}
     )]
     keywords: Option<Vec<SetChange<String>>>,
