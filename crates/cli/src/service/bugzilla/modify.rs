@@ -38,7 +38,7 @@ struct Options {
             exists.
 
             Example:
-              - bug 123: assign to yourself: bite m -a @me 123
+              - bug 123: assign to yourself: bite m --assigned-to @me 123
         "}
     )]
     assigned_to: Option<String>,
@@ -63,9 +63,9 @@ struct Options {
             no arguments removes the entire list.
 
             Examples:
-              - bug 10: add 1: bite m -b 1 10
-              - bug 10: add 2 and remove 1: bite m -b +2,-1 10
-              - bug 10: set to 3: bite m -b 3 10
+              - bug 10: add 1: bite m --blocks 1 10
+              - bug 10: add 2 and remove 1: bite m --blocks +2,-1 10
+              - bug 10: set to 3: bite m --blocks 3 10
         "}
     )]
     blocks: Option<Vec<SetChange<NonZeroU64>>>,
@@ -138,9 +138,9 @@ struct Options {
             no arguments removes the entire list.
 
             Examples:
-              - bug 10: add 1: bite m -d +1 10
-              - bug 10: add 2 and remove 1: bite m -d +2,-1 10
-              - bug 10: set to 3: bite m -d 3 10
+              - bug 10: add 1: bite m --depends-on +1 10
+              - bug 10: add 2 and remove 1: bite m --depends-on +2,-1 10
+              - bug 10: set to 3: bite m --depends-on 3 10
         "}
     )]
     depends_on: Option<Vec<SetChange<NonZeroU64>>>,
@@ -166,8 +166,8 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list.
 
             Examples:
-              - bug 10: add `admin`: bite m -g +admin 10
-              - bug 10: add `test` and remove `admin`: bite m -g +test,-admin 10
+              - bug 10: add `admin`: bite m --groups +admin 10
+              - bug 10: add `test` and remove `admin`: bite m --groups +test,-admin 10
         "}
     )]
     groups: Option<Vec<SetChange<String>>>,
@@ -192,9 +192,9 @@ struct Options {
             no arguments removes the entire list.
 
             Examples:
-              - bug 10: add `key`: bite m -k +key 10
-              - bug 10: add `test` and remove `key`: bite m -k +test,-key 10
-              - bug 10: set to `verify`: bite m -k verify 10
+              - bug 10: add `key`: bite m --keywords +key 10
+              - bug 10: add `test` and remove `key`: bite m --keywords +test,-key 10
+              - bug 10: set to `verify`: bite m --keywords verify 10
         "}
     )]
     keywords: Option<Vec<SetChange<String>>>,
@@ -501,8 +501,8 @@ pub(super) struct Command {
             Multiple arguments can be specified in a comma-separated list.
 
             Example:
-              - bug 123: reply to comments 1 and 2: bite m -R 1,2 123
-              - bug 123: reply to the last comment: bite m 123 -R
+              - bug 123: reply to comments 1 and 2: bite m --reply 1,2 123
+              - bug 123: reply to the last comment: bite m 123 --reply
         "}
     )]
     reply: Option<Vec<usize>>,
