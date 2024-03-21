@@ -628,7 +628,7 @@ impl Api for ExistsField {
             Self::Blocks => "blocked",
             Self::Cc => "cc",
             Self::DependsOn => "dependson",
-            Self::Flags => "flagtypes.name",
+            Self::Flags => "setters.login_name",
             Self::Groups => "bug_group",
             Self::Keywords => "keywords",
             Self::SeeAlso => "see_also",

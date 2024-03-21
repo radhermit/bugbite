@@ -172,8 +172,14 @@ struct AttributeOptions {
     depends_on: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
     /// restrict by flag
-    #[arg(short = 'F', long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    flags: Option<Vec<MaybeStdinVec<String>>>,
+    #[arg(
+        short = 'F',
+        long,
+        num_args = 0..=1,
+        value_name = "VALUE[,...]",
+        default_missing_value = "true",
+    )]
+    flags: Option<ExistsOrArray<MaybeStdinVec<String>>>,
 
     /// restrict by group
     #[arg(
@@ -602,7 +608,10 @@ impl Command {
             query.summary(values.into_iter().flatten());
         }
         if let Some(values) = params.attr.flags {
-            query.flags(values.into_iter().flatten())
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Flags, value),
+                ExistsOrArray::Array(values) => query.flags(values.into_iter().flatten()),
+            }
         }
         if let Some(values) = params.attr.groups {
             match values {
