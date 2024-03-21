@@ -235,7 +235,7 @@ struct AttributeOptions {
 
     /// restrict by component
     #[arg(short = 'C', long, value_delimiter = ',')]
-    component: Option<Vec<String>>,
+    component: Option<Vec<Match>>,
 
     /// restrict by custom field
     #[arg(long = "cf", num_args = 2, value_names = ["NAME", "VALUE"])]
@@ -269,7 +269,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    groups: Option<ExistsOrArray<MaybeStdinVec<String>>>,
+    groups: Option<ExistsOrArray<MaybeStdinVec<Match>>>,
 
     /// restrict by ID
     #[arg(long)]
@@ -287,23 +287,23 @@ struct AttributeOptions {
 
     /// restrict by OS
     #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    os: Option<Vec<String>>,
+    os: Option<Vec<Match>>,
 
     /// restrict by platform
     #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    platform: Option<Vec<String>>,
+    platform: Option<Vec<Match>>,
 
     /// restrict by priority
     #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    priority: Option<Vec<String>>,
+    priority: Option<Vec<Match>>,
 
     /// restrict by product
     #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    product: Option<Vec<String>>,
+    product: Option<Vec<Match>>,
 
     /// restrict by resolution
     #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    resolution: Option<Vec<String>>,
+    resolution: Option<Vec<Match>>,
 
     /// restrict by external URLs
     #[arg(
@@ -313,11 +313,11 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    see_also: Option<ExistsOrArray<String>>,
+    see_also: Option<ExistsOrArray<Match>>,
 
     /// restrict by severity
     #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    severity: Option<Vec<String>>,
+    severity: Option<Vec<Match>>,
 
     /// restrict by status
     #[arg(
@@ -336,7 +336,7 @@ struct AttributeOptions {
 
     /// restrict by target
     #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    target: Option<Vec<String>>,
+    target: Option<Vec<Match>>,
 
     /// restrict by URL
     #[arg(
@@ -350,7 +350,7 @@ struct AttributeOptions {
 
     /// restrict by version
     #[arg(short = 'V', long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    version: Option<Vec<String>>,
+    version: Option<Vec<Match>>,
 
     /// specified range of votes
     #[arg(long)]
@@ -364,7 +364,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    whiteboard: Option<ExistsOrArray<String>>,
+    whiteboard: Option<ExistsOrArray<Match>>,
 }
 
 #[derive(Debug, Args)]
@@ -672,7 +672,7 @@ impl Command {
         if let Some(values) = params.attr.see_also {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::SeeAlso, value),
-                ExistsOrArray::Array(values) => query.see_also(&values),
+                ExistsOrArray::Array(values) => query.see_also(values),
             }
         }
         if let Some(values) = params.user.reporter {
@@ -690,7 +690,7 @@ impl Command {
         if let Some(values) = params.attr.whiteboard {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Whiteboard, value),
-                ExistsOrArray::Array(values) => query.whiteboard(&values),
+                ExistsOrArray::Array(values) => query.whiteboard(values),
             }
         }
         if let Some(values) = params.attr.url {

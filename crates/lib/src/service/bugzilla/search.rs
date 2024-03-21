@@ -176,9 +176,9 @@ impl QueryBuilder<'_> {
     pub fn resolution<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("resolution", values);
+        self.or("resolution", values);
     }
 
     pub fn comment<I, S>(&mut self, values: I)
@@ -322,17 +322,17 @@ impl QueryBuilder<'_> {
     pub fn priority<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("priority", values);
+        self.or("priority", values);
     }
 
     pub fn severity<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("bug_severity", values);
+        self.or("bug_severity", values);
     }
 
     pub fn status<I, S>(&mut self, values: I)
@@ -353,67 +353,65 @@ impl QueryBuilder<'_> {
     pub fn version<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("version", values);
+        self.or("version", values);
     }
 
     pub fn component<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("component", values);
+        self.or("component", values)
     }
 
     pub fn product<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("product", values);
+        self.or("product", values);
     }
 
     pub fn platform<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("platform", values);
+        self.or("platform", values);
     }
 
     pub fn os<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("op_sys", values);
+        self.or("op_sys", values);
     }
 
     pub fn see_also<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        for value in values {
-            self.advanced_field("see_also", "substring", value);
-        }
+        self.or("see_also", values);
     }
 
     pub fn target<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("target_milestone", values);
+        self.or("target_milestone", values);
     }
 
     pub fn whiteboard<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("whiteboard", values);
+        self.or("whiteboard", values);
     }
 
     pub fn votes(&mut self, value: RangeOrEqual<u64>) {
@@ -464,9 +462,9 @@ impl QueryBuilder<'_> {
     pub fn groups<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        self.extend("bug_group", values);
+        self.or("bug_group", values);
     }
 
     pub fn keywords<I, S>(&mut self, values: I)
