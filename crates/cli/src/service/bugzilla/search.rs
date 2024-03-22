@@ -388,8 +388,12 @@ struct AttributeOptions {
     )]
     status: Option<Vec<String>>,
 
-    /// restrict by target milestone
+    /// restrict by personal tags
     #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    tags: Option<Vec<Match>>,
+
+    /// restrict by target milestone
+    #[arg(short = 'T', long, value_name = "VALUE[,...]", value_delimiter = ',')]
     target: Option<Vec<Match>>,
 
     /// restrict by URL
@@ -755,6 +759,9 @@ impl Command {
         }
         if let Some(values) = params.attr.status {
             query.status(values);
+        }
+        if let Some(values) = params.attr.tags {
+            query.tags(values);
         }
         if let Some(values) = params.attr.target {
             query.target(values);

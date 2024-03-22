@@ -455,6 +455,14 @@ impl QueryBuilder<'_> {
         self.or("see_also", values);
     }
 
+    pub fn tags<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        self.or("tag", values);
+    }
+
     pub fn target<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
