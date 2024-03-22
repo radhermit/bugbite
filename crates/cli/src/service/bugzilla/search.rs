@@ -441,7 +441,7 @@ struct ChangeOptions {
         long,
         value_name = "FIELD[,...]=TIME",
         long_help = indoc::formatdoc! {"
-            Restrict by fields within a time interval.
+            Restrict by fields changed within a time interval.
 
             possible fields:
             {}", ChangeField::VARIANTS.join(", ")}
