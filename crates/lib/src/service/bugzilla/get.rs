@@ -47,6 +47,10 @@ impl GetRequest {
             }
         }
 
+        // include personal tags
+        url.query_pairs_mut()
+            .append_pair("include_fields", "_default,tags");
+
         // drop useless token that is injected for authenticated requests
         url.query_pairs_mut()
             .append_pair("exclude_fields", "update_token");

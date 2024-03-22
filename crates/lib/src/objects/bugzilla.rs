@@ -260,6 +260,8 @@ pub struct Bug {
     #[serde(deserialize_with = "null_empty_vec")]
     pub flags: Vec<Flag>,
     #[serde(deserialize_with = "null_empty_vec")]
+    pub tags: Vec<String>,
+    #[serde(deserialize_with = "null_empty_vec")]
     pub see_also: Vec<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub url: Option<String>,
@@ -310,6 +312,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Severity => format!("{:<12}", stringify!(self.severity)),
                 BugField::Status => format!("{:<20}", stringify!(self.status)),
                 BugField::Summary => stringify!(self.summary),
+                BugField::Tags => format!("{:<20}", self.tags.iter().join(",")),
                 BugField::Target => format!("{:<20}", stringify!(self.target)),
                 BugField::Updated => stringify!(self.updated),
                 BugField::Url => format!("{:<20}", stringify!(self.url)),
