@@ -735,7 +735,6 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 
 impl Command {
     pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
-        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let mut attrs: Attributes = self.options.into();
 
         // read modification attributes from a template
@@ -756,18 +755,19 @@ impl Command {
             }
         }
 
-        let mut params = attrs.into_params(client, ids)?;
-
-        // interactively create a reply
-        if let Some(mut values) = self.reply {
-            if ids.len() > 1 {
-                anyhow::bail!("reply invalid, targeting multiple bugs");
-            }
-            let comment = get_reply(client, ids[0], &mut values)?;
-            params.comment(comment.trim());
-        }
-
         if !self.dry_run {
+            let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
+            let mut params = attrs.into_params(client, ids)?;
+
+            // interactively create a reply
+            if let Some(mut values) = self.reply {
+                if ids.len() > 1 {
+                    anyhow::bail!("reply invalid, targeting multiple bugs");
+                }
+                let comment = get_reply(client, ids[0], &mut values)?;
+                params.comment(comment.trim());
+            }
+
             let changes = async_block!(client.modify(ids, params))?;
             for change in changes {
                 info!("{change}");
