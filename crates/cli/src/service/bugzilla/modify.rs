@@ -65,6 +65,13 @@ struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
     is_private: Option<bool>,
 }
 
+impl<T: FromStr + PartialOrd + Eq + Hash> CommentPrivacy<T> {
+    /// Determine if newly created comments should be created private.
+    fn created_private(&self) -> bool {
+        self.container.is_none() && self.is_private.unwrap_or_default()
+    }
+}
+
 impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for CommentPrivacy<T>
 where
     <T as FromStr>::Err: fmt::Display + fmt::Debug,
@@ -448,7 +455,7 @@ impl Attributes {
         self,
         client: &'a Client,
         ids: &[S],
-        comment_is_private: Option<bool>,
+        created_private: bool,
     ) -> anyhow::Result<ModifyParams<'a>>
     where
         S: fmt::Display,
@@ -476,7 +483,7 @@ impl Attributes {
             if value.trim().is_empty() {
                 value = edit_comment(value.trim())?;
             }
-            params.comment(&value, comment_is_private.unwrap_or_default());
+            params.comment(&value, created_private);
         }
 
         if let Some(value) = self.component.as_ref() {
@@ -515,24 +522,26 @@ impl Attributes {
             params.priority(value);
         }
 
-        if let Some(value) = self.private_comment.and_then(|x| x.container) {
-            let id = match ids {
-                [x] => x,
-                _ => anyhow::bail!("can't toggle comment privacy for multiple bugs"),
-            };
-            let comments = async_block!(client.comment(&[id], None))?
-                .into_iter()
-                .next()
-                .expect("invalid comments response");
+        if let Some(value) = self.private_comment.as_ref() {
+            if let Some(container) = value.container.as_ref() {
+                let id = match ids {
+                    [x] => x,
+                    _ => anyhow::bail!("can't toggle comment privacy for multiple bugs"),
+                };
+                let comments = async_block!(client.comment(&[id], None))?
+                    .into_iter()
+                    .next()
+                    .expect("invalid comments response");
 
-            let mut toggled = vec![];
-            for c in comments {
-                if value.contains(&c.count) {
-                    toggled.push((c.id, comment_is_private.unwrap_or(!c.is_private)));
+                let mut toggled = vec![];
+                for c in comments {
+                    if container.contains(&c.count) {
+                        toggled.push((c.id, value.is_private.unwrap_or(!c.is_private)));
+                    }
                 }
-            }
 
-            params.comment_is_private(toggled);
+                params.comment_is_private(toggled);
+            }
         }
 
         if let Some(value) = self.product.as_ref() {
@@ -775,8 +784,12 @@ impl Command {
 
         if !self.dry_run {
             let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-            let comment_is_private = attrs.private_comment.as_ref().and_then(|x| x.is_private);
-            let mut params = attrs.into_params(client, ids, comment_is_private)?;
+            let created_private = attrs
+                .private_comment
+                .as_ref()
+                .map(|x| x.created_private())
+                .unwrap_or_default();
+            let mut params = attrs.into_params(client, ids, created_private)?;
 
             // interactively create a reply
             if let Some(mut values) = self.reply {
@@ -784,7 +797,7 @@ impl Command {
                     anyhow::bail!("reply invalid, targeting multiple bugs");
                 }
                 let comment = get_reply(client, ids[0], &mut values)?;
-                params.comment(comment.trim(), comment_is_private.unwrap_or_default());
+                params.comment(comment.trim(), created_private);
             }
 
             let changes = async_block!(client.modify(ids, params))?;
