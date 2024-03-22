@@ -335,12 +335,7 @@ impl QueryBuilder<'_> {
     {
         for (field, users) in values {
             for user in users {
-                let user = user.as_ref();
-                let user = if user == "@me" {
-                    self.service.user().unwrap_or(user)
-                } else {
-                    user
-                };
+                let user = self.service.replace_user_alias(user.as_ref());
                 self.advanced_field(field.api(), "changedby", user);
             }
         }

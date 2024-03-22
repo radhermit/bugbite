@@ -124,14 +124,8 @@ impl<'a> CreateParams<'a> {
     }
 
     pub fn assigned_to(&mut self, value: &str) {
-        // TODO: support pulling aliases from the config?
-        if value == "@me" {
-            if let Some(user) = self.service.user() {
-                self.params.assigned_to = Some(user.into());
-            }
-        } else {
-            self.params.assigned_to = Some(value.into());
-        }
+        let user = self.service.replace_user_alias(value);
+        self.params.assigned_to = Some(user.into());
     }
 
     pub fn blocks<I>(&mut self, values: I)

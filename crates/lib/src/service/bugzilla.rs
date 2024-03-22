@@ -76,6 +76,16 @@ impl Service {
         })
     }
 
+    /// Substitute user aliases for matching values.
+    // TODO: support pulling aliases from the config?
+    pub(crate) fn replace_user_alias<'a>(&'a self, value: &'a str) -> &str {
+        if value == "@me" {
+            self.user().unwrap_or(value)
+        } else {
+            value
+        }
+    }
+
     pub(crate) fn attach_request<S>(
         &self,
         ids: &[S],

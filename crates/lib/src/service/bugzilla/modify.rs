@@ -4,7 +4,6 @@ use std::{fmt, fs};
 
 use camino::Utf8Path;
 use indexmap::IndexMap;
-use itertools::Either;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 
@@ -298,14 +297,8 @@ impl<'a> ModifyParams<'a> {
     }
 
     pub fn assigned_to(&mut self, value: &str) {
-        // TODO: support pulling aliases from the config?
-        if value == "@me" {
-            if let Some(user) = self.service.user() {
-                self.params.assigned_to = Some(user.into());
-            }
-        } else {
-            self.params.assigned_to = Some(value.into());
-        }
+        let user = self.service.replace_user_alias(value);
+        self.params.assigned_to = Some(user.into());
     }
 
     pub fn blocks<I>(&mut self, values: I)
@@ -319,17 +312,20 @@ impl<'a> ModifyParams<'a> {
     where
         I: IntoIterator<Item = SetChange<String>>,
     {
-        // TODO: support pulling aliases from the config?
-        let iter = if let Some(user) = self.service.user() {
-            Either::Left(values.into_iter().map(|c| match c {
-                SetChange::Add(value) if value == "@me" => SetChange::Add(user.into()),
-                SetChange::Remove(value) if value == "@me" => SetChange::Remove(user.into()),
-                SetChange::Set(value) if value == "@me" => SetChange::Set(user.into()),
-                c => c,
-            }))
-        } else {
-            Either::Right(values.into_iter())
-        };
+        let iter = values.into_iter().map(|c| match c {
+            SetChange::Add(value) => {
+                let user = self.service.replace_user_alias(&value);
+                SetChange::Add(user.into())
+            }
+            SetChange::Remove(value) => {
+                let user = self.service.replace_user_alias(&value);
+                SetChange::Remove(user.into())
+            }
+            SetChange::Set(value) => {
+                let user = self.service.replace_user_alias(&value);
+                SetChange::Set(user.into())
+            }
+        });
 
         self.params.cc = Some(iter.collect());
     }
