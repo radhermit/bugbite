@@ -303,11 +303,9 @@ impl QueryBuilder<'_> {
     pub fn url<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        for value in values {
-            self.advanced_field("bug_file_loc", "substring", value);
-        }
+        self.or("bug_file_loc", values);
     }
 
     pub fn changed<'a, I>(&mut self, values: I)

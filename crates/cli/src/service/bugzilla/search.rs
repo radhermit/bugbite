@@ -400,7 +400,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    url: Option<ExistsOrArray<String>>,
+    url: Option<ExistsOrArray<Match>>,
 
     /// restrict by version
     #[arg(short = 'V', long, value_name = "VALUE[,...]", value_delimiter = ',')]
@@ -761,7 +761,7 @@ impl Command {
         if let Some(values) = params.attr.url {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Url, value),
-                ExistsOrArray::Array(values) => query.url(&values),
+                ExistsOrArray::Array(values) => query.url(values),
             }
         }
         if let Some(value) = params.range.votes {
