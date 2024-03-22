@@ -346,7 +346,7 @@ impl<'a> ModifyParams<'a> {
         self.params.component = Some(value.into());
     }
 
-    pub fn depends_on<I>(&mut self, values: I)
+    pub fn depends<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = SetChange<NonZeroU64>>,
     {

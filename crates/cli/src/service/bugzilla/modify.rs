@@ -221,12 +221,12 @@ struct Options {
             no arguments removes the entire list.
 
             Examples modifying bug 10:
-              - add 1: bite m --depends-on +1 10
-              - add 2 and remove 1: bite m --depends-on +2,-1 10
-              - set to 3: bite m --depends-on 3 10
+              - add 1: bite m --depends +1 10
+              - add 2 and remove 1: bite m --depends +2,-1 10
+              - set to 3: bite m --depends 3 10
         "}
     )]
-    depends_on: Option<Vec<SetChange<NonZeroU64>>>,
+    depends: Option<Vec<SetChange<NonZeroU64>>>,
 
     /// mark bug as duplicate
     #[arg(short = 'D', long, value_name = "ID", conflicts_with_all = ["status", "resolution"])]
@@ -396,7 +396,7 @@ struct Attributes {
     cc: Option<Vec<SetChange<String>>>,
     comment: Option<String>,
     component: Option<String>,
-    depends_on: Option<Vec<SetChange<NonZeroU64>>>,
+    depends: Option<Vec<SetChange<NonZeroU64>>>,
     duplicate_of: Option<NonZeroU64>,
     groups: Option<Vec<SetChange<String>>>,
     keywords: Option<Vec<SetChange<String>>>,
@@ -428,7 +428,7 @@ impl Attributes {
             cc: self.cc.or(other.cc),
             comment: self.comment.or(other.comment),
             component: self.component.or(other.component),
-            depends_on: self.depends_on.or(other.depends_on),
+            depends: self.depends.or(other.depends),
             duplicate_of: self.duplicate_of.or(other.duplicate_of),
             groups: self.groups.or(other.groups),
             keywords: self.keywords.or(other.keywords),
@@ -494,8 +494,8 @@ impl Attributes {
             params.custom_fields(values);
         }
 
-        if let Some(values) = self.depends_on {
-            params.depends_on(values);
+        if let Some(values) = self.depends {
+            params.depends(values);
         }
 
         if let Some(value) = self.duplicate_of {
@@ -597,7 +597,7 @@ impl From<Options> for Attributes {
             cc: value.cc,
             comment: value.comment,
             component: value.component,
-            depends_on: value.depends_on,
+            depends: value.depends,
             duplicate_of: value.duplicate_of,
             groups: value.groups,
             keywords: value.keywords,
