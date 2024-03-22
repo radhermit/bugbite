@@ -338,7 +338,7 @@ struct Options {
     #[arg(short, long)]
     resolution: Option<String>,
 
-    /// add/remove external bug URLs
+    /// add/remove bug URLs
     #[arg(
         short = 'U',
         long,
@@ -348,12 +348,17 @@ struct Options {
             Add or remove URLs to bugs in external trackers.
 
             Values must be valid URLs to bugs, issues, or tickets in external
-            trackers.
+            trackers or IDs to existing bugs for the targeted service.
 
             Prefixing values with `+` or `-` adds or removes URLs from the
             list, respectively. Unprefixed values will be added to the list.
 
             Multiple arguments can be specified in a comma-separated list.
+
+            Examples modifying bug 10:
+              - add URL to bug 2: bite m --see-also 2 10
+              - remove URL to bug 3 and add 4: bite m --see-also=-3,+4
+              - add URL to external project's bug 5: bite m --see-also https://url/to/bug/5 10
         "}
     )]
     see_also: Option<Vec<SetChange<String>>>,
