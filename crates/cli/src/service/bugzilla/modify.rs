@@ -112,7 +112,7 @@ struct Options {
             exists.
 
             Example:
-              - bug 123: assign to yourself: bite m --assigned-to @me 123
+              - bug 123, assign to yourself: bite m --assigned-to @me 123
         "}
     )]
     assigned_to: Option<String>,
@@ -137,9 +137,9 @@ struct Options {
             no arguments removes the entire list.
 
             Examples:
-              - bug 10: add 1: bite m --blocks 1 10
-              - bug 10: add 2 and remove 1: bite m --blocks +2,-1 10
-              - bug 10: set to 3: bite m --blocks 3 10
+              - bug 10, add 1: bite m --blocks 1 10
+              - bug 10, add 2 and remove 1: bite m --blocks +2,-1 10
+              - bug 10, set to 3: bite m --blocks 3 10
         "}
     )]
     blocks: Option<Vec<SetChange<NonZeroU64>>>,
@@ -162,8 +162,8 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list.
 
             Examples:
-              - bug 123: add yourself to the CC list: bite m --cc @me 123
-              - bug 123: remove yourself from the CC list: bite m --cc=-@me 123
+              - bug 123, add yourself to the CC list: bite m --cc @me 123
+              - bug 123, remove yourself from the CC list: bite m --cc=-@me 123
         "}
     )]
     cc: Option<Vec<SetChange<String>>>,
@@ -212,9 +212,9 @@ struct Options {
             no arguments removes the entire list.
 
             Examples:
-              - bug 10: add 1: bite m --depends-on +1 10
-              - bug 10: add 2 and remove 1: bite m --depends-on +2,-1 10
-              - bug 10: set to 3: bite m --depends-on 3 10
+              - bug 10, add 1: bite m --depends-on +1 10
+              - bug 10, add 2 and remove 1: bite m --depends-on +2,-1 10
+              - bug 10, set to 3: bite m --depends-on 3 10
         "}
     )]
     depends_on: Option<Vec<SetChange<NonZeroU64>>>,
@@ -240,8 +240,8 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list.
 
             Examples:
-              - bug 10: add `admin`: bite m --groups +admin 10
-              - bug 10: add `test` and remove `admin`: bite m --groups +test,-admin 10
+              - bug 10, add `admin`: bite m --groups +admin 10
+              - bug 10, add `test` and remove `admin`: bite m --groups +test,-admin 10
         "}
     )]
     groups: Option<Vec<SetChange<String>>>,
@@ -266,9 +266,9 @@ struct Options {
             no arguments removes the entire list.
 
             Examples:
-              - bug 10: add `key`: bite m --keywords +key 10
-              - bug 10: add `test` and remove `key`: bite m --keywords +test,-key 10
-              - bug 10: set to `verify`: bite m --keywords verify 10
+              - bug 10, add `key`: bite m --keywords +key 10
+              - bug 10, add `test` and remove `key`: bite m --keywords +test,-key 10
+              - bug 10, set to `verify`: bite m --keywords verify 10
         "}
     )]
     keywords: Option<Vec<SetChange<String>>>,
@@ -303,10 +303,10 @@ struct Options {
             matching comments is toggled.
 
             Example:
-              - bug 10: toggle comment 1 privacy: bite m --private-comments 1 10
-              - bug 10: toggle comment 1 and 2 privacy: bite m --private-comments 1,2 10
-              - bug 10: toggle all comment privacy: bite m --private-comments .. 10
-              - bug 10: mark comments 2-5 private: bite m --private-comments 2..=5:true 10
+              - bug 10, toggle comment 1 privacy: bite m --private-comments 1 10
+              - bug 10, toggle comment 1 and 2 privacy: bite m --private-comments 1,2 10
+              - bug 10, toggle all comment privacy: bite m --private-comments .. 10
+              - bug 10, mark comments 2-5 private: bite m --private-comments 2..=5:true 10
         "}
     )]
     private_comments: Option<CommentPrivacy<usize>>,
@@ -627,8 +627,8 @@ pub(super) struct Command {
             Multiple arguments can be specified in a comma-separated list.
 
             Example:
-              - bug 123: reply to comments 1 and 2: bite m --reply 1,2 123
-              - bug 123: reply to the last comment: bite m 123 --reply
+              - bug 123, reply to comments 1 and 2: bite m --reply 1,2 123
+              - bug 123, reply to the last comment: bite m 123 --reply
         "}
     )]
     reply: Option<Vec<usize>>,
