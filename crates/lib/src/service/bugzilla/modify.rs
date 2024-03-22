@@ -415,6 +415,7 @@ impl<'a> ModifyParams<'a> {
     where
         I: IntoIterator<Item = SetChange<String>>,
     {
+        // convert bug IDs to full URLs
         let iter = values.into_iter().map(|x| match x {
             SetChange::Add(value) if value.parse::<u64>().is_ok() => {
                 SetChange::Add(self.service.item_url(value))
