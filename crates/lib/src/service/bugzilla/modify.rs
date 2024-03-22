@@ -334,10 +334,10 @@ impl<'a> ModifyParams<'a> {
         self.params.cc = Some(iter.collect());
     }
 
-    pub fn comment(&mut self, value: &str) {
+    pub fn comment(&mut self, value: &str, is_private: bool) {
         let comment = Comment {
             body: value.into(),
-            is_private: false,
+            is_private,
         };
         self.params.comment = Some(comment);
     }
@@ -400,7 +400,7 @@ impl<'a> ModifyParams<'a> {
         self.params.priority = Some(value.into());
     }
 
-    pub fn private_comments<I>(&mut self, values: I)
+    pub fn comment_is_private<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = (u64, bool)>,
     {

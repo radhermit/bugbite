@@ -61,8 +61,8 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
 struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
     raw: String,
-    container: RangeOrSet<T>,
-    private: Option<bool>,
+    container: Option<RangeOrSet<T>>,
+    is_private: Option<bool>,
 }
 
 impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for CommentPrivacy<T>
@@ -72,16 +72,18 @@ where
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (container, private) = if let Some((ids, value)) = s.split_once(':') {
-            (ids.parse()?, Some(value.parse()?))
+        let (container, is_private) = if let Some((ids, value)) = s.split_once(':') {
+            (Some(ids.parse()?), Some(value.parse()?))
+        } else if let Ok(value) = s.parse::<bool>() {
+            (None, Some(value))
         } else {
-            (s.parse()?, None)
+            (Some(s.parse()?), None)
         };
 
         Ok(Self {
             raw: s.to_string(),
             container,
-            private,
+            is_private,
         })
     }
 }
@@ -289,27 +291,37 @@ struct Options {
     #[arg(
         short = 'P',
         long,
-        value_name = "RANGE_OR_IDS[:BOOL]",
+        value_name = "VALUE",
+        num_args = 0..=1,
+        default_missing_value = "true",
         long_help = indoc::indoc! {"
             Modify the privacy of comments.
 
-            The values can be comma-separated comment IDs local to the specified
-            bug ID starting at 0 for the bug description or a range of comment
-            IDs.
+            This option controls modifying the privacy of both existing comments
+            and those currently being created via the `--comment` or `--reply`
+            options.
 
-            An optional suffixed consisting of boolean value in the form of
-            `:true` or `:false` can be included to enable or disable all comment
-            privacy respectively. Without this suffix, the privacy of all
-            matching comments is toggled.
+            To modify existing comments, the value must be comma-separated
+            comment IDs local to the specified bug ID starting at 0 for the bug
+            description or a range of comment IDs. An optional suffix consisting
+            of boolean value in the form of `:true` or `:false` can be included
+            to enable or disable all comment privacy respectively. Without this
+            suffix, the privacy of all matching comments is toggled.
 
-            Example:
-              - bug 10, toggle comment 1 privacy: bite m --private-comments 1 10
-              - bug 10, toggle comment 1 and 2 privacy: bite m --private-comments 1,2 10
-              - bug 10, toggle all comment privacy: bite m --private-comments .. 10
-              - bug 10, mark comments 2-5 private: bite m --private-comments 2..=5:true 10
+            To modify comments being created, either no argument can be used to
+            enable privacy or an explicit boolean.
+
+            Examples modifying bug 10:
+              - toggle comment 1 privacy: bite m --private-comment 1 10
+              - toggle comment 1 and 2 privacy: bite m --private-comment 1,2 10
+              - toggle all comment privacy: bite m --private-comment .. 10
+              - disable comment 1 and 2 privacy: bite m --private-comment 1,2:false 10
+              - mark comments 2-5 private: bite m --private-comment 2..=5:true 10
+              - mark created comment private: bite m --comment --private-comment 10
+              - mark created reply private: bite m --reply --private-comment 10
         "}
     )]
-    private_comments: Option<CommentPrivacy<usize>>,
+    private_comment: Option<CommentPrivacy<usize>>,
 
     /// modify product
     #[arg(short, long)]
@@ -384,7 +396,7 @@ struct Attributes {
     os: Option<String>,
     platform: Option<String>,
     priority: Option<String>,
-    private_comments: Option<CommentPrivacy<usize>>,
+    private_comment: Option<CommentPrivacy<usize>>,
     product: Option<String>,
     resolution: Option<String>,
     see_also: Option<Vec<SetChange<String>>>,
@@ -416,7 +428,7 @@ impl Attributes {
             os: self.os.or(other.os),
             platform: self.platform.or(other.platform),
             priority: self.priority.or(other.priority),
-            private_comments: self.private_comments.or(other.private_comments),
+            private_comment: self.private_comment.or(other.private_comment),
             product: self.product.or(other.product),
             resolution: self.resolution.or(other.resolution),
             see_also: self.see_also.or(other.see_also),
@@ -432,7 +444,12 @@ impl Attributes {
         }
     }
 
-    fn into_params<'a, S>(self, client: &'a Client, ids: &[S]) -> anyhow::Result<ModifyParams<'a>>
+    fn into_params<'a, S>(
+        self,
+        client: &'a Client,
+        ids: &[S],
+        comment_is_private: Option<bool>,
+    ) -> anyhow::Result<ModifyParams<'a>>
     where
         S: fmt::Display,
     {
@@ -459,7 +476,7 @@ impl Attributes {
             if value.trim().is_empty() {
                 value = edit_comment(value.trim())?;
             }
-            params.comment(&value);
+            params.comment(&value, comment_is_private.unwrap_or_default());
         }
 
         if let Some(value) = self.component.as_ref() {
@@ -498,7 +515,7 @@ impl Attributes {
             params.priority(value);
         }
 
-        if let Some(value) = self.private_comments {
+        if let Some(value) = self.private_comment.and_then(|x| x.container) {
             let id = match ids {
                 [x] => x,
                 _ => anyhow::bail!("can't toggle comment privacy for multiple bugs"),
@@ -510,12 +527,12 @@ impl Attributes {
 
             let mut toggled = vec![];
             for c in comments {
-                if value.container.contains(&c.count) {
-                    toggled.push((c.id, value.private.unwrap_or(!c.is_private)));
+                if value.contains(&c.count) {
+                    toggled.push((c.id, comment_is_private.unwrap_or(!c.is_private)));
                 }
             }
 
-            params.private_comments(toggled);
+            params.comment_is_private(toggled);
         }
 
         if let Some(value) = self.product.as_ref() {
@@ -578,7 +595,7 @@ impl From<Options> for Attributes {
             os: value.os,
             platform: value.platform,
             priority: value.priority,
-            private_comments: value.private_comments,
+            private_comment: value.private_comment,
             product: value.product,
             resolution: value.resolution,
             see_also: value.see_also,
@@ -626,9 +643,10 @@ pub(super) struct Command {
 
             Multiple arguments can be specified in a comma-separated list.
 
-            Example:
-              - bug 123, reply to comments 1 and 2: bite m --reply 1,2 123
-              - bug 123, reply to the last comment: bite m 123 --reply
+            Examples modifying bug 123:
+              - reply to comments 1 and 2: bite m --reply 1,2 123
+              - reply to the last comment: bite m 123 --reply
+              - create private reply to the last comment: bite m 123 --reply --private-comment
         "}
     )]
     reply: Option<Vec<usize>>,
@@ -757,7 +775,8 @@ impl Command {
 
         if !self.dry_run {
             let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-            let mut params = attrs.into_params(client, ids)?;
+            let comment_is_private = attrs.private_comment.as_ref().and_then(|x| x.is_private);
+            let mut params = attrs.into_params(client, ids, comment_is_private)?;
 
             // interactively create a reply
             if let Some(mut values) = self.reply {
@@ -765,7 +784,7 @@ impl Command {
                     anyhow::bail!("reply invalid, targeting multiple bugs");
                 }
                 let comment = get_reply(client, ids[0], &mut values)?;
-                params.comment(comment.trim());
+                params.comment(comment.trim(), comment_is_private.unwrap_or_default());
             }
 
             let changes = async_block!(client.modify(ids, params))?;
