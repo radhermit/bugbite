@@ -186,7 +186,7 @@ struct Options {
     summary: Option<String>,
 
     /// set target milestone
-    #[arg(short, long, value_name = "MILESTONE")]
+    #[arg(short = 'T', long, value_name = "MILESTONE")]
     target: Option<String>,
 
     /// set URL
