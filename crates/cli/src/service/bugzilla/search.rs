@@ -572,6 +572,10 @@ struct UserOptions {
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
     commenters: Option<Vec<Match>>,
 
+    /// user who set a flag
+    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
+    flaggers: Option<Vec<Match>>,
+
     /// user who reported
     #[arg(short = 'R', long, value_name = "USER[,...]", value_delimiter = ',')]
     reporter: Option<Vec<Match>>,
@@ -709,6 +713,9 @@ impl Command {
         }
         if let Some(values) = params.user.commenters {
             query.commenters(values);
+        }
+        if let Some(values) = params.user.flaggers {
+            query.flaggers(values);
         }
         if let Some(values) = params.attr.custom_fields {
             query.custom_fields(values.into_iter().tuples());

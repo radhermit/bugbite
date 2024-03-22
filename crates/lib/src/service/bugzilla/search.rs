@@ -300,6 +300,14 @@ impl QueryBuilder<'_> {
         self.and("commenter", values)
     }
 
+    pub fn flaggers<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        self.and("setters.login_name", values)
+    }
+
     pub fn url<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
