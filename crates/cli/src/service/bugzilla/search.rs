@@ -437,19 +437,51 @@ struct RangeOptions {
 #[clap(next_help_heading = "Change options")]
 struct ChangeOptions {
     /// fields changed at this time or later
-    #[arg(long, value_name = "FIELD[,...]=TIME")]
+    #[arg(
+        long,
+        value_name = "FIELD[,...]=TIME",
+        long_help = indoc::formatdoc! {"
+            Restrict by fields within a time interval.
+
+            possible fields:
+            {}", ChangeField::VARIANTS.join(", ")}
+    )]
     changed: Option<Vec<Changed>>,
 
     /// fields changed by users
-    #[arg(long, value_name = "FIELD[,...]=USER[,...]")]
+    #[arg(
+        long,
+        value_name = "FIELD[,...]=USER[,...]",
+        long_help = indoc::formatdoc! {"
+            Restrict by fields changed by a given user.
+
+            possible fields:
+            {}", ChangeField::VARIANTS.join(", ")}
+    )]
     changed_by: Option<Vec<ChangedBy>>,
 
     /// fields changed from a value
-    #[arg(long, value_name = "FIELD=VALUE")]
+    #[arg(
+        long,
+        value_name = "FIELD=VALUE",
+        long_help = indoc::formatdoc! {"
+            Restrict by fields changed from a given value.
+
+            possible fields:
+            {}", ChangeField::VARIANTS.join(", ")}
+    )]
     changed_from: Option<Vec<ChangedValue>>,
 
     /// fields changed to a value
-    #[arg(long, value_name = "FIELD=VALUE")]
+    #[arg(
+        long,
+        value_name = "FIELD=VALUE",
+        long_help = indoc::formatdoc! {"
+            Restrict by fields changed to a given value.
+
+            possible fields:
+            {}", ChangeField::VARIANTS.join(", ")}
+    )]
     changed_to: Option<Vec<ChangedValue>>,
 }
 
