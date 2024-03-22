@@ -76,6 +76,12 @@ impl Service {
         })
     }
 
+    /// Return the website URL for an item ID.
+    pub fn item_url<I: std::fmt::Display>(&self, id: I) -> String {
+        let base = self.base().as_str().trim_end_matches('/');
+        format!("{base}/show_bug.cgi?id={id}")
+    }
+
     /// Substitute user aliases for matching values.
     // TODO: support pulling aliases from the config?
     pub(crate) fn replace_user_alias<'a>(&'a self, value: &'a str) -> &str {

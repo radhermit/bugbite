@@ -415,7 +415,20 @@ impl<'a> ModifyParams<'a> {
     where
         I: IntoIterator<Item = SetChange<String>>,
     {
-        self.params.see_also = Some(values.into_iter().collect());
+        let iter = values.into_iter().map(|x| match x {
+            SetChange::Add(value) if value.parse::<u64>().is_ok() => {
+                SetChange::Add(self.service.item_url(value))
+            }
+            SetChange::Remove(value) if value.parse::<u64>().is_ok() => {
+                SetChange::Remove(self.service.item_url(value))
+            }
+            SetChange::Set(value) if value.parse::<u64>().is_ok() => {
+                SetChange::Set(self.service.item_url(value))
+            }
+            c => c,
+        });
+
+        self.params.see_also = Some(iter.collect());
     }
 
     pub fn severity(&mut self, value: &str) {

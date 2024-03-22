@@ -65,7 +65,7 @@ impl Command {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
 
         if self.browser {
-            let urls = ids.iter().map(|id| client.item_url(*id));
+            let urls = ids.iter().map(|id| client.service().item_url(id));
             launch_browser(urls)?;
         } else {
             let attachments = !self.options.no_attachments;

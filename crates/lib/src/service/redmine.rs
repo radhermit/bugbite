@@ -77,6 +77,12 @@ impl Service {
             client: builder.build()?,
         })
     }
+
+    /// Return the website URL for an item ID.
+    pub fn item_url<I: std::fmt::Display>(&self, id: I) -> String {
+        let base = self.config.web_base.as_str().trim_end_matches('/');
+        format!("{base}/issues/{id}")
+    }
 }
 
 impl<'a> WebClient<'a> for Service {

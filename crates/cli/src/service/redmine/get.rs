@@ -47,7 +47,7 @@ impl Command {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
 
         if self.options.browser {
-            let urls = ids.iter().map(|id| client.item_url(*id));
+            let urls = ids.iter().map(|id| client.service().item_url(id));
             launch_browser(urls)?;
         } else {
             let comments = !self.options.no_comments;
