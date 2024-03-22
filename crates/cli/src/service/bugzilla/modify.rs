@@ -113,8 +113,8 @@ struct Options {
             `@me` can also be used for the service's configured user if one
             exists.
 
-            Example:
-              - bug 123, assign to yourself: bite m --assigned-to @me 123
+            Example modifying bug 123:
+              - assign to yourself: bite m --assigned-to @me 123
         "}
     )]
     assigned_to: Option<String>,
@@ -138,10 +138,10 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list while
             no arguments removes the entire list.
 
-            Examples:
-              - bug 10, add 1: bite m --blocks 1 10
-              - bug 10, add 2 and remove 1: bite m --blocks +2,-1 10
-              - bug 10, set to 3: bite m --blocks 3 10
+            Examples modifying bug 10:
+              - add 1: bite m --blocks 1 10
+              - add 2 and remove 1: bite m --blocks +2,-1 10
+              - set to 3: bite m --blocks 3 10
         "}
     )]
     blocks: Option<Vec<SetChange<NonZeroU64>>>,
@@ -163,9 +163,9 @@ struct Options {
 
             Multiple arguments can be specified in a comma-separated list.
 
-            Examples:
-              - bug 123, add yourself to the CC list: bite m --cc @me 123
-              - bug 123, remove yourself from the CC list: bite m --cc=-@me 123
+            Examples modifying bug 123:
+              - add yourself to the CC list: bite m --cc @me 123
+              - remove yourself from the CC list: bite m --cc=-@me 123
         "}
     )]
     cc: Option<Vec<SetChange<String>>>,
@@ -213,10 +213,10 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list while
             no arguments removes the entire list.
 
-            Examples:
-              - bug 10, add 1: bite m --depends-on +1 10
-              - bug 10, add 2 and remove 1: bite m --depends-on +2,-1 10
-              - bug 10, set to 3: bite m --depends-on 3 10
+            Examples modifying bug 10:
+              - add 1: bite m --depends-on +1 10
+              - add 2 and remove 1: bite m --depends-on +2,-1 10
+              - set to 3: bite m --depends-on 3 10
         "}
     )]
     depends_on: Option<Vec<SetChange<NonZeroU64>>>,
@@ -241,9 +241,9 @@ struct Options {
 
             Multiple arguments can be specified in a comma-separated list.
 
-            Examples:
-              - bug 10, add `admin`: bite m --groups +admin 10
-              - bug 10, add `test` and remove `admin`: bite m --groups +test,-admin 10
+            Examples modifying bug 10:
+              - add `admin`: bite m --groups +admin 10
+              - add `test` and remove `admin`: bite m --groups +test,-admin 10
         "}
     )]
     groups: Option<Vec<SetChange<String>>>,
@@ -267,10 +267,10 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list while
             no arguments removes the entire list.
 
-            Examples:
-              - bug 10, add `key`: bite m --keywords +key 10
-              - bug 10, add `test` and remove `key`: bite m --keywords +test,-key 10
-              - bug 10, set to `verify`: bite m --keywords verify 10
+            Examples modifying bug 10:
+              - add `key`: bite m --keywords +key 10
+              - add `test` and remove `key`: bite m --keywords +test,-key 10
+              - set to `verify`: bite m --keywords verify 10
         "}
     )]
     keywords: Option<Vec<SetChange<String>>>,
