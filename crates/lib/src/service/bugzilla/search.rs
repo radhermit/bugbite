@@ -154,7 +154,7 @@ impl From<u64> for EnabledOrDisabled<u64> {
 /// information.
 #[derive(Debug)]
 pub struct QueryBuilder<'a> {
-    _service: &'a super::Service,
+    service: &'a super::Service,
     query: ListOrderedMultimap<String, String>,
     advanced_count: u64,
 }
@@ -162,9 +162,9 @@ pub struct QueryBuilder<'a> {
 impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
     type Service = super::Service;
 
-    fn new(_service: &'a Self::Service) -> Self {
+    fn new(service: &'a Self::Service) -> Self {
         Self {
-            _service,
+            service,
             query: Default::default(),
             advanced_count: Default::default(),
         }
@@ -331,10 +331,16 @@ impl QueryBuilder<'_> {
     where
         I: IntoIterator<Item = (ChangeField, J)>,
         J: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: AsRef<str>,
     {
         for (field, users) in values {
             for user in users {
+                let user = user.as_ref();
+                let user = if user == "@me" {
+                    self.service.user().unwrap_or(user)
+                } else {
+                    user
+                };
                 self.advanced_field(field.api(), "changedby", user);
             }
         }
