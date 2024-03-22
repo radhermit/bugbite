@@ -720,7 +720,7 @@ fn get_reply(client: &Client, id: &str, comment_ids: &mut Vec<usize>) -> anyhow:
         .next()
         .expect("invalid comments response");
     if comments.is_empty() {
-        anyhow::bail!("reply invalid, bug #{id} has no comments")
+        anyhow::bail!("reply invalid, bug {id} has no comments")
     }
 
     // use the last comment if no IDs were specified

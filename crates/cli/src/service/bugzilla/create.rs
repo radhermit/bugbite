@@ -467,7 +467,7 @@ impl Command {
             let mut stdout = stdout().lock();
             let id = async_block!(client.create(params))?;
             if stdout.is_terminal() {
-                info!("Created bug #{id}");
+                info!("Created bug {id}");
             } else {
                 writeln!(stdout, "{id}")?;
             }
