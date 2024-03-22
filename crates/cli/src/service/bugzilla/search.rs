@@ -250,6 +250,7 @@ struct AttributeOptions {
 
             Examples:
               - isn't blocked on bug #10: bite s --blocks=-10
+              - blocked on bugs #10 and #11: bite s --blocks +10,11
               - blocked on bug #10 but not #11: bite s --blocks 10,-11
 
             Values are taken from standard input when `-`.
@@ -296,6 +297,7 @@ struct AttributeOptions {
 
             Examples:
               - doesn't depend on bug #10: bite s --depends=-10
+              - depends on bugs #10 and #11: bite s --depends +10,11
               - depends on bug #10 but not #11: bite s --depends 10,-11
 
             Values are taken from standard input when `-`.
