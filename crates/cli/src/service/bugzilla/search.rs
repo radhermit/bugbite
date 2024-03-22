@@ -226,6 +226,34 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "ID[,...]",
         default_missing_value = "true",
+        long_help = indoc::indoc! {"
+            Restrict by blockers.
+
+            On a nonexistent value, all bugs with blockers are returned. If the
+            value is `true` or `false`, all bugs with or without blockers are
+            returned, respectively.
+
+            Examples:
+              - existence: bite s --blocks
+              - nonexistence: bite s --blocks false
+
+            Regular values search for matching blockers and multiple values can
+            be specified in a comma-separated list, matching if a bug contains
+            all of the specified blockers.
+
+            Examples:
+              - blocked on bug #10: bite s --blocks 10
+              - blocked on bugs #10 and #11: bite s --blocks 10,11
+
+            Values can also use `-` or `+` prefixes to manipulate blocker
+            existence for the query.
+
+            Examples:
+              - isn't blocked on bug #10: bite s --blocks=-10
+              - blocked on bug #10 but not #11: bite s --blocks 10,-11
+
+            Values are taken from standard input when `-`.
+        "}
     )]
     blocks: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
@@ -248,6 +276,34 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "ID[,...]",
         default_missing_value = "true",
+        long_help = indoc::indoc! {"
+            Restrict by dependencies.
+
+            On a nonexistent value, all bugs with dependencies are returned. If
+            the value is `true` or `false`, all bugs with or without blockers
+            are returned, respectively.
+
+            Examples:
+              - existence: bite s --depends-on
+              - nonexistence: bite s --depends-on false
+
+            Regular values search for matching dependencies and multiple values
+            can be specified in a comma-separated list, matching if a bug
+            contains all of the specified dependencies.
+
+            Examples:
+              - depends on bug #10: bite s --depends-on 10
+              - depends on bugs #10 and #11: bite s --depends-on 10,11
+
+            Values can also use `-` or `+` prefixes to manipulate dependency
+            existence for the query.
+
+            Examples:
+              - doesn't depend on bug #10: bite s --depends-on=-10
+              - depends on bug #10 but not #11: bite s --depends-on 10,-11
+
+            Values are taken from standard input when `-`.
+        "}
     )]
     depends_on: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
