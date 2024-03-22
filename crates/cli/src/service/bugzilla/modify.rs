@@ -285,13 +285,13 @@ struct Options {
     #[arg(long)]
     priority: Option<String>,
 
-    /// toggle comment privacy
+    /// modify comment privacy
     #[arg(
         short = 'P',
         long,
         value_name = "RANGE_OR_IDS[:BOOL]",
         long_help = indoc::indoc! {"
-            Toggle comment privacy.
+            Modify the privacy of comments.
 
             The values can be comma-separated comment IDs local to the specified
             bug ID starting at 0 for the bug description or a range of comment
