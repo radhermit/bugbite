@@ -257,10 +257,6 @@ struct AttributeOptions {
     )]
     blocks: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
-    /// specified range of comments
-    #[arg(long)]
-    comments: Option<RangeOrEqual<u64>>,
-
     /// restrict by component
     #[arg(short = 'C', long, value_delimiter = ',')]
     component: Option<Vec<Match>>,
@@ -408,10 +404,6 @@ struct AttributeOptions {
     #[arg(short = 'V', long, value_name = "VALUE[,...]", value_delimiter = ',')]
     version: Option<Vec<Match>>,
 
-    /// specified range of votes
-    #[arg(long)]
-    votes: Option<RangeOrEqual<u64>>,
-
     /// restrict by whiteboard
     #[arg(
         short,
@@ -421,6 +413,18 @@ struct AttributeOptions {
         default_missing_value = "true",
     )]
     whiteboard: Option<ExistsOrArray<Match>>,
+}
+
+#[derive(Debug, Args)]
+#[clap(next_help_heading = "Range options")]
+struct RangeOptions {
+    /// restrict by comments
+    #[arg(long)]
+    comments: Option<RangeOrEqual<u64>>,
+
+    /// restrict by votes
+    #[arg(long)]
+    votes: Option<RangeOrEqual<u64>>,
 }
 
 #[derive(Debug, Args)]
@@ -582,6 +586,9 @@ struct Params {
 
     #[clap(flatten)]
     attr: AttributeOptions,
+
+    #[clap(flatten)]
+    range: RangeOptions,
 
     #[clap(flatten)]
     change: ChangeOptions,
@@ -755,10 +762,10 @@ impl Command {
                 ExistsOrArray::Array(values) => query.url(&values),
             }
         }
-        if let Some(value) = params.attr.votes {
+        if let Some(value) = params.range.votes {
             query.votes(value);
         }
-        if let Some(value) = params.attr.comments {
+        if let Some(value) = params.range.comments {
             query.comments(value);
         }
         if let Some(values) = params.attr.alias {
