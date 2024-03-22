@@ -103,7 +103,7 @@ pub struct Comment {
     /// The number of the comment local to the bug.
     ///
     /// The description is 0, comments start at 1.
-    pub count: u64,
+    pub count: usize,
 
     pub text: String,
     pub creator: String,

@@ -521,24 +521,24 @@ impl QueryBuilder<'_> {
     {
         match value {
             RangeOrEqual::Equal(value) => self.advanced_field(field, "equals", value),
-            RangeOrEqual::Range(Range::Between(start, finish)) => {
-                self.advanced_field(field, "greaterthaneq", start);
-                self.advanced_field(field, "lessthan", finish);
+            RangeOrEqual::Range(Range::Range(r)) => {
+                self.advanced_field(field, "greaterthaneq", r.start);
+                self.advanced_field(field, "lessthan", r.end);
             }
-            RangeOrEqual::Range(Range::Inclusive(start, finish)) => {
-                self.advanced_field(field, "greaterthaneq", start);
-                self.advanced_field(field, "lessthaneq", finish);
+            RangeOrEqual::Range(Range::Inclusive(r)) => {
+                self.advanced_field(field, "greaterthaneq", r.start());
+                self.advanced_field(field, "lessthaneq", r.end());
             }
-            RangeOrEqual::Range(Range::To(value)) => {
-                self.advanced_field(field, "lessthan", value);
+            RangeOrEqual::Range(Range::To(r)) => {
+                self.advanced_field(field, "lessthan", r.end);
             }
-            RangeOrEqual::Range(Range::ToInclusive(value)) => {
-                self.advanced_field(field, "lessthaneq", value);
+            RangeOrEqual::Range(Range::ToInclusive(r)) => {
+                self.advanced_field(field, "lessthaneq", r.end);
             }
-            RangeOrEqual::Range(Range::From(value)) => {
-                self.advanced_field(field, "greaterthaneq", value);
+            RangeOrEqual::Range(Range::From(r)) => {
+                self.advanced_field(field, "greaterthaneq", r.start);
             }
-            RangeOrEqual::Range(Range::Full) => (),
+            RangeOrEqual::Range(Range::Full(_)) => (),
         }
     }
 

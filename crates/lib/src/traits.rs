@@ -4,6 +4,11 @@ use url::Url;
 use crate::service::ServiceKind;
 use crate::Error;
 
+/// Return true if a type contains a given object, otherwise false.
+pub trait Contains<T> {
+    fn contains(&self, obj: &T) -> bool;
+}
+
 pub trait Query {
     /// Returns true if no relevant parameters are defined, false otherwise.
     fn is_empty(&self) -> bool {

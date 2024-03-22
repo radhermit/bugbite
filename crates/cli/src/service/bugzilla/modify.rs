@@ -1,22 +1,95 @@
-use std::collections::HashMap;
-use std::fs;
+use std::collections::{HashMap, HashSet};
+use std::hash::Hash;
 use std::num::NonZeroU64;
 use std::process::ExitCode;
+use std::str::FromStr;
+use std::{fmt, fs};
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::objects::Range;
 use bugbite::service::bugzilla::modify::{ModifyParams, SetChange};
-use bugbite::traits::WebClient;
+use bugbite::traits::{Contains, WebClient};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
+use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 use tempfile::NamedTempFile;
 use tracing::info;
 
 use crate::macros::async_block;
 use crate::utils::{confirm, launch_editor};
+
+#[derive(Debug, Clone)]
+enum Container<T: FromStr + PartialOrd + Eq + Hash> {
+    Range(Range<T>),
+    Set(HashSet<T>),
+}
+
+impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for Container<T>
+where
+    <T as FromStr>::Err: fmt::Display + fmt::Debug,
+{
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(value) = s.parse() {
+            Ok(Self::Range(value))
+        } else {
+            let mut set = HashSet::new();
+            for x in s.split(',') {
+                let value = x
+                    .parse()
+                    .map_err(|e| anyhow::anyhow!("invalid value: {e}"))?;
+                set.insert(value);
+            }
+            Ok(Self::Set(set))
+        }
+    }
+}
+
+impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for Container<T> {
+    fn contains(&self, obj: &T) -> bool {
+        match self {
+            Self::Range(value) => value.contains(obj),
+            Self::Set(value) => value.contains(obj),
+        }
+    }
+}
+
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
+struct RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {
+    raw: String,
+    value: Container<T>,
+}
+
+impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for RangeOrSet<T>
+where
+    <T as FromStr>::Err: fmt::Display + fmt::Debug,
+{
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = s.parse()?;
+        Ok(Self {
+            raw: s.to_string(),
+            value,
+        })
+    }
+}
+
+impl<T: FromStr + PartialOrd + Eq + Hash> fmt::Display for RangeOrSet<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.raw.fmt(f)
+    }
+}
+
+impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
+    fn contains(&self, obj: &T) -> bool {
+        self.value.contains(obj)
+    }
+}
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
@@ -215,19 +288,21 @@ struct Options {
     #[arg(
         short = 'P',
         long,
-        value_name = "ID[,...]",
-        value_delimiter = ',',
+        value_name = "RANGE_OR_IDS",
         long_help = indoc::indoc! {"
             Toggle comment privacy.
 
-            The values must be comma-separated comment IDs local to the
-            specified bug ID starting at 0 for the bug description.
+            The values can be comma-separated comment IDs local to the specified
+            bug ID starting at 0 for the bug description or a range of comment
+            IDs.
 
             Example:
-              - bug 123: toggle comment 1 and 2 privacy: bite comments -p 1,2 123
+              - bug 10: toggle comment 1 privacy: bite m --private-comments 1 10
+              - bug 10: toggle comment 1 and 2 privacy: bite m --private-comments 1,2 10
+              - bug 10: toggle all comment privacy: bite m --private-comments .. 10
         "}
     )]
-    private_comments: Option<Vec<usize>>,
+    private_comments: Option<RangeOrSet<usize>>,
 
     /// modify product
     #[arg(short, long)]
@@ -302,7 +377,7 @@ struct Attributes {
     os: Option<String>,
     platform: Option<String>,
     priority: Option<String>,
-    private_comments: Option<Vec<usize>>,
+    private_comments: Option<RangeOrSet<usize>>,
     product: Option<String>,
     resolution: Option<String>,
     see_also: Option<Vec<SetChange<String>>>,
@@ -352,7 +427,7 @@ impl Attributes {
 
     fn into_params<'a, S>(self, client: &'a Client, ids: &[S]) -> anyhow::Result<ModifyParams<'a>>
     where
-        S: std::fmt::Display,
+        S: fmt::Display,
     {
         let mut params = client.service().modify_params();
 
@@ -416,7 +491,7 @@ impl Attributes {
             params.priority(value);
         }
 
-        if let Some(values) = self.private_comments {
+        if let Some(value) = self.private_comments {
             let id = match ids {
                 [x] => x,
                 _ => anyhow::bail!("can't toggle comment privacy for multiple bugs"),
@@ -426,16 +501,14 @@ impl Attributes {
                 .next()
                 .expect("invalid comments response");
 
-            let mut private = vec![];
-            for c in values {
-                if let Some(comment) = comments.get(c) {
-                    private.push((comment.id, !comment.is_private));
-                } else {
-                    anyhow::bail!("comment #{c} doesn't exist on bug #{id}");
+            let mut toggled = vec![];
+            for c in comments {
+                if value.contains(&c.count) {
+                    toggled.push((c.id, !c.is_private));
                 }
             }
 
-            params.private_comments(private);
+            params.private_comments(toggled);
         }
 
         if let Some(value) = self.product.as_ref() {

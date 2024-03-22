@@ -1,4 +1,5 @@
 use std::fmt;
+use std::ops::RangeBounds;
 use std::str::FromStr;
 
 use base64::prelude::*;
@@ -7,6 +8,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
+use crate::traits::Contains;
 use crate::Error;
 
 pub mod bugzilla;
@@ -128,12 +130,12 @@ static RANGE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\d+)?(..=?)(\d+)?").un
 
 #[derive(Debug, Clone)]
 pub enum Range<T> {
-    Between(T, T),   // 0..1
-    Inclusive(T, T), // 0..=1
-    To(T),           // ..1
-    ToInclusive(T),  // ..=1
-    From(T),         // 0..
-    Full,            // ..
+    Range(std::ops::Range<T>),                  // 0..1
+    Inclusive(std::ops::RangeInclusive<T>),     // 0..=1
+    To(std::ops::RangeTo<T>),                   // ..1
+    ToInclusive(std::ops::RangeToInclusive<T>), // ..=1
+    From(std::ops::RangeFrom<T>),               // 0..
+    Full(std::ops::RangeFull),                  // ..
 }
 
 impl<T> FromStr for Range<T>
@@ -155,17 +157,31 @@ where
         match (start, op, finish) {
             (Some(start), "..", Some(finish)) => {
                 if start != finish {
-                    Ok(Range::Between(start, finish))
+                    Ok(Range::Range(start..finish))
                 } else {
                     Err(Error::InvalidValue(format!("empty range: {s}")))
                 }
             }
-            (Some(start), "..", None) => Ok(Range::From(start)),
-            (None, "..", Some(finish)) => Ok(Range::To(finish)),
-            (None, "..", None) => Ok(Range::Full),
-            (Some(start), "..=", Some(finish)) => Ok(Range::Inclusive(start, finish)),
-            (None, "..=", Some(finish)) => Ok(Range::ToInclusive(finish)),
+            (Some(start), "..", None) => Ok(Range::From(start..)),
+            (None, "..", Some(finish)) => Ok(Range::To(..finish)),
+            (None, "..", None) => Ok(Range::Full(..)),
+            (Some(start), "..=", Some(finish)) => Ok(Range::Inclusive(start..=finish)),
+            (None, "..=", Some(finish)) => Ok(Range::ToInclusive(..=finish)),
             _ => Err(Error::InvalidValue(format!("invalid range: {s}"))),
+        }
+    }
+}
+
+/// Return true if a type contains a given object, otherwise false.
+impl<T: PartialOrd> Contains<T> for Range<T> {
+    fn contains(&self, obj: &T) -> bool {
+        match self {
+            Self::Range(r) => r.contains(obj),
+            Self::Inclusive(r) => r.contains(obj),
+            Self::To(r) => r.contains(obj),
+            Self::ToInclusive(r) => r.contains(obj),
+            Self::From(r) => r.contains(obj),
+            Self::Full(r) => r.contains(obj),
         }
     }
 }
