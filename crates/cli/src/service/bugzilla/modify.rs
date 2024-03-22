@@ -22,12 +22,12 @@ use crate::macros::async_block;
 use crate::utils::{confirm, launch_editor};
 
 #[derive(Debug, Clone)]
-enum Container<T: FromStr + PartialOrd + Eq + Hash> {
+enum RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {
     Range(Range<T>),
     Set(HashSet<T>),
 }
 
-impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for Container<T>
+impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for RangeOrSet<T>
 where
     <T as FromStr>::Err: fmt::Display + fmt::Debug,
 {
@@ -49,7 +49,7 @@ where
     }
 }
 
-impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for Container<T> {
+impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
     fn contains(&self, obj: &T) -> bool {
         match self {
             Self::Range(value) => value.contains(obj),
@@ -59,35 +59,36 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for Container<T> {
 }
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
-struct RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {
+struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
     raw: String,
-    value: Container<T>,
+    container: RangeOrSet<T>,
+    private: Option<bool>,
 }
 
-impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for RangeOrSet<T>
+impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for CommentPrivacy<T>
 where
     <T as FromStr>::Err: fmt::Display + fmt::Debug,
 {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let value = s.parse()?;
+        let (container, private) = if let Some((ids, value)) = s.split_once(':') {
+            (ids.parse()?, Some(value.parse()?))
+        } else {
+            (s.parse()?, None)
+        };
+
         Ok(Self {
             raw: s.to_string(),
-            value,
+            container,
+            private,
         })
     }
 }
 
-impl<T: FromStr + PartialOrd + Eq + Hash> fmt::Display for RangeOrSet<T> {
+impl<T: FromStr + PartialOrd + Eq + Hash> fmt::Display for CommentPrivacy<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.raw.fmt(f)
-    }
-}
-
-impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
-    fn contains(&self, obj: &T) -> bool {
-        self.value.contains(obj)
     }
 }
 
@@ -288,7 +289,7 @@ struct Options {
     #[arg(
         short = 'P',
         long,
-        value_name = "RANGE_OR_IDS",
+        value_name = "RANGE_OR_IDS[:BOOL]",
         long_help = indoc::indoc! {"
             Toggle comment privacy.
 
@@ -296,13 +297,19 @@ struct Options {
             bug ID starting at 0 for the bug description or a range of comment
             IDs.
 
+            An optional suffixed consisting of boolean value in the form of
+            `:true` or `:false` can be included to enable or disable all comment
+            privacy respectively. Without this suffix, the privacy of all
+            matching comments is toggled.
+
             Example:
               - bug 10: toggle comment 1 privacy: bite m --private-comments 1 10
               - bug 10: toggle comment 1 and 2 privacy: bite m --private-comments 1,2 10
               - bug 10: toggle all comment privacy: bite m --private-comments .. 10
+              - bug 10: mark comments 2-5 private: bite m --private-comments 2..=5:true 10
         "}
     )]
-    private_comments: Option<RangeOrSet<usize>>,
+    private_comments: Option<CommentPrivacy<usize>>,
 
     /// modify product
     #[arg(short, long)]
@@ -377,7 +384,7 @@ struct Attributes {
     os: Option<String>,
     platform: Option<String>,
     priority: Option<String>,
-    private_comments: Option<RangeOrSet<usize>>,
+    private_comments: Option<CommentPrivacy<usize>>,
     product: Option<String>,
     resolution: Option<String>,
     see_also: Option<Vec<SetChange<String>>>,
@@ -503,8 +510,8 @@ impl Attributes {
 
             let mut toggled = vec![];
             for c in comments {
-                if value.contains(&c.count) {
-                    toggled.push((c.id, !c.is_private));
+                if value.container.contains(&c.count) {
+                    toggled.push((c.id, value.private.unwrap_or(!c.is_private)));
                 }
             }
 
