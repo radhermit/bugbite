@@ -284,28 +284,28 @@ struct AttributeOptions {
             are returned, respectively.
 
             Examples:
-              - existence: bite s --depends-on
-              - nonexistence: bite s --depends-on false
+              - existence: bite s --depends
+              - nonexistence: bite s --depends false
 
             Regular values search for matching dependencies and multiple values
             can be specified in a comma-separated list, matching if a bug
             contains all of the specified dependencies.
 
             Examples:
-              - depends on bug #10: bite s --depends-on 10
-              - depends on bugs #10 and #11: bite s --depends-on 10,11
+              - depends on bug #10: bite s --depends 10
+              - depends on bugs #10 and #11: bite s --depends 10,11
 
             Values can also use `-` or `+` prefixes to manipulate dependency
             existence for the query.
 
             Examples:
-              - doesn't depend on bug #10: bite s --depends-on=-10
-              - depends on bug #10 but not #11: bite s --depends-on 10,-11
+              - doesn't depend on bug #10: bite s --depends=-10
+              - depends on bug #10 but not #11: bite s --depends 10,-11
 
             Values are taken from standard input when `-`.
         "}
     )]
-    depends_on: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
+    depends: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
     /// restrict by flag
     #[arg(
@@ -812,10 +812,10 @@ impl Command {
                 ExistsOrArray::Array(values) => query.blocks(values.into_iter().flatten()),
             }
         }
-        if let Some(values) = params.attr.depends_on {
+        if let Some(values) = params.attr.depends {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::DependsOn, value),
-                ExistsOrArray::Array(values) => query.depends_on(values.into_iter().flatten()),
+                ExistsOrArray::Array(values) => query.depends(values.into_iter().flatten()),
             }
         }
         if let Some(value) = params.query.quicksearch {

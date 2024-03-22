@@ -499,7 +499,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn depends_on<I, V>(&mut self, values: I)
+    pub fn depends<I, V>(&mut self, values: I)
     where
         I: IntoIterator<Item = V>,
         V: Into<EnabledOrDisabled<u64>>,
