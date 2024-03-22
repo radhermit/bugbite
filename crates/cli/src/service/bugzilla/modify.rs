@@ -675,8 +675,8 @@ pub(super) struct Command {
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs or aliases
     #[clap(
-        required = true,
         help_heading = "Arguments",
+        required_unless_present = "dry_run",
         long_help = indoc::indoc! {"
             IDs of bugs to modify.
 
