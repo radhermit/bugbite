@@ -97,7 +97,7 @@ struct Options {
             taken from standard input when `-`.
         "}
     )]
-    depends_on: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+    depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
 
     /// set description
     #[arg(short = 'D', long)]
@@ -210,7 +210,7 @@ struct Attributes {
     blocks: Option<Vec<NonZeroU64>>,
     cc: Option<Vec<String>>,
     component: Option<String>,
-    depends_on: Option<Vec<NonZeroU64>>,
+    depends: Option<Vec<NonZeroU64>>,
     description: Option<String>,
     groups: Option<Vec<String>>,
     keywords: Option<Vec<String>>,
@@ -240,7 +240,7 @@ impl Attributes {
             blocks: self.blocks.or(other.blocks),
             cc: self.cc.or(other.cc),
             component: self.component.or(other.component),
-            depends_on: self.depends_on.or(other.depends_on),
+            depends: self.depends.or(other.depends),
             description: self.description.or(other.description),
             groups: self.groups.or(other.groups),
             keywords: self.keywords.or(other.keywords),
@@ -289,8 +289,8 @@ impl Attributes {
             params.custom_fields(values);
         }
 
-        if let Some(values) = self.depends_on {
-            params.depends_on(values);
+        if let Some(values) = self.depends {
+            params.depends(values);
         }
 
         if let Some(value) = self.description.as_ref() {
@@ -369,7 +369,7 @@ impl From<Options> for Attributes {
             blocks: value.blocks.map(|x| x.into_iter().flatten().collect()),
             cc: value.cc,
             component: value.component,
-            depends_on: value.depends_on.map(|x| x.into_iter().flatten().collect()),
+            depends: value.depends.map(|x| x.into_iter().flatten().collect()),
             description: value.description,
             groups: value.groups,
             keywords: value.keywords,
