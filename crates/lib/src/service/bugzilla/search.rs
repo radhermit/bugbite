@@ -266,12 +266,12 @@ impl QueryBuilder<'_> {
         T: TryInto<Order>,
         <T as TryInto<Order>>::Error: std::fmt::Display,
     {
-        let values = values
+        let values: Vec<_> = values
             .into_iter()
             .map(|x| x.try_into())
-            .collect::<Result<Vec<_>, _>>()
+            .try_collect()
             .map_err(|e| Error::InvalidValue(format!("{e}")))?;
-        let value = values.into_iter().map(|x| x.api()).join(",");
+        let value = values.iter().map(|x| x.api()).join(",");
         self.insert("order", value);
         Ok(())
     }

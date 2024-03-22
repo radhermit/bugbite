@@ -127,7 +127,7 @@ where
                         x.parse()
                             .map_err(|e| anyhow::anyhow!("failed parsing: {e}"))
                     })
-                    .collect::<Result<_, _>>()?,
+                    .try_collect()?,
             )),
         }
     }

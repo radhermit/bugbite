@@ -1,6 +1,7 @@
 use std::{fs, str};
 
 use camino::Utf8Path;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -103,7 +104,7 @@ impl Request for AttachRequest {
             .into_iter()
             .map(|x| service.client().post(self.url.clone()).json(&x))
             .map(|r| r.inject_auth(service, true).map(|r| r.send()))
-            .collect::<Result<Vec<_>, _>>()?;
+            .try_collect()?;
 
         let mut attachment_ids = vec![];
         for future in futures {
