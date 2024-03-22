@@ -5,7 +5,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::RangeOrEqual;
 use bugbite::service::bugzilla::{
-    search::{ChangeField, ExistsField, Match, Order, OrderField},
+    search::{ChangeField, EnabledOrDisabled, ExistsField, Match, Order, OrderField},
     BugField,
 };
 use bugbite::time::TimeDelta;
@@ -227,7 +227,7 @@ struct AttributeOptions {
         value_name = "ID[,...]",
         default_missing_value = "true",
     )]
-    blocks: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
+    blocks: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
     /// specified range of comments
     #[arg(long)]
@@ -249,7 +249,7 @@ struct AttributeOptions {
         value_name = "ID[,...]",
         default_missing_value = "true",
     )]
-    depends_on: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
+    depends_on: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
     /// restrict by flag
     #[arg(
