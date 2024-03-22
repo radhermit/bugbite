@@ -211,6 +211,24 @@ struct Options {
     #[arg(long)]
     priority: Option<String>,
 
+    /// toggle comment privacy
+    #[arg(
+        short = 'P',
+        long,
+        value_name = "ID[,...]",
+        value_delimiter = ',',
+        long_help = indoc::indoc! {"
+            Toggle comment privacy.
+
+            The values must be comma-separated comment IDs local to the
+            specified bug ID starting at 0 for the bug description.
+
+            Example:
+              - bug 123: toggle comment 1 and 2 privacy: bite comments -p 1,2 123
+        "}
+    )]
+    private_comments: Option<Vec<usize>>,
+
     /// modify product
     #[arg(short, long)]
     product: Option<String>,
@@ -284,6 +302,7 @@ struct Attributes {
     os: Option<String>,
     platform: Option<String>,
     priority: Option<String>,
+    private_comments: Option<Vec<usize>>,
     product: Option<String>,
     resolution: Option<String>,
     see_also: Option<Vec<SetChange<String>>>,
@@ -315,6 +334,7 @@ impl Attributes {
             os: self.os.or(other.os),
             platform: self.platform.or(other.platform),
             priority: self.priority.or(other.priority),
+            private_comments: self.private_comments.or(other.private_comments),
             product: self.product.or(other.product),
             resolution: self.resolution.or(other.resolution),
             see_also: self.see_also.or(other.see_also),
@@ -330,7 +350,10 @@ impl Attributes {
         }
     }
 
-    fn into_params(self, client: &Client) -> anyhow::Result<ModifyParams> {
+    fn into_params<'a, S>(self, client: &'a Client, ids: &[S]) -> anyhow::Result<ModifyParams<'a>>
+    where
+        S: std::fmt::Display,
+    {
         let mut params = client.service().modify_params();
 
         if let Some(value) = self.alias.as_ref() {
@@ -352,7 +375,7 @@ impl Attributes {
         if let Some(mut value) = self.comment {
             // interactively create a comment
             if value.trim().is_empty() {
-                value = get_comment(value.trim())?;
+                value = edit_comment(value.trim())?;
             }
             params.comment(&value);
         }
@@ -391,6 +414,28 @@ impl Attributes {
 
         if let Some(value) = self.priority.as_ref() {
             params.priority(value);
+        }
+
+        if let Some(values) = self.private_comments {
+            let id = match ids {
+                [x] => x,
+                _ => anyhow::bail!("can't toggle comment privacy for multiple bugs"),
+            };
+            let comments = async_block!(client.comment(&[id], None))?
+                .into_iter()
+                .next()
+                .expect("invalid comments response");
+
+            let mut private = vec![];
+            for c in values {
+                if let Some(comment) = comments.get(c) {
+                    private.push((comment.id, !comment.is_private));
+                } else {
+                    anyhow::bail!("comment #{c} doesn't exist on bug #{id}");
+                }
+            }
+
+            params.private_comments(private);
         }
 
         if let Some(value) = self.product.as_ref() {
@@ -453,6 +498,7 @@ impl From<Options> for Attributes {
             os: value.os,
             platform: value.platform,
             priority: value.priority,
+            private_comments: value.private_comments,
             product: value.product,
             resolution: value.resolution,
             see_also: value.see_also,
@@ -585,11 +631,11 @@ fn get_reply(client: &Client, id: &str, comment_ids: &mut Vec<usize>) -> anyhow:
     let data = data.iter().map(|x| x.reply()).join("\n\n");
 
     // interactively edit the comment
-    get_comment(&data)
+    edit_comment(&data)
 }
 
 /// Interactively edit a comment.
-fn get_comment(data: &str) -> anyhow::Result<String> {
+fn edit_comment(data: &str) -> anyhow::Result<String> {
     let temp_file = NamedTempFile::new()?;
     if !data.is_empty() {
         fs::write(&temp_file, data)?;
@@ -630,7 +676,7 @@ impl Command {
             }
         }
 
-        let mut params = attrs.into_params(client)?;
+        let mut params = attrs.into_params(client, ids)?;
 
         // interactively create a reply
         if let Some(mut values) = self.reply {

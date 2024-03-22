@@ -231,6 +231,7 @@ struct Params {
     blocks: Option<SetChanges<NonZeroU64>>,
     cc: Option<Changes<String>>,
     comment: Option<Comment>,
+    comment_is_private: Option<IndexMap<u64, bool>>,
     component: Option<String>,
     depends_on: Option<SetChanges<NonZeroU64>>,
     dupe_of: Option<NonZeroU64>,
@@ -397,6 +398,13 @@ impl<'a> ModifyParams<'a> {
 
     pub fn priority(&mut self, value: &str) {
         self.params.priority = Some(value.into());
+    }
+
+    pub fn private_comments<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = (u64, bool)>,
+    {
+        self.params.comment_is_private = Some(values.into_iter().collect());
     }
 
     pub fn product(&mut self, value: &str) {
