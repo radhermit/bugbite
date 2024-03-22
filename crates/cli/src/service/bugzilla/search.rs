@@ -388,7 +388,7 @@ struct AttributeOptions {
     )]
     status: Option<Vec<String>>,
 
-    /// restrict by target
+    /// restrict by target milestone
     #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
     target: Option<Vec<Match>>,
 
