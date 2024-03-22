@@ -313,7 +313,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    flags: Option<ExistsOrArray<MaybeStdinVec<String>>>,
+    flags: Option<ExistsOrArray<MaybeStdinVec<Match>>>,
 
     /// restrict by group
     #[arg(

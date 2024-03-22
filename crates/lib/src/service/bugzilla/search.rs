@@ -519,11 +519,9 @@ impl QueryBuilder<'_> {
     pub fn flags<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        S: Into<Match>,
     {
-        for value in values {
-            self.advanced_field("flagtypes.name", "substring", value);
-        }
+        self.or("flagtypes.name", values)
     }
 
     pub fn groups<I, S>(&mut self, values: I)
