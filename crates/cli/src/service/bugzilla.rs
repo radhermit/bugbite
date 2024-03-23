@@ -178,6 +178,7 @@ impl Render for Bug {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         output_field_wrapped!(f, "Summary", &self.summary, width);
         output_field!(f, "Assignee", &self.assigned_to, width);
+        output_field!(f, "QA", &self.qa_contact, width);
         output_field!(f, "Creator", &self.creator, width);
         output_field!(f, "Created", &self.created, width);
         output_field!(f, "Updated", &self.updated, width);

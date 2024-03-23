@@ -251,6 +251,8 @@ pub struct Bug {
     #[serde(deserialize_with = "non_empty_str")]
     pub assigned_to: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
+    pub qa_contact: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
     pub creator: Option<String>,
     #[serde(rename = "creation_time")]
     pub created: Option<DateTime<Utc>>,
@@ -343,6 +345,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Platform => format!("{:<20}", stringify!(self.platform)),
                 BugField::Priority => format!("{:<12}", stringify!(self.priority)),
                 BugField::Product => format!("{:<20}", stringify!(self.product)),
+                BugField::Qa => format!("{:<20}", stringify!(self.qa_contact)),
                 BugField::Resolution => format!("{:<20}", stringify!(self.resolution)),
                 BugField::SeeAlso => format!("{:<20}", self.see_also.iter().join(",")),
                 BugField::Severity => format!("{:<12}", stringify!(self.severity)),
