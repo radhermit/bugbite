@@ -168,6 +168,21 @@ struct Options {
     #[arg(short, long)]
     product: Option<String>,
 
+    /// set QA contact
+    #[arg(
+        short,
+        long,
+        value_name = "USER",
+        long_help = indoc::indoc! {"
+            Set the QA contact for a bug.
+
+            The value must be an email address for a service user. The alias
+            `@me` can also be used for the service's configured user if one
+            exists.
+        "}
+    )]
+    qa: Option<String>,
+
     /// set resolution
     #[arg(short, long)]
     resolution: Option<String>,
@@ -235,6 +250,7 @@ struct Attributes {
     platform: Option<String>,
     priority: Option<String>,
     product: Option<String>,
+    qa: Option<String>,
     resolution: Option<String>,
     see_also: Option<Vec<String>>,
     severity: Option<String>,
@@ -266,6 +282,7 @@ impl Attributes {
             platform: self.platform.or(other.platform),
             priority: self.priority.or(other.priority),
             product: self.product.or(other.product),
+            qa: self.qa.or(other.qa),
             resolution: self.resolution.or(other.resolution),
             see_also: self.see_also.or(other.see_also),
             status: self.status.or(other.status),
@@ -343,6 +360,10 @@ impl Attributes {
             params.product(value);
         }
 
+        if let Some(value) = self.qa.as_ref() {
+            params.qa(value);
+        }
+
         if let Some(value) = self.resolution {
             params.resolution(value);
         }
@@ -400,6 +421,7 @@ impl From<Options> for Attributes {
             platform: value.platform,
             priority: value.priority,
             product: value.product,
+            qa: value.qa,
             resolution: value.resolution,
             see_also: value.see_also,
             status: value.status,

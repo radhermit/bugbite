@@ -64,6 +64,7 @@ struct Params {
     groups: Option<Vec<String>>,
     ids: Option<Vec<u64>>,
     keywords: Option<Vec<String>>,
+    qa_contact: Option<String>,
     resolution: Option<String>,
     see_also: Option<Vec<String>>,
     status: Option<String>,
@@ -217,6 +218,11 @@ impl<'a> CreateParams<'a> {
 
     pub fn product<S: Into<String>>(&mut self, value: S) {
         self.params.product = value.into();
+    }
+
+    pub fn qa(&mut self, value: &str) {
+        let user = self.service.replace_user_alias(value);
+        self.params.qa_contact = Some(user.into());
     }
 
     pub fn resolution<S: Into<String>>(&mut self, value: S) {
