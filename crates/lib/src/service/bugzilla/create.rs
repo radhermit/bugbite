@@ -139,11 +139,12 @@ impl<'a> CreateParams<'a> {
         self.params.blocks = Some(values.into_iter().collect());
     }
 
-    pub fn cc<I>(&mut self, values: I)
+    pub fn cc<I, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = String>,
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
     {
-        self.params.cc = Some(values.into_iter().collect());
+        self.params.cc = Some(values.into_iter().map(Into::into).collect());
     }
 
     pub fn component(&mut self, value: &str) {
@@ -178,18 +179,20 @@ impl<'a> CreateParams<'a> {
         );
     }
 
-    pub fn groups<I>(&mut self, values: I)
+    pub fn groups<I, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = String>,
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
     {
-        self.params.groups = Some(values.into_iter().collect());
+        self.params.groups = Some(values.into_iter().map(Into::into).collect());
     }
 
-    pub fn keywords<I>(&mut self, values: I)
+    pub fn keywords<I, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = String>,
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
     {
-        self.params.keywords = Some(values.into_iter().collect());
+        self.params.keywords = Some(values.into_iter().map(Into::into).collect());
     }
 
     pub fn os(&mut self, value: &str) {
@@ -212,11 +215,12 @@ impl<'a> CreateParams<'a> {
         self.params.resolution = Some(value.into());
     }
 
-    pub fn see_also<I>(&mut self, values: I)
+    pub fn see_also<I, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = String>,
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
     {
-        self.params.see_also = Some(values.into_iter().collect());
+        self.params.see_also = Some(values.into_iter().map(Into::into).collect());
     }
 
     pub fn severity(&mut self, value: &str) {
