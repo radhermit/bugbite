@@ -8,12 +8,10 @@ use crate::Error;
 use super::attachment::AttachmentRequest;
 use super::comment::CommentRequest;
 use super::history::HistoryRequest;
-use super::IdOrAlias;
 
 #[derive(Debug)]
 pub(crate) struct GetRequest {
     url: Url,
-    ids: Vec<String>,
     attachments: Option<AttachmentRequest>,
     comments: Option<CommentRequest>,
     history: Option<HistoryRequest>,
@@ -30,38 +28,17 @@ impl GetRequest {
     where
         S: std::fmt::Display,
     {
-        if ids.is_empty() {
+        let [id, remaining_ids @ ..] = ids else {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
-        // TODO: use query builder instead of manual creation
-        let mut url = service.base().join("rest/bug")?;
-        let mut count = 1;
-        url.query_pairs_mut()
-            .append_pair(&format!("f{count}"), "OP");
-        url.query_pairs_mut()
-            .append_pair(&format!("j{count}"), "OR");
+        let mut url = service.base().join(&format!("rest/bug/{id}"))?;
 
-        let mut new_ids = vec![];
-        for id in ids {
-            let id = id.to_string();
-            let field = match IdOrAlias::from(id.as_str()) {
-                IdOrAlias::Id(_) => "bug_id",
-                IdOrAlias::Alias(_) => "alias",
-            };
-
-            count += 1;
-            url.query_pairs_mut()
-                .append_pair(&format!("f{count}"), field);
-            url.query_pairs_mut()
-                .append_pair(&format!("o{count}"), "equals");
-            url.query_pairs_mut().append_pair(&format!("v{count}"), &id);
-            new_ids.push(id);
+        // Note that multiple request support is missing from upstream's REST API
+        // documentation, but exists in older RPC-based docs.
+        for id in remaining_ids {
+            url.query_pairs_mut().append_pair("ids", &id.to_string());
         }
-
-        count += 1;
-        url.query_pairs_mut()
-            .append_pair(&format!("f{count}"), "CP");
 
         // include personal tags
         url.query_pairs_mut()
@@ -89,7 +66,6 @@ impl GetRequest {
 
         Ok(Self {
             url,
-            ids: new_ids,
             attachments,
             comments,
             history,
@@ -117,7 +93,6 @@ impl Request for GetRequest {
                 "invalid service response to get request".to_string(),
             ));
         };
-        let mut data = data.into_iter();
 
         let mut attachments = match attachments {
             Some(f) => f.await?.into_iter(),
@@ -133,10 +108,7 @@ impl Request for GetRequest {
         };
 
         let mut bugs = vec![];
-        for id in &self.ids {
-            let value = data
-                .next()
-                .ok_or_else(|| Error::InvalidValue(format!("nonexistent bug {id}")))?;
+        for value in data {
             let mut bug: Bug = serde_json::from_value(value)?;
             bug.attachments = attachments.next().unwrap_or_default();
             bug.comments = comments.next().unwrap_or_default();
