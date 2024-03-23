@@ -1,5 +1,3 @@
-use std::num::NonZeroU64;
-
 use reqwest::ClientBuilder;
 use tracing::info;
 
@@ -26,7 +24,7 @@ impl Client {
 
     pub async fn get(
         &self,
-        ids: &[NonZeroU64],
+        ids: &[u64],
         attachments: bool,
         comments: bool,
         history: bool,

@@ -1,5 +1,3 @@
-use std::num::NonZeroU64;
-
 use reqwest::ClientBuilder;
 use tracing::info;
 
@@ -47,11 +45,7 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn attachment(
-        &self,
-        ids: &[NonZeroU64],
-        data: bool,
-    ) -> crate::Result<Vec<Vec<Attachment>>> {
+    pub async fn attachment(&self, ids: &[u64], data: bool) -> crate::Result<Vec<Vec<Attachment>>> {
         let request = self.service.attachment_request(ids, data)?;
         request.send(&self.service).await
     }
