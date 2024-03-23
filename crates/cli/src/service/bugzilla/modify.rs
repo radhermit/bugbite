@@ -262,13 +262,19 @@ struct Options {
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = indoc::indoc! {r#"
             Add or remove flags.
 
-            Values must be valid flags.
+            Values must be valid flags composed of the flag name followed by its
+            status. Supported statuses include `+`, `-`, and `?`. In addition,
+            the special status `X` removes a flag.
 
             Multiple arguments can be specified in a comma-separated list.
-        "}
+
+            Examples modifying bug 10:
+              - add `test?`: bite m --flags "test?" 10
+              - add `check+` and remove `test?`: bite m --flags check+,testX 10
+        "#}
     )]
     flags: Option<Vec<Flag>>,
 

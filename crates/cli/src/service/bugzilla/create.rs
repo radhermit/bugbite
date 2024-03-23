@@ -110,7 +110,8 @@ struct Options {
         long_help = indoc::indoc! {"
             Set flags.
 
-            Values must be valid flags.
+            Values must be valid flags composed of the flag name followed by its
+            status. Supported statuses include `+`, `-`, and `?`.
 
             Multiple arguments can be specified in a comma-separated list.
         "}
