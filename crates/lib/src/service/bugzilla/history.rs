@@ -51,7 +51,7 @@ impl Request for HistoryRequest {
         let mut data = service.parse_response(response).await?;
         let Value::Array(bugs) = data["bugs"].take() else {
             return Err(Error::InvalidValue(
-                "invalid history data returned".to_string(),
+                "invalid service response to history request".to_string(),
             ));
         };
 
