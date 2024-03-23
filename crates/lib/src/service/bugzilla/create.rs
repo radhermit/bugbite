@@ -5,6 +5,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
+use crate::objects::bugzilla::Flag;
 use crate::traits::{InjectAuth, Request, ServiceParams, WebService};
 use crate::Error;
 
@@ -59,6 +60,7 @@ struct Params {
     blocks: Option<Vec<u64>>,
     cc: Option<Vec<String>>,
     depends_on: Option<Vec<u64>>,
+    flags: Option<Vec<Flag>>,
     groups: Option<Vec<String>>,
     ids: Option<Vec<u64>>,
     keywords: Option<Vec<String>>,
@@ -176,6 +178,13 @@ impl<'a> CreateParams<'a> {
                 })
                 .collect(),
         );
+    }
+
+    pub fn flags<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = Flag>,
+    {
+        self.params.flags = Some(values.into_iter().collect());
     }
 
     pub fn groups<I, S>(&mut self, values: I)

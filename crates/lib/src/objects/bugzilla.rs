@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::fmt;
+use std::str::FromStr;
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
@@ -13,6 +14,7 @@ use strum::{Display, EnumString};
 use crate::serde::{non_empty_str, null_empty_vec};
 use crate::service::bugzilla::BugField;
 use crate::traits::RenderSearch;
+use crate::Error;
 
 use super::{stringify, Base64, Item};
 
@@ -165,10 +167,43 @@ pub enum FlagStatus {
     Remove,
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
 pub struct Flag {
     pub name: String,
     pub status: FlagStatus,
+}
+
+impl FromStr for Flag {
+    type Err = Error;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        if s.is_empty() {
+            return Err(Error::InvalidValue("empty flag".to_string()));
+        }
+
+        let name = &s[..s.len() - 1];
+        let status = &s[s.len() - 1..];
+        let status = status
+            .parse()
+            .map_err(|_| Error::InvalidValue(format!("invalid flag status: {status}")))?;
+
+        Ok(Self {
+            name: name.to_string(),
+            status,
+        })
+    }
+}
+
+impl fmt::Display for Flag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}{}", self.name, self.status)
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+pub struct BugFlag {
+    #[serde(flatten)]
+    pub flag: Flag,
     pub setter: String,
     #[serde(rename = "creation_date")]
     pub created: DateTime<Utc>,
@@ -176,9 +211,9 @@ pub struct Flag {
     pub updated: DateTime<Utc>,
 }
 
-impl fmt::Display for Flag {
+impl fmt::Display for BugFlag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}{}", self.name, self.status)
+        write!(f, "{}", self.flag)
     }
 }
 
@@ -259,7 +294,7 @@ pub struct Bug {
     #[serde(rename = "dupe_of")]
     pub duplicate_of: Option<u64>,
     #[serde(deserialize_with = "null_empty_vec")]
-    pub flags: Vec<Flag>,
+    pub flags: Vec<BugFlag>,
     #[serde(deserialize_with = "null_empty_vec")]
     pub tags: Vec<String>,
     #[serde(deserialize_with = "null_empty_vec")]

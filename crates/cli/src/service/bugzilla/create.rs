@@ -5,7 +5,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
-use bugbite::objects::bugzilla::Bug;
+use bugbite::objects::bugzilla::{Bug, Flag};
 use bugbite::service::bugzilla::create::CreateParams;
 use bugbite::traits::WebClient;
 use camino::Utf8PathBuf;
@@ -100,6 +100,22 @@ struct Options {
     /// set description
     #[arg(short = 'D', long)]
     description: Option<String>,
+
+    /// set flags
+    #[arg(
+        short = 'F',
+        long,
+        value_name = "VALUE[,...]",
+        value_delimiter = ',',
+        long_help = indoc::indoc! {"
+            Set flags.
+
+            Values must be valid flags.
+
+            Multiple arguments can be specified in a comma-separated list.
+        "}
+    )]
+    flags: Option<Vec<Flag>>,
 
     /// set groups
     #[arg(
@@ -211,6 +227,7 @@ struct Attributes {
     component: Option<String>,
     depends: Option<Vec<u64>>,
     description: Option<String>,
+    flags: Option<Vec<Flag>>,
     groups: Option<Vec<String>>,
     keywords: Option<Vec<String>>,
     os: Option<String>,
@@ -241,6 +258,7 @@ impl Attributes {
             component: self.component.or(other.component),
             depends: self.depends.or(other.depends),
             description: self.description.or(other.description),
+            flags: self.flags.or(other.flags),
             groups: self.groups.or(other.groups),
             keywords: self.keywords.or(other.keywords),
             os: self.os.or(other.os),
@@ -294,6 +312,10 @@ impl Attributes {
 
         if let Some(value) = self.description {
             params.description(value);
+        }
+
+        if let Some(values) = self.flags {
+            params.flags(values);
         }
 
         if let Some(values) = self.groups {
@@ -370,6 +392,7 @@ impl From<Options> for Attributes {
             component: value.component,
             depends: value.depends.map(|x| x.into_iter().flatten().collect()),
             description: value.description,
+            flags: value.flags,
             groups: value.groups,
             keywords: value.keywords,
             os: value.os,
