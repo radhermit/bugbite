@@ -21,6 +21,7 @@ struct Options {
         num_args = 0..=1,
         default_missing_value = "true",
         value_name = "BOOL",
+        hide_possible_values = true,
     )]
     attachment: Option<bool>,
 
