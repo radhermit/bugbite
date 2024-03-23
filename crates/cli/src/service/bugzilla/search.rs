@@ -138,6 +138,7 @@ where
 struct AttributeOptions {
     /// restrict by alias
     #[arg(
+        short = 'A',
         long,
         num_args = 0..=1,
         value_name = "VALUE[,...]",
@@ -177,7 +178,6 @@ struct AttributeOptions {
 
     /// restrict by attachments
     #[arg(
-        short = 'A',
         long,
         num_args = 0..=1,
         value_name = "VALUE[,...]",

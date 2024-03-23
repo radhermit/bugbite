@@ -106,6 +106,7 @@ impl<T: FromStr + PartialOrd + Eq + Hash> fmt::Display for CommentPrivacy<T> {
 struct Options {
     /// add/remove/set aliases
     #[arg(
+        short = 'A',
         long,
         num_args = 0..=1,
         value_name = "VALUE[,...]",
