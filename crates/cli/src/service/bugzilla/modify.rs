@@ -137,16 +137,22 @@ struct Options {
         short,
         long,
         value_name = "USER",
-        long_help = indoc::indoc! {"
+        num_args = 0..=1,
+        default_missing_value = "",
+        long_help = indoc::indoc! {r#"
             Assign a bug to a user.
 
             The value must be an email address for a service user. The alias
             `@me` can also be used for the service's configured user if one
             exists.
 
+            No argument or an empty string will reset the assignee to the
+            default for target bug's component.
+
             Example modifying bug 123:
               - assign to yourself: bite m --assigned-to @me 123
-        "}
+              - reset to default: bite m --assigned-to "" 123
+        "#}
     )]
     assigned_to: Option<String>,
 
@@ -520,7 +526,11 @@ impl Attributes {
         }
 
         if let Some(value) = self.assigned_to.as_ref() {
-            params.assigned_to(value);
+            if value.is_empty() {
+                params.assigned_to(None);
+            } else {
+                params.assigned_to(Some(value));
+            }
         }
 
         if let Some(values) = self.blocks {

@@ -242,6 +242,7 @@ struct Params {
     platform: Option<String>,
     priority: Option<String>,
     product: Option<String>,
+    reset_assigned_to: Option<bool>,
     resolution: Option<String>,
     see_also: Option<Changes<String>>,
     severity: Option<String>,
@@ -300,9 +301,13 @@ impl<'a> ModifyParams<'a> {
         self.params.alias = Some(values.into_iter().collect());
     }
 
-    pub fn assigned_to(&mut self, value: &str) {
-        let user = self.service.replace_user_alias(value);
-        self.params.assigned_to = Some(user.into());
+    pub fn assigned_to(&mut self, value: Option<&str>) {
+        if let Some(name) = value {
+            let user = self.service.replace_user_alias(name);
+            self.params.assigned_to = Some(user.into());
+        } else {
+            self.params.reset_assigned_to = Some(true);
+        }
     }
 
     pub fn blocks<I>(&mut self, values: I)
