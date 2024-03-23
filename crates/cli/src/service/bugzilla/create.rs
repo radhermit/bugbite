@@ -5,6 +5,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::objects::bugzilla::Bug;
 use bugbite::service::bugzilla::create::CreateParams;
 use bugbite::traits::WebClient;
 use camino::Utf8PathBuf;
@@ -393,6 +394,21 @@ impl From<Options> for Attributes {
     }
 }
 
+impl From<Bug> for Attributes {
+    fn from(value: Bug) -> Self {
+        Self {
+            component: value.component,
+            os: value.op_sys,
+            platform: value.platform,
+            priority: value.priority,
+            product: value.product,
+            severity: value.severity,
+            version: value.version,
+            ..Default::default()
+        }
+    }
+}
+
 #[derive(Debug, Args)]
 pub(super) struct Command {
     /// skip service interaction
@@ -405,6 +421,7 @@ pub(super) struct Command {
         help_heading = "Create options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
+        conflicts_with = "from_bug",
         long_help = indoc::indoc! {"
             Read attributes from a template.
 
@@ -416,6 +433,25 @@ pub(super) struct Command {
         "}
     )]
     from: Option<Utf8PathBuf>,
+
+    /// read attributes from an existing bug
+    #[arg(
+        long,
+        help_heading = "Create options",
+        value_name = "ID",
+        conflicts_with = "from",
+        long_help = indoc::indoc! {"
+            Read attributes from an existing bug.
+
+            Value must be the ID of an existing bug which will be used to
+            pre-populate the relevant, required fields for creation.
+
+            Combining this option with -n/--dry-run and --to allows creating
+            templates using existing bugs to edit and use later without creating
+            a new bug.
+        "}
+    )]
+    from_bug: Option<u64>,
 
     /// write attributes to a template
     #[arg(
@@ -450,7 +486,13 @@ impl Command {
                 .map_err(|e| anyhow::anyhow!("failed parsing template: {path}: {e}"))?;
             // command-line options override template options
             attrs = attrs.merge(template);
-        };
+        } else if let Some(id) = self.from_bug {
+            let bug = async_block!(client.get(&[id], false, false, false))?
+                .into_iter()
+                .next()
+                .expect("failed getting bug");
+            attrs = attrs.merge(bug.into());
+        }
 
         // write attributes to a template
         if let Some(path) = self.to.as_ref() {
