@@ -1,3 +1,4 @@
+use serde_json::Value;
 use url::Url;
 
 use crate::objects::bugzilla::Bug;
@@ -12,6 +13,7 @@ use super::IdOrAlias;
 #[derive(Debug)]
 pub(crate) struct GetRequest {
     url: Url,
+    ids: Vec<String>,
     attachments: Option<AttachmentRequest>,
     comments: Option<CommentRequest>,
     history: Option<HistoryRequest>,
@@ -40,6 +42,7 @@ impl GetRequest {
         url.query_pairs_mut()
             .append_pair(&format!("j{count}"), "OR");
 
+        let mut new_ids = vec![];
         for id in ids {
             let id = id.to_string();
             let id_or_alias = IdOrAlias::from(id.as_str());
@@ -54,6 +57,7 @@ impl GetRequest {
             url.query_pairs_mut()
                 .append_pair(&format!("o{count}"), "equals");
             url.query_pairs_mut().append_pair(&format!("v{count}"), &id);
+            new_ids.push(id);
         }
 
         count += 1;
@@ -86,6 +90,7 @@ impl GetRequest {
 
         Ok(Self {
             url,
+            ids: new_ids,
             attachments,
             comments,
             history,
@@ -108,8 +113,12 @@ impl Request for GetRequest {
 
         let response = bugs.await?;
         let mut data = service.parse_response(response).await?;
-        let data = data["bugs"].take();
-        let mut bugs: Vec<Bug> = serde_json::from_value(data)?;
+        let Value::Array(data) = data["bugs"].take() else {
+            return Err(Error::InvalidValue(
+                "invalid service response to get request".to_string(),
+            ));
+        };
+        let mut data = data.into_iter();
 
         let mut attachments = match attachments {
             Some(f) => f.await?.into_iter(),
@@ -124,10 +133,16 @@ impl Request for GetRequest {
             None => Vec::new().into_iter(),
         };
 
-        for bug in &mut bugs {
+        let mut bugs = vec![];
+        for id in &self.ids {
+            let value = data
+                .next()
+                .ok_or_else(|| Error::InvalidValue(format!("nonexistent bug {id}")))?;
+            let mut bug: Bug = serde_json::from_value(value)?;
             bug.attachments = attachments.next().unwrap_or_default();
             bug.comments = comments.next().unwrap_or_default();
             bug.history = history.next().unwrap_or_default();
+            bugs.push(bug);
         }
 
         Ok(bugs)
