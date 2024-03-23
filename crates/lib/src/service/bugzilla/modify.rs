@@ -332,7 +332,7 @@ impl<'a> ModifyParams<'a> {
         self.params.cc = Some(iter.collect());
     }
 
-    pub fn comment(&mut self, value: &str, is_private: bool) {
+    pub fn comment<S: Into<String>>(&mut self, value: S, is_private: bool) {
         let comment = Comment {
             body: value.into(),
             is_private,
@@ -340,7 +340,7 @@ impl<'a> ModifyParams<'a> {
         self.params.comment = Some(comment);
     }
 
-    pub fn component(&mut self, value: &str) {
+    pub fn component<S: Into<String>>(&mut self, value: S) {
         self.params.component = Some(value.into());
     }
 
@@ -386,15 +386,15 @@ impl<'a> ModifyParams<'a> {
         self.params.keywords = Some(values.into_iter().collect());
     }
 
-    pub fn os(&mut self, value: &str) {
+    pub fn os<S: Into<String>>(&mut self, value: S) {
         self.params.op_sys = Some(value.into());
     }
 
-    pub fn platform(&mut self, value: &str) {
+    pub fn platform<S: Into<String>>(&mut self, value: S) {
         self.params.platform = Some(value.into());
     }
 
-    pub fn priority(&mut self, value: &str) {
+    pub fn priority<S: Into<String>>(&mut self, value: S) {
         self.params.priority = Some(value.into());
     }
 
@@ -405,11 +405,11 @@ impl<'a> ModifyParams<'a> {
         self.params.comment_is_private = Some(values.into_iter().collect());
     }
 
-    pub fn product(&mut self, value: &str) {
+    pub fn product<S: Into<String>>(&mut self, value: S) {
         self.params.product = Some(value.into());
     }
 
-    pub fn resolution(&mut self, value: &str) {
+    pub fn resolution<S: Into<String>>(&mut self, value: S) {
         self.params.resolution = Some(value.into());
     }
 
@@ -434,31 +434,31 @@ impl<'a> ModifyParams<'a> {
         self.params.see_also = Some(iter.collect());
     }
 
-    pub fn severity(&mut self, value: &str) {
+    pub fn severity<S: Into<String>>(&mut self, value: S) {
         self.params.severity = Some(value.into());
     }
 
-    pub fn status(&mut self, value: &str) {
+    pub fn status<S: Into<String>>(&mut self, value: S) {
         self.params.status = Some(value.into());
     }
 
-    pub fn summary(&mut self, value: &str) {
+    pub fn summary<S: Into<String>>(&mut self, value: S) {
         self.params.summary = Some(value.into());
     }
 
-    pub fn target(&mut self, value: &str) {
+    pub fn target<S: Into<String>>(&mut self, value: S) {
         self.params.target_milestone = Some(value.into());
     }
 
-    pub fn url(&mut self, value: &str) {
+    pub fn url<S: Into<String>>(&mut self, value: S) {
         self.params.url = Some(value.into());
     }
 
-    pub fn version(&mut self, value: &str) {
+    pub fn version<S: Into<String>>(&mut self, value: S) {
         self.params.version = Some(value.into());
     }
 
-    pub fn whiteboard(&mut self, value: &str) {
+    pub fn whiteboard<S: Into<String>>(&mut self, value: S) {
         self.params.whiteboard = Some(value.into());
     }
 }
