@@ -242,7 +242,9 @@ struct Params {
     platform: Option<String>,
     priority: Option<String>,
     product: Option<String>,
+    qa_contact: Option<String>,
     reset_assigned_to: Option<bool>,
+    reset_qa_contact: Option<bool>,
     resolution: Option<String>,
     see_also: Option<Changes<String>>,
     severity: Option<String>,
@@ -421,6 +423,15 @@ impl<'a> ModifyParams<'a> {
 
     pub fn product<S: Into<String>>(&mut self, value: S) {
         self.params.product = Some(value.into());
+    }
+
+    pub fn qa(&mut self, value: Option<&str>) {
+        if let Some(name) = value {
+            let user = self.service.replace_user_alias(name);
+            self.params.qa_contact = Some(user.into());
+        } else {
+            self.params.reset_qa_contact = Some(true);
+        }
     }
 
     pub fn resolution<S: Into<String>>(&mut self, value: S) {

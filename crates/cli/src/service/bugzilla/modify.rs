@@ -146,8 +146,8 @@ struct Options {
             `@me` can also be used for the service's configured user if one
             exists.
 
-            No argument or an empty string will reset the assignee to the
-            default for target bug's component.
+            No argument or an empty string will reset the field to the default
+            for target component.
 
             Example modifying bug 123:
               - assign to yourself: bite m --assigned-to @me 123
@@ -386,6 +386,29 @@ struct Options {
     #[arg(short, long)]
     product: Option<String>,
 
+    /// modify QA contact
+    #[arg(
+        long,
+        value_name = "USER",
+        num_args = 0..=1,
+        default_missing_value = "",
+        long_help = indoc::indoc! {r#"
+            Assign a QA contact for the bug.
+
+            The value must be an email address for a service user. The alias
+            `@me` can also be used for the service's configured user if one
+            exists.
+
+            No argument or an empty string will reset the field to the default
+            for target component.
+
+            Example modifying bug 123:
+              - assign to yourself: bite m --qa @me 123
+              - reset to default: bite m --qa "" 123
+        "#}
+    )]
+    qa: Option<String>,
+
     /// modify resolution
     #[arg(short, long)]
     resolution: Option<String>,
@@ -463,6 +486,7 @@ struct Attributes {
     priority: Option<String>,
     private_comment: Option<CommentPrivacy<usize>>,
     product: Option<String>,
+    qa: Option<String>,
     resolution: Option<String>,
     see_also: Option<Vec<SetChange<String>>>,
     severity: Option<String>,
@@ -496,6 +520,7 @@ impl Attributes {
             priority: self.priority.or(other.priority),
             private_comment: self.private_comment.or(other.private_comment),
             product: self.product.or(other.product),
+            qa: self.qa.or(other.qa),
             resolution: self.resolution.or(other.resolution),
             see_also: self.see_also.or(other.see_also),
             status: self.status.or(other.status),
@@ -615,6 +640,14 @@ impl Attributes {
             params.product(value);
         }
 
+        if let Some(value) = self.qa.as_ref() {
+            if value.is_empty() {
+                params.qa(None);
+            } else {
+                params.qa(Some(value));
+            }
+        }
+
         if let Some(value) = self.resolution {
             params.resolution(value);
         }
@@ -674,6 +707,7 @@ impl From<Options> for Attributes {
             priority: value.priority,
             private_comment: value.private_comment,
             product: value.product,
+            qa: value.qa,
             resolution: value.resolution,
             see_also: value.see_also,
             status: value.status,
