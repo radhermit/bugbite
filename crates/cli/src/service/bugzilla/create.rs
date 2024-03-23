@@ -170,7 +170,6 @@ struct Options {
 
     /// set QA contact
     #[arg(
-        short,
         long,
         value_name = "USER",
         long_help = indoc::indoc! {"
