@@ -108,7 +108,7 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn create<'a>(&'a self, params: CreateParams<'a>) -> crate::Result<NonZeroU64> {
+    pub async fn create<'a>(&'a self, params: CreateParams<'a>) -> crate::Result<u64> {
         let request = self.service.create_request(params)?;
         request.send(&self.service).await
     }

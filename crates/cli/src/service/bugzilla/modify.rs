@@ -1,6 +1,5 @@
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
-use std::num::NonZeroU64;
 use std::process::ExitCode;
 use std::str::FromStr;
 use std::{fmt, fs};
@@ -175,7 +174,7 @@ struct Options {
               - set to 3: bite m --blocks 3 10
         "}
     )]
-    blocks: Option<Vec<SetChange<NonZeroU64>>>,
+    blocks: Option<Vec<SetChange<u64>>>,
 
     /// add/remove CC users
     #[arg(
@@ -250,11 +249,11 @@ struct Options {
               - set to 3: bite m --depends 3 10
         "}
     )]
-    depends: Option<Vec<SetChange<NonZeroU64>>>,
+    depends: Option<Vec<SetChange<u64>>>,
 
     /// mark bug as duplicate
     #[arg(short = 'D', long, value_name = "ID", conflicts_with_all = ["status", "resolution"])]
-    duplicate_of: Option<NonZeroU64>,
+    duplicate_of: Option<u64>,
 
     /// add/remove groups
     #[arg(
@@ -421,12 +420,12 @@ struct Options {
 struct Attributes {
     alias: Option<Vec<SetChange<String>>>,
     assigned_to: Option<String>,
-    blocks: Option<Vec<SetChange<NonZeroU64>>>,
+    blocks: Option<Vec<SetChange<u64>>>,
     cc: Option<Vec<SetChange<String>>>,
     comment: Option<String>,
     component: Option<String>,
-    depends: Option<Vec<SetChange<NonZeroU64>>>,
-    duplicate_of: Option<NonZeroU64>,
+    depends: Option<Vec<SetChange<u64>>>,
+    duplicate_of: Option<u64>,
     groups: Option<Vec<SetChange<String>>>,
     keywords: Option<Vec<SetChange<String>>>,
     os: Option<String>,

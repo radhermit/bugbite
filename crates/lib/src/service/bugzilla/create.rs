@@ -1,5 +1,4 @@
 use std::fs;
-use std::num::NonZeroU64;
 
 use camino::Utf8Path;
 use indexmap::IndexMap;
@@ -16,7 +15,7 @@ pub(crate) struct CreateRequest {
 }
 
 impl Request for CreateRequest {
-    type Output = NonZeroU64;
+    type Output = u64;
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
@@ -57,11 +56,11 @@ struct Params {
     // optional fields
     alias: Option<Vec<String>>,
     assigned_to: Option<String>,
-    blocks: Option<Vec<NonZeroU64>>,
+    blocks: Option<Vec<u64>>,
     cc: Option<String>,
-    depends_on: Option<Vec<NonZeroU64>>,
+    depends_on: Option<Vec<u64>>,
     groups: Option<String>,
-    ids: Option<Vec<NonZeroU64>>,
+    ids: Option<Vec<u64>>,
     keywords: Option<String>,
     resolution: Option<String>,
     see_also: Option<String>,
@@ -134,7 +133,7 @@ impl<'a> CreateParams<'a> {
 
     pub fn blocks<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = NonZeroU64>,
+        I: IntoIterator<Item = u64>,
     {
         self.params.blocks = Some(values.into_iter().collect());
     }
@@ -153,7 +152,7 @@ impl<'a> CreateParams<'a> {
 
     pub fn depends<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = NonZeroU64>,
+        I: IntoIterator<Item = u64>,
     {
         self.params.depends_on = Some(values.into_iter().collect());
     }

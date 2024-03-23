@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io::{stdout, IsTerminal, Write};
-use std::num::NonZeroU64;
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -56,7 +55,7 @@ struct Options {
             taken from standard input when `-`.
         "}
     )]
-    blocks: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+    blocks: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// set CC users
     #[arg(
@@ -97,7 +96,7 @@ struct Options {
             taken from standard input when `-`.
         "}
     )]
-    depends: Option<Vec<MaybeStdinVec<NonZeroU64>>>,
+    depends: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// set description
     #[arg(short = 'D', long)]
@@ -207,10 +206,10 @@ struct Options {
 struct Attributes {
     alias: Option<Vec<String>>,
     assigned_to: Option<String>,
-    blocks: Option<Vec<NonZeroU64>>,
+    blocks: Option<Vec<u64>>,
     cc: Option<Vec<String>>,
     component: Option<String>,
-    depends: Option<Vec<NonZeroU64>>,
+    depends: Option<Vec<u64>>,
     description: Option<String>,
     groups: Option<Vec<String>>,
     keywords: Option<Vec<String>>,

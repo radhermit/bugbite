@@ -1,4 +1,3 @@
-use std::num::NonZeroU64;
 use std::str::FromStr;
 use std::{fmt, fs};
 
@@ -34,7 +33,7 @@ impl fmt::Display for FieldChange {
 /// Changes made to a bug.
 #[derive(Deserialize, Debug, Eq, PartialEq)]
 pub struct BugChange {
-    id: NonZeroU64,
+    id: u64,
     comment: Option<Comment>,
     changes: IndexMap<String, FieldChange>,
 }
@@ -227,13 +226,13 @@ impl fmt::Display for Comment {
 struct Params {
     alias: Option<SetChanges<String>>,
     assigned_to: Option<String>,
-    blocks: Option<SetChanges<NonZeroU64>>,
+    blocks: Option<SetChanges<u64>>,
     cc: Option<Changes<String>>,
     comment: Option<Comment>,
     comment_is_private: Option<IndexMap<u64, bool>>,
     component: Option<String>,
-    depends_on: Option<SetChanges<NonZeroU64>>,
-    dupe_of: Option<NonZeroU64>,
+    depends_on: Option<SetChanges<u64>>,
+    dupe_of: Option<u64>,
     groups: Option<Changes<String>>,
     ids: Option<Vec<String>>,
     keywords: Option<SetChanges<String>>,
@@ -306,7 +305,7 @@ impl<'a> ModifyParams<'a> {
 
     pub fn blocks<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = SetChange<NonZeroU64>>,
+        I: IntoIterator<Item = SetChange<u64>>,
     {
         self.params.blocks = Some(values.into_iter().collect());
     }
@@ -347,12 +346,12 @@ impl<'a> ModifyParams<'a> {
 
     pub fn depends<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = SetChange<NonZeroU64>>,
+        I: IntoIterator<Item = SetChange<u64>>,
     {
         self.params.depends_on = Some(values.into_iter().collect());
     }
 
-    pub fn duplicate_of(&mut self, value: NonZeroU64) {
+    pub fn duplicate_of(&mut self, value: u64) {
         self.params.dupe_of = Some(value);
     }
 
