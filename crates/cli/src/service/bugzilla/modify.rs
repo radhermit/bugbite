@@ -161,7 +161,7 @@ struct Options {
 
             Values must be valid IDs for existing bugs.
 
-            Prefixing IDs with `+` or `-` adds or removes bugs from the list,
+            Prefixing values with `+` or `-` adds or removes from the list,
             respectively. Unprefixed values are treated as set values and
             override the entire list, ignoring any prefixed values.
 
@@ -169,7 +169,7 @@ struct Options {
             no arguments removes the entire list.
 
             Examples modifying bug 10:
-              - add 1: bite m --blocks 1 10
+              - add 1: bite m --blocks +1 10
               - add 2 and remove 1: bite m --blocks +2,-1 10
               - set to 3: bite m --blocks 3 10
         "}
@@ -188,8 +188,8 @@ struct Options {
             `@me` can also be used for the service's configured user if one
             exists.
 
-            Prefixing values with `+` or `-` adds or removes users from the
-            list, respectively. Unprefixed values will be added to the list.
+            Prefixing values with `+` or `-` adds or removes from the list,
+            respectively. Unprefixed values will be added to the list.
 
             Multiple arguments can be specified in a comma-separated list.
 
@@ -236,7 +236,7 @@ struct Options {
 
             Values must be valid IDs for existing bugs.
 
-            Prefixing IDs with `+` or `-` adds or removes bugs from the list,
+            Prefixing values with `+` or `-` adds or removes from the list,
             respectively. Unprefixed values are treated as set values and
             override the entire list, ignoring any prefixed values.
 
@@ -266,8 +266,8 @@ struct Options {
 
             Values must be valid service groups.
 
-            Prefixing groups with `+` or `-` adds or removes groups from the
-            list, respectively. Unprefixed values will be added to the list.
+            Prefixing values with `+` or `-` adds or removes from the list,
+            respectively. Unprefixed values will be added to the list.
 
             Multiple arguments can be specified in a comma-separated list.
 
@@ -290,7 +290,7 @@ struct Options {
 
             Values must be valid keywords.
 
-            Prefixing keywords with `+` or `-` adds or removes them from the list,
+            Prefixing values with `+` or `-` adds or removes from the list,
             respectively. Unprefixed values are treated as set values and
             override the entire list, ignoring any prefixed values.
 
@@ -373,14 +373,14 @@ struct Options {
             Values must be valid URLs to bugs, issues, or tickets in external
             trackers or IDs to existing bugs for the targeted service.
 
-            Prefixing values with `+` or `-` adds or removes URLs from the
-            list, respectively. Unprefixed values will be added to the list.
+            Prefixing values with `+` or `-` adds or removes from the list,
+            respectively. Unprefixed values will be added to the list.
 
             Multiple arguments can be specified in a comma-separated list.
 
             Examples modifying bug 10:
               - add URL to bug 2: bite m --see-also 2 10
-              - remove URL to bug 3 and add 4: bite m --see-also=-3,+4
+              - add bug 3 URL and remove 2: bite m --see-also=+3,-2 10
               - add URL to external project's bug 5: bite m --see-also https://url/to/bug/5 10
         "}
     )]
