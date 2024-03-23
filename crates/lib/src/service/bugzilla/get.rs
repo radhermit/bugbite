@@ -32,20 +32,33 @@ impl GetRequest {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
+        // TODO: use query builder instead of manual creation
         let mut url = service.base().join("rest/bug")?;
+        let mut count = 1;
+        url.query_pairs_mut()
+            .append_pair(&format!("f{count}"), "OP");
+        url.query_pairs_mut()
+            .append_pair(&format!("j{count}"), "OR");
 
         for id in ids {
             let id = id.to_string();
             let id_or_alias = IdOrAlias::from(id.as_str());
-            match id_or_alias {
-                IdOrAlias::Id(_) => {
-                    url.query_pairs_mut().append_pair("id", &id);
-                }
-                IdOrAlias::Alias(_) => {
-                    url.query_pairs_mut().append_pair("alias", &id);
-                }
-            }
+            let field = match id_or_alias {
+                IdOrAlias::Id(_) => "bug_id",
+                IdOrAlias::Alias(_) => "alias",
+            };
+
+            count += 1;
+            url.query_pairs_mut()
+                .append_pair(&format!("f{count}"), field);
+            url.query_pairs_mut()
+                .append_pair(&format!("o{count}"), "equals");
+            url.query_pairs_mut().append_pair(&format!("v{count}"), &id);
         }
+
+        count += 1;
+        url.query_pairs_mut()
+            .append_pair(&format!("f{count}"), "CP");
 
         // include personal tags
         url.query_pairs_mut()
