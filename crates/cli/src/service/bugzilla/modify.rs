@@ -6,6 +6,7 @@ use std::{fmt, fs};
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::objects::bugzilla::Flag;
 use bugbite::objects::Range;
 use bugbite::service::bugzilla::modify::{ModifyParams, SetChange};
 use bugbite::traits::{Contains, WebClient};
@@ -255,6 +256,22 @@ struct Options {
     #[arg(short = 'D', long, value_name = "ID", conflicts_with_all = ["status", "resolution"])]
     duplicate_of: Option<u64>,
 
+    /// add/remove flags
+    #[arg(
+        short = 'F',
+        long,
+        value_name = "VALUE[,...]",
+        value_delimiter = ',',
+        long_help = indoc::indoc! {"
+            Add or remove flags.
+
+            Values must be valid flags.
+
+            Multiple arguments can be specified in a comma-separated list.
+        "}
+    )]
+    flags: Option<Vec<Flag>>,
+
     /// add/remove groups
     #[arg(
         short,
@@ -426,6 +443,7 @@ struct Attributes {
     component: Option<String>,
     depends: Option<Vec<SetChange<u64>>>,
     duplicate_of: Option<u64>,
+    flags: Option<Vec<Flag>>,
     groups: Option<Vec<SetChange<String>>>,
     keywords: Option<Vec<SetChange<String>>>,
     os: Option<String>,
@@ -458,6 +476,7 @@ impl Attributes {
             component: self.component.or(other.component),
             depends: self.depends.or(other.depends),
             duplicate_of: self.duplicate_of.or(other.duplicate_of),
+            flags: self.flags.or(other.flags),
             groups: self.groups.or(other.groups),
             keywords: self.keywords.or(other.keywords),
             os: self.os.or(other.os),
@@ -528,6 +547,10 @@ impl Attributes {
 
         if let Some(value) = self.duplicate_of {
             params.duplicate_of(value);
+        }
+
+        if let Some(values) = self.flags {
+            params.flags(values);
         }
 
         if let Some(values) = self.groups {
@@ -627,6 +650,7 @@ impl From<Options> for Attributes {
             component: value.component,
             depends: value.depends,
             duplicate_of: value.duplicate_of,
+            flags: value.flags,
             groups: value.groups,
             keywords: value.keywords,
             os: value.os,
