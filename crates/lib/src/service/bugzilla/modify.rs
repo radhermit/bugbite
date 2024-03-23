@@ -225,7 +225,7 @@ impl fmt::Display for Comment {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 struct Params {
-    alias: Option<String>,
+    alias: Option<SetChanges<String>>,
     assigned_to: Option<String>,
     blocks: Option<SetChanges<NonZeroU64>>,
     cc: Option<Changes<String>>,
@@ -292,8 +292,11 @@ impl<'a> ModifyParams<'a> {
         }
     }
 
-    pub fn alias(&mut self, value: &str) {
-        self.params.alias = Some(value.into());
+    pub fn alias<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = SetChange<String>>,
+    {
+        self.params.alias = Some(values.into_iter().collect());
     }
 
     pub fn assigned_to(&mut self, value: &str) {

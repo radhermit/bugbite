@@ -104,9 +104,32 @@ impl<T: FromStr + PartialOrd + Eq + Hash> fmt::Display for CommentPrivacy<T> {
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
-    /// modify alias
-    #[arg(long)]
-    alias: Option<String>,
+    /// add/remove/set aliases
+    #[arg(
+        long,
+        num_args = 0..=1,
+        value_name = "VALUE[,...]",
+        value_delimiter = ',',
+        long_help = indoc::indoc! {"
+            Add, remove, or set aliases.
+
+            Values must be unique when adding or setting and are ignored when
+            missing when removing.
+
+            Prefixing values with `+` or `-` adds or removes from the list,
+            respectively. Unprefixed values are treated as set values and
+            override the entire list, ignoring any prefixed values.
+
+            Multiple arguments can be specified in a comma-separated list while
+            no arguments removes the entire list.
+
+            Examples modifying bug 10:
+              - add `a1`: bite m --alias +a1 10
+              - add `a2` and remove `a1`: bite m --alias +a2,-a1 10
+              - set to `a3`: bite m --alias a3 10
+        "}
+    )]
+    alias: Option<Vec<SetChange<String>>>,
 
     /// modify assignee
     #[arg(
@@ -395,7 +418,7 @@ struct Options {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 struct Attributes {
-    alias: Option<String>,
+    alias: Option<Vec<SetChange<String>>>,
     assigned_to: Option<String>,
     blocks: Option<Vec<SetChange<NonZeroU64>>>,
     cc: Option<Vec<SetChange<String>>>,
@@ -467,8 +490,8 @@ impl Attributes {
     {
         let mut params = client.service().modify_params();
 
-        if let Some(value) = self.alias.as_ref() {
-            params.alias(value);
+        if let Some(values) = self.alias {
+            params.alias(values);
         }
 
         if let Some(value) = self.assigned_to.as_ref() {
