@@ -146,7 +146,7 @@ impl<'a> CreateParams<'a> {
         self.params.cc = Some(values.into_iter().map(Into::into).collect());
     }
 
-    pub fn component(&mut self, value: &str) {
+    pub fn component<S: Into<String>>(&mut self, value: S) {
         self.params.component = value.into();
     }
 
@@ -157,7 +157,7 @@ impl<'a> CreateParams<'a> {
         self.params.depends_on = Some(values.into_iter().collect());
     }
 
-    pub fn description(&mut self, value: &str) {
+    pub fn description<S: Into<String>>(&mut self, value: S) {
         self.params.description = value.into();
     }
 
@@ -194,23 +194,23 @@ impl<'a> CreateParams<'a> {
         self.params.keywords = Some(values.into_iter().map(Into::into).collect());
     }
 
-    pub fn os(&mut self, value: &str) {
+    pub fn os<S: Into<String>>(&mut self, value: S) {
         self.params.op_sys = value.into();
     }
 
-    pub fn platform(&mut self, value: &str) {
+    pub fn platform<S: Into<String>>(&mut self, value: S) {
         self.params.platform = value.into();
     }
 
-    pub fn priority(&mut self, value: &str) {
+    pub fn priority<S: Into<String>>(&mut self, value: S) {
         self.params.priority = value.into();
     }
 
-    pub fn product(&mut self, value: &str) {
+    pub fn product<S: Into<String>>(&mut self, value: S) {
         self.params.product = value.into();
     }
 
-    pub fn resolution(&mut self, value: &str) {
+    pub fn resolution<S: Into<String>>(&mut self, value: S) {
         self.params.resolution = Some(value.into());
     }
 
@@ -222,31 +222,31 @@ impl<'a> CreateParams<'a> {
         self.params.see_also = Some(values.into_iter().map(Into::into).collect());
     }
 
-    pub fn severity(&mut self, value: &str) {
+    pub fn severity<S: Into<String>>(&mut self, value: S) {
         self.params.severity = value.into();
     }
 
-    pub fn status(&mut self, value: &str) {
+    pub fn status<S: Into<String>>(&mut self, value: S) {
         self.params.status = Some(value.into());
     }
 
-    pub fn summary(&mut self, value: &str) {
+    pub fn summary<S: Into<String>>(&mut self, value: S) {
         self.params.summary = value.into();
     }
 
-    pub fn target(&mut self, value: &str) {
+    pub fn target<S: Into<String>>(&mut self, value: S) {
         self.params.target_milestone = Some(value.into());
     }
 
-    pub fn url(&mut self, value: &str) {
+    pub fn url<S: Into<String>>(&mut self, value: S) {
         self.params.url = Some(value.into());
     }
 
-    pub fn version(&mut self, value: &str) {
+    pub fn version<S: Into<String>>(&mut self, value: S) {
         self.params.version = value.into();
     }
 
-    pub fn whiteboard(&mut self, value: &str) {
+    pub fn whiteboard<S: Into<String>>(&mut self, value: S) {
         self.params.whiteboard = Some(value.into());
     }
 }

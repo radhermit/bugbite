@@ -281,7 +281,7 @@ impl Attributes {
             params.cc(values);
         }
 
-        if let Some(value) = self.component.as_ref() {
+        if let Some(value) = self.component {
             params.component(value);
         }
 
@@ -293,7 +293,7 @@ impl Attributes {
             params.depends(values);
         }
 
-        if let Some(value) = self.description.as_ref() {
+        if let Some(value) = self.description {
             params.description(value);
         }
 
@@ -305,23 +305,23 @@ impl Attributes {
             params.keywords(values);
         }
 
-        if let Some(value) = self.os.as_ref() {
+        if let Some(value) = self.os {
             params.os(value);
         }
 
-        if let Some(value) = self.platform.as_ref() {
+        if let Some(value) = self.platform {
             params.platform(value);
         }
 
-        if let Some(value) = self.priority.as_ref() {
+        if let Some(value) = self.priority {
             params.priority(value);
         }
 
-        if let Some(value) = self.product.as_ref() {
+        if let Some(value) = self.product {
             params.product(value);
         }
 
-        if let Some(value) = self.resolution.as_ref() {
+        if let Some(value) = self.resolution {
             params.resolution(value);
         }
 
@@ -329,31 +329,31 @@ impl Attributes {
             params.see_also(values);
         }
 
-        if let Some(value) = self.severity.as_ref() {
+        if let Some(value) = self.severity {
             params.severity(value);
         }
 
-        if let Some(value) = self.status.as_ref() {
+        if let Some(value) = self.status {
             params.status(value);
         }
 
-        if let Some(value) = self.target.as_ref() {
+        if let Some(value) = self.target {
             params.target(value);
         }
 
-        if let Some(value) = self.summary.as_ref() {
+        if let Some(value) = self.summary {
             params.summary(value);
         }
 
-        if let Some(value) = self.url.as_ref() {
+        if let Some(value) = self.url {
             params.url(value);
         }
 
-        if let Some(value) = self.version.as_ref() {
+        if let Some(value) = self.version {
             params.version(value);
         }
 
-        if let Some(value) = self.whiteboard.as_ref() {
+        if let Some(value) = self.whiteboard {
             params.whiteboard(value);
         }
 
