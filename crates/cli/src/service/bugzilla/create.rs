@@ -21,11 +21,11 @@ use crate::utils::confirm;
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
-    /// set alias
-    #[arg(short = 'A', long)]
-    alias: Option<String>,
+    /// set aliases
+    #[arg(short = 'A', long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    alias: Option<Vec<String>>,
 
-    /// assign to a user
+    /// set assignee
     #[arg(
         short,
         long,
@@ -205,7 +205,7 @@ struct Options {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 struct Attributes {
-    alias: Option<String>,
+    alias: Option<Vec<String>>,
     assigned_to: Option<String>,
     blocks: Option<Vec<NonZeroU64>>,
     cc: Option<Vec<String>>,
@@ -265,8 +265,8 @@ impl Attributes {
     fn into_params(self, client: &Client) -> CreateParams {
         let mut params = client.service().create_params();
 
-        if let Some(value) = self.alias.as_ref() {
-            params.alias(value);
+        if let Some(values) = self.alias {
+            params.alias(values);
         }
 
         if let Some(value) = self.assigned_to.as_ref() {

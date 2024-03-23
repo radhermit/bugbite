@@ -55,7 +55,7 @@ struct Params {
     version: String,
 
     // optional fields
-    alias: Option<String>,
+    alias: Option<Vec<String>>,
     assigned_to: Option<String>,
     blocks: Option<Vec<NonZeroU64>>,
     cc: Option<String>,
@@ -119,8 +119,12 @@ impl<'a> CreateParams<'a> {
         }
     }
 
-    pub fn alias(&mut self, value: &str) {
-        self.params.alias = Some(value.into());
+    pub fn alias<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.params.alias = Some(values.into_iter().map(Into::into).collect());
     }
 
     pub fn assigned_to(&mut self, value: &str) {
