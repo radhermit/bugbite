@@ -26,11 +26,9 @@ struct Options {
     #[arg(
         short,
         long,
-        num_args = ..,
-        conflicts_with = "ids",
-        value_name = "IDS",
+        value_name = "BOOL",
         long_help = indoc::indoc! {"
-            Request all attachments from the specified bug IDs or aliases.
+            Treat IDs as bug IDs or aliases, not attachment IDs.
 
             Regular ID arguments relate to individual attachment IDs. Using this
             option pulls all attachments from the related bugs.
@@ -40,7 +38,7 @@ struct Options {
             order to avoid file name overlap.
         "}
     )]
-    item_ids: Option<Vec<MaybeStdinVec<String>>>,
+    item_ids: bool,
 
     /// save attachments into a base directory
     #[arg(
@@ -65,25 +63,19 @@ pub(super) struct Command {
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
-    /// attachment IDs
+    /// attachment IDs or bug IDs/aliases
     #[clap(required = true, help_heading = "Arguments")]
-    ids: Vec<MaybeStdinVec<u64>>,
+    ids: Vec<MaybeStdinVec<String>>,
 }
 
 impl Command {
     pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let mut stdout = stdout().lock();
-        let get_data = !self.options.list;
 
-        let (attachments, multiple_bugs) = if let Some(ids) = &self.options.item_ids {
-            let ids = &ids.iter().flatten().collect::<Vec<_>>();
-            let attachments = async_block!(client.item_attachment(ids, get_data))?;
-            (attachments, ids.len() > 1)
-        } else {
-            let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
-            let attachments = async_block!(client.attachment(ids, get_data))?;
-            (attachments, false)
-        };
+        let get_data = !self.options.list;
+        let multiple_bugs = self.options.item_ids && ids.len() > 1;
+        let attachments = async_block!(client.attachment(ids, self.options.item_ids, get_data))?;
 
         if self.options.list {
             for attachment in attachments.iter().flatten() {

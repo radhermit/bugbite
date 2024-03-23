@@ -49,7 +49,7 @@ impl GetRequest {
             .append_pair("exclude_fields", "update_token");
 
         let attachments = if attachments {
-            Some(service.item_attachment_request(ids, false)?)
+            Some(service.attachment_request(ids, true, false)?)
         } else {
             None
         };

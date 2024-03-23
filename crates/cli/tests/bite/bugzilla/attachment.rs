@@ -1,7 +1,6 @@
 use std::{env, fs};
 
 use predicates::prelude::*;
-use predicates::str::contains;
 use tempfile::tempdir;
 
 use crate::command::cmd;
@@ -21,17 +20,6 @@ fn aliases() {
                 .success();
         }
     }
-}
-
-#[test]
-fn invalid_ids() {
-    cmd("bite bugzilla attachment")
-        .arg("id")
-        .assert()
-        .stdout("")
-        .stderr(contains("error: invalid value 'id' for '<IDS>...': "))
-        .failure()
-        .code(2);
 }
 
 #[tokio::test]

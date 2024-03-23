@@ -46,20 +46,16 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn attachment(&self, ids: &[u64], data: bool) -> crate::Result<Vec<Vec<Attachment>>> {
-        let request = self.service.attachment_request(ids, data)?;
-        request.send(&self.service).await
-    }
-
-    pub async fn item_attachment<S>(
+    pub async fn attachment<S>(
         &self,
         ids: &[S],
+        bugs: bool,
         data: bool,
     ) -> crate::Result<Vec<Vec<Attachment>>>
     where
         S: std::fmt::Display,
     {
-        let request = self.service.item_attachment_request(ids, data)?;
+        let request = self.service.attachment_request(ids, bugs, data)?;
         request.send(&self.service).await
     }
 

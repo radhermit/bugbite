@@ -106,23 +106,18 @@ impl Service {
     pub(crate) fn attachment_request<S>(
         &self,
         ids: &[S],
+        bugs: bool,
         data: bool,
     ) -> crate::Result<attachment::AttachmentRequest>
     where
         S: std::fmt::Display,
     {
-        attachment::AttachmentRequest::new(self, Ids::object(ids), data)
-    }
-
-    pub(crate) fn item_attachment_request<S>(
-        &self,
-        ids: &[S],
-        data: bool,
-    ) -> crate::Result<attachment::AttachmentRequest>
-    where
-        S: std::fmt::Display,
-    {
-        attachment::AttachmentRequest::new(self, Ids::item(ids), data)
+        let ids = if bugs {
+            Ids::item(ids)
+        } else {
+            Ids::object(ids)
+        };
+        attachment::AttachmentRequest::new(self, ids, data)
     }
 
     pub(crate) fn comment_request<S>(
