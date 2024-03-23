@@ -106,7 +106,7 @@ struct Options {
     #[arg(
         short,
         long,
-        value_name = "GROUP[,...]",
+        value_name = "VALUE[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Set groups.
@@ -123,7 +123,7 @@ struct Options {
         short,
         long,
         num_args = 0..=1,
-        value_name = "KW[,...]",
+        value_name = "VALUE[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Set keywords.
@@ -159,7 +159,7 @@ struct Options {
     #[arg(
         short = 'U',
         long,
-        value_name = "URL[,...]",
+        value_name = "VALUE[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Set URLs to bugs in external trackers.
