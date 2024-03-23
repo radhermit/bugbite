@@ -105,12 +105,14 @@ struct Options {
     #[arg(
         short,
         long,
+        num_args = 0..=1,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
             Set groups.
 
-            Values must be valid service groups.
+            Values must be valid service groups. No arguments may be used to
+            avoid adding the bug to all default groups for the targeted product.
 
             Multiple arguments can be specified in a comma-separated list.
         "}
