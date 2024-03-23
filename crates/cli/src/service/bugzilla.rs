@@ -195,7 +195,7 @@ impl Render for Bug {
         output_field!(f, "Priority", &self.priority, width);
         output_field!(f, "Severity", &self.severity, width);
         writeln!(f, "{:<12} : {}", "ID", self.id)?;
-        output_field!(f, "Alias", &self.alias, width);
+        wrapped_csv(f, "Alias", &self.alias, width)?;
         wrapped_csv(f, "Groups", &self.groups, width)?;
         wrapped_csv(f, "Keywords", &self.keywords, width)?;
         wrapped_csv(f, "CC", &self.cc, width)?;

@@ -176,29 +176,6 @@ impl fmt::Display for Flag {
 enum Alias {
     List(Vec<String>),
     String(String),
-    None,
-}
-
-/// Deserialize an alias field to a string.
-fn alias_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error> {
-    Alias::deserialize(d).map(|o| match o {
-        Alias::String(value) => {
-            if !value.is_empty() {
-                Some(value)
-            } else {
-                None
-            }
-        }
-        Alias::List(values) => {
-            if let Some(value) = values.into_iter().next() {
-                if !value.is_empty() {
-                    return Some(value);
-                }
-            }
-            None
-        }
-        Alias::None => None,
-    })
 }
 
 /// Deserialize a string field value setting common unset values to None.
@@ -206,12 +183,21 @@ pub(crate) fn unset_value_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<
     non_empty_str(d).map(|o| o.filter(|s| !UNSET_VALUES.contains(s)))
 }
 
+/// Deserialize an alias as a vector of strings.
+pub(crate) fn alias_to_vec<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<String>, D::Error> {
+    Option::<Alias>::deserialize(d).map(|o| match o {
+        Some(Alias::List(values)) => values,
+        Some(Alias::String(value)) => vec![value],
+        None => vec![],
+    })
+}
+
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 #[serde(default)]
 pub struct Bug {
     pub id: u64,
-    #[serde(deserialize_with = "alias_str")]
-    pub alias: Option<String>,
+    #[serde(deserialize_with = "alias_to_vec")]
+    pub alias: Vec<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub assigned_to: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
@@ -290,7 +276,7 @@ impl RenderSearch<BugField> for Bug {
     fn render(&self, fields: &[BugField]) -> String {
         let field_to_string = |field: &BugField| -> String {
             match field {
-                BugField::Alias => format!("{:<20}", stringify!(self.alias)),
+                BugField::Alias => format!("{:<20}", self.alias.iter().join(",")),
                 BugField::AssignedTo => format!("{:<20}", stringify!(self.assigned_to)),
                 BugField::Blocks => format!("{:<20}", self.blocks.iter().join(",")),
                 BugField::Cc => format!("{:<20}", self.cc.iter().join(",")),

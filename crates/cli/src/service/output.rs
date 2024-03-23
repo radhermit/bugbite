@@ -12,18 +12,19 @@ use crate::utils::{truncate, COLUMNS};
 pub(crate) static INDENT: Lazy<String> = Lazy::new(|| " ".repeat(15));
 
 /// Output an iterable field in wrapped CSV format.
-pub(crate) fn wrapped_csv<W, S>(
+pub(crate) fn wrapped_csv<I, W, S>(
     f: &mut W,
     name: &str,
-    data: &[S],
+    data: I,
     width: usize,
 ) -> std::io::Result<()>
 where
+    I: IntoIterator<Item = S>,
     W: std::io::Write,
     S: std::fmt::Display,
 {
-    if !data.is_empty() {
-        let rendered = data.iter().join(", ");
+    let rendered = data.into_iter().join(", ");
+    if !rendered.is_empty() {
         if rendered.len() + 15 <= width {
             writeln!(f, "{name:<12} : {rendered}")?;
         } else {
