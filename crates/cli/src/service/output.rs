@@ -65,7 +65,6 @@ where
     I: IntoIterator<Item = R>,
     R: Render,
 {
-    let mut items = items.into_iter().peekable();
     let mut stdout = stdout().lock();
 
     // text wrap width
@@ -75,11 +74,8 @@ where
         90
     };
 
-    while let Some(item) = items.next() {
+    for item in items {
         item.render(&mut stdout, width)?;
-        if items.peek().is_some() {
-            writeln!(stdout, "{}", "=".repeat(width))?;
-        }
     }
 
     Ok(())
