@@ -7,7 +7,8 @@ use humansize::{format_size, BINARY};
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
-use serde_with::{serde_as, BoolFromInt};
+use serde_with::{serde_as, BoolFromInt, DeserializeFromStr, SerializeDisplay};
+use strum::{Display, EnumString};
 
 use crate::serde::{non_empty_str, null_empty_vec};
 use crate::service::bugzilla::BugField;
@@ -150,10 +151,24 @@ pub struct Change {
     pub attachment_id: Option<u64>,
 }
 
+#[derive(
+    Display, EnumString, DeserializeFromStr, SerializeDisplay, Debug, Eq, PartialEq, Clone, Copy,
+)]
+pub enum FlagStatus {
+    #[strum(serialize = "+")]
+    Granted,
+    #[strum(serialize = "-")]
+    Denied,
+    #[strum(serialize = "?")]
+    Requested,
+    #[strum(serialize = "X")]
+    Remove,
+}
+
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 pub struct Flag {
     pub name: String,
-    pub status: String,
+    pub status: FlagStatus,
     pub setter: String,
     #[serde(rename = "creation_date")]
     pub created: DateTime<Utc>,
