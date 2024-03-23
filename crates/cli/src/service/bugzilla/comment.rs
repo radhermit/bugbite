@@ -3,6 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::service::bugzilla::comment::CommentParams;
 use bugbite::time::TimeDelta;
 use clap::Args;
 
@@ -13,9 +14,23 @@ use crate::utils::COLUMNS;
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Comment options")]
 struct Options {
+    /// comment includes attachment
+    #[arg(
+        short,
+        long,
+        num_args = 0..=1,
+        default_missing_value = "true",
+        value_name = "BOOL",
+    )]
+    attachment: Option<bool>,
+
     /// comment created at this time or later
     #[arg(short, long, value_name = "TIME")]
     created: Option<TimeDelta>,
+
+    /// user who commented
+    #[arg(short = 'R', long, value_name = "USER")]
+    creator: Option<String>,
 }
 
 #[derive(Debug, Args)]
@@ -31,10 +46,24 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-        let created = self.options.created.as_ref();
-        let comments = async_block!(client.comment(ids, created))?;
+
+        let mut params = CommentParams::new();
+
+        if let Some(value) = self.options.attachment {
+            params.attachment(value);
+        }
+
+        if let Some(value) = self.options.created {
+            params.created_after(value);
+        }
+
+        if let Some(value) = self.options.creator {
+            params.creator(value);
+        }
+
+        let comments = async_block!(client.comment(ids, Some(params)))?;
         let mut comments = comments.iter().flatten().peekable();
         let mut stdout = stdout().lock();
 

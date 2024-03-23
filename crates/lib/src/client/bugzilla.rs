@@ -3,6 +3,7 @@ use tracing::info;
 
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::attach::CreateAttachment;
+use crate::service::bugzilla::comment::CommentParams;
 use crate::service::bugzilla::create::CreateParams;
 use crate::service::bugzilla::modify::{BugChange, ModifyParams};
 use crate::service::bugzilla::{Config, Service};
@@ -65,12 +66,12 @@ impl Client {
     pub async fn comment<S>(
         &self,
         ids: &[S],
-        created: Option<&TimeDelta>,
+        params: Option<CommentParams>,
     ) -> crate::Result<Vec<Vec<Comment>>>
     where
         S: std::fmt::Display,
     {
-        let request = self.service.comment_request(ids, created)?;
+        let request = self.service.comment_request(ids, params)?;
         request.send(&self.service).await
     }
 

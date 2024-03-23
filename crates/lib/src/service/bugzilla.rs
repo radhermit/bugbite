@@ -16,7 +16,7 @@ use crate::Error;
 
 pub mod attach;
 mod attachment;
-mod comment;
+pub mod comment;
 pub mod create;
 mod get;
 mod history;
@@ -128,12 +128,12 @@ impl Service {
     pub(crate) fn comment_request<S>(
         &self,
         ids: &[S],
-        created: Option<&TimeDelta>,
+        params: Option<comment::CommentParams>,
     ) -> crate::Result<comment::CommentRequest>
     where
         S: std::fmt::Display,
     {
-        comment::CommentRequest::new(self, ids, created)
+        comment::CommentRequest::new(self, ids, params)
     }
 
     pub(crate) fn history_request<S>(
