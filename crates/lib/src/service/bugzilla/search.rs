@@ -216,6 +216,14 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), "CP");
     }
 
+    pub fn qa<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        self.or("qa_contact", values);
+    }
+
     pub fn reporter<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,

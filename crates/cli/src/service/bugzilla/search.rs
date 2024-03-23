@@ -612,6 +612,10 @@ struct UserOptions {
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
     flaggers: Option<Vec<Match>>,
 
+    /// QA user
+    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
+    qa: Option<Vec<Match>>,
+
     /// user who reported
     #[arg(short = 'R', long, value_name = "USER[,...]", value_delimiter = ',')]
     reporter: Option<Vec<Match>>,
@@ -758,6 +762,9 @@ impl Command {
         }
         if let Some(values) = params.attr.priority {
             query.priority(values);
+        }
+        if let Some(values) = params.user.qa {
+            query.qa(values);
         }
         if let Some(values) = params.attr.severity {
             query.severity(values);
