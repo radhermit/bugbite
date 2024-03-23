@@ -45,8 +45,7 @@ impl GetRequest {
         let mut new_ids = vec![];
         for id in ids {
             let id = id.to_string();
-            let id_or_alias = IdOrAlias::from(id.as_str());
-            let field = match id_or_alias {
+            let field = match IdOrAlias::from(id.as_str()) {
                 IdOrAlias::Id(_) => "bug_id",
                 IdOrAlias::Alias(_) => "alias",
             };
