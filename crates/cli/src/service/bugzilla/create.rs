@@ -44,7 +44,6 @@ struct Options {
     #[arg(
         short,
         long,
-        num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
@@ -85,7 +84,6 @@ struct Options {
     #[arg(
         short,
         long,
-        num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
@@ -123,7 +121,6 @@ struct Options {
     #[arg(
         short,
         long,
-        num_args = 0..=1,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
         long_help = indoc::indoc! {"
