@@ -9,7 +9,7 @@ use serde_with::{DeserializeFromStr, SerializeDisplay};
 use crate::Error;
 
 static RELATIVE_TIME_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?<value>\d+)(?<unit>[ymwdhs]|min)").unwrap());
+    Lazy::new(|| Regex::new(r"^(?<value>\d+)(?<unit>[ymwdhs]|min)$").unwrap());
 
 /// Supported service variants
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
