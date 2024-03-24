@@ -1,8 +1,7 @@
-use chrono::offset::Utc;
 use serde_json::Value;
 
 use crate::objects::bugzilla::Comment;
-use crate::time::TimeDelta;
+use crate::time::TimeDeltaIso8601;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
@@ -35,10 +34,9 @@ impl<'a> CommentRequest<'a> {
         }
 
         if let Some(params) = params.as_ref() {
-            if let Some(interval) = params.created_after.as_ref() {
-                let datetime = Utc::now() - interval.delta();
-                let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
-                url.query_pairs_mut().append_pair("new_since", &target);
+            if let Some(value) = params.created_after.as_ref() {
+                url.query_pairs_mut()
+                    .append_pair("new_since", &value.to_string());
             }
         }
 
@@ -98,7 +96,7 @@ impl Request for CommentRequest<'_> {
 #[derive(Debug, Default)]
 pub struct CommentParams {
     attachment: Option<bool>,
-    created_after: Option<TimeDelta>,
+    created_after: Option<TimeDeltaIso8601>,
     creator: Option<String>,
 }
 
@@ -127,7 +125,7 @@ impl CommentParams {
         self.attachment = Some(value);
     }
 
-    pub fn created_after(&mut self, interval: TimeDelta) {
+    pub fn created_after(&mut self, interval: TimeDeltaIso8601) {
         self.created_after = Some(interval);
     }
 
