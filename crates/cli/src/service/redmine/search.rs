@@ -57,8 +57,13 @@ struct Params {
     limit: Option<u64>,
 
     /// restrict by ID
-    #[arg(long, help_heading = "Attribute options")]
-    ids: Option<Vec<MaybeStdinVec<u64>>>,
+    #[arg(
+        long,
+        help_heading = "Attribute options",
+        value_name = "ID[,...]",
+        value_delimiter = ','
+    )]
+    id: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// restrict by status
     #[arg(
@@ -106,8 +111,8 @@ impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut query = client.service().search_query();
         let params = &self.params;
-        if let Some(values) = params.ids.as_ref() {
-            query.ids(values.iter().flatten());
+        if let Some(values) = params.id.as_ref() {
+            query.id(values.iter().flatten());
         }
         if let Some(value) = params.limit {
             query.limit(value);

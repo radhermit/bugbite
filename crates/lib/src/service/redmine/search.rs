@@ -28,7 +28,7 @@ impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
 }
 
 impl QueryBuilder<'_> {
-    pub fn ids<I, S>(&mut self, values: I)
+    pub fn id<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
