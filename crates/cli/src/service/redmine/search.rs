@@ -90,6 +90,38 @@ struct Params {
     )]
     blocks: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
+    /// restrict by dependencies
+    #[arg(
+        short = 'D',
+        long,
+        num_args = 0..=1,
+        help_heading = "Attribute options",
+        value_name = "ID[,...]",
+        default_missing_value = "true",
+        long_help = indoc::indoc! {"
+            Restrict by dependencies.
+
+            On a nonexistent value, all matches with dependencies are returned.
+            If the value is `true` or `false`, all matches with or without
+            dependencies are returned, respectively.
+
+            Examples:
+              - existence: bite s --depends
+              - nonexistence: bite s --depends false
+
+            Regular values search for matching dependencies and multiple values can
+            be specified in a comma-separated list, matching if all of the
+            specified dependencies match.
+
+            Examples:
+              - depends on 10: bite s --depends 10
+              - depends on 10 and 11: bite s --depends 10,11
+
+            Values are taken from standard input when `-`.
+        "}
+    )]
+    depends: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
+
     /// restrict by ID
     #[arg(
         long,
@@ -149,6 +181,12 @@ impl Command {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Blocks, value),
                 ExistsOrArray::Array(values) => query.blocks(values.into_iter().flatten()),
+            }
+        }
+        if let Some(values) = params.depends {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::DependsOn, value),
+                ExistsOrArray::Array(values) => query.depends(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.id.as_ref() {

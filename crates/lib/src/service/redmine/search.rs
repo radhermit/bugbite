@@ -37,6 +37,14 @@ impl QueryBuilder<'_> {
         self.insert("blocks", value);
     }
 
+    pub fn depends<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = u64>,
+    {
+        let value = values.into_iter().join(",");
+        self.insert("blocked", value);
+    }
+
     pub fn id<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
@@ -214,6 +222,7 @@ impl Request for SearchRequest<'_> {
 #[strum(serialize_all = "kebab-case")]
 pub enum ExistsField {
     Blocks,
+    DependsOn,
 }
 
 impl Api for ExistsField {
@@ -221,6 +230,7 @@ impl Api for ExistsField {
     fn api(&self) -> Self::Output {
         match self {
             Self::Blocks => "blocks",
+            Self::DependsOn => "blocked",
         }
     }
 }
