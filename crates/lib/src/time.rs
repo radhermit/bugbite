@@ -1,6 +1,7 @@
 use std::fmt;
 use std::str::FromStr;
 
+use chrono::offset::Utc;
 use chronoutil::RelativeDuration;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -11,8 +12,7 @@ use crate::Error;
 static RELATIVE_TIME_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"^(?<value>\d+)(?<unit>[ymwdhs]|min)$").unwrap());
 
-/// Supported service variants
-#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone, PartialEq, Eq)]
 pub struct TimeDelta {
     raw: String,
     delta: RelativeDuration,
@@ -73,5 +73,31 @@ impl TryFrom<&str> for TimeDelta {
 impl fmt::Display for TimeDelta {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.raw)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TimeDeltaIso8601(TimeDelta);
+
+impl FromStr for TimeDeltaIso8601 {
+    type Err = Error;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        Ok(Self(s.parse()?))
+    }
+}
+
+impl TryFrom<&str> for TimeDeltaIso8601 {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+
+impl fmt::Display for TimeDeltaIso8601 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let datetime = Utc::now() - self.0.delta();
+        write!(f, "{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"))
     }
 }

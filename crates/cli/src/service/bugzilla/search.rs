@@ -8,7 +8,7 @@ use bugbite::service::bugzilla::{
     search::{ChangeField, EnabledOrDisabled, ExistsField, Match, Order, OrderField},
     BugField,
 };
-use bugbite::time::TimeDelta;
+use bugbite::time::TimeDeltaIso8601;
 use bugbite::traits::WebClient;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
@@ -22,7 +22,7 @@ use crate::utils::launch_browser;
 #[derive(Debug, Clone)]
 struct Changed {
     fields: Vec<ChangeField>,
-    interval: TimeDelta,
+    interval: TimeDeltaIso8601,
 }
 
 impl FromStr for Changed {
@@ -574,13 +574,13 @@ struct QueryOptions {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Time options")]
 struct TimeOptions {
-    /// created at this time or later
+    /// restrict by creation time
     #[arg(short, long, value_name = "TIME")]
-    created: Option<TimeDelta>,
+    created: Option<RangeOrEqual<TimeDeltaIso8601>>,
 
-    /// modified at this time or later
+    /// restrict by modification time
     #[arg(short, long, value_name = "TIME")]
-    modified: Option<TimeDelta>,
+    modified: Option<RangeOrEqual<TimeDeltaIso8601>>,
 }
 
 #[derive(Debug, Args)]
@@ -739,10 +739,10 @@ impl Command {
             query.limit(value);
         }
         if let Some(value) = params.time.created {
-            query.created_after(&value);
+            query.created(value);
         }
         if let Some(value) = params.time.modified {
-            query.modified_after(&value);
+            query.modified(value);
         }
         if let Some(values) = params.query.order {
             query.order(values)?;

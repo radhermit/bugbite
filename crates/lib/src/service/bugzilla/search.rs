@@ -1,7 +1,6 @@
 use std::fmt;
 use std::str::FromStr;
 
-use chrono::offset::Utc;
 use indexmap::IndexSet;
 use itertools::Itertools;
 use ordered_multimap::ListOrderedMultimap;
@@ -9,7 +8,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOrEqual};
-use crate::time::TimeDelta;
+use crate::time::TimeDeltaIso8601;
 use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
@@ -259,16 +258,20 @@ impl QueryBuilder<'_> {
         self.and("short_desc", values)
     }
 
-    pub fn created_after(&mut self, interval: &TimeDelta) {
-        let datetime = Utc::now() - interval.delta();
-        let target = datetime.format("%Y-%m-%dT%H:%M:%SZ");
-        self.advanced_field("creation_ts", "greaterthaneq", target);
+    pub fn created(&mut self, value: RangeOrEqual<TimeDeltaIso8601>) {
+        match value {
+            RangeOrEqual::Equal(value) => {
+                self.advanced_field("creation_ts", "greaterthaneq", value)
+            }
+            RangeOrEqual::Range(range) => self.range("creation_ts", range),
+        }
     }
 
-    pub fn modified_after(&mut self, interval: &TimeDelta) {
-        let datetime = Utc::now() - interval.delta();
-        let target = datetime.format("%Y-%m-%dT%H:%M:%SZ");
-        self.advanced_field("delta_ts", "greaterthaneq", target);
+    pub fn modified(&mut self, value: RangeOrEqual<TimeDeltaIso8601>) {
+        match value {
+            RangeOrEqual::Equal(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
+            RangeOrEqual::Range(range) => self.range("delta_ts", range),
+        }
     }
 
     pub fn order<I, T>(&mut self, values: I) -> crate::Result<()>
@@ -329,11 +332,9 @@ impl QueryBuilder<'_> {
 
     pub fn changed<'a, I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (ChangeField, &'a TimeDelta)>,
+        I: IntoIterator<Item = (ChangeField, &'a TimeDeltaIso8601)>,
     {
-        for (field, interval) in values {
-            let datetime = Utc::now() - interval.delta();
-            let target = datetime.format("%Y-%m-%dT%H:%M:%SZ");
+        for (field, target) in values {
             self.advanced_field(field.api(), "changedafter", target);
         }
     }
