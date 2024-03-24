@@ -77,6 +77,15 @@ impl QueryBuilder<'_> {
         Ok(())
     }
 
+    pub fn closed(&mut self, value: &RangeOrEqual<TimeDeltaIso8601>) {
+        match value {
+            RangeOrEqual::Equal(value) => {
+                self.insert("closed_on", format!(">={value}"));
+            }
+            RangeOrEqual::Range(range) => self.range("closed_on", range),
+        }
+    }
+
     pub fn created(&mut self, value: &RangeOrEqual<TimeDeltaIso8601>) {
         match value {
             RangeOrEqual::Equal(value) => {

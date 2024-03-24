@@ -180,6 +180,10 @@ struct Params {
     #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
     modified: Option<RangeOrEqual<TimeDeltaIso8601>>,
 
+    /// restrict by closed time
+    #[arg(short = 'C', long, value_name = "TIME", help_heading = "Time options")]
+    closed: Option<RangeOrEqual<TimeDeltaIso8601>>,
+
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
     summary: Option<Vec<MaybeStdinVec<String>>>,
@@ -235,6 +239,9 @@ impl Command {
         }
         if let Some(value) = params.status.as_ref() {
             query.status(value)?;
+        }
+        if let Some(value) = params.closed.as_ref() {
+            query.closed(value);
         }
         if let Some(value) = params.created.as_ref() {
             query.created(value);
