@@ -28,7 +28,36 @@ impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
     }
 }
 
+/// Quote terms containing whitespace, combining them into a query value.
+fn quoted_strings<I, S>(values: I) -> String
+where
+    I: IntoIterator<Item = S>,
+    S: fmt::Display,
+{
+    values
+        .into_iter()
+        .map(|s| {
+            let s = s.to_string();
+            if s.contains(char::is_whitespace) {
+                format!("\"{s}\"")
+            } else {
+                s
+            }
+        })
+        .join(" ")
+}
+
 impl QueryBuilder<'_> {
+    pub fn attachments<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        let value = quoted_strings(values);
+        // TODO: support other operators, currently this specifies the `contains` op
+        self.insert("attachment", format!("~{value}"));
+    }
+
     pub fn blocks<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = u64>,
@@ -107,19 +136,8 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        // quote terms containing whitespace
-        let value = values
-            .into_iter()
-            .map(|s| {
-                let s = s.to_string();
-                if s.contains(char::is_whitespace) {
-                    format!("\"{s}\"")
-                } else {
-                    s
-                }
-            })
-            .join(" ");
-
+        let value = quoted_strings(values);
+        // TODO: support other operators, currently this specifies the `contains` op
         self.insert("subject", format!("~{value}"));
     }
 
@@ -238,6 +256,7 @@ impl Request for SearchRequest<'_> {
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum ExistsField {
+    Attachment,
     Blocks,
     Blocked,
     Relates,

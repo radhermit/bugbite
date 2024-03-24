@@ -58,6 +58,39 @@ struct Params {
     )]
     limit: Option<u64>,
 
+    /// restrict by attachments
+    #[arg(
+        long,
+        num_args = 0..=1,
+        help_heading = "Attribute options",
+        value_name = "VALUE[,...]",
+        default_missing_value = "true",
+        long_help = indoc::indoc! {r#"
+            Restrict query by attachments.
+
+            On a nonexistent value, all matches with attachments are returned.
+            If the value is `true` or `false`, all matches with or without
+            attachments are returned, respectively.
+
+            Examples:
+              - existence: bite s --attachments
+              - nonexistence: bite s --attachments false
+
+            Regular string values search for matching substrings in an
+            attachment's file name.
+
+            Example:
+              - contains `value`: bite s --attachments value
+
+            Multiple values can be specified in a comma-separated list and will
+            match if all of the specified values match.
+
+            Example:
+              - equals `test1` and `test2`: bite s --attachments test1,test2
+        "#}
+    )]
+    attachments: Option<ExistsOrArray<String>>,
+
     /// restrict by blockers
     #[arg(
         short = 'B',
@@ -213,6 +246,12 @@ impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut query = client.service().search_query();
         let params = self.params;
+        if let Some(values) = params.attachments {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Attachment, value),
+                ExistsOrArray::Array(values) => query.attachments(values.into_iter()),
+            }
+        }
         if let Some(values) = params.blocks {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Blocks, value),
