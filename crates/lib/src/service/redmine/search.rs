@@ -7,7 +7,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOrEqual};
 use crate::time::TimeDeltaIso8601;
-use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
+use crate::traits::{InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
 /// Construct a search query.
@@ -37,7 +37,7 @@ impl QueryBuilder<'_> {
         self.insert("blocks", value);
     }
 
-    pub fn depends<I>(&mut self, values: I)
+    pub fn blocked<I>(&mut self, values: I)
     where
         I: IntoIterator<Item = u64>,
     {
@@ -109,7 +109,7 @@ impl QueryBuilder<'_> {
     /// Match conditionally existent array field values.
     pub fn exists(&mut self, field: ExistsField, status: bool) {
         let status = if status { "*" } else { "!*" };
-        self.insert(field.api(), status);
+        self.insert(field, status);
     }
 
     fn range<T>(&mut self, field: &str, value: &Range<T>)
@@ -222,15 +222,5 @@ impl Request for SearchRequest<'_> {
 #[strum(serialize_all = "kebab-case")]
 pub enum ExistsField {
     Blocks,
-    DependsOn,
-}
-
-impl Api for ExistsField {
-    type Output = &'static str;
-    fn api(&self) -> Self::Output {
-        match self {
-            Self::Blocks => "blocks",
-            Self::DependsOn => "blocked",
-        }
-    }
+    Blocked,
 }

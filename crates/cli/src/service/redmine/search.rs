@@ -106,21 +106,21 @@ struct Params {
             dependencies are returned, respectively.
 
             Examples:
-              - existence: bite s --depends
-              - nonexistence: bite s --depends false
+              - existence: bite s --blocked
+              - nonexistence: bite s --blocked false
 
             Regular values search for matching dependencies and multiple values can
             be specified in a comma-separated list, matching if all of the
             specified dependencies match.
 
             Examples:
-              - depends on 10: bite s --depends 10
-              - depends on 10 and 11: bite s --depends 10,11
+              - blocked on 10: bite s --blocked 10
+              - blocked on 10 and 11: bite s --blocked 10,11
 
             Values are taken from standard input when `-`.
         "}
     )]
-    depends: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
+    blocked: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
     /// restrict by ID
     #[arg(
@@ -183,10 +183,10 @@ impl Command {
                 ExistsOrArray::Array(values) => query.blocks(values.into_iter().flatten()),
             }
         }
-        if let Some(values) = params.depends {
+        if let Some(values) = params.blocked {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::DependsOn, value),
-                ExistsOrArray::Array(values) => query.depends(values.into_iter().flatten()),
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Blocked, value),
+                ExistsOrArray::Array(values) => query.blocked(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.id.as_ref() {
