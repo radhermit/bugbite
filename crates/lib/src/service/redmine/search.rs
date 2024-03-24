@@ -45,6 +45,14 @@ impl QueryBuilder<'_> {
         self.insert("blocked", value);
     }
 
+    pub fn relates<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = u64>,
+    {
+        let value = values.into_iter().join(",");
+        self.insert("relates", value);
+    }
+
     pub fn id<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
@@ -223,4 +231,5 @@ impl Request for SearchRequest<'_> {
 pub enum ExistsField {
     Blocks,
     Blocked,
+    Relates,
 }

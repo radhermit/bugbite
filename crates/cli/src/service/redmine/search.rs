@@ -122,6 +122,38 @@ struct Params {
     )]
     blocked: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
+    /// restrict by relations
+    #[arg(
+        short = 'R',
+        long,
+        num_args = 0..=1,
+        help_heading = "Attribute options",
+        value_name = "ID[,...]",
+        default_missing_value = "true",
+        long_help = indoc::indoc! {"
+            Restrict by related issues.
+
+            On a nonexistent value, all matches with relations are returned.
+            If the value is `true` or `false`, all matches with or without
+            relations are returned, respectively.
+
+            Examples:
+              - existence: bite s --relates
+              - nonexistence: bite s --relates false
+
+            Regular values search for matching relations and multiple values can
+            be specified in a comma-separated list, matching if any of the
+            specified relations match.
+
+            Examples:
+              - relates to 10: bite s --relates 10
+              - relates to 10 and 11: bite s --relates 10,11
+
+            Values are taken from standard input when `-`.
+        "}
+    )]
+    relates: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
+
     /// restrict by ID
     #[arg(
         long,
@@ -187,6 +219,12 @@ impl Command {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Blocked, value),
                 ExistsOrArray::Array(values) => query.blocked(values.into_iter().flatten()),
+            }
+        }
+        if let Some(values) = params.relates {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Relates, value),
+                ExistsOrArray::Array(values) => query.relates(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.id.as_ref() {
