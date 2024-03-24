@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use std::fmt;
 
+use crate::serde::null_empty_str;
 use crate::service::redmine::IssueField;
 use crate::traits::RenderSearch;
 
@@ -57,7 +58,7 @@ pub struct Comment {
     /// The description is 0, comments start at 1.
     #[serde(default)]
     pub count: u64,
-    #[serde(rename = "notes")]
+    #[serde(rename = "notes", deserialize_with = "null_empty_str")]
     pub text: String,
     #[serde(rename = "user")]
     pub creator: Person,
