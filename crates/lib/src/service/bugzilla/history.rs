@@ -1,8 +1,7 @@
-use chrono::offset::Utc;
 use serde_json::Value;
 
 use crate::objects::bugzilla::Event;
-use crate::time::TimeDelta;
+use crate::time::TimeDeltaIso8601;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
@@ -16,7 +15,7 @@ impl<'a> HistoryRequest<'a> {
     pub(super) fn new<S>(
         service: &'a super::Service,
         ids: &[S],
-        created: Option<&TimeDelta>,
+        created: Option<&TimeDeltaIso8601>,
     ) -> crate::Result<Self>
     where
         S: std::fmt::Display,
@@ -33,10 +32,9 @@ impl<'a> HistoryRequest<'a> {
             url.query_pairs_mut().append_pair("ids", &id.to_string());
         }
 
-        if let Some(interval) = created {
-            let datetime = Utc::now() - interval.delta();
-            let target = format!("{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
-            url.query_pairs_mut().append_pair("new_since", &target);
+        if let Some(value) = created {
+            url.query_pairs_mut()
+                .append_pair("new_since", &value.to_string());
         }
 
         Ok(Self { url, service })

@@ -10,7 +10,7 @@ use url::Url;
 
 use crate::objects::Ids;
 use crate::service::ServiceKind;
-use crate::time::TimeDelta;
+use crate::time::TimeDeltaIso8601;
 use crate::traits::{Api, Query, ServiceParams, WebClient, WebService};
 use crate::Error;
 
@@ -134,7 +134,7 @@ impl Service {
     pub(crate) fn history_request<S>(
         &self,
         ids: &[S],
-        created: Option<&TimeDelta>,
+        created: Option<&TimeDeltaIso8601>,
     ) -> crate::Result<history::HistoryRequest>
     where
         S: std::fmt::Display,

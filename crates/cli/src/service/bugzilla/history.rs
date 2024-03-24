@@ -3,7 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
-use bugbite::time::TimeDelta;
+use bugbite::time::TimeDeltaIso8601;
 use clap::Args;
 
 use crate::service::Render;
@@ -14,7 +14,7 @@ use crate::utils::COLUMNS;
 struct Options {
     /// event occurred at this time or later
     #[arg(short, long, value_name = "TIME")]
-    created: Option<TimeDelta>,
+    created: Option<TimeDeltaIso8601>,
 }
 
 #[derive(Debug, Args)]

@@ -7,7 +7,7 @@ use crate::service::bugzilla::comment::CommentParams;
 use crate::service::bugzilla::create::CreateParams;
 use crate::service::bugzilla::modify::{BugChange, ModifyParams};
 use crate::service::bugzilla::{Config, Service};
-use crate::time::TimeDelta;
+use crate::time::TimeDeltaIso8601;
 use crate::traits::{Query, Request, WebService};
 
 #[derive(Debug)]
@@ -90,7 +90,7 @@ impl Client {
     pub async fn history<S>(
         &self,
         ids: &[S],
-        created: Option<&TimeDelta>,
+        created: Option<&TimeDeltaIso8601>,
     ) -> crate::Result<Vec<Vec<Event>>>
     where
         S: std::fmt::Display,
