@@ -155,8 +155,8 @@ struct AttributeOptions {
         long_help = indoc::indoc! {r#"
             Restrict query by attachments.
 
-            On a nonexistent value, all bugs with attachments are returned. If
-            the value is `true` or `false`, all bugs with or without attachments
+            On a nonexistent value, all matches with attachments are returned. If
+            the value is `true` or `false`, all matches with or without attachments
             are returned, respectively.
 
             Examples:
@@ -471,10 +471,10 @@ struct QueryOptions {
         long_help = indoc::formatdoc! {"
             Restrict the data fields returned by the query.
 
-            By default, only the id and summary fields of a bug are returned.
-            This can be altered by specifying a custom list of fields instead
-            which will also change the output format to a space separated list
-            of the field values for each bug.
+            By default, only the id and summary fields are returned. This can be
+            altered by specifying a custom list of fields instead which will
+            also change the output format to a space separated list of the field
+            values for each item.
 
             possible values:
             {}", BugField::VARIANTS.join(", ")}
