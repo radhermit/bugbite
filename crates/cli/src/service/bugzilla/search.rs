@@ -501,10 +501,10 @@ struct QueryOptions {
         long_help = indoc::formatdoc! {"
             Restrict the data fields returned by the query.
 
-            By default, only the id, assignee, and summary fields of a bug are
-            returned. This can be altered by specifying a custom list of fields
-            instead which will also change the output format to a space
-            separated list of the field values for each bug.
+            By default, only the id and summary fields of a bug are returned.
+            This can be altered by specifying a custom list of fields instead
+            which will also change the output format to a space separated list
+            of the field values for each bug.
 
             possible values:
             {}", BugField::VARIANTS.join(", ")}
