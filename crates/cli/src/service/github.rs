@@ -29,7 +29,11 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn run(self, base: String, builder: ClientBuilder) -> anyhow::Result<ExitCode> {
+    pub(crate) async fn run(
+        self,
+        base: String,
+        builder: ClientBuilder,
+    ) -> anyhow::Result<ExitCode> {
         let base = match self.project.as_ref() {
             Some(project) => format!("https://github.com/{project}"),
             None => base,
@@ -39,7 +43,7 @@ impl Command {
         config.token = self.auth.token;
 
         let client = Client::new(config, builder.build())?;
-        self.cmd.run(&client)
+        self.cmd.run(&client).await
     }
 }
 
@@ -52,10 +56,10 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Get(cmd) => cmd.run(client),
-            Self::Search(cmd) => cmd.run(client),
+            Self::Get(cmd) => cmd.run(client).await,
+            Self::Search(cmd) => cmd.run(client).await,
         }
     }
 }

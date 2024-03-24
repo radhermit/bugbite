@@ -7,7 +7,6 @@ use bugbite::client::bugzilla::Client;
 use camino::Utf8PathBuf;
 use clap::Args;
 
-use crate::macros::async_block;
 use crate::service::Render;
 use crate::utils::COLUMNS;
 
@@ -69,13 +68,15 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let mut stdout = stdout().lock();
 
         let get_data = !self.options.list;
         let multiple_bugs = self.options.item_ids && ids.len() > 1;
-        let attachments = async_block!(client.attachment(ids, self.options.item_ids, get_data))?;
+        let attachments = client
+            .attachment(ids, self.options.item_ids, get_data)
+            .await?;
 
         if self.options.list {
             for attachment in attachments.iter().flatten() {

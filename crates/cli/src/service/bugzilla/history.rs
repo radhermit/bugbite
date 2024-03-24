@@ -6,7 +6,6 @@ use bugbite::client::bugzilla::Client;
 use bugbite::time::TimeDelta;
 use clap::Args;
 
-use crate::macros::async_block;
 use crate::service::Render;
 use crate::utils::COLUMNS;
 
@@ -31,10 +30,10 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let created = self.options.created.as_ref();
-        let events = async_block!(client.history(ids, created))?;
+        let events = client.history(ids, created).await?;
         let mut events = events.iter().flatten().peekable();
         let mut stdout = stdout().lock();
 

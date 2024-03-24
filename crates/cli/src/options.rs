@@ -244,13 +244,13 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, base: String) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, base: String) -> anyhow::Result<ExitCode> {
         enable_logging(self.verbosity.log_level_filter());
 
         let client = Client::builder()
             .insecure(self.options.bite.insecure)
             .timeout(self.options.bite.timeout);
 
-        self.subcmd.run(base, client)
+        self.subcmd.run(base, client).await
     }
 }

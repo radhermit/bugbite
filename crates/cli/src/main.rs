@@ -3,7 +3,6 @@ use std::process::ExitCode;
 use clap::Parser;
 
 mod config;
-mod macros;
 mod options;
 mod service;
 mod subcmds;
@@ -15,5 +14,5 @@ async fn main() -> anyhow::Result<ExitCode> {
     let (base, args) = options::ServiceCommand::service()?;
     // parse remaining args and run command
     let cmd = options::Command::parse_from(args);
-    cmd.run(base)
+    cmd.run(base).await
 }

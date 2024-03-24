@@ -38,14 +38,18 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn run(self, base: String, builder: ClientBuilder) -> anyhow::Result<ExitCode> {
+    pub(crate) async fn run(
+        self,
+        base: String,
+        builder: ClientBuilder,
+    ) -> anyhow::Result<ExitCode> {
         let mut config = Config::new(&base)?;
         config.key = self.auth.key;
         config.user = self.auth.user;
         config.password = self.auth.password;
 
         let client = Client::new(config, builder.build())?;
-        self.cmd.run(&client)
+        self.cmd.run(&client).await
     }
 }
 
@@ -58,10 +62,10 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Get(cmd) => cmd.run(client),
-            Self::Search(cmd) => cmd.run(client),
+            Self::Get(cmd) => cmd.run(client).await,
+            Self::Search(cmd) => cmd.run(client).await,
         }
     }
 }

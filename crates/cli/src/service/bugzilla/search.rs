@@ -16,7 +16,6 @@ use clap::{Args, ValueHint};
 use itertools::Itertools;
 use strum::VariantNames;
 
-use crate::macros::async_block;
 use crate::service::output::render_search;
 use crate::utils::launch_browser;
 
@@ -712,7 +711,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         // TODO: implement a custom serde serializer to convert structs to URL parameters
         let mut query = client.service().search_query();
         let params = self.params;
@@ -891,7 +890,7 @@ impl Command {
             let url = client.search_url(query)?;
             launch_browser([url])?;
         } else if !self.dry_run {
-            let bugs = async_block!(client.search(query))?;
+            let bugs = client.search(query).await?;
             render_search(bugs, fields)?;
         }
 

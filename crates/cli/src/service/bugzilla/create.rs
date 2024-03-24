@@ -15,7 +15,6 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use tracing::info;
 
-use crate::macros::async_block;
 use crate::utils::confirm;
 
 #[derive(Args, Debug)]
@@ -519,7 +518,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut attrs: Attributes = self.options.into();
 
         // read attributes from a template
@@ -531,7 +530,9 @@ impl Command {
             // command-line options override template options
             attrs = attrs.merge(template);
         } else if let Some(id) = self.from_bug {
-            let bug = async_block!(client.get(&[id], false, false, false))?
+            let bug = client
+                .get(&[id], false, false, false)
+                .await?
                 .into_iter()
                 .next()
                 .expect("failed getting bug");
@@ -550,7 +551,7 @@ impl Command {
 
         if !self.dry_run {
             let mut stdout = stdout().lock();
-            let id = async_block!(client.create(params))?;
+            let id = client.create(params).await?;
             if stdout.is_terminal() {
                 info!("Created bug {id}");
             } else {

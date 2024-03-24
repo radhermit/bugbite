@@ -18,7 +18,6 @@ use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 use tempfile::NamedTempFile;
 use tracing::info;
 
-use crate::macros::async_block;
 use crate::utils::{confirm, launch_editor};
 
 #[derive(Debug, Clone)]
@@ -535,7 +534,7 @@ impl Attributes {
         }
     }
 
-    fn into_params<'a, S>(
+    async fn into_params<'a, S>(
         self,
         client: &'a Client,
         ids: &[S],
@@ -620,7 +619,9 @@ impl Attributes {
                     [x] => x,
                     _ => anyhow::bail!("can't toggle comment privacy for multiple bugs"),
                 };
-                let comments = async_block!(client.comment(&[id], None))?
+                let comments = client
+                    .comment(&[id], None)
+                    .await?
                     .into_iter()
                     .next()
                     .expect("invalid comments response");
@@ -816,8 +817,14 @@ pub(super) struct Command {
 }
 
 /// Interactively create a reply, pulling specified comments for pre-population.
-fn get_reply(client: &Client, id: &str, comment_ids: &mut Vec<usize>) -> anyhow::Result<String> {
-    let comments = async_block!(client.comment(&[id], None))?
+async fn get_reply(
+    client: &Client,
+    id: &str,
+    comment_ids: &mut Vec<usize>,
+) -> anyhow::Result<String> {
+    let comments = client
+        .comment(&[id], None)
+        .await?
         .into_iter()
         .next()
         .expect("invalid comments response");
@@ -863,7 +870,7 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 }
 
 impl Command {
-    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut attrs: Attributes = self.options.into();
 
         // read modification attributes from a template
@@ -891,18 +898,18 @@ impl Command {
                 .as_ref()
                 .map(|x| x.created_private())
                 .unwrap_or_default();
-            let mut params = attrs.into_params(client, ids, created_private)?;
+            let mut params = attrs.into_params(client, ids, created_private).await?;
 
             // interactively create a reply
             if let Some(mut values) = self.reply {
                 if ids.len() > 1 {
                     anyhow::bail!("reply invalid, targeting multiple bugs");
                 }
-                let comment = get_reply(client, ids[0], &mut values)?;
+                let comment = get_reply(client, ids[0], &mut values).await?;
                 params.comment(comment.trim(), created_private);
             }
 
-            let changes = async_block!(client.modify(ids, params))?;
+            let changes = client.modify(ids, params).await?;
             for change in changes {
                 info!("{change}");
             }

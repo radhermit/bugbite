@@ -8,8 +8,6 @@ use clap::{Args, ValueHint};
 use itertools::Itertools;
 use tracing::info;
 
-use crate::macros::async_block;
-
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attachments options")]
 struct Options {
@@ -93,7 +91,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut attachments = vec![];
         for file in &self.files {
             let mut attachment = CreateAttachment::new(file)?;
@@ -112,7 +110,7 @@ impl Command {
         }
 
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-        let attachment_ids = async_block!(client.attach(ids, attachments))?;
+        let attachment_ids = client.attach(ids, attachments).await?;
 
         let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
         for (file, ids) in self.files.iter().zip(attachment_ids.iter()) {

@@ -4,7 +4,6 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use clap::Args;
 
-use crate::macros::async_block;
 use crate::service::output::render_items;
 use crate::utils::launch_browser;
 
@@ -61,7 +60,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
 
         if self.browser {
@@ -71,7 +70,7 @@ impl Command {
             let attachments = !self.options.no_attachments;
             let comments = !self.options.no_comments;
             let history = !self.options.no_history;
-            let bugs = async_block!(client.get(ids, attachments, comments, history))?;
+            let bugs = client.get(ids, attachments, comments, history).await?;
             render_items(bugs)?;
         }
 

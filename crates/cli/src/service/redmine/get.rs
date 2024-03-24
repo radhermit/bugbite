@@ -4,7 +4,6 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
 use clap::Args;
 
-use crate::macros::async_block;
 use crate::service::output::render_items;
 use crate::utils::launch_browser;
 
@@ -42,7 +41,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
 
         if self.options.browser {
@@ -50,7 +49,7 @@ impl Command {
             launch_browser(urls)?;
         } else {
             let comments = !self.options.no_comments;
-            let issues = async_block!(client.get(ids, false, comments))?;
+            let issues = client.get(ids, false, comments).await?;
             render_items(issues)?;
         }
 

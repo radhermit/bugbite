@@ -12,7 +12,6 @@ use serde_with::skip_serializing_none;
 use strum::VariantNames;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::macros::async_block;
 use crate::utils::COLUMNS;
 
 /// Available search parameters.
@@ -56,14 +55,14 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(mut self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(mut self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut query = client.service().search_query();
 
         if let Some(value) = self.params.sort.take() {
             query.sort(value);
         }
 
-        let issues = async_block!(client.search(query))?;
+        let issues = client.search(query).await?;
         let mut stdout = stdout().lock();
         let mut count = 0;
 

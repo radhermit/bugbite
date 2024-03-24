@@ -24,11 +24,11 @@ pub(crate) enum Subcommand {
 }
 
 impl Subcommand {
-    pub(crate) fn run(self, base: String, client: ClientBuilder) -> anyhow::Result<ExitCode> {
+    pub(crate) async fn run(self, base: String, client: ClientBuilder) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Bugzilla(cmd) => cmd.run(base, client),
-            Self::Github(cmd) => cmd.run(base, client),
-            Self::Redmine(cmd) => cmd.run(base, client),
+            Self::Bugzilla(cmd) => cmd.run(base, client).await,
+            Self::Github(cmd) => cmd.run(base, client).await,
+            Self::Redmine(cmd) => cmd.run(base, client).await,
             Self::Show(cmd) => cmd.run(),
         }
     }

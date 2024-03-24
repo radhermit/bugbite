@@ -7,7 +7,6 @@ use bugbite::service::bugzilla::comment::CommentParams;
 use bugbite::time::TimeDelta;
 use clap::Args;
 
-use crate::macros::async_block;
 use crate::service::Render;
 use crate::utils::COLUMNS;
 
@@ -47,7 +46,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
 
         let mut params = CommentParams::new();
@@ -64,7 +63,7 @@ impl Command {
             params.creator(value);
         }
 
-        let comments = async_block!(client.comment(ids, Some(params)))?;
+        let comments = client.comment(ids, Some(params)).await?;
         let mut comments = comments.iter().flatten().peekable();
         let mut stdout = stdout().lock();
 

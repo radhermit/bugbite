@@ -9,7 +9,6 @@ use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
 
-use crate::macros::async_block;
 use crate::service::output::render_search;
 
 /// Available search parameters.
@@ -88,7 +87,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut query = client.service().search_query();
         let params = &self.params;
         if let Some(values) = params.ids.as_ref() {
@@ -111,7 +110,7 @@ impl Command {
         }
         let fields = &params.fields;
 
-        let issues = async_block!(client.search(query))?;
+        let issues = client.search(query).await?;
         render_search(issues, fields)?;
 
         Ok(ExitCode::SUCCESS)
