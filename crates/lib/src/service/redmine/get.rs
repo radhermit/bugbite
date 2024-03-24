@@ -31,13 +31,14 @@ impl<'a> GetRequest<'a> {
         let mut request_ids = vec![];
         let mut urls = vec![];
 
+        // conditionally request additional data fields
+        let mut fields = vec![];
+        if comments {
+            fields.push("journals");
+        }
+
         for id in ids {
             let mut url = service.config.web_base.join(&format!("issues/{id}.json"))?;
-            // conditionally request additional data fields
-            let mut fields = vec![];
-            if comments {
-                fields.push("journals");
-            }
             if !fields.is_empty() {
                 url.query_pairs_mut()
                     .append_pair("include", &fields.iter().join(","));
