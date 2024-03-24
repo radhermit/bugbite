@@ -4,6 +4,7 @@ use itertools::Itertools;
 use ordered_multimap::ListOrderedMultimap;
 
 use crate::objects::redmine::Issue;
+use crate::objects::{Range, RangeOrEqual};
 use crate::time::TimeDeltaIso8601;
 use crate::traits::{InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
@@ -50,16 +51,48 @@ impl QueryBuilder<'_> {
         Ok(())
     }
 
-    pub fn created_after(&mut self, value: &TimeDeltaIso8601) {
-        self.insert("created_on", format!(">={value}"));
+    pub fn created(&mut self, value: &RangeOrEqual<TimeDeltaIso8601>) {
+        match value {
+            RangeOrEqual::Equal(value) => {
+                self.insert("created_on", format!(">={value}"));
+            }
+            RangeOrEqual::Range(range) => self.range("created_on", range),
+        }
     }
 
-    pub fn modified_after(&mut self, value: &TimeDeltaIso8601) {
-        self.insert("updated_on", format!(">={value}"));
+    pub fn modified(&mut self, value: &RangeOrEqual<TimeDeltaIso8601>) {
+        match value {
+            RangeOrEqual::Equal(value) => self.insert("updated_on", format!(">={value}")),
+            RangeOrEqual::Range(range) => self.range("updated_on", range),
+        }
     }
 
     pub fn summary(&mut self, value: &str) {
         self.insert("subject", format!("~{value}"));
+    }
+
+    fn range<T>(&mut self, field: &str, value: &Range<T>)
+    where
+        T: fmt::Display,
+    {
+        match value {
+            Range::Range(r) => {
+                self.insert(field, format!("><{}|{}", r.start, r.end));
+            }
+            Range::Inclusive(r) => {
+                self.insert(field, format!("><{}|{}", r.start(), r.end()));
+            }
+            Range::To(r) => {
+                self.insert(field, format!("<={}", r.end));
+            }
+            Range::ToInclusive(r) => {
+                self.insert(field, format!("<={}", r.end));
+            }
+            Range::From(r) => {
+                self.insert(field, format!(">={}", r.start));
+            }
+            Range::Full(_) => (),
+        }
     }
 
     pub fn extend<K, I, V>(&mut self, key: K, values: I)

@@ -2,6 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
+use bugbite::objects::RangeOrEqual;
 use bugbite::service::redmine::IssueField;
 use bugbite::time::TimeDeltaIso8601;
 use bugbite::traits::WebClient;
@@ -67,13 +68,13 @@ struct Params {
     )]
     status: Option<String>,
 
-    /// created at this time or later
+    /// restrict by creation time
     #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
-    created: Option<TimeDeltaIso8601>,
+    created: Option<RangeOrEqual<TimeDeltaIso8601>>,
 
-    /// modified at this time or later
+    /// restrict by modification time
     #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
-    modified: Option<TimeDeltaIso8601>,
+    modified: Option<RangeOrEqual<TimeDeltaIso8601>>,
 
     /// string to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
@@ -100,10 +101,10 @@ impl Command {
             query.status(value)?;
         }
         if let Some(value) = params.created.as_ref() {
-            query.created_after(value);
+            query.created(value);
         }
         if let Some(value) = params.modified.as_ref() {
-            query.modified_after(value);
+            query.modified(value);
         }
         if let Some(value) = params.summary.as_ref() {
             query.summary(value);

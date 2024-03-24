@@ -58,7 +58,7 @@ enum Subcommand {
     /// Get issues
     Get(get::Command),
     /// Search issues
-    Search(search::Command),
+    Search(Box<search::Command>),
 }
 
 impl Subcommand {
