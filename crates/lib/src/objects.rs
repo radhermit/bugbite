@@ -149,25 +149,17 @@ where
             return Err(Error::InvalidValue(format!("invalid range: {s}")));
         };
 
-        let start =
-            if !start.is_empty() {
-                Some(start.parse().map_err(|e| {
-                    Error::InvalidValue(format!("invalid range start: {start}: {e}"))
-                })?)
+        let parse = |value: &str| -> crate::Result<Option<T>> {
+            if !value.is_empty() {
+                Ok(Some(value.parse().map_err(|e| {
+                    Error::InvalidValue(format!("invalid range value: {value}: {e}"))
+                })?))
             } else {
-                None
-            };
+                Ok(None)
+            }
+        };
 
-        let finish =
-            if !finish.is_empty() {
-                Some(finish.parse().map_err(|e| {
-                    Error::InvalidValue(format!("invalid range finish: {finish}: {e}"))
-                })?)
-            } else {
-                None
-            };
-
-        match (start, op, finish) {
+        match (parse(start)?, op, parse(finish)?) {
             (Some(start), "..", Some(finish)) => {
                 if start != finish {
                     Ok(Range::Range(start..finish))
