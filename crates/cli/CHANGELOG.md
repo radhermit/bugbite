@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.0.6
+
+### Added
+
+#### Bugzilla
+- Support using bug aliases in addition to IDs where possible.
+- Only output attachment ID and summary by default with other relevant info
+  being displayed at the info verbosity level.
+- Support displaying, creating, altering, and searching by bug flags.
+- Support displaying and searching by personal bug tags.
+
+- attachment: Support pulling attachments from bug aliases.
+- comment: Add initial support for comment filtering.
+- create: Support pre-populating fields using an existing bug.
+- modify: Support adding/removing see-also URLs by bug ID.
+- modify: Support modifying comment privacy.
+- modify: Support pulling the last comment for -R/--reply with no args.
+- modify: Support modifying aliases.
+- search: Support inverted blocker and dependencies queries.
+- search: Support various change-related restrictions.
+- search: Support match values for keywords, assignees, reporters, urls, and flags.
+- search: Support matching against flag setters.
+- search: Support matching against aliases.
+- search: Support matching against attachment creators.
+- search: Support matching against attachment description or filename.
+
+#### Redmine
+- search: Add -l/--limit support.
+- search: Support status aliases such as @open similar to bugzilla.
+
 ## 0.0.5
 
 ### Fixed
