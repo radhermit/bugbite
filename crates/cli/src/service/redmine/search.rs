@@ -11,6 +11,7 @@ use clap::Args;
 use strum::VariantNames;
 
 use crate::service::output::render_search;
+use crate::utils::launch_browser;
 
 /// Available search parameters.
 #[derive(Debug, Args)]
@@ -83,6 +84,20 @@ struct Params {
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
+    /// open query in a browser
+    #[arg(
+        short,
+        long,
+        help_heading = "Search options",
+        long_help = indoc::indoc! {"
+            Open query in a browser.
+
+            This functionality requires xdg-open with a valid, preferred browser
+            set for http(s) URLs.
+        "}
+    )]
+    browser: bool,
+
     #[clap(flatten)]
     params: Params,
 }
@@ -111,8 +126,13 @@ impl Command {
         }
         let fields = &params.fields;
 
-        let issues = client.search(query).await?;
-        render_search(issues, fields)?;
+        if self.browser {
+            let url = client.search_url(query)?;
+            launch_browser([url])?;
+        } else {
+            let issues = client.search(query).await?;
+            render_search(issues, fields)?;
+        }
 
         Ok(ExitCode::SUCCESS)
     }
