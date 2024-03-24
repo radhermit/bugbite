@@ -207,7 +207,7 @@ dependencies = [
 
 [[package]]
 name = "bugbite"
-version = "0.0.4"
+version = "0.0.6"
 dependencies = [
  "base64 0.22.0",
  "camino",
@@ -236,7 +236,7 @@ dependencies = [
 
 [[package]]
 name = "bugbite-cli"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "anyhow",
  "assert_cmd",
