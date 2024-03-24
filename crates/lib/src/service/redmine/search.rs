@@ -33,7 +33,8 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        self.insert("issue_id", values.into_iter().join(","));
+        let value = values.into_iter().join(",");
+        self.insert("issue_id", value);
     }
 
     pub fn limit(&mut self, value: u64) {
@@ -67,7 +68,24 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn summary(&mut self, value: &str) {
+    pub fn summary<I, S>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        // quote terms containing whitespace
+        let value = values
+            .into_iter()
+            .map(|s| {
+                let s = s.to_string();
+                if s.contains(char::is_whitespace) {
+                    format!("\"{s}\"")
+                } else {
+                    s
+                }
+            })
+            .join(" ");
+
         self.insert("subject", format!("~{value}"));
     }
 

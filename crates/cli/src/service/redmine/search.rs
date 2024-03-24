@@ -82,9 +82,9 @@ struct Params {
     #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
     modified: Option<RangeOrEqual<TimeDeltaIso8601>>,
 
-    /// string to search for in the summary
+    /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
-    summary: Option<String>,
+    summary: Option<Vec<MaybeStdinVec<String>>>,
 }
 
 #[derive(Debug, Args)]
@@ -126,8 +126,8 @@ impl Command {
         if let Some(value) = params.modified.as_ref() {
             query.modified(value);
         }
-        if let Some(value) = params.summary.as_ref() {
-            query.summary(value);
+        if let Some(values) = params.summary.as_ref() {
+            query.summary(values.iter().flatten());
         }
         let fields = &params.fields;
 
