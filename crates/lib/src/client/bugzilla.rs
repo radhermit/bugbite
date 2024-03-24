@@ -43,7 +43,7 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.attach_request(ids, attachments)?;
-        request.send(&self.service).await
+        request.send().await
     }
 
     pub async fn attachment<S>(
@@ -56,7 +56,7 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.attachment_request(ids, bugs, data)?;
-        request.send(&self.service).await
+        request.send().await
     }
 
     pub async fn comment<S>(
@@ -68,7 +68,7 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.comment_request(ids, params)?;
-        request.send(&self.service).await
+        request.send().await
     }
 
     pub async fn get<S>(
@@ -84,7 +84,7 @@ impl Client {
         let request = self
             .service
             .get_request(ids, attachments, comments, history)?;
-        request.send(&self.service).await
+        request.send().await
     }
 
     pub async fn history<S>(
@@ -96,12 +96,12 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.history_request(ids, created)?;
-        request.send(&self.service).await
+        request.send().await
     }
 
     pub async fn create<'a>(&'a self, params: CreateParams<'a>) -> crate::Result<u64> {
         let request = self.service.create_request(params)?;
-        request.send(&self.service).await
+        request.send().await
     }
 
     pub async fn modify<'a, S>(
@@ -113,12 +113,12 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.modify_request(ids, params)?;
-        request.send(&self.service).await
+        request.send().await
     }
 
     pub async fn search<Q: Query>(&self, query: Q) -> crate::Result<Vec<Bug>> {
         let request = self.service.search_request(query)?;
-        request.send(&self.service).await
+        request.send().await
     }
 }
 

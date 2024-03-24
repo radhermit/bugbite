@@ -10,16 +10,17 @@ use super::comment::CommentRequest;
 use super::history::HistoryRequest;
 
 #[derive(Debug)]
-pub(crate) struct GetRequest {
+pub(crate) struct GetRequest<'a> {
     url: Url,
-    attachments: Option<AttachmentRequest>,
-    comments: Option<CommentRequest>,
-    history: Option<HistoryRequest>,
+    attachments: Option<AttachmentRequest<'a>>,
+    comments: Option<CommentRequest<'a>>,
+    history: Option<HistoryRequest<'a>>,
+    service: &'a super::Service,
 }
 
-impl GetRequest {
+impl<'a> GetRequest<'a> {
     pub(super) fn new<S>(
-        service: &super::Service,
+        service: &'a super::Service,
         ids: &[S],
         attachments: bool,
         comments: bool,
@@ -69,25 +70,29 @@ impl GetRequest {
             attachments,
             comments,
             history,
+            service,
         })
     }
 }
 
-impl Request for GetRequest {
+impl Request for GetRequest<'_> {
     type Output = Vec<Bug>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.url).inject_auth(service, false)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
+            .client()
+            .get(self.url)
+            .inject_auth(self.service, false)?;
         let (bugs, attachments, comments, history) = (
             request.send(),
-            self.attachments.map(|r| r.send(service)),
-            self.comments.map(|r| r.send(service)),
-            self.history.map(|r| r.send(service)),
+            self.attachments.map(|r| r.send()),
+            self.comments.map(|r| r.send()),
+            self.history.map(|r| r.send()),
         );
 
         let response = bugs.await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let Value::Array(data) = data["bugs"].take() else {
             return Err(Error::InvalidValue(
                 "invalid service response to get request".to_string(),

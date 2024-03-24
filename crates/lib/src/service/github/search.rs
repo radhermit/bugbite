@@ -109,9 +109,8 @@ pub(crate) struct SearchRequest(reqwest::Request);
 
 impl Request for SearchRequest {
     type Output = Vec<Issue>;
-    type Service = super::Service;
 
-    async fn send(self, _service: &Self::Service) -> crate::Result<Self::Output> {
+    async fn send(self) -> crate::Result<Self::Output> {
         debug!("{:?}", self.0);
         todo!()
     }

@@ -34,11 +34,9 @@ pub(crate) trait Api {
     fn api(&self) -> Self::Output;
 }
 
-/// Scan a response for a web service error, raising it if one exists.
 pub(crate) trait Request {
     type Output;
-    type Service;
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output>;
+    async fn send(self) -> crate::Result<Self::Output>;
 }
 
 /// Placeholder request that does nothing.
@@ -46,8 +44,7 @@ pub(crate) struct NullRequest;
 
 impl Request for NullRequest {
     type Output = ();
-    type Service = ();
-    async fn send(self, _service: &Self::Service) -> crate::Result<Self::Output> {
+    async fn send(self) -> crate::Result<Self::Output> {
         Ok(())
     }
 }
@@ -127,7 +124,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> {
 
     /// Create a request for bugs, issues, or tickets by their IDs.
     fn get_request<S>(
-        &self,
+        &'a self,
         _ids: &[S],
         _attachments: bool,
         _comments: bool,
@@ -143,7 +140,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> {
     }
 
     /// Create a creation request for a bug, issue, or ticket.
-    fn create_request(&self, _params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
+    fn create_request(&'a self, _params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
         Err(Error::Unsupported(format!(
             "{}: create requests unsupported",
             self.kind()
@@ -152,7 +149,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> {
 
     /// Create a modify request for bugs, issues, or tickets.
     fn modify_request<S>(
-        &self,
+        &'a self,
         _ids: &[S],
         _params: Self::ModifyParams,
     ) -> crate::Result<Self::ModifyRequest>
@@ -166,7 +163,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> {
     }
 
     /// Create a search request for bugs, issues, or tickets.
-    fn search_request<Q: Query>(&self, _query: Q) -> crate::Result<Self::SearchRequest> {
+    fn search_request<Q: Query>(&'a self, _query: Q) -> crate::Result<Self::SearchRequest> {
         Err(Error::Unsupported(format!(
             "{}: search requests unsupported",
             self.kind()

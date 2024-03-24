@@ -19,27 +19,33 @@ use super::{BugField, FilterField};
 static DEFAULT_SEARCH_FIELDS: &[BugField] = &[BugField::Id, BugField::Summary];
 
 #[derive(Debug)]
-pub(crate) struct SearchRequest(url::Url);
+pub(crate) struct SearchRequest<'a> {
+    url: url::Url,
+    service: &'a super::Service,
+}
 
-impl Request for SearchRequest {
+impl Request for SearchRequest<'_> {
     type Output = Vec<Bug>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.0).inject_auth(service, false)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
+            .client()
+            .get(self.url)
+            .inject_auth(self.service, false)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
         Ok(serde_json::from_value(data)?)
     }
 }
 
-impl SearchRequest {
-    pub(super) fn new<Q: Query>(service: &super::Service, mut query: Q) -> crate::Result<Self> {
+impl<'a> SearchRequest<'a> {
+    pub(super) fn new<Q: Query>(service: &'a super::Service, mut query: Q) -> crate::Result<Self> {
         let url = service
             .base()
             .join(&format!("rest/bug?{}", query.params()?))?;
-        Ok(Self(url))
+        Ok(Self { url, service })
     }
 }
 

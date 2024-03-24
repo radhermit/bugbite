@@ -60,14 +60,15 @@ impl CreateAttachment {
 }
 
 #[derive(Debug)]
-pub(crate) struct AttachRequest {
+pub(crate) struct AttachRequest<'a> {
     url: Url,
     attachments: Vec<CreateAttachment>,
+    service: &'a super::Service,
 }
 
-impl AttachRequest {
+impl<'a> AttachRequest<'a> {
     pub(crate) fn new<S>(
-        service: &super::Service,
+        service: &'a super::Service,
         ids: &[S],
         mut attachments: Vec<CreateAttachment>,
     ) -> crate::Result<Self>
@@ -90,26 +91,29 @@ impl AttachRequest {
             attachment.ids = ids.iter().map(|x| x.to_string()).collect();
         }
 
-        Ok(Self { url, attachments })
+        Ok(Self {
+            url,
+            attachments,
+            service,
+        })
     }
 }
 
-impl Request for AttachRequest {
+impl Request for AttachRequest<'_> {
     type Output = Vec<Vec<u64>>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+    async fn send(self) -> crate::Result<Self::Output> {
         let futures: Vec<_> = self
             .attachments
             .into_iter()
-            .map(|x| service.client().post(self.url.clone()).json(&x))
-            .map(|r| r.inject_auth(service, true).map(|r| r.send()))
+            .map(|x| self.service.client().post(self.url.clone()).json(&x))
+            .map(|r| r.inject_auth(self.service, true).map(|r| r.send()))
             .try_collect()?;
 
         let mut attachment_ids = vec![];
         for future in futures {
             let response = future.await?;
-            let mut data = service.parse_response(response).await?;
+            let mut data = self.service.parse_response(response).await?;
             let data = data["ids"].take();
             attachment_ids.push(serde_json::from_value(data)?);
         }

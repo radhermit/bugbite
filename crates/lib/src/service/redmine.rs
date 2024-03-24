@@ -111,10 +111,10 @@ impl<'a> WebClient<'a> for Service {
 impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
-    type GetRequest = get::GetRequest;
+    type GetRequest = get::GetRequest<'a>;
     type CreateRequest = NullRequest;
     type ModifyRequest = NullRequest;
-    type SearchRequest = search::SearchRequest;
+    type SearchRequest = search::SearchRequest<'a>;
 
     fn base(&self) -> &Url {
         self.config.base()
@@ -176,7 +176,7 @@ impl<'a> WebService<'a> for Service {
     }
 
     fn get_request<S>(
-        &self,
+        &'a self,
         ids: &[S],
         attachments: bool,
         comments: bool,
@@ -188,7 +188,7 @@ impl<'a> WebService<'a> for Service {
         get::GetRequest::new(self, ids, attachments, comments)
     }
 
-    fn search_request<Q: Query>(&self, query: Q) -> crate::Result<Self::SearchRequest> {
+    fn search_request<Q: Query>(&'a self, query: Q) -> crate::Result<Self::SearchRequest> {
         search::SearchRequest::new(self, query)
     }
 }

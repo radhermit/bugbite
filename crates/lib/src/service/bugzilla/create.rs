@@ -10,32 +10,34 @@ use crate::traits::{InjectAuth, Request, ServiceParams, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct CreateRequest {
+pub(crate) struct CreateRequest<'a> {
     url: url::Url,
     params: Params,
+    service: &'a super::Service,
 }
 
-impl Request for CreateRequest {
+impl Request for CreateRequest<'_> {
     type Output = u64;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
             .client()
             .post(self.url)
             .json(&self.params)
-            .inject_auth(service, true)?;
+            .inject_auth(self.service, true)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         Ok(serde_json::from_value(data["id"].take())?)
     }
 }
 
-impl CreateRequest {
-    pub(super) fn new(service: &super::Service, params: CreateParams) -> crate::Result<Self> {
+impl<'a> CreateRequest<'a> {
+    pub(super) fn new(service: &'a super::Service, params: CreateParams) -> crate::Result<Self> {
         Ok(Self {
             url: service.base().join("rest/bug")?,
             params: params.build()?,
+            service,
         })
     }
 }

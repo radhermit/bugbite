@@ -32,11 +32,11 @@ impl Client {
         let request = self
             .service
             .get_request(ids, attachments, comments, history)?;
-        request.send(&self.service).await
+        request.send().await
     }
 
     pub async fn search<Q: Query>(&self, query: Q) -> crate::Result<Vec<Issue>> {
         let request = self.service.search_request(query)?;
-        request.send(&self.service).await
+        request.send().await
     }
 }

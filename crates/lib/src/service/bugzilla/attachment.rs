@@ -6,13 +6,14 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct AttachmentRequest {
+pub(crate) struct AttachmentRequest<'a> {
     ids: Ids,
     url: Url,
+    service: &'a super::Service,
 }
 
-impl AttachmentRequest {
-    pub(crate) fn new(service: &super::Service, ids: Ids, data: bool) -> crate::Result<Self> {
+impl<'a> AttachmentRequest<'a> {
+    pub(crate) fn new(service: &'a super::Service, ids: Ids, data: bool) -> crate::Result<Self> {
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
         let mut url = match ids.as_slice() {
@@ -38,18 +39,21 @@ impl AttachmentRequest {
             url.query_pairs_mut().append_pair("exclude_fields", "data");
         }
 
-        Ok(Self { ids, url })
+        Ok(Self { ids, url, service })
     }
 }
 
-impl Request for AttachmentRequest {
+impl Request for AttachmentRequest<'_> {
     type Output = Vec<Vec<Attachment>>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.url).inject_auth(service, false)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
+            .client()
+            .get(self.url)
+            .inject_auth(self.service, false)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         match self.ids {
             Ids::Item(_) => {
                 let data = data["bugs"].take();

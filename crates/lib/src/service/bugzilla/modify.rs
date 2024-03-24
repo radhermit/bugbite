@@ -61,23 +61,24 @@ impl fmt::Display for BugChange {
 }
 
 #[derive(Debug)]
-pub(crate) struct ModifyRequest {
+pub(crate) struct ModifyRequest<'a> {
     url: url::Url,
     params: Params,
+    service: &'a super::Service,
 }
 
-impl Request for ModifyRequest {
+impl Request for ModifyRequest<'_> {
     type Output = Vec<BugChange>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
             .client()
             .put(self.url)
             .json(&self.params)
-            .inject_auth(service, true)?;
+            .inject_auth(self.service, true)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
         let mut changes: Vec<BugChange> = serde_json::from_value(data)?;
         if let Some(comment) = self.params.comment.as_ref() {
@@ -89,9 +90,9 @@ impl Request for ModifyRequest {
     }
 }
 
-impl ModifyRequest {
+impl<'a> ModifyRequest<'a> {
     pub(super) fn new<S>(
-        service: &super::Service,
+        service: &'a super::Service,
         ids: &[S],
         params: ModifyParams,
     ) -> crate::Result<Self>
@@ -108,6 +109,7 @@ impl ModifyRequest {
         Ok(Self {
             url: service.base().join(&format!("rest/bug/{id}"))?,
             params,
+            service,
         })
     }
 }

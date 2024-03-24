@@ -1,6 +1,5 @@
 use chrono::offset::Utc;
 use serde_json::Value;
-use url::Url;
 
 use crate::objects::bugzilla::Event;
 use crate::time::TimeDelta;
@@ -8,11 +7,14 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct HistoryRequest(Url);
+pub(crate) struct HistoryRequest<'a> {
+    url: url::Url,
+    service: &'a super::Service,
+}
 
-impl HistoryRequest {
+impl<'a> HistoryRequest<'a> {
     pub(super) fn new<S>(
-        service: &super::Service,
+        service: &'a super::Service,
         ids: &[S],
         created: Option<&TimeDelta>,
     ) -> crate::Result<Self>
@@ -37,18 +39,21 @@ impl HistoryRequest {
             url.query_pairs_mut().append_pair("new_since", &target);
         }
 
-        Ok(Self(url))
+        Ok(Self { url, service })
     }
 }
 
-impl Request for HistoryRequest {
+impl Request for HistoryRequest<'_> {
     type Output = Vec<Vec<Event>>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.0).inject_auth(service, false)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
+            .client()
+            .get(self.url)
+            .inject_auth(self.service, false)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let Value::Array(bugs) = data["bugs"].take() else {
             return Err(Error::InvalidValue(
                 "invalid service response to history request".to_string(),

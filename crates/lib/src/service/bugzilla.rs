@@ -184,10 +184,10 @@ impl<'a> WebClient<'a> for Service {
 impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
-    type GetRequest = get::GetRequest;
-    type CreateRequest = create::CreateRequest;
-    type ModifyRequest = modify::ModifyRequest;
-    type SearchRequest = search::SearchRequest;
+    type GetRequest = get::GetRequest<'a>;
+    type CreateRequest = create::CreateRequest<'a>;
+    type ModifyRequest = modify::ModifyRequest<'a>;
+    type SearchRequest = search::SearchRequest<'a>;
 
     fn base(&self) -> &Url {
         self.config.base()
@@ -243,7 +243,7 @@ impl<'a> WebService<'a> for Service {
     }
 
     fn get_request<S>(
-        &self,
+        &'a self,
         ids: &[S],
         attachments: bool,
         comments: bool,
@@ -255,12 +255,12 @@ impl<'a> WebService<'a> for Service {
         get::GetRequest::new(self, ids, attachments, comments, history)
     }
 
-    fn create_request(&self, params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
+    fn create_request(&'a self, params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
         create::CreateRequest::new(self, params)
     }
 
     fn modify_request<S>(
-        &self,
+        &'a self,
         ids: &[S],
         params: Self::ModifyParams,
     ) -> crate::Result<Self::ModifyRequest>
@@ -270,7 +270,7 @@ impl<'a> WebService<'a> for Service {
         modify::ModifyRequest::new(self, ids, params)
     }
 
-    fn search_request<Q: Query>(&self, query: Q) -> crate::Result<Self::SearchRequest> {
+    fn search_request<Q: Query>(&'a self, query: Q) -> crate::Result<Self::SearchRequest> {
         search::SearchRequest::new(self, query)
     }
 }
