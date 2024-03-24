@@ -229,9 +229,9 @@ impl Query for QueryBuilder<'_> {
             self.limit(100);
         }
 
-        // sort by ascending issue ID by default
-        if !self.query.contains_key("sort") {
-            self.append("sort", "id:asc");
+        // sort by ascending ID by default
+        if !self.query.contains_key("order") {
+            self.order(["+id"])?;
         }
 
         params.extend_pairs(self.query.iter());

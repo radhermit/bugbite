@@ -710,7 +710,7 @@ impl Query for QueryBuilder<'_> {
 
         // sort by ascending ID by default
         if !self.query.contains_key("order") {
-            self.order(["id"])?;
+            self.order(["+id"])?;
         }
 
         // limit requested fields by default to decrease bandwidth and speed up response
