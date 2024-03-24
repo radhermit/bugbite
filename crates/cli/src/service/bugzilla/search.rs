@@ -885,7 +885,7 @@ impl Command {
         }
 
         let fields = &params.query.fields;
-        query.fields(fields.iter().copied())?;
+        query.fields(fields.iter().copied());
 
         if self.browser {
             let url = client.search_url(query)?;

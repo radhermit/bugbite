@@ -15,9 +15,6 @@ use crate::Error;
 
 use super::{BugField, FilterField};
 
-// default fields to return for searches
-static DEFAULT_SEARCH_FIELDS: &[BugField] = &[BugField::Id, BugField::Summary];
-
 #[derive(Debug)]
 pub(crate) struct SearchRequest<'a> {
     url: url::Url,
@@ -577,21 +574,17 @@ impl QueryBuilder<'_> {
         self.and("cc", values)
     }
 
-    pub fn fields<I, F>(&mut self, fields: I) -> crate::Result<()>
+    pub fn fields<I, F>(&mut self, fields: I)
     where
         I: IntoIterator<Item = F>,
         F: Into<FilterField>,
     {
         let mut fields: IndexSet<_> = fields.into_iter().map(Into::into).collect();
-        if fields.is_empty() {
-            return Err(Error::InvalidValue("fields cannot be empty".to_string()));
-        }
 
         // always include bug IDs in field requests
         fields.insert(FilterField::Bug(BugField::Id));
 
         self.insert("include_fields", fields.iter().map(|f| f.api()).join(","));
-        Ok(())
     }
 
     fn range<T>(&mut self, field: &str, value: RangeOrEqual<T>)
@@ -715,10 +708,7 @@ impl Query for QueryBuilder<'_> {
 
         // limit requested fields by default to decrease bandwidth and speed up response
         if !self.query.contains_key("include_fields") {
-            self.insert(
-                "include_fields",
-                DEFAULT_SEARCH_FIELDS.iter().map(|f| f.api()).join(","),
-            );
+            self.fields([BugField::Id, BugField::Summary]);
         }
 
         let mut params = url::form_urlencoded::Serializer::new(String::new());
