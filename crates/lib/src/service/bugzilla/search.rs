@@ -492,11 +492,17 @@ impl QueryBuilder<'_> {
     }
 
     pub fn votes(&mut self, value: RangeOrEqual<u64>) {
-        self.range("votes", value)
+        match value {
+            RangeOrEqual::Equal(value) => self.advanced_field("votes", "equals", value),
+            RangeOrEqual::Range(range) => self.range("votes", range),
+        }
     }
 
     pub fn comments(&mut self, value: RangeOrEqual<u64>) {
-        self.range("longdescs.count", value)
+        match value {
+            RangeOrEqual::Equal(value) => self.advanced_field("longdescs.count", "equals", value),
+            RangeOrEqual::Range(range) => self.range("longdescs.count", range),
+        }
     }
 
     /// Match bugs with conditionally existent array field values.
@@ -587,30 +593,29 @@ impl QueryBuilder<'_> {
         self.insert("include_fields", fields.iter().map(|f| f.api()).join(","));
     }
 
-    fn range<T>(&mut self, field: &str, value: RangeOrEqual<T>)
+    fn range<T>(&mut self, field: &str, value: Range<T>)
     where
         T: fmt::Display,
     {
         match value {
-            RangeOrEqual::Equal(value) => self.advanced_field(field, "equals", value),
-            RangeOrEqual::Range(Range::Range(r)) => {
+            Range::Range(r) => {
                 self.advanced_field(field, "greaterthaneq", r.start);
                 self.advanced_field(field, "lessthan", r.end);
             }
-            RangeOrEqual::Range(Range::Inclusive(r)) => {
+            Range::Inclusive(r) => {
                 self.advanced_field(field, "greaterthaneq", r.start());
                 self.advanced_field(field, "lessthaneq", r.end());
             }
-            RangeOrEqual::Range(Range::To(r)) => {
+            Range::To(r) => {
                 self.advanced_field(field, "lessthan", r.end);
             }
-            RangeOrEqual::Range(Range::ToInclusive(r)) => {
+            Range::ToInclusive(r) => {
                 self.advanced_field(field, "lessthaneq", r.end);
             }
-            RangeOrEqual::Range(Range::From(r)) => {
+            Range::From(r) => {
                 self.advanced_field(field, "greaterthaneq", r.start);
             }
-            RangeOrEqual::Range(Range::Full(_)) => (),
+            Range::Full(_) => (),
         }
     }
 
