@@ -3,7 +3,8 @@ use std::process::ExitCode;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
 use bugbite::objects::RangeOrEqual;
-use bugbite::service::redmine::search::ExistsField;
+use bugbite::query::Order;
+use bugbite::service::redmine::search::{ExistsField, OrderField};
 use bugbite::service::redmine::IssueField;
 use bugbite::time::TimeDeltaIso8601;
 use bugbite::traits::WebClient;
@@ -57,6 +58,31 @@ struct Params {
         "}
     )]
     limit: Option<u64>,
+
+    /// order query results
+    #[arg(
+        short,
+        long,
+        value_name = "FIELD[,...]",
+        value_delimiter = ',',
+        help_heading = "Search options",
+        long_help = indoc::formatdoc! {"
+            Perform server-side sorting on the query.
+
+            Fields can be prefixed with `-` or `+` to sort in descending or
+            ascending order, respectively. Unprefixed fields will use ascending
+            order.
+
+            Multiple fields are supported via comma-separated lists which sort
+            the data response by the each field in order.
+
+            Note that if an invalid sorting request is made, sorting will
+            fallback to the service default.
+
+            possible values:
+            {}", OrderField::VARIANTS.join(", ")}
+    )]
+    order: Option<Vec<Order<OrderField>>>,
 
     /// restrict by attachments
     #[arg(
@@ -275,6 +301,9 @@ impl Command {
         }
         if let Some(value) = params.limit {
             query.limit(value);
+        }
+        if let Some(values) = params.order {
+            query.order(values)?;
         }
         if let Some(value) = params.status.as_ref() {
             query.status(value)?;

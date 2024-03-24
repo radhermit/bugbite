@@ -760,18 +760,6 @@ impl Api for ExistsField {
     }
 }
 
-impl Api for Order<OrderField> {
-    type Output = String;
-    /// Translate a search order variant into the expected REST API v1 name.
-    fn api(&self) -> Self::Output {
-        let name = self.field.api();
-        match self.order {
-            OrderType::Descending => format!("{name} DESC"),
-            OrderType::Ascending => format!("{name} ASC"),
-        }
-    }
-}
-
 /// Valid search order sorting terms.
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
@@ -841,6 +829,18 @@ impl Api for OrderField {
             Self::Version => "version",
             Self::Votes => "votes",
             Self::Whiteboard => "status_whiteboard",
+        }
+    }
+}
+
+impl Api for Order<OrderField> {
+    type Output = String;
+    /// Translate a search order variant into the expected REST API v1 name.
+    fn api(&self) -> Self::Output {
+        let name = self.field.api();
+        match self.order {
+            OrderType::Descending => format!("{name} DESC"),
+            OrderType::Ascending => format!("{name} ASC"),
         }
     }
 }

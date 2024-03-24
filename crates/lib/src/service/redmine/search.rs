@@ -6,8 +6,9 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOrEqual};
+use crate::query::{Order, OrderType};
 use crate::time::TimeDeltaIso8601;
-use crate::traits::{InjectAuth, Query, Request, ServiceParams, WebService};
+use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
 /// Construct a search query.
@@ -93,6 +94,22 @@ impl QueryBuilder<'_> {
 
     pub fn limit(&mut self, value: u64) {
         self.insert("limit", value);
+    }
+
+    pub fn order<I, T>(&mut self, values: I) -> crate::Result<()>
+    where
+        I: IntoIterator<Item = T>,
+        T: TryInto<Order<OrderField>>,
+        <T as TryInto<Order<OrderField>>>::Error: std::fmt::Display,
+    {
+        let values: Vec<_> = values
+            .into_iter()
+            .map(|x| x.try_into())
+            .try_collect()
+            .map_err(|e| Error::InvalidValue(format!("{e}")))?;
+        let value = values.iter().map(|x| x.api()).join(",");
+        self.insert("sort", value);
+        Ok(())
     }
 
     pub fn status(&mut self, value: &str) -> crate::Result<()> {
@@ -260,4 +277,45 @@ pub enum ExistsField {
     Blocks,
     Blocked,
     Relates,
+}
+
+/// Valid search order sorting terms.
+#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
+#[strum(serialize_all = "kebab-case")]
+pub enum OrderField {
+    AssignedTo,
+    Closed,
+    Created,
+    Id,
+    Status,
+    Subject,
+    Tracker,
+    Updated,
+}
+
+impl Api for OrderField {
+    type Output = &'static str;
+    fn api(&self) -> Self::Output {
+        match self {
+            Self::AssignedTo => "assigned_to",
+            Self::Closed => "closed_on",
+            Self::Created => "created_on",
+            Self::Id => "id",
+            Self::Status => "status",
+            Self::Subject => "subject",
+            Self::Tracker => "tracker",
+            Self::Updated => "updated_on",
+        }
+    }
+}
+
+impl Api for Order<OrderField> {
+    type Output = String;
+    fn api(&self) -> Self::Output {
+        let name = self.field.api();
+        match self.order {
+            OrderType::Descending => format!("{name}:desc"),
+            OrderType::Ascending => format!("{name}:asc"),
+        }
+    }
 }
