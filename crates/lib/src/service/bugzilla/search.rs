@@ -8,6 +8,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOrEqual};
+use crate::query::{Order, OrderType};
 use crate::time::TimeDeltaIso8601;
 use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
@@ -277,8 +278,8 @@ impl QueryBuilder<'_> {
     pub fn order<I, T>(&mut self, values: I) -> crate::Result<()>
     where
         I: IntoIterator<Item = T>,
-        T: TryInto<Order>,
-        <T as TryInto<Order>>::Error: std::fmt::Display,
+        T: TryInto<Order<OrderField>>,
+        <T as TryInto<Order<OrderField>>>::Error: std::fmt::Display,
     {
         let values: Vec<_> = values
             .into_iter()
@@ -759,54 +760,7 @@ impl Api for ExistsField {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-enum OrderType {
-    Ascending,
-    Descending,
-}
-
-/// Invertable search order sorting term.
-#[derive(Debug, Clone, Copy)]
-pub struct Order {
-    order: OrderType,
-    field: OrderField,
-}
-
-impl TryFrom<&str> for Order {
-    type Error = Error;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        value.parse()
-    }
-}
-
-impl FromStr for Order {
-    type Err = Error;
-
-    fn from_str(s: &str) -> crate::Result<Self> {
-        let (order, field) = if let Some(value) = s.strip_prefix('-') {
-            (OrderType::Descending, value)
-        } else {
-            (OrderType::Ascending, s.strip_prefix('+').unwrap_or(s))
-        };
-        let field = field
-            .parse()
-            .map_err(|_| Error::InvalidValue(format!("unknown search field: {field}")))?;
-        Ok(Self { order, field })
-    }
-}
-
-impl fmt::Display for Order {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let name = self.field.api();
-        match self.order {
-            OrderType::Descending => write!(f, "-{name}"),
-            OrderType::Ascending => write!(f, "{name}"),
-        }
-    }
-}
-
-impl Api for Order {
+impl Api for Order<OrderField> {
     type Output = String;
     /// Translate a search order variant into the expected REST API v1 name.
     fn api(&self) -> Self::Output {

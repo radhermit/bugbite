@@ -3,6 +3,7 @@ pub mod client;
 pub mod config;
 pub mod error;
 pub mod objects;
+pub mod query;
 pub(crate) mod serde;
 pub mod service;
 pub mod services;

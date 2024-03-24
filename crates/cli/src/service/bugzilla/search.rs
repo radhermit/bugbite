@@ -4,8 +4,9 @@ use std::str::FromStr;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::RangeOrEqual;
+use bugbite::query::Order;
 use bugbite::service::bugzilla::{
-    search::{ChangeField, EnabledOrDisabled, ExistsField, Match, Order, OrderField},
+    search::{ChangeField, EnabledOrDisabled, ExistsField, Match, OrderField},
     BugField,
 };
 use bugbite::time::TimeDeltaIso8601;
@@ -522,7 +523,7 @@ struct QueryOptions {
             possible values:
             {}", OrderField::VARIANTS.join(", ")}
     )]
-    order: Option<Vec<Order>>,
+    order: Option<Vec<Order<OrderField>>>,
 
     /// search using query grammar
     #[arg(short = 'Q', long)]
