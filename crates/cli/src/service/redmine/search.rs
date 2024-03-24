@@ -78,7 +78,7 @@ struct Params {
               - nonexistence: bite s --blocks false
 
             Regular values search for matching blockers and multiple values can
-            be specified in a comma-separated list, matching if all of the
+            be specified in a comma-separated list, matching if any of the
             specified blockers match.
 
             Examples:
@@ -110,7 +110,7 @@ struct Params {
               - nonexistence: bite s --blocked false
 
             Regular values search for matching dependencies and multiple values can
-            be specified in a comma-separated list, matching if all of the
+            be specified in a comma-separated list, matching if any of the
             specified dependencies match.
 
             Examples:
