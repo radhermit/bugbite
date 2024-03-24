@@ -3,9 +3,6 @@ use std::ops::RangeBounds;
 use std::str::FromStr;
 
 use base64::prelude::*;
-use itertools::Itertools;
-use once_cell::sync::Lazy;
-use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::traits::Contains;
@@ -125,9 +122,6 @@ where
     }
 }
 
-// TODO: replace regex-based parsing with parser combinator (winnow)
-static RANGE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\d+)?(..=?)(\d+)?").unwrap());
-
 #[derive(Debug, Clone)]
 pub enum Range<T> {
     Range(std::ops::Range<T>),                  // 0..1
@@ -146,14 +140,33 @@ where
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let Some(caps) = RANGE_RE.captures(s) else {
+        // TODO: rework to use parser combinator (winnow)
+        let (start, op, finish) = if let Some((start, finish)) = s.split_once("..=") {
+            (start, "..=", finish)
+        } else if let Some((start, finish)) = s.split_once("..") {
+            (start, "..", finish)
+        } else {
             return Err(Error::InvalidValue(format!("invalid range: {s}")));
         };
 
-        let (start, op, finish) = caps.iter().skip(1).collect_tuple().unwrap();
-        let start = start.map(|x| x.as_str().parse().unwrap());
-        let op = op.unwrap().as_str();
-        let finish = finish.map(|x| x.as_str().parse().unwrap());
+        let start =
+            if !start.is_empty() {
+                Some(start.parse().map_err(|e| {
+                    Error::InvalidValue(format!("invalid range start: {start}: {e}"))
+                })?)
+            } else {
+                None
+            };
+
+        let finish =
+            if !finish.is_empty() {
+                Some(finish.parse().map_err(|e| {
+                    Error::InvalidValue(format!("invalid range finish: {finish}: {e}"))
+                })?)
+            } else {
+                None
+            };
+
         match (start, op, finish) {
             (Some(start), "..", Some(finish)) => {
                 if start != finish {
