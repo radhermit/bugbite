@@ -1,11 +1,10 @@
 use std::fmt;
 
-use chrono::offset::Utc;
 use itertools::Itertools;
 use ordered_multimap::ListOrderedMultimap;
 
 use crate::objects::redmine::Issue;
-use crate::time::TimeDelta;
+use crate::time::TimeDeltaIso8601;
 use crate::traits::{InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
@@ -51,16 +50,12 @@ impl QueryBuilder<'_> {
         Ok(())
     }
 
-    pub fn created_after(&mut self, interval: &TimeDelta) {
-        let datetime = Utc::now() - interval.delta();
-        let target = format!(">={}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
-        self.insert("created_on", target);
+    pub fn created_after(&mut self, value: &TimeDeltaIso8601) {
+        self.insert("created_on", format!(">={value}"));
     }
 
-    pub fn modified_after(&mut self, interval: &TimeDelta) {
-        let datetime = Utc::now() - interval.delta();
-        let target = format!(">={}", datetime.format("%Y-%m-%dT%H:%M:%SZ"));
-        self.insert("updated_on", target);
+    pub fn modified_after(&mut self, value: &TimeDeltaIso8601) {
+        self.insert("updated_on", format!(">={value}"));
     }
 
     pub fn summary(&mut self, value: &str) {
