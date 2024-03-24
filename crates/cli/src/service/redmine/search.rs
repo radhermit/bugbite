@@ -3,6 +3,7 @@ use std::process::ExitCode;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
 use bugbite::objects::RangeOrEqual;
+use bugbite::service::redmine::search::ExistsField;
 use bugbite::service::redmine::IssueField;
 use bugbite::time::TimeDeltaIso8601;
 use bugbite::traits::WebClient;
@@ -10,6 +11,7 @@ use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
 
+use crate::service::args::ExistsOrArray;
 use crate::service::output::render_search;
 use crate::utils::launch_browser;
 
@@ -55,6 +57,38 @@ struct Params {
         "}
     )]
     limit: Option<u64>,
+
+    /// restrict by blockers
+    #[arg(
+        short = 'B',
+        long,
+        num_args = 0..=1,
+        help_heading = "Attribute options",
+        value_name = "ID[,...]",
+        default_missing_value = "true",
+        long_help = indoc::indoc! {"
+            Restrict by blockers.
+
+            On a nonexistent value, all matches with blockers are returned. If the
+            value is `true` or `false`, all matches with or without blockers are
+            returned, respectively.
+
+            Examples:
+              - existence: bite s --blocks
+              - nonexistence: bite s --blocks false
+
+            Regular values search for matching blockers and multiple values can
+            be specified in a comma-separated list, matching if all of the
+            specified blockers match.
+
+            Examples:
+              - blocked on 10: bite s --blocks 10
+              - blocked on 10 and 11: bite s --blocks 10,11
+
+            Values are taken from standard input when `-`.
+        "}
+    )]
+    blocks: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
     /// restrict by ID
     #[arg(
@@ -110,7 +144,13 @@ pub(super) struct Command {
 impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut query = client.service().search_query();
-        let params = &self.params;
+        let params = self.params;
+        if let Some(values) = params.blocks {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Blocks, value),
+                ExistsOrArray::Array(values) => query.blocks(values.into_iter().flatten()),
+            }
+        }
         if let Some(values) = params.id.as_ref() {
             query.id(values.iter().flatten());
         }

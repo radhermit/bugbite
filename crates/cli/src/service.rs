@@ -1,4 +1,5 @@
-// output and rendering support
+// args, output, and rendering support
+pub(crate) mod args;
 pub(crate) mod output;
 
 // service modules

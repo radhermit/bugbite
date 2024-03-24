@@ -16,6 +16,7 @@ use clap::{Args, ValueHint};
 use itertools::Itertools;
 use strum::VariantNames;
 
+use crate::service::args::ExistsOrArray;
 use crate::service::output::render_search;
 use crate::utils::launch_browser;
 
@@ -99,36 +100,6 @@ impl FromStr for ChangedValue {
             field,
             value: value.to_string(),
         })
-    }
-}
-
-#[derive(Debug, Clone)]
-enum ExistsOrArray<T> {
-    Exists(bool),
-    Array(Vec<T>),
-}
-
-impl<T> FromStr for ExistsOrArray<T>
-where
-    T: FromStr,
-    <T as FromStr>::Err: std::fmt::Display,
-{
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "true" => Ok(ExistsOrArray::Exists(true)),
-            "false" => Ok(ExistsOrArray::Exists(false)),
-            value => Ok(ExistsOrArray::Array(
-                value
-                    .split(',')
-                    .map(|x| {
-                        x.parse()
-                            .map_err(|e| anyhow::anyhow!("failed parsing: {e}"))
-                    })
-                    .try_collect()?,
-            )),
-        }
     }
 }
 
@@ -228,8 +199,8 @@ struct AttributeOptions {
         long_help = indoc::indoc! {"
             Restrict by blockers.
 
-            On a nonexistent value, all bugs with blockers are returned. If the
-            value is `true` or `false`, all bugs with or without blockers are
+            On a nonexistent value, all matches with blockers are returned. If the
+            value is `true` or `false`, all matches with or without blockers are
             returned, respectively.
 
             Examples:
@@ -237,20 +208,20 @@ struct AttributeOptions {
               - nonexistence: bite s --blocks false
 
             Regular values search for matching blockers and multiple values can
-            be specified in a comma-separated list, matching if a bug contains
-            all of the specified blockers.
+            be specified in a comma-separated list, matching if all of the
+            specified blockers match.
 
             Examples:
-              - blocked on bug 10: bite s --blocks 10
-              - blocked on bugs 10 and 11: bite s --blocks 10,11
+              - blocked on 10: bite s --blocks 10
+              - blocked on 10 and 11: bite s --blocks 10,11
 
             Values can also use `-` or `+` prefixes to manipulate blocker
             existence for the query.
 
             Examples:
-              - isn't blocked on bug 10: bite s --blocks=-10
-              - blocked on bugs 10 and 11: bite s --blocks +10,11
-              - blocked on bug 10 but not 11: bite s --blocks 10,-11
+              - isn't blocked on 10: bite s --blocks=-10
+              - blocked on 10 and 11: bite s --blocks +10,11
+              - blocked on 10 but not 11: bite s --blocks 10,-11
 
             Values are taken from standard input when `-`.
         "}

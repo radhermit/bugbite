@@ -2,11 +2,12 @@ use std::fmt;
 
 use itertools::Itertools;
 use ordered_multimap::ListOrderedMultimap;
+use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOrEqual};
 use crate::time::TimeDeltaIso8601;
-use crate::traits::{InjectAuth, Query, Request, ServiceParams, WebService};
+use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
 /// Construct a search query.
@@ -28,6 +29,14 @@ impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
 }
 
 impl QueryBuilder<'_> {
+    pub fn blocks<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = u64>,
+    {
+        let value = values.into_iter().join(",");
+        self.insert("blocks", value);
+    }
+
     pub fn id<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
@@ -87,6 +96,12 @@ impl QueryBuilder<'_> {
             .join(" ");
 
         self.insert("subject", format!("~{value}"));
+    }
+
+    /// Match conditionally existent array field values.
+    pub fn exists(&mut self, field: ExistsField, status: bool) {
+        let status = if status { "*" } else { "!*" };
+        self.insert(field.api(), status);
     }
 
     fn range<T>(&mut self, field: &str, value: &Range<T>)
@@ -192,5 +207,20 @@ impl Request for SearchRequest<'_> {
         let mut data = self.service.parse_response(response).await?;
         let data = data["issues"].take();
         Ok(serde_json::from_value(data)?)
+    }
+}
+
+#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
+#[strum(serialize_all = "kebab-case")]
+pub enum ExistsField {
+    Blocks,
+}
+
+impl Api for ExistsField {
+    type Output = &'static str;
+    fn api(&self) -> Self::Output {
+        match self {
+            Self::Blocks => "blocks",
+        }
     }
 }
