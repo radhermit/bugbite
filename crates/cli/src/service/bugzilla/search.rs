@@ -411,8 +411,14 @@ struct AttributeOptions {
     status: Option<Vec<String>>,
 
     /// restrict by personal tags
-    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
-    tags: Option<Vec<Match>>,
+    #[arg(
+        short,
+        long,
+        value_name = "VALUE[,...]",
+        num_args = 0..=1,
+        default_missing_value = "true",
+    )]
+    tags: Option<ExistsOrArray<Match>>,
 
     /// restrict by target milestone
     #[arg(short = 'T', long, value_name = "VALUE[,...]", value_delimiter = ',')]
@@ -422,8 +428,8 @@ struct AttributeOptions {
     #[arg(
         short = 'u',
         long,
-        num_args = 0..=1,
         value_name = "VALUE[,...]",
+        num_args = 0..=1,
         default_missing_value = "true",
     )]
     url: Option<ExistsOrArray<Match>>,
@@ -835,7 +841,10 @@ impl Command {
             query.status(values);
         }
         if let Some(values) = params.attr.tags {
-            query.tags(values);
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Tags, value),
+                ExistsOrArray::Array(values) => query.tags(values),
+            }
         }
         if let Some(values) = params.attr.target {
             query.target(values);

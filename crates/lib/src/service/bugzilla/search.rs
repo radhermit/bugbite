@@ -739,6 +739,7 @@ pub enum ExistsField {
     Groups,
     Keywords,
     Qa,
+    Tags,
     SeeAlso,
     Url,
     Whiteboard,
@@ -758,6 +759,7 @@ impl Api for ExistsField {
             Self::Keywords => "keywords",
             Self::Qa => "qa_contact",
             Self::SeeAlso => "see_also",
+            Self::Tags => "tag",
             Self::Url => "bug_file_loc",
             Self::Whiteboard => "status_whiteboard",
         }
