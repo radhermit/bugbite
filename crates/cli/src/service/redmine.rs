@@ -28,7 +28,7 @@ struct Authentication {
 }
 
 #[derive(Debug, clap::Args)]
-#[clap(infer_subcommands = true, next_help_heading = "Redmine")]
+#[clap(next_help_heading = "Redmine")]
 pub(crate) struct Command {
     #[clap(flatten)]
     auth: Authentication,
@@ -56,8 +56,10 @@ impl Command {
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
     /// Get issues
+    #[command(alias = "g")]
     Get(get::Command),
     /// Search issues
+    #[command(alias = "s")]
     Search(Box<search::Command>),
 }
 
