@@ -12,7 +12,7 @@ use serde_with::skip_serializing_none;
 use strum::VariantNames;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::utils::COLUMNS;
+use crate::utils::{wrapped_doc, COLUMNS};
 
 /// Available search parameters.
 #[skip_serializing_none]
@@ -29,7 +29,7 @@ struct Params {
         long,
         help_heading = "Search related",
         value_name = "TERM",
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Perform server-side sorting on the given query.
 
             Sorting in descending order can be done by prefixing a given term
@@ -38,8 +38,9 @@ struct Params {
             using '=' between the option and value such as `-S=-created` or
             `--sort=-comments`.
 
-            possible values:
-            {}", SearchTerm::VARIANTS.join(", ")}
+            Possible values: {}",
+            SearchTerm::VARIANTS.join(", ")
+        )
     )]
     sort: Option<SearchOrder>,
 

@@ -16,7 +16,7 @@ use tracing_log::AsTrace;
 
 use crate::config::Config;
 use crate::subcmds::Subcommand;
-use crate::utils::COLUMNS;
+use crate::utils::{wrapped_doc, COLUMNS};
 
 fn enable_logging(verbosity: LevelFilter) {
     // Simplify log output when using info level since bugbite uses it for information messages
@@ -131,7 +131,7 @@ struct ServiceOpts {
         short,
         long,
         env = "BUGBITE_CONNECTION",
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Use a pre-configured connection by its alias.
 
             Connections can be defined in the user config. The precedence order
@@ -150,7 +150,7 @@ struct ServiceOpts {
             SERVICES.iter()
                 .map(|(name, config)| format!("{name}: {config}"))
                 .sorted().join("\n")
-        }
+        )
     )]
     connection: Option<String>,
     /// base service URL
@@ -158,11 +158,12 @@ struct ServiceOpts {
         short,
         long,
         env = "BUGBITE_BASE",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Specify the service URL to connect to.
 
             For example, a bugzilla service would use `https://bugzilla.kernel.org`
-            and a github service would use `https://github.com/radhermit/bugbite`."}
+            and a github service would use `https://github.com/radhermit/bugbite`.
+        ")
     )]
     base: Option<String>,
     /// service type
@@ -170,14 +171,15 @@ struct ServiceOpts {
         short,
         long,
         env = "BUGBITE_SERVICE",
-        long_help = indoc::formatdoc! {"
-            Specify the service type to use.
-
-            Possible values: {}",
-            ServiceKind::VARIANTS.join(", ")},
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(ServiceKind::VARIANTS)
             .map(|s| s.parse::<ServiceKind>().unwrap()),
+        long_help = wrapped_doc!("
+            Specify the service type to use.
+
+            Possible values: {}",
+            ServiceKind::VARIANTS.join(", ")
+        )
     )]
     service: Option<ServiceKind>,
 }
@@ -210,16 +212,16 @@ pub(crate) struct Options {
     version,
     author = clap::crate_authors!(),
     about = "command line tool for mangling bugs, issues, and tickets",
-    long_about = indoc::indoc! {"
+    long_about = wrapped_doc!("
         Bite is a command line tool that aids interaction with a subset of the
         myriad bug, issue, and ticket trackers accessible online. It tries to
         support a consistent interface to search, request, modify, and create
         bugs (or their variants) in addition to other actions a service
         provides access to.
-    "},
+    "),
     disable_help_subcommand = true,
     term_width = *COLUMNS,
-    help_template = indoc::indoc! {"
+    help_template = wrapped_doc!("
         {before-help}{name} {version}
 
         {about}
@@ -233,7 +235,7 @@ pub(crate) struct Options {
         are aliased to their first letter.
 
         {all-args}{after-help}
-    "},
+    ")
 )]
 pub(crate) struct Command {
     #[clap(flatten)]

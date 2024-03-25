@@ -18,7 +18,7 @@ use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 use tempfile::NamedTempFile;
 use tracing::info;
 
-use crate::utils::{confirm, launch_editor};
+use crate::utils::{confirm, launch_editor, wrapped_doc};
 
 #[derive(Debug, Clone)]
 enum RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {
@@ -110,7 +110,7 @@ struct Options {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Add, remove, or set aliases.
 
             Values must be unique when adding or setting and are ignored when
@@ -127,7 +127,7 @@ struct Options {
               - add `a1`: bite m --alias +a1 10
               - add `a2` and remove `a1`: bite m --alias +a2,-a1 10
               - set to `a3`: bite m --alias a3 10
-        "}
+        ")
     )]
     alias: Option<Vec<SetChange<String>>>,
 
@@ -138,7 +138,7 @@ struct Options {
         value_name = "USER",
         num_args = 0..=1,
         default_missing_value = "",
-        long_help = indoc::indoc! {r#"
+        long_help = wrapped_doc!(r#"
             Assign a bug to a user.
 
             The value must be an email address for a service user. The alias
@@ -151,7 +151,7 @@ struct Options {
             Example modifying bug 123:
               - assign to yourself: bite m --assigned-to @me 123
               - reset to default: bite m --assigned-to "" 123
-        "#}
+        "#)
     )]
     assignee: Option<String>,
 
@@ -162,7 +162,7 @@ struct Options {
         num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Add, remove, or set blockers.
 
             Values must be valid IDs for existing bugs.
@@ -178,7 +178,7 @@ struct Options {
               - add 1: bite m --blocks +1 10
               - add 2 and remove 1: bite m --blocks +2,-1 10
               - set to 3: bite m --blocks 3 10
-        "}
+        ")
     )]
     blocks: Option<Vec<SetChange<u64>>>,
 
@@ -187,7 +187,7 @@ struct Options {
         long,
         value_name = "USER[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Add or remove users from the CC list.
 
             Values must be email addresses for service users. The alias
@@ -202,7 +202,7 @@ struct Options {
             Examples modifying bug 123:
               - add yourself to the CC list: bite m --cc @me 123
               - remove yourself from the CC list: bite m --cc=-@me 123
-        "}
+        ")
     )]
     cc: Option<Vec<SetChange<String>>>,
 
@@ -213,12 +213,12 @@ struct Options {
         num_args = 0..=1,
         conflicts_with = "reply",
         default_missing_value = "",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Add a comment.
 
             When no comment argument is specified, an editor is launched
             allowing for interactive entry.
-        "}
+        ")
     )]
     comment: Option<String>,
 
@@ -237,7 +237,7 @@ struct Options {
         num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Add, remove, or set dependencies.
 
             Values must be valid IDs for existing bugs.
@@ -253,7 +253,7 @@ struct Options {
               - add 1: bite m --depends +1 10
               - add 2 and remove 1: bite m --depends +2,-1 10
               - set to 3: bite m --depends 3 10
-        "}
+        ")
     )]
     depends: Option<Vec<SetChange<u64>>>,
 
@@ -267,7 +267,7 @@ struct Options {
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {r#"
+        long_help = wrapped_doc!(r#"
             Add or remove flags.
 
             Values must be valid flags composed of the flag name followed by its
@@ -279,7 +279,7 @@ struct Options {
             Examples modifying bug 10:
               - add `test?`: bite m --flags "test?" 10
               - add `check+` and remove `test?`: bite m --flags check+,testX 10
-        "#}
+        "#)
     )]
     flags: Option<Vec<Flag>>,
 
@@ -289,7 +289,7 @@ struct Options {
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Add or remove groups.
 
             Values must be valid service groups.
@@ -302,7 +302,7 @@ struct Options {
             Examples modifying bug 10:
               - add `admin`: bite m --groups +admin 10
               - add `test` and remove `admin`: bite m --groups +test,-admin 10
-        "}
+        ")
     )]
     groups: Option<Vec<SetChange<String>>>,
 
@@ -313,7 +313,7 @@ struct Options {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Add, remove, or set keywords.
 
             Values must be valid keywords.
@@ -329,7 +329,7 @@ struct Options {
               - add `key`: bite m --keywords +key 10
               - add `test` and remove `key`: bite m --keywords +test,-key 10
               - set to `verify`: bite m --keywords verify 10
-        "}
+        ")
     )]
     keywords: Option<Vec<SetChange<String>>>,
 
@@ -352,7 +352,7 @@ struct Options {
         value_name = "VALUE",
         num_args = 0..=1,
         default_missing_value = "true",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Modify the privacy of comments.
 
             This option controls modifying the privacy of both existing comments
@@ -377,7 +377,7 @@ struct Options {
               - mark comments 2-5 private: bite m --private-comment 2..=5:true 10
               - mark created comment private: bite m --comment --private-comment 10
               - mark created reply private: bite m --reply --private-comment 10
-        "}
+        ")
     )]
     private_comment: Option<CommentPrivacy<usize>>,
 
@@ -391,7 +391,7 @@ struct Options {
         value_name = "USER",
         num_args = 0..=1,
         default_missing_value = "",
-        long_help = indoc::indoc! {r#"
+        long_help = wrapped_doc!(r#"
             Assign a QA contact for the bug.
 
             The value must be an email address for a service user. The alias
@@ -404,7 +404,7 @@ struct Options {
             Example modifying bug 123:
               - assign to yourself: bite m --qa @me 123
               - reset to default: bite m --qa "" 123
-        "#}
+        "#)
     )]
     qa: Option<String>,
 
@@ -418,7 +418,7 @@ struct Options {
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Add or remove URLs to bugs in external trackers.
 
             Values must be valid URLs to bugs, issues, or tickets in external
@@ -432,8 +432,8 @@ struct Options {
             Examples modifying bug 10:
               - add URL to bug 2: bite m --see-also 2 10
               - add bug 3 URL and remove 2: bite m --see-also=+3,-2 10
-              - add URL to external project's bug 5: bite m --see-also https://url/to/bug/5 10
-        "}
+              - add URL to external bug: bite m --see-also https://url/to/bug/5 10
+        ")
     )]
     see_also: Option<Vec<SetChange<String>>>,
 
@@ -741,7 +741,7 @@ pub(super) struct Command {
         value_delimiter = ',',
         conflicts_with = "comment",
         help_heading = "Modify options",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Interactively reply to specific comments for a given bug.
 
             Values must be valid comment IDs specific to the bug, starting at 0
@@ -758,8 +758,8 @@ pub(super) struct Command {
             Examples modifying bug 123:
               - reply to comments 1 and 2: bite m --reply 1,2 123
               - reply to the last comment: bite m 123 --reply
-              - create private reply to the last comment: bite m 123 --reply --private-comment
-        "}
+              - private reply to last comment: bite m 123 --reply --private-comment
+        ")
     )]
     reply: Option<Vec<usize>>,
 
@@ -769,7 +769,7 @@ pub(super) struct Command {
         help_heading = "Modify options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Read modification attributes from a template.
 
             Value must be the path to a valid modify template file. Templates
@@ -777,7 +777,7 @@ pub(super) struct Command {
 
             Fields that don't match known bug field names are used for custom
             field modifications.
-        "}
+        ")
     )]
     from: Option<Utf8PathBuf>,
 
@@ -787,14 +787,14 @@ pub(super) struct Command {
         help_heading = "Modify options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Write modification attributes to a template.
 
             Value is the file path where the TOML template file will be written.
 
             Combining this option with -n/--dry-run allows creating modify
             templates without any service interaction.
-        "}
+        ")
     )]
     to: Option<Utf8PathBuf>,
 
@@ -807,11 +807,11 @@ pub(super) struct Command {
     #[clap(
         help_heading = "Arguments",
         required_unless_present = "dry_run",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             IDs of bugs to modify.
 
             Taken from standard input when `-`.
-        "}
+        ")
     )]
     ids: Vec<MaybeStdinVec<String>>,
 }

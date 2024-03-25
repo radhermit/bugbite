@@ -19,7 +19,7 @@ use strum::VariantNames;
 
 use crate::service::args::ExistsOrArray;
 use crate::service::output::render_search;
-use crate::utils::launch_browser;
+use crate::utils::{launch_browser, wrapped_doc};
 
 #[derive(Debug, Clone)]
 struct Changed {
@@ -114,7 +114,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {r#"
+        long_help = wrapped_doc!(r#"
             Restrict query by an alias.
 
             With no argument, all bugs with aliases are returned. If the value
@@ -143,7 +143,7 @@ struct AttributeOptions {
               - doesn't equal `value`: bite s --alias !=#value
               - matches regex: bite s --alias r#test?.+
               - doesn't match regex: bite s --alias !r#test?.+
-        "#}
+        "#)
     )]
     alias: Option<ExistsOrArray<Match>>,
 
@@ -153,7 +153,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {r#"
+        long_help = wrapped_doc!(r#"
             Restrict query by attachments.
 
             With no argument, all matches with attachments are returned. If the
@@ -186,7 +186,7 @@ struct AttributeOptions {
 
             Example:
               - equals `test1` or `test2`: bite s --attachments =#test1,=#test2
-        "#}
+        "#)
     )]
     attachments: Option<ExistsOrArray<Match>>,
 
@@ -197,7 +197,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Restrict by blockers.
 
             With no argument, all matches with blockers are returned. If the
@@ -225,7 +225,7 @@ struct AttributeOptions {
               - blocked on 10 but not 11: bite s --blocks 10,-11
 
             Values are taken from standard input when `-`.
-        "}
+        ")
     )]
     blocks: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
@@ -244,7 +244,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Restrict by dependencies.
 
             With no argument, all matches with dependencies are returned. If the
@@ -272,7 +272,7 @@ struct AttributeOptions {
               - depends on 10 but not 11: bite s --depends 10,-11
 
             Values are taken from standard input when `-`.
-        "}
+        ")
     )]
     depends: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
@@ -350,12 +350,12 @@ struct AttributeOptions {
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Restrict bugs by status.
 
             The aliases `@open`, `@closed`, and `@all` can be used to search for
             open, closed, and all bugs, respectively.
-        "}
+        ")
     )]
     status: Option<Vec<String>>,
 
@@ -411,11 +411,12 @@ struct ChangeOptions {
     #[arg(
         long,
         value_name = "FIELD[,...]=TIME",
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Restrict by fields changed within a time interval.
 
-            possible fields:
-            {}", ChangeField::VARIANTS.join(", ")}
+            Possible fields: {}",
+            ChangeField::VARIANTS.join(", ")
+        )
     )]
     changed: Option<Vec<Changed>>,
 
@@ -423,11 +424,12 @@ struct ChangeOptions {
     #[arg(
         long,
         value_name = "FIELD[,...]=USER[,...]",
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Restrict by fields changed by a given user.
 
-            possible fields:
-            {}", ChangeField::VARIANTS.join(", ")}
+            Possible fields: {}",
+            ChangeField::VARIANTS.join(", ")
+        )
     )]
     changed_by: Option<Vec<ChangedBy>>,
 
@@ -435,11 +437,12 @@ struct ChangeOptions {
     #[arg(
         long,
         value_name = "FIELD=VALUE",
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Restrict by fields changed from a given value.
 
-            possible fields:
-            {}", ChangeField::VARIANTS.join(", ")}
+            Possible fields: {}",
+            ChangeField::VARIANTS.join(", ")
+        )
     )]
     changed_from: Option<Vec<ChangedValue>>,
 
@@ -447,11 +450,12 @@ struct ChangeOptions {
     #[arg(
         long,
         value_name = "FIELD=VALUE",
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Restrict by fields changed to a given value.
 
-            possible fields:
-            {}", ChangeField::VARIANTS.join(", ")}
+            Possible fields: {}",
+            ChangeField::VARIANTS.join(", ")
+        )
     )]
     changed_to: Option<Vec<ChangedValue>>,
 }
@@ -469,7 +473,7 @@ struct QueryOptions {
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(BugField::VARIANTS)
                 .map(|s| s.parse::<BugField>().unwrap()),
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Restrict the data fields returned by the query.
 
             By default, only the id and summary fields are returned. This
@@ -477,8 +481,9 @@ struct QueryOptions {
             change the output format to a space separated list of the
             field values for each item.
 
-            possible values:
-            {}", BugField::VARIANTS.join(", ")}
+            Possible values: {}",
+            BugField::VARIANTS.join(", ")
+        )
     )]
     fields: Vec<BugField>,
 
@@ -486,13 +491,13 @@ struct QueryOptions {
     #[arg(
         short,
         long,
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Limit the number of bugs returned.
 
             If the value is higher than the maximum service limit that value is
             used instead. If the limit is set to zero, all matching results are
             returned.
-        "}
+        ")
     )]
     limit: Option<u64>,
 
@@ -502,7 +507,7 @@ struct QueryOptions {
         long,
         value_name = "FIELD[,...]",
         value_delimiter = ',',
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Perform server-side sorting on the query.
 
             Fields can be prefixed with `-` or `+` to sort in descending or
@@ -515,8 +520,9 @@ struct QueryOptions {
             Note that if an invalid sorting request is made, sorting will
             fallback to the service default.
 
-            possible values:
-            {}", OrderField::VARIANTS.join(", ")}
+            Possible values: {}",
+            OrderField::VARIANTS.join(", ")
+        )
     )]
     order: Option<Vec<Order<OrderField>>>,
 
@@ -528,12 +534,12 @@ struct QueryOptions {
     #[arg(
         short = 'S',
         long,
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Search for bugs using quicksearch syntax.
 
             For more information see:
             https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
-        "}
+        ")
     )]
     quicksearch: Option<String>,
 }
@@ -627,12 +633,12 @@ pub(super) struct Command {
         short,
         long,
         help_heading = "Search options",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Open query in a browser.
 
             This functionality requires xdg-open with a valid, preferred browser
             set for http(s) URLs.
-        "}
+        ")
     )]
     browser: bool,
 
@@ -646,13 +652,13 @@ pub(super) struct Command {
         help_heading = "Search options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Read search attributes from a template.
 
             Value must be the path to a valid search template file.
             Templates use the TOML format and generally map long option names to
             values.
-        "}
+        ")
     )]
     from: Option<Utf8PathBuf>,
 
@@ -662,14 +668,14 @@ pub(super) struct Command {
         help_heading = "Search options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Write search attributes to a template.
 
             Value is the file path where the TOML template file will be written.
 
             Combining this option with -n/--dry-run allows creating search
             templates without any service interaction.
-        "}
+        ")
     )]
     to: Option<Utf8PathBuf>,
 

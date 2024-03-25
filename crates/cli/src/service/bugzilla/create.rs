@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use tracing::info;
 
-use crate::utils::confirm;
+use crate::utils::{confirm, wrapped_doc};
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
@@ -29,13 +29,13 @@ struct Options {
         short,
         long,
         value_name = "USER",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Assign a bug to a user.
 
             The value must be an email address for a service user. The alias
             `@me` can also be used for the service's configured user if one
             exists.
-        "}
+        ")
     )]
     assignee: Option<String>,
 
@@ -45,14 +45,14 @@ struct Options {
         long,
         value_name = "ID[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Set blockers.
 
             Values must be valid IDs for existing bugs.
 
             Multiple arguments can be specified in a comma-separated list or are
             taken from standard input when `-`.
-        "}
+        ")
     )]
     blocks: Option<Vec<MaybeStdinVec<u64>>>,
 
@@ -61,13 +61,13 @@ struct Options {
         long,
         value_name = "USER[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Set users in the CC list.
 
             Values must be email addresses for service users.
 
             Multiple arguments can be specified in a comma-separated list.
-        "}
+        ")
     )]
     cc: Option<Vec<String>>,
 
@@ -85,14 +85,14 @@ struct Options {
         long,
         value_name = "ID[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Set dependencies.
 
             Values must be valid IDs for existing bugs.
 
             Multiple arguments can be specified in a comma-separated list or are
             taken from standard input when `-`.
-        "}
+        ")
     )]
     depends: Option<Vec<MaybeStdinVec<u64>>>,
 
@@ -106,14 +106,14 @@ struct Options {
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Set flags.
 
             Values must be valid flags composed of the flag name followed by its
             status. Supported statuses include `+`, `-`, and `?`.
 
             Multiple arguments can be specified in a comma-separated list.
-        "}
+        ")
     )]
     flags: Option<Vec<Flag>>,
 
@@ -124,14 +124,14 @@ struct Options {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Set groups.
 
             Values must be valid service groups. No arguments may be used to
             avoid adding the bug to all default groups for the targeted product.
 
             Multiple arguments can be specified in a comma-separated list.
-        "}
+        ")
     )]
     groups: Option<Vec<String>>,
 
@@ -141,13 +141,13 @@ struct Options {
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Set keywords.
 
             Values must be valid keywords.
 
             Multiple arguments can be specified in a comma-separated list.
-        "}
+        ")
     )]
     keywords: Option<Vec<String>>,
 
@@ -171,13 +171,13 @@ struct Options {
     #[arg(
         long,
         value_name = "USER",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Set the QA contact for a bug.
 
             The value must be an email address for a service user. The alias
             `@me` can also be used for the service's configured user if one
             exists.
-        "}
+        ")
     )]
     qa: Option<String>,
 
@@ -191,14 +191,14 @@ struct Options {
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Set URLs to bugs in external trackers.
 
             Values must be valid URLs to bugs, issues, or tickets in external
             trackers.
 
             Multiple arguments can be specified in a comma-separated list.
-        "}
+        ")
     )]
     see_also: Option<Vec<String>>,
 
@@ -465,7 +465,7 @@ pub(super) struct Command {
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
         conflicts_with = "from_bug",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Read attributes from a template.
 
             Value must be the path to a valid template file. Templates
@@ -473,7 +473,7 @@ pub(super) struct Command {
 
             Fields that don't match known bug field names are used for custom
             fields.
-        "}
+        ")
     )]
     from: Option<Utf8PathBuf>,
 
@@ -483,7 +483,7 @@ pub(super) struct Command {
         help_heading = "Create options",
         value_name = "ID",
         conflicts_with = "from",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Read attributes from an existing bug.
 
             Value must be the ID of an existing bug which will be used to
@@ -492,7 +492,7 @@ pub(super) struct Command {
             Combining this option with -n/--dry-run and --to allows creating
             templates using existing bugs to edit and use later without creating
             a new bug.
-        "}
+        ")
     )]
     from_bug: Option<u64>,
 
@@ -502,14 +502,14 @@ pub(super) struct Command {
         help_heading = "Create options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Write attributes to a template.
 
             Value is the file path where the TOML template file will be written.
 
             Combining this option with -n/--dry-run allows creating
             templates without any service interaction.
-        "}
+        ")
     )]
     to: Option<Utf8PathBuf>,
 

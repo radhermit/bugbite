@@ -5,7 +5,7 @@ use bugbite::client::bugzilla::Client;
 use clap::Args;
 
 use crate::service::output::render_items;
-use crate::utils::launch_browser;
+use crate::utils::{launch_browser, wrapped_doc};
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
@@ -32,12 +32,12 @@ pub(super) struct Command {
     #[arg(
         short,
         long,
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Open bugs in a browser.
 
             This functionality requires xdg-open with a valid, preferred browser
             set for http(s) URLs.
-        "}
+        ")
     )]
     browser: bool,
 
@@ -47,14 +47,14 @@ pub(super) struct Command {
     #[clap(
         required = true,
         help_heading = "Arguments",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             IDs or aliases of bugs to fetch.
 
             Taken from standard input when `-`.
 
             Example:
               - fetch all matching bugs: bite s bugbite -f id | bite g -
-        "}
+        ")
     )]
     ids: Vec<MaybeStdinVec<String>>,
 }

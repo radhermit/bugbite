@@ -5,7 +5,7 @@ use bugbite::client::redmine::Client;
 use clap::Args;
 
 use crate::service::output::render_items;
-use crate::utils::launch_browser;
+use crate::utils::{launch_browser, wrapped_doc};
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
@@ -18,12 +18,12 @@ struct Options {
     #[arg(
         short,
         long,
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Open issues in a browser.
 
             This functionality requires xdg-open with a valid, preferred browser
             set for http(s) URLs.
-        "}
+        ")
     )]
     browser: bool,
 }

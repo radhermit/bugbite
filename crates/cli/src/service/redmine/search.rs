@@ -14,7 +14,7 @@ use strum::VariantNames;
 
 use crate::service::args::ExistsOrArray;
 use crate::service::output::render_search;
-use crate::utils::launch_browser;
+use crate::utils::{launch_browser, wrapped_doc};
 
 /// Available search parameters.
 #[derive(Debug, Args)]
@@ -30,7 +30,7 @@ struct Params {
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(IssueField::VARIANTS)
                 .map(|s| s.parse::<IssueField>().unwrap()),
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Restrict the data fields returned by the query.
 
             By default, only the id and subject fields are returned. This can be
@@ -38,8 +38,9 @@ struct Params {
             output format to a space separated list of the field values for each
             item.
 
-            possible values:
-            {}", IssueField::VARIANTS.join(", ")}
+            Possible values: {}",
+            IssueField::VARIANTS.join(", ")
+        )
     )]
     fields: Vec<IssueField>,
 
@@ -48,14 +49,14 @@ struct Params {
         short,
         long,
         help_heading = "Search options",
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Limit the number of issues returned.
 
             If the value is higher than the maximum limit that value is used
             instead and if the limit is set to zero, the default limit is used.
             Note that the maximum limit and default limit are generally not
             equal, most instances default to 100 and 25, respectively.
-        "}
+        ")
     )]
     limit: Option<u64>,
 
@@ -66,7 +67,7 @@ struct Params {
         value_name = "FIELD[,...]",
         value_delimiter = ',',
         help_heading = "Search options",
-        long_help = indoc::formatdoc! {"
+        long_help = wrapped_doc!("
             Perform server-side sorting on the query.
 
             Fields can be prefixed with `-` or `+` to sort in descending or
@@ -79,8 +80,9 @@ struct Params {
             Note that if an invalid sorting request is made, sorting will
             fallback to the service default.
 
-            possible values:
-            {}", OrderField::VARIANTS.join(", ")}
+            Possible values: {}",
+            OrderField::VARIANTS.join(", ")
+        )
     )]
     order: Option<Vec<Order<OrderField>>>,
 
@@ -93,13 +95,13 @@ struct Params {
         hide_possible_values = true,
         value_name = "BOOL",
         help_heading = "Attribute options",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Restrict by assignee status.
 
             With no argument, all matches with assignees are returned. If the
             value is `true` or `false`, all matches with or without assignees
             are returned, respectively.
-        "}
+        ")
     )]
     assignee: Option<bool>,
 
@@ -110,7 +112,7 @@ struct Params {
         help_heading = "Attribute options",
         value_name = "VALUE[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {r#"
+        long_help = wrapped_doc!(r#"
             Restrict query by attachments.
 
             With no argument, all matches with attachments are returned. If the
@@ -132,7 +134,7 @@ struct Params {
 
             Example:
               - equals `test1` and `test2`: bite s --attachments test1,test2
-        "#}
+        "#)
     )]
     attachments: Option<ExistsOrArray<String>>,
 
@@ -144,7 +146,7 @@ struct Params {
         help_heading = "Attribute options",
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Restrict by blockers.
 
             With no argument, all matches with blockers are returned. If the
@@ -164,7 +166,7 @@ struct Params {
               - blocked on 10 and 11: bite s --blocks 10,11
 
             Values are taken from standard input when `-`.
-        "}
+        ")
     )]
     blocks: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
@@ -176,7 +178,7 @@ struct Params {
         help_heading = "Attribute options",
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Restrict by dependencies.
 
             With no argument, all matches with dependencies are returned. If the
@@ -196,7 +198,7 @@ struct Params {
               - blocked on 10 and 11: bite s --blocked 10,11
 
             Values are taken from standard input when `-`.
-        "}
+        ")
     )]
     blocked: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
@@ -208,7 +210,7 @@ struct Params {
         help_heading = "Attribute options",
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Restrict by related issues.
 
             With no argument, all matches with relations are returned. If the
@@ -228,7 +230,7 @@ struct Params {
               - relates to 10 and 11: bite s --relates 10,11
 
             Values are taken from standard input when `-`.
-        "}
+        ")
     )]
     relates: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
 
@@ -274,12 +276,12 @@ pub(super) struct Command {
         short,
         long,
         help_heading = "Search options",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Open query in a browser.
 
             This functionality requires xdg-open with a valid, preferred browser
             set for http(s) URLs.
-        "}
+        ")
     )]
     browser: bool,
 

@@ -8,7 +8,7 @@ use camino::Utf8PathBuf;
 use clap::Args;
 
 use crate::service::Render;
-use crate::utils::COLUMNS;
+use crate::utils::{wrapped_doc, COLUMNS};
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attachments options")]
@@ -26,7 +26,7 @@ struct Options {
         short,
         long,
         value_name = "BOOL",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Treat IDs as bug IDs or aliases, not attachment IDs.
 
             Regular ID arguments relate to individual attachment IDs. Using this
@@ -35,7 +35,7 @@ struct Options {
             Note that when saving multiple attachments from multiple bugs,
             subdirectories named after the bug IDs are automatically used in
             order to avoid file name overlap.
-        "}
+        ")
     )]
     item_ids: bool,
 
@@ -45,12 +45,12 @@ struct Options {
         long,
         value_name = "PATH",
         default_value = ".",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Save attachments to a specified directory.
 
             By default, attachments are saved to the current working directory
             and this allows altering that target directory.
-        "}
+        ")
     )]
     dir: Utf8PathBuf,
 }

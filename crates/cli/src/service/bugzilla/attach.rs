@@ -8,6 +8,8 @@ use clap::{Args, ValueHint};
 use itertools::Itertools;
 use tracing::info;
 
+use crate::utils::wrapped_doc;
+
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attachments options")]
 struct Options {
@@ -20,13 +22,13 @@ struct Options {
         short,
         long,
         conflicts_with = "patch",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Specify the MIME type of the attachment.
 
             This option should be unnecessary in regular usage due to the
             automatic MIME type detection done using `file` with a fallback to
             internal inference of common file types.
-        "}
+        ")
     )]
     mime: Option<String>,
 
@@ -42,11 +44,11 @@ struct Options {
     #[arg(
         short,
         long,
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             A short description of the attachment.
 
             By default the file name is used when this is not specified.
-        "}
+        ")
     )]
     summary: Option<String>,
 }
@@ -65,14 +67,14 @@ pub(super) struct Command {
         value_delimiter = ',',
         value_name = "ID[,...]",
         help_heading = "Arguments",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             IDs or aliases of bugs to create attachments for.
 
             Taken from standard input when `-`.
 
             Example:
-              - attach file to all matching bugs: bite s bugbite -f id | bite at - path/to/file
-        "}
+              - attach to matches: bite s bugbite -f id | bite at - path/to/file
+        ")
     )]
     ids: Vec<MaybeStdinVec<String>>,
 
@@ -81,11 +83,11 @@ pub(super) struct Command {
         required = true,
         value_hint = ValueHint::FilePath,
         help_heading = "Arguments",
-        long_help = indoc::indoc! {"
+        long_help = wrapped_doc!("
             Paths to attachment files.
 
             Multiple attachments can be created by specifying multiple paths.
-        "}
+        ")
     )]
     files: Vec<Utf8PathBuf>,
 }
