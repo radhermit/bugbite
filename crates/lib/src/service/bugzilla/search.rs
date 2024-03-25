@@ -627,6 +627,9 @@ impl QueryBuilder<'_> {
             RangeOp::Equal(value) => {
                 self.advanced_field(field, "equals", value);
             }
+            RangeOp::NotEqual(value) => {
+                self.advanced_field(field, "notequals", value);
+            }
             RangeOp::GreaterOrEqual(value) => {
                 self.advanced_field(field, "greaterthaneq", value);
             }

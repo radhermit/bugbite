@@ -128,13 +128,14 @@ where
 }
 
 static RANGE_OP_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"^(?<op>[<>]=?|=)(?<value>.+)$").unwrap());
+    Lazy::new(|| Regex::new(r"^(?<op>[<>]=?|!?=)(?<value>.+)$").unwrap());
 
 #[derive(Debug, Clone)]
 pub enum RangeOp<T> {
     Less(T),
     LessOrEqual(T),
     Equal(T),
+    NotEqual(T),
     GreaterOrEqual(T),
     Greater(T),
 }
@@ -157,6 +158,7 @@ where
                 "<" => Ok(Self::Less(value)),
                 "<=" => Ok(Self::LessOrEqual(value)),
                 "=" => Ok(Self::Equal(value)),
+                "!=" => Ok(Self::NotEqual(value)),
                 ">=" => Ok(Self::GreaterOrEqual(value)),
                 ">" => Ok(Self::Greater(value)),
                 _ => panic!("invalid RangeOp regex"),

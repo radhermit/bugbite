@@ -183,6 +183,9 @@ impl QueryBuilder<'_> {
             RangeOp::Equal(value) => {
                 self.insert(field, format!("={value}"));
             }
+            RangeOp::NotEqual(value) => {
+                self.insert(field, format!("!{value}"));
+            }
             RangeOp::GreaterOrEqual(value) | RangeOp::Greater(value) => {
                 self.insert(field, format!(">={value}"));
             }
