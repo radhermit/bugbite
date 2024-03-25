@@ -101,6 +101,13 @@ struct Params {
             With no argument, all matches with assignees are returned. If the
             value is `true` or `false`, all matches with or without assignees
             are returned, respectively.
+
+            Examples:
+            - assigned
+            > bite s --assignee
+
+            - unassigned
+            > bite s --assignee false
         ")
     )]
     assignee: Option<bool>,
