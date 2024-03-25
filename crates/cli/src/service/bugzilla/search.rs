@@ -454,11 +454,11 @@ struct AttributeOptions {
 struct RangeOptions {
     /// restrict by comments
     #[arg(long)]
-    comments: Option<RangeOrValue<u64>>,
+    comments: Option<Vec<RangeOrValue<u64>>>,
 
     /// restrict by votes
     #[arg(long)]
-    votes: Option<RangeOrValue<u64>>,
+    votes: Option<Vec<RangeOrValue<u64>>>,
 }
 
 #[derive(Debug, Args)]
@@ -861,11 +861,11 @@ impl Command {
                 ExistsOrArray::Array(values) => query.url(values),
             }
         }
-        if let Some(value) = params.range.votes {
-            query.votes(value);
+        if let Some(values) = params.range.votes {
+            query.votes(values);
         }
-        if let Some(value) = params.range.comments {
-            query.comments(value);
+        if let Some(values) = params.range.comments {
+            query.comments(values);
         }
         if let Some(values) = params.attr.alias {
             match values {

@@ -497,19 +497,31 @@ impl QueryBuilder<'_> {
         self.op_field("OR", "whiteboard", values);
     }
 
-    pub fn votes(&mut self, value: RangeOrValue<u64>) {
-        match value {
-            RangeOrValue::Value(value) => self.advanced_field("votes", "equals", value),
-            RangeOrValue::RangeOp(value) => self.range_op("votes", value),
-            RangeOrValue::Range(value) => self.range("votes", value),
+    pub fn votes<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = RangeOrValue<u64>>,
+    {
+        for value in values {
+            match value {
+                RangeOrValue::Value(value) => self.advanced_field("votes", "equals", value),
+                RangeOrValue::RangeOp(value) => self.range_op("votes", value),
+                RangeOrValue::Range(value) => self.range("votes", value),
+            }
         }
     }
 
-    pub fn comments(&mut self, value: RangeOrValue<u64>) {
-        match value {
-            RangeOrValue::Value(value) => self.advanced_field("longdescs.count", "equals", value),
-            RangeOrValue::RangeOp(value) => self.range_op("longdescs.count", value),
-            RangeOrValue::Range(value) => self.range("longdescs.count", value),
+    pub fn comments<I>(&mut self, values: I)
+    where
+        I: IntoIterator<Item = RangeOrValue<u64>>,
+    {
+        for value in values {
+            match value {
+                RangeOrValue::Value(value) => {
+                    self.advanced_field("longdescs.count", "equals", value)
+                }
+                RangeOrValue::RangeOp(value) => self.range_op("longdescs.count", value),
+                RangeOrValue::Range(value) => self.range("longdescs.count", value),
+            }
         }
     }
 
