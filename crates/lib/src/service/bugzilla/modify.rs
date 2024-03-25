@@ -306,7 +306,7 @@ impl<'a> ModifyParams<'a> {
         self.params.alias = Some(values.into_iter().collect());
     }
 
-    pub fn assigned_to(&mut self, value: Option<&str>) {
+    pub fn assignee(&mut self, value: Option<&str>) {
         if let Some(name) = value {
             let user = self.service.replace_user_alias(name);
             self.params.assigned_to = Some(user.into());

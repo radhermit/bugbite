@@ -153,7 +153,7 @@ struct Options {
               - reset to default: bite m --assigned-to "" 123
         "#}
     )]
-    assigned_to: Option<String>,
+    assignee: Option<String>,
 
     /// add/remove/set blockers
     #[arg(
@@ -470,7 +470,7 @@ struct Options {
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 struct Attributes {
     alias: Option<Vec<SetChange<String>>>,
-    assigned_to: Option<String>,
+    assignee: Option<String>,
     blocks: Option<Vec<SetChange<u64>>>,
     cc: Option<Vec<SetChange<String>>>,
     comment: Option<String>,
@@ -504,7 +504,7 @@ impl Attributes {
     fn merge(self, other: Self) -> Self {
         Self {
             alias: self.alias.or(other.alias),
-            assigned_to: self.assigned_to.or(other.assigned_to),
+            assignee: self.assignee.or(other.assignee),
             blocks: self.blocks.or(other.blocks),
             cc: self.cc.or(other.cc),
             comment: self.comment.or(other.comment),
@@ -549,11 +549,11 @@ impl Attributes {
             params.alias(values);
         }
 
-        if let Some(value) = self.assigned_to.as_ref() {
+        if let Some(value) = self.assignee.as_ref() {
             if value.is_empty() {
-                params.assigned_to(None);
+                params.assignee(None);
             } else {
-                params.assigned_to(Some(value));
+                params.assignee(Some(value));
             }
         }
 
@@ -693,7 +693,7 @@ impl From<Options> for Attributes {
     fn from(value: Options) -> Self {
         Self {
             alias: value.alias,
-            assigned_to: value.assigned_to,
+            assignee: value.assignee,
             blocks: value.blocks,
             cc: value.cc,
             comment: value.comment,

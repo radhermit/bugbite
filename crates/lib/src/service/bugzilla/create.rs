@@ -133,7 +133,7 @@ impl<'a> CreateParams<'a> {
         self.params.alias = Some(values.into_iter().map(Into::into).collect());
     }
 
-    pub fn assigned_to(&mut self, value: &str) {
+    pub fn assignee(&mut self, value: &str) {
         let user = self.service.replace_user_alias(value);
         self.params.assigned_to = Some(user.into());
     }

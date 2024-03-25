@@ -37,7 +37,7 @@ struct Options {
             exists.
         "}
     )]
-    assigned_to: Option<String>,
+    assignee: Option<String>,
 
     /// set blockers
     #[arg(
@@ -235,7 +235,7 @@ struct Options {
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 struct Attributes {
     alias: Option<Vec<String>>,
-    assigned_to: Option<String>,
+    assignee: Option<String>,
     blocks: Option<Vec<u64>>,
     cc: Option<Vec<String>>,
     component: Option<String>,
@@ -267,7 +267,7 @@ impl Attributes {
     fn merge(self, other: Self) -> Self {
         Self {
             alias: self.alias.or(other.alias),
-            assigned_to: self.assigned_to.or(other.assigned_to),
+            assignee: self.assignee.or(other.assignee),
             blocks: self.blocks.or(other.blocks),
             cc: self.cc.or(other.cc),
             component: self.component.or(other.component),
@@ -302,8 +302,8 @@ impl Attributes {
             params.alias(values);
         }
 
-        if let Some(value) = self.assigned_to.as_ref() {
-            params.assigned_to(value);
+        if let Some(value) = self.assignee.as_ref() {
+            params.assignee(value);
         }
 
         if let Some(values) = self.blocks {
@@ -406,7 +406,7 @@ impl From<Options> for Attributes {
     fn from(value: Options) -> Self {
         Self {
             alias: value.alias,
-            assigned_to: value.assigned_to,
+            assignee: value.assignee,
             blocks: value.blocks.map(|x| x.into_iter().flatten().collect()),
             cc: value.cc,
             component: value.component,
