@@ -200,6 +200,7 @@ pub enum IssueField {
     Assignee,
     Subject,
     Creator,
+    Closed,
     Created,
     Updated,
 }
