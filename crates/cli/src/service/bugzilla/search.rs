@@ -453,11 +453,11 @@ struct AttributeOptions {
 #[clap(next_help_heading = "Range options")]
 struct RangeOptions {
     /// restrict by comments
-    #[arg(long)]
+    #[arg(long, value_delimiter = ',')]
     comments: Option<Vec<RangeOrValue<u64>>>,
 
     /// restrict by votes
-    #[arg(long)]
+    #[arg(long, value_delimiter = ',')]
     votes: Option<Vec<RangeOrValue<u64>>>,
 }
 
