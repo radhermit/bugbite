@@ -348,7 +348,7 @@ struct AttributeOptions {
     groups: Option<ExistsOrArray<MaybeStdinVec<Match>>>,
 
     /// restrict by ID
-    #[arg(long)]
+    #[arg(long, value_delimiter = ',')]
     id: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// restrict by keyword
