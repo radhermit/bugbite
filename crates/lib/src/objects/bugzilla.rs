@@ -13,7 +13,7 @@ use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::{serde_as, BoolFromInt, DeserializeFromStr, SerializeDisplay};
 use strum::{Display, EnumString};
 
-use crate::serde::{non_empty_str, null_empty_vec};
+use crate::serde::{non_empty_str, null_empty_set, null_empty_vec};
 use crate::service::bugzilla::BugField;
 use crate::traits::RenderSearch;
 use crate::Error;
@@ -285,24 +285,24 @@ pub struct Bug {
     pub priority: Option<String>,
     #[serde(deserialize_with = "unset_value_str")]
     pub severity: Option<String>,
-    #[serde(deserialize_with = "null_empty_vec")]
-    pub groups: Vec<String>,
-    #[serde(deserialize_with = "null_empty_vec")]
-    pub keywords: Vec<String>,
-    #[serde(deserialize_with = "null_empty_vec")]
-    pub cc: Vec<String>,
-    #[serde(deserialize_with = "null_empty_vec")]
-    pub blocks: Vec<u64>,
-    #[serde(deserialize_with = "null_empty_vec")]
-    pub depends_on: Vec<u64>,
+    #[serde(deserialize_with = "null_empty_set")]
+    pub groups: IndexSet<String>,
+    #[serde(deserialize_with = "null_empty_set")]
+    pub keywords: IndexSet<String>,
+    #[serde(deserialize_with = "null_empty_set")]
+    pub cc: IndexSet<String>,
+    #[serde(deserialize_with = "null_empty_set")]
+    pub blocks: IndexSet<u64>,
+    #[serde(deserialize_with = "null_empty_set")]
+    pub depends_on: IndexSet<u64>,
     #[serde(rename = "dupe_of")]
     pub duplicate_of: Option<u64>,
     #[serde(deserialize_with = "null_empty_vec")]
     pub flags: Vec<BugFlag>,
-    #[serde(deserialize_with = "null_empty_vec")]
-    pub tags: Vec<String>,
-    #[serde(deserialize_with = "null_empty_vec")]
-    pub see_also: Vec<String>,
+    #[serde(deserialize_with = "null_empty_set")]
+    pub tags: IndexSet<String>,
+    #[serde(deserialize_with = "null_empty_set")]
+    pub see_also: IndexSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub url: Option<String>,
     pub comments: Vec<Comment>,
