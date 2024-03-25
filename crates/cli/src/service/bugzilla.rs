@@ -105,13 +105,12 @@ impl Subcommand {
 
 impl Render for Attachment {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        let line = format!("{}: {}", self.id, self.summary);
+        let line = format!("{}: {} ({})", self.id, self.summary, self.file_name);
         writeln!(f, "{}", truncate(&line, width))?;
 
         // output additional attachment info on request
         let line = format!(
-            "  {} ({}) {}, created by {}, {}",
-            self.file_name,
+            "  ({}) {}, created by {}, {}",
             self.content_type,
             self.human_size(),
             self.creator,
