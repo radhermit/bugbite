@@ -1,7 +1,7 @@
+use std::collections::HashMap;
 use std::fmt;
 
 use itertools::Itertools;
-use ordered_multimap::ListOrderedMultimap;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::redmine::Issue;
@@ -15,7 +15,7 @@ use crate::Error;
 #[derive(Debug)]
 pub struct QueryBuilder<'a> {
     _service: &'a super::Service,
-    query: ListOrderedMultimap<String, String>,
+    query: HashMap<String, String>,
 }
 
 impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
@@ -119,9 +119,9 @@ impl QueryBuilder<'_> {
     pub fn status(&mut self, value: &str) -> crate::Result<()> {
         // TODO: move valid status search values to an enum
         match value {
-            "open" | "@open" => self.append("status_id", "open"),
-            "closed" | "@closed" => self.append("status_id", "closed"),
-            "all" | "@all" => self.append("status_id", "*"),
+            "open" | "@open" => self.insert("status_id", "open"),
+            "closed" | "@closed" => self.insert("status_id", "closed"),
+            "all" | "@all" => self.insert("status_id", "*"),
             _ => return Err(Error::InvalidValue(format!("invalid status: {value}"))),
         }
         Ok(())
@@ -192,26 +192,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn extend<K, I, V>(&mut self, key: K, values: I)
-    where
-        I: IntoIterator<Item = V>,
-        K: fmt::Display,
-        V: fmt::Display,
-    {
-        for value in values {
-            self.query.append(key.to_string(), value.to_string());
-        }
-    }
-
-    pub fn append<K, V>(&mut self, key: K, value: V)
-    where
-        K: fmt::Display,
-        V: fmt::Display,
-    {
-        self.query.append(key.to_string(), value.to_string());
-    }
-
-    pub fn insert<K, V>(&mut self, key: K, value: V)
+    fn insert<K, V>(&mut self, key: K, value: V)
     where
         K: fmt::Display,
         V: fmt::Display,
@@ -225,7 +206,7 @@ impl Query for QueryBuilder<'_> {
         let mut params = url::form_urlencoded::Serializer::new(String::new());
         // limit to open issues by default
         if !self.query.contains_key("status_id") {
-            self.append("status_id", "open");
+            self.status("open")?;
         }
 
         // default to the common maximum limit, without this the default limit is used
