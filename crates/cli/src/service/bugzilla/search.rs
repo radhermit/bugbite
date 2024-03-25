@@ -453,11 +453,73 @@ struct AttributeOptions {
 #[clap(next_help_heading = "Range options")]
 struct RangeOptions {
     /// restrict by comments
-    #[arg(long, value_delimiter = ',')]
+    #[arg(
+        long,
+        value_delimiter = ',',
+        long_help = wrapped_doc!(r#"
+            Restrict by the number of comments.
+
+            Values can either be numbers, numbers prefixed with operators (e.g.
+            <, !=, >=), or ranges using the operators `..` and `..=`.
+
+            Examples:
+            - equal to 10
+            > bite s --comments 10
+            > bite s --comments "=10"
+
+            - not equal to 10
+            > bite s --comments "!=10"
+
+            - greater than or equal to 10
+            > bite s --comments ">=10"
+
+            - between 5 and 10
+            > bite s --comments 5..10
+
+            Multiple values can be specified in a comma-separated list or with
+            multiple options and will match if all of the specified values
+            match.
+
+            - more than 5 and less than 10
+            > bite s --comments ">5,<10"
+            > bite s --comments ">5" --comments "<10"
+        "#)
+    )]
     comments: Option<Vec<RangeOrValue<u64>>>,
 
     /// restrict by votes
-    #[arg(long, value_delimiter = ',')]
+    #[arg(
+        long,
+        value_delimiter = ',',
+        long_help = wrapped_doc!(r#"
+            Restrict by the number of votes.
+
+            Values can either be numbers, numbers prefixed with operators (e.g.
+            <, !=, >=), or ranges using the operators `..` and `..=`.
+
+            Examples:
+            - equal to 10
+            > bite s --votes 10
+            > bite s --votes "=10"
+
+            - not equal to 10
+            > bite s --votes "!=10"
+
+            - greater than or equal to 10
+            > bite s --votes ">=10"
+
+            - between 5 and 10
+            > bite s --votes 5..10
+
+            Multiple values can be specified in a comma-separated list or with
+            multiple options and will match if all of the specified values
+            match.
+
+            - more than 5 and less than 10
+            > bite s --votes ">5,<10"
+            > bite s --votes ">5" --votes "<10"
+        "#)
+    )]
     votes: Option<Vec<RangeOrValue<u64>>>,
 }
 
@@ -529,7 +591,7 @@ struct QueryOptions {
         default_value = "id,summary",
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(BugField::VARIANTS)
-                .map(|s| s.parse::<BugField>().unwrap()),
+            .map(|s| s.parse::<BugField>().unwrap()),
         long_help = wrapped_doc!("
             Restrict the data fields returned by the query.
 
