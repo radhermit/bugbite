@@ -43,12 +43,6 @@ impl Config {
     }
 }
 
-impl fmt::Display for Config {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Service: {} -- {}", self.kind(), self.base())
-    }
-}
-
 // TODO: remove this once authentication support is added
 #[derive(Debug)]
 pub struct Service {
@@ -62,6 +56,12 @@ impl Service {
             config,
             client: builder.build()?,
         })
+    }
+}
+
+impl fmt::Display for Service {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} -- {}", self.kind(), self.base())
     }
 }
 

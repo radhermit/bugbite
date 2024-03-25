@@ -17,10 +17,9 @@ pub struct Client {
 
 impl Client {
     pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
-        info!("{config}");
-        Ok(Self {
-            service: Service::new(config, builder)?,
-        })
+        let service = Service::new(config, builder)?;
+        info!("Service: {service}");
+        Ok(Self { service })
     }
 
     pub fn service(&self) -> &Service {

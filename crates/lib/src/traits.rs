@@ -1,3 +1,5 @@
+use std::fmt;
+
 use reqwest::RequestBuilder;
 use url::Url;
 
@@ -86,7 +88,7 @@ impl InjectAuth for RequestBuilder {
     }
 }
 
-pub(crate) trait WebService<'a>: WebClient<'a> {
+pub(crate) trait WebService<'a>: WebClient<'a> + fmt::Display {
     const API_VERSION: &'static str;
     type Response;
     type GetRequest: Request;

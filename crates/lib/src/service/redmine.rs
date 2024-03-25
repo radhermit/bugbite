@@ -57,12 +57,6 @@ impl Config {
     }
 }
 
-impl fmt::Display for Config {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Service: {} -- {}", self.kind(), self.base())
-    }
-}
-
 // TODO: remove this once authentication support is added
 #[derive(Debug)]
 pub struct Service {
@@ -82,6 +76,12 @@ impl Service {
     pub fn item_url<I: std::fmt::Display>(&self, id: I) -> String {
         let base = self.config.web_base.as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
+    }
+}
+
+impl fmt::Display for Service {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} -- {}", self.kind(), self.base())
     }
 }
 

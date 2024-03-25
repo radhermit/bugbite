@@ -56,12 +56,6 @@ impl Config {
     }
 }
 
-impl fmt::Display for Config {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Service: {} -- {}", self.kind(), self.base())
-    }
-}
-
 #[derive(Debug)]
 pub struct Service {
     config: Config,
@@ -156,6 +150,12 @@ macro_rules! return_if_error {
             return Err(Error::Bugzilla { code, message });
         }
     }};
+}
+
+impl fmt::Display for Service {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} -- {}", self.kind(), self.base())
+    }
 }
 
 impl<'a> WebClient<'a> for Service {
