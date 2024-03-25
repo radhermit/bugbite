@@ -334,9 +334,7 @@ impl Bug {
     pub fn events(&self) -> impl Iterator<Item = Modification> {
         let comments = self.comments.iter().map(Modification::Comment);
         let history = self.history.iter().map(Modification::Event);
-        let mut events: Vec<_> = comments.chain(history).collect();
-        events.sort();
-        events.into_iter()
+        comments.chain(history).sorted()
     }
 }
 
