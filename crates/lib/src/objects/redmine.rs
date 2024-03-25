@@ -1,3 +1,5 @@
+use std::hash::{Hash, Hasher};
+
 use chrono::prelude::*;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -10,7 +12,7 @@ use crate::traits::RenderSearch;
 
 use super::{stringify, Item};
 
-#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Default)]
 #[serde(default)]
 pub struct Issue {
     pub id: u64,
@@ -29,6 +31,20 @@ pub struct Issue {
     #[serde(rename = "updated_on")]
     pub updated: Option<DateTime<Utc>>,
     pub comments: Vec<Comment>,
+}
+
+impl PartialEq for Issue {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for Issue {}
+
+impl Hash for Issue {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
