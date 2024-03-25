@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::io::{stdout, IsTerminal, Write};
 
 use bugbite::traits::RenderSearch;
@@ -82,30 +83,35 @@ where
 }
 
 /// Output an iterable field in truncated list format.
-pub(crate) fn truncated_list<W, S>(
+pub(crate) fn truncated_list<W, I, S>(
     f: &mut W,
     name: &str,
-    data: &[S],
+    data: I,
     width: usize,
 ) -> std::io::Result<()>
 where
     W: std::io::Write,
+    I: IntoIterator<Item = S>,
+    <I as IntoIterator>::IntoIter: ExactSizeIterator,
     S: std::fmt::Display,
 {
-    match data {
-        [] => (),
-        [value] => {
+    let mut values = data.into_iter();
+    match values.len().cmp(&1) {
+        Ordering::Equal => {
+            let value = values.next().unwrap();
             let line = format!("{name:<12} : {value}");
             writeln!(f, "{}", truncate(&line, width))?;
         }
-        values => {
+        Ordering::Greater => {
             writeln!(f, "{name:<12} :")?;
             for value in values {
                 let line = format!("  {value}");
                 writeln!(f, "{}", truncate(&line, width))?;
             }
         }
+        Ordering::Less => (),
     }
+
     Ok(())
 }
 
