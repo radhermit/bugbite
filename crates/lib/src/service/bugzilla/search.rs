@@ -33,7 +33,9 @@ impl Request for SearchRequest<'_> {
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
-        Ok(serde_json::from_value(data)?)
+        let bugs = serde_json::from_value(data)
+            .map_err(|e| Error::InvalidValue(format!("failed deserializing bugs: {e}")))?;
+        Ok(bugs)
     }
 }
 

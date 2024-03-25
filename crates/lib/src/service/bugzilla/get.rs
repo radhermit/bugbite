@@ -114,7 +114,8 @@ impl Request for GetRequest<'_> {
 
         let mut bugs = vec![];
         for value in data {
-            let mut bug: Bug = serde_json::from_value(value)?;
+            let mut bug: Bug = serde_json::from_value(value)
+                .map_err(|e| Error::InvalidValue(format!("failed deserializing bug: {e}")))?;
             bug.attachments = attachments.next().unwrap_or_default();
             bug.comments = comments.next().unwrap_or_default();
             bug.history = history.next().unwrap_or_default();

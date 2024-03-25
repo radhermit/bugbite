@@ -16,8 +16,6 @@ pub enum Error {
     InvalidValue(String),
     #[error("{0}")]
     IO(String),
-    #[error("{0}")]
-    Json(serde_json::Error),
     #[error("bugzilla: {message}")]
     Bugzilla { code: i64, message: String },
     #[error("redmine: {0}")]
@@ -37,12 +35,6 @@ impl From<reqwest::Error> for Error {
 impl From<io::Error> for Error {
     fn from(e: io::Error) -> Self {
         Error::IO(format!("{e}: {}", e.kind()))
-    }
-}
-
-impl From<serde_json::Error> for Error {
-    fn from(e: serde_json::Error) -> Self {
-        Error::Json(e)
     }
 }
 

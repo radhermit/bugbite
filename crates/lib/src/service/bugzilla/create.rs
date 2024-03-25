@@ -28,7 +28,9 @@ impl Request for CreateRequest<'_> {
             .inject_auth(self.service, true)?;
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
-        Ok(serde_json::from_value(data["id"].take())?)
+        let id = serde_json::from_value(data["id"].take())
+            .map_err(|e| Error::InvalidValue(format!("failed deserializing id: {e}")))?;
+        Ok(id)
     }
 }
 

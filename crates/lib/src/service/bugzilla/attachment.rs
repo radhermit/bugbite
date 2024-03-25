@@ -62,11 +62,14 @@ impl Request for AttachmentRequest<'_> {
                 };
                 // Bugzilla's response always uses bug IDs even if attachments were requested via
                 // alias so we assume the response is in the same order as the request.
-                let mut attachments = vec![];
+                let mut bug_attachments = vec![];
                 for (_id, values) in data {
-                    attachments.push(serde_json::from_value(values)?);
+                    let attachments = serde_json::from_value(values).map_err(|e| {
+                        Error::InvalidValue(format!("failed deserializing attachments: {e}"))
+                    })?;
+                    bug_attachments.push(attachments);
                 }
-                Ok(attachments)
+                Ok(bug_attachments)
             }
             Ids::Object(ids) => {
                 let mut data = data["attachments"].take();

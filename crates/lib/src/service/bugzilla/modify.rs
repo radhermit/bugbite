@@ -80,7 +80,8 @@ impl Request for ModifyRequest<'_> {
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
-        let mut changes: Vec<BugChange> = serde_json::from_value(data)?;
+        let mut changes: Vec<BugChange> = serde_json::from_value(data)
+            .map_err(|e| Error::InvalidValue(format!("failed deserializing changes: {e}")))?;
         if let Some(comment) = self.params.comment.as_ref() {
             for change in changes.iter_mut() {
                 change.comment = Some(comment.clone());

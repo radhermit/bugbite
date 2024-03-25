@@ -61,7 +61,9 @@ impl Request for HistoryRequest<'_> {
         let mut history = vec![];
         for mut bug in bugs {
             let data = bug["history"].take();
-            history.push(serde_json::from_value(data)?);
+            let events = serde_json::from_value(data)
+                .map_err(|e| Error::InvalidValue(format!("failed deserializing events: {e}")))?;
+            history.push(events);
         }
 
         Ok(history)

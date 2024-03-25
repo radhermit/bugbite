@@ -115,7 +115,9 @@ impl Request for AttachRequest<'_> {
             let response = future.await?;
             let mut data = self.service.parse_response(response).await?;
             let data = data["ids"].take();
-            attachment_ids.push(serde_json::from_value(data)?);
+            let ids = serde_json::from_value(data)
+                .map_err(|e| Error::InvalidValue(format!("failed deserializing ids: {e}")))?;
+            attachment_ids.push(ids);
         }
 
         Ok(attachment_ids)

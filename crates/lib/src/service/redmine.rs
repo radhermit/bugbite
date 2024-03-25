@@ -153,7 +153,9 @@ impl<'a> WebService<'a> for Service {
                 debug!("{data}");
                 let errors = data["errors"].take();
                 if !errors.is_null() {
-                    let errors: Vec<_> = serde_json::from_value(errors)?;
+                    let errors: Vec<_> = serde_json::from_value(errors).map_err(|e| {
+                        Error::InvalidValue(format!("failed deserializing errors: {e}"))
+                    })?;
                     let error = errors.into_iter().next().unwrap();
                     Err(Error::Redmine(error))
                 } else {
@@ -165,7 +167,9 @@ impl<'a> WebService<'a> for Service {
                     debug!("{data}");
                     let errors = data["errors"].take();
                     if !errors.is_null() {
-                        let errors: Vec<_> = serde_json::from_value(errors)?;
+                        let errors: Vec<_> = serde_json::from_value(errors).map_err(|e| {
+                            Error::InvalidValue(format!("failed deserializing errors: {e}"))
+                        })?;
                         let error = errors.into_iter().next().unwrap();
                         return Err(Error::Redmine(error));
                     }

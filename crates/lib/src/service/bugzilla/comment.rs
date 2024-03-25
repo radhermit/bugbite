@@ -80,7 +80,9 @@ impl Request for CommentRequest<'_> {
             // deserialize and filter comments
             let mut bug_comments = vec![];
             for value in data {
-                let comment: Comment = serde_json::from_value(value)?;
+                let comment: Comment = serde_json::from_value(value).map_err(|e| {
+                    Error::InvalidValue(format!("failed deserializing comment: {e}"))
+                })?;
                 if params.filter(&comment) {
                     bug_comments.push(comment);
                 }
