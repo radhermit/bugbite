@@ -190,7 +190,7 @@ impl QueryBuilder<'_> {
         self.or("alias", values)
     }
 
-    pub fn assigned_to<I, S>(&mut self, values: I)
+    pub fn assignee<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
         S: Into<Match>,
@@ -765,7 +765,7 @@ impl Api for ExistsField {
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
     Alias,
-    AssignedTo,
+    Assignee,
     Blocks,
     Comments,
     Component,
@@ -801,7 +801,7 @@ impl Api for OrderField {
     fn api(&self) -> Self::Output {
         match self {
             Self::Alias => "alias",
-            Self::AssignedTo => "assigned_to",
+            Self::Assignee => "assigned_to",
             Self::Blocks => "blocked",
             Self::Comments => "longdescs.count",
             Self::Component => "component",
@@ -850,7 +850,7 @@ impl Api for Order<OrderField> {
 #[strum(serialize_all = "kebab-case")]
 pub enum ChangeField {
     Alias,
-    AssignedTo,
+    Assignee,
     Blocks,
     Component,
     Cc,
@@ -881,7 +881,7 @@ impl Api for ChangeField {
     fn api(&self) -> Self::Output {
         match self {
             Self::Alias => "alias",
-            Self::AssignedTo => "assigned_to",
+            Self::Assignee => "assigned_to",
             Self::Blocks => "blocked",
             Self::Component => "component",
             Self::Cc => "cc",

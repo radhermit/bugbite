@@ -553,9 +553,9 @@ struct TimeOptions {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "User options")]
 struct UserOptions {
-    /// user the bug is assigned to
+    /// user is the assignee
     #[arg(short, long, value_name = "USER[,...]", value_delimiter = ',')]
-    assigned_to: Option<Vec<Match>>,
+    assignee: Option<Vec<Match>>,
 
     /// user created attachment
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
@@ -699,8 +699,8 @@ impl Command {
         if let Some(values) = params.change.changed_to {
             query.changed_to(values.into_iter().map(|c| (c.field, c.value)));
         }
-        if let Some(values) = params.user.assigned_to {
-            query.assigned_to(values);
+        if let Some(values) = params.user.assignee {
+            query.assignee(values);
         }
         if let Some(value) = params.query.limit {
             query.limit(value);
