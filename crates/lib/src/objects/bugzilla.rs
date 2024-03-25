@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 
 use chrono::prelude::*;
@@ -243,7 +244,7 @@ pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(d: D) -> Result<IndexSet<S
     })
 }
 
-#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Default)]
 #[serde(default)]
 pub struct Bug {
     pub id: u64,
@@ -307,6 +308,20 @@ pub struct Bug {
     pub comments: Vec<Comment>,
     pub attachments: Vec<Attachment>,
     pub history: Vec<Event>,
+}
+
+impl PartialEq for Bug {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for Bug {}
+
+impl Hash for Bug {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
 }
 
 impl From<Bug> for Item {
