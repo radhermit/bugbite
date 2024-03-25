@@ -646,8 +646,13 @@ struct UserOptions {
     flaggers: Option<Vec<Match>>,
 
     /// user is the QA contact
-    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
-    qa: Option<Vec<Match>>,
+    #[arg(
+        long,
+        value_name = "USER[,...]",
+        num_args = 0..=1,
+        default_missing_value = "true",
+    )]
+    qa: Option<ExistsOrArray<Match>>,
 
     /// user who reported
     #[arg(short = 'R', long, value_name = "USER[,...]", value_delimiter = ',')]
@@ -796,9 +801,6 @@ impl Command {
         if let Some(values) = params.attr.priority {
             query.priority(values);
         }
-        if let Some(values) = params.user.qa {
-            query.qa(values);
-        }
         if let Some(values) = params.attr.severity {
             query.severity(values);
         }
@@ -899,6 +901,12 @@ impl Command {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Cc, value),
                 ExistsOrArray::Array(values) => query.cc(values),
+            }
+        }
+        if let Some(values) = params.user.qa {
+            match values {
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Qa, value),
+                ExistsOrArray::Array(values) => query.qa(values),
             }
         }
         if let Some(values) = params.attr.blocks {
