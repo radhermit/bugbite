@@ -44,13 +44,13 @@ struct Params {
     )]
     fields: Vec<IssueField>,
 
-    /// limit the number of issues returned
+    /// limit the number of results
     #[arg(
         short,
         long,
         help_heading = "Search options",
         long_help = wrapped_doc!("
-            Limit the number of issues returned.
+            Limit the number of results.
 
             If the value is higher than the maximum limit that value is used
             instead and if the limit is set to zero, the default limit is used.

@@ -538,12 +538,12 @@ struct QueryOptions {
     )]
     fields: Vec<BugField>,
 
-    /// limit the number of bugs returned
+    /// limit the number of results
     #[arg(
         short,
         long,
         long_help = wrapped_doc!("
-            Limit the number of bugs returned.
+            Limit the number of results.
 
             If the value is higher than the maximum service limit that value is
             used instead. If the limit is set to zero, all matching results are
