@@ -15,8 +15,7 @@ use super::{stringify, Item};
 pub struct Issue {
     pub id: u64,
     pub assigned_to: Option<Person>,
-    #[serde(rename = "subject")]
-    pub summary: Option<String>,
+    pub subject: Option<String>,
     pub description: Option<String>,
     #[serde(rename = "author")]
     pub creator: Option<Person>,
@@ -71,8 +70,8 @@ impl RenderSearch<IssueField> for Issue {
         let field_to_string = |field: &IssueField| -> String {
             match field {
                 IssueField::Id => format!("{:<8}", self.id),
-                IssueField::AssignedTo => format!("{:<20}", stringify!(self.assigned_to)),
-                IssueField::Summary => stringify!(self.summary),
+                IssueField::Assignee => format!("{:<20}", stringify!(self.assigned_to)),
+                IssueField::Subject => stringify!(self.subject),
                 IssueField::Creator => format!("{:<20}", stringify!(self.creator)),
                 IssueField::Created => stringify!(self.created),
                 IssueField::Updated => stringify!(self.updated),

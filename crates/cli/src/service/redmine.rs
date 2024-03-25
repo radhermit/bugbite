@@ -87,7 +87,8 @@ impl Render for Comment {
 
 impl Render for Issue {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        output_field_wrapped!(f, "Summary", &self.summary, width);
+        output_field_wrapped!(f, "Subject", &self.subject, width);
+        output_field!(f, "Assignee", &self.assigned_to, width);
         output_field!(f, "Reporter", &self.creator, width);
         output_field!(f, "Created", &self.created, width);
         output_field!(f, "Updated", &self.updated, width);

@@ -197,8 +197,8 @@ impl<'a> WebService<'a> for Service {
 #[strum(serialize_all = "kebab-case")]
 pub enum IssueField {
     Id,
-    AssignedTo,
-    Summary,
+    Assignee,
+    Subject,
     Creator,
     Created,
     Updated,

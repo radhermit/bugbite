@@ -26,17 +26,17 @@ struct Params {
         help_heading = "Search options",
         value_name = "FIELD[,...]",
         value_delimiter = ',',
-        default_value = "id,summary",
+        default_value = "id,subject",
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(IssueField::VARIANTS)
                 .map(|s| s.parse::<IssueField>().unwrap()),
         long_help = indoc::formatdoc! {"
             Restrict the data fields returned by the query.
 
-            By default, only the id and summary fields are returned. This can be
-            altered by specifying a custom list of fields instead which will
-            also change the output format to a space separated list of the field
-            values for each item.
+            By default, only the id and subject fields are returned. This can be
+            altered by specifying a custom list of fields which will change the
+            output format to a space separated list of the field values for each
+            item.
 
             possible values:
             {}", IssueField::VARIANTS.join(", ")}
