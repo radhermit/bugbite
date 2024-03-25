@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
-use bugbite::objects::RangeOrEqual;
+use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::bugzilla::{
     search::{ChangeField, EnabledOrDisabled, ExistsField, Match, OrderField},
@@ -454,11 +454,11 @@ struct AttributeOptions {
 struct RangeOptions {
     /// restrict by comments
     #[arg(long)]
-    comments: Option<RangeOrEqual<u64>>,
+    comments: Option<RangeOrValue<u64>>,
 
     /// restrict by votes
     #[arg(long)]
-    votes: Option<RangeOrEqual<u64>>,
+    votes: Option<RangeOrValue<u64>>,
 }
 
 #[derive(Debug, Args)]
@@ -616,11 +616,11 @@ struct QueryOptions {
 struct TimeOptions {
     /// restrict by creation time
     #[arg(short, long, value_name = "TIME")]
-    created: Option<RangeOrEqual<TimeDeltaIso8601>>,
+    created: Option<RangeOrValue<TimeDeltaIso8601>>,
 
     /// restrict by modification time
     #[arg(short, long, value_name = "TIME")]
-    modified: Option<RangeOrEqual<TimeDeltaIso8601>>,
+    modified: Option<RangeOrValue<TimeDeltaIso8601>>,
 }
 
 #[derive(Debug, Args)]

@@ -3,6 +3,8 @@ use std::ops::RangeBounds;
 use std::str::FromStr;
 
 use base64::prelude::*;
+use once_cell::sync::Lazy;
+use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::traits::Contains;
@@ -101,12 +103,13 @@ macro_rules! stringify {
 use stringify;
 
 #[derive(Debug, Clone)]
-pub enum RangeOrEqual<T> {
-    Equal(T),
+pub enum RangeOrValue<T> {
+    Value(T),
+    RangeOp(RangeOp<T>),
     Range(Range<T>),
 }
 
-impl<T> FromStr for RangeOrEqual<T>
+impl<T> FromStr for RangeOrValue<T>
 where
     T: FromStr + Eq,
     <T as FromStr>::Err: std::fmt::Display + std::fmt::Debug,
@@ -115,9 +118,51 @@ where
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Ok(value) = s.parse() {
-            Ok(RangeOrEqual::Equal(value))
+            Ok(RangeOrValue::Value(value))
+        } else if let Ok(value) = RangeOp::from_str(s) {
+            Ok(RangeOrValue::RangeOp(value))
         } else {
-            Ok(RangeOrEqual::Range(s.parse()?))
+            Ok(RangeOrValue::Range(s.parse()?))
+        }
+    }
+}
+
+static RANGE_OP_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"^(?<op>[<>]=?|=)(?<value>.+)$").unwrap());
+
+#[derive(Debug, Clone)]
+pub enum RangeOp<T> {
+    Less(T),
+    LessOrEqual(T),
+    Equal(T),
+    GreaterOrEqual(T),
+    Greater(T),
+}
+
+impl<T> FromStr for RangeOp<T>
+where
+    T: FromStr + Eq,
+    <T as FromStr>::Err: std::fmt::Display + std::fmt::Debug,
+{
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some(caps) = RANGE_OP_RE.captures(s) {
+            let op = caps.name("op").map_or("", |m| m.as_str());
+            let value = caps.name("value").map_or("", |m| m.as_str());
+            let value = value
+                .parse()
+                .map_err(|e| Error::InvalidValue(format!("invalid range value: {value}: {e}")))?;
+            match op {
+                "<" => Ok(Self::Less(value)),
+                "<=" => Ok(Self::LessOrEqual(value)),
+                "=" => Ok(Self::Equal(value)),
+                ">=" => Ok(Self::GreaterOrEqual(value)),
+                ">" => Ok(Self::Greater(value)),
+                _ => panic!("invalid RangeOp regex"),
+            }
+        } else {
+            Err(Error::InvalidValue(format!("invalid range op: {s}")))
         }
     }
 }

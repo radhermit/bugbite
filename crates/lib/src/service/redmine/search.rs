@@ -5,7 +5,7 @@ use itertools::Itertools;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::redmine::Issue;
-use crate::objects::{Range, RangeOrEqual};
+use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, OrderType};
 use crate::time::TimeDeltaIso8601;
 use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
@@ -127,28 +127,31 @@ impl QueryBuilder<'_> {
         Ok(())
     }
 
-    pub fn closed(&mut self, value: &RangeOrEqual<TimeDeltaIso8601>) {
+    pub fn closed(&mut self, value: &RangeOrValue<TimeDeltaIso8601>) {
         match value {
-            RangeOrEqual::Equal(value) => {
+            RangeOrValue::Value(value) => {
                 self.insert("closed_on", format!(">={value}"));
             }
-            RangeOrEqual::Range(range) => self.range("closed_on", range),
+            RangeOrValue::RangeOp(value) => self.range_op("closed_on", value),
+            RangeOrValue::Range(value) => self.range("closed_on", value),
         }
     }
 
-    pub fn created(&mut self, value: &RangeOrEqual<TimeDeltaIso8601>) {
+    pub fn created(&mut self, value: &RangeOrValue<TimeDeltaIso8601>) {
         match value {
-            RangeOrEqual::Equal(value) => {
+            RangeOrValue::Value(value) => {
                 self.insert("created_on", format!(">={value}"));
             }
-            RangeOrEqual::Range(range) => self.range("created_on", range),
+            RangeOrValue::RangeOp(value) => self.range_op("created_on", value),
+            RangeOrValue::Range(value) => self.range("created_on", value),
         }
     }
 
-    pub fn modified(&mut self, value: &RangeOrEqual<TimeDeltaIso8601>) {
+    pub fn modified(&mut self, value: &RangeOrValue<TimeDeltaIso8601>) {
         match value {
-            RangeOrEqual::Equal(value) => self.insert("updated_on", format!(">={value}")),
-            RangeOrEqual::Range(range) => self.range("updated_on", range),
+            RangeOrValue::Value(value) => self.insert("updated_on", format!(">={value}")),
+            RangeOrValue::RangeOp(value) => self.range_op("updated_on", value),
+            RangeOrValue::Range(value) => self.range("updated_on", value),
         }
     }
 
@@ -166,6 +169,24 @@ impl QueryBuilder<'_> {
     pub fn exists(&mut self, field: ExistsField, status: bool) {
         let status = if status { "*" } else { "!*" };
         self.insert(field.api(), status);
+    }
+
+    // Redmine doesn't support native < or > operators so use <= and >= for them.
+    fn range_op<T>(&mut self, field: &str, value: &RangeOp<T>)
+    where
+        T: fmt::Display,
+    {
+        match value {
+            RangeOp::Less(value) | RangeOp::LessOrEqual(value) => {
+                self.insert(field, format!("<={value}"));
+            }
+            RangeOp::Equal(value) => {
+                self.insert(field, format!("={value}"));
+            }
+            RangeOp::GreaterOrEqual(value) | RangeOp::Greater(value) => {
+                self.insert(field, format!(">={value}"));
+            }
+        }
     }
 
     fn range<T>(&mut self, field: &str, value: &Range<T>)

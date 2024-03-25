@@ -2,7 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
-use bugbite::objects::RangeOrEqual;
+use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::redmine::search::{ExistsField, OrderField};
 use bugbite::service::redmine::IssueField;
@@ -284,15 +284,15 @@ struct Params {
 
     /// restrict by creation time
     #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
-    created: Option<RangeOrEqual<TimeDeltaIso8601>>,
+    created: Option<RangeOrValue<TimeDeltaIso8601>>,
 
     /// restrict by modification time
     #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
-    modified: Option<RangeOrEqual<TimeDeltaIso8601>>,
+    modified: Option<RangeOrValue<TimeDeltaIso8601>>,
 
     /// restrict by closed time
     #[arg(short = 'C', long, value_name = "TIME", help_heading = "Time options")]
-    closed: Option<RangeOrEqual<TimeDeltaIso8601>>,
+    closed: Option<RangeOrValue<TimeDeltaIso8601>>,
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]

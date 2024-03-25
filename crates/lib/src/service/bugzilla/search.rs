@@ -7,7 +7,7 @@ use ordered_multimap::ListOrderedMultimap;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 
 use crate::objects::bugzilla::Bug;
-use crate::objects::{Range, RangeOrEqual};
+use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, OrderType};
 use crate::time::TimeDeltaIso8601;
 use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
@@ -261,19 +261,21 @@ impl QueryBuilder<'_> {
         self.op_field("AND", "short_desc", values)
     }
 
-    pub fn created(&mut self, value: RangeOrEqual<TimeDeltaIso8601>) {
+    pub fn created(&mut self, value: RangeOrValue<TimeDeltaIso8601>) {
         match value {
-            RangeOrEqual::Equal(value) => {
+            RangeOrValue::Value(value) => {
                 self.advanced_field("creation_ts", "greaterthaneq", value)
             }
-            RangeOrEqual::Range(range) => self.range("creation_ts", range),
+            RangeOrValue::RangeOp(value) => self.range_op("creation_ts", value),
+            RangeOrValue::Range(value) => self.range("creation_ts", value),
         }
     }
 
-    pub fn modified(&mut self, value: RangeOrEqual<TimeDeltaIso8601>) {
+    pub fn modified(&mut self, value: RangeOrValue<TimeDeltaIso8601>) {
         match value {
-            RangeOrEqual::Equal(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
-            RangeOrEqual::Range(range) => self.range("delta_ts", range),
+            RangeOrValue::Value(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
+            RangeOrValue::RangeOp(value) => self.range_op("delta_ts", value),
+            RangeOrValue::Range(value) => self.range("delta_ts", value),
         }
     }
 
@@ -495,17 +497,19 @@ impl QueryBuilder<'_> {
         self.op_field("OR", "whiteboard", values);
     }
 
-    pub fn votes(&mut self, value: RangeOrEqual<u64>) {
+    pub fn votes(&mut self, value: RangeOrValue<u64>) {
         match value {
-            RangeOrEqual::Equal(value) => self.advanced_field("votes", "equals", value),
-            RangeOrEqual::Range(range) => self.range("votes", range),
+            RangeOrValue::Value(value) => self.advanced_field("votes", "equals", value),
+            RangeOrValue::RangeOp(value) => self.range_op("votes", value),
+            RangeOrValue::Range(value) => self.range("votes", value),
         }
     }
 
-    pub fn comments(&mut self, value: RangeOrEqual<u64>) {
+    pub fn comments(&mut self, value: RangeOrValue<u64>) {
         match value {
-            RangeOrEqual::Equal(value) => self.advanced_field("longdescs.count", "equals", value),
-            RangeOrEqual::Range(range) => self.range("longdescs.count", range),
+            RangeOrValue::Value(value) => self.advanced_field("longdescs.count", "equals", value),
+            RangeOrValue::RangeOp(value) => self.range_op("longdescs.count", value),
+            RangeOrValue::Range(value) => self.range("longdescs.count", value),
         }
     }
 
@@ -595,6 +599,29 @@ impl QueryBuilder<'_> {
         fields.insert(FilterField::Bug(BugField::Id));
 
         self.insert("include_fields", fields.iter().map(|f| f.api()).join(","));
+    }
+
+    fn range_op<T>(&mut self, field: &str, value: RangeOp<T>)
+    where
+        T: fmt::Display,
+    {
+        match value {
+            RangeOp::Less(value) => {
+                self.advanced_field(field, "lessthan", value);
+            }
+            RangeOp::LessOrEqual(value) => {
+                self.advanced_field(field, "lessthaneq", value);
+            }
+            RangeOp::Equal(value) => {
+                self.advanced_field(field, "equals", value);
+            }
+            RangeOp::GreaterOrEqual(value) => {
+                self.advanced_field(field, "greaterthaneq", value);
+            }
+            RangeOp::Greater(value) => {
+                self.advanced_field(field, "greaterthan", value);
+            }
+        }
     }
 
     fn range<T>(&mut self, field: &str, value: Range<T>)
