@@ -225,7 +225,7 @@ impl fmt::Display for BugFlag {
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
 #[serde(untagged)]
 enum Alias {
-    List(Vec<String>),
+    List(IndexSet<String>),
     String(String),
 }
 
@@ -234,12 +234,12 @@ pub(crate) fn unset_value_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<
     non_empty_str(d).map(|o| o.filter(|s| !UNSET_VALUES.contains(s)))
 }
 
-/// Deserialize an alias as a vector of strings.
-pub(crate) fn alias_to_vec<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<String>, D::Error> {
+/// Deserialize an alias as an ordered set of strings.
+pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(d: D) -> Result<IndexSet<String>, D::Error> {
     Option::<Alias>::deserialize(d).map(|o| match o {
         Some(Alias::List(values)) => values,
-        Some(Alias::String(value)) => vec![value],
-        None => vec![],
+        Some(Alias::String(value)) => [value].into_iter().collect(),
+        None => Default::default(),
     })
 }
 
@@ -247,8 +247,8 @@ pub(crate) fn alias_to_vec<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<String
 #[serde(default)]
 pub struct Bug {
     pub id: u64,
-    #[serde(deserialize_with = "alias_to_vec")]
-    pub alias: Vec<String>,
+    #[serde(deserialize_with = "alias_to_set")]
+    pub alias: IndexSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub assigned_to: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
