@@ -515,10 +515,17 @@ struct QueryOptions {
             order.
 
             Multiple fields are supported via comma-separated lists which sort
-            the data response by the each field in order.
+            by each field in order.
 
             Note that if an invalid sorting request is made, sorting will
             fallback to the service default.
+
+            Ordering is especially useful in combination with -l/--limit to get
+            the first or last results of an ordered match.
+
+            Examples:
+              - top ten bugs by votes: bite s --limit 10 --order=-votes
+              - highest comment count: bite s --limit 1 --order=-comments
 
             Possible values: {}",
             OrderField::VARIANTS.join(", ")
