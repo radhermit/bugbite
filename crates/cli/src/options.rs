@@ -137,18 +137,16 @@ struct ServiceOpts {
             Connections can be defined in the user config. The precedence order
             when overlapping connection names exist or when multiple locations
             are defined is as follows from lowest to highest: internal, user
-            config, environment, command option, and subcommand. In addition,
-            specifying a connection always overrides the manual --base and
-            --service settings.
+            config, environment, and command option. Specifying a connection
+            always overrides the manual --base and --service settings.
 
             The following connections are defined internally in bugbite
             for ease of use:
 
             {}
 
-            It's also possible to specify a target connection via subcommand,
-            e.g. `bite mozilla get 10` would try to get bug #10 from Mozilla's
-            bugtracker, as well as using the environment variable seen below.",
+            It's also possible to specify a target connection via the
+            environment variable seen below.",
             SERVICES.iter()
                 .map(|(name, config)| format!("{name}: {config}"))
                 .sorted().join("\n")
