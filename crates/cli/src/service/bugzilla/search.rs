@@ -593,10 +593,6 @@ struct QueryOptions {
     )]
     order: Option<Vec<Order<OrderField>>>,
 
-    /// search using query grammar
-    #[arg(short = 'Q', long)]
-    query: Option<String>,
-
     /// search using quicksearch syntax
     #[arg(
         short = 'S',
