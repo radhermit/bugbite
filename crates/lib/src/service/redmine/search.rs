@@ -49,6 +49,10 @@ where
 }
 
 impl QueryBuilder<'_> {
+    pub fn assignee(&mut self, value: bool) {
+        self.exists(ExistsField::Assignee, value)
+    }
+
     pub fn attachments<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
@@ -161,7 +165,7 @@ impl QueryBuilder<'_> {
     /// Match conditionally existent array field values.
     pub fn exists(&mut self, field: ExistsField, status: bool) {
         let status = if status { "*" } else { "!*" };
-        self.insert(field, status);
+        self.insert(field.api(), status);
     }
 
     fn range<T>(&mut self, field: &str, value: &Range<T>)
@@ -273,17 +277,31 @@ impl Request for SearchRequest<'_> {
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum ExistsField {
+    Assignee,
     Attachment,
     Blocks,
     Blocked,
     Relates,
 }
 
+impl Api for ExistsField {
+    type Output = &'static str;
+    fn api(&self) -> Self::Output {
+        match self {
+            Self::Assignee => "assigned_to_id",
+            Self::Attachment => "attachment",
+            Self::Blocks => "blocks",
+            Self::Blocked => "blocked",
+            Self::Relates => "relates",
+        }
+    }
+}
+
 /// Valid search order sorting terms.
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
-    AssignedTo,
+    Assignee,
     Closed,
     Created,
     Id,
@@ -297,7 +315,7 @@ impl Api for OrderField {
     type Output = &'static str;
     fn api(&self) -> Self::Output {
         match self {
-            Self::AssignedTo => "assigned_to",
+            Self::Assignee => "assigned_to",
             Self::Closed => "closed_on",
             Self::Created => "created_on",
             Self::Id => "id",

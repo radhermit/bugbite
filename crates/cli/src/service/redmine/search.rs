@@ -84,6 +84,25 @@ struct Params {
     )]
     order: Option<Vec<Order<OrderField>>>,
 
+    /// restrict by assignee status
+    #[arg(
+        short,
+        long,
+        num_args = 0..=1,
+        default_missing_value = "true",
+        hide_possible_values = true,
+        value_name = "BOOL",
+        help_heading = "Attribute options",
+        long_help = indoc::indoc! {"
+            Restrict by assignee status.
+
+            With no argument, all matches with assignees are returned.
+            If the value is `true` or `false`, all matches with or without
+            assignees are returned, respectively.
+        "}
+    )]
+    assignee: Option<bool>,
+
     /// restrict by attachments
     #[arg(
         long,
@@ -272,6 +291,9 @@ impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut query = client.service().search_query();
         let params = self.params;
+        if let Some(value) = params.assignee {
+            query.assignee(value);
+        }
         if let Some(values) = params.attachments {
             match values {
                 ExistsOrArray::Exists(value) => query.exists(ExistsField::Attachment, value),
