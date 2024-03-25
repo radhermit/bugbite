@@ -86,6 +86,7 @@ impl Request for GetRequest<'_> {
 
             if self.comments {
                 let mut count = 0;
+                // treat description as a comment
                 if let Some(text) = issue.description.take() {
                     issue.comments.push(Comment {
                         count,

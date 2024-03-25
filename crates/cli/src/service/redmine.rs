@@ -95,9 +95,8 @@ impl Render for Issue {
         output_field!(f, "Updated", &self.updated, width);
         writeln!(f, "{:<12} : {}", "ID", self.id)?;
 
-        // don't count the description as a comment
-        if self.comments.len() > 1 {
-            writeln!(f, "{:<12} : {}", "Comments", self.comments.len() - 1)?;
+        if !self.comments.is_empty() {
+            writeln!(f, "{:<12} : {}", "Comments", self.comments.len())?;
         }
 
         // render both comments
