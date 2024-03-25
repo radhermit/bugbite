@@ -234,7 +234,7 @@ impl Query for QueryBuilder<'_> {
         }
 
         // sort by ascending ID by default
-        if !self.query.contains_key("order") {
+        if !self.query.contains_key("sort") {
             self.order(["+id"])?;
         }
 
