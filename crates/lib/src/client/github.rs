@@ -2,8 +2,9 @@ use reqwest::ClientBuilder;
 use tracing::info;
 
 use crate::objects::github::Issue;
+use crate::service::github::search::QueryBuilder;
 use crate::service::github::{Config, Service};
-use crate::traits::{Query, Request, WebService};
+use crate::traits::{Request, WebService};
 
 #[derive(Debug)]
 pub struct Client {
@@ -34,7 +35,7 @@ impl Client {
         request.send().await
     }
 
-    pub async fn search<Q: Query>(&self, query: Q) -> crate::Result<Vec<Issue>> {
+    pub async fn search<'a>(&'a self, query: QueryBuilder<'a>) -> crate::Result<Vec<Issue>> {
         let request = self.service.search_request(query)?;
         request.send().await
     }

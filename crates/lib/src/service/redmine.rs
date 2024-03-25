@@ -6,7 +6,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
-use crate::traits::{NullRequest, Query, ServiceParams, WebClient, WebService};
+use crate::traits::{NullRequest, ServiceParams, WebClient, WebService};
 use crate::Error;
 
 use super::ServiceKind;
@@ -192,7 +192,7 @@ impl<'a> WebService<'a> for Service {
         get::GetRequest::new(self, ids, attachments, comments)
     }
 
-    fn search_request<Q: Query>(&'a self, query: Q) -> crate::Result<Self::SearchRequest> {
+    fn search_request(&'a self, query: Self::SearchQuery) -> crate::Result<Self::SearchRequest> {
         search::SearchRequest::new(self, query)
     }
 }

@@ -2,6 +2,7 @@ use reqwest::ClientBuilder;
 use tracing::info;
 
 use crate::objects::redmine::Issue;
+use crate::service::redmine::search::QueryBuilder;
 use crate::service::redmine::{Config, Service};
 use crate::traits::{Query, Request, WebService};
 
@@ -43,7 +44,7 @@ impl Client {
         request.send().await
     }
 
-    pub async fn search<Q: Query>(&self, query: Q) -> crate::Result<Vec<Issue>> {
+    pub async fn search<'a>(&'a self, query: QueryBuilder<'a>) -> crate::Result<Vec<Issue>> {
         let request = self.service.search_request(query)?;
         request.send().await
     }

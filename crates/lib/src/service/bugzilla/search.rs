@@ -40,7 +40,7 @@ impl Request for SearchRequest<'_> {
 }
 
 impl<'a> SearchRequest<'a> {
-    pub(super) fn new<Q: Query>(service: &'a super::Service, mut query: Q) -> crate::Result<Self> {
+    pub(super) fn new(service: &'a super::Service, mut query: QueryBuilder) -> crate::Result<Self> {
         let url = service
             .base()
             .join(&format!("rest/bug?{}", query.params()?))?;

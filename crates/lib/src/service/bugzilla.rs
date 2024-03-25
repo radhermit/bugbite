@@ -11,7 +11,7 @@ use url::Url;
 use crate::objects::Ids;
 use crate::service::ServiceKind;
 use crate::time::TimeDeltaIso8601;
-use crate::traits::{Api, Query, ServiceParams, WebClient, WebService};
+use crate::traits::{Api, ServiceParams, WebClient, WebService};
 use crate::Error;
 
 pub mod attach;
@@ -270,7 +270,7 @@ impl<'a> WebService<'a> for Service {
         modify::ModifyRequest::new(self, ids, params)
     }
 
-    fn search_request<Q: Query>(&'a self, query: Q) -> crate::Result<Self::SearchRequest> {
+    fn search_request(&'a self, query: Self::SearchQuery) -> crate::Result<Self::SearchRequest> {
         search::SearchRequest::new(self, query)
     }
 }

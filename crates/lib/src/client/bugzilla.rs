@@ -6,6 +6,7 @@ use crate::service::bugzilla::attach::CreateAttachment;
 use crate::service::bugzilla::comment::CommentParams;
 use crate::service::bugzilla::create::CreateParams;
 use crate::service::bugzilla::modify::{BugChange, ModifyParams};
+use crate::service::bugzilla::search::QueryBuilder;
 use crate::service::bugzilla::{Config, Service};
 use crate::time::TimeDeltaIso8601;
 use crate::traits::{Query, Request, WebService};
@@ -115,7 +116,7 @@ impl Client {
         request.send().await
     }
 
-    pub async fn search<Q: Query>(&self, query: Q) -> crate::Result<Vec<Bug>> {
+    pub async fn search<'a>(&'a self, query: QueryBuilder<'a>) -> crate::Result<Vec<Bug>> {
         let request = self.service.search_request(query)?;
         request.send().await
     }

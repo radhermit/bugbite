@@ -165,7 +165,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> + fmt::Display {
     }
 
     /// Create a search request for bugs, issues, or tickets.
-    fn search_request<Q: Query>(&'a self, _query: Q) -> crate::Result<Self::SearchRequest> {
+    fn search_request(&'a self, _query: Self::SearchQuery) -> crate::Result<Self::SearchRequest> {
         Err(Error::Unsupported(format!(
             "{}: search requests unsupported",
             self.kind()
