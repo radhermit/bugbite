@@ -117,9 +117,9 @@ struct AttributeOptions {
         long_help = indoc::indoc! {r#"
             Restrict query by an alias.
 
-            On a nonexistent value, all bugs with aliases are returned. If the
-            value is `true` or `false`, all bugs with or without aliases are
-            returned, respectively.
+            With no argument, all bugs with aliases are returned. If the value
+            is `true` or `false`, all bugs with or without aliases are returned,
+            respectively.
 
             Examples:
               - existence: bite s --alias
@@ -156,8 +156,8 @@ struct AttributeOptions {
         long_help = indoc::indoc! {r#"
             Restrict query by attachments.
 
-            On a nonexistent value, all matches with attachments are returned. If
-            the value is `true` or `false`, all matches with or without attachments
+            With no argument, all matches with attachments are returned. If the
+            value is `true` or `false`, all matches with or without attachments
             are returned, respectively.
 
             Examples:
@@ -200,7 +200,7 @@ struct AttributeOptions {
         long_help = indoc::indoc! {"
             Restrict by blockers.
 
-            On a nonexistent value, all matches with blockers are returned. If the
+            With no argument, all matches with blockers are returned. If the
             value is `true` or `false`, all matches with or without blockers are
             returned, respectively.
 
@@ -247,9 +247,9 @@ struct AttributeOptions {
         long_help = indoc::indoc! {"
             Restrict by dependencies.
 
-            On a nonexistent value, all matches with dependencies are returned.
-            If the value is `true` or `false`, all matches with or without
-            dependencies are returned, respectively.
+            With no argument, all matches with dependencies are returned. If the
+            value is `true` or `false`, all matches with or without dependencies
+            are returned, respectively.
 
             Examples:
               - existence: bite s --depends

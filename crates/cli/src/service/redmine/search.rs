@@ -96,9 +96,9 @@ struct Params {
         long_help = indoc::indoc! {"
             Restrict by assignee status.
 
-            With no argument, all matches with assignees are returned.
-            If the value is `true` or `false`, all matches with or without
-            assignees are returned, respectively.
+            With no argument, all matches with assignees are returned. If the
+            value is `true` or `false`, all matches with or without assignees
+            are returned, respectively.
         "}
     )]
     assignee: Option<bool>,
@@ -113,9 +113,9 @@ struct Params {
         long_help = indoc::indoc! {r#"
             Restrict query by attachments.
 
-            On a nonexistent value, all matches with attachments are returned.
-            If the value is `true` or `false`, all matches with or without
-            attachments are returned, respectively.
+            With no argument, all matches with attachments are returned. If the
+            value is `true` or `false`, all matches with or without attachments
+            are returned, respectively.
 
             Examples:
               - existence: bite s --attachments
@@ -147,7 +147,7 @@ struct Params {
         long_help = indoc::indoc! {"
             Restrict by blockers.
 
-            On a nonexistent value, all matches with blockers are returned. If the
+            With no argument, all matches with blockers are returned. If the
             value is `true` or `false`, all matches with or without blockers are
             returned, respectively.
 
@@ -179,9 +179,9 @@ struct Params {
         long_help = indoc::indoc! {"
             Restrict by dependencies.
 
-            On a nonexistent value, all matches with dependencies are returned.
-            If the value is `true` or `false`, all matches with or without
-            dependencies are returned, respectively.
+            With no argument, all matches with dependencies are returned. If the
+            value is `true` or `false`, all matches with or without dependencies
+            are returned, respectively.
 
             Examples:
               - existence: bite s --blocked
@@ -211,9 +211,9 @@ struct Params {
         long_help = indoc::indoc! {"
             Restrict by related issues.
 
-            On a nonexistent value, all matches with relations are returned.
-            If the value is `true` or `false`, all matches with or without
-            relations are returned, respectively.
+            With no argument, all matches with relations are returned. If the
+            value is `true` or `false`, all matches with or without relations
+            are returned, respectively.
 
             Examples:
               - existence: bite s --relates
