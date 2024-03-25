@@ -5,6 +5,7 @@ use std::str::FromStr;
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
+use indexmap::IndexSet;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -113,7 +114,7 @@ pub struct Comment {
     #[serde(rename = "creation_time")]
     pub created: DateTime<Utc>,
     pub is_private: bool,
-    pub tags: Vec<String>,
+    pub tags: IndexSet<String>,
 }
 
 impl Comment {
