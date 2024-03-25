@@ -19,6 +19,7 @@ pub struct Issue {
     pub description: Option<String>,
     pub status: Option<FieldValue>,
     pub tracker: Option<FieldValue>,
+    pub priority: Option<FieldValue>,
     #[serde(rename = "author")]
     pub creator: Option<Person>,
     #[serde(rename = "closed_on")]
@@ -90,6 +91,7 @@ impl RenderSearch<IssueField> for Issue {
                 IssueField::Subject => stringify!(self.subject),
                 IssueField::Status => format!("{:<20}", stringify!(self.status)),
                 IssueField::Tracker => format!("{:<20}", stringify!(self.tracker)),
+                IssueField::Priority => format!("{:<20}", stringify!(self.priority)),
                 IssueField::Creator => format!("{:<20}", stringify!(self.creator)),
                 IssueField::Closed => stringify!(self.closed),
                 IssueField::Created => stringify!(self.created),
