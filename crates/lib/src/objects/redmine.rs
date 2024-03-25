@@ -18,6 +18,7 @@ pub struct Issue {
     pub subject: Option<String>,
     pub description: Option<String>,
     pub status: Option<FieldValue>,
+    pub tracker: Option<FieldValue>,
     #[serde(rename = "author")]
     pub creator: Option<Person>,
     #[serde(rename = "closed_on")]
@@ -88,6 +89,7 @@ impl RenderSearch<IssueField> for Issue {
                 IssueField::Assignee => format!("{:<20}", stringify!(self.assigned_to)),
                 IssueField::Subject => stringify!(self.subject),
                 IssueField::Status => format!("{:<20}", stringify!(self.status)),
+                IssueField::Tracker => format!("{:<20}", stringify!(self.tracker)),
                 IssueField::Creator => format!("{:<20}", stringify!(self.creator)),
                 IssueField::Closed => stringify!(self.closed),
                 IssueField::Created => stringify!(self.created),

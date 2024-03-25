@@ -91,6 +91,7 @@ impl Render for Issue {
         output_field!(f, "Assignee", &self.assigned_to, width);
         output_field!(f, "Reporter", &self.creator, width);
         output_field!(f, "Status", &self.status, width);
+        output_field!(f, "Tracker", &self.tracker, width);
         output_field!(f, "Closed", &self.closed, width);
         output_field!(f, "Created", &self.created, width);
         output_field!(f, "Updated", &self.updated, width);

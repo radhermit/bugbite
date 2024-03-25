@@ -203,6 +203,7 @@ pub enum IssueField {
     Closed,
     Created,
     Status,
+    Tracker,
     Updated,
 }
 
