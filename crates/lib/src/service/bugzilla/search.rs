@@ -1,5 +1,5 @@
-use std::fmt;
 use std::str::FromStr;
+use std::{fmt, iter};
 
 use indexmap::IndexSet;
 use itertools::Itertools;
@@ -181,7 +181,7 @@ impl QueryBuilder<'_> {
     where
         I: IntoIterator<Item = u64>,
     {
-        self.or("bug_id", values.into_iter().map(Match::equals));
+        self.op_field("OR", "bug_id", values.into_iter().map(Match::equals));
     }
 
     pub fn alias<I, S>(&mut self, values: I)
@@ -189,7 +189,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("alias", values)
+        self.op_field("OR", "alias", values)
     }
 
     pub fn assignee<I, S>(&mut self, values: I)
@@ -197,7 +197,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("assigned_to", values);
+        self.op_field("OR", "assigned_to", values);
     }
 
     /// Search for attachments with matching descriptions or filenames.
@@ -226,7 +226,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("qa_contact", values);
+        self.op_field("OR", "qa_contact", values);
     }
 
     pub fn reporter<I, S>(&mut self, values: I)
@@ -234,7 +234,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("reporter", values);
+        self.op_field("OR", "reporter", values);
     }
 
     pub fn resolution<I, S>(&mut self, values: I)
@@ -242,7 +242,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("resolution", values);
+        self.op_field("OR", "resolution", values);
     }
 
     pub fn comment<I, S>(&mut self, values: I)
@@ -250,7 +250,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.and("longdesc", values)
+        self.op_field("AND", "longdesc", values)
     }
 
     pub fn summary<I, S>(&mut self, values: I)
@@ -258,7 +258,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.and("short_desc", values)
+        self.op_field("AND", "short_desc", values)
     }
 
     pub fn created(&mut self, value: RangeOrEqual<TimeDeltaIso8601>) {
@@ -306,7 +306,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.and("attachments.submitter", values)
+        self.op_field("AND", "attachments.submitter", values)
     }
 
     pub fn commenters<I, S>(&mut self, values: I)
@@ -314,7 +314,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.and("commenter", values)
+        self.op_field("AND", "commenter", values)
     }
 
     pub fn flaggers<I, S>(&mut self, values: I)
@@ -322,7 +322,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.and("setters.login_name", values)
+        self.op_field("AND", "setters.login_name", values)
     }
 
     pub fn url<I, S>(&mut self, values: I)
@@ -330,7 +330,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("bug_file_loc", values);
+        self.op_field("OR", "bug_file_loc", values);
     }
 
     pub fn changed<'a, I>(&mut self, values: I)
@@ -397,7 +397,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("priority", values);
+        self.op_field("OR", "priority", values);
     }
 
     pub fn severity<I, S>(&mut self, values: I)
@@ -405,7 +405,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("bug_severity", values);
+        self.op_field("OR", "bug_severity", values);
     }
 
     pub fn status<I, S>(&mut self, values: I)
@@ -428,7 +428,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("version", values);
+        self.op_field("OR", "version", values);
     }
 
     pub fn component<I, S>(&mut self, values: I)
@@ -436,7 +436,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("component", values)
+        self.op_field("OR", "component", values)
     }
 
     pub fn product<I, S>(&mut self, values: I)
@@ -444,7 +444,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("product", values);
+        self.op_field("OR", "product", values);
     }
 
     pub fn platform<I, S>(&mut self, values: I)
@@ -452,7 +452,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("platform", values);
+        self.op_field("OR", "platform", values);
     }
 
     pub fn os<I, S>(&mut self, values: I)
@@ -460,7 +460,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("op_sys", values);
+        self.op_field("OR", "op_sys", values);
     }
 
     pub fn see_also<I, S>(&mut self, values: I)
@@ -468,7 +468,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("see_also", values);
+        self.op_field("OR", "see_also", values);
     }
 
     pub fn tags<I, S>(&mut self, values: I)
@@ -476,7 +476,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("tag", values);
+        self.op_field("OR", "tag", values);
     }
 
     pub fn target<I, S>(&mut self, values: I)
@@ -484,7 +484,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("target_milestone", values);
+        self.op_field("OR", "target_milestone", values);
     }
 
     pub fn whiteboard<I, S>(&mut self, values: I)
@@ -492,7 +492,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("whiteboard", values);
+        self.op_field("OR", "whiteboard", values);
     }
 
     pub fn votes(&mut self, value: RangeOrEqual<u64>) {
@@ -557,7 +557,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("flagtypes.name", values)
+        self.op_field("OR", "flagtypes.name", values)
     }
 
     pub fn groups<I, S>(&mut self, values: I)
@@ -565,7 +565,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.or("bug_group", values);
+        self.op_field("OR", "bug_group", values);
     }
 
     pub fn keywords<I, S>(&mut self, values: I)
@@ -573,7 +573,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.and("keywords", values)
+        self.op_field("AND", "keywords", values)
     }
 
     pub fn cc<I, S>(&mut self, values: I)
@@ -581,7 +581,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.and("cc", values)
+        self.op_field("AND", "cc", values)
     }
 
     pub fn fields<I, F>(&mut self, fields: I)
@@ -652,18 +652,19 @@ impl QueryBuilder<'_> {
         self.insert(format!("v{num}"), value);
     }
 
-    fn op<F, I, S>(&mut self, op: &str, field: F, values: I)
+    fn op<I, F, V>(&mut self, op: &str, values: I)
     where
-        F: fmt::Display + Copy,
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
+        I: IntoIterator<Item = (F, V)>,
+        F: fmt::Display,
+        V: Into<Match>,
     {
         self.advanced_count += 1;
         let num = self.advanced_count;
         self.insert(format!("f{num}"), "OP");
         self.insert(format!("j{num}"), op);
 
-        for value in values.into_iter().map(Into::into) {
+        for (field, value) in values {
+            let value = value.into();
             self.advanced_field(field, value.op, value);
         }
 
@@ -672,22 +673,14 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), "CP");
     }
 
-    fn and<F, I, S>(&mut self, field: F, values: I)
+    fn op_field<F, I, S>(&mut self, op: &str, field: F, values: I)
     where
         F: fmt::Display + Copy,
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.op("AND", field, values)
-    }
-
-    fn or<F, I, S>(&mut self, field: F, values: I)
-    where
-        F: fmt::Display + Copy,
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op("OR", field, values)
+        let fields = iter::repeat_with(|| field);
+        self.op(op, fields.zip(values))
     }
 }
 
