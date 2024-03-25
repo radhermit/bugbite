@@ -105,7 +105,11 @@ impl Subcommand {
 
 impl Render for Attachment {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        let line = format!("{}: {} ({})", self.id, self.summary, self.file_name);
+        let line = if self.summary != self.file_name {
+            format!("{}: {} ({})", self.id, self.summary, self.file_name)
+        } else {
+            format!("{}: {}", self.id, self.summary)
+        };
         writeln!(f, "{}", truncate(&line, width))?;
 
         // output additional attachment info on request
