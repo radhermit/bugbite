@@ -142,12 +142,17 @@ struct ServiceOpts {
             --service settings.
 
             The following connections are defined internally in bugbite
-            for ease of use: {}.
+            for ease of use:
+
+            {}
 
             It's also possible to specify a target connection via subcommand,
             e.g. `bite mozilla get 10` would try to get bug #10 from Mozilla's
             bugtracker, as well as using the environment variable seen below.",
-            SERVICES.iter().map(|(name, _)| name).sorted().join(", ")}
+            SERVICES.iter()
+                .map(|(name, config)| format!("{name}: {config}"))
+                .sorted().join("\n")
+        }
     )]
     connection: Option<String>,
     /// base service URL
