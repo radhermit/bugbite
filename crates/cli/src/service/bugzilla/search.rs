@@ -578,7 +578,7 @@ struct UserOptions {
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
     flaggers: Option<Vec<Match>>,
 
-    /// user for QA contact
+    /// user is the QA contact
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
     qa: Option<Vec<Match>>,
 
