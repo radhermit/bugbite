@@ -124,9 +124,14 @@ struct Options {
             no arguments removes the entire list.
 
             Examples modifying bug 10:
-              - add `a1`: bite m --alias +a1 10
-              - add `a2` and remove `a1`: bite m --alias +a2,-a1 10
-              - set to `a3`: bite m --alias a3 10
+            - add `a1`
+            > bite m --alias +a1 10
+
+            - add `a2` and remove `a1`
+            > bite m --alias +a2,-a1 10
+
+            - set to `a3`
+            > bite m --alias a3 10
         ")
     )]
     alias: Option<Vec<SetChange<String>>>,
@@ -149,8 +154,11 @@ struct Options {
             for target component.
 
             Example modifying bug 123:
-              - assign to yourself: bite m --assigned-to @me 123
-              - reset to default: bite m --assigned-to "" 123
+            - assign to yourself
+            > bite m --assigned-to @me 123
+
+            - reset to default
+            > bite m --assigned-to "" 123
         "#)
     )]
     assignee: Option<String>,
@@ -175,9 +183,14 @@ struct Options {
             no arguments removes the entire list.
 
             Examples modifying bug 10:
-              - add 1: bite m --blocks +1 10
-              - add 2 and remove 1: bite m --blocks +2,-1 10
-              - set to 3: bite m --blocks 3 10
+            - add 1
+            > bite m --blocks +1 10
+
+            - add 2 and remove 1
+            > bite m --blocks +2,-1 10
+
+            - set to 3
+            > bite m --blocks 3 10
         ")
     )]
     blocks: Option<Vec<SetChange<u64>>>,
@@ -200,8 +213,11 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list.
 
             Examples modifying bug 123:
-              - add yourself to the CC list: bite m --cc @me 123
-              - remove yourself from the CC list: bite m --cc=-@me 123
+            - add yourself to the CC list
+            > bite m --cc @me 123
+
+            - remove yourself from the CC list
+            > bite m --cc=-@me 123
         ")
     )]
     cc: Option<Vec<SetChange<String>>>,
@@ -250,9 +266,14 @@ struct Options {
             no arguments removes the entire list.
 
             Examples modifying bug 10:
-              - add 1: bite m --depends +1 10
-              - add 2 and remove 1: bite m --depends +2,-1 10
-              - set to 3: bite m --depends 3 10
+            - add 1
+            > bite m --depends +1 10
+
+            - add 2 and remove 1
+            > bite m --depends +2,-1 10
+
+            - set to 3
+            > bite m --depends 3 10
         ")
     )]
     depends: Option<Vec<SetChange<u64>>>,
@@ -277,8 +298,11 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list.
 
             Examples modifying bug 10:
-              - add `test?`: bite m --flags "test?" 10
-              - add `check+` and remove `test?`: bite m --flags check+,testX 10
+            - add `test?`
+            > bite m --flags "test?" 10
+
+            - add `check+` and remove `test?`
+            > bite m --flags check+,testX 10
         "#)
     )]
     flags: Option<Vec<Flag>>,
@@ -300,8 +324,11 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list.
 
             Examples modifying bug 10:
-              - add `admin`: bite m --groups +admin 10
-              - add `test` and remove `admin`: bite m --groups +test,-admin 10
+            - add `admin`
+            > bite m --groups +admin 10
+
+            - add `test` and remove `admin`
+            > bite m --groups +test,-admin 10
         ")
     )]
     groups: Option<Vec<SetChange<String>>>,
@@ -326,9 +353,14 @@ struct Options {
             no arguments removes the entire list.
 
             Examples modifying bug 10:
-              - add `key`: bite m --keywords +key 10
-              - add `test` and remove `key`: bite m --keywords +test,-key 10
-              - set to `verify`: bite m --keywords verify 10
+            - add `key`
+            > bite m --keywords +key 10
+
+            - add `test` and remove `key`
+            > bite m --keywords +test,-key 10
+
+            - set to `verify`
+            > bite m --keywords verify 10
         ")
     )]
     keywords: Option<Vec<SetChange<String>>>,
@@ -370,13 +402,26 @@ struct Options {
             enable privacy or an explicit boolean.
 
             Examples modifying bug 10:
-              - toggle comment 1 privacy: bite m --private-comment 1 10
-              - toggle comment 1 and 2 privacy: bite m --private-comment 1,2 10
-              - toggle all comment privacy: bite m --private-comment .. 10
-              - disable comment 1 and 2 privacy: bite m --private-comment 1,2:false 10
-              - mark comments 2-5 private: bite m --private-comment 2..=5:true 10
-              - mark created comment private: bite m --comment --private-comment 10
-              - mark created reply private: bite m --reply --private-comment 10
+            - toggle comment 1 privacy
+            > bite m --private-comment 1 10
+
+            - toggle comment 1 and 2 privacy
+            > bite m --private-comment 1,2 10
+
+            - toggle all comment privacy
+            > bite m --private-comment .. 10
+
+            - disable comment 1 and 2 privacy
+            > bite m --private-comment 1,2:false 10
+
+            - mark comments 2-5 private
+            > bite m --private-comment 2..=5:true 10
+
+            - mark created comment private
+            > bite m --comment --private-comment 10
+
+            - mark created reply private
+            > bite m --reply --private-comment 10
         ")
     )]
     private_comment: Option<CommentPrivacy<usize>>,
@@ -401,9 +446,12 @@ struct Options {
             No argument or an empty string will reset the field to the default
             for target component.
 
-            Example modifying bug 123:
-              - assign to yourself: bite m --qa @me 123
-              - reset to default: bite m --qa "" 123
+            Examples modifying bug 123:
+            - assign to yourself
+            > bite m --qa @me 123
+
+            - reset to default
+            > bite m --qa "" 123
         "#)
     )]
     qa: Option<String>,
@@ -430,9 +478,14 @@ struct Options {
             Multiple arguments can be specified in a comma-separated list.
 
             Examples modifying bug 10:
-              - add URL to bug 2: bite m --see-also 2 10
-              - add bug 3 URL and remove 2: bite m --see-also=+3,-2 10
-              - add URL to external bug: bite m --see-also https://url/to/bug/5 10
+            - add URL to bug 2
+            > bite m --see-also 2 10
+
+            - add bug 3 URL and remove 2
+            > bite m --see-also=+3,-2 10
+
+            - add URL to external bug
+            > bite m --see-also https://url/to/bug/5 10
         ")
     )]
     see_also: Option<Vec<SetChange<String>>>,
@@ -756,9 +809,14 @@ pub(super) struct Command {
             Multiple arguments can be specified in a comma-separated list.
 
             Examples modifying bug 123:
-              - reply to comments 1 and 2: bite m --reply 1,2 123
-              - reply to the last comment: bite m 123 --reply
-              - private reply to last comment: bite m 123 --reply --private-comment
+            - reply to comments 1 and 2
+            > bite m --reply 1,2 123
+
+            - reply to the last comment
+            > bite m 123 --reply
+
+            - private reply to last comment
+            > bite m 123 --reply --private-comment
         ")
     )]
     reply: Option<Vec<usize>>,

@@ -122,27 +122,42 @@ struct AttributeOptions {
             respectively.
 
             Examples:
-              - existence: bite s --alias
-              - nonexistence: bite s --alias false
+            - existence
+            > bite s --alias
+
+            - nonexistence
+            > bite s --alias false
 
             Regular values search for matching substrings and multiple values
             can be specified in a comma-separated list, matching if any of the
             specified values match.
 
             Examples:
-              - contains `value`: bite s --alias value
-              - contains `value1` or `value2`: bite s --alias value1,value1
+            - contains `value`
+            > bite s --alias value
+
+            - contains `value1` or `value2`
+            > bite s --alias value1,value1
 
             Values can use match operator prefixes to alter their query
             application. Note that some operators may need to be escaped when
             used in the shell environment.
 
             Examples:
-              - doesn't contain `value`: bite s --alias !#value
-              - equals `value`: bite s --alias =#value
-              - doesn't equal `value`: bite s --alias !=#value
-              - matches regex: bite s --alias r#test?.+
-              - doesn't match regex: bite s --alias !r#test?.+
+            - doesn't contain `value`
+            > bite s --alias !#value
+
+            - equals `value`
+            > bite s --alias =#value
+
+            - doesn't equal `value`
+            > bite s --alias !=#value
+
+            - matches regex
+            > bite s --alias r#test?.+
+
+            - doesn't match regex
+            > bite s --alias !r#test?.+
         "#)
     )]
     alias: Option<ExistsOrArray<Match>>,
@@ -161,31 +176,45 @@ struct AttributeOptions {
             are returned, respectively.
 
             Examples:
-              - existence: bite s --attachments
-              - nonexistence: bite s --attachments false
+            - existence
+            > bite s --attachments
+
+            - nonexistence
+            > bite s --attachments false
 
             Regular string values search for matching substrings in an
             attachment's description or file name.
 
             Example:
-              - contains `value`: bite s --attachments value
+            - contains `value`
+            > bite s --attachments value
 
             Values can use string matching prefixes to alter their application
             to queries. Note that some match operators may need to be escaped
             when used in the shell environment.
 
             Examples:
-              - doesn't contain `value`: bite s --attachments !#value
-              - equals `value`: bite s --attachments =#value
-              - doesn't equal `value`: bite s --attachments !=#value
-              - matches regex: bite s --attachments r#test?.+
-              - doesn't match regex: bite s --attachments !r#test?.+
+            - doesn't contain `value`
+            > bite s --attachments !#value
+
+            - equals `value`
+            > bite s --attachments =#value
+
+            - doesn't equal `value`
+            > bite s --attachments !=#value
+
+            - matches regex
+            > bite s --attachments r#test?.+
+
+            - doesn't match regex
+            > bite s --attachments !r#test?.+
 
             Multiple values can be specified in a comma-separated list and will
             match if any of the specified values match.
 
             Example:
-              - equals `test1` or `test2`: bite s --attachments =#test1,=#test2
+            - equals `test1` or `test2`
+            > bite s --attachments =#test1,=#test2
         "#)
     )]
     attachments: Option<ExistsOrArray<Match>>,
@@ -205,24 +234,35 @@ struct AttributeOptions {
             returned, respectively.
 
             Examples:
-              - existence: bite s --blocks
-              - nonexistence: bite s --blocks false
+            - existence
+            > bite s --blocks
+
+            - nonexistence
+            > bite s --blocks false
 
             Regular values search for matching blockers and multiple values can
             be specified in a comma-separated list, matching if all of the
             specified blockers match.
 
             Examples:
-              - blocked on 10: bite s --blocks 10
-              - blocked on 10 and 11: bite s --blocks 10,11
+            - blocked on 10
+            > bite s --blocks 10
+
+            - blocked on 10 and 11
+            > bite s --blocks 10,11
 
             Values can also use `-` or `+` prefixes to manipulate blocker
             existence for the query.
 
             Examples:
-              - isn't blocked on 10: bite s --blocks=-10
-              - blocked on 10 and 11: bite s --blocks +10,11
-              - blocked on 10 but not 11: bite s --blocks 10,-11
+            - isn't blocked on 10
+            > bite s --blocks=-10
+
+            - blocked on 10 and 11
+            > bite s --blocks +10,11
+
+            - blocked on 10 but not 11
+            > bite s --blocks 10,-11
 
             Values are taken from standard input when `-`.
         ")
@@ -252,24 +292,35 @@ struct AttributeOptions {
             are returned, respectively.
 
             Examples:
-              - existence: bite s --depends
-              - nonexistence: bite s --depends false
+            - existence
+            > bite s --depends
+
+            - nonexistence
+            > bite s --depends false
 
             Regular values search for matching dependencies and multiple values can
             be specified in a comma-separated list, matching if all of the
             specified dependencies match.
 
             Examples:
-              - depends on 10: bite s --depends 10
-              - depends on 10 and 11: bite s --depends 10,11
+            - depends on 10
+            > bite s --depends 10
+
+            - depends on 10 and 11
+            > bite s --depends 10,11
 
             Values can also use `-` or `+` prefixes to manipulate dependency
             existence for the query.
 
             Examples:
-              - doesn't depend on 10: bite s --depends=-10
-              - depends on 10 and 11: bite s --depends +10,11
-              - depends on 10 but not 11: bite s --depends 10,-11
+            - doesn't depend on 10
+            > bite s --depends=-10
+
+            - depends on 10 and 11
+            > bite s --depends +10,11
+
+            - depends on 10 but not 11
+            > bite s --depends 10,-11
 
             Values are taken from standard input when `-`.
         ")
@@ -524,8 +575,11 @@ struct QueryOptions {
             the first or last results of an ordered match.
 
             Examples:
-              - top ten bugs by votes: bite s --limit 10 --order=-votes
-              - highest comment count: bite s --limit 1 --order=-comments
+            - top ten bugs by votes
+            > bite s --limit 10 --order=-votes
+
+            - highest comment count
+            > bite s --limit 1 --order=-comments
 
             Possible values: {}",
             OrderField::VARIANTS.join(", ")

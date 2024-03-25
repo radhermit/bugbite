@@ -120,20 +120,25 @@ struct Params {
             are returned, respectively.
 
             Examples:
-              - existence: bite s --attachments
-              - nonexistence: bite s --attachments false
+            - existence
+            > bite s --attachments
+
+            - nonexistence
+            > bite s --attachments false
 
             Regular string values search for matching substrings in an
             attachment's file name.
 
             Example:
-              - contains `value`: bite s --attachments value
+            - contains `value`
+            > bite s --attachments value
 
             Multiple values can be specified in a comma-separated list and will
             match if all of the specified values match.
 
             Example:
-              - equals `test1` and `test2`: bite s --attachments test1,test2
+            - equals `test1` and `test2`
+            > bite s --attachments test1,test2
         "#)
     )]
     attachments: Option<ExistsOrArray<String>>,
@@ -154,16 +159,22 @@ struct Params {
             returned, respectively.
 
             Examples:
-              - existence: bite s --blocks
-              - nonexistence: bite s --blocks false
+            - existence
+            > bite s --blocks
+
+            - nonexistence
+            > bite s --blocks false
 
             Regular values search for matching blockers and multiple values can
             be specified in a comma-separated list, matching if any of the
             specified blockers match.
 
             Examples:
-              - blocked on 10: bite s --blocks 10
-              - blocked on 10 and 11: bite s --blocks 10,11
+            - blocked on 10
+            > bite s --blocks 10
+
+            - blocked on 10 and 11
+            > bite s --blocks 10,11
 
             Values are taken from standard input when `-`.
         ")
@@ -186,16 +197,22 @@ struct Params {
             are returned, respectively.
 
             Examples:
-              - existence: bite s --blocked
-              - nonexistence: bite s --blocked false
+            - existence
+            > bite s --blocked
+
+            - nonexistence
+            > bite s --blocked false
 
             Regular values search for matching dependencies and multiple values can
             be specified in a comma-separated list, matching if any of the
             specified dependencies match.
 
             Examples:
-              - blocked on 10: bite s --blocked 10
-              - blocked on 10 and 11: bite s --blocked 10,11
+            - blocked on 10
+            > bite s --blocked 10
+
+            - blocked on 10 and 11
+            > bite s --blocked 10,11
 
             Values are taken from standard input when `-`.
         ")
@@ -218,16 +235,22 @@ struct Params {
             are returned, respectively.
 
             Examples:
-              - existence: bite s --relates
-              - nonexistence: bite s --relates false
+            - existence
+            > bite s --relates
+
+            - nonexistence
+            > bite s --relates false
 
             Regular values search for matching relations and multiple values can
             be specified in a comma-separated list, matching if any of the
             specified relations match.
 
             Examples:
-              - relates to 10: bite s --relates 10
-              - relates to 10 and 11: bite s --relates 10,11
+            - relates to 10
+            > bite s --relates 10
+
+            - relates to 10 and 11
+            > bite s --relates 10,11
 
             Values are taken from standard input when `-`.
         ")

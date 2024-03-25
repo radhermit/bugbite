@@ -53,7 +53,8 @@ pub(super) struct Command {
             Taken from standard input when `-`.
 
             Example:
-              - fetch all matching bugs: bite s bugbite -f id | bite g -
+            - fetch all matching bugs
+            > bite s bugbite -f id | bite g -
         ")
     )]
     ids: Vec<MaybeStdinVec<String>>,

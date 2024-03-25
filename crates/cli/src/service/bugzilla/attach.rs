@@ -73,7 +73,8 @@ pub(super) struct Command {
             Taken from standard input when `-`.
 
             Example:
-              - attach to matches: bite s bugbite -f id | bite at - path/to/file
+            - attach file to all matching bugs
+            > bite s bugbite -f id | bite at - path/to/file
         ")
     )]
     ids: Vec<MaybeStdinVec<String>>,
