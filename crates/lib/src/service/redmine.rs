@@ -202,6 +202,7 @@ pub enum IssueField {
     Creator,
     Closed,
     Created,
+    Status,
     Updated,
 }
 

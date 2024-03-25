@@ -17,6 +17,7 @@ pub struct Issue {
     pub assigned_to: Option<Person>,
     pub subject: Option<String>,
     pub description: Option<String>,
+    pub status: Option<FieldValue>,
     #[serde(rename = "author")]
     pub creator: Option<Person>,
     #[serde(rename = "closed_on")]
@@ -26,6 +27,18 @@ pub struct Issue {
     #[serde(rename = "updated_on")]
     pub updated: Option<DateTime<Utc>>,
     pub comments: Vec<Comment>,
+}
+
+#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
+pub struct FieldValue {
+    id: u64,
+    name: String,
+}
+
+impl fmt::Display for FieldValue {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.name)
+    }
 }
 
 impl Issue {
@@ -74,6 +87,7 @@ impl RenderSearch<IssueField> for Issue {
                 IssueField::Id => format!("{:<8}", self.id),
                 IssueField::Assignee => format!("{:<20}", stringify!(self.assigned_to)),
                 IssueField::Subject => stringify!(self.subject),
+                IssueField::Status => format!("{:<20}", stringify!(self.status)),
                 IssueField::Creator => format!("{:<20}", stringify!(self.creator)),
                 IssueField::Closed => stringify!(self.closed),
                 IssueField::Created => stringify!(self.created),
