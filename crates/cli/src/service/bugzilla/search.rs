@@ -14,12 +14,21 @@ use bugbite::traits::WebClient;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};
+use crossterm::style::Stylize;
 use itertools::Itertools;
 use strum::VariantNames;
 
 use crate::service::args::ExistsOrArray;
 use crate::service::output::render_search;
 use crate::utils::{launch_browser, wrapped_doc};
+
+/// Parse a string into a ChangeField, adding possible values to the error on failure.
+fn change_field(s: &str) -> anyhow::Result<ChangeField> {
+    s.parse().map_err(|_| {
+        let possible = ChangeField::VARIANTS.iter().map(|s| s.green()).join(", ");
+        anyhow::anyhow!("invalid change field: {s}\n  [possible values: {possible}]")
+    })
+}
 
 #[derive(Debug, Clone)]
 struct Changed {
@@ -35,16 +44,8 @@ impl FromStr for Changed {
             anyhow::bail!("missing time interval");
         };
 
-        let mut fields = vec![];
-        for s in raw_fields.split(',') {
-            let field = s
-                .parse()
-                .map_err(|_| anyhow::anyhow!("invalid change field: {s}"))?;
-            fields.push(field);
-        }
-
         Ok(Self {
-            fields,
+            fields: raw_fields.split(',').map(change_field).try_collect()?,
             interval: time.parse()?,
         })
     }
@@ -64,16 +65,8 @@ impl FromStr for ChangedBy {
             anyhow::bail!("missing users");
         };
 
-        let mut fields = vec![];
-        for s in raw_fields.split(',') {
-            let field = s
-                .parse()
-                .map_err(|_| anyhow::anyhow!("invalid change field: {s}"))?;
-            fields.push(field);
-        }
-
         Ok(Self {
-            fields,
+            fields: raw_fields.split(',').map(change_field).try_collect()?,
             users: users.split(',').map(|s| s.to_string()).collect(),
         })
     }
@@ -93,12 +86,8 @@ impl FromStr for ChangedValue {
             anyhow::bail!("missing value");
         };
 
-        let field = field
-            .parse()
-            .map_err(|_| anyhow::anyhow!("invalid change field: {field}"))?;
-
         Ok(Self {
-            field,
+            field: change_field(field)?,
             value: value.to_string(),
         })
     }
