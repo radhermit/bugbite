@@ -6,6 +6,7 @@ mod config;
 mod options;
 mod service;
 mod subcmds;
+mod test;
 mod utils;
 
 #[tokio::main]

@@ -976,3 +976,13 @@ impl Command {
         Ok(ExitCode::SUCCESS)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::test::*;
+
+    #[test]
+    fn examples() {
+        subcmd_parse_examples(&["bugzilla", "modify"]);
+    }
+}
