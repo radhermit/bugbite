@@ -352,7 +352,7 @@ impl From<u64> for IdOrAlias {
 #[strum(serialize_all = "kebab-case")]
 pub enum BugField {
     Alias,
-    AssignedTo,
+    Assignee,
     Blocks,
     Cc,
     Component,
@@ -393,7 +393,7 @@ impl Api for BugField {
     fn api(&self) -> Self::Output {
         match self {
             Self::Alias => "alias",
-            Self::AssignedTo => "assigned_to",
+            Self::Assignee => "assigned_to",
             Self::Blocks => "blocks",
             Self::Cc => "cc",
             Self::Component => "component",

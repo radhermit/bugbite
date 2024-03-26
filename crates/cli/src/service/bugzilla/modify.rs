@@ -155,10 +155,10 @@ struct Options {
 
             Example modifying bug 123:
             - assign to yourself
-            > bite m --assigned-to @me 123
+            > bite m --assignee @me 123
 
             - reset to default
-            > bite m --assigned-to "" 123
+            > bite m --assignee "" 123
         "#)
     )]
     assignee: Option<String>,
