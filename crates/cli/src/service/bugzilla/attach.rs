@@ -54,19 +54,17 @@ struct Options {
 }
 
 #[derive(Debug, Args)]
-pub(super) struct Command {
-    #[clap(flatten)]
-    options: Options,
-
+#[clap(next_help_heading = "Arguments")]
+struct Arguments {
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs or aliases
     #[clap(
+        display_order = 0,
         num_args = 1,
         required = true,
         value_delimiter = ',',
         value_name = "ID[,...]",
-        help_heading = "Arguments",
         long_help = wrapped_doc!("
             IDs or aliases of bugs to create attachments for.
 
@@ -81,9 +79,9 @@ pub(super) struct Command {
 
     /// files to attach
     #[clap(
+        display_order = 1,
         required = true,
         value_hint = ValueHint::FilePath,
-        help_heading = "Arguments",
         long_help = wrapped_doc!("
             Paths to attachment files.
 
@@ -93,10 +91,19 @@ pub(super) struct Command {
     files: Vec<Utf8PathBuf>,
 }
 
+#[derive(Debug, Args)]
+pub(super) struct Command {
+    #[clap(flatten)]
+    options: Options,
+
+    #[clap(flatten)]
+    args: Arguments,
+}
+
 impl Command {
     pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut attachments = vec![];
-        for file in &self.files {
+        for file in &self.args.files {
             let mut attachment = CreateAttachment::new(file)?;
             if let Some(value) = self.options.summary.as_ref() {
                 attachment.summary = value.clone()
@@ -112,11 +119,11 @@ impl Command {
             attachments.push(attachment);
         }
 
-        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
+        let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
         let attachment_ids = client.attach(ids, attachments).await?;
 
         let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
-        for (file, ids) in self.files.iter().zip(attachment_ids.iter()) {
+        for (file, ids) in self.args.files.iter().zip(attachment_ids.iter()) {
             let ids = ids.iter().map(|x| x.to_string()).join(", ");
             info!("{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})");
         }
