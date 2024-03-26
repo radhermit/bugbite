@@ -984,7 +984,7 @@ impl Command {
         }
         if let Some(values) = params.attr.depends {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::DependsOn, value),
+                ExistsOrArray::Exists(value) => query.exists(ExistsField::Depends, value),
                 ExistsOrArray::Array(values) => query.depends(values.into_iter().flatten()),
             }
         }

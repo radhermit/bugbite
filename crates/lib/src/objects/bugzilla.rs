@@ -350,7 +350,7 @@ impl RenderSearch<BugField> for Bug {
                 BugField::Created => stringify!(self.created),
                 BugField::Creator => format!("{:<20}", stringify!(self.creator)),
                 BugField::Deadline => stringify!(self.deadline),
-                BugField::DependsOn => format!("{:<20}", self.depends_on.iter().join(",")),
+                BugField::Depends => format!("{:<20}", self.depends_on.iter().join(",")),
                 BugField::DuplicateOf => format!("{:<9}", stringify!(self.duplicate_of)),
                 BugField::Flags => format!("{:<20}", self.flags.iter().join(",")),
                 BugField::Id => format!("{:<9}", self.id),
