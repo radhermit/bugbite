@@ -3,8 +3,14 @@ use std::fs;
 use camino::Utf8Path;
 use wiremock::{matchers, Match, Mock, MockServer, ResponseTemplate};
 
+use crate::args::maybe_stdin::STDIN_HAS_BEEN_USED;
 use crate::client::Client;
 use crate::service::ServiceKind;
+
+/// Reset standard input argument usage flag.
+pub fn reset_stdin() {
+    STDIN_HAS_BEEN_USED.store(false, std::sync::atomic::Ordering::SeqCst);
+}
 
 /// Build a [`Utf8PathBuf`] path from a base and components.
 #[macro_export]

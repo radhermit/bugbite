@@ -25,7 +25,7 @@ use std::io::{self, BufRead, IsTerminal, Read};
 use std::str::FromStr;
 use std::sync::atomic::AtomicBool;
 
-static STDIN_HAS_BEEN_USED: AtomicBool = AtomicBool::new(false);
+pub(crate) static STDIN_HAS_BEEN_USED: AtomicBool = AtomicBool::new(false);
 
 #[derive(Debug, thiserror::Error)]
 pub enum StdinError {
