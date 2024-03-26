@@ -13,8 +13,7 @@ pub(crate) fn subcmd_parse_examples(command: &[&str]) {
 
     let help = cmd.render_long_help().to_string();
     for line in help.lines() {
-        let line = line.trim();
-        if let Some(example) = line.strip_prefix("> ") {
+        if let Some(example) = line.trim().strip_prefix("> ") {
             for cmd in example.split(" | ").filter_map(|x| x.strip_prefix("bite")) {
                 let full_cmd = format!("bite {service} {cmd}");
                 let args = shlex::split(full_cmd.trim()).unwrap();
