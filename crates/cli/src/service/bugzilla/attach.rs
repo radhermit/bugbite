@@ -25,9 +25,9 @@ struct Options {
         long_help = wrapped_doc!("
             Specify the MIME type of the attachment.
 
-            This option should be unnecessary in regular usage due to the
-            automatic MIME type detection done using `file` with a fallback to
-            internal inference of common file types.
+            This option is unnecessary for regular usage since the MIME type is
+            automatically detected using `file` with a fallback to internal
+            inference of common file types.
         ")
     )]
     mime: Option<String>,
@@ -71,8 +71,11 @@ struct Arguments {
             Taken from standard input when `-`.
 
             Example:
-            - attach file to all matching bugs
+            - attach to all matching bugs
             > bite s bugbite -f id | bite at - path/to/file
+
+            - attach to multiple bugs
+            > bite at 3,4,5 file
         ")
     )]
     ids: Vec<MaybeStdinVec<String>>,
@@ -86,6 +89,10 @@ struct Arguments {
             Paths to attachment files.
 
             Multiple attachments can be created by specifying multiple paths.
+
+            Example:
+            - attach multiple files
+            > bite at 3 file1 file2 file3
         ")
     )]
     files: Vec<Utf8PathBuf>,
