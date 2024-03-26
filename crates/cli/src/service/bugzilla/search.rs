@@ -33,7 +33,7 @@ fn change_field(s: &str) -> anyhow::Result<ChangeField> {
 #[derive(Debug, Clone)]
 struct Changed {
     fields: Vec<ChangeField>,
-    interval: TimeDeltaIso8601,
+    interval: RangeOrValue<TimeDeltaIso8601>,
 }
 
 impl FromStr for Changed {

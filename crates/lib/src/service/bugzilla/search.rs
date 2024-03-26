@@ -349,10 +349,53 @@ impl QueryBuilder<'_> {
 
     pub fn changed<'a, I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (ChangeField, &'a TimeDeltaIso8601)>,
+        I: IntoIterator<Item = (ChangeField, &'a RangeOrValue<TimeDeltaIso8601>)>,
     {
         for (field, target) in values {
-            self.advanced_field(field.api(), "changedafter", target);
+            let field = field.api();
+            match target {
+                RangeOrValue::Value(value) => self.advanced_field(field, "changedafter", value),
+                RangeOrValue::RangeOp(value) => match value {
+                    RangeOp::Less(value) => {
+                        self.advanced_field(field, "changedbefore", value);
+                    }
+                    RangeOp::LessOrEqual(value) => {
+                        self.advanced_field(field, "changedbefore", value);
+                    }
+                    RangeOp::Equal(value) => {
+                        self.advanced_field(field, "equals", value);
+                    }
+                    RangeOp::NotEqual(value) => {
+                        self.advanced_field(field, "notequals", value);
+                    }
+                    RangeOp::GreaterOrEqual(value) => {
+                        self.advanced_field(field, "changedafter", value);
+                    }
+                    RangeOp::Greater(value) => {
+                        self.advanced_field(field, "changedafter", value);
+                    }
+                },
+                RangeOrValue::Range(value) => match value {
+                    Range::Range(r) => {
+                        self.advanced_field(field, "changedafter", &r.start);
+                        self.advanced_field(field, "changedbefore", &r.end);
+                    }
+                    Range::Inclusive(r) => {
+                        self.advanced_field(field, "changedafter", r.start());
+                        self.advanced_field(field, "changedbefore", r.end());
+                    }
+                    Range::To(r) => {
+                        self.advanced_field(field, "changedbefore", &r.end);
+                    }
+                    Range::ToInclusive(r) => {
+                        self.advanced_field(field, "changedbefore", &r.end);
+                    }
+                    Range::From(r) => {
+                        self.advanced_field(field, "changedafter", &r.start);
+                    }
+                    Range::Full(_) => (),
+                },
+            }
         }
     }
 
