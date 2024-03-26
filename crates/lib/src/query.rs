@@ -1,6 +1,9 @@
 use std::fmt;
 use std::str::FromStr;
 
+use itertools::Itertools;
+use strum::VariantNames;
+
 use crate::Error;
 
 #[derive(Debug, Clone, Copy)]
@@ -16,7 +19,7 @@ pub struct Order<T> {
     pub(crate) field: T,
 }
 
-impl<T: FromStr> TryFrom<&str> for Order<T> {
+impl<T: FromStr + VariantNames> TryFrom<&str> for Order<T> {
     type Error = Error;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -24,7 +27,7 @@ impl<T: FromStr> TryFrom<&str> for Order<T> {
     }
 }
 
-impl<T: FromStr> FromStr for Order<T> {
+impl<T: FromStr + VariantNames> FromStr for Order<T> {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
@@ -33,9 +36,12 @@ impl<T: FromStr> FromStr for Order<T> {
         } else {
             (OrderType::Ascending, s.strip_prefix('+').unwrap_or(s))
         };
-        let field = field
-            .parse()
-            .map_err(|_| Error::InvalidValue(format!("unknown search field: {field}")))?;
+        let field = field.parse().map_err(|_| {
+            let possible = T::VARIANTS.iter().join(", ");
+            Error::InvalidValue(format!(
+                "unknown search field: {field}\n  [possible values: {possible}]"
+            ))
+        })?;
         Ok(Self { order, field })
     }
 }
