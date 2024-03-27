@@ -498,7 +498,7 @@ pub(super) struct Command {
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
         conflicts_with = "from_bug",
-        long_help = wrapped_doc!("
+        long_help = wrapped_doc!(r#"
             Read attributes from a template.
 
             Value must be the path to a valid template file. Templates
@@ -506,7 +506,11 @@ pub(super) struct Command {
 
             Fields that don't match known bug field names are used for custom
             fields.
-        ")
+
+            Example:
+            - create bug using template
+            > bite c --from path/to/new.toml -S "summary" -D "description"
+        "#)
     )]
     from: Option<Utf8PathBuf>,
 
@@ -528,7 +532,7 @@ pub(super) struct Command {
 
             Example:
             - create template using existing bug
-            > bite c --from-bug 123 --to bug-123.toml --dry-run
+            > bite c --from-bug 123 --to path/to/new.toml --dry-run
         ")
     )]
     from_bug: Option<u64>,
