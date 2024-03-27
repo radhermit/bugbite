@@ -9,6 +9,7 @@ use crate::command::cmd;
 
 mod attachment;
 mod comment;
+mod create;
 mod get;
 mod history;
 mod search;
@@ -20,6 +21,8 @@ async fn start_server() -> TestServer {
     let server = TestServer::new().await;
     env::set_var("BUGBITE_BASE", server.uri());
     env::set_var("BUGBITE_SERVICE", "bugzilla");
+    env::set_var("BUGBITE_USER", "bugbite@bugbite.test");
+    env::set_var("BUGBITE_PASS", "bugbite");
     server
 }
 
