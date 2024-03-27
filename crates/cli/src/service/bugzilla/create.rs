@@ -548,8 +548,12 @@ pub(super) struct Command {
 
             Value is the file path where the TOML template file will be written.
 
-            Combining this option with -n/--dry-run allows creating
-            templates without any service interaction.
+            Combining this option with -n/--dry-run allows creating templates
+            without any service interaction.
+
+            Example:
+            - create template using specified values
+            > bite c -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
         ")
     )]
     to: Option<Utf8PathBuf>,
