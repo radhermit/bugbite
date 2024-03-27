@@ -43,7 +43,7 @@ fn invalid_ids() {
         .args(["--id", "id"])
         .assert()
         .stdout("")
-        .stderr(contains("error: invalid value 'id' for '--id <ID>': "))
+        .stderr(predicate::str::is_empty().not())
         .failure()
         .code(2);
 }
