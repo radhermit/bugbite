@@ -337,7 +337,32 @@ struct AttributeOptions {
     groups: Option<ExistsOrArray<MaybeStdinVec<Match>>>,
 
     /// restrict by ID
-    #[arg(long, value_delimiter = ',')]
+    #[arg(
+        long,
+        num_args = 1,
+        value_delimiter = ',',
+        value_name = "ID[,...]",
+        long_help = wrapped_doc!("
+            Restrict by ID.
+
+            Values must be valid identifiers for bugs and multiple values can be
+            specified in a comma-separated list, matching if any of the IDs
+            match.
+
+            Examples:
+            - ID equal to 10
+            > bite s --id 10
+
+            - IDs 10 or 20
+            > bite s --id 10,20
+
+            Values are taken from standard input when `-`.
+
+            Example:
+            - Any ID matching values taken from a file
+            > cat file | bite s --id -
+        ")
+    )]
     id: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// restrict by keyword
