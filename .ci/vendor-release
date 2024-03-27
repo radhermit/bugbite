@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create a vendored rust release.
+# Create a vendored release.
 # Requires a single argument of the target package name.
 
 set -e
