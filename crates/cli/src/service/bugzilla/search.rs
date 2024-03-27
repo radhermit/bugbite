@@ -799,12 +799,12 @@ struct Params {
 }
 
 #[derive(Debug, Args)]
-pub(super) struct Command {
+#[clap(next_help_heading = "Search options")]
+pub(super) struct SearchOptions {
     /// open query in a browser
     #[arg(
         short,
         long,
-        help_heading = "Search options",
         long_help = wrapped_doc!("
             Open query in a browser.
 
@@ -815,13 +815,12 @@ pub(super) struct Command {
     browser: bool,
 
     /// skip service interaction
-    #[arg(short = 'n', long, help_heading = "Search options")]
+    #[arg(short = 'n', long)]
     dry_run: bool,
 
     /// read attributes from a template
     #[arg(
         long,
-        help_heading = "Search options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
         long_help = wrapped_doc!("
@@ -837,7 +836,6 @@ pub(super) struct Command {
     /// write attributes to a template
     #[arg(
         long,
-        help_heading = "Search options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
         long_help = wrapped_doc!("
@@ -850,6 +848,12 @@ pub(super) struct Command {
         ")
     )]
     to: Option<Utf8PathBuf>,
+}
+
+#[derive(Debug, Args)]
+pub(super) struct Command {
+    #[clap(flatten)]
+    search: SearchOptions,
 
     #[clap(flatten)]
     params: Params,
@@ -1037,10 +1041,10 @@ impl Command {
         let fields = &params.query.fields;
         query.fields(fields.iter().copied());
 
-        if self.browser {
+        if self.search.browser {
             let url = client.search_url(query)?;
             launch_browser([url])?;
-        } else if !self.dry_run {
+        } else if !self.search.dry_run {
             let bugs = client.search(query).await?;
             render_search(bugs, fields)?;
         }
