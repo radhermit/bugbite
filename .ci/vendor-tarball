@@ -37,5 +37,7 @@ replace-with = "vendored-sources"
 directory = "vendor"
 EOF
 
+popd >/dev/null
+
 # create release tarball
-tar -cvf ${REPO_DIR}/${RELEASE}.tar *
+tar -cvf ${REPO_DIR}/${RELEASE}.tar ${RELEASE}
