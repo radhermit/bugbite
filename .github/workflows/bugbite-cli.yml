@@ -44,8 +44,8 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       id: rust
 
-    - name: Create vendored release tarball
-      run: .ci/vendor-tarball bugbite-cli
+    - name: Create vendored release
+      run: .ci/vendor-release bugbite-cli
 
     - name: Download artifacts
       uses: actions/download-artifact@v4
@@ -54,8 +54,6 @@ jobs:
 
     - name: Create archive
       run: |
-        # unpack tarball
-        tar -xf ${{ github.ref_name }}.tar
         # move generated files into the release
         mv man shell ${{ github.ref_name }}
         # create the release tarball

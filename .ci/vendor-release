@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create a vendored rust release tarball.
+# Create a vendored rust release.
 # Requires a single argument of the target package name.
 
 set -e
@@ -39,5 +39,5 @@ EOF
 
 popd >/dev/null
 
-# create release tarball
-tar -cvf ${REPO_DIR}/${RELEASE}.tar ${RELEASE}
+# move release to repo dir
+mv ${RELEASE} ${REPO_DIR}
