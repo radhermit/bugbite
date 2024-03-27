@@ -33,8 +33,7 @@ struct Options {
             Assign a bug to a user.
 
             The value must be an email address for a service user. The alias
-            `@me` can also be used for the service's configured user if one
-            exists.
+            `@me` can be used for the service's configured user if one exists.
         ")
     )]
     assignee: Option<String>,
@@ -50,8 +49,10 @@ struct Options {
 
             Values must be valid IDs for existing bugs.
 
-            Multiple arguments can be specified in a comma-separated list or are
-            taken from standard input when `-`.
+            Multiple arguments can be specified in a comma-separated list or via
+            multiple options.
+
+            Values are taken from standard input when `-`.
         ")
     )]
     blocks: Option<Vec<MaybeStdinVec<u64>>>,
@@ -66,7 +67,8 @@ struct Options {
 
             Values must be email addresses for service users.
 
-            Multiple arguments can be specified in a comma-separated list.
+            Multiple arguments can be specified in a comma-separated list or via
+            multiple options.
         ")
     )]
     cc: Option<Vec<String>>,
@@ -90,8 +92,10 @@ struct Options {
 
             Values must be valid IDs for existing bugs.
 
-            Multiple arguments can be specified in a comma-separated list or are
-            taken from standard input when `-`.
+            Multiple arguments can be specified in a comma-separated list or via
+            multiple options.
+
+            Values are taken from standard input when `-`.
         ")
     )]
     depends: Option<Vec<MaybeStdinVec<u64>>>,
@@ -112,7 +116,8 @@ struct Options {
             Values must be valid flags composed of the flag name followed by its
             status. Supported statuses include `+`, `-`, and `?`.
 
-            Multiple arguments can be specified in a comma-separated list.
+            Multiple arguments can be specified in a comma-separated list or via
+            multiple options.
         ")
     )]
     flags: Option<Vec<Flag>>,
@@ -130,7 +135,8 @@ struct Options {
             Values must be valid service groups. No arguments may be used to
             avoid adding the bug to all default groups for the targeted product.
 
-            Multiple arguments can be specified in a comma-separated list.
+            Multiple arguments can be specified in a comma-separated list or via
+            multiple options.
         ")
     )]
     groups: Option<Vec<String>>,
@@ -146,7 +152,8 @@ struct Options {
 
             Values must be valid keywords.
 
-            Multiple arguments can be specified in a comma-separated list.
+            Multiple arguments can be specified in a comma-separated list or via
+            multiple options.
         ")
     )]
     keywords: Option<Vec<String>>,
@@ -197,7 +204,8 @@ struct Options {
             Values must be valid URLs to bugs, issues, or tickets in external
             trackers.
 
-            Multiple arguments can be specified in a comma-separated list.
+            Multiple arguments can be specified in a comma-separated list or via
+            multiple options.
         ")
     )]
     see_also: Option<Vec<String>>,
