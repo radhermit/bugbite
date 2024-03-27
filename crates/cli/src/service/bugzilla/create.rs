@@ -525,6 +525,10 @@ pub(super) struct Command {
             Combining this option with -n/--dry-run and --to allows creating
             templates using existing bugs to edit and use later without creating
             a new bug.
+
+            Example:
+            - create template using existing bug
+            > bite c --from-bug 123 --to bug-123.toml --dry-run
         ")
     )]
     from_bug: Option<u64>,
