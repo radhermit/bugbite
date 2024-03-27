@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.0.7
+
+### Added
+
+#### Bugzilla
+- search: Support time ranges for relevant fields (#16).
+- search: Support opening the query in the browser via -b/--browser.
+- search: Support querying QA contact existence.
+- search: Support querying personal tags existence.
+- search: Support comma-separated IDs for the --id option.
+- search: Support range values using operators, e.g. ">=4" for numeric values.
+- create: Replace --assigned-to with --assignee.
+- modify: Replace --assigned-to with --assignee.
+
+#### Redmine
+- search: Support time ranges for relevant fields (#16).
+- search: Support opening the query in the browser via -b/--browser.
+- search: Support comma-separated IDs for the --id option.
+- search: Support multiple summary terms.
+- search: Support querying for blockers, dependencies, and related issues.
+- search: Support querying for closed time.
+- search: Support querying for attachment existence.
+- search: Support querying by assignee.
+- search: Support custom query ordering.
+- search: Support range values using operators, e.g. ">=4" for numeric values.
+
 ## 0.0.6
 
 ### Added

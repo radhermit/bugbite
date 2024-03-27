@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.0.7
+
+### Added
+
+#### Bugzilla
+- search: Support time ranges for relevant fields (#16).
+- search: Support querying QA contact existence.
+- search: Support querying personal tags existence.
+- search: Support ranges for change-related options.
+- search: Support inverted status matches via `!` prefix.
+- search: Replace user alias `@me` for cc and assignee fields.
+
+#### Redmine
+- search: Support time ranges for relevant fields (#16).
+- search: Support multiple summary terms.
+- search: Support querying for blockers, dependencies, and related issues.
+- search: Support querying for closed time.
+- search: Support querying for attachment existence.
+- search: Support querying by assignee.
+- search: Support custom query ordering.
+
 ## 0.0.6
 
 ### Added
