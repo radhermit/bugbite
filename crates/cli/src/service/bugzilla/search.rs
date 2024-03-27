@@ -416,10 +416,38 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         value_delimiter = ',',
         long_help = wrapped_doc!("
-            Restrict bugs by status.
+            Restrict by status.
+
+            By default, searches with no status parameter only target open bugs.
+            This option supports extending searches to closed bugs.
+
+            Regular values search for case-insensitive matches. The prefix `!`
+            can be used to search for all non-matches instead.
+
+            Examples:
+            - unconfirmed bugs
+            > bite s --status unconfirmed
+
+            - unresolved bugs
+            > bite s --status !resolved
+
+            Multiple values can be specified in a comma-separated list or with
+            multiple options, matching if any value matches.
+
+            Examples:
+            - confirmed or verified bugs
+            > bite s --status confirmed,verified
+            > bite s --status confirmed --status verified
 
             The aliases `@open`, `@closed`, and `@all` can be used to search for
             open, closed, and all bugs, respectively.
+
+            Examples:
+            - closed bugs with bugbite in the summary
+            > bite s --status @closed bugbite
+
+            - all bugs assigned to yourself
+            > bite s --status @all --assignee @me
         ")
     )]
     status: Option<Vec<String>>,
