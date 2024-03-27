@@ -79,6 +79,16 @@ impl Match {
             value: value.to_string(),
         }
     }
+
+    /// Substitute user alias for matching value.
+    fn replace_user_alias(mut self, service: &super::Service) -> Self {
+        if let Some(user) = service.user() {
+            if self.value == "@me" {
+                self.value = user.to_string();
+            }
+        }
+        self
+    }
 }
 
 impl fmt::Display for Match {
@@ -200,6 +210,10 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
+        let values: Vec<_> = values
+            .into_iter()
+            .map(|x| x.into().replace_user_alias(self.service))
+            .collect();
         self.op_field("OR", "assigned_to", values);
     }
 
@@ -667,6 +681,10 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
+        let values: Vec<_> = values
+            .into_iter()
+            .map(|x| x.into().replace_user_alias(self.service))
+            .collect();
         self.op_field("AND", "cc", values)
     }
 

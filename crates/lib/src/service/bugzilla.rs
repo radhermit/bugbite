@@ -76,7 +76,7 @@ impl Service {
         format!("{base}/show_bug.cgi?id={id}")
     }
 
-    /// Substitute user aliases for matching values.
+    /// Substitute user alias for matching value.
     // TODO: support pulling aliases from the config?
     pub(crate) fn replace_user_alias<'a>(&'a self, value: &'a str) -> &str {
         if value == "@me" {
