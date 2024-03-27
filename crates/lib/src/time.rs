@@ -51,7 +51,7 @@ impl FromStr for TimeDelta {
                 "h" => delta = delta + RelativeDuration::hours(value_i64),
                 "min" => delta = delta + RelativeDuration::minutes(value_i64),
                 "s" => delta = delta + RelativeDuration::seconds(value_i64),
-                x => panic!("invalid time interval unit: {x}"),
+                _ => panic!("invalid time interval unit: {unit}"),
             }
         }
 
