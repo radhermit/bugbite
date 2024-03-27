@@ -278,33 +278,21 @@ impl QueryBuilder<'_> {
         self.op_field("AND", "short_desc", values)
     }
 
-    pub fn created<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = RangeOrValue<TimeDeltaIso8601>>,
-    {
-        for value in values {
-            match value {
-                RangeOrValue::Value(value) => {
-                    self.advanced_field("creation_ts", "greaterthaneq", value)
-                }
-                RangeOrValue::RangeOp(value) => self.range_op("creation_ts", value),
-                RangeOrValue::Range(value) => self.range("creation_ts", value),
+    pub fn created(&mut self, value: RangeOrValue<TimeDeltaIso8601>) {
+        match value {
+            RangeOrValue::Value(value) => {
+                self.advanced_field("creation_ts", "greaterthaneq", value)
             }
+            RangeOrValue::RangeOp(value) => self.range_op("creation_ts", value),
+            RangeOrValue::Range(value) => self.range("creation_ts", value),
         }
     }
 
-    pub fn modified<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = RangeOrValue<TimeDeltaIso8601>>,
-    {
-        for value in values {
-            match value {
-                RangeOrValue::Value(value) => {
-                    self.advanced_field("delta_ts", "greaterthaneq", value)
-                }
-                RangeOrValue::RangeOp(value) => self.range_op("delta_ts", value),
-                RangeOrValue::Range(value) => self.range("delta_ts", value),
-            }
+    pub fn modified(&mut self, value: RangeOrValue<TimeDeltaIso8601>) {
+        match value {
+            RangeOrValue::Value(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
+            RangeOrValue::RangeOp(value) => self.range_op("delta_ts", value),
+            RangeOrValue::Range(value) => self.range("delta_ts", value),
         }
     }
 

@@ -716,11 +716,11 @@ struct QueryOptions {
 struct TimeOptions {
     /// restrict by creation time
     #[arg(short, long, value_name = "TIME", value_delimiter = ',')]
-    created: Option<Vec<RangeOrValue<TimeDeltaIso8601>>>,
+    created: Option<RangeOrValue<TimeDeltaIso8601>>,
 
     /// restrict by modification time
     #[arg(short, long, value_name = "TIME", value_delimiter = ',')]
-    modified: Option<Vec<RangeOrValue<TimeDeltaIso8601>>>,
+    modified: Option<RangeOrValue<TimeDeltaIso8601>>,
 }
 
 #[derive(Debug, Args)]
@@ -887,11 +887,11 @@ impl Command {
         if let Some(value) = params.query.limit {
             query.limit(value);
         }
-        if let Some(values) = params.time.created {
-            query.created(values);
+        if let Some(value) = params.time.created {
+            query.created(value);
         }
-        if let Some(values) = params.time.modified {
-            query.modified(values);
+        if let Some(value) = params.time.modified {
+            query.modified(value);
         }
         if let Some(values) = params.query.order {
             query.order(values)?;
