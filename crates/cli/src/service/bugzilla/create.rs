@@ -21,7 +21,21 @@ use crate::utils::{confirm, wrapped_doc};
 #[clap(next_help_heading = "Attribute options")]
 struct Options {
     /// set aliases
-    #[arg(short = 'A', long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    #[arg(
+        short = 'A',
+        long,
+        value_name = "VALUE[,...]",
+        value_delimiter = ',',
+        long_help = wrapped_doc!("
+            Set aliases.
+
+            The values must be unique aliases for a bug, using existing aliases
+            will cause the service to return an error.
+
+            Multiple arguments can be specified in a comma-separated list or via
+            multiple options.
+        ")
+    )]
     alias: Option<Vec<String>>,
 
     /// set assignee
@@ -78,7 +92,18 @@ struct Options {
     component: Option<String>,
 
     /// set custom field
-    #[arg(long = "cf", num_args = 2, value_names = ["NAME", "VALUE"])]
+    #[arg(
+        long = "cf",
+        num_args = 2,
+        value_names = ["NAME", "VALUE"],
+        long_help = wrapped_doc!("
+            Set custom fields.
+
+            The values must be valid custom field names followed by their value.
+
+            Multiple arguments can be specified via multiple options.
+        ")
+    )]
     custom_fields: Option<Vec<String>>,
 
     /// set dependencies
