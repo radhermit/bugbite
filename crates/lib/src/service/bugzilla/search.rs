@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::str::FromStr;
 use std::{fmt, iter};
 
@@ -162,6 +163,7 @@ pub struct QueryBuilder<'a> {
     service: &'a super::Service,
     query: ListOrderedMultimap<String, String>,
     advanced_count: u64,
+    defaults: HashSet<String>,
 }
 
 impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
@@ -172,6 +174,7 @@ impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
             service,
             query: Default::default(),
             advanced_count: Default::default(),
+            defaults: Default::default(),
         }
     }
 }
@@ -297,6 +300,9 @@ impl QueryBuilder<'_> {
         T: TryInto<Order<OrderField>>,
         <T as TryInto<Order<OrderField>>>::Error: std::fmt::Display,
     {
+        // don't set order by default
+        self.defaults.insert("order".to_string());
+
         let values: Vec<_> = values
             .into_iter()
             .map(|x| x.try_into())
@@ -470,6 +476,9 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
+        // don't set status by default
+        self.defaults.insert("status".to_string());
+
         for value in values {
             match value.as_ref() {
                 "@open" => self.append("bug_status", "__open__"),
@@ -660,6 +669,9 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = F>,
         F: Into<FilterField>,
     {
+        // don't set fields by default
+        self.defaults.insert("fields".to_string());
+
         let mut fields: IndexSet<_> = fields.into_iter().map(Into::into).collect();
 
         // always include bug IDs in field requests
@@ -796,17 +808,17 @@ impl Query for QueryBuilder<'_> {
         }
 
         // only return open bugs by default
-        if !self.query.contains_key("bug_status") {
+        if !self.defaults.contains("status") {
             self.status(["@open"]);
         }
 
         // sort by ascending ID by default
-        if !self.query.contains_key("order") {
+        if !self.defaults.contains("order") {
             self.order(["+id"])?;
         }
 
         // limit requested fields by default to decrease bandwidth and speed up response
-        if !self.query.contains_key("include_fields") {
+        if !self.defaults.contains("fields") {
             self.fields([BugField::Id, BugField::Summary]);
         }
 
