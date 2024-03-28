@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 use crate::objects::bugzilla::Event;
-use crate::time::TimeDeltaIso8601;
+use crate::time::TimeDelta;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
@@ -15,7 +15,7 @@ impl<'a> HistoryRequest<'a> {
     pub(super) fn new<S>(
         service: &'a super::Service,
         ids: &[S],
-        created: Option<&TimeDeltaIso8601>,
+        created: Option<&TimeDelta>,
     ) -> crate::Result<Self>
     where
         S: std::fmt::Display,

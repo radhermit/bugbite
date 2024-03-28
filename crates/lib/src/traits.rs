@@ -32,8 +32,7 @@ pub trait RenderSearch<T> {
 
 /// Encode a type into the expected API name.
 pub(crate) trait Api {
-    type Output: std::fmt::Display;
-    fn api(&self) -> Self::Output;
+    fn api(&self) -> String;
 }
 
 pub(crate) trait Request {

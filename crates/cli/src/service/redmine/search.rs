@@ -6,7 +6,7 @@ use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::redmine::search::{ExistsField, OrderField};
 use bugbite::service::redmine::IssueField;
-use bugbite::time::TimeDeltaIso8601;
+use bugbite::time::TimeDelta;
 use bugbite::traits::WebClient;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
@@ -284,15 +284,15 @@ struct Params {
 
     /// restrict by creation time
     #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
-    created: Option<RangeOrValue<TimeDeltaIso8601>>,
+    created: Option<RangeOrValue<TimeDelta>>,
 
     /// restrict by modification time
     #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
-    modified: Option<RangeOrValue<TimeDeltaIso8601>>,
+    modified: Option<RangeOrValue<TimeDelta>>,
 
     /// restrict by closed time
     #[arg(short = 'C', long, value_name = "TIME", help_heading = "Time options")]
-    closed: Option<RangeOrValue<TimeDeltaIso8601>>,
+    closed: Option<RangeOrValue<TimeDelta>>,
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]

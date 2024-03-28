@@ -7,6 +7,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
+use crate::traits::Api;
 use crate::Error;
 
 static RELATIVE_TIME_RE: Lazy<Regex> =
@@ -19,7 +20,7 @@ pub struct TimeDelta {
 }
 
 impl TimeDelta {
-    pub fn delta(&self) -> RelativeDuration {
+    fn delta(&self) -> RelativeDuration {
         self.delta
     }
 }
@@ -76,28 +77,9 @@ impl fmt::Display for TimeDelta {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TimeDeltaIso8601(TimeDelta);
-
-impl FromStr for TimeDeltaIso8601 {
-    type Err = Error;
-
-    fn from_str(s: &str) -> crate::Result<Self> {
-        Ok(Self(s.parse()?))
-    }
-}
-
-impl TryFrom<&str> for TimeDeltaIso8601 {
-    type Error = Error;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        value.parse()
-    }
-}
-
-impl fmt::Display for TimeDeltaIso8601 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let datetime = Utc::now() - self.0.delta();
-        write!(f, "{}", datetime.format("%Y-%m-%dT%H:%M:%SZ"))
+impl Api for TimeDelta {
+    fn api(&self) -> String {
+        let datetime = Utc::now() - self.delta();
+        datetime.format("%Y-%m-%dT%H:%M:%SZ").to_string()
     }
 }

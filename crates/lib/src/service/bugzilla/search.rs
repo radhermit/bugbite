@@ -10,7 +10,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, OrderType};
-use crate::time::TimeDeltaIso8601;
+use crate::time::TimeDelta;
 use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
@@ -278,7 +278,7 @@ impl QueryBuilder<'_> {
         self.op_field("AND", "short_desc", values)
     }
 
-    pub fn created(&mut self, value: RangeOrValue<TimeDeltaIso8601>) {
+    pub fn created(&mut self, value: RangeOrValue<TimeDelta>) {
         match value {
             RangeOrValue::Value(value) => {
                 self.advanced_field("creation_ts", "greaterthaneq", value)
@@ -288,7 +288,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn modified(&mut self, value: RangeOrValue<TimeDeltaIso8601>) {
+    pub fn modified(&mut self, value: RangeOrValue<TimeDelta>) {
         match value {
             RangeOrValue::Value(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
             RangeOrValue::RangeOp(value) => self.range_op("delta_ts", value),
@@ -357,7 +357,7 @@ impl QueryBuilder<'_> {
 
     pub fn changed<'a, I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (ChangeField, &'a RangeOrValue<TimeDeltaIso8601>)>,
+        I: IntoIterator<Item = (ChangeField, &'a RangeOrValue<TimeDelta>)>,
     {
         for (field, target) in values {
             let field = field.api();
@@ -385,12 +385,12 @@ impl QueryBuilder<'_> {
                 },
                 RangeOrValue::Range(value) => match value {
                     Range::Range(r) => {
-                        self.advanced_field(field, "changedafter", &r.start);
-                        self.advanced_field(field, "changedbefore", &r.end);
+                        self.advanced_field(&field, "changedafter", &r.start);
+                        self.advanced_field(&field, "changedbefore", &r.end);
                     }
                     Range::Inclusive(r) => {
-                        self.advanced_field(field, "changedafter", r.start());
-                        self.advanced_field(field, "changedbefore", r.end());
+                        self.advanced_field(&field, "changedafter", r.start());
+                        self.advanced_field(&field, "changedbefore", r.end());
                     }
                     Range::To(r) => {
                         self.advanced_field(field, "changedbefore", &r.end);
@@ -860,9 +860,8 @@ pub enum ExistsField {
 }
 
 impl Api for ExistsField {
-    type Output = &'static str;
-    fn api(&self) -> Self::Output {
-        match self {
+    fn api(&self) -> String {
+        let value = match self {
             Self::Alias => "alias",
             Self::Attachments => "attachments.submitter",
             Self::Blocks => "blocked",
@@ -876,7 +875,8 @@ impl Api for ExistsField {
             Self::Tags => "tag",
             Self::Url => "bug_file_loc",
             Self::Whiteboard => "status_whiteboard",
-        }
+        };
+        value.to_string()
     }
 }
 
@@ -916,10 +916,8 @@ pub enum OrderField {
 }
 
 impl Api for OrderField {
-    type Output = &'static str;
-    /// Translate a search order variant into the expected REST API v1 name.
-    fn api(&self) -> Self::Output {
-        match self {
+    fn api(&self) -> String {
+        let value = match self {
             Self::Alias => "alias",
             Self::Assignee => "assigned_to",
             Self::Blocks => "blocked",
@@ -949,14 +947,13 @@ impl Api for OrderField {
             Self::Version => "version",
             Self::Votes => "votes",
             Self::Whiteboard => "status_whiteboard",
-        }
+        };
+        value.to_string()
     }
 }
 
 impl Api for Order<OrderField> {
-    type Output = String;
-    /// Translate a search order variant into the expected REST API v1 name.
-    fn api(&self) -> Self::Output {
+    fn api(&self) -> String {
         let name = self.field.api();
         match self.order {
             OrderType::Descending => format!("{name} DESC"),
@@ -996,10 +993,8 @@ pub enum ChangeField {
 }
 
 impl Api for ChangeField {
-    type Output = &'static str;
-    /// Translate a search order variant into the expected REST API v1 name.
-    fn api(&self) -> Self::Output {
-        match self {
+    fn api(&self) -> String {
+        let value = match self {
             Self::Alias => "alias",
             Self::Assignee => "assigned_to",
             Self::Blocks => "blocked",
@@ -1024,7 +1019,8 @@ impl Api for ChangeField {
             Self::Version => "version",
             Self::Votes => "votes",
             Self::Whiteboard => "status_whiteboard",
-        }
+        };
+        value.to_string()
     }
 }
 

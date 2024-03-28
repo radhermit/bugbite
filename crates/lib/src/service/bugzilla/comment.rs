@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 use crate::objects::bugzilla::Comment;
-use crate::time::TimeDeltaIso8601;
+use crate::time::TimeDelta;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
@@ -98,7 +98,7 @@ impl Request for CommentRequest<'_> {
 #[derive(Debug, Default)]
 pub struct CommentParams {
     attachment: Option<bool>,
-    created_after: Option<TimeDeltaIso8601>,
+    created_after: Option<TimeDelta>,
     creator: Option<String>,
 }
 
@@ -127,7 +127,7 @@ impl CommentParams {
         self.attachment = Some(value);
     }
 
-    pub fn created_after(&mut self, interval: TimeDeltaIso8601) {
+    pub fn created_after(&mut self, interval: TimeDelta) {
         self.created_after = Some(interval);
     }
 

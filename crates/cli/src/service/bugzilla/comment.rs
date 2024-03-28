@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::comment::CommentParams;
-use bugbite::time::TimeDeltaIso8601;
+use bugbite::time::TimeDelta;
 use clap::Args;
 
 use crate::service::Render;
@@ -26,7 +26,7 @@ struct Options {
 
     /// comment created at this time or later
     #[arg(short, long, value_name = "TIME")]
-    created: Option<TimeDeltaIso8601>,
+    created: Option<TimeDelta>,
 
     /// user who commented
     #[arg(short = 'R', long, value_name = "USER")]

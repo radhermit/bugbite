@@ -10,7 +10,7 @@ use url::Url;
 
 use crate::objects::Ids;
 use crate::service::ServiceKind;
-use crate::time::TimeDeltaIso8601;
+use crate::time::TimeDelta;
 use crate::traits::{Api, ServiceParams, WebClient, WebService};
 use crate::Error;
 
@@ -128,7 +128,7 @@ impl Service {
     pub(crate) fn history_request<S>(
         &self,
         ids: &[S],
-        created: Option<&TimeDeltaIso8601>,
+        created: Option<&TimeDelta>,
     ) -> crate::Result<history::HistoryRequest>
     where
         S: std::fmt::Display,
@@ -298,14 +298,14 @@ impl From<GroupField> for FilterField {
 }
 
 impl Api for GroupField {
-    type Output = &'static str;
-    fn api(&self) -> Self::Output {
-        match self {
+    fn api(&self) -> String {
+        let value = match self {
             Self::All => "_all",
             Self::Default => "_default",
             Self::Extra => "_extra",
             Self::Custom => "_custom",
-        }
+        };
+        value.to_string()
     }
 }
 
@@ -389,9 +389,8 @@ impl From<BugField> for FilterField {
 }
 
 impl Api for BugField {
-    type Output = &'static str;
-    fn api(&self) -> Self::Output {
-        match self {
+    fn api(&self) -> String {
+        let value = match self {
             Self::Alias => "alias",
             Self::Assignee => "assigned_to",
             Self::Blocks => "blocks",
@@ -421,7 +420,8 @@ impl Api for BugField {
             Self::Updated => "last_change_time",
             Self::Version => "version",
             Self::Whiteboard => "whiteboard",
-        }
+        };
+        value.to_string()
     }
 }
 
@@ -455,8 +455,7 @@ impl FromStr for FilterField {
 }
 
 impl Api for FilterField {
-    type Output = &'static str;
-    fn api(&self) -> Self::Output {
+    fn api(&self) -> String {
         match self {
             Self::Bug(value) => value.api(),
             Self::Group(value) => value.api(),

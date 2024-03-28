@@ -7,7 +7,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, OrderType};
-use crate::time::TimeDeltaIso8601;
+use crate::time::TimeDelta;
 use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
 use crate::Error;
 
@@ -127,7 +127,7 @@ impl QueryBuilder<'_> {
         Ok(())
     }
 
-    pub fn closed(&mut self, value: &RangeOrValue<TimeDeltaIso8601>) {
+    pub fn closed(&mut self, value: &RangeOrValue<TimeDelta>) {
         match value {
             RangeOrValue::Value(value) => {
                 self.insert("closed_on", format!(">={value}"));
@@ -137,7 +137,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn created(&mut self, value: &RangeOrValue<TimeDeltaIso8601>) {
+    pub fn created(&mut self, value: &RangeOrValue<TimeDelta>) {
         match value {
             RangeOrValue::Value(value) => {
                 self.insert("created_on", format!(">={value}"));
@@ -147,7 +147,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn modified(&mut self, value: &RangeOrValue<TimeDeltaIso8601>) {
+    pub fn modified(&mut self, value: &RangeOrValue<TimeDelta>) {
         match value {
             RangeOrValue::Value(value) => self.insert("updated_on", format!(">={value}")),
             RangeOrValue::RangeOp(value) => self.range_op("updated_on", value),
@@ -292,15 +292,15 @@ pub enum ExistsField {
 }
 
 impl Api for ExistsField {
-    type Output = &'static str;
-    fn api(&self) -> Self::Output {
-        match self {
+    fn api(&self) -> String {
+        let value = match self {
             Self::Assignee => "assigned_to_id",
             Self::Attachment => "attachment",
             Self::Blocks => "blocks",
             Self::Blocked => "blocked",
             Self::Relates => "relates",
-        }
+        };
+        value.to_string()
     }
 }
 
@@ -320,9 +320,8 @@ pub enum OrderField {
 }
 
 impl Api for OrderField {
-    type Output = &'static str;
-    fn api(&self) -> Self::Output {
-        match self {
+    fn api(&self) -> String {
+        let value = match self {
             Self::Assignee => "assigned_to",
             Self::Closed => "closed_on",
             Self::Created => "created_on",
@@ -332,13 +331,13 @@ impl Api for OrderField {
             Self::Subject => "subject",
             Self::Tracker => "tracker",
             Self::Updated => "updated_on",
-        }
+        };
+        value.to_string()
     }
 }
 
 impl Api for Order<OrderField> {
-    type Output = String;
-    fn api(&self) -> Self::Output {
+    fn api(&self) -> String {
         let name = self.field.api();
         match self.order {
             OrderType::Descending => format!("{name}:desc"),
