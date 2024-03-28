@@ -35,6 +35,30 @@ pub(crate) trait Api {
     fn api(&self) -> String;
 }
 
+impl Api for String {
+    fn api(&self) -> String {
+        self.clone()
+    }
+}
+
+impl Api for &str {
+    fn api(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl Api for u64 {
+    fn api(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl<T: Api> Api for &T {
+    fn api(&self) -> String {
+        (*self).api()
+    }
+}
+
 pub(crate) trait Request {
     type Output;
     async fn send(self) -> crate::Result<Self::Output>;

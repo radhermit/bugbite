@@ -50,8 +50,7 @@ impl<'a> SearchRequest<'a> {
 }
 
 /// Advanced field matching operators.
-#[derive(Display, Debug, Clone, Copy)]
-#[strum(serialize_all = "lowercase")]
+#[derive(Debug, Clone, Copy)]
 enum MatchOp {
     /// case-sensitive substring matching
     CaseSubstring,
@@ -63,6 +62,21 @@ enum MatchOp {
     NotEquals,
     Regexp,
     NotRegexp,
+}
+
+impl Api for MatchOp {
+    fn api(&self) -> String {
+        let value = match self {
+            Self::CaseSubstring => "casesubstring",
+            Self::Substring => "substring",
+            Self::NotSubstring => "notsubstring",
+            Self::Equals => "equals",
+            Self::NotEquals => "notequals",
+            Self::Regexp => "regexp",
+            Self::NotRegexp => "notregexp",
+        };
+        value.to_string()
+    }
 }
 
 /// Advanced field match.
@@ -88,6 +102,12 @@ impl Match {
             }
         }
         self
+    }
+}
+
+impl Api for Match {
+    fn api(&self) -> String {
+        self.value.to_string()
     }
 }
 
@@ -427,7 +447,7 @@ impl QueryBuilder<'_> {
         S: fmt::Display,
     {
         for (field, value) in values {
-            self.advanced_field(field.api(), "changedfrom", value);
+            self.advanced_field(field.api(), "changedfrom", value.to_string());
         }
     }
 
@@ -437,7 +457,7 @@ impl QueryBuilder<'_> {
         S: fmt::Display,
     {
         for (field, value) in values {
-            self.advanced_field(field.api(), "changedto", value);
+            self.advanced_field(field.api(), "changedto", value.to_string());
         }
     }
 
@@ -694,7 +714,7 @@ impl QueryBuilder<'_> {
 
     fn range_op<T>(&mut self, field: &str, value: RangeOp<T>)
     where
-        T: fmt::Display,
+        T: Api,
     {
         match value {
             RangeOp::Less(value) => {
@@ -720,7 +740,7 @@ impl QueryBuilder<'_> {
 
     fn range<T>(&mut self, field: &str, value: Range<T>)
     where
-        T: fmt::Display,
+        T: Api,
     {
         match value {
             Range::Range(r) => {
@@ -746,25 +766,25 @@ impl QueryBuilder<'_> {
 
     fn append<K, V>(&mut self, key: K, value: V)
     where
-        K: fmt::Display,
-        V: fmt::Display,
+        K: Api,
+        V: Api,
     {
-        self.query.append(key.to_string(), value.to_string());
+        self.query.append(key.api(), value.api());
     }
 
     fn insert<K, V>(&mut self, key: K, value: V)
     where
-        K: fmt::Display,
-        V: fmt::Display,
+        K: Api,
+        V: Api,
     {
-        self.query.insert(key.to_string(), value.to_string());
+        self.query.insert(key.api(), value.api());
     }
 
     fn advanced_field<F, K, V>(&mut self, field: F, operator: K, value: V)
     where
-        F: fmt::Display,
-        K: fmt::Display,
-        V: fmt::Display,
+        F: Api,
+        K: Api,
+        V: Api,
     {
         self.advanced_count += 1;
         let num = self.advanced_count;
@@ -776,7 +796,7 @@ impl QueryBuilder<'_> {
     fn op<I, F, V>(&mut self, op: &str, values: I)
     where
         I: IntoIterator<Item = (F, V)>,
-        F: fmt::Display,
+        F: Api,
         V: Into<Match>,
     {
         self.advanced_count += 1;
@@ -796,7 +816,7 @@ impl QueryBuilder<'_> {
 
     fn op_field<F, I, S>(&mut self, op: &str, field: F, values: I)
     where
-        F: fmt::Display + Copy,
+        F: Api + Copy,
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {

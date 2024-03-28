@@ -130,6 +130,7 @@ impl QueryBuilder<'_> {
     pub fn closed(&mut self, value: &RangeOrValue<TimeDelta>) {
         match value {
             RangeOrValue::Value(value) => {
+                let value = value.api();
                 self.insert("closed_on", format!(">={value}"));
             }
             RangeOrValue::RangeOp(value) => self.range_op("closed_on", value),
@@ -140,6 +141,7 @@ impl QueryBuilder<'_> {
     pub fn created(&mut self, value: &RangeOrValue<TimeDelta>) {
         match value {
             RangeOrValue::Value(value) => {
+                let value = value.api();
                 self.insert("created_on", format!(">={value}"));
             }
             RangeOrValue::RangeOp(value) => self.range_op("created_on", value),
@@ -149,7 +151,10 @@ impl QueryBuilder<'_> {
 
     pub fn modified(&mut self, value: &RangeOrValue<TimeDelta>) {
         match value {
-            RangeOrValue::Value(value) => self.insert("updated_on", format!(">={value}")),
+            RangeOrValue::Value(value) => {
+                let value = value.api();
+                self.insert("updated_on", format!(">={value}"));
+            }
             RangeOrValue::RangeOp(value) => self.range_op("updated_on", value),
             RangeOrValue::Range(value) => self.range("updated_on", value),
         }
@@ -174,19 +179,23 @@ impl QueryBuilder<'_> {
     // Redmine doesn't support native < or > operators so use <= and >= for them.
     fn range_op<T>(&mut self, field: &str, value: &RangeOp<T>)
     where
-        T: fmt::Display,
+        T: Api,
     {
         match value {
             RangeOp::Less(value) | RangeOp::LessOrEqual(value) => {
+                let value = value.api();
                 self.insert(field, format!("<={value}"));
             }
             RangeOp::Equal(value) => {
+                let value = value.api();
                 self.insert(field, format!("={value}"));
             }
             RangeOp::NotEqual(value) => {
+                let value = value.api();
                 self.insert(field, format!("!{value}"));
             }
             RangeOp::GreaterOrEqual(value) | RangeOp::Greater(value) => {
+                let value = value.api();
                 self.insert(field, format!(">={value}"));
             }
         }
@@ -194,23 +203,28 @@ impl QueryBuilder<'_> {
 
     fn range<T>(&mut self, field: &str, value: &Range<T>)
     where
-        T: fmt::Display,
+        T: Api,
     {
         match value {
             Range::Range(r) => {
-                self.insert(field, format!("><{}|{}", r.start, r.end));
+                let (start, end) = (r.start.api(), r.end.api());
+                self.insert(field, format!("><{start}|{end}"));
             }
             Range::Inclusive(r) => {
-                self.insert(field, format!("><{}|{}", r.start(), r.end()));
+                let (start, end) = (r.start().api(), r.end().api());
+                self.insert(field, format!("><{start}|{end}"));
             }
             Range::To(r) => {
-                self.insert(field, format!("<={}", r.end));
+                let end = r.end.api();
+                self.insert(field, format!("<={end}"));
             }
             Range::ToInclusive(r) => {
-                self.insert(field, format!("<={}", r.end));
+                let end = r.end.api();
+                self.insert(field, format!("<={end}"));
             }
             Range::From(r) => {
-                self.insert(field, format!(">={}", r.start));
+                let start = r.start.api();
+                self.insert(field, format!(">={start}"));
             }
             Range::Full(_) => (),
         }
@@ -218,10 +232,10 @@ impl QueryBuilder<'_> {
 
     fn insert<K, V>(&mut self, key: K, value: V)
     where
-        K: fmt::Display,
-        V: fmt::Display,
+        K: Api,
+        V: Api,
     {
-        self.query.insert(key.to_string(), value.to_string());
+        self.query.insert(key.api(), value.api());
     }
 }
 
