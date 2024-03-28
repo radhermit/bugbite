@@ -87,10 +87,9 @@ impl QueryBuilder<'_> {
         self.insert("relates", value);
     }
 
-    pub fn id<I, S>(&mut self, values: I)
+    pub fn id<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator<Item = u64>,
     {
         let value = values.into_iter().join(",");
         self.insert("issue_id", value);

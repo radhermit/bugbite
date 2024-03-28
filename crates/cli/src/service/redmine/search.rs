@@ -350,8 +350,8 @@ impl Command {
                 ExistsOrArray::Array(values) => query.relates(values.into_iter().flatten()),
             }
         }
-        if let Some(values) = params.id.as_ref() {
-            query.id(values.iter().flatten());
+        if let Some(values) = params.id {
+            query.id(values.into_iter().flatten());
         }
         if let Some(value) = params.limit {
             query.limit(value);
