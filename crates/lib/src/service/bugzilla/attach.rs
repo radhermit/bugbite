@@ -121,7 +121,10 @@ impl CreateAttachment {
         })
     }
 
-    fn build(self, ids: Vec<String>) -> crate::Result<Attachment> {
+    fn build<S>(self, ids: &[S]) -> crate::Result<Attachment>
+    where
+        S: std::fmt::Display,
+    {
         let path = &self.path;
         let file_name = path
             .file_name()
@@ -131,7 +134,7 @@ impl CreateAttachment {
         let mime_type = get_mime_type(path, &data);
 
         let mut attachment = Attachment {
-            ids,
+            ids: ids.iter().map(|s| s.to_string()).collect(),
             data: Base64(data),
             file_name: file_name.to_string(),
             content_type: mime_type,
@@ -216,10 +219,9 @@ impl<'a> AttachRequest<'a> {
 
         let url = service.base().join(&format!("rest/bug/{id}/attachment"))?;
 
-        let ids: Vec<_> = ids.iter().map(|s| s.to_string()).collect();
         let mut attachments = vec![];
         for attachment in create_attachments {
-            attachments.push(attachment.build(ids.clone())?);
+            attachments.push(attachment.build(ids)?);
         }
 
         Ok(Self {
