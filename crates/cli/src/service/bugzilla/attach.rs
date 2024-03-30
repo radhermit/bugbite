@@ -19,7 +19,7 @@ struct Options {
     #[arg(short, long)]
     comment: Option<String>,
 
-    /// compress the attachment
+    /// compress attachment
     #[arg(
         short = 'C',
         long,
@@ -36,6 +36,8 @@ struct Options {
     #[arg(
         long,
         value_name = "SIZE",
+        num_args = 0..=1,
+        default_missing_value = "1",
         conflicts_with_all = ["mime", "patch"],
         long_help = wrapped_doc!("
             Auto-compress attachments larger than a given size.
