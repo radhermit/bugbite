@@ -2,10 +2,12 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
-use bugbite::service::bugzilla::attach::CreateAttachment;
+use bugbite::service::bugzilla::attach::{Compression, CreateAttachment};
 use camino::Utf8PathBuf;
+use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};
 use itertools::Itertools;
+use strum::VariantNames;
 use tracing::info;
 
 use crate::utils::wrapped_doc;
@@ -17,11 +19,38 @@ struct Options {
     #[arg(short, long)]
     comment: Option<String>,
 
+    /// compress the attachment
+    #[arg(
+        short = 'C',
+        long,
+        conflicts_with_all = ["mime", "patch"],
+        num_args = 0..=1,
+        default_missing_value = "xz",
+        hide_possible_values = true,
+        value_parser = PossibleValuesParser::new(Compression::VARIANTS)
+            .map(|s| s.parse::<Compression>().unwrap()),
+    )]
+    compress: Option<Compression>,
+
+    /// auto-compress attachment
+    #[arg(
+        long,
+        value_name = "SIZE",
+        conflicts_with_all = ["mime", "patch"],
+        long_help = wrapped_doc!("
+            Auto-compress attachments larger than a given size.
+
+            The value must be the file size limit in MB above which attachments
+            will be compressed.
+        ")
+    )]
+    auto_compress: Option<f64>,
+
     /// specify the MIME type
     #[arg(
         short,
         long,
-        conflicts_with = "patch",
+        conflicts_with_all = ["compress", "auto_compress", "patch"],
         long_help = wrapped_doc!("
             Specify the MIME type of the attachment.
 
@@ -33,7 +62,11 @@ struct Options {
     mime: Option<String>,
 
     /// attachment is a patch
-    #[arg(short, long, conflicts_with = "mime")]
+    #[arg(
+        short,
+        long,
+        conflicts_with_all = ["compress", "auto_compress", "mime"],
+    )]
     patch: bool,
 
     /// attachment is private
@@ -112,15 +145,11 @@ impl Command {
         let mut attachments = vec![];
         for file in &self.args.files {
             let mut attachment = CreateAttachment::new(file)?;
-            if let Some(value) = self.options.summary.as_ref() {
-                attachment.summary = value.clone()
-            }
-            if let Some(value) = self.options.comment.as_ref() {
-                attachment.comment = value.clone()
-            }
-            if let Some(value) = self.options.mime.as_ref() {
-                attachment.content_type = value.clone()
-            }
+            attachment.compress = self.options.compress;
+            attachment.auto_compress = self.options.auto_compress;
+            attachment.summary = self.options.summary.clone();
+            attachment.comment = self.options.comment.clone();
+            attachment.content_type = self.options.mime.clone();
             attachment.is_patch = self.options.patch;
             attachment.is_private = self.options.private;
             attachments.push(attachment);
