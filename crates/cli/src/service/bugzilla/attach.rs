@@ -44,6 +44,13 @@ struct Options {
 
             The value must be the file size limit in MB above which attachments
             will be compressed.
+
+            Examples modifying bug 10:
+            - auto-compress attachment using the default compression type and size limit
+            > bite at 10 path/to/file --auto-compress
+
+            - auto-compress attachment using zstd with 5MB size limit
+            > bite at 10 path/to/file --auto-compress 5 --compress zstd
         ")
     )]
     auto_compress: Option<f64>,
