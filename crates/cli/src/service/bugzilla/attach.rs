@@ -29,6 +29,21 @@ struct Options {
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(Compression::VARIANTS)
             .map(|s| s.parse::<Compression>().unwrap()),
+        long_help = wrapped_doc!("
+            Compress attachments.
+
+            The value must be the compression variant to use.
+
+            Examples modifying bug 10:
+            - compress attachment using the default compression type
+            > bite at 10 path/to/file --compress
+
+            - compress attachment using zstd
+            > bite at 10 path/to/file --compress zstd
+
+            Possible values: {}",
+            Compression::VARIANTS.join(", ")
+        )
     )]
     compress: Option<Compression>,
 
