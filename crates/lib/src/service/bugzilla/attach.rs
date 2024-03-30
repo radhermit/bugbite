@@ -26,7 +26,7 @@ pub enum Compression {
 }
 
 impl Compression {
-    fn run(&self, path: &Utf8Path, tempdir: &Path) -> crate::Result<String> {
+    fn run(&self, path: &Utf8Path, tempdir: &Utf8Path) -> crate::Result<String> {
         let file_name = path
             .file_name()
             .ok_or_else(|| Error::InvalidValue(format!("src missing file name: {path}")))?;
@@ -88,6 +88,7 @@ pub struct CreateAttachment {
     pub is_private: bool,
     pub compress: Option<Compression>,
     pub auto_compress: Option<f64>,
+    pub auto_truncate: Option<usize>,
 }
 
 // Try to detect data content type use `file` then via `infer, and finally falling back to
@@ -118,64 +119,96 @@ impl CreateAttachment {
             is_private: false,
             compress: None,
             auto_compress: None,
+            auto_truncate: None,
         })
+    }
+
+    /// Compress an attachment using a specified compression type.
+    pub fn compress(&mut self, compress: Compression) {
+        self.compress = Some(compress);
+    }
+
+    /// Conditionally compress an attachment if larger than a given size in MB.
+    pub fn auto_compress(&mut self, size: f64) {
+        self.auto_compress = Some(size);
+    }
+
+    /// Conditionally truncate a text attachment to the last count of lines.
+    ///
+    /// If the attachment MIME type does not match text/* this setting is ignored.
+    pub fn auto_truncate(&mut self, count: usize) {
+        // inject file size compression trigger if none was specified
+        if self.auto_compress.is_none() {
+            self.auto_compress = Some(1.0);
+        }
+        self.auto_truncate = Some(count);
     }
 
     fn build<S>(self, ids: &[S]) -> crate::Result<Attachment>
     where
         S: std::fmt::Display,
     {
-        let path = &self.path;
-        let file_name = path
+        let mut path = self.path;
+        let mut file_name = path
             .file_name()
+            .map(|s| s.to_string())
             .ok_or_else(|| Error::InvalidValue(format!("attachment missing file name: {path}")))?;
-        let data = fs::read(path)
+        let mut data = fs::read(&path)
             .map_err(|e| Error::InvalidValue(format!("failed reading attachment: {path}: {e}")))?;
-        let mime_type = get_mime_type(path, &data);
-
-        let mut attachment = Attachment {
-            ids: ids.iter().map(|s| s.to_string()).collect(),
-            data: Base64(data),
-            file_name: file_name.to_string(),
-            content_type: mime_type,
-            summary: self.summary.unwrap_or_else(|| file_name.to_string()),
-            comment: self.comment.unwrap_or_default(),
-            is_patch: self.is_patch,
-            is_private: self.is_private,
-        };
+        let mut mime_type = get_mime_type(&path, &data);
 
         // determine file size
-        let f = File::open(path)
-            .map_err(|e| Error::InvalidValue(format!("invalid attachment file: {path}: {e}")))?;
-        let metadata = f.metadata().unwrap();
-        let file_size = metadata.len();
-        let auto_compress = self
-            .auto_compress
-            .map(|x| x * 1e6 < file_size as f64)
-            .unwrap_or_default();
+        let auto_compress = |size: usize| -> bool {
+            self.auto_compress
+                .map(|x| x * 1e6 < size as f64)
+                .unwrap_or_default()
+        };
 
-        // compress the file if requested
-        if self.compress.is_some() || auto_compress {
+        // compress and/or truncate the file if requested
+        if self.compress.is_some() || auto_compress(data.len()) || self.auto_truncate.is_some() {
             let compress = self.compress.unwrap_or_default();
             let dir = tempfile::tempdir()
                 .map_err(|e| Error::InvalidValue(format!("failed acquiring temporary dir: {e}")))?;
-            let name = compress.run(path, dir.path())?;
-            let path = dir.path().join(&name);
-            let data = fs::read(&path).map_err(|e| {
-                Error::InvalidValue(format!("failed reading compressed attachment: {name}: {e}"))
-            })?;
-            let mime_type = get_mime_type(path, &data);
+            let dir_path = Utf8Path::from_path(dir.path())
+                .ok_or_else(|| Error::InvalidValue("non-unicode temporary dir path".to_string()))?;
 
-            // override attachment fields
-            attachment.data = Base64(data);
-            attachment.file_name = name.clone();
-            attachment.content_type = mime_type;
-            if attachment.summary == file_name {
-                attachment.summary = name.clone();
+            // optionally truncate text files
+            if let Some(count) = self.auto_truncate {
+                if mime_type.starts_with("text/") {
+                    path = dir_path.join(&file_name);
+                    let s = String::from_utf8(data).map_err(|e| {
+                        Error::InvalidValue(format!("invalid attachment file: {path}: {e}"))
+                    })?;
+                    let content: Vec<_> = s.lines().rev().take(count).collect();
+                    data = content.into_iter().rev().join("\n").into_bytes();
+                    fs::write(&path, &data).map_err(|e| {
+                        Error::InvalidValue(format!("failed writing truncated file: {e}"))
+                    })?;
+                }
+            }
+
+            if self.compress.is_some() || auto_compress(data.len()) {
+                file_name = compress.run(&path, dir_path)?;
+                let path = dir_path.join(&file_name);
+                data = fs::read(&path).map_err(|e| {
+                    Error::InvalidValue(format!(
+                        "failed reading compressed attachment: {file_name}: {e}"
+                    ))
+                })?;
+                mime_type = get_mime_type(path, &data);
             }
         }
 
-        Ok(attachment)
+        Ok(Attachment {
+            ids: ids.iter().map(|s| s.to_string()).collect(),
+            data: Base64(data),
+            content_type: mime_type,
+            file_name: file_name.clone(),
+            summary: self.summary.unwrap_or(file_name),
+            comment: self.comment.unwrap_or_default(),
+            is_patch: self.is_patch,
+            is_private: self.is_private,
+        })
     }
 }
 

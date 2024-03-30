@@ -58,7 +58,7 @@ struct Options {
             Auto-compress attachments larger than a given size.
 
             The value must be the file size limit in MB above which attachments
-            will be compressed.
+            will be compressed, defaulting to 1MB when not given.
 
             Examples modifying bug 10:
             - auto-compress attachment using the default compression type and size limit
@@ -70,11 +70,38 @@ struct Options {
     )]
     auto_compress: Option<f64>,
 
+    /// auto-truncate text attachment
+    #[arg(
+        long,
+        value_name = "LINES",
+        num_args = 0..=1,
+        default_missing_value = "1000",
+        conflicts_with_all = ["mime", "patch"],
+        long_help = wrapped_doc!("
+            Auto-truncate text attachments to a given number of lines.
+
+            The value must be the number of lines to which the file will be
+            truncated starting from the end, defaulting to 1000 lines when not
+            given.
+
+            This option works in coordination with --auto-compress using the
+            file size limit to trigger when a text file is truncated.
+
+            Examples modifying bug 10:
+            - auto-truncate to 1000 lines
+            > bite at 10 path/to/file.txt --auto-truncate
+
+            - auto-truncate to 5000 lines and compress attachment using zstd
+            > bite at 10 path/to/file --auto-truncate 5000 --compress zstd
+        ")
+    )]
+    auto_truncate: Option<usize>,
+
     /// specify the MIME type
     #[arg(
         short,
         long,
-        conflicts_with_all = ["compress", "auto_compress", "patch"],
+        conflicts_with_all = ["compress", "auto_compress", "auto_truncate", "patch"],
         long_help = wrapped_doc!("
             Specify the MIME type of the attachment.
 
@@ -89,7 +116,7 @@ struct Options {
     #[arg(
         short,
         long,
-        conflicts_with_all = ["compress", "auto_compress", "mime"],
+        conflicts_with_all = ["compress", "auto_compress", "auto_truncate", "mime"],
     )]
     patch: bool,
 
@@ -169,13 +196,22 @@ impl Command {
         let mut attachments = vec![];
         for file in &self.args.files {
             let mut attachment = CreateAttachment::new(file)?;
-            attachment.compress = self.options.compress;
-            attachment.auto_compress = self.options.auto_compress;
             attachment.summary = self.options.summary.clone();
             attachment.comment = self.options.comment.clone();
             attachment.content_type = self.options.mime.clone();
             attachment.is_patch = self.options.patch;
             attachment.is_private = self.options.private;
+
+            if let Some(value) = self.options.compress {
+                attachment.compress(value);
+            }
+            if let Some(value) = self.options.auto_compress {
+                attachment.auto_compress(value);
+            }
+            if let Some(value) = self.options.auto_truncate {
+                attachment.auto_truncate(value);
+            }
+
             attachments.push(attachment);
         }
 
