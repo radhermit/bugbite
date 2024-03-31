@@ -317,6 +317,10 @@ pub(super) struct Command {
     )]
     browser: bool,
 
+    /// skip service interaction
+    #[arg(short = 'n', long)]
+    dry_run: bool,
+
     #[clap(flatten)]
     params: Params,
 }
@@ -381,7 +385,7 @@ impl Command {
         if self.browser {
             let url = client.search_url(query)?;
             launch_browser([url])?;
-        } else {
+        } else if !self.dry_run {
             let issues = client.search(query).await?;
             render_search(issues, fields)?;
         }
