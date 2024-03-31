@@ -376,7 +376,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    keywords: Option<ExistsOrValues<MaybeStdinVec<Match>>>,
+    keywords: Option<Vec<ExistsOrValues<MaybeStdinVec<Match>>>>,
 
     /// restrict by OS
     #[arg(long, value_name = "VALUE")]
@@ -1064,10 +1064,16 @@ impl Command {
             });
         }
         if let Some(values) = params.attr.keywords {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Keywords, value),
-                ExistsOrValues::Values(values) => query.keywords(values.into_iter().flatten()),
-            }
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Keywords, value),
+                        ExistsOrValues::Values(values) => query.and(|query| {
+                            values.into_iter().flatten().for_each(|x| query.keywords(x))
+                        }),
+                    }
+                }
+            });
         }
         if let Some(values) = params.user.cc {
             query.or(|query| {

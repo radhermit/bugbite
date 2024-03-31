@@ -552,12 +552,9 @@ impl QueryBuilder<'_> {
         self.advanced_field("bug_group", value.op, value)
     }
 
-    pub fn keywords<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("AND", "keywords", values)
+    pub fn keywords<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("keywords", value.op, value)
     }
 
     pub fn cc<V: Into<Match>>(&mut self, value: V) {
