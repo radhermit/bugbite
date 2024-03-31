@@ -44,6 +44,15 @@ impl<T: fmt::Display + FromStr> fmt::Display for Csv<T> {
     }
 }
 
+impl<T: fmt::Display + FromStr> IntoIterator for Csv<T> {
+    type Item = T;
+    type IntoIter = std::vec::IntoIter<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.values.into_iter()
+    }
+}
+
 impl<T: fmt::Display + FromStr> Deref for Csv<T> {
     type Target = [T];
 
