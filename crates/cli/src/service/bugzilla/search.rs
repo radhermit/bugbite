@@ -325,7 +325,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    flags: Option<ExistsOrValues<MaybeStdinVec<Match>>>,
+    flags: Option<Vec<ExistsOrValues<MaybeStdinVec<String>>>>,
 
     /// restrict by group
     #[arg(
@@ -1020,10 +1020,16 @@ impl Command {
             query.summary(values.into_iter().flatten());
         }
         if let Some(values) = params.attr.flags {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, value),
-                ExistsOrValues::Values(values) => query.flags(values.into_iter().flatten()),
-            }
+            query.or(|query| {
+                for value in &values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().flatten().for_each(|x| query.flags(x)))
+                        }
+                    }
+                }
+            });
         }
         if let Some(values) = params.attr.groups {
             match values {

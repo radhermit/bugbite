@@ -587,12 +587,9 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn flags<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "flagtypes.name", values)
+    pub fn flags<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("flagtypes.name", value.op, value)
     }
 
     pub fn groups<I, S>(&mut self, values: I)
