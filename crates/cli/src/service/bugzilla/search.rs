@@ -732,7 +732,7 @@ struct UserOptions {
 
     /// user created attachment
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
-    attachers: Option<Vec<Match>>,
+    attacher: Option<Vec<Match>>,
 
     /// user in the CC list
     #[arg(
@@ -745,11 +745,11 @@ struct UserOptions {
 
     /// user who commented
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
-    commenters: Option<Vec<Match>>,
+    commenter: Option<Vec<Match>>,
 
     /// user who set a flag
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
-    flaggers: Option<Vec<Match>>,
+    flagger: Option<Vec<Match>>,
 
     /// user is the QA contact
     #[arg(
@@ -896,14 +896,14 @@ impl Command {
         if let Some(values) = params.query.order {
             query.order(values)?;
         }
-        if let Some(values) = params.user.attachers {
-            query.attachers(values);
+        if let Some(values) = params.user.attacher {
+            query.attacher(values);
         }
-        if let Some(values) = params.user.commenters {
-            query.commenters(values);
+        if let Some(values) = params.user.commenter {
+            query.commenter(values);
         }
-        if let Some(values) = params.user.flaggers {
-            query.flaggers(values);
+        if let Some(values) = params.user.flagger {
+            query.flagger(values);
         }
         if let Some(values) = params.attr.custom_fields {
             query.custom_fields(values.into_iter().tuples());

@@ -343,7 +343,7 @@ impl QueryBuilder<'_> {
         self.insert("quicksearch", value);
     }
 
-    pub fn attachers<I, S>(&mut self, values: I)
+    pub fn attacher<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
         S: Into<Match>,
@@ -351,7 +351,7 @@ impl QueryBuilder<'_> {
         self.op_field("AND", "attachments.submitter", values)
     }
 
-    pub fn commenters<I, S>(&mut self, values: I)
+    pub fn commenter<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
         S: Into<Match>,
@@ -359,7 +359,7 @@ impl QueryBuilder<'_> {
         self.op_field("AND", "commenter", values)
     }
 
-    pub fn flaggers<I, S>(&mut self, values: I)
+    pub fn flagger<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
         S: Into<Match>,
