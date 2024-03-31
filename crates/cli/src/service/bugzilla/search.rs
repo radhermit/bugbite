@@ -12,7 +12,6 @@ use bugbite::service::bugzilla::{
 use bugbite::time::TimeDelta;
 use bugbite::traits::WebClient;
 use camino::Utf8PathBuf;
-use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};
 use crossterm::style::Stylize;
 use itertools::Itertools;
@@ -631,11 +630,7 @@ struct QueryOptions {
         short,
         long,
         value_name = "FIELD[,...]",
-        value_delimiter = ',',
         default_value = "id,summary",
-        hide_possible_values = true,
-        value_parser = PossibleValuesParser::new(BugField::VARIANTS)
-            .map(|s| s.parse::<BugField>().unwrap()),
         long_help = wrapped_doc!("
             Restrict the data fields returned by the query.
 
@@ -648,7 +643,7 @@ struct QueryOptions {
             BugField::VARIANTS.join(", ")
         )
     )]
-    fields: Vec<BugField>,
+    fields: Csv<BugField>,
 
     /// limit the number of results
     #[arg(
@@ -669,7 +664,6 @@ struct QueryOptions {
         short,
         long,
         value_name = "FIELD[,...]",
-        value_delimiter = ',',
         long_help = wrapped_doc!("
             Perform server-side sorting on the query.
 
@@ -697,7 +691,7 @@ struct QueryOptions {
             OrderField::VARIANTS.join(", ")
         )
     )]
-    order: Option<Vec<Order<OrderField>>>,
+    order: Option<Csv<Order<OrderField>>>,
 
     /// search using quicksearch syntax
     #[arg(
