@@ -231,16 +231,9 @@ impl QueryBuilder<'_> {
         self.op_field("OR", "alias", values)
     }
 
-    pub fn assignee<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        let values: Vec<_> = values
-            .into_iter()
-            .map(|x| x.into().replace_user_alias(self.service))
-            .collect();
-        self.op_field("AND", "assigned_to", values);
+    pub fn assignee<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into().replace_user_alias(self.service);
+        self.advanced_field("assigned_to", value.op, value);
     }
 
     /// Search for attachments with matching descriptions or filenames.
@@ -264,20 +257,14 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), "CP");
     }
 
-    pub fn qa<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "qa_contact", values);
+    pub fn qa<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("qa_contact", value.op, value);
     }
 
-    pub fn reporter<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("AND", "reporter", values);
+    pub fn reporter<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into().replace_user_alias(self.service);
+        self.advanced_field("reporter", value.op, value);
     }
 
     pub fn resolution<I, S>(&mut self, values: I)
@@ -349,28 +336,19 @@ impl QueryBuilder<'_> {
         self.insert("quicksearch", value);
     }
 
-    pub fn attacher<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("AND", "attachments.submitter", values)
+    pub fn attacher<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into().replace_user_alias(self.service);
+        self.advanced_field("attachments.submitter", value.op, value);
     }
 
-    pub fn commenter<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("AND", "commenter", values)
+    pub fn commenter<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into().replace_user_alias(self.service);
+        self.advanced_field("commenter", value.op, value);
     }
 
-    pub fn flagger<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("AND", "setters.login_name", values)
+    pub fn flagger<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into().replace_user_alias(self.service);
+        self.advanced_field("setters.login_name", value.op, value);
     }
 
     pub fn url<I, S>(&mut self, values: I)
@@ -690,16 +668,9 @@ impl QueryBuilder<'_> {
         self.op_field("AND", "keywords", values)
     }
 
-    pub fn cc<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        let values: Vec<_> = values
-            .into_iter()
-            .map(|x| x.into().replace_user_alias(self.service))
-            .collect();
-        self.op_field("AND", "cc", values)
+    pub fn cc<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into().replace_user_alias(self.service);
+        self.advanced_field("cc", value.op, value);
     }
 
     pub fn fields<I, F>(&mut self, fields: I)

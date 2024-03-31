@@ -884,7 +884,7 @@ impl Command {
         if let Some(values) = params.user.assignee {
             query.or(|query| {
                 for value in &values {
-                    query.assignee(value.split(','));
+                    query.and(|query| value.split(',').for_each(|x| query.assignee(x)))
                 }
             });
         }
@@ -903,21 +903,21 @@ impl Command {
         if let Some(values) = params.user.attacher {
             query.or(|query| {
                 for value in &values {
-                    query.attacher(value.split(','));
+                    query.and(|query| value.split(',').for_each(|x| query.attacher(x)))
                 }
             });
         }
         if let Some(values) = params.user.commenter {
             query.or(|query| {
                 for value in &values {
-                    query.commenter(value.split(','));
+                    query.and(|query| value.split(',').for_each(|x| query.commenter(x)))
                 }
             });
         }
         if let Some(values) = params.user.flagger {
             query.or(|query| {
                 for value in &values {
-                    query.flagger(value.split(','));
+                    query.and(|query| value.split(',').for_each(|x| query.flagger(x)))
                 }
             });
         }
@@ -954,7 +954,7 @@ impl Command {
         if let Some(values) = params.user.reporter {
             query.or(|query| {
                 for value in &values {
-                    query.reporter(value.split(','));
+                    query.and(|query| value.split(',').for_each(|x| query.reporter(x)))
                 }
             });
         }
@@ -1035,7 +1035,9 @@ impl Command {
                 for value in &values {
                     match value {
                         ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, *value),
-                        ExistsOrValues::Values(values) => query.cc(values),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.cc(x)))
+                        }
                     }
                 }
             });
@@ -1045,7 +1047,9 @@ impl Command {
                 for value in &values {
                     match value {
                         ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, *value),
-                        ExistsOrValues::Values(values) => query.qa(values),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.qa(x)))
+                        }
                     }
                 }
             });
