@@ -246,7 +246,7 @@ struct AttributeOptions {
             - blocked on 10 or 11
             > bite s --blocks 10 --blocks 11
 
-            Values can also use a `-` prefix to search for non-blockers.
+            Values can use the `-` prefix to search for non-blockers.
 
             Examples:
             - isn't blocked on 10
@@ -303,7 +303,7 @@ struct AttributeOptions {
             - depends on 10 or 11
             > bite s --depends 10 --depends 11
 
-            Values can also use a `-` prefix to search for non-dependencies.
+            Values can use the `-` prefix to search for non-dependencies.
 
             Examples:
             - doesn't depend on 10
@@ -340,22 +340,25 @@ struct AttributeOptions {
     /// restrict by ID
     #[arg(
         long,
-        num_args = 1,
-        value_delimiter = ',',
-        value_name = "ID[,...]",
         long_help = wrapped_doc!("
             Restrict by ID.
 
-            Values must be valid identifiers for bugs and multiple values can be
-            specified in a comma-separated list, matching if any of the IDs
-            match.
+            Regular values search for exact bug identifiers and multiple values
+            can be specified in multiple options for logical OR.
 
             Examples:
             - ID equal to 10
             > bite s --id 10
 
             - IDs 10 or 20
-            > bite s --id 10,20
+            > bite s --id 10 --id 20
+
+            Values can use the `-` prefix to search for identifiers not equal to
+            the value.
+
+            Examples:
+            - all bugs except 10
+            > bite s --id=-10
 
             Values are taken from standard input when `-`.
 
@@ -364,7 +367,7 @@ struct AttributeOptions {
             > cat file | bite s --id -
         ")
     )]
-    id: Option<Vec<MaybeStdinVec<u64>>>,
+    id: Option<Vec<MaybeStdinVec<i64>>>,
 
     /// restrict by keyword
     #[arg(
@@ -1011,7 +1014,7 @@ impl Command {
             }
         }
         if let Some(values) = params.attr.id {
-            query.id(values.into_iter().flatten());
+            query.or(|query| values.into_iter().flatten().for_each(|x| query.id(x)))
         }
         if let Some(values) = params.comment {
             query.comment(values.into_iter().flatten());

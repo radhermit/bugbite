@@ -87,13 +87,6 @@ pub struct Match {
 }
 
 impl Match {
-    fn equals<S: fmt::Display>(value: S) -> Self {
-        Self {
-            op: MatchOp::Equals,
-            value: value.to_string(),
-        }
-    }
-
     /// Substitute user alias for matching value.
     fn replace_user_alias(mut self, service: &super::Service) -> Self {
         if let Some(user) = service.user() {
@@ -180,11 +173,12 @@ impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
 }
 
 impl QueryBuilder<'_> {
-    pub fn id<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = u64>,
-    {
-        self.op_field("OR", "bug_id", values.into_iter().map(Match::equals));
+    pub fn id(&mut self, value: i64) {
+        if value >= 0 {
+            self.advanced_field("bug_id", "equals", value);
+        } else {
+            self.advanced_field("bug_id", "notequals", value.abs());
+        }
     }
 
     pub fn alias<V: Into<Match>>(&mut self, value: V) {
