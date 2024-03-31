@@ -222,12 +222,9 @@ impl QueryBuilder<'_> {
         self.advanced_field("reporter", value.op, value);
     }
 
-    pub fn resolution<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "resolution", values);
+    pub fn resolution<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("resolution", value.op, value);
     }
 
     pub fn comment<I, S>(&mut self, values: I)
@@ -416,20 +413,14 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn priority<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "priority", values);
+    pub fn priority<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("priority", value.op, value);
     }
 
-    pub fn severity<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "bug_severity", values);
+    pub fn severity<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("bug_severity", value.op, value);
     }
 
     pub fn status<I, S>(&mut self, values: I)
@@ -456,44 +447,29 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn version<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "version", values);
+    pub fn version<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("version", value.op, value);
     }
 
-    pub fn component<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "component", values)
+    pub fn component<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("component", value.op, value);
     }
 
-    pub fn product<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "product", values);
+    pub fn product<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("product", value.op, value);
     }
 
-    pub fn platform<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "platform", values);
+    pub fn platform<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("platform", value.op, value);
     }
 
-    pub fn os<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "op_sys", values);
+    pub fn os<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("op_sys", value.op, value);
     }
 
     pub fn see_also<I, S>(&mut self, values: I)
@@ -512,20 +488,14 @@ impl QueryBuilder<'_> {
         self.op_field("OR", "tag", values);
     }
 
-    pub fn target<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "target_milestone", values);
+    pub fn target<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("target_milestone", value.op, value);
     }
 
-    pub fn whiteboard<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "whiteboard", values);
+    pub fn whiteboard<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("whiteboard", value.op, value);
     }
 
     pub fn votes<I>(&mut self, values: I)

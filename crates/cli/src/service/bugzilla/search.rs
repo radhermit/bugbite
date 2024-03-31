@@ -489,7 +489,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    whiteboard: Option<ExistsOrValues<Match>>,
+    whiteboard: Option<Vec<ExistsOrValues<Match>>>,
 }
 
 #[derive(Debug, Args)]
@@ -921,25 +921,25 @@ impl Command {
             query.custom_fields(values.into_iter().tuples());
         }
         if let Some(values) = params.attr.priority {
-            query.priority(values);
+            query.or(|query| values.into_iter().for_each(|x| query.priority(x)));
         }
         if let Some(values) = params.attr.severity {
-            query.severity(values);
+            query.or(|query| values.into_iter().for_each(|x| query.severity(x)));
         }
         if let Some(values) = params.attr.version {
-            query.version(values);
+            query.or(|query| values.into_iter().for_each(|x| query.version(x)));
         }
         if let Some(values) = params.attr.component {
-            query.component(values);
+            query.or(|query| values.into_iter().for_each(|x| query.component(x)));
         }
         if let Some(values) = params.attr.product {
-            query.product(values);
+            query.or(|query| values.into_iter().for_each(|x| query.product(x)));
         }
         if let Some(values) = params.attr.platform {
-            query.platform(values);
+            query.or(|query| values.into_iter().for_each(|x| query.platform(x)));
         }
         if let Some(values) = params.attr.os {
-            query.os(values);
+            query.or(|query| values.into_iter().for_each(|x| query.os(x)));
         }
         if let Some(values) = params.attr.see_also {
             match values {
@@ -955,7 +955,7 @@ impl Command {
             });
         }
         if let Some(values) = params.attr.resolution {
-            query.resolution(values);
+            query.or(|query| values.into_iter().for_each(|x| query.resolution(x)));
         }
         if let Some(values) = params.attr.status {
             query.status(values);
@@ -967,13 +967,21 @@ impl Command {
             }
         }
         if let Some(values) = params.attr.target {
-            query.target(values);
+            query.or(|query| values.into_iter().for_each(|x| query.target(x)));
         }
         if let Some(values) = params.attr.whiteboard {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Whiteboard, value),
-                ExistsOrValues::Values(values) => query.whiteboard(values),
-            }
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => {
+                            query.exists(ExistsField::Whiteboard, value)
+                        }
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.whiteboard(x)))
+                        }
+                    }
+                }
+            });
         }
         if let Some(values) = params.attr.url {
             match values {
