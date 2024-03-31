@@ -6,7 +6,7 @@ use bugbite::client::bugzilla::Client;
 use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::bugzilla::{
-    search::{ChangeField, EnabledOrDisabled, ExistsField, Match, OrderField},
+    search::{ChangeField, ExistsField, Match, OrderField},
     BugField,
 };
 use bugbite::time::TimeDelta;
@@ -240,15 +240,11 @@ struct AttributeOptions {
             - blocked on 10 and 11
             > bite s --blocks 10,11
 
-            Values can also use `-` or `+` prefixes to manipulate blocker
-            existence for the query.
+            Values can also use a `-` prefix to search for non-blockers.
 
             Examples:
             - isn't blocked on 10
             > bite s --blocks=-10
-
-            - blocked on 10 and 11
-            > bite s --blocks +10,11
 
             - blocked on 10 but not 11
             > bite s --blocks 10,-11
@@ -256,7 +252,7 @@ struct AttributeOptions {
             Values are taken from standard input when `-`.
         ")
     )]
-    blocks: Option<ExistsOrValues<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
+    blocks: Option<ExistsOrValues<MaybeStdinVec<i64>>>,
 
     /// restrict by component
     #[arg(short = 'C', long, value_delimiter = ',')]
@@ -298,15 +294,11 @@ struct AttributeOptions {
             - depends on 10 and 11
             > bite s --depends 10,11
 
-            Values can also use `-` or `+` prefixes to manipulate dependency
-            existence for the query.
+            Values can also use a `-` prefix to search for non-dependencies.
 
             Examples:
             - doesn't depend on 10
             > bite s --depends=-10
-
-            - depends on 10 and 11
-            > bite s --depends +10,11
 
             - depends on 10 but not 11
             > bite s --depends 10,-11
@@ -314,7 +306,7 @@ struct AttributeOptions {
             Values are taken from standard input when `-`.
         ")
     )]
-    depends: Option<ExistsOrValues<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
+    depends: Option<ExistsOrValues<MaybeStdinVec<i64>>>,
 
     /// restrict by flag
     #[arg(

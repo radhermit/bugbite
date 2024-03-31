@@ -53,6 +53,12 @@ impl Api for u64 {
     }
 }
 
+impl Api for i64 {
+    fn api(&self) -> String {
+        self.to_string()
+    }
+}
+
 impl<T: Api> Api for &T {
     fn api(&self) -> String {
         (*self).api()

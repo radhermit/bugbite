@@ -154,42 +154,6 @@ impl From<&String> for Match {
     }
 }
 
-#[derive(Debug, Clone)]
-pub enum EnabledOrDisabled<T> {
-    Enabled(T),
-    Disabled(T),
-}
-
-impl<T> FromStr for EnabledOrDisabled<T>
-where
-    T: FromStr,
-    <T as FromStr>::Err: std::fmt::Display,
-{
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some(value) = s.strip_prefix('-') {
-            Ok(Self::Disabled(value.parse().map_err(|e| {
-                Error::InvalidValue(format!("failed parsing: {e}"))
-            })?))
-        } else if let Some(value) = s.strip_prefix('+') {
-            Ok(Self::Enabled(value.parse().map_err(|e| {
-                Error::InvalidValue(format!("failed parsing: {e}"))
-            })?))
-        } else {
-            Ok(Self::Enabled(s.parse().map_err(|e| {
-                Error::InvalidValue(format!("failed parsing: {e}"))
-            })?))
-        }
-    }
-}
-
-impl From<u64> for EnabledOrDisabled<u64> {
-    fn from(value: u64) -> Self {
-        Self::Enabled(value)
-    }
-}
-
 /// Construct a search query.
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
@@ -610,36 +574,28 @@ impl QueryBuilder<'_> {
         self.insert(format!("o{num}"), status);
     }
 
-    pub fn blocks<I, V>(&mut self, values: I)
+    pub fn blocks<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = V>,
-        V: Into<EnabledOrDisabled<u64>>,
+        I: IntoIterator<Item = i64>,
     {
         for value in values {
-            match value.into() {
-                EnabledOrDisabled::Enabled(value) => {
-                    self.advanced_field("blocked", "equals", value)
-                }
-                EnabledOrDisabled::Disabled(value) => {
-                    self.advanced_field("blocked", "notequals", value)
-                }
+            if value >= 0 {
+                self.advanced_field("blocked", "equals", value)
+            } else {
+                self.advanced_field("blocked", "notequals", value.abs())
             }
         }
     }
 
-    pub fn depends<I, V>(&mut self, values: I)
+    pub fn depends<I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = V>,
-        V: Into<EnabledOrDisabled<u64>>,
+        I: IntoIterator<Item = i64>,
     {
         for value in values {
-            match value.into() {
-                EnabledOrDisabled::Enabled(value) => {
-                    self.advanced_field("dependson", "equals", value)
-                }
-                EnabledOrDisabled::Disabled(value) => {
-                    self.advanced_field("dependson", "notequals", value)
-                }
+            if value >= 0 {
+                self.advanced_field("dependson", "equals", value)
+            } else {
+                self.advanced_field("dependson", "notequals", value.abs())
             }
         }
     }
