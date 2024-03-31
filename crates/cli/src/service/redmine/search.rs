@@ -16,14 +16,13 @@ use crate::service::args::ExistsOrValues;
 use crate::service::output::render_search;
 use crate::utils::{launch_browser, wrapped_doc};
 
-/// Available search parameters.
 #[derive(Debug, Args)]
-struct Params {
+#[clap(next_help_heading = "Query options")]
+struct QueryOptions {
     /// fields to output
     #[arg(
         short,
         long,
-        help_heading = "Search options",
         value_name = "FIELD[,...]",
         value_delimiter = ',',
         default_value = "id,subject",
@@ -48,7 +47,6 @@ struct Params {
     #[arg(
         short,
         long,
-        help_heading = "Search options",
         long_help = wrapped_doc!("
             Limit the number of results.
 
@@ -66,7 +64,6 @@ struct Params {
         long,
         value_name = "FIELD[,...]",
         value_delimiter = ',',
-        help_heading = "Search options",
         long_help = wrapped_doc!("
             Perform server-side sorting on the query.
 
@@ -85,7 +82,11 @@ struct Params {
         )
     )]
     order: Option<Vec<Order<OrderField>>>,
+}
 
+#[derive(Debug, Args)]
+#[clap(next_help_heading = "Attribute options")]
+struct AttributeOptions {
     /// restrict by assignee status
     #[arg(
         short,
@@ -94,7 +95,6 @@ struct Params {
         default_missing_value = "true",
         hide_possible_values = true,
         value_name = "BOOL",
-        help_heading = "Attribute options",
         long_help = wrapped_doc!("
             Restrict by assignee status.
 
@@ -116,7 +116,6 @@ struct Params {
     #[arg(
         long,
         num_args = 0..=1,
-        help_heading = "Attribute options",
         value_name = "VALUE[,...]",
         default_missing_value = "true",
         long_help = wrapped_doc!(r#"
@@ -155,7 +154,6 @@ struct Params {
         short = 'B',
         long,
         num_args = 0..=1,
-        help_heading = "Attribute options",
         value_name = "ID[,...]",
         default_missing_value = "true",
         long_help = wrapped_doc!("
@@ -193,7 +191,6 @@ struct Params {
         short = 'D',
         long,
         num_args = 0..=1,
-        help_heading = "Attribute options",
         value_name = "ID[,...]",
         default_missing_value = "true",
         long_help = wrapped_doc!("
@@ -231,7 +228,6 @@ struct Params {
         short = 'R',
         long,
         num_args = 0..=1,
-        help_heading = "Attribute options",
         value_name = "ID[,...]",
         default_missing_value = "true",
         long_help = wrapped_doc!("
@@ -265,34 +261,45 @@ struct Params {
     relates: Option<ExistsOrValues<MaybeStdinVec<u64>>>,
 
     /// restrict by ID
-    #[arg(
-        long,
-        help_heading = "Attribute options",
-        value_name = "ID[,...]",
-        value_delimiter = ','
-    )]
+    #[arg(long, value_name = "ID[,...]", value_delimiter = ',')]
     id: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// restrict by status
     #[arg(
         short,
         long,
-        help_heading = "Attribute options",
         value_parser = ["open", "closed", "all"],
     )]
     status: Option<String>,
+}
 
+#[derive(Debug, Args)]
+#[clap(next_help_heading = "Time options")]
+struct TimeOptions {
     /// restrict by creation time
-    #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
+    #[arg(short, long, value_name = "TIME")]
     created: Option<RangeOrValue<TimeDelta>>,
 
     /// restrict by modification time
-    #[arg(short, long, value_name = "TIME", help_heading = "Time options")]
+    #[arg(short, long, value_name = "TIME")]
     modified: Option<RangeOrValue<TimeDelta>>,
 
     /// restrict by closed time
-    #[arg(short = 'C', long, value_name = "TIME", help_heading = "Time options")]
+    #[arg(short = 'C', long, value_name = "TIME")]
     closed: Option<RangeOrValue<TimeDelta>>,
+}
+
+/// Available search parameters.
+#[derive(Debug, Args)]
+struct Params {
+    #[clap(flatten)]
+    query: QueryOptions,
+
+    #[clap(flatten)]
+    attr: AttributeOptions,
+
+    #[clap(flatten)]
+    time: TimeOptions,
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
@@ -323,58 +330,58 @@ impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut query = client.service().search_query();
         let params = self.params;
-        if let Some(value) = params.assignee {
+        if let Some(value) = params.attr.assignee {
             query.assignee(value);
         }
-        if let Some(values) = params.attachments {
+        if let Some(values) = params.attr.attachments {
             match values {
                 ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachment, value),
                 ExistsOrValues::Values(values) => query.attachments(values.into_iter()),
             }
         }
-        if let Some(values) = params.blocks {
+        if let Some(values) = params.attr.blocks {
             match values {
                 ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
                 ExistsOrValues::Values(values) => query.blocks(values.into_iter().flatten()),
             }
         }
-        if let Some(values) = params.blocked {
+        if let Some(values) = params.attr.blocked {
             match values {
                 ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocked, value),
                 ExistsOrValues::Values(values) => query.blocked(values.into_iter().flatten()),
             }
         }
-        if let Some(values) = params.relates {
+        if let Some(values) = params.attr.relates {
             match values {
                 ExistsOrValues::Exists(value) => query.exists(ExistsField::Relates, value),
                 ExistsOrValues::Values(values) => query.relates(values.into_iter().flatten()),
             }
         }
-        if let Some(values) = params.id {
+        if let Some(values) = params.attr.id {
             query.id(values.into_iter().flatten());
         }
-        if let Some(value) = params.limit {
+        if let Some(value) = params.query.limit {
             query.limit(value);
         }
-        if let Some(values) = params.order {
+        if let Some(values) = params.query.order {
             query.order(values)?;
         }
-        if let Some(value) = params.status.as_ref() {
+        if let Some(value) = params.attr.status.as_ref() {
             query.status(value)?;
         }
-        if let Some(value) = params.closed.as_ref() {
+        if let Some(value) = params.time.closed.as_ref() {
             query.closed(value);
         }
-        if let Some(value) = params.created.as_ref() {
+        if let Some(value) = params.time.created.as_ref() {
             query.created(value);
         }
-        if let Some(value) = params.modified.as_ref() {
+        if let Some(value) = params.time.modified.as_ref() {
             query.modified(value);
         }
         if let Some(values) = params.summary.as_ref() {
             query.summary(values.iter().flatten());
         }
-        let fields = &params.fields;
+        let fields = &params.query.fields;
 
         if self.browser {
             let url = client.search_url(query)?;
