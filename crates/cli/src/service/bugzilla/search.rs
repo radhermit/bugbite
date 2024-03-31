@@ -461,7 +461,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    tags: Option<ExistsOrValues<Match>>,
+    tags: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by target milestone
     #[arg(short = 'T', long, value_name = "VALUE")]
@@ -967,10 +967,16 @@ impl Command {
             query.status(values);
         }
         if let Some(values) = params.attr.tags {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Tags, value),
-                ExistsOrValues::Values(values) => query.tags(values),
-            }
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Tags, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.tags(x)))
+                        }
+                    }
+                }
+            });
         }
         if let Some(values) = params.attr.target {
             query.or(|query| values.into_iter().for_each(|x| query.target(x)));
