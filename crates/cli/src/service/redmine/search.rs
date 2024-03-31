@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::args::MaybeStdinVec;
+use bugbite::args::{Csv, MaybeStdinVec};
 use bugbite::client::redmine::Client;
 use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
@@ -8,7 +8,6 @@ use bugbite::service::redmine::search::{ExistsField, OrderField};
 use bugbite::service::redmine::IssueField;
 use bugbite::time::TimeDelta;
 use bugbite::traits::WebClient;
-use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
 
@@ -24,11 +23,7 @@ struct QueryOptions {
         short,
         long,
         value_name = "FIELD[,...]",
-        value_delimiter = ',',
         default_value = "id,subject",
-        hide_possible_values = true,
-        value_parser = PossibleValuesParser::new(IssueField::VARIANTS)
-                .map(|s| s.parse::<IssueField>().unwrap()),
         long_help = wrapped_doc!("
             Restrict the data fields returned by the query.
 
@@ -41,7 +36,7 @@ struct QueryOptions {
             IssueField::VARIANTS.join(", ")
         )
     )]
-    fields: Vec<IssueField>,
+    fields: Csv<IssueField>,
 
     /// limit the number of results
     #[arg(
