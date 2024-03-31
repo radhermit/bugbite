@@ -118,15 +118,18 @@ struct AttributeOptions {
             > bite s --alias false
 
             Regular values search for matching substrings and multiple values
-            can be specified in a comma-separated list, matching if any of the
-            specified values match.
+            can be specified in a comma-separated list for logical AND or
+            multiple options for logical OR.
 
             Examples:
             - contains `value`
             > bite s --alias value
 
-            - contains `value1` or `value2`
+            - contains `value1` and `value2`
             > bite s --alias value1,value1
+
+            - contains `value1` or `value2`
+            > bite s --alias value1 --alias value1
 
             Values can use match operator prefixes to alter their query
             application. Note that some operators may need to be escaped when
@@ -149,7 +152,7 @@ struct AttributeOptions {
             > bite s --alias !r#test?.+
         "#)
     )]
-    alias: Option<ExistsOrValues<Match>>,
+    alias: Option<Vec<ExistsOrValues<String>>>,
 
     /// restrict by attachments
     #[arg(
@@ -990,10 +993,16 @@ impl Command {
             query.comments(values);
         }
         if let Some(values) = params.attr.alias {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Alias, value),
-                ExistsOrValues::Values(values) => query.alias(values),
-            }
+            query.or(|query| {
+                for value in &values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Alias, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.alias(x)))
+                        }
+                    }
+                }
+            });
         }
         if let Some(values) = params.attr.attachments {
             match values {

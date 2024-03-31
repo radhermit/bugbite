@@ -187,12 +187,9 @@ impl QueryBuilder<'_> {
         self.op_field("OR", "bug_id", values.into_iter().map(Match::equals));
     }
 
-    pub fn alias<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "alias", values)
+    pub fn alias<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("alias", value.op, value);
     }
 
     pub fn assignee<V: Into<Match>>(&mut self, value: V) {
