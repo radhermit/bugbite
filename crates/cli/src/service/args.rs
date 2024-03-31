@@ -17,9 +17,9 @@ where
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "true" => Ok(ExistsOrValues::Exists(true)),
-            "false" => Ok(ExistsOrValues::Exists(false)),
-            value => Ok(ExistsOrValues::Values(
+            "true" => Ok(Self::Exists(true)),
+            "false" => Ok(Self::Exists(false)),
+            value => Ok(Self::Values(
                 value
                     .split(',')
                     .map(|x| {
