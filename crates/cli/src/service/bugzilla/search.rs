@@ -964,7 +964,7 @@ impl Command {
             query.or(|query| values.into_iter().for_each(|x| query.resolution(x)));
         }
         if let Some(values) = params.attr.status {
-            query.status(values);
+            query.or(|query| values.into_iter().for_each(|x| query.status(x)));
         }
         if let Some(values) = params.attr.tags {
             query.or(|query| {

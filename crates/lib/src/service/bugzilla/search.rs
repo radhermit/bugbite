@@ -420,25 +420,19 @@ impl QueryBuilder<'_> {
         self.advanced_field("bug_severity", value.op, value);
     }
 
-    pub fn status<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: AsRef<str>,
-    {
+    pub fn status<S: AsRef<str>>(&mut self, value: S) {
         // don't set status by default
         self.defaults.insert("status".to_string());
 
-        for value in values {
-            match value.as_ref() {
-                "@open" => self.append("bug_status", "__open__"),
-                "@closed" => self.append("bug_status", "__closed__"),
-                "@all" => self.append("bug_status", "__all__"),
-                value => {
-                    if let Some(value) = value.strip_prefix('!') {
-                        self.advanced_field("bug_status", "notequals", value)
-                    } else {
-                        self.advanced_field("bug_status", "equals", value)
-                    }
+        match value.as_ref() {
+            "@open" => self.append("bug_status", "__open__"),
+            "@closed" => self.append("bug_status", "__closed__"),
+            "@all" => self.append("bug_status", "__all__"),
+            value => {
+                if let Some(value) = value.strip_prefix('!') {
+                    self.advanced_field("bug_status", "notequals", value)
+                } else {
+                    self.advanced_field("bug_status", "equals", value)
                 }
             }
         }
@@ -726,7 +720,7 @@ impl Query for QueryBuilder<'_> {
 
         // only return open bugs by default
         if !self.defaults.contains("status") {
-            self.status(["@open"]);
+            self.status("@open");
         }
 
         // sort by ascending ID by default
