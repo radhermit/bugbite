@@ -261,7 +261,7 @@ struct AttributeOptions {
     blocks: Option<Vec<ExistsOrValues<MaybeStdinVec<i64>>>>,
 
     /// restrict by component
-    #[arg(short = 'C', long, value_delimiter = ',')]
+    #[arg(short = 'C', long, value_name = "VALUE")]
     component: Option<Vec<Match>>,
 
     /// restrict by custom field
@@ -380,23 +380,23 @@ struct AttributeOptions {
     keywords: Option<ExistsOrValues<MaybeStdinVec<Match>>>,
 
     /// restrict by OS
-    #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    #[arg(long, value_name = "VALUE")]
     os: Option<Vec<Match>>,
 
     /// restrict by platform
-    #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    #[arg(long, value_name = "VALUE")]
     platform: Option<Vec<Match>>,
 
     /// restrict by priority
-    #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    #[arg(long, value_name = "VALUE")]
     priority: Option<Vec<Match>>,
 
     /// restrict by product
-    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    #[arg(short, long, value_name = "VALUE")]
     product: Option<Vec<Match>>,
 
     /// restrict by resolution
-    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    #[arg(short, long, value_name = "VALUE")]
     resolution: Option<Vec<Match>>,
 
     /// restrict by external URLs
@@ -410,15 +410,14 @@ struct AttributeOptions {
     see_also: Option<ExistsOrValues<Match>>,
 
     /// restrict by severity
-    #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    #[arg(long, value_name = "VALUE")]
     severity: Option<Vec<Match>>,
 
     /// restrict by status
     #[arg(
         short,
         long,
-        value_name = "VALUE[,...]",
-        value_delimiter = ',',
+        value_name = "VALUE",
         long_help = wrapped_doc!("
             Restrict by status.
 
@@ -435,12 +434,11 @@ struct AttributeOptions {
             - unresolved bugs
             > bite s --status !resolved
 
-            Multiple values can be specified in a comma-separated list or with
-            multiple options, matching if any value matches.
+            Multiple values can be specified in with multiple options for
+            logical OR.
 
             Examples:
             - confirmed or verified bugs
-            > bite s --status confirmed,verified
             > bite s --status confirmed --status verified
 
             The aliases `@open`, `@closed`, and `@all` can be used to search for
@@ -467,7 +465,7 @@ struct AttributeOptions {
     tags: Option<ExistsOrValues<Match>>,
 
     /// restrict by target milestone
-    #[arg(short = 'T', long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    #[arg(short = 'T', long, value_name = "VALUE")]
     target: Option<Vec<Match>>,
 
     /// restrict by URL
@@ -481,7 +479,7 @@ struct AttributeOptions {
     url: Option<ExistsOrValues<Match>>,
 
     /// restrict by version
-    #[arg(short = 'V', long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    #[arg(short = 'V', long, value_name = "VALUE")]
     version: Option<Vec<Match>>,
 
     /// restrict by whiteboard
