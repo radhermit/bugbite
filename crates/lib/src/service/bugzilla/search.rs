@@ -574,29 +574,19 @@ impl QueryBuilder<'_> {
         self.insert(format!("o{num}"), status);
     }
 
-    pub fn blocks<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = i64>,
-    {
-        for value in values {
-            if value >= 0 {
-                self.advanced_field("blocked", "equals", value)
-            } else {
-                self.advanced_field("blocked", "notequals", value.abs())
-            }
+    pub fn blocks(&mut self, value: i64) {
+        if value >= 0 {
+            self.advanced_field("blocked", "equals", value);
+        } else {
+            self.advanced_field("blocked", "notequals", value.abs());
         }
     }
 
-    pub fn depends<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = i64>,
-    {
-        for value in values {
-            if value >= 0 {
-                self.advanced_field("dependson", "equals", value)
-            } else {
-                self.advanced_field("dependson", "notequals", value.abs())
-            }
+    pub fn depends(&mut self, value: i64) {
+        if value >= 0 {
+            self.advanced_field("dependson", "equals", value);
+        } else {
+            self.advanced_field("dependson", "notequals", value.abs());
         }
     }
 

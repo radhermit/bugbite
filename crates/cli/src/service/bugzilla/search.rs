@@ -230,8 +230,8 @@ struct AttributeOptions {
             > bite s --blocks false
 
             Regular values search for matching blockers and multiple values can
-            be specified in a comma-separated list, matching if all of the
-            specified blockers match.
+            be specified in a comma-separated list for logical AND or multiple
+            options for logical OR.
 
             Examples:
             - blocked on 10
@@ -239,6 +239,9 @@ struct AttributeOptions {
 
             - blocked on 10 and 11
             > bite s --blocks 10,11
+
+            - blocked on 10 or 11
+            > bite s --blocks 10 --blocks 11
 
             Values can also use a `-` prefix to search for non-blockers.
 
@@ -252,7 +255,7 @@ struct AttributeOptions {
             Values are taken from standard input when `-`.
         ")
     )]
-    blocks: Option<ExistsOrValues<MaybeStdinVec<i64>>>,
+    blocks: Option<Vec<ExistsOrValues<MaybeStdinVec<i64>>>>,
 
     /// restrict by component
     #[arg(short = 'C', long, value_delimiter = ',')]
@@ -284,8 +287,8 @@ struct AttributeOptions {
             > bite s --depends false
 
             Regular values search for matching dependencies and multiple values can
-            be specified in a comma-separated list, matching if all of the
-            specified dependencies match.
+            be specified in a comma-separated list for logical AND or multiple
+            options for logical OR.
 
             Examples:
             - depends on 10
@@ -293,6 +296,9 @@ struct AttributeOptions {
 
             - depends on 10 and 11
             > bite s --depends 10,11
+
+            - depends on 10 or 11
+            > bite s --depends 10 --depends 11
 
             Values can also use a `-` prefix to search for non-dependencies.
 
@@ -306,7 +312,7 @@ struct AttributeOptions {
             Values are taken from standard input when `-`.
         ")
     )]
-    depends: Option<ExistsOrValues<MaybeStdinVec<i64>>>,
+    depends: Option<Vec<ExistsOrValues<MaybeStdinVec<i64>>>>,
 
     /// restrict by flag
     #[arg(
@@ -1047,16 +1053,26 @@ impl Command {
             });
         }
         if let Some(values) = params.attr.blocks {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
-                ExistsOrValues::Values(values) => query.blocks(values.into_iter().flatten()),
-            }
+            query.or(|query| {
+                for value in &values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, *value),
+                        ExistsOrValues::Values(values) => query
+                            .and(|query| values.iter().flatten().for_each(|x| query.blocks(*x))),
+                    }
+                }
+            });
         }
         if let Some(values) = params.attr.depends {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, value),
-                ExistsOrValues::Values(values) => query.depends(values.into_iter().flatten()),
-            }
+            query.or(|query| {
+                for value in &values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, *value),
+                        ExistsOrValues::Values(values) => query
+                            .and(|query| values.iter().flatten().for_each(|x| query.depends(*x))),
+                    }
+                }
+            });
         }
         if let Some(value) = params.query.quicksearch {
             query.quicksearch(value);
