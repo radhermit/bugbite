@@ -18,7 +18,7 @@ use crossterm::style::Stylize;
 use itertools::Itertools;
 use strum::VariantNames;
 
-use crate::service::args::ExistsOrArray;
+use crate::service::args::ExistsOrValues;
 use crate::service::output::render_search;
 use crate::utils::{launch_browser, wrapped_doc};
 
@@ -149,7 +149,7 @@ struct AttributeOptions {
             > bite s --alias !r#test?.+
         "#)
     )]
-    alias: Option<ExistsOrArray<Match>>,
+    alias: Option<ExistsOrValues<Match>>,
 
     /// restrict by attachments
     #[arg(
@@ -206,7 +206,7 @@ struct AttributeOptions {
             > bite s --attachments =#test1,=#test2
         "#)
     )]
-    attachments: Option<ExistsOrArray<Match>>,
+    attachments: Option<ExistsOrValues<Match>>,
 
     /// restrict by blockers
     #[arg(
@@ -256,7 +256,7 @@ struct AttributeOptions {
             Values are taken from standard input when `-`.
         ")
     )]
-    blocks: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
+    blocks: Option<ExistsOrValues<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
     /// restrict by component
     #[arg(short = 'C', long, value_delimiter = ',')]
@@ -314,7 +314,7 @@ struct AttributeOptions {
             Values are taken from standard input when `-`.
         ")
     )]
-    depends: Option<ExistsOrArray<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
+    depends: Option<ExistsOrValues<MaybeStdinVec<EnabledOrDisabled<u64>>>>,
 
     /// restrict by flag
     #[arg(
@@ -324,7 +324,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    flags: Option<ExistsOrArray<MaybeStdinVec<Match>>>,
+    flags: Option<ExistsOrValues<MaybeStdinVec<Match>>>,
 
     /// restrict by group
     #[arg(
@@ -334,7 +334,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    groups: Option<ExistsOrArray<MaybeStdinVec<Match>>>,
+    groups: Option<ExistsOrValues<MaybeStdinVec<Match>>>,
 
     /// restrict by ID
     #[arg(
@@ -373,7 +373,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    keywords: Option<ExistsOrArray<MaybeStdinVec<Match>>>,
+    keywords: Option<ExistsOrValues<MaybeStdinVec<Match>>>,
 
     /// restrict by OS
     #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
@@ -403,7 +403,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    see_also: Option<ExistsOrArray<Match>>,
+    see_also: Option<ExistsOrValues<Match>>,
 
     /// restrict by severity
     #[arg(long, value_name = "VALUE[,...]", value_delimiter = ',')]
@@ -460,7 +460,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    tags: Option<ExistsOrArray<Match>>,
+    tags: Option<ExistsOrValues<Match>>,
 
     /// restrict by target milestone
     #[arg(short = 'T', long, value_name = "VALUE[,...]", value_delimiter = ',')]
@@ -474,7 +474,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    url: Option<ExistsOrArray<Match>>,
+    url: Option<ExistsOrValues<Match>>,
 
     /// restrict by version
     #[arg(short = 'V', long, value_name = "VALUE[,...]", value_delimiter = ',')]
@@ -488,7 +488,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    whiteboard: Option<ExistsOrArray<Match>>,
+    whiteboard: Option<ExistsOrValues<Match>>,
 }
 
 #[derive(Debug, Args)]
@@ -741,7 +741,7 @@ struct UserOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    cc: Option<ExistsOrArray<Match>>,
+    cc: Option<ExistsOrValues<Match>>,
 
     /// user who commented
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
@@ -758,7 +758,7 @@ struct UserOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    qa: Option<ExistsOrArray<Match>>,
+    qa: Option<ExistsOrValues<Match>>,
 
     /// user who reported
     #[arg(short = 'R', long, value_name = "USER[,...]", value_delimiter = ',')]
@@ -931,8 +931,8 @@ impl Command {
         }
         if let Some(values) = params.attr.see_also {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::SeeAlso, value),
-                ExistsOrArray::Array(values) => query.see_also(values),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::SeeAlso, value),
+                ExistsOrValues::Values(values) => query.see_also(values),
             }
         }
         if let Some(values) = params.user.reporter {
@@ -946,8 +946,8 @@ impl Command {
         }
         if let Some(values) = params.attr.tags {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Tags, value),
-                ExistsOrArray::Array(values) => query.tags(values),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Tags, value),
+                ExistsOrValues::Values(values) => query.tags(values),
             }
         }
         if let Some(values) = params.attr.target {
@@ -955,14 +955,14 @@ impl Command {
         }
         if let Some(values) = params.attr.whiteboard {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Whiteboard, value),
-                ExistsOrArray::Array(values) => query.whiteboard(values),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Whiteboard, value),
+                ExistsOrValues::Values(values) => query.whiteboard(values),
             }
         }
         if let Some(values) = params.attr.url {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Url, value),
-                ExistsOrArray::Array(values) => query.url(values),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Url, value),
+                ExistsOrValues::Values(values) => query.url(values),
             }
         }
         if let Some(values) = params.range.votes {
@@ -973,14 +973,14 @@ impl Command {
         }
         if let Some(values) = params.attr.alias {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Alias, value),
-                ExistsOrArray::Array(values) => query.alias(values),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Alias, value),
+                ExistsOrValues::Values(values) => query.alias(values),
             }
         }
         if let Some(values) = params.attr.attachments {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Attachments, value),
-                ExistsOrArray::Array(values) => query.attachments(values),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachments, value),
+                ExistsOrValues::Values(values) => query.attachments(values),
             }
         }
         if let Some(values) = params.attr.id {
@@ -994,44 +994,44 @@ impl Command {
         }
         if let Some(values) = params.attr.flags {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Flags, value),
-                ExistsOrArray::Array(values) => query.flags(values.into_iter().flatten()),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, value),
+                ExistsOrValues::Values(values) => query.flags(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.attr.groups {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Groups, value),
-                ExistsOrArray::Array(values) => query.groups(values.into_iter().flatten()),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Groups, value),
+                ExistsOrValues::Values(values) => query.groups(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.attr.keywords {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Keywords, value),
-                ExistsOrArray::Array(values) => query.keywords(values.into_iter().flatten()),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Keywords, value),
+                ExistsOrValues::Values(values) => query.keywords(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.user.cc {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Cc, value),
-                ExistsOrArray::Array(values) => query.cc(values),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, value),
+                ExistsOrValues::Values(values) => query.cc(values),
             }
         }
         if let Some(values) = params.user.qa {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Qa, value),
-                ExistsOrArray::Array(values) => query.qa(values),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, value),
+                ExistsOrValues::Values(values) => query.qa(values),
             }
         }
         if let Some(values) = params.attr.blocks {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Blocks, value),
-                ExistsOrArray::Array(values) => query.blocks(values.into_iter().flatten()),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
+                ExistsOrValues::Values(values) => query.blocks(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.attr.depends {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Depends, value),
-                ExistsOrArray::Array(values) => query.depends(values.into_iter().flatten()),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, value),
+                ExistsOrValues::Values(values) => query.depends(values.into_iter().flatten()),
             }
         }
         if let Some(value) = params.query.quicksearch {

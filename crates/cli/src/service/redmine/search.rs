@@ -12,7 +12,7 @@ use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
 use strum::VariantNames;
 
-use crate::service::args::ExistsOrArray;
+use crate::service::args::ExistsOrValues;
 use crate::service::output::render_search;
 use crate::utils::{launch_browser, wrapped_doc};
 
@@ -148,7 +148,7 @@ struct Params {
             > bite s --attachments test1,test2
         "#)
     )]
-    attachments: Option<ExistsOrArray<String>>,
+    attachments: Option<ExistsOrValues<String>>,
 
     /// restrict by blockers
     #[arg(
@@ -186,7 +186,7 @@ struct Params {
             Values are taken from standard input when `-`.
         ")
     )]
-    blocks: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
+    blocks: Option<ExistsOrValues<MaybeStdinVec<u64>>>,
 
     /// restrict by dependencies
     #[arg(
@@ -224,7 +224,7 @@ struct Params {
             Values are taken from standard input when `-`.
         ")
     )]
-    blocked: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
+    blocked: Option<ExistsOrValues<MaybeStdinVec<u64>>>,
 
     /// restrict by relations
     #[arg(
@@ -262,7 +262,7 @@ struct Params {
             Values are taken from standard input when `-`.
         ")
     )]
-    relates: Option<ExistsOrArray<MaybeStdinVec<u64>>>,
+    relates: Option<ExistsOrValues<MaybeStdinVec<u64>>>,
 
     /// restrict by ID
     #[arg(
@@ -328,26 +328,26 @@ impl Command {
         }
         if let Some(values) = params.attachments {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Attachment, value),
-                ExistsOrArray::Array(values) => query.attachments(values.into_iter()),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachment, value),
+                ExistsOrValues::Values(values) => query.attachments(values.into_iter()),
             }
         }
         if let Some(values) = params.blocks {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Blocks, value),
-                ExistsOrArray::Array(values) => query.blocks(values.into_iter().flatten()),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
+                ExistsOrValues::Values(values) => query.blocks(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.blocked {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Blocked, value),
-                ExistsOrArray::Array(values) => query.blocked(values.into_iter().flatten()),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocked, value),
+                ExistsOrValues::Values(values) => query.blocked(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.relates {
             match values {
-                ExistsOrArray::Exists(value) => query.exists(ExistsField::Relates, value),
-                ExistsOrArray::Array(values) => query.relates(values.into_iter().flatten()),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Relates, value),
+                ExistsOrValues::Values(values) => query.relates(values.into_iter().flatten()),
             }
         }
         if let Some(values) = params.id {

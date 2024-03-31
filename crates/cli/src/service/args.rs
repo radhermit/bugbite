@@ -3,12 +3,12 @@ use std::str::FromStr;
 use itertools::Itertools;
 
 #[derive(Debug, Clone)]
-pub(crate) enum ExistsOrArray<T> {
+pub(crate) enum ExistsOrValues<T> {
     Exists(bool),
-    Array(Vec<T>),
+    Values(Vec<T>),
 }
 
-impl<T> FromStr for ExistsOrArray<T>
+impl<T> FromStr for ExistsOrValues<T>
 where
     T: FromStr,
     <T as FromStr>::Err: std::fmt::Display,
@@ -17,9 +17,9 @@ where
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "true" => Ok(ExistsOrArray::Exists(true)),
-            "false" => Ok(ExistsOrArray::Exists(false)),
-            value => Ok(ExistsOrArray::Array(
+            "true" => Ok(ExistsOrValues::Exists(true)),
+            "false" => Ok(ExistsOrValues::Exists(false)),
+            value => Ok(ExistsOrValues::Values(
                 value
                     .split(',')
                     .map(|x| {
