@@ -303,12 +303,9 @@ impl QueryBuilder<'_> {
         self.advanced_field("setters.login_name", value.op, value);
     }
 
-    pub fn url<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "bug_file_loc", values);
+    pub fn url<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("bug_file_loc", value.op, value);
     }
 
     pub fn changed<'a, I>(&mut self, values: I)

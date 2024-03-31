@@ -475,7 +475,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    url: Option<ExistsOrValues<Match>>,
+    url: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by version
     #[arg(short = 'V', long, value_name = "VALUE")]
@@ -984,10 +984,16 @@ impl Command {
             });
         }
         if let Some(values) = params.attr.url {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Url, value),
-                ExistsOrValues::Values(values) => query.url(values),
-            }
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Url, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.url(x)))
+                        }
+                    }
+                }
+            });
         }
         if let Some(values) = params.range.votes {
             query.votes(values);
