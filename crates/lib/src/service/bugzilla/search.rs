@@ -148,6 +148,12 @@ impl From<String> for Match {
     }
 }
 
+impl From<&String> for Match {
+    fn from(s: &String) -> Self {
+        s.as_str().into()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum EnabledOrDisabled<T> {
     Enabled(T),
@@ -234,7 +240,7 @@ impl QueryBuilder<'_> {
             .into_iter()
             .map(|x| x.into().replace_user_alias(self.service))
             .collect();
-        self.op_field("OR", "assigned_to", values);
+        self.op_field("AND", "assigned_to", values);
     }
 
     /// Search for attachments with matching descriptions or filenames.
@@ -271,7 +277,7 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = S>,
         S: Into<Match>,
     {
-        self.op_field("OR", "reporter", values);
+        self.op_field("AND", "reporter", values);
     }
 
     pub fn resolution<I, S>(&mut self, values: I)
@@ -822,6 +828,25 @@ impl QueryBuilder<'_> {
     {
         let fields = iter::repeat_with(|| field);
         self.op(op, fields.zip(values))
+    }
+
+    pub fn op_func<F: FnMut(&mut Self)>(&mut self, op: &str, mut func: F) {
+        self.advanced_count += 1;
+        let num = self.advanced_count;
+        self.insert(format!("f{num}"), "OP");
+        self.insert(format!("j{num}"), op);
+        func(self);
+        self.advanced_count += 1;
+        let num = self.advanced_count;
+        self.insert(format!("f{num}"), "CP");
+    }
+
+    pub fn or<F: FnMut(&mut Self)>(&mut self, func: F) {
+        self.op_func("OR", func)
+    }
+
+    pub fn and<F: FnMut(&mut Self)>(&mut self, func: F) {
+        self.op_func("AND", func)
     }
 }
 

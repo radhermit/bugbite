@@ -727,12 +727,12 @@ struct TimeOptions {
 #[clap(next_help_heading = "User options")]
 struct UserOptions {
     /// user is the assignee
-    #[arg(short, long, value_name = "USER[,...]", value_delimiter = ',')]
-    assignee: Option<Vec<Match>>,
+    #[arg(short, long, value_name = "USER[,...]")]
+    assignee: Option<Vec<String>>,
 
     /// user created attachment
-    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
-    attacher: Option<Vec<Match>>,
+    #[arg(long, value_name = "USER[,...]")]
+    attacher: Option<Vec<String>>,
 
     /// user in the CC list
     #[arg(
@@ -741,15 +741,15 @@ struct UserOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    cc: Option<ExistsOrValues<Match>>,
+    cc: Option<Vec<ExistsOrValues<String>>>,
 
     /// user who commented
-    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
-    commenter: Option<Vec<Match>>,
+    #[arg(long, value_name = "USER[,...]")]
+    commenter: Option<Vec<String>>,
 
     /// user who set a flag
-    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
-    flagger: Option<Vec<Match>>,
+    #[arg(long, value_name = "USER[,...]")]
+    flagger: Option<Vec<String>>,
 
     /// user is the QA contact
     #[arg(
@@ -758,11 +758,11 @@ struct UserOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    qa: Option<ExistsOrValues<Match>>,
+    qa: Option<Vec<ExistsOrValues<String>>>,
 
     /// user who reported
-    #[arg(short = 'R', long, value_name = "USER[,...]", value_delimiter = ',')]
-    reporter: Option<Vec<Match>>,
+    #[arg(short = 'R', long, value_name = "USER[,...]")]
+    reporter: Option<Vec<String>>,
 }
 
 /// Available search parameters.
@@ -882,7 +882,11 @@ impl Command {
             query.changed_to(values.into_iter().map(|c| (c.field, c.value)));
         }
         if let Some(values) = params.user.assignee {
-            query.assignee(values);
+            query.or(|query| {
+                for value in &values {
+                    query.assignee(value.split(','));
+                }
+            });
         }
         if let Some(value) = params.query.limit {
             query.limit(value);
@@ -897,13 +901,25 @@ impl Command {
             query.order(values)?;
         }
         if let Some(values) = params.user.attacher {
-            query.attacher(values);
+            query.or(|query| {
+                for value in &values {
+                    query.attacher(value.split(','));
+                }
+            });
         }
         if let Some(values) = params.user.commenter {
-            query.commenter(values);
+            query.or(|query| {
+                for value in &values {
+                    query.commenter(value.split(','));
+                }
+            });
         }
         if let Some(values) = params.user.flagger {
-            query.flagger(values);
+            query.or(|query| {
+                for value in &values {
+                    query.flagger(value.split(','));
+                }
+            });
         }
         if let Some(values) = params.attr.custom_fields {
             query.custom_fields(values.into_iter().tuples());
@@ -936,7 +952,11 @@ impl Command {
             }
         }
         if let Some(values) = params.user.reporter {
-            query.reporter(values);
+            query.or(|query| {
+                for value in &values {
+                    query.reporter(value.split(','));
+                }
+            });
         }
         if let Some(values) = params.attr.resolution {
             query.resolution(values);
@@ -1011,16 +1031,24 @@ impl Command {
             }
         }
         if let Some(values) = params.user.cc {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, value),
-                ExistsOrValues::Values(values) => query.cc(values),
-            }
+            query.or(|query| {
+                for value in &values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, *value),
+                        ExistsOrValues::Values(values) => query.cc(values),
+                    }
+                }
+            });
         }
         if let Some(values) = params.user.qa {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, value),
-                ExistsOrValues::Values(values) => query.qa(values),
-            }
+            query.or(|query| {
+                for value in &values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, *value),
+                        ExistsOrValues::Values(values) => query.qa(values),
+                    }
+                }
+            });
         }
         if let Some(values) = params.attr.blocks {
             match values {
