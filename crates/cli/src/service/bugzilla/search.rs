@@ -334,7 +334,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    groups: Option<ExistsOrValues<MaybeStdinVec<Match>>>,
+    groups: Option<Vec<ExistsOrValues<MaybeStdinVec<Match>>>>,
 
     /// restrict by ID
     #[arg(
@@ -1052,10 +1052,16 @@ impl Command {
             });
         }
         if let Some(values) = params.attr.groups {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Groups, value),
-                ExistsOrValues::Values(values) => query.groups(values.into_iter().flatten()),
-            }
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Groups, value),
+                        ExistsOrValues::Values(values) => query.and(|query| {
+                            values.into_iter().flatten().for_each(|x| query.groups(x))
+                        }),
+                    }
+                }
+            });
         }
         if let Some(values) = params.attr.keywords {
             match values {
