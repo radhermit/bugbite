@@ -58,7 +58,6 @@ struct QueryOptions {
         short,
         long,
         value_name = "FIELD[,...]",
-        value_delimiter = ',',
         long_help = wrapped_doc!("
             Perform server-side sorting on the query.
 
@@ -76,7 +75,7 @@ struct QueryOptions {
             OrderField::VARIANTS.join(", ")
         )
     )]
-    order: Option<Vec<Order<OrderField>>>,
+    order: Option<Csv<Order<OrderField>>>,
 }
 
 #[derive(Debug, Args)]
