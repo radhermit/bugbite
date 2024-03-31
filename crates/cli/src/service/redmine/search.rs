@@ -284,6 +284,27 @@ struct TimeOptions {
     closed: Option<RangeOrValue<TimeDelta>>,
 }
 
+#[derive(Debug, Args)]
+#[clap(next_help_heading = "Search options")]
+pub(super) struct SearchOptions {
+    /// open query in a browser
+    #[arg(
+        short,
+        long,
+        long_help = wrapped_doc!("
+            Open query in a browser.
+
+            This functionality requires xdg-open with a valid, preferred browser
+            set for http(s) URLs.
+        ")
+    )]
+    browser: bool,
+
+    /// skip service interaction
+    #[arg(short = 'n', long)]
+    dry_run: bool,
+}
+
 /// Available search parameters.
 #[derive(Debug, Args)]
 struct Params {
@@ -303,23 +324,8 @@ struct Params {
 
 #[derive(Debug, Args)]
 pub(super) struct Command {
-    /// open query in a browser
-    #[arg(
-        short,
-        long,
-        help_heading = "Search options",
-        long_help = wrapped_doc!("
-            Open query in a browser.
-
-            This functionality requires xdg-open with a valid, preferred browser
-            set for http(s) URLs.
-        ")
-    )]
-    browser: bool,
-
-    /// skip service interaction
-    #[arg(short = 'n', long)]
-    dry_run: bool,
+    #[clap(flatten)]
+    search: SearchOptions,
 
     #[clap(flatten)]
     params: Params,
@@ -382,10 +388,10 @@ impl Command {
         }
         let fields = &params.query.fields;
 
-        if self.browser {
+        if self.search.browser {
             let url = client.search_url(query)?;
             launch_browser([url])?;
-        } else if !self.dry_run {
+        } else if !self.search.dry_run {
             let issues = client.search(query).await?;
             render_search(issues, fields)?;
         }
