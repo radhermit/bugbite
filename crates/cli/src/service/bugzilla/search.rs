@@ -406,7 +406,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    see_also: Option<ExistsOrValues<Match>>,
+    see_also: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by severity
     #[arg(long, value_name = "VALUE")]
@@ -942,10 +942,16 @@ impl Command {
             query.or(|query| values.into_iter().for_each(|x| query.os(x)));
         }
         if let Some(values) = params.attr.see_also {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::SeeAlso, value),
-                ExistsOrValues::Values(values) => query.see_also(values),
-            }
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::SeeAlso, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.see_also(x)))
+                        }
+                    }
+                }
+            });
         }
         if let Some(values) = params.user.reporter {
             query.or(|query| {

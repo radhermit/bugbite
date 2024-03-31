@@ -469,12 +469,9 @@ impl QueryBuilder<'_> {
         self.advanced_field("op_sys", value.op, value);
     }
 
-    pub fn see_also<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("OR", "see_also", values);
+    pub fn see_also<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("see_also", value.op, value);
     }
 
     pub fn tags<I, S>(&mut self, values: I)
