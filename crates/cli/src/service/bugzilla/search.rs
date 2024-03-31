@@ -729,11 +729,11 @@ struct TimeOptions {
 struct UserOptions {
     /// user is the assignee
     #[arg(short, long, value_name = "USER[,...]")]
-    assignee: Option<Vec<Csv<String>>>,
+    assignee: Option<Vec<Csv<Match>>>,
 
     /// user created attachment
     #[arg(long, value_name = "USER[,...]")]
-    attacher: Option<Vec<Csv<String>>>,
+    attacher: Option<Vec<Csv<Match>>>,
 
     /// user in the CC list
     #[arg(
@@ -746,11 +746,11 @@ struct UserOptions {
 
     /// user who commented
     #[arg(long, value_name = "USER[,...]")]
-    commenter: Option<Vec<Csv<String>>>,
+    commenter: Option<Vec<Csv<Match>>>,
 
     /// user who set a flag
     #[arg(long, value_name = "USER[,...]")]
-    flagger: Option<Vec<Csv<String>>>,
+    flagger: Option<Vec<Csv<Match>>>,
 
     /// user is the QA contact
     #[arg(
@@ -763,7 +763,7 @@ struct UserOptions {
 
     /// user who reported
     #[arg(short = 'R', long, value_name = "USER[,...]")]
-    reporter: Option<Vec<Csv<String>>>,
+    reporter: Option<Vec<Csv<Match>>>,
 }
 
 /// Available search parameters.
@@ -885,7 +885,7 @@ impl Command {
         if let Some(values) = params.user.assignee {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.assignee(x)))
+                    query.and(|query| value.into_iter().for_each(|x| query.assignee(x)))
                 }
             });
         }
@@ -904,21 +904,21 @@ impl Command {
         if let Some(values) = params.user.attacher {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.attacher(x)))
+                    query.and(|query| value.into_iter().for_each(|x| query.attacher(x)))
                 }
             });
         }
         if let Some(values) = params.user.commenter {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.commenter(x)))
+                    query.and(|query| value.into_iter().for_each(|x| query.commenter(x)))
                 }
             });
         }
         if let Some(values) = params.user.flagger {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.flagger(x)))
+                    query.and(|query| value.into_iter().for_each(|x| query.flagger(x)))
                 }
             });
         }
@@ -955,7 +955,7 @@ impl Command {
         if let Some(values) = params.user.reporter {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.reporter(x)))
+                    query.and(|query| value.into_iter().for_each(|x| query.reporter(x)))
                 }
             });
         }
