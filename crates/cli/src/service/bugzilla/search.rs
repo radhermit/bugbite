@@ -1,7 +1,7 @@
 use std::process::ExitCode;
 use std::str::FromStr;
 
-use bugbite::args::MaybeStdinVec;
+use bugbite::args::{Csv, MaybeStdinVec};
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
@@ -152,7 +152,7 @@ struct AttributeOptions {
             > bite s --alias !r#test?.+
         "#)
     )]
-    alias: Option<Vec<ExistsOrValues<String>>>,
+    alias: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by attachments
     #[arg(
@@ -325,7 +325,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    flags: Option<Vec<ExistsOrValues<MaybeStdinVec<String>>>>,
+    flags: Option<Vec<ExistsOrValues<MaybeStdinVec<Match>>>>,
 
     /// restrict by group
     #[arg(
@@ -729,11 +729,11 @@ struct TimeOptions {
 struct UserOptions {
     /// user is the assignee
     #[arg(short, long, value_name = "USER[,...]")]
-    assignee: Option<Vec<String>>,
+    assignee: Option<Vec<Csv<String>>>,
 
     /// user created attachment
     #[arg(long, value_name = "USER[,...]")]
-    attacher: Option<Vec<String>>,
+    attacher: Option<Vec<Csv<String>>>,
 
     /// user in the CC list
     #[arg(
@@ -742,15 +742,15 @@ struct UserOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    cc: Option<Vec<ExistsOrValues<String>>>,
+    cc: Option<Vec<ExistsOrValues<Match>>>,
 
     /// user who commented
     #[arg(long, value_name = "USER[,...]")]
-    commenter: Option<Vec<String>>,
+    commenter: Option<Vec<Csv<String>>>,
 
     /// user who set a flag
     #[arg(long, value_name = "USER[,...]")]
-    flagger: Option<Vec<String>>,
+    flagger: Option<Vec<Csv<String>>>,
 
     /// user is the QA contact
     #[arg(
@@ -759,11 +759,11 @@ struct UserOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    qa: Option<Vec<ExistsOrValues<String>>>,
+    qa: Option<Vec<ExistsOrValues<Match>>>,
 
     /// user who reported
     #[arg(short = 'R', long, value_name = "USER[,...]")]
-    reporter: Option<Vec<String>>,
+    reporter: Option<Vec<Csv<String>>>,
 }
 
 /// Available search parameters.
@@ -884,8 +884,8 @@ impl Command {
         }
         if let Some(values) = params.user.assignee {
             query.or(|query| {
-                for value in &values {
-                    query.and(|query| value.split(',').for_each(|x| query.assignee(x)))
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.assignee(x)))
                 }
             });
         }
@@ -903,22 +903,22 @@ impl Command {
         }
         if let Some(values) = params.user.attacher {
             query.or(|query| {
-                for value in &values {
-                    query.and(|query| value.split(',').for_each(|x| query.attacher(x)))
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.attacher(x)))
                 }
             });
         }
         if let Some(values) = params.user.commenter {
             query.or(|query| {
-                for value in &values {
-                    query.and(|query| value.split(',').for_each(|x| query.commenter(x)))
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.commenter(x)))
                 }
             });
         }
         if let Some(values) = params.user.flagger {
             query.or(|query| {
-                for value in &values {
-                    query.and(|query| value.split(',').for_each(|x| query.flagger(x)))
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.flagger(x)))
                 }
             });
         }
@@ -954,8 +954,8 @@ impl Command {
         }
         if let Some(values) = params.user.reporter {
             query.or(|query| {
-                for value in &values {
-                    query.and(|query| value.split(',').for_each(|x| query.reporter(x)))
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.reporter(x)))
                 }
             });
         }
@@ -994,11 +994,11 @@ impl Command {
         }
         if let Some(values) = params.attr.alias {
             query.or(|query| {
-                for value in &values {
+                for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Alias, *value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Alias, value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.alias(x)))
+                            query.and(|query| values.into_iter().for_each(|x| query.alias(x)))
                         }
                     }
                 }
@@ -1021,12 +1021,11 @@ impl Command {
         }
         if let Some(values) = params.attr.flags {
             query.or(|query| {
-                for value in &values {
+                for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().flatten().for_each(|x| query.flags(x)))
-                        }
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, value),
+                        ExistsOrValues::Values(values) => query
+                            .and(|query| values.into_iter().flatten().for_each(|x| query.flags(x))),
                     }
                 }
             });
@@ -1045,11 +1044,11 @@ impl Command {
         }
         if let Some(values) = params.user.cc {
             query.or(|query| {
-                for value in &values {
+                for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, *value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.cc(x)))
+                            query.and(|query| values.into_iter().for_each(|x| query.cc(x)))
                         }
                     }
                 }
@@ -1057,11 +1056,11 @@ impl Command {
         }
         if let Some(values) = params.user.qa {
             query.or(|query| {
-                for value in &values {
+                for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, *value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.qa(x)))
+                            query.and(|query| values.into_iter().for_each(|x| query.qa(x)))
                         }
                     }
                 }
@@ -1069,22 +1068,24 @@ impl Command {
         }
         if let Some(values) = params.attr.blocks {
             query.or(|query| {
-                for value in &values {
+                for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, *value),
-                        ExistsOrValues::Values(values) => query
-                            .and(|query| values.iter().flatten().for_each(|x| query.blocks(*x))),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
+                        ExistsOrValues::Values(values) => query.and(|query| {
+                            values.into_iter().flatten().for_each(|x| query.blocks(x))
+                        }),
                     }
                 }
             });
         }
         if let Some(values) = params.attr.depends {
             query.or(|query| {
-                for value in &values {
+                for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, *value),
-                        ExistsOrValues::Values(values) => query
-                            .and(|query| values.iter().flatten().for_each(|x| query.depends(*x))),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, value),
+                        ExistsOrValues::Values(values) => query.and(|query| {
+                            values.into_iter().flatten().for_each(|x| query.depends(x))
+                        }),
                     }
                 }
             });

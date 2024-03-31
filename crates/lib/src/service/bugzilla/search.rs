@@ -741,7 +741,7 @@ impl QueryBuilder<'_> {
         self.op(op, fields.zip(values))
     }
 
-    pub fn op_func<F: FnMut(&mut Self)>(&mut self, op: &str, mut func: F) {
+    pub fn op_func<F: FnOnce(&mut Self)>(&mut self, op: &str, func: F) {
         self.advanced_count += 1;
         let num = self.advanced_count;
         self.insert(format!("f{num}"), "OP");
@@ -752,11 +752,11 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), "CP");
     }
 
-    pub fn or<F: FnMut(&mut Self)>(&mut self, func: F) {
+    pub fn or<F: FnOnce(&mut Self)>(&mut self, func: F) {
         self.op_func("OR", func)
     }
 
-    pub fn and<F: FnMut(&mut Self)>(&mut self, func: F) {
+    pub fn and<F: FnOnce(&mut Self)>(&mut self, func: F) {
         self.op_func("AND", func)
     }
 }
