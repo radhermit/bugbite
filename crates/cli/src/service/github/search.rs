@@ -7,16 +7,13 @@ use bugbite::service::github::search::{SearchOrder, SearchTerm};
 use bugbite::traits::WebClient;
 use clap::Args;
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
 use strum::VariantNames;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::utils::{wrapped_doc, COLUMNS};
 
 /// Available search parameters.
-#[skip_serializing_none]
-#[derive(Debug, Deserialize, Serialize, Args)]
+#[derive(Debug, Args)]
 struct Params {
     // TODO: use enum to define supported fields
     /// fields to output
