@@ -6,14 +6,13 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct HistoryRequest<'a> {
+pub(crate) struct HistoryRequest {
     url: url::Url,
-    service: &'a super::Service,
 }
 
-impl<'a> HistoryRequest<'a> {
+impl HistoryRequest {
     pub(super) fn new<S>(
-        service: &'a super::Service,
+        service: &super::Service,
         ids: &[S],
         created: Option<&TimeDelta>,
     ) -> crate::Result<Self>
@@ -37,21 +36,18 @@ impl<'a> HistoryRequest<'a> {
                 .append_pair("new_since", &value.to_string());
         }
 
-        Ok(Self { url, service })
+        Ok(Self { url })
     }
 }
 
-impl Request for HistoryRequest<'_> {
+impl Request for HistoryRequest {
     type Output = Vec<Vec<Event>>;
+    type Service = super::Service;
 
-    async fn send(self) -> crate::Result<Self::Output> {
-        let request = self
-            .service
-            .client()
-            .get(self.url)
-            .inject_auth(self.service, false)?;
+    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+        let request = service.client().get(self.url).inject_auth(service, false)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
+        let mut data = service.parse_response(response).await?;
         let Value::Array(bugs) = data["bugs"].take() else {
             return Err(Error::InvalidValue(
                 "invalid service response to history request".to_string(),

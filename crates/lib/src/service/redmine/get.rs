@@ -7,16 +7,15 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct GetRequest<'a> {
+pub(crate) struct GetRequest {
     ids: Vec<String>,
     urls: Vec<Url>,
     comments: bool,
-    service: &'a super::Service,
 }
 
-impl<'a> GetRequest<'a> {
+impl GetRequest {
     pub(super) fn new<S>(
-        service: &'a super::Service,
+        service: &super::Service,
         ids: &[S],
         _attachments: bool,
         comments: bool,
@@ -51,27 +50,26 @@ impl<'a> GetRequest<'a> {
             ids: request_ids,
             urls,
             comments,
-            service,
         })
     }
 }
 
-impl Request for GetRequest<'_> {
+impl Request for GetRequest {
     type Output = Vec<Issue>;
+    type Service = super::Service;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
         let futures: Vec<_> = self
             .urls
             .into_iter()
-            .map(|u| self.service.client().get(u))
-            .map(|r| r.inject_auth(self.service, false).map(|r| r.send()))
+            .map(|u| service.client().get(u))
+            .map(|r| r.inject_auth(service, false).map(|r| r.send()))
             .try_collect()?;
 
         let mut issues = vec![];
         for (future, id) in futures.into_iter().zip(self.ids.into_iter()) {
             let response = future.await?;
-            let mut data = self
-                .service
+            let mut data = service
                 .parse_response(response)
                 .await
                 .map_err(|e| match e {

@@ -1,18 +1,14 @@
-use std::collections::HashMap;
 use std::fs;
 use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
-use bugbite::objects::bugzilla::{Bug, Flag};
-use bugbite::service::bugzilla::create::CreateParams;
-use bugbite::traits::WebClient;
+use bugbite::objects::bugzilla::Flag;
+use bugbite::service::bugzilla::create::Parameters;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
 use tracing::info;
 
 use crate::utils::{confirm, wrapped_doc};
@@ -264,178 +260,7 @@ struct Options {
     whiteboard: Option<String>,
 }
 
-#[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
-struct Attributes {
-    alias: Option<Vec<String>>,
-    assignee: Option<String>,
-    blocks: Option<Vec<u64>>,
-    cc: Option<Vec<String>>,
-    component: Option<String>,
-    depends: Option<Vec<u64>>,
-    description: Option<String>,
-    flags: Option<Vec<Flag>>,
-    groups: Option<Vec<String>>,
-    keywords: Option<Vec<String>>,
-    os: Option<String>,
-    platform: Option<String>,
-    priority: Option<String>,
-    product: Option<String>,
-    qa: Option<String>,
-    resolution: Option<String>,
-    see_also: Option<Vec<String>>,
-    severity: Option<String>,
-    status: Option<String>,
-    summary: Option<String>,
-    target: Option<String>,
-    url: Option<String>,
-    version: Option<String>,
-    whiteboard: Option<String>,
-
-    #[serde(flatten)]
-    custom_fields: Option<HashMap<String, String>>,
-}
-
-impl Attributes {
-    fn merge(self, other: Self) -> Self {
-        Self {
-            alias: self.alias.or(other.alias),
-            assignee: self.assignee.or(other.assignee),
-            blocks: self.blocks.or(other.blocks),
-            cc: self.cc.or(other.cc),
-            component: self.component.or(other.component),
-            depends: self.depends.or(other.depends),
-            description: self.description.or(other.description),
-            flags: self.flags.or(other.flags),
-            groups: self.groups.or(other.groups),
-            keywords: self.keywords.or(other.keywords),
-            os: self.os.or(other.os),
-            platform: self.platform.or(other.platform),
-            priority: self.priority.or(other.priority),
-            product: self.product.or(other.product),
-            qa: self.qa.or(other.qa),
-            resolution: self.resolution.or(other.resolution),
-            see_also: self.see_also.or(other.see_also),
-            status: self.status.or(other.status),
-            severity: self.severity.or(other.severity),
-            target: self.target.or(other.target),
-            summary: self.summary.or(other.summary),
-            url: self.url.or(other.url),
-            version: self.version.or(other.version),
-            whiteboard: self.whiteboard.or(other.whiteboard),
-
-            custom_fields: self.custom_fields.or(other.custom_fields),
-        }
-    }
-
-    fn into_params(self, client: &Client) -> CreateParams {
-        let mut params = client.service().create_params();
-
-        if let Some(values) = self.alias {
-            params.alias(values);
-        }
-
-        if let Some(value) = self.assignee.as_ref() {
-            params.assignee(value);
-        }
-
-        if let Some(values) = self.blocks {
-            params.blocks(values);
-        }
-
-        if let Some(values) = self.cc {
-            params.cc(values);
-        }
-
-        if let Some(value) = self.component {
-            params.component(value);
-        }
-
-        if let Some(values) = self.custom_fields {
-            params.custom_fields(values);
-        }
-
-        if let Some(values) = self.depends {
-            params.depends(values);
-        }
-
-        if let Some(value) = self.description {
-            params.description(value);
-        }
-
-        if let Some(values) = self.flags {
-            params.flags(values);
-        }
-
-        if let Some(values) = self.groups {
-            params.groups(values);
-        }
-
-        if let Some(values) = self.keywords {
-            params.keywords(values);
-        }
-
-        if let Some(value) = self.os {
-            params.os(value);
-        }
-
-        if let Some(value) = self.platform {
-            params.platform(value);
-        }
-
-        if let Some(value) = self.priority {
-            params.priority(value);
-        }
-
-        if let Some(value) = self.product {
-            params.product(value);
-        }
-
-        if let Some(value) = self.qa.as_ref() {
-            params.qa(value);
-        }
-
-        if let Some(value) = self.resolution {
-            params.resolution(value);
-        }
-
-        if let Some(values) = self.see_also {
-            params.see_also(values);
-        }
-
-        if let Some(value) = self.severity {
-            params.severity(value);
-        }
-
-        if let Some(value) = self.status {
-            params.status(value);
-        }
-
-        if let Some(value) = self.target {
-            params.target(value);
-        }
-
-        if let Some(value) = self.summary {
-            params.summary(value);
-        }
-
-        if let Some(value) = self.url {
-            params.url(value);
-        }
-
-        if let Some(value) = self.version {
-            params.version(value);
-        }
-
-        if let Some(value) = self.whiteboard {
-            params.whiteboard(value);
-        }
-
-        params
-    }
-}
-
-impl From<Options> for Attributes {
+impl From<Options> for Parameters {
     fn from(value: Options) -> Self {
         Self {
             alias: value.alias,
@@ -466,21 +291,6 @@ impl From<Options> for Attributes {
             custom_fields: value
                 .custom_fields
                 .map(|x| x.into_iter().tuples().collect()),
-        }
-    }
-}
-
-impl From<Bug> for Attributes {
-    fn from(value: Bug) -> Self {
-        Self {
-            component: value.component,
-            os: value.op_sys,
-            platform: value.platform,
-            priority: value.priority,
-            product: value.product,
-            severity: value.severity,
-            version: value.version,
-            ..Default::default()
         }
     }
 }
@@ -564,16 +374,13 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
-        let mut attrs: Attributes = self.options.into();
+        let mut params: Parameters = self.options.into();
 
         // read attributes from a template
         if let Some(path) = self.from.as_ref() {
-            let data = fs::read_to_string(path)
-                .map_err(|e| anyhow::anyhow!("failed loading template: {path}: {e}"))?;
-            let template = toml::from_str(&data)
-                .map_err(|e| anyhow::anyhow!("failed parsing template: {path}: {e}"))?;
+            let template = Parameters::from_path(path)?;
             // command-line options override template options
-            attrs = attrs.merge(template);
+            params = params.merge(template);
         } else if let Some(id) = self.from_bug {
             let bug = client
                 .get(&[id], false, false, false)
@@ -581,18 +388,16 @@ impl Command {
                 .into_iter()
                 .next()
                 .expect("failed getting bug");
-            attrs = attrs.merge(bug.into());
+            params = params.merge(bug.into());
         }
 
         // write attributes to a template
         if let Some(path) = self.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                let data = toml::to_string(&attrs)?;
+                let data = toml::to_string(&params)?;
                 fs::write(path, data)?;
             }
         }
-
-        let params = attrs.into_params(client);
 
         if !self.dry_run {
             let mut stdout = stdout().lock();

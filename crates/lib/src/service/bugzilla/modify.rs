@@ -1,14 +1,19 @@
-use std::fmt;
+use std::hash::Hash;
 use std::str::FromStr;
+use std::{fmt, fs};
 
-use indexmap::IndexMap;
+use camino::Utf8Path;
+use indexmap::{IndexMap, IndexSet};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 
-use crate::objects::bugzilla::Flag;
+use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
-use crate::traits::{InjectAuth, Request, ServiceParams, WebService};
+use crate::traits::{Contains, InjectAuth, Request, WebService};
 use crate::Error;
+
+use super::comment::CommentRequest;
 
 /// Changes made to a field.
 #[derive(Deserialize, Debug, Eq, PartialEq, Hash)]
@@ -59,29 +64,76 @@ impl fmt::Display for BugChange {
     }
 }
 
-#[derive(Debug)]
-pub(crate) struct ModifyRequest<'a> {
-    url: url::Url,
-    params: Params,
-    service: &'a super::Service,
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
+pub enum RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {
+    Range(Range<T>),
+    Set(IndexSet<T>),
 }
 
-impl Request for ModifyRequest<'_> {
-    type Output = Vec<BugChange>;
+impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for RangeOrSet<T>
+where
+    <T as FromStr>::Err: fmt::Display + fmt::Debug,
+{
+    type Err = crate::Error;
 
-    async fn send(self) -> crate::Result<Self::Output> {
-        let request = self
-            .service
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(value) = s.parse() {
+            Ok(Self::Range(value))
+        } else {
+            let mut set = IndexSet::new();
+            for x in s.split(',') {
+                let value = x
+                    .parse()
+                    .map_err(|e| Error::InvalidValue(format!("invalid value: {e}")))?;
+                set.insert(value);
+            }
+            Ok(Self::Set(set))
+        }
+    }
+}
+
+impl<T: fmt::Display + FromStr + PartialOrd + Eq + Hash> fmt::Display for RangeOrSet<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Range(value) => value.fmt(f),
+            Self::Set(values) => write!(f, "{}", values.into_iter().join(",")),
+        }
+    }
+}
+
+impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
+    fn contains(&self, obj: &T) -> bool {
+        match self {
+            Self::Range(value) => value.contains(obj),
+            Self::Set(value) => value.contains(obj),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct ModifyRequest {
+    url: url::Url,
+    ids: Vec<String>,
+    params: Parameters,
+}
+
+impl Request for ModifyRequest {
+    type Output = Vec<BugChange>;
+    type Service = super::Service;
+
+    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+        let params = self.params.encode(service, self.ids).await?;
+        let request = service
             .client()
             .put(self.url)
-            .json(&self.params)
-            .inject_auth(self.service, true)?;
+            .json(&params)
+            .inject_auth(service, true)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
+        let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
         let mut changes: Vec<BugChange> = serde_json::from_value(data)
             .map_err(|e| Error::InvalidValue(format!("failed deserializing changes: {e}")))?;
-        if let Some(comment) = self.params.comment.as_ref() {
+        if let Some(comment) = params.comment.as_ref() {
             for change in changes.iter_mut() {
                 change.comment = Some(comment.clone());
             }
@@ -90,11 +142,11 @@ impl Request for ModifyRequest<'_> {
     }
 }
 
-impl<'a> ModifyRequest<'a> {
+impl ModifyRequest {
     pub(super) fn new<S>(
-        service: &'a super::Service,
+        service: &super::Service,
         ids: &[S],
-        params: ModifyParams,
+        params: Parameters,
     ) -> crate::Result<Self>
     where
         S: fmt::Display,
@@ -103,13 +155,10 @@ impl<'a> ModifyRequest<'a> {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
-        let mut params = params.build()?;
-        params.ids = Some(ids.iter().map(|x| x.to_string()).collect());
-
         Ok(Self {
             url: service.base().join(&format!("rest/bug/{id}"))?,
+            ids: ids.iter().map(|x| x.to_string()).collect(),
             params,
-            service,
         })
     }
 }
@@ -224,9 +273,234 @@ impl fmt::Display for Comment {
     }
 }
 
+/// Bug modification parameters.
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+pub struct Parameters {
+    pub alias: Option<Vec<SetChange<String>>>,
+    pub assignee: Option<String>,
+    pub blocks: Option<Vec<SetChange<u64>>>,
+    pub cc: Option<Vec<SetChange<String>>>,
+    pub comment: Option<String>,
+    pub comment_is_private: Option<bool>,
+    pub component: Option<String>,
+    pub depends: Option<Vec<SetChange<u64>>>,
+    pub duplicate_of: Option<u64>,
+    pub flags: Option<Vec<Flag>>,
+    pub groups: Option<Vec<SetChange<String>>>,
+    pub keywords: Option<Vec<SetChange<String>>>,
+    pub os: Option<String>,
+    pub platform: Option<String>,
+    pub priority: Option<String>,
+    pub private_comments: Option<(RangeOrSet<usize>, Option<bool>)>,
+    pub product: Option<String>,
+    pub qa: Option<String>,
+    pub resolution: Option<String>,
+    pub see_also: Option<Vec<SetChange<String>>>,
+    pub severity: Option<String>,
+    pub status: Option<String>,
+    pub summary: Option<String>,
+    pub target: Option<String>,
+    pub url: Option<String>,
+    pub version: Option<String>,
+    pub whiteboard: Option<String>,
+
+    #[serde(flatten)]
+    pub custom_fields: Option<IndexMap<String, String>>,
+}
+
+impl Parameters {
+    /// Load parameters in TOML format from a file.
+    pub fn from_path(path: &Utf8Path) -> crate::Result<Self> {
+        let data = fs::read_to_string(path)
+            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
+        toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
+    }
+
+    pub fn merge(self, other: Self) -> Self {
+        Self {
+            alias: self.alias.or(other.alias),
+            assignee: self.assignee.or(other.assignee),
+            blocks: self.blocks.or(other.blocks),
+            cc: self.cc.or(other.cc),
+            comment: self.comment.or(other.comment),
+            comment_is_private: self.comment_is_private.or(other.comment_is_private),
+            component: self.component.or(other.component),
+            depends: self.depends.or(other.depends),
+            duplicate_of: self.duplicate_of.or(other.duplicate_of),
+            flags: self.flags.or(other.flags),
+            groups: self.groups.or(other.groups),
+            keywords: self.keywords.or(other.keywords),
+            os: self.os.or(other.os),
+            platform: self.platform.or(other.platform),
+            priority: self.priority.or(other.priority),
+            private_comments: self.private_comments.or(other.private_comments),
+            product: self.product.or(other.product),
+            qa: self.qa.or(other.qa),
+            resolution: self.resolution.or(other.resolution),
+            see_also: self.see_also.or(other.see_also),
+            status: self.status.or(other.status),
+            severity: self.severity.or(other.severity),
+            target: self.target.or(other.target),
+            summary: self.summary.or(other.summary),
+            url: self.url.or(other.url),
+            version: self.version.or(other.version),
+            whiteboard: self.whiteboard.or(other.whiteboard),
+
+            custom_fields: self.custom_fields.or(other.custom_fields),
+        }
+    }
+
+    /// Encode parameters into the form required for the request.
+    async fn encode(
+        self,
+        service: &super::Service,
+        ids: Vec<String>,
+    ) -> crate::Result<RequestParameters> {
+        let mut params = RequestParameters {
+            alias: self.alias.map(|x| x.into_iter().collect()),
+            blocks: self.blocks.map(|x| x.into_iter().collect()),
+            component: self.component,
+            depends_on: self.depends.map(|x| x.into_iter().collect()),
+            dupe_of: self.duplicate_of,
+            flags: self.flags,
+            groups: self.groups.map(|x| x.into_iter().collect()),
+            keywords: self.keywords.map(|x| x.into_iter().collect()),
+            op_sys: self.os,
+            platform: self.platform,
+            priority: self.priority,
+            product: self.product,
+            resolution: self.resolution,
+            severity: self.severity,
+            status: self.status,
+            summary: self.summary,
+            target_milestone: self.target,
+            url: self.url,
+            version: self.version,
+            whiteboard: self.whiteboard,
+
+            // auto-prefix custom field names
+            custom_fields: self.custom_fields.map(|values| {
+                values
+                    .into_iter()
+                    .map(|(k, v)| {
+                        if !k.starts_with("cf_") {
+                            (format!("cf_{k}"), v)
+                        } else {
+                            (k, v)
+                        }
+                    })
+                    .collect()
+            }),
+
+            ..Default::default()
+        };
+
+        if let Some(value) = self.assignee.as_ref() {
+            if value.is_empty() {
+                params.reset_assigned_to = Some(true);
+            } else {
+                let user = service.replace_user_alias(value);
+                params.assigned_to = Some(user.into());
+            }
+        }
+
+        if let Some(values) = self.cc {
+            let iter = values.into_iter().map(|c| match c {
+                SetChange::Add(value) => {
+                    let user = service.replace_user_alias(&value);
+                    SetChange::Add(user.into())
+                }
+                SetChange::Remove(value) => {
+                    let user = service.replace_user_alias(&value);
+                    SetChange::Remove(user.into())
+                }
+                SetChange::Set(value) => {
+                    let user = service.replace_user_alias(&value);
+                    SetChange::Set(user.into())
+                }
+            });
+
+            params.cc = Some(iter.collect());
+        }
+
+        if let Some(value) = self.comment {
+            params.comment = Some(Comment {
+                body: value,
+                is_private: self.comment_is_private.unwrap_or_default(),
+            });
+        }
+
+        if let Some((value, is_private)) = self.private_comments {
+            let id = match &ids[..] {
+                [x] => x,
+                _ => {
+                    return Err(Error::InvalidValue(
+                        "can't toggle comment privacy for multiple bugs".to_string(),
+                    ))
+                }
+            };
+            let comments = CommentRequest::new(service, &[id], None)?
+                .send(service)
+                .await?
+                .into_iter()
+                .next()
+                .expect("invalid comments response");
+
+            let mut toggled = IndexMap::new();
+            for c in comments {
+                if value.contains(&c.count) {
+                    toggled.insert(c.id, is_private.unwrap_or(!c.is_private));
+                }
+            }
+
+            params.comment_is_private = Some(toggled);
+        }
+
+        if let Some(value) = self.qa.as_ref() {
+            if value.is_empty() {
+                params.reset_qa_contact = Some(true);
+            } else {
+                let user = service.replace_user_alias(value);
+                params.qa_contact = Some(user.into());
+            }
+        }
+
+        if let Some(values) = self.see_also {
+            // convert bug IDs to full URLs
+            let iter = values.into_iter().map(|x| match x {
+                SetChange::Add(value) if value.parse::<u64>().is_ok() => {
+                    SetChange::Add(service.item_url(value))
+                }
+                SetChange::Remove(value) if value.parse::<u64>().is_ok() => {
+                    SetChange::Remove(service.item_url(value))
+                }
+                SetChange::Set(value) if value.parse::<u64>().is_ok() => {
+                    SetChange::Set(service.item_url(value))
+                }
+                c => c,
+            });
+
+            params.see_also = Some(iter.collect());
+        }
+
+        // TODO: verify all required fields are non-empty
+        if params == RequestParameters::default() {
+            Err(Error::EmptyParams)
+        } else {
+            Ok(params)
+        }
+    }
+}
+
+/// Internal bug modification request parameters.
+///
+/// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
+/// information.
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
-struct Params {
+struct RequestParameters {
     alias: Option<SetChanges<String>>,
     assigned_to: Option<String>,
     blocks: Option<SetChanges<u64>>,
@@ -259,225 +533,4 @@ struct Params {
 
     #[serde(flatten)]
     custom_fields: Option<IndexMap<String, String>>,
-}
-
-/// Construct bug modification parameters.
-///
-/// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
-/// information.
-pub struct ModifyParams<'a> {
-    service: &'a super::Service,
-    params: Params,
-}
-
-impl<'a> ServiceParams<'a> for ModifyParams<'a> {
-    type Service = super::Service;
-
-    fn new(service: &'a Self::Service) -> Self {
-        Self {
-            service,
-            params: Default::default(),
-        }
-    }
-}
-
-impl<'a> ModifyParams<'a> {
-    fn build(self) -> crate::Result<Params> {
-        if self.params == Params::default() {
-            Err(Error::EmptyParams)
-        } else {
-            Ok(self.params)
-        }
-    }
-
-    pub fn alias<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = SetChange<String>>,
-    {
-        self.params.alias = Some(values.into_iter().collect());
-    }
-
-    pub fn assignee(&mut self, value: Option<&str>) {
-        if let Some(name) = value {
-            let user = self.service.replace_user_alias(name);
-            self.params.assigned_to = Some(user.into());
-        } else {
-            self.params.reset_assigned_to = Some(true);
-        }
-    }
-
-    pub fn blocks<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = SetChange<u64>>,
-    {
-        self.params.blocks = Some(values.into_iter().collect());
-    }
-
-    pub fn cc<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = SetChange<String>>,
-    {
-        let iter = values.into_iter().map(|c| match c {
-            SetChange::Add(value) => {
-                let user = self.service.replace_user_alias(&value);
-                SetChange::Add(user.into())
-            }
-            SetChange::Remove(value) => {
-                let user = self.service.replace_user_alias(&value);
-                SetChange::Remove(user.into())
-            }
-            SetChange::Set(value) => {
-                let user = self.service.replace_user_alias(&value);
-                SetChange::Set(user.into())
-            }
-        });
-
-        self.params.cc = Some(iter.collect());
-    }
-
-    pub fn comment<S: Into<String>>(&mut self, value: S, is_private: bool) {
-        let comment = Comment {
-            body: value.into(),
-            is_private,
-        };
-        self.params.comment = Some(comment);
-    }
-
-    pub fn component<S: Into<String>>(&mut self, value: S) {
-        self.params.component = Some(value.into());
-    }
-
-    pub fn depends<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = SetChange<u64>>,
-    {
-        self.params.depends_on = Some(values.into_iter().collect());
-    }
-
-    pub fn duplicate_of(&mut self, value: u64) {
-        self.params.dupe_of = Some(value);
-    }
-
-    pub fn custom_fields<I, K, V>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = (K, V)>,
-        K: AsRef<str>,
-        V: Into<String>,
-    {
-        self.params.custom_fields = Some(
-            values
-                .into_iter()
-                .map(|(k, v)| match k.as_ref() {
-                    k if k.starts_with("cf_") => (k.into(), v.into()),
-                    k => (format!("cf_{k}"), v.into()),
-                })
-                .collect(),
-        );
-    }
-
-    pub fn flags<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = Flag>,
-    {
-        self.params.flags = Some(values.into_iter().collect());
-    }
-
-    pub fn groups<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = SetChange<String>>,
-    {
-        self.params.groups = Some(values.into_iter().collect());
-    }
-
-    pub fn keywords<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = SetChange<String>>,
-    {
-        self.params.keywords = Some(values.into_iter().collect());
-    }
-
-    pub fn os<S: Into<String>>(&mut self, value: S) {
-        self.params.op_sys = Some(value.into());
-    }
-
-    pub fn platform<S: Into<String>>(&mut self, value: S) {
-        self.params.platform = Some(value.into());
-    }
-
-    pub fn priority<S: Into<String>>(&mut self, value: S) {
-        self.params.priority = Some(value.into());
-    }
-
-    pub fn comment_is_private<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = (u64, bool)>,
-    {
-        self.params.comment_is_private = Some(values.into_iter().collect());
-    }
-
-    pub fn product<S: Into<String>>(&mut self, value: S) {
-        self.params.product = Some(value.into());
-    }
-
-    pub fn qa(&mut self, value: Option<&str>) {
-        if let Some(name) = value {
-            let user = self.service.replace_user_alias(name);
-            self.params.qa_contact = Some(user.into());
-        } else {
-            self.params.reset_qa_contact = Some(true);
-        }
-    }
-
-    pub fn resolution<S: Into<String>>(&mut self, value: S) {
-        self.params.resolution = Some(value.into());
-    }
-
-    pub fn see_also<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = SetChange<String>>,
-    {
-        // convert bug IDs to full URLs
-        let iter = values.into_iter().map(|x| match x {
-            SetChange::Add(value) if value.parse::<u64>().is_ok() => {
-                SetChange::Add(self.service.item_url(value))
-            }
-            SetChange::Remove(value) if value.parse::<u64>().is_ok() => {
-                SetChange::Remove(self.service.item_url(value))
-            }
-            SetChange::Set(value) if value.parse::<u64>().is_ok() => {
-                SetChange::Set(self.service.item_url(value))
-            }
-            c => c,
-        });
-
-        self.params.see_also = Some(iter.collect());
-    }
-
-    pub fn severity<S: Into<String>>(&mut self, value: S) {
-        self.params.severity = Some(value.into());
-    }
-
-    pub fn status<S: Into<String>>(&mut self, value: S) {
-        self.params.status = Some(value.into());
-    }
-
-    pub fn summary<S: Into<String>>(&mut self, value: S) {
-        self.params.summary = Some(value.into());
-    }
-
-    pub fn target<S: Into<String>>(&mut self, value: S) {
-        self.params.target_milestone = Some(value.into());
-    }
-
-    pub fn url<S: Into<String>>(&mut self, value: S) {
-        self.params.url = Some(value.into());
-    }
-
-    pub fn version<S: Into<String>>(&mut self, value: S) {
-        self.params.version = Some(value.into());
-    }
-
-    pub fn whiteboard<S: Into<String>>(&mut self, value: S) {
-        self.params.whiteboard = Some(value.into());
-    }
 }

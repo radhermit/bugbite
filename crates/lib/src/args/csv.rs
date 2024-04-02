@@ -13,6 +13,12 @@ pub struct Csv<T: fmt::Display + FromStr> {
     values: Vec<T>,
 }
 
+impl<T: fmt::Display + FromStr> Csv<T> {
+    pub fn into_inner(self) -> Vec<T> {
+        self.values
+    }
+}
+
 impl<T> FromStr for Csv<T>
 where
     T: fmt::Display + FromStr,

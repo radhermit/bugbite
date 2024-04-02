@@ -1,19 +1,19 @@
+use std::fs;
 use std::process::ExitCode;
 
-use bugbite::args::{Csv, MaybeStdinVec};
+use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
 use bugbite::client::redmine::Client;
 use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
-use bugbite::service::redmine::search::{ExistsField, OrderField};
+use bugbite::service::redmine::search::{OrderField, Parameters};
 use bugbite::service::redmine::IssueField;
 use bugbite::time::TimeDelta;
-use bugbite::traits::WebClient;
-use clap::Args;
+use camino::Utf8PathBuf;
+use clap::{Args, ValueHint};
 use strum::VariantNames;
 
-use crate::service::args::ExistsOrValues;
 use crate::service::output::render_search;
-use crate::utils::{launch_browser, wrapped_doc};
+use crate::utils::{confirm, launch_browser, wrapped_doc};
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Query options")]
@@ -283,6 +283,43 @@ struct TimeOptions {
     closed: Option<RangeOrValue<TimeDelta>>,
 }
 
+/// Available search parameters.
+#[derive(Debug, Args)]
+struct Params {
+    #[clap(flatten)]
+    query: QueryOptions,
+
+    #[clap(flatten)]
+    attr: AttributeOptions,
+
+    #[clap(flatten)]
+    time: TimeOptions,
+
+    /// strings to search for in the summary
+    #[clap(value_name = "TERM", help_heading = "Arguments")]
+    summary: Option<Vec<MaybeStdinVec<String>>>,
+}
+
+impl From<Params> for Parameters {
+    fn from(value: Params) -> Self {
+        Self {
+            assignee: value.attr.assignee,
+            attachments: value.attr.attachments,
+            blocks: value.attr.blocks.map(|x| x.flatten()),
+            blocked: value.attr.blocked.map(|x| x.flatten()),
+            relates: value.attr.relates.map(|x| x.flatten()),
+            ids: value.attr.id.map(|x| x.into_iter().flatten().collect()),
+            created: value.time.created,
+            modified: value.time.modified,
+            closed: value.time.closed,
+            status: value.attr.status,
+            limit: value.query.limit,
+            order: value.query.order.map(|x| x.into_iter().collect()),
+            summary: value.summary.map(|x| x.into_iter().flatten().collect()),
+        }
+    }
+}
+
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Search options")]
 pub(super) struct SearchOptions {
@@ -302,23 +339,37 @@ pub(super) struct SearchOptions {
     /// skip service interaction
     #[arg(short = 'n', long)]
     dry_run: bool,
-}
 
-/// Available search parameters.
-#[derive(Debug, Args)]
-struct Params {
-    #[clap(flatten)]
-    query: QueryOptions,
+    /// read attributes from a template
+    #[arg(
+        long,
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+        long_help = wrapped_doc!("
+            Read search attributes from a template.
 
-    #[clap(flatten)]
-    attr: AttributeOptions,
+            Value must be the path to a valid search template file.
+            Templates use the TOML format and generally map long option names to
+            values.
+        ")
+    )]
+    from: Option<Utf8PathBuf>,
 
-    #[clap(flatten)]
-    time: TimeOptions,
+    /// write attributes to a template
+    #[arg(
+        long,
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+        long_help = wrapped_doc!("
+            Write search attributes to a template.
 
-    /// strings to search for in the summary
-    #[clap(value_name = "TERM", help_heading = "Arguments")]
-    summary: Option<Vec<MaybeStdinVec<String>>>,
+            Value is the file path where the TOML template file will be written.
+
+            Combining this option with -n/--dry-run allows creating search
+            templates without any service interaction.
+        ")
+    )]
+    to: Option<Utf8PathBuf>,
 }
 
 #[derive(Debug, Args)]
@@ -332,67 +383,30 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
-        let mut query = client.service().search_query();
-        let params = self.params;
-        if let Some(value) = params.attr.assignee {
-            query.assignee(value);
+        let fields = self.params.query.fields.clone();
+        let mut params: Parameters = self.params.into();
+
+        // read attributes from a template
+        if let Some(path) = self.search.from.as_ref() {
+            let template = Parameters::from_path(path)?;
+            // command-line options override template options
+            params = params.merge(template);
         }
-        if let Some(values) = params.attr.attachments {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachment, value),
-                ExistsOrValues::Values(values) => query.attachments(values.into_iter()),
+
+        // write attributes to a template
+        if let Some(path) = self.search.to.as_ref() {
+            if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
+                let data = toml::to_string(&params)?;
+                fs::write(path, data)?;
             }
         }
-        if let Some(values) = params.attr.blocks {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
-                ExistsOrValues::Values(values) => query.blocks(values.into_iter().flatten()),
-            }
-        }
-        if let Some(values) = params.attr.blocked {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocked, value),
-                ExistsOrValues::Values(values) => query.blocked(values.into_iter().flatten()),
-            }
-        }
-        if let Some(values) = params.attr.relates {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Relates, value),
-                ExistsOrValues::Values(values) => query.relates(values.into_iter().flatten()),
-            }
-        }
-        if let Some(values) = params.attr.id {
-            query.id(values.into_iter().flatten());
-        }
-        if let Some(value) = params.query.limit {
-            query.limit(value);
-        }
-        if let Some(values) = params.query.order {
-            query.order(values)?;
-        }
-        if let Some(value) = params.attr.status.as_ref() {
-            query.status(value)?;
-        }
-        if let Some(value) = params.time.closed.as_ref() {
-            query.closed(value);
-        }
-        if let Some(value) = params.time.created.as_ref() {
-            query.created(value);
-        }
-        if let Some(value) = params.time.modified.as_ref() {
-            query.modified(value);
-        }
-        if let Some(values) = params.summary.as_ref() {
-            query.summary(values.iter().flatten());
-        }
-        let fields = &params.query.fields;
 
         if self.search.browser {
-            let url = client.search_url(query)?;
+            let url = client.search_url(params)?;
             launch_browser([url])?;
         } else if !self.search.dry_run {
-            let issues = client.search(query).await?;
-            render_search(issues, fields)?;
+            let issues = client.search(params).await?;
+            render_search(issues, &fields)?;
         }
 
         Ok(ExitCode::SUCCESS)

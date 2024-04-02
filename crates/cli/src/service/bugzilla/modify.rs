@@ -1,4 +1,3 @@
-use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::process::ExitCode;
 use std::str::FromStr;
@@ -7,67 +6,25 @@ use std::{fmt, fs};
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
-use bugbite::objects::Range;
-use bugbite::service::bugzilla::modify::{ModifyParams, SetChange};
-use bugbite::traits::{Contains, WebClient};
+use bugbite::service::bugzilla::modify::{Parameters, RangeOrSet, SetChange};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 use tempfile::NamedTempFile;
 use tracing::info;
 
 use crate::utils::{confirm, launch_editor, wrapped_doc};
 
 #[derive(Debug, Clone)]
-enum RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {
-    Range(Range<T>),
-    Set(HashSet<T>),
-}
-
-impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for RangeOrSet<T>
-where
-    <T as FromStr>::Err: fmt::Display + fmt::Debug,
-{
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Ok(value) = s.parse() {
-            Ok(Self::Range(value))
-        } else {
-            let mut set = HashSet::new();
-            for x in s.split(',') {
-                let value = x
-                    .parse()
-                    .map_err(|e| anyhow::anyhow!("invalid value: {e}"))?;
-                set.insert(value);
-            }
-            Ok(Self::Set(set))
-        }
-    }
-}
-
-impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
-    fn contains(&self, obj: &T) -> bool {
-        match self {
-            Self::Range(value) => value.contains(obj),
-            Self::Set(value) => value.contains(obj),
-        }
-    }
-}
-
-#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
 struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
     raw: String,
-    container: Option<RangeOrSet<T>>,
+    range_or_set: Option<RangeOrSet<T>>,
     is_private: Option<bool>,
 }
 
 impl<T: FromStr + PartialOrd + Eq + Hash> CommentPrivacy<T> {
-    /// Determine if newly created comments should be created private.
-    fn created_private(&self) -> bool {
-        self.container.is_none() && self.is_private.unwrap_or_default()
+    fn into_private_comments(self) -> Option<(RangeOrSet<T>, Option<bool>)> {
+        self.range_or_set.map(|x| (x, self.is_private))
     }
 }
 
@@ -78,7 +35,7 @@ where
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (container, is_private) = if let Some((ids, value)) = s.split_once(':') {
+        let (range_or_set, is_private) = if let Some((ids, value)) = s.split_once(':') {
             (Some(ids.parse()?), Some(value.parse()?))
         } else if let Ok(value) = s.parse::<bool>() {
             (None, Some(value))
@@ -88,7 +45,7 @@ where
 
         Ok(Self {
             raw: s.to_string(),
-            container,
+            range_or_set,
             is_private,
         })
     }
@@ -519,230 +476,7 @@ struct Options {
     whiteboard: Option<String>,
 }
 
-#[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
-struct Attributes {
-    alias: Option<Vec<SetChange<String>>>,
-    assignee: Option<String>,
-    blocks: Option<Vec<SetChange<u64>>>,
-    cc: Option<Vec<SetChange<String>>>,
-    comment: Option<String>,
-    component: Option<String>,
-    depends: Option<Vec<SetChange<u64>>>,
-    duplicate_of: Option<u64>,
-    flags: Option<Vec<Flag>>,
-    groups: Option<Vec<SetChange<String>>>,
-    keywords: Option<Vec<SetChange<String>>>,
-    os: Option<String>,
-    platform: Option<String>,
-    priority: Option<String>,
-    private_comment: Option<CommentPrivacy<usize>>,
-    product: Option<String>,
-    qa: Option<String>,
-    resolution: Option<String>,
-    see_also: Option<Vec<SetChange<String>>>,
-    severity: Option<String>,
-    status: Option<String>,
-    summary: Option<String>,
-    target: Option<String>,
-    url: Option<String>,
-    version: Option<String>,
-    whiteboard: Option<String>,
-
-    #[serde(flatten)]
-    custom_fields: Option<HashMap<String, String>>,
-}
-
-impl Attributes {
-    fn merge(self, other: Self) -> Self {
-        Self {
-            alias: self.alias.or(other.alias),
-            assignee: self.assignee.or(other.assignee),
-            blocks: self.blocks.or(other.blocks),
-            cc: self.cc.or(other.cc),
-            comment: self.comment.or(other.comment),
-            component: self.component.or(other.component),
-            depends: self.depends.or(other.depends),
-            duplicate_of: self.duplicate_of.or(other.duplicate_of),
-            flags: self.flags.or(other.flags),
-            groups: self.groups.or(other.groups),
-            keywords: self.keywords.or(other.keywords),
-            os: self.os.or(other.os),
-            platform: self.platform.or(other.platform),
-            priority: self.priority.or(other.priority),
-            private_comment: self.private_comment.or(other.private_comment),
-            product: self.product.or(other.product),
-            qa: self.qa.or(other.qa),
-            resolution: self.resolution.or(other.resolution),
-            see_also: self.see_also.or(other.see_also),
-            status: self.status.or(other.status),
-            severity: self.severity.or(other.severity),
-            target: self.target.or(other.target),
-            summary: self.summary.or(other.summary),
-            url: self.url.or(other.url),
-            version: self.version.or(other.version),
-            whiteboard: self.whiteboard.or(other.whiteboard),
-
-            custom_fields: self.custom_fields.or(other.custom_fields),
-        }
-    }
-
-    async fn into_params<'a, S>(
-        self,
-        client: &'a Client,
-        ids: &[S],
-        created_private: bool,
-    ) -> anyhow::Result<ModifyParams<'a>>
-    where
-        S: fmt::Display,
-    {
-        let mut params = client.service().modify_params();
-
-        if let Some(values) = self.alias {
-            params.alias(values);
-        }
-
-        if let Some(value) = self.assignee.as_ref() {
-            if value.is_empty() {
-                params.assignee(None);
-            } else {
-                params.assignee(Some(value));
-            }
-        }
-
-        if let Some(values) = self.blocks {
-            params.blocks(values);
-        }
-
-        if let Some(values) = self.cc {
-            params.cc(values);
-        }
-
-        if let Some(mut value) = self.comment {
-            // interactively create a comment
-            if value.trim().is_empty() {
-                value = edit_comment(value.trim())?;
-            }
-            params.comment(&value, created_private);
-        }
-
-        if let Some(value) = self.component {
-            params.component(value);
-        }
-
-        if let Some(values) = self.custom_fields {
-            params.custom_fields(values);
-        }
-
-        if let Some(values) = self.depends {
-            params.depends(values);
-        }
-
-        if let Some(value) = self.duplicate_of {
-            params.duplicate_of(value);
-        }
-
-        if let Some(values) = self.flags {
-            params.flags(values);
-        }
-
-        if let Some(values) = self.groups {
-            params.groups(values);
-        }
-
-        if let Some(values) = self.keywords {
-            params.keywords(values);
-        }
-
-        if let Some(value) = self.os {
-            params.os(value);
-        }
-
-        if let Some(value) = self.platform {
-            params.platform(value);
-        }
-
-        if let Some(value) = self.priority {
-            params.priority(value);
-        }
-
-        if let Some(value) = self.private_comment.as_ref() {
-            if let Some(container) = value.container.as_ref() {
-                let id = match ids {
-                    [x] => x,
-                    _ => anyhow::bail!("can't toggle comment privacy for multiple bugs"),
-                };
-                let comments = client
-                    .comment(&[id], None)
-                    .await?
-                    .into_iter()
-                    .next()
-                    .expect("invalid comments response");
-
-                let mut toggled = vec![];
-                for c in comments {
-                    if container.contains(&c.count) {
-                        toggled.push((c.id, value.is_private.unwrap_or(!c.is_private)));
-                    }
-                }
-
-                params.comment_is_private(toggled);
-            }
-        }
-
-        if let Some(value) = self.product {
-            params.product(value);
-        }
-
-        if let Some(value) = self.qa.as_ref() {
-            if value.is_empty() {
-                params.qa(None);
-            } else {
-                params.qa(Some(value));
-            }
-        }
-
-        if let Some(value) = self.resolution {
-            params.resolution(value);
-        }
-
-        if let Some(values) = self.see_also {
-            params.see_also(values);
-        }
-
-        if let Some(value) = self.severity {
-            params.severity(value);
-        }
-
-        if let Some(value) = self.status {
-            params.status(value);
-        }
-
-        if let Some(value) = self.target {
-            params.target(value);
-        }
-
-        if let Some(value) = self.summary {
-            params.summary(value);
-        }
-
-        if let Some(value) = self.url {
-            params.url(value);
-        }
-
-        if let Some(value) = self.version {
-            params.version(value);
-        }
-
-        if let Some(value) = self.whiteboard {
-            params.whiteboard(value);
-        }
-
-        Ok(params)
-    }
-}
-
-impl From<Options> for Attributes {
+impl From<Options> for Parameters {
     fn from(value: Options) -> Self {
         Self {
             alias: value.alias,
@@ -750,6 +484,7 @@ impl From<Options> for Attributes {
             blocks: value.blocks,
             cc: value.cc,
             comment: value.comment,
+            comment_is_private: value.private_comment.as_ref().and_then(|x| x.is_private),
             component: value.component,
             depends: value.depends,
             duplicate_of: value.duplicate_of,
@@ -759,7 +494,9 @@ impl From<Options> for Attributes {
             os: value.os,
             platform: value.platform,
             priority: value.priority,
-            private_comment: value.private_comment,
+            private_comments: value
+                .private_comment
+                .and_then(|x| x.into_private_comments()),
             product: value.product,
             qa: value.qa,
             resolution: value.resolution,
@@ -922,51 +659,50 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
         }
         let comment = fs::read_to_string(&temp_file)?;
         if comment != data || confirm("No changes made to comment, submit anyway?", false)? {
-            return Ok(comment);
+            return Ok(comment.trim().to_string());
         }
     }
 }
 
 impl Command {
-    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
-        let mut attrs: Attributes = self.options.into();
+    pub(super) async fn run(mut self, client: &Client) -> anyhow::Result<ExitCode> {
+        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
+
+        // interactively create a reply
+        if let Some(mut values) = self.reply {
+            if ids.len() > 1 {
+                anyhow::bail!("reply invalid, targeting multiple bugs");
+            }
+            let comment = get_reply(client, ids[0], &mut values).await?;
+            self.options.comment = Some(comment);
+        }
+
+        let mut params: Parameters = self.options.into();
+
+        // interactively create comment
+        if let Some(value) = params.comment.as_ref() {
+            if value.trim().is_empty() {
+                let comment = edit_comment(value.trim())?;
+                params.comment = Some(comment);
+            }
+        }
 
         // read modification attributes from a template
         if let Some(path) = self.from.as_ref() {
-            let data = fs::read_to_string(path)
-                .map_err(|e| anyhow::anyhow!("failed loading template: {path}: {e}"))?;
-            let template = toml::from_str(&data)
-                .map_err(|e| anyhow::anyhow!("failed parsing template: {path}: {e}"))?;
+            let template = Parameters::from_path(path)?;
             // command-line options override template options
-            attrs = attrs.merge(template);
+            params = params.merge(template);
         };
 
         // write modification attributes to a template
         if let Some(path) = self.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                let data = toml::to_string(&attrs)?;
+                let data = toml::to_string(&params)?;
                 fs::write(path, data)?;
             }
         }
 
         if !self.dry_run {
-            let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-            let created_private = attrs
-                .private_comment
-                .as_ref()
-                .map(|x| x.created_private())
-                .unwrap_or_default();
-            let mut params = attrs.into_params(client, ids, created_private).await?;
-
-            // interactively create a reply
-            if let Some(mut values) = self.reply {
-                if ids.len() > 1 {
-                    anyhow::bail!("reply invalid, targeting multiple bugs");
-                }
-                let comment = get_reply(client, ids[0], &mut values).await?;
-                params.comment(comment.trim(), created_private);
-            }
-
             let changes = client.modify(ids, params).await?;
             for change in changes {
                 info!("{change}");

@@ -2,14 +2,15 @@ use reqwest::ClientBuilder;
 use tracing::info;
 
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
-use crate::service::bugzilla::attach::CreateAttachment;
-use crate::service::bugzilla::comment::CommentParams;
-use crate::service::bugzilla::create::CreateParams;
-use crate::service::bugzilla::modify::{BugChange, ModifyParams};
-use crate::service::bugzilla::search::QueryBuilder;
-use crate::service::bugzilla::{Config, Service};
+use crate::service::bugzilla::{
+    attach::CreateAttachment,
+    comment::CommentParams,
+    create,
+    modify::{self, BugChange},
+    search, {Config, Service},
+};
 use crate::time::TimeDelta;
-use crate::traits::{Query, Request, WebService};
+use crate::traits::{Request, WebService};
 
 #[derive(Debug)]
 pub struct Client {
@@ -28,9 +29,9 @@ impl Client {
     }
 
     /// Return the website URL for a query.
-    pub fn search_url<Q: Query>(&self, mut query: Q) -> crate::Result<String> {
+    pub fn search_url(&self, params: search::Parameters) -> crate::Result<String> {
         let base = self.service.base().as_str().trim_end_matches('/');
-        let params = query.params()?;
+        let params = params.encode(&self.service)?;
         Ok(format!("{base}/buglist.cgi?{params}"))
     }
 
@@ -43,7 +44,7 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.attach_request(ids, attachments)?;
-        request.send().await
+        request.send(&self.service).await
     }
 
     pub async fn attachment<S>(
@@ -56,7 +57,7 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.attachment_request(ids, bugs, data)?;
-        request.send().await
+        request.send(&self.service).await
     }
 
     pub async fn comment<S>(
@@ -68,7 +69,7 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.comment_request(ids, params)?;
-        request.send().await
+        request.send(&self.service).await
     }
 
     pub async fn get<S>(
@@ -84,7 +85,7 @@ impl Client {
         let request = self
             .service
             .get_request(ids, attachments, comments, history)?;
-        request.send().await
+        request.send(&self.service).await
     }
 
     pub async fn history<S>(
@@ -96,29 +97,29 @@ impl Client {
         S: std::fmt::Display,
     {
         let request = self.service.history_request(ids, created)?;
-        request.send().await
+        request.send(&self.service).await
     }
 
-    pub async fn create<'a>(&'a self, params: CreateParams<'a>) -> crate::Result<u64> {
+    pub async fn create(&self, params: create::Parameters) -> crate::Result<u64> {
         let request = self.service.create_request(params)?;
-        request.send().await
+        request.send(&self.service).await
     }
 
-    pub async fn modify<'a, S>(
-        &'a self,
+    pub async fn modify<S>(
+        &self,
         ids: &[S],
-        params: ModifyParams<'a>,
+        params: modify::Parameters,
     ) -> crate::Result<Vec<BugChange>>
     where
         S: std::fmt::Display,
     {
         let request = self.service.modify_request(ids, params)?;
-        request.send().await
+        request.send(&self.service).await
     }
 
-    pub async fn search<'a>(&'a self, query: QueryBuilder<'a>) -> crate::Result<Vec<Bug>> {
-        let request = self.service.search_request(query)?;
-        request.send().await
+    pub async fn search(&self, params: search::Parameters) -> crate::Result<Vec<Bug>> {
+        let request = self.service.search_request(params)?;
+        request.send(&self.service).await
     }
 }
 
@@ -126,7 +127,8 @@ impl Client {
 mod tests {
     use crate::service::ServiceKind;
     use crate::test::{TestServer, TESTDATA_PATH};
-    use crate::traits::WebClient;
+
+    use super::*;
 
     #[tokio::test]
     async fn get() {
@@ -162,8 +164,7 @@ mod tests {
             .unwrap();
 
         server.respond(200, path.join("search/ids.json")).await;
-        let mut query = client.service().search_query();
-        query.summary(["test"]);
+        let query = search::Parameters::new().summary(["test"]);
         let bugs = client.search(query).await.unwrap();
         assert_eq!(bugs.len(), 5);
     }

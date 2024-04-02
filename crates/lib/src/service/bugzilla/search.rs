@@ -1,38 +1,38 @@
-use std::collections::HashSet;
+use std::fs;
+use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 use std::{fmt, iter};
 
+use camino::Utf8Path;
 use indexmap::IndexSet;
 use itertools::Itertools;
-use ordered_multimap::ListOrderedMultimap;
+use serde::{Deserialize, Serialize};
+use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 use strum::{Display, EnumIter, EnumString, VariantNames};
 
+use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
-use crate::query::{Order, OrderType};
+use crate::query::{self, Order, OrderType};
 use crate::time::TimeDelta;
-use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
+use crate::traits::{Api, InjectAuth, Request, WebService};
 use crate::Error;
 
 use super::{BugField, FilterField};
 
 #[derive(Debug)]
-pub(crate) struct SearchRequest<'a> {
+pub(crate) struct SearchRequest {
     url: url::Url,
-    service: &'a super::Service,
 }
 
-impl Request for SearchRequest<'_> {
+impl Request for SearchRequest {
     type Output = Vec<Bug>;
+    type Service = super::Service;
 
-    async fn send(self) -> crate::Result<Self::Output> {
-        let request = self
-            .service
-            .client()
-            .get(self.url)
-            .inject_auth(self.service, false)?;
+    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+        let request = service.client().get(self.url).inject_auth(service, false)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
+        let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
         let bugs = serde_json::from_value(data)
             .map_err(|e| Error::InvalidValue(format!("failed deserializing bugs: {e}")))?;
@@ -40,17 +40,16 @@ impl Request for SearchRequest<'_> {
     }
 }
 
-impl<'a> SearchRequest<'a> {
-    pub(super) fn new(service: &'a super::Service, mut query: QueryBuilder) -> crate::Result<Self> {
-        let url = service
-            .base()
-            .join(&format!("rest/bug?{}", query.params()?))?;
-        Ok(Self { url, service })
+impl SearchRequest {
+    pub(super) fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
+        let params = params.encode(service)?;
+        let url = service.base().join(&format!("rest/bug?{params}"))?;
+        Ok(Self { url })
     }
 }
 
 /// Advanced field matching operators.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum MatchOp {
     /// case-sensitive substring matching
     CaseSubstring,
@@ -80,7 +79,7 @@ impl Api for MatchOp {
 }
 
 /// Advanced field match.
-#[derive(Debug, Clone)]
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub struct Match {
     op: MatchOp,
     value: String,
@@ -147,33 +146,551 @@ impl From<&String> for Match {
     }
 }
 
+/// Bug search parameters.
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Clone)]
+pub struct Parameters {
+    pub alias: Option<Vec<ExistsOrValues<Match>>>,
+    pub attachments: Option<ExistsOrValues<Match>>,
+    pub flags: Option<Vec<ExistsOrValues<Match>>>,
+    pub groups: Option<Vec<ExistsOrValues<Match>>>,
+    pub keywords: Option<Vec<ExistsOrValues<Match>>>,
+    pub see_also: Option<Vec<ExistsOrValues<Match>>>,
+    pub tags: Option<Vec<ExistsOrValues<Match>>>,
+    pub whiteboard: Option<Vec<ExistsOrValues<Match>>>,
+    pub url: Option<Vec<ExistsOrValues<Match>>>,
+
+    pub changed: Option<Vec<(Vec<ChangeField>, RangeOrValue<TimeDelta>)>>,
+    pub changed_by: Option<Vec<(Vec<ChangeField>, Vec<String>)>>,
+    pub changed_from: Option<Vec<(ChangeField, String)>>,
+    pub changed_to: Option<Vec<(ChangeField, String)>>,
+
+    pub assignee: Option<Vec<Vec<Match>>>,
+    pub attacher: Option<Vec<Vec<Match>>>,
+    pub cc: Option<Vec<ExistsOrValues<Match>>>,
+    pub commenter: Option<Vec<Vec<Match>>>,
+    pub flagger: Option<Vec<Vec<Match>>>,
+    pub qa: Option<Vec<ExistsOrValues<Match>>>,
+    pub reporter: Option<Vec<Vec<Match>>>,
+
+    #[serde(skip_serializing)]
+    pub fields: Option<Vec<FilterField>>,
+    pub limit: Option<u64>,
+    pub order: Option<Vec<Order<OrderField>>>,
+
+    pub created: Option<RangeOrValue<TimeDelta>>,
+    pub modified: Option<RangeOrValue<TimeDelta>>,
+
+    pub blocks: Option<Vec<ExistsOrValues<i64>>>,
+    pub depends: Option<Vec<ExistsOrValues<i64>>>,
+    pub ids: Option<Vec<i64>>,
+    pub priority: Option<Vec<Match>>,
+    pub severity: Option<Vec<Match>>,
+    pub version: Option<Vec<Match>>,
+    pub component: Option<Vec<Match>>,
+    pub product: Option<Vec<Match>>,
+    pub platform: Option<Vec<Match>>,
+    pub os: Option<Vec<Match>>,
+    pub resolution: Option<Vec<Match>>,
+    pub status: Option<Vec<String>>,
+    pub target: Option<Vec<Match>>,
+    pub comments: Option<RangeOrValue<u64>>,
+    pub votes: Option<RangeOrValue<u64>>,
+    pub comment: Option<Vec<Match>>,
+    pub summary: Option<Vec<Match>>,
+    pub quicksearch: Option<String>,
+    pub custom_fields: Option<Vec<(String, Match)>>,
+}
+
+impl Parameters {
+    pub fn new() -> Self {
+        Parameters::default()
+    }
+
+    /// Load parameters in TOML format from a file.
+    pub fn from_path(path: &Utf8Path) -> crate::Result<Self> {
+        let data = fs::read_to_string(path)
+            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
+        toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
+    }
+
+    /// Merge parameters using the provided value for fallbacks.
+    pub fn merge(self, other: Self) -> Self {
+        Self {
+            alias: self.alias.or(other.alias),
+            attachments: self.attachments.or(other.attachments),
+            flags: self.flags.or(other.flags),
+            groups: self.groups.or(other.groups),
+            keywords: self.keywords.or(other.keywords),
+            see_also: self.see_also.or(other.see_also),
+            tags: self.tags.or(other.tags),
+            whiteboard: self.whiteboard.or(other.whiteboard),
+            url: self.url.or(other.url),
+
+            changed: self.changed.or(other.changed),
+            changed_by: self.changed_by.or(other.changed_by),
+            changed_from: self.changed_from.or(other.changed_from),
+            changed_to: self.changed_to.or(other.changed_to),
+
+            assignee: self.assignee.or(other.assignee),
+            attacher: self.attacher.or(other.attacher),
+            cc: self.cc.or(other.cc),
+            commenter: self.commenter.or(other.commenter),
+            flagger: self.flagger.or(other.flagger),
+            qa: self.qa.or(other.qa),
+            reporter: self.reporter.or(other.reporter),
+
+            fields: self.fields.or(other.fields),
+            limit: self.limit.or(other.limit),
+            order: self.order.or(other.order),
+
+            created: self.created.or(other.created),
+            modified: self.modified.or(other.modified),
+
+            blocks: self.blocks.or(other.blocks),
+            depends: self.depends.or(other.depends),
+            ids: self.ids.or(other.ids),
+            priority: self.priority.or(other.priority),
+            severity: self.severity.or(other.severity),
+            version: self.version.or(other.version),
+            component: self.component.or(other.component),
+            product: self.product.or(other.product),
+            platform: self.platform.or(other.platform),
+            os: self.os.or(other.os),
+            resolution: self.resolution.or(other.resolution),
+            status: self.status.or(other.status),
+            target: self.target.or(other.target),
+            comments: self.comments.or(other.comments),
+            votes: self.votes.or(other.votes),
+            comment: self.comment.or(other.comment),
+            summary: self.summary.or(other.summary),
+            quicksearch: self.quicksearch.or(other.quicksearch),
+            custom_fields: self.custom_fields.or(other.custom_fields),
+        }
+    }
+
+    pub fn order<I>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = Order<OrderField>>,
+    {
+        self.order = Some(values.into_iter().collect());
+        self
+    }
+
+    pub fn fields<I, F>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = F>,
+        F: Into<FilterField>,
+    {
+        self.fields = Some(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn status<I, S>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.status = Some(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn summary<I, S>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        self.summary = Some(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn created(mut self, value: RangeOrValue<TimeDelta>) -> Self {
+        self.created = Some(value);
+        self
+    }
+
+    pub fn modified(mut self, value: RangeOrValue<TimeDelta>) -> Self {
+        self.modified = Some(value);
+        self
+    }
+
+    pub fn limit(mut self, value: u64) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn quicksearch<S: Into<String>>(mut self, value: S) -> Self {
+        self.quicksearch = Some(value.into());
+        self
+    }
+
+    pub(crate) fn encode(self, service: &super::Service) -> crate::Result<String> {
+        let mut query = QueryBuilder::new(service);
+
+        if let Some(values) = self.status {
+            query.or(|query| values.into_iter().for_each(|x| query.status(x)));
+        } else {
+            // only return open bugs by default
+            query.status("@open");
+        }
+
+        if let Some(values) = self.order {
+            query.order(values)?;
+        } else {
+            // sort by ascending ID by default
+            query.order([Order::ascending(OrderField::Id)])?;
+        }
+
+        if let Some(values) = self.fields {
+            query.fields(values);
+        } else {
+            // limit requested fields by default to decrease bandwidth and speed up response
+            query.fields([BugField::Id, BugField::Summary]);
+        }
+
+        if let Some(value) = self.limit {
+            query.insert("limit", value);
+        }
+
+        if let Some(values) = self.alias {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Alias, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.alias(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.attachments {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachments, value),
+                ExistsOrValues::Values(values) => query.attachments(values),
+            }
+        }
+
+        if let Some(values) = self.flags {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.flags(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.groups {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Groups, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.groups(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.keywords {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Keywords, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.keywords(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.see_also {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::SeeAlso, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.see_also(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.tags {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Tags, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.tags(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.whiteboard {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => {
+                            query.exists(ExistsField::Whiteboard, value)
+                        }
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.whiteboard(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.url {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Url, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.url(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.changed {
+            for (fields, interval) in values {
+                query.changed(fields.into_iter().map(|f| (f, &interval)));
+            }
+        }
+
+        if let Some(values) = self.changed_by {
+            for (fields, users) in values {
+                query.changed_by(fields.into_iter().map(|f| (f, &users)));
+            }
+        }
+
+        if let Some(values) = self.changed_from {
+            query.changed_from(values);
+        }
+
+        if let Some(values) = self.changed_to {
+            query.changed_to(values);
+        }
+
+        if let Some(value) = self.comments {
+            query.comments(value);
+        }
+
+        if let Some(value) = self.votes {
+            query.votes(value);
+        }
+
+        if let Some(values) = self.assignee {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.into_iter().for_each(|x| query.assignee(x)))
+                }
+            });
+        }
+
+        if let Some(values) = self.attacher {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.into_iter().for_each(|x| query.attacher(x)))
+                }
+            });
+        }
+
+        if let Some(values) = self.cc {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.cc(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.commenter {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.into_iter().for_each(|x| query.commenter(x)))
+                }
+            });
+        }
+
+        if let Some(values) = self.flagger {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.into_iter().for_each(|x| query.flagger(x)))
+                }
+            });
+        }
+
+        if let Some(values) = self.qa {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.qa(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.reporter {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.into_iter().for_each(|x| query.reporter(x)))
+                }
+            });
+        }
+
+        if let Some(values) = self.comment {
+            query.op_field("AND", "longdesc", values)
+        }
+
+        if let Some(values) = self.summary {
+            query.op_field("AND", "short_desc", values)
+        }
+
+        if let Some(values) = self.blocks {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.blocks(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.depends {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.into_iter().for_each(|x| query.depends(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = self.ids {
+            query.or(|query| values.into_iter().for_each(|x| query.id(x)));
+        }
+
+        if let Some(values) = self.priority {
+            query.or(|query| values.into_iter().for_each(|x| query.priority(x)));
+        }
+
+        if let Some(values) = self.severity {
+            query.or(|query| values.into_iter().for_each(|x| query.severity(x)));
+        }
+
+        if let Some(values) = self.version {
+            query.or(|query| values.into_iter().for_each(|x| query.version(x)));
+        }
+
+        if let Some(values) = self.component {
+            query.or(|query| values.into_iter().for_each(|x| query.component(x)));
+        }
+
+        if let Some(values) = self.product {
+            query.or(|query| values.into_iter().for_each(|x| query.product(x)));
+        }
+
+        if let Some(values) = self.platform {
+            query.or(|query| values.into_iter().for_each(|x| query.platform(x)));
+        }
+
+        if let Some(values) = self.os {
+            query.or(|query| values.into_iter().for_each(|x| query.os(x)));
+        }
+
+        if let Some(values) = self.resolution {
+            query.or(|query| values.into_iter().for_each(|x| query.resolution(x)));
+        }
+
+        if let Some(values) = self.target {
+            query.or(|query| values.into_iter().for_each(|x| query.target(x)));
+        }
+
+        if let Some(value) = self.created {
+            query.created(value);
+        }
+
+        if let Some(value) = self.modified {
+            query.modified(value);
+        }
+
+        if let Some(value) = self.quicksearch {
+            query.insert("quicksearch", value);
+        }
+
+        if let Some(values) = self.custom_fields {
+            query.custom_fields(values);
+        }
+
+        Ok(query.encode())
+    }
+}
+
 /// Construct a search query.
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
 /// information.
 #[derive(Debug)]
-pub struct QueryBuilder<'a> {
+struct QueryBuilder<'a> {
     service: &'a super::Service,
-    query: ListOrderedMultimap<String, String>,
+    query: query::QueryBuilder,
     advanced_count: u64,
-    defaults: HashSet<String>,
 }
 
-impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
-    type Service = super::Service;
+impl Deref for QueryBuilder<'_> {
+    type Target = query::QueryBuilder;
 
-    fn new(service: &'a Self::Service) -> Self {
+    fn deref(&self) -> &Self::Target {
+        &self.query
+    }
+}
+
+impl DerefMut for QueryBuilder<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.query
+    }
+}
+
+impl<'a> QueryBuilder<'a> {
+    fn new(service: &'a super::Service) -> Self {
         Self {
             service,
             query: Default::default(),
             advanced_count: Default::default(),
-            defaults: Default::default(),
         }
     }
 }
 
 impl QueryBuilder<'_> {
-    pub fn id(&mut self, value: i64) {
+    fn id(&mut self, value: i64) {
         if value >= 0 {
             self.advanced_field("bug_id", "equals", value);
         } else {
@@ -181,18 +698,18 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn alias<V: Into<Match>>(&mut self, value: V) {
+    fn alias<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("alias", value.op, value);
     }
 
-    pub fn assignee<V: Into<Match>>(&mut self, value: V) {
+    fn assignee<V: Into<Match>>(&mut self, value: V) {
         let value = value.into().replace_user_alias(self.service);
         self.advanced_field("assigned_to", value.op, value);
     }
 
     /// Search for attachments with matching descriptions or filenames.
-    pub fn attachments<I, S>(&mut self, values: I)
+    fn attachments<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = S>,
         S: Into<Match>,
@@ -212,38 +729,22 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), "CP");
     }
 
-    pub fn qa<V: Into<Match>>(&mut self, value: V) {
+    fn qa<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("qa_contact", value.op, value);
     }
 
-    pub fn reporter<V: Into<Match>>(&mut self, value: V) {
+    fn reporter<V: Into<Match>>(&mut self, value: V) {
         let value = value.into().replace_user_alias(self.service);
         self.advanced_field("reporter", value.op, value);
     }
 
-    pub fn resolution<V: Into<Match>>(&mut self, value: V) {
+    fn resolution<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("resolution", value.op, value);
     }
 
-    pub fn comment<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("AND", "longdesc", values)
-    }
-
-    pub fn summary<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.op_field("AND", "short_desc", values)
-    }
-
-    pub fn created(&mut self, value: RangeOrValue<TimeDelta>) {
+    fn created(&mut self, value: RangeOrValue<TimeDelta>) {
         match value {
             RangeOrValue::Value(value) => {
                 self.advanced_field("creation_ts", "greaterthaneq", value)
@@ -253,7 +754,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn modified(&mut self, value: RangeOrValue<TimeDelta>) {
+    fn modified(&mut self, value: RangeOrValue<TimeDelta>) {
         match value {
             RangeOrValue::Value(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
             RangeOrValue::RangeOp(value) => self.range_op("delta_ts", value),
@@ -261,15 +762,12 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn order<I, T>(&mut self, values: I) -> crate::Result<()>
+    fn order<I, T>(&mut self, values: I) -> crate::Result<()>
     where
         I: IntoIterator<Item = T>,
         T: TryInto<Order<OrderField>>,
         <T as TryInto<Order<OrderField>>>::Error: std::fmt::Display,
     {
-        // don't set order by default
-        self.defaults.insert("order".to_string());
-
         let values: Vec<_> = values
             .into_iter()
             .map(|x| x.try_into())
@@ -280,35 +778,27 @@ impl QueryBuilder<'_> {
         Ok(())
     }
 
-    pub fn limit(&mut self, value: u64) {
-        self.insert("limit", value);
-    }
-
-    pub fn quicksearch(&mut self, value: String) {
-        self.insert("quicksearch", value);
-    }
-
-    pub fn attacher<V: Into<Match>>(&mut self, value: V) {
+    fn attacher<V: Into<Match>>(&mut self, value: V) {
         let value = value.into().replace_user_alias(self.service);
         self.advanced_field("attachments.submitter", value.op, value);
     }
 
-    pub fn commenter<V: Into<Match>>(&mut self, value: V) {
+    fn commenter<V: Into<Match>>(&mut self, value: V) {
         let value = value.into().replace_user_alias(self.service);
         self.advanced_field("commenter", value.op, value);
     }
 
-    pub fn flagger<V: Into<Match>>(&mut self, value: V) {
+    fn flagger<V: Into<Match>>(&mut self, value: V) {
         let value = value.into().replace_user_alias(self.service);
         self.advanced_field("setters.login_name", value.op, value);
     }
 
-    pub fn url<V: Into<Match>>(&mut self, value: V) {
+    fn url<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("bug_file_loc", value.op, value);
     }
 
-    pub fn changed<'a, I>(&mut self, values: I)
+    fn changed<'a, I>(&mut self, values: I)
     where
         I: IntoIterator<Item = (ChangeField, &'a RangeOrValue<TimeDelta>)>,
     {
@@ -360,7 +850,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn changed_by<I, J, S>(&mut self, values: I)
+    fn changed_by<I, J, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = (ChangeField, J)>,
         J: IntoIterator<Item = S>,
@@ -374,7 +864,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn changed_from<I, S>(&mut self, values: I)
+    fn changed_from<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = (ChangeField, S)>,
         S: fmt::Display,
@@ -384,7 +874,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn changed_to<I, S>(&mut self, values: I)
+    fn changed_to<I, S>(&mut self, values: I)
     where
         I: IntoIterator<Item = (ChangeField, S)>,
         S: fmt::Display,
@@ -394,7 +884,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn custom_fields<I, K, V>(&mut self, values: I)
+    fn custom_fields<I, K, V>(&mut self, values: I)
     where
         I: IntoIterator<Item = (K, V)>,
         K: AsRef<str>,
@@ -410,20 +900,17 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn priority<V: Into<Match>>(&mut self, value: V) {
+    fn priority<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("priority", value.op, value);
     }
 
-    pub fn severity<V: Into<Match>>(&mut self, value: V) {
+    fn severity<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("bug_severity", value.op, value);
     }
 
-    pub fn status<S: AsRef<str>>(&mut self, value: S) {
-        // don't set status by default
-        self.defaults.insert("status".to_string());
-
+    fn status<S: AsRef<str>>(&mut self, value: S) {
         match value.as_ref() {
             "@open" => self.append("bug_status", "__open__"),
             "@closed" => self.append("bug_status", "__closed__"),
@@ -438,81 +925,69 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn version<V: Into<Match>>(&mut self, value: V) {
+    fn version<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("version", value.op, value);
     }
 
-    pub fn component<V: Into<Match>>(&mut self, value: V) {
+    fn component<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("component", value.op, value);
     }
 
-    pub fn product<V: Into<Match>>(&mut self, value: V) {
+    fn product<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("product", value.op, value);
     }
 
-    pub fn platform<V: Into<Match>>(&mut self, value: V) {
+    fn platform<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("platform", value.op, value);
     }
 
-    pub fn os<V: Into<Match>>(&mut self, value: V) {
+    fn os<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("op_sys", value.op, value);
     }
 
-    pub fn see_also<V: Into<Match>>(&mut self, value: V) {
+    fn see_also<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("see_also", value.op, value);
     }
 
-    pub fn tags<V: Into<Match>>(&mut self, value: V) {
+    fn tags<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("tag", value.op, value);
     }
 
-    pub fn target<V: Into<Match>>(&mut self, value: V) {
+    fn target<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("target_milestone", value.op, value);
     }
 
-    pub fn whiteboard<V: Into<Match>>(&mut self, value: V) {
+    fn whiteboard<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("whiteboard", value.op, value);
     }
 
-    pub fn votes<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = RangeOrValue<u64>>,
-    {
-        for value in values {
-            match value {
-                RangeOrValue::Value(value) => self.advanced_field("votes", "equals", value),
-                RangeOrValue::RangeOp(value) => self.range_op("votes", value),
-                RangeOrValue::Range(value) => self.range("votes", value),
-            }
+    fn votes(&mut self, value: RangeOrValue<u64>) {
+        match value {
+            RangeOrValue::Value(value) => self.advanced_field("votes", "equals", value),
+            RangeOrValue::RangeOp(value) => self.range_op("votes", value),
+            RangeOrValue::Range(value) => self.range("votes", value),
         }
     }
 
-    pub fn comments<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = RangeOrValue<u64>>,
-    {
-        for value in values {
-            match value {
-                RangeOrValue::Value(value) => {
-                    self.advanced_field("longdescs.count", "equals", value)
-                }
-                RangeOrValue::RangeOp(value) => self.range_op("longdescs.count", value),
-                RangeOrValue::Range(value) => self.range("longdescs.count", value),
-            }
+    fn comments(&mut self, value: RangeOrValue<u64>) {
+        match value {
+            RangeOrValue::Value(value) => self.advanced_field("longdescs.count", "equals", value),
+            RangeOrValue::RangeOp(value) => self.range_op("longdescs.count", value),
+            RangeOrValue::Range(value) => self.range("longdescs.count", value),
         }
     }
 
     /// Match bugs with conditionally existent array field values.
-    pub fn exists(&mut self, field: ExistsField, status: bool) {
+    fn exists(&mut self, field: ExistsField, status: bool) {
         self.advanced_count += 1;
         let num = self.advanced_count;
         let status = if status { "isnotempty" } else { "isempty" };
@@ -520,7 +995,7 @@ impl QueryBuilder<'_> {
         self.insert(format!("o{num}"), status);
     }
 
-    pub fn blocks(&mut self, value: i64) {
+    fn blocks(&mut self, value: i64) {
         if value >= 0 {
             self.advanced_field("blocked", "equals", value);
         } else {
@@ -528,7 +1003,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn depends(&mut self, value: i64) {
+    fn depends(&mut self, value: i64) {
         if value >= 0 {
             self.advanced_field("dependson", "equals", value);
         } else {
@@ -536,34 +1011,31 @@ impl QueryBuilder<'_> {
         }
     }
 
-    pub fn flags<V: Into<Match>>(&mut self, value: V) {
+    fn flags<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("flagtypes.name", value.op, value)
     }
 
-    pub fn groups<V: Into<Match>>(&mut self, value: V) {
+    fn groups<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("bug_group", value.op, value)
     }
 
-    pub fn keywords<V: Into<Match>>(&mut self, value: V) {
+    fn keywords<V: Into<Match>>(&mut self, value: V) {
         let value = value.into();
         self.advanced_field("keywords", value.op, value)
     }
 
-    pub fn cc<V: Into<Match>>(&mut self, value: V) {
+    fn cc<V: Into<Match>>(&mut self, value: V) {
         let value = value.into().replace_user_alias(self.service);
         self.advanced_field("cc", value.op, value);
     }
 
-    pub fn fields<I, F>(&mut self, fields: I)
+    fn fields<I, F>(&mut self, fields: I)
     where
         I: IntoIterator<Item = F>,
         F: Into<FilterField>,
     {
-        // don't set fields by default
-        self.defaults.insert("fields".to_string());
-
         let mut fields: IndexSet<_> = fields.into_iter().map(Into::into).collect();
 
         // always include bug IDs in field requests
@@ -574,7 +1046,7 @@ impl QueryBuilder<'_> {
 
     fn range_op<T>(&mut self, field: &str, value: RangeOp<T>)
     where
-        T: Api,
+        T: Api + Eq,
     {
         match value {
             RangeOp::Less(value) => {
@@ -600,7 +1072,7 @@ impl QueryBuilder<'_> {
 
     fn range<T>(&mut self, field: &str, value: Range<T>)
     where
-        T: Api,
+        T: Api + Eq,
     {
         match value {
             Range::Range(r) => {
@@ -684,7 +1156,7 @@ impl QueryBuilder<'_> {
         self.op(op, fields.zip(values))
     }
 
-    pub fn op_func<F: FnOnce(&mut Self)>(&mut self, op: &str, func: F) {
+    fn op_func<F: FnOnce(&mut Self)>(&mut self, op: &str, func: F) {
         self.advanced_count += 1;
         let num = self.advanced_count;
         self.insert(format!("f{num}"), "OP");
@@ -695,47 +1167,12 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), "CP");
     }
 
-    pub fn or<F: FnOnce(&mut Self)>(&mut self, func: F) {
+    fn or<F: FnOnce(&mut Self)>(&mut self, func: F) {
         self.op_func("OR", func)
     }
 
-    pub fn and<F: FnOnce(&mut Self)>(&mut self, func: F) {
+    fn and<F: FnOnce(&mut Self)>(&mut self, func: F) {
         self.op_func("AND", func)
-    }
-}
-
-impl Query for QueryBuilder<'_> {
-    fn is_empty(&self) -> bool {
-        // TODO: move the keys to skip into a trait attribute
-        !self
-            .query
-            .keys()
-            .any(|k| k != "order" && k != "include_fields")
-    }
-
-    fn params(&mut self) -> crate::Result<String> {
-        if self.is_empty() {
-            return Err(Error::EmptyParams);
-        }
-
-        // only return open bugs by default
-        if !self.defaults.contains("status") {
-            self.status("@open");
-        }
-
-        // sort by ascending ID by default
-        if !self.defaults.contains("order") {
-            self.order(["+id"])?;
-        }
-
-        // limit requested fields by default to decrease bandwidth and speed up response
-        if !self.defaults.contains("fields") {
-            self.fields([BugField::Id, BugField::Summary]);
-        }
-
-        let mut params = url::form_urlencoded::Serializer::new(String::new());
-        params.extend_pairs(self.query.iter());
-        Ok(params.finish())
     }
 }
 
@@ -780,7 +1217,7 @@ impl Api for ExistsField {
 }
 
 /// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, VariantNames, Debug, PartialEq, Eq, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
     Alias,
@@ -862,7 +1299,19 @@ impl Api for Order<OrderField> {
 }
 
 /// Valid change fields.
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
+#[derive(
+    Display,
+    EnumIter,
+    EnumString,
+    VariantNames,
+    DeserializeFromStr,
+    SerializeDisplay,
+    Debug,
+    PartialEq,
+    Eq,
+    Clone,
+    Copy,
+)]
 #[strum(serialize_all = "kebab-case")]
 pub enum ChangeField {
     Alias,

@@ -11,20 +11,6 @@ pub trait Contains<T> {
     fn contains(&self, obj: &T) -> bool;
 }
 
-pub trait Query {
-    /// Returns true if no relevant parameters are defined, false otherwise.
-    fn is_empty(&self) -> bool {
-        true
-    }
-    /// Encode query parameters into the application/x-www-form-urlencoded string format.
-    fn params(&mut self) -> crate::Result<String>;
-}
-
-pub trait ServiceParams<'a> {
-    type Service;
-    fn new(service: &'a Self::Service) -> Self;
-}
-
 /// Render an object in search context into a formatted string using the given fields.
 pub trait RenderSearch<T> {
     fn render(&self, fields: &[T]) -> String;
@@ -67,7 +53,9 @@ impl<T: Api> Api for &T {
 
 pub(crate) trait Request {
     type Output;
-    async fn send(self) -> crate::Result<Self::Output>;
+    type Service;
+
+    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output>;
 }
 
 /// Placeholder request that does nothing.
@@ -75,28 +63,11 @@ pub(crate) struct NullRequest;
 
 impl Request for NullRequest {
     type Output = ();
-    async fn send(self) -> crate::Result<Self::Output> {
+    type Service = ();
+
+    async fn send(self, _service: &Self::Service) -> crate::Result<Self::Output> {
         Ok(())
     }
-}
-
-pub trait WebClient<'a> {
-    type Service;
-    type CreateParams: ServiceParams<'a>;
-    type ModifyParams: ServiceParams<'a>;
-    type SearchQuery: Query + ServiceParams<'a>;
-
-    /// Return the service,
-    fn service(&'a self) -> &'a Self::Service;
-
-    /// Create a create params builder for the service.
-    fn create_params(&'a self) -> Self::CreateParams;
-
-    /// Create a modification params builder for the service.
-    fn modify_params(&'a self) -> Self::ModifyParams;
-
-    /// Create a search query builder for the service.
-    fn search_query(&'a self) -> Self::SearchQuery;
 }
 
 pub(crate) trait InjectAuth: Sized {
@@ -117,13 +88,16 @@ impl InjectAuth for RequestBuilder {
     }
 }
 
-pub(crate) trait WebService<'a>: WebClient<'a> + fmt::Display {
+pub(crate) trait WebService<'a>: fmt::Display {
     const API_VERSION: &'static str;
     type Response;
     type GetRequest: Request;
     type CreateRequest: Request;
+    type CreateParams;
     type ModifyRequest: Request;
+    type ModifyParams;
     type SearchRequest: Request;
+    type SearchParams;
 
     /// Return the base URL for a service.
     fn base(&self) -> &Url;
@@ -155,7 +129,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> + fmt::Display {
 
     /// Create a request for bugs, issues, or tickets by their IDs.
     fn get_request<S>(
-        &'a self,
+        &self,
         _ids: &[S],
         _attachments: bool,
         _comments: bool,
@@ -171,7 +145,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> + fmt::Display {
     }
 
     /// Create a creation request for a bug, issue, or ticket.
-    fn create_request(&'a self, _params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
+    fn create_request(&self, _params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
         Err(Error::Unsupported(format!(
             "{}: create requests unsupported",
             self.kind()
@@ -180,7 +154,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> + fmt::Display {
 
     /// Create a modify request for bugs, issues, or tickets.
     fn modify_request<S>(
-        &'a self,
+        &self,
         _ids: &[S],
         _params: Self::ModifyParams,
     ) -> crate::Result<Self::ModifyRequest>
@@ -194,7 +168,7 @@ pub(crate) trait WebService<'a>: WebClient<'a> + fmt::Display {
     }
 
     /// Create a search request for bugs, issues, or tickets.
-    fn search_request(&'a self, _query: Self::SearchQuery) -> crate::Result<Self::SearchRequest> {
+    fn search_request(&self, _query: Self::SearchParams) -> crate::Result<Self::SearchRequest> {
         Err(Error::Unsupported(format!(
             "{}: search requests unsupported",
             self.kind()

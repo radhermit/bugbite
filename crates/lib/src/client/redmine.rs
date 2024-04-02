@@ -2,9 +2,8 @@ use reqwest::ClientBuilder;
 use tracing::info;
 
 use crate::objects::redmine::Issue;
-use crate::service::redmine::search::QueryBuilder;
-use crate::service::redmine::{Config, Service};
-use crate::traits::{Query, Request, WebService};
+use crate::service::redmine::{search, Config, Service};
+use crate::traits::{Request, WebService};
 
 #[derive(Debug)]
 pub struct Client {
@@ -23,9 +22,9 @@ impl Client {
     }
 
     /// Return the website URL for a query.
-    pub fn search_url<Q: Query>(&self, mut query: Q) -> crate::Result<String> {
+    pub fn search_url(&self, params: search::Parameters) -> crate::Result<String> {
         let base = self.service.base().as_str().trim_end_matches('/');
-        let params = query.params()?;
+        let params = params.encode(&self.service)?;
         Ok(format!("{base}/issues?set_filter=1&{params}"))
     }
 
@@ -41,11 +40,11 @@ impl Client {
         let request = self
             .service
             .get_request(ids, attachments, comments, false)?;
-        request.send().await
+        request.send(&self.service).await
     }
 
-    pub async fn search<'a>(&'a self, query: QueryBuilder<'a>) -> crate::Result<Vec<Issue>> {
-        let request = self.service.search_request(query)?;
-        request.send().await
+    pub async fn search(&self, params: search::Parameters) -> crate::Result<Vec<Issue>> {
+        let request = self.service.search_request(params)?;
+        request.send(&self.service).await
     }
 }

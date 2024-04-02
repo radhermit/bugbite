@@ -3,8 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::Csv;
 use bugbite::client::github::Client;
-use bugbite::service::github::search::{SearchOrder, SearchTerm};
-use bugbite::traits::WebClient;
+use bugbite::service::github::search::{Parameters, SearchOrder, SearchTerm};
 use clap::Args;
 use itertools::Itertools;
 use strum::VariantNames;
@@ -39,11 +38,17 @@ struct Params {
             SearchTerm::VARIANTS.join(", ")
         )
     )]
-    sort: Option<SearchOrder>,
+    order: Option<SearchOrder>,
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
     summary: Vec<String>,
+}
+
+impl From<Params> for Parameters {
+    fn from(value: Params) -> Self {
+        Self { order: value.order }
+    }
 }
 
 #[derive(Debug, Args)]
@@ -53,14 +58,10 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(mut self, client: &Client) -> anyhow::Result<ExitCode> {
-        let mut query = client.service().search_query();
+    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+        let params: Parameters = self.params.into();
 
-        if let Some(value) = self.params.sort.take() {
-            query.sort(value);
-        }
-
-        let issues = client.search(query).await?;
+        let issues = client.search(params).await?;
         let mut stdout = stdout().lock();
         let mut count = 0;
 

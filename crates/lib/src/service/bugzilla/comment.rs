@@ -6,15 +6,14 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct CommentRequest<'a> {
+pub(crate) struct CommentRequest {
     url: url::Url,
     params: Option<CommentParams>,
-    service: &'a super::Service,
 }
 
-impl<'a> CommentRequest<'a> {
+impl CommentRequest {
     pub(super) fn new<S>(
-        service: &'a super::Service,
+        service: &super::Service,
         ids: &[S],
         params: Option<CommentParams>,
     ) -> crate::Result<Self>
@@ -40,25 +39,18 @@ impl<'a> CommentRequest<'a> {
             }
         }
 
-        Ok(Self {
-            url,
-            params,
-            service,
-        })
+        Ok(Self { url, params })
     }
 }
 
-impl Request for CommentRequest<'_> {
+impl Request for CommentRequest {
     type Output = Vec<Vec<Comment>>;
+    type Service = super::Service;
 
-    async fn send(self) -> crate::Result<Self::Output> {
-        let request = self
-            .service
-            .client()
-            .get(self.url)
-            .inject_auth(self.service, false)?;
+    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+        let request = service.client().get(self.url).inject_auth(service, false)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
+        let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();
         let serde_json::value::Value::Object(data) = data else {
             return Err(Error::InvalidValue(

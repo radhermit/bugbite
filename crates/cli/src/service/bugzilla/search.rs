@@ -1,25 +1,24 @@
+use std::fs;
 use std::process::ExitCode;
 use std::str::FromStr;
 
-use bugbite::args::{Csv, MaybeStdinVec};
+use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::bugzilla::{
-    search::{ChangeField, ExistsField, Match, OrderField},
+    search::{ChangeField, Match, OrderField, Parameters},
     BugField,
 };
 use bugbite::time::TimeDelta;
-use bugbite::traits::WebClient;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use crossterm::style::Stylize;
 use itertools::Itertools;
 use strum::VariantNames;
 
-use crate::service::args::ExistsOrValues;
 use crate::service::output::render_search;
-use crate::utils::{launch_browser, wrapped_doc};
+use crate::utils::{confirm, launch_browser, wrapped_doc};
 
 /// Parse a string into a ChangeField, adding possible values to the error on failure.
 fn change_field(s: &str) -> anyhow::Result<ChangeField> {
@@ -324,7 +323,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    flags: Option<Vec<ExistsOrValues<MaybeStdinVec<Match>>>>,
+    flags: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by group
     #[arg(
@@ -334,7 +333,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    groups: Option<Vec<ExistsOrValues<MaybeStdinVec<Match>>>>,
+    groups: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by ID
     #[arg(
@@ -376,7 +375,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    keywords: Option<Vec<ExistsOrValues<MaybeStdinVec<Match>>>>,
+    keywords: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by OS
     #[arg(long, value_name = "VALUE")]
@@ -498,7 +497,6 @@ struct RangeOptions {
     /// restrict by comments
     #[arg(
         long,
-        value_delimiter = ',',
         long_help = wrapped_doc!(r#"
             Restrict by the number of comments.
 
@@ -518,22 +516,13 @@ struct RangeOptions {
 
             - between 5 and 10
             > bite s --comments 5..10
-
-            Multiple values can be specified in a comma-separated list or with
-            multiple options and will match if all of the specified values
-            match.
-
-            - more than 5 and less than 10
-            > bite s --comments ">5,<10"
-            > bite s --comments ">5" --comments "<10"
         "#)
     )]
-    comments: Option<Vec<RangeOrValue<u64>>>,
+    comments: Option<RangeOrValue<u64>>,
 
     /// restrict by votes
     #[arg(
         long,
-        value_delimiter = ',',
         long_help = wrapped_doc!(r#"
             Restrict by the number of votes.
 
@@ -553,17 +542,9 @@ struct RangeOptions {
 
             - between 5 and 10
             > bite s --votes 5..10
-
-            Multiple values can be specified in a comma-separated list or with
-            multiple options and will match if all of the specified values
-            match.
-
-            - more than 5 and less than 10
-            > bite s --votes ">5,<10"
-            > bite s --votes ">5" --votes "<10"
         "#)
     )]
-    votes: Option<Vec<RangeOrValue<u64>>>,
+    votes: Option<RangeOrValue<u64>>,
 }
 
 #[derive(Debug, Args)]
@@ -794,6 +775,102 @@ struct Params {
     summary: Option<Vec<MaybeStdinVec<Match>>>,
 }
 
+impl From<Params> for Parameters {
+    fn from(value: Params) -> Self {
+        Self {
+            fields: Some(value.query.fields.into_iter().map(Into::into).collect()),
+            limit: value.query.limit,
+            order: value.query.order.map(|x| x.into_iter().collect()),
+            quicksearch: value.query.quicksearch,
+
+            alias: value.attr.alias,
+            attachments: value.attr.attachments,
+            flags: value.attr.flags,
+            groups: value.attr.groups,
+            keywords: value.attr.keywords,
+            see_also: value.attr.see_also,
+            tags: value.attr.tags,
+            whiteboard: value.attr.whiteboard,
+            url: value.attr.url,
+            blocks: value
+                .attr
+                .blocks
+                .map(|x| x.into_iter().map(|x| x.flatten()).collect()),
+            depends: value
+                .attr
+                .depends
+                .map(|x| x.into_iter().map(|x| x.flatten()).collect()),
+            ids: value.attr.id.map(|x| x.into_iter().flatten().collect()),
+            priority: value.attr.priority,
+            severity: value.attr.severity,
+            version: value.attr.version,
+            component: value.attr.component,
+            product: value.attr.product,
+            platform: value.attr.platform,
+            os: value.attr.os,
+            resolution: value.attr.resolution,
+            status: value.attr.status,
+            target: value.attr.target,
+
+            changed: value
+                .change
+                .changed
+                .map(|x| x.into_iter().map(|x| (x.fields, x.interval)).collect()),
+            changed_by: value
+                .change
+                .changed_by
+                .map(|x| x.into_iter().map(|x| (x.fields, x.users)).collect()),
+            changed_from: value
+                .change
+                .changed_from
+                .map(|x| x.into_iter().map(|x| (x.field, x.value)).collect()),
+            changed_to: value
+                .change
+                .changed_to
+                .map(|x| x.into_iter().map(|x| (x.field, x.value)).collect()),
+
+            comments: value.range.comments,
+            votes: value.range.votes,
+
+            created: value.time.created,
+            modified: value.time.modified,
+
+            assignee: value
+                .user
+                .assignee
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            attacher: value
+                .user
+                .attacher
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            cc: value.user.cc,
+            commenter: value
+                .user
+                .commenter
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            flagger: value
+                .user
+                .flagger
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            qa: value.user.qa,
+            reporter: value
+                .user
+                .reporter
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+
+            comment: value.comment.map(|x| x.into_iter().flatten().collect()),
+            summary: value.summary.map(|x| x.into_iter().flatten().collect()),
+
+            custom_fields: value.attr.custom_fields.map(|x| {
+                x.into_iter()
+                    .tuples()
+                    .map(|(name, value)| (name, value.into()))
+                    .collect()
+            }),
+        }
+    }
+}
+
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Search options")]
 pub(super) struct SearchOptions {
@@ -857,285 +934,30 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
-        // TODO: implement a custom serde serializer to convert structs to URL parameters
-        let mut query = client.service().search_query();
-        let params = self.params;
+        let fields = self.params.query.fields.clone();
+        let mut params: Parameters = self.params.into();
 
-        if let Some(values) = params.change.changed {
-            for change in values {
-                query.changed(change.fields.iter().map(|f| (*f, &change.interval)));
-            }
-        }
-        if let Some(values) = params.change.changed_by {
-            for change in values {
-                query.changed_by(change.fields.iter().map(|f| (*f, &change.users)));
-            }
-        }
-        if let Some(values) = params.change.changed_from {
-            query.changed_from(values.into_iter().map(|c| (c.field, c.value)));
-        }
-        if let Some(values) = params.change.changed_to {
-            query.changed_to(values.into_iter().map(|c| (c.field, c.value)));
-        }
-        if let Some(values) = params.user.assignee {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.assignee(x)))
-                }
-            });
-        }
-        if let Some(value) = params.query.limit {
-            query.limit(value);
-        }
-        if let Some(value) = params.time.created {
-            query.created(value);
-        }
-        if let Some(value) = params.time.modified {
-            query.modified(value);
-        }
-        if let Some(values) = params.query.order {
-            query.order(values)?;
-        }
-        if let Some(values) = params.user.attacher {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.attacher(x)))
-                }
-            });
-        }
-        if let Some(values) = params.user.commenter {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.commenter(x)))
-                }
-            });
-        }
-        if let Some(values) = params.user.flagger {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.flagger(x)))
-                }
-            });
-        }
-        if let Some(values) = params.attr.custom_fields {
-            query.custom_fields(values.into_iter().tuples());
-        }
-        if let Some(values) = params.attr.priority {
-            query.or(|query| values.into_iter().for_each(|x| query.priority(x)));
-        }
-        if let Some(values) = params.attr.severity {
-            query.or(|query| values.into_iter().for_each(|x| query.severity(x)));
-        }
-        if let Some(values) = params.attr.version {
-            query.or(|query| values.into_iter().for_each(|x| query.version(x)));
-        }
-        if let Some(values) = params.attr.component {
-            query.or(|query| values.into_iter().for_each(|x| query.component(x)));
-        }
-        if let Some(values) = params.attr.product {
-            query.or(|query| values.into_iter().for_each(|x| query.product(x)));
-        }
-        if let Some(values) = params.attr.platform {
-            query.or(|query| values.into_iter().for_each(|x| query.platform(x)));
-        }
-        if let Some(values) = params.attr.os {
-            query.or(|query| values.into_iter().for_each(|x| query.os(x)));
-        }
-        if let Some(values) = params.attr.see_also {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::SeeAlso, value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.see_also(x)))
-                        }
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.user.reporter {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.reporter(x)))
-                }
-            });
-        }
-        if let Some(values) = params.attr.resolution {
-            query.or(|query| values.into_iter().for_each(|x| query.resolution(x)));
-        }
-        if let Some(values) = params.attr.status {
-            query.or(|query| values.into_iter().for_each(|x| query.status(x)));
-        }
-        if let Some(values) = params.attr.tags {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Tags, value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.tags(x)))
-                        }
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.attr.target {
-            query.or(|query| values.into_iter().for_each(|x| query.target(x)));
-        }
-        if let Some(values) = params.attr.whiteboard {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => {
-                            query.exists(ExistsField::Whiteboard, value)
-                        }
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.whiteboard(x)))
-                        }
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.attr.url {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Url, value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.url(x)))
-                        }
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.range.votes {
-            query.votes(values);
-        }
-        if let Some(values) = params.range.comments {
-            query.comments(values);
-        }
-        if let Some(values) = params.attr.alias {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Alias, value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.alias(x)))
-                        }
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.attr.attachments {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachments, value),
-                ExistsOrValues::Values(values) => query.attachments(values),
-            }
-        }
-        if let Some(values) = params.attr.id {
-            query.or(|query| values.into_iter().flatten().for_each(|x| query.id(x)))
-        }
-        if let Some(values) = params.comment {
-            query.comment(values.into_iter().flatten());
-        }
-        if let Some(values) = params.summary {
-            query.summary(values.into_iter().flatten());
-        }
-        if let Some(values) = params.attr.flags {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, value),
-                        ExistsOrValues::Values(values) => query
-                            .and(|query| values.into_iter().flatten().for_each(|x| query.flags(x))),
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.attr.groups {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Groups, value),
-                        ExistsOrValues::Values(values) => query.and(|query| {
-                            values.into_iter().flatten().for_each(|x| query.groups(x))
-                        }),
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.attr.keywords {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Keywords, value),
-                        ExistsOrValues::Values(values) => query.and(|query| {
-                            values.into_iter().flatten().for_each(|x| query.keywords(x))
-                        }),
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.user.cc {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.cc(x)))
-                        }
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.user.qa {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.qa(x)))
-                        }
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.attr.blocks {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
-                        ExistsOrValues::Values(values) => query.and(|query| {
-                            values.into_iter().flatten().for_each(|x| query.blocks(x))
-                        }),
-                    }
-                }
-            });
-        }
-        if let Some(values) = params.attr.depends {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, value),
-                        ExistsOrValues::Values(values) => query.and(|query| {
-                            values.into_iter().flatten().for_each(|x| query.depends(x))
-                        }),
-                    }
-                }
-            });
-        }
-        if let Some(value) = params.query.quicksearch {
-            query.quicksearch(value);
+        // read attributes from a template
+        if let Some(path) = self.search.from.as_ref() {
+            let template = Parameters::from_path(path)?;
+            // command-line options override template options
+            params = params.merge(template);
         }
 
-        let fields = &params.query.fields;
-        query.fields(fields.iter().copied());
+        // write attributes to a template
+        if let Some(path) = self.search.to.as_ref() {
+            if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
+                let data = toml::to_string(&params)?;
+                fs::write(path, data)?;
+            }
+        }
 
         if self.search.browser {
-            let url = client.search_url(query)?;
+            let url = client.search_url(params)?;
             launch_browser([url])?;
         } else if !self.search.dry_run {
-            let bugs = client.search(query).await?;
-            render_search(bugs, fields)?;
+            let bugs = client.search(params).await?;
+            render_search(bugs, &fields)?;
         }
 
         Ok(ExitCode::SUCCESS)

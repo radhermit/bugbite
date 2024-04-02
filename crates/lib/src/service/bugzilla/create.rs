@@ -1,49 +1,208 @@
+use std::fs;
+
+use camino::Utf8Path;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::objects::bugzilla::Flag;
-use crate::traits::{InjectAuth, Request, ServiceParams, WebService};
+use crate::objects::bugzilla::{Bug, Flag};
+use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct CreateRequest<'a> {
+pub(crate) struct CreateRequest {
     url: url::Url,
-    params: Params,
-    service: &'a super::Service,
+    params: Parameters,
 }
 
-impl Request for CreateRequest<'_> {
+impl Request for CreateRequest {
     type Output = u64;
+    type Service = super::Service;
 
-    async fn send(self) -> crate::Result<Self::Output> {
-        let request = self
-            .service
+    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+        let params = self.params.encode(service)?;
+        let request = service
             .client()
             .post(self.url)
-            .json(&self.params)
-            .inject_auth(self.service, true)?;
+            .json(&params)
+            .inject_auth(service, true)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
+        let mut data = service.parse_response(response).await?;
         let id = serde_json::from_value(data["id"].take())
             .map_err(|e| Error::InvalidValue(format!("failed deserializing id: {e}")))?;
         Ok(id)
     }
 }
 
-impl<'a> CreateRequest<'a> {
-    pub(super) fn new(service: &'a super::Service, params: CreateParams) -> crate::Result<Self> {
+impl CreateRequest {
+    pub(super) fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
         Ok(Self {
             url: service.base().join("rest/bug")?,
-            params: params.build()?,
-            service,
+            params,
         })
     }
 }
 
+/// Bug creation parameters.
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+pub struct Parameters {
+    pub alias: Option<Vec<String>>,
+    pub assignee: Option<String>,
+    pub blocks: Option<Vec<u64>>,
+    pub cc: Option<Vec<String>>,
+    pub component: Option<String>,
+    pub depends: Option<Vec<u64>>,
+    pub description: Option<String>,
+    pub flags: Option<Vec<Flag>>,
+    pub groups: Option<Vec<String>>,
+    pub keywords: Option<Vec<String>>,
+    pub os: Option<String>,
+    pub platform: Option<String>,
+    pub priority: Option<String>,
+    pub product: Option<String>,
+    pub qa: Option<String>,
+    pub resolution: Option<String>,
+    pub see_also: Option<Vec<String>>,
+    pub severity: Option<String>,
+    pub status: Option<String>,
+    pub summary: Option<String>,
+    pub target: Option<String>,
+    pub url: Option<String>,
+    pub version: Option<String>,
+    pub whiteboard: Option<String>,
+
+    #[serde(flatten)]
+    pub custom_fields: Option<IndexMap<String, String>>,
+}
+
+impl Parameters {
+    /// Load parameters in TOML format from a file.
+    pub fn from_path(path: &Utf8Path) -> crate::Result<Self> {
+        let data = fs::read_to_string(path)
+            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
+        toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
+    }
+
+    /// Merge parameters using the provided value for fallbacks.
+    pub fn merge(self, other: Self) -> Self {
+        Self {
+            alias: self.alias.or(other.alias),
+            assignee: self.assignee.or(other.assignee),
+            blocks: self.blocks.or(other.blocks),
+            cc: self.cc.or(other.cc),
+            component: self.component.or(other.component),
+            custom_fields: self.custom_fields.or(other.custom_fields),
+            depends: self.depends.or(other.depends),
+            description: self.description.or(other.description),
+            flags: self.flags.or(other.flags),
+            groups: self.groups.or(other.groups),
+            keywords: self.keywords.or(other.keywords),
+            os: self.os.or(other.os),
+            platform: self.platform.or(other.platform),
+            priority: self.priority.or(other.priority),
+            product: self.product.or(other.product),
+            qa: self.qa.or(other.qa),
+            resolution: self.resolution.or(other.resolution),
+            see_also: self.see_also.or(other.see_also),
+            status: self.status.or(other.status),
+            severity: self.severity.or(other.severity),
+            target: self.target.or(other.target),
+            summary: self.summary.or(other.summary),
+            url: self.url.or(other.url),
+            version: self.version.or(other.version),
+            whiteboard: self.whiteboard.or(other.whiteboard),
+        }
+    }
+
+    /// Encode parameters into the form required for the request.
+    fn encode(self, service: &super::Service) -> crate::Result<RequestParameters> {
+        let params = RequestParameters {
+            // inject defaults for required fields
+            op_sys: self.os.unwrap_or_else(|| "All".to_string()),
+            platform: self.platform.unwrap_or_else(|| "All".to_string()),
+            priority: self.priority.unwrap_or_else(|| "Normal".to_string()),
+            severity: self.severity.unwrap_or_else(|| "normal".to_string()),
+            version: self.version.unwrap_or_else(|| "unspecified".to_string()),
+
+            // error out on missing required fields
+            component: self
+                .component
+                .ok_or_else(|| Error::InvalidValue("missing component".to_string()))?,
+            description: self
+                .description
+                .ok_or_else(|| Error::InvalidValue("missing description".to_string()))?,
+            product: self
+                .product
+                .ok_or_else(|| Error::InvalidValue("missing product".to_string()))?,
+            summary: self
+                .summary
+                .ok_or_else(|| Error::InvalidValue("missing summary".to_string()))?,
+
+            // optional fields
+            alias: self.alias,
+            assigned_to: self.assignee.map(|x| service.replace_user_alias(&x).into()),
+            blocks: self.blocks,
+            cc: self.cc,
+            depends_on: self.depends,
+            flags: self.flags,
+            groups: self.groups,
+            keywords: self.keywords,
+            qa_contact: self.qa.map(|x| service.replace_user_alias(&x).into()),
+            resolution: self.resolution,
+            see_also: self.see_also,
+            status: self.status,
+            target_milestone: self.target,
+            url: self.url,
+            whiteboard: self.whiteboard,
+
+            // auto-prefix custom field names
+            custom_fields: self.custom_fields.map(|values| {
+                values
+                    .into_iter()
+                    .map(|(k, v)| {
+                        if !k.starts_with("cf_") {
+                            (format!("cf_{k}"), v)
+                        } else {
+                            (k, v)
+                        }
+                    })
+                    .collect()
+            }),
+        };
+
+        // TODO: verify all required fields are non-empty
+        if params == RequestParameters::default() {
+            Err(Error::EmptyParams)
+        } else {
+            Ok(params)
+        }
+    }
+}
+
+impl From<Bug> for Parameters {
+    fn from(value: Bug) -> Self {
+        Self {
+            component: value.component,
+            os: value.op_sys,
+            platform: value.platform,
+            priority: value.priority,
+            product: value.product,
+            severity: value.severity,
+            version: value.version,
+            ..Default::default()
+        }
+    }
+}
+
+/// Internal bug creation request parameters.
+///
+/// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
+/// information.
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
-struct Params {
+struct RequestParameters {
     // required fields
     component: String,
     description: String,
@@ -63,7 +222,6 @@ struct Params {
     depends_on: Option<Vec<u64>>,
     flags: Option<Vec<Flag>>,
     groups: Option<Vec<String>>,
-    ids: Option<Vec<u64>>,
     keywords: Option<Vec<String>>,
     qa_contact: Option<String>,
     resolution: Option<String>,
@@ -75,186 +233,4 @@ struct Params {
 
     #[serde(flatten)]
     custom_fields: Option<IndexMap<String, String>>,
-}
-
-/// Construct bug modification parameters.
-///
-/// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
-/// information.
-pub struct CreateParams<'a> {
-    service: &'a super::Service,
-    params: Params,
-}
-
-impl<'a> ServiceParams<'a> for CreateParams<'a> {
-    type Service = super::Service;
-
-    fn new(service: &'a Self::Service) -> Self {
-        Self {
-            service,
-            params: Params {
-                op_sys: "All".to_string(),
-                platform: "All".to_string(),
-                priority: "Normal".to_string(),
-                severity: "normal".to_string(),
-                version: "unspecified".to_string(),
-                ..Default::default()
-            },
-        }
-    }
-}
-
-impl<'a> CreateParams<'a> {
-    fn build(self) -> crate::Result<Params> {
-        // TODO: verify all required fields are non-empty
-        if self.params == Params::default() {
-            Err(Error::EmptyParams)
-        } else {
-            Ok(self.params)
-        }
-    }
-
-    pub fn alias<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
-    {
-        self.params.alias = Some(values.into_iter().map(Into::into).collect());
-    }
-
-    pub fn assignee(&mut self, value: &str) {
-        let user = self.service.replace_user_alias(value);
-        self.params.assigned_to = Some(user.into());
-    }
-
-    pub fn blocks<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = u64>,
-    {
-        self.params.blocks = Some(values.into_iter().collect());
-    }
-
-    pub fn cc<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
-    {
-        self.params.cc = Some(values.into_iter().map(Into::into).collect());
-    }
-
-    pub fn component<S: Into<String>>(&mut self, value: S) {
-        self.params.component = value.into();
-    }
-
-    pub fn depends<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = u64>,
-    {
-        self.params.depends_on = Some(values.into_iter().collect());
-    }
-
-    pub fn description<S: Into<String>>(&mut self, value: S) {
-        self.params.description = value.into();
-    }
-
-    pub fn custom_fields<I, K, V>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = (K, V)>,
-        K: AsRef<str>,
-        V: Into<String>,
-    {
-        self.params.custom_fields = Some(
-            values
-                .into_iter()
-                .map(|(k, v)| match k.as_ref() {
-                    k if k.starts_with("cf_") => (k.into(), v.into()),
-                    k => (format!("cf_{k}"), v.into()),
-                })
-                .collect(),
-        );
-    }
-
-    pub fn flags<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = Flag>,
-    {
-        self.params.flags = Some(values.into_iter().collect());
-    }
-
-    pub fn groups<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
-    {
-        self.params.groups = Some(values.into_iter().map(Into::into).collect());
-    }
-
-    pub fn keywords<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
-    {
-        self.params.keywords = Some(values.into_iter().map(Into::into).collect());
-    }
-
-    pub fn os<S: Into<String>>(&mut self, value: S) {
-        self.params.op_sys = value.into();
-    }
-
-    pub fn platform<S: Into<String>>(&mut self, value: S) {
-        self.params.platform = value.into();
-    }
-
-    pub fn priority<S: Into<String>>(&mut self, value: S) {
-        self.params.priority = value.into();
-    }
-
-    pub fn product<S: Into<String>>(&mut self, value: S) {
-        self.params.product = value.into();
-    }
-
-    pub fn qa(&mut self, value: &str) {
-        let user = self.service.replace_user_alias(value);
-        self.params.qa_contact = Some(user.into());
-    }
-
-    pub fn resolution<S: Into<String>>(&mut self, value: S) {
-        self.params.resolution = Some(value.into());
-    }
-
-    pub fn see_also<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
-    {
-        self.params.see_also = Some(values.into_iter().map(Into::into).collect());
-    }
-
-    pub fn severity<S: Into<String>>(&mut self, value: S) {
-        self.params.severity = value.into();
-    }
-
-    pub fn status<S: Into<String>>(&mut self, value: S) {
-        self.params.status = Some(value.into());
-    }
-
-    pub fn summary<S: Into<String>>(&mut self, value: S) {
-        self.params.summary = value.into();
-    }
-
-    pub fn target<S: Into<String>>(&mut self, value: S) {
-        self.params.target_milestone = Some(value.into());
-    }
-
-    pub fn url<S: Into<String>>(&mut self, value: S) {
-        self.params.url = Some(value.into());
-    }
-
-    pub fn version<S: Into<String>>(&mut self, value: S) {
-        self.params.version = value.into();
-    }
-
-    pub fn whiteboard<S: Into<String>>(&mut self, value: S) {
-        self.params.whiteboard = Some(value.into());
-    }
 }

@@ -102,8 +102,8 @@ macro_rules! stringify {
 }
 use stringify;
 
-#[derive(Debug, Clone)]
-pub enum RangeOrValue<T> {
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
+pub enum RangeOrValue<T: PartialEq + Eq> {
     Value(T),
     RangeOp(RangeOp<T>),
     Range(Range<T>),
@@ -127,11 +127,21 @@ where
     }
 }
 
+impl<T: fmt::Display + Eq> fmt::Display for RangeOrValue<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Value(value) => value.fmt(f),
+            Self::RangeOp(value) => value.fmt(f),
+            Self::Range(value) => value.fmt(f),
+        }
+    }
+}
+
 static RANGE_OP_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"^(?<op>[<>]=?|!?=)(?<value>.+)$").unwrap());
 
-#[derive(Debug, Clone)]
-pub enum RangeOp<T> {
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
+pub enum RangeOp<T: PartialEq + Eq> {
     Less(T),
     LessOrEqual(T),
     Equal(T),
@@ -169,8 +179,21 @@ where
     }
 }
 
-#[derive(Debug, Clone)]
-pub enum Range<T> {
+impl<T: fmt::Display + Eq> fmt::Display for RangeOp<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Less(value) => write!(f, "<{value}"),
+            Self::LessOrEqual(value) => write!(f, "<={value}"),
+            Self::Equal(value) => write!(f, "={value}"),
+            Self::NotEqual(value) => write!(f, "!={value}"),
+            Self::GreaterOrEqual(value) => write!(f, ">={value}"),
+            Self::Greater(value) => write!(f, ">{value}"),
+        }
+    }
+}
+
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
+pub enum Range<T: PartialEq + Eq> {
     Range(std::ops::Range<T>),                  // 0..1
     Inclusive(std::ops::RangeInclusive<T>),     // 0..=1
     To(std::ops::RangeTo<T>),                   // ..1
@@ -224,8 +247,21 @@ where
     }
 }
 
+impl<T: fmt::Display + Eq> fmt::Display for Range<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Range(r) => write!(f, "{}..{}", r.start, r.end),
+            Self::Inclusive(r) => write!(f, "{}..={}", r.start(), r.end()),
+            Self::To(r) => write!(f, "..{}", r.end),
+            Self::ToInclusive(r) => write!(f, "..={}", r.end),
+            Self::From(r) => write!(f, "{}..", r.start),
+            Self::Full(_) => write!(f, ".."),
+        }
+    }
+}
+
 /// Return true if a type contains a given object, otherwise false.
-impl<T: PartialOrd> Contains<T> for Range<T> {
+impl<T: PartialOrd + Eq> Contains<T> for Range<T> {
     fn contains(&self, obj: &T) -> bool {
         match self {
             Self::Range(r) => r.contains(obj),

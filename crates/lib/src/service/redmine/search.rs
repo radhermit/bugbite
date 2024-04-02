@@ -1,184 +1,69 @@
-use std::collections::HashMap;
-use std::fmt;
+use std::ops::{Deref, DerefMut};
+use std::{fmt, fs};
 
+use camino::Utf8Path;
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 
+use crate::args::ExistsOrValues;
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
-use crate::query::{Order, OrderType};
+use crate::query::{self, Order, OrderType};
 use crate::time::TimeDelta;
-use crate::traits::{Api, InjectAuth, Query, Request, ServiceParams, WebService};
+use crate::traits::{Api, InjectAuth, Request, WebService};
 use crate::Error;
 
-/// Construct a search query.
 #[derive(Debug)]
-pub struct QueryBuilder<'a> {
+struct QueryBuilder<'a> {
     _service: &'a super::Service,
-    query: HashMap<String, String>,
+    query: query::QueryBuilder,
 }
 
-impl<'a> ServiceParams<'a> for QueryBuilder<'a> {
-    type Service = super::Service;
+impl Deref for QueryBuilder<'_> {
+    type Target = query::QueryBuilder;
 
-    fn new(_service: &'a Self::Service) -> Self {
+    fn deref(&self) -> &Self::Target {
+        &self.query
+    }
+}
+
+impl DerefMut for QueryBuilder<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.query
+    }
+}
+
+impl<'a> QueryBuilder<'a> {
+    fn new(_service: &'a super::Service) -> Self {
         Self {
             _service,
             query: Default::default(),
         }
     }
-}
-
-/// Quote terms containing whitespace, combining them into a query value.
-fn quoted_strings<I, S>(values: I) -> String
-where
-    I: IntoIterator<Item = S>,
-    S: fmt::Display,
-{
-    values
-        .into_iter()
-        .map(|s| {
-            let s = s.to_string();
-            if s.contains(char::is_whitespace) {
-                format!("\"{s}\"")
-            } else {
-                s
-            }
-        })
-        .join(" ")
-}
-
-impl QueryBuilder<'_> {
-    pub fn assignee(&mut self, value: bool) {
-        self.exists(ExistsField::Assignee, value)
-    }
-
-    pub fn attachments<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
-    {
-        let value = quoted_strings(values);
-        // TODO: support other operators, currently this specifies the `contains` op
-        self.insert("attachment", format!("~{value}"));
-    }
-
-    pub fn blocks<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = u64>,
-    {
-        let value = values.into_iter().join(",");
-        self.insert("blocks", value);
-    }
-
-    pub fn blocked<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = u64>,
-    {
-        let value = values.into_iter().join(",");
-        self.insert("blocked", value);
-    }
-
-    pub fn relates<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = u64>,
-    {
-        let value = values.into_iter().join(",");
-        self.insert("relates", value);
-    }
-
-    pub fn id<I>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = u64>,
-    {
-        let value = values.into_iter().join(",");
-        self.insert("issue_id", value);
-    }
-
-    pub fn limit(&mut self, value: u64) {
-        self.insert("limit", value);
-    }
-
-    pub fn order<I, T>(&mut self, values: I) -> crate::Result<()>
-    where
-        I: IntoIterator<Item = T>,
-        T: TryInto<Order<OrderField>>,
-        <T as TryInto<Order<OrderField>>>::Error: std::fmt::Display,
-    {
-        let values: Vec<_> = values
-            .into_iter()
-            .map(|x| x.try_into())
-            .try_collect()
-            .map_err(|e| Error::InvalidValue(format!("{e}")))?;
-        let value = values.iter().map(|x| x.api()).join(",");
-        self.insert("sort", value);
-        Ok(())
-    }
-
-    pub fn status(&mut self, value: &str) -> crate::Result<()> {
-        // TODO: move valid status search values to an enum
-        match value {
-            "open" | "@open" => self.insert("status_id", "open"),
-            "closed" | "@closed" => self.insert("status_id", "closed"),
-            "all" | "@all" => self.insert("status_id", "*"),
-            _ => return Err(Error::InvalidValue(format!("invalid status: {value}"))),
-        }
-        Ok(())
-    }
-
-    pub fn closed(&mut self, value: &RangeOrValue<TimeDelta>) {
-        match value {
-            RangeOrValue::Value(value) => {
-                let value = value.api();
-                self.insert("closed_on", format!(">={value}"));
-            }
-            RangeOrValue::RangeOp(value) => self.range_op("closed_on", value),
-            RangeOrValue::Range(value) => self.range("closed_on", value),
-        }
-    }
-
-    pub fn created(&mut self, value: &RangeOrValue<TimeDelta>) {
-        match value {
-            RangeOrValue::Value(value) => {
-                let value = value.api();
-                self.insert("created_on", format!(">={value}"));
-            }
-            RangeOrValue::RangeOp(value) => self.range_op("created_on", value),
-            RangeOrValue::Range(value) => self.range("created_on", value),
-        }
-    }
-
-    pub fn modified(&mut self, value: &RangeOrValue<TimeDelta>) {
-        match value {
-            RangeOrValue::Value(value) => {
-                let value = value.api();
-                self.insert("updated_on", format!(">={value}"));
-            }
-            RangeOrValue::RangeOp(value) => self.range_op("updated_on", value),
-            RangeOrValue::Range(value) => self.range("updated_on", value),
-        }
-    }
-
-    pub fn summary<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
-    {
-        let value = quoted_strings(values);
-        // TODO: support other operators, currently this specifies the `contains` op
-        self.insert("subject", format!("~{value}"));
-    }
 
     /// Match conditionally existent array field values.
-    pub fn exists(&mut self, field: ExistsField, status: bool) {
+    fn exists(&mut self, field: ExistsField, status: bool) {
         let status = if status { "*" } else { "!*" };
         self.insert(field.api(), status);
     }
 
+    fn time(&mut self, field: &str, value: RangeOrValue<TimeDelta>) {
+        match value {
+            RangeOrValue::Value(value) => {
+                let value = value.api();
+                self.insert(field, format!(">={value}"));
+            }
+            RangeOrValue::RangeOp(value) => self.range_op(field, value),
+            RangeOrValue::Range(value) => self.range(field, value),
+        }
+    }
+
     // Redmine doesn't support native < or > operators so use <= and >= for them.
-    fn range_op<T>(&mut self, field: &str, value: &RangeOp<T>)
+    fn range_op<T>(&mut self, field: &str, value: RangeOp<T>)
     where
-        T: Api,
+        T: Api + Eq,
     {
         match value {
             RangeOp::Less(value) | RangeOp::LessOrEqual(value) => {
@@ -200,9 +85,9 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn range<T>(&mut self, field: &str, value: &Range<T>)
+    fn range<T>(&mut self, field: &str, value: Range<T>)
     where
-        T: Api,
+        T: Api + Eq,
     {
         match value {
             Range::Range(r) => {
@@ -228,65 +113,206 @@ impl QueryBuilder<'_> {
             Range::Full(_) => (),
         }
     }
+}
 
-    fn insert<K, V>(&mut self, key: K, value: V)
+/// Issue search parameters.
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Clone)]
+pub struct Parameters {
+    pub assignee: Option<bool>,
+    pub attachments: Option<ExistsOrValues<String>>,
+    pub blocks: Option<ExistsOrValues<u64>>,
+    pub blocked: Option<ExistsOrValues<u64>>,
+    pub relates: Option<ExistsOrValues<u64>>,
+    pub ids: Option<Vec<u64>>,
+
+    pub created: Option<RangeOrValue<TimeDelta>>,
+    pub modified: Option<RangeOrValue<TimeDelta>>,
+    pub closed: Option<RangeOrValue<TimeDelta>>,
+
+    pub limit: Option<u64>,
+    pub order: Option<Vec<Order<OrderField>>>,
+    pub status: Option<String>,
+    pub summary: Option<Vec<String>>,
+}
+
+impl Parameters {
+    /// Load parameters in TOML format from a file.
+    pub fn from_path(path: &Utf8Path) -> crate::Result<Self> {
+        let data = fs::read_to_string(path)
+            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
+        toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
+    }
+
+    /// Merge parameters using the provided value for fallbacks.
+    pub fn merge(self, other: Self) -> Self {
+        Self {
+            assignee: self.assignee.or(other.assignee),
+            attachments: self.attachments.or(other.attachments),
+            blocks: self.blocks.or(other.blocks),
+            blocked: self.blocked.or(other.blocked),
+            relates: self.relates.or(other.relates),
+            ids: self.ids.or(other.ids),
+            created: self.created.or(other.created),
+            modified: self.modified.or(other.modified),
+            closed: self.closed.or(other.closed),
+            limit: self.limit.or(other.limit),
+            order: self.order.or(other.order),
+            status: self.status.or(other.status),
+            summary: self.summary.or(other.summary),
+        }
+    }
+
+    pub fn order<I>(mut self, values: I) -> Self
     where
-        K: Api,
-        V: Api,
+        I: IntoIterator<Item = Order<OrderField>>,
     {
-        self.query.insert(key.api(), value.api());
+        self.order = Some(values.into_iter().collect());
+        self
+    }
+
+    pub fn status<S: AsRef<str>>(mut self, value: S) -> crate::Result<Self> {
+        // TODO: move valid status search values to an enum
+        match value.as_ref() {
+            "open" => self.status = Some("open".to_string()),
+            "closed" => self.status = Some("closed".to_string()),
+            "all" => self.status = Some("*".to_string()),
+            x => return Err(Error::InvalidValue(format!("invalid status: {x}"))),
+        }
+        Ok(self)
     }
 }
 
-impl Query for QueryBuilder<'_> {
-    fn params(&mut self) -> crate::Result<String> {
-        let mut params = url::form_urlencoded::Serializer::new(String::new());
-        // limit to open issues by default
-        if !self.query.contains_key("status_id") {
-            self.status("open")?;
+/// Quote terms containing whitespace, combining them into a query value.
+fn quoted_strings<I, S>(values: I) -> String
+where
+    I: IntoIterator<Item = S>,
+    S: fmt::Display,
+{
+    values
+        .into_iter()
+        .map(|s| {
+            let s = s.to_string();
+            if s.contains(char::is_whitespace) {
+                format!("\"{s}\"")
+            } else {
+                s
+            }
+        })
+        .join(" ")
+}
+
+impl Parameters {
+    pub(crate) fn encode(self, service: &super::Service) -> crate::Result<String> {
+        let mut query = QueryBuilder::new(service);
+
+        if let Some(values) = self.blocks {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
+                ExistsOrValues::Values(values) => query.insert("blocks", values.iter().join(",")),
+            }
         }
 
-        // default to the common maximum limit, without this the default limit is used
-        if !self.query.contains_key("limit") {
-            self.limit(100);
+        if let Some(values) = self.blocked {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocked, value),
+                ExistsOrValues::Values(values) => query.insert("blocked", values.iter().join(",")),
+            }
         }
 
-        // sort by ascending ID by default
-        if !self.query.contains_key("sort") {
-            self.order(["+id"])?;
+        if let Some(values) = self.relates {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Relates, value),
+                ExistsOrValues::Values(values) => query.insert("relates", values.iter().join(",")),
+            }
         }
 
-        params.extend_pairs(self.query.iter());
-        Ok(params.finish())
+        if let Some(values) = self.ids {
+            query.insert("issue_id", values.iter().join(","));
+        }
+
+        if let Some(value) = self.closed {
+            query.time("closed_on", value);
+        }
+
+        if let Some(value) = self.created {
+            query.time("created_on", value);
+        }
+
+        if let Some(value) = self.modified {
+            query.time("updated_on", value);
+        }
+
+        if let Some(value) = self.assignee {
+            query.exists(ExistsField::Assignee, value);
+        }
+
+        if let Some(values) = self.attachments {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachment, value),
+                ExistsOrValues::Values(values) => {
+                    let value = quoted_strings(values);
+                    // TODO: support other operators, currently this specifies the `contains` op
+                    query.insert("attachment", format!("~{value}"));
+                }
+            }
+        }
+
+        if let Some(values) = self.summary {
+            let value = quoted_strings(values);
+            // TODO: support other operators, currently this specifies the `contains` op
+            query.insert("subject", format!("~{value}"));
+        }
+
+        if let Some(value) = self.status {
+            query.insert("status", value);
+        } else {
+            // limit to open issues by default
+            query.insert("status", "open");
+        }
+
+        if let Some(values) = self.order {
+            let value = values.iter().map(|x| x.api()).join(",");
+            query.insert("sort", value);
+        } else {
+            // sort by ascending ID by default
+            let order = Order::ascending(OrderField::Id);
+            query.insert("sort", order.api());
+        }
+
+        if let Some(value) = self.limit {
+            query.insert("limit", value);
+        } else {
+            // default to the common maximum limit, without this the default limit is used
+            query.insert("limit", "100");
+        }
+
+        Ok(query.encode())
     }
 }
 
 #[derive(Debug)]
-pub(crate) struct SearchRequest<'a> {
+pub(crate) struct SearchRequest {
     url: url::Url,
-    service: &'a super::Service,
 }
 
-impl<'a> SearchRequest<'a> {
-    pub(super) fn new<Q: Query>(service: &'a super::Service, mut query: Q) -> crate::Result<Self> {
-        let url = service
-            .base()
-            .join(&format!("issues.json?{}", query.params()?))?;
-        Ok(Self { url, service })
+impl SearchRequest {
+    pub(super) fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
+        let params = params.encode(service)?;
+        let url = service.base().join(&format!("issues.json?{params}"))?;
+        Ok(Self { url })
     }
 }
 
-impl Request for SearchRequest<'_> {
+impl Request for SearchRequest {
     type Output = Vec<Issue>;
+    type Service = super::Service;
 
-    async fn send(self) -> crate::Result<Self::Output> {
-        let request = self
-            .service
-            .client()
-            .get(self.url)
-            .inject_auth(self.service, false)?;
+    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+        let request = service.client().get(self.url).inject_auth(service, false)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
+        let mut data = service.parse_response(response).await?;
         let data = data["issues"].take();
         let issues = serde_json::from_value(data)
             .map_err(|e| Error::InvalidValue(format!("failed deserializing issues: {e}")))?;
@@ -318,7 +344,7 @@ impl Api for ExistsField {
 }
 
 /// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, VariantNames, Debug, PartialEq, Eq, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
     Assignee,
