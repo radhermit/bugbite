@@ -1,7 +1,6 @@
+use std::fmt;
 use std::str::FromStr;
-use std::{fmt, fs};
 
-use camino::Utf8Path;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
@@ -283,14 +282,6 @@ impl<'a> ServiceParams<'a> for ModifyParams<'a> {
 }
 
 impl<'a> ModifyParams<'a> {
-    pub fn load(path: &Utf8Path, service: &'a super::Service) -> crate::Result<Self> {
-        let data = fs::read_to_string(path)
-            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
-        let params = toml::from_str(&data)
-            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))?;
-        Ok(Self { service, params })
-    }
-
     fn build(self) -> crate::Result<Params> {
         if self.params == Params::default() {
             Err(Error::EmptyParams)
