@@ -3,6 +3,7 @@ use std::hash::{Hash, Hasher};
 use chrono::prelude::*;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 use std::fmt;
 
@@ -12,6 +13,7 @@ use crate::traits::RenderSearch;
 
 use super::{stringify, Item};
 
+#[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default)]
 #[serde(default)]
 pub struct Issue {
@@ -30,6 +32,7 @@ pub struct Issue {
     pub created: Option<DateTime<Utc>>,
     #[serde(rename = "updated_on")]
     pub updated: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub comments: Vec<Comment>,
 }
 

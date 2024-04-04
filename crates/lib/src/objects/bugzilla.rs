@@ -10,7 +10,9 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
-use serde_with::{serde_as, BoolFromInt, DeserializeFromStr, SerializeDisplay};
+use serde_with::{
+    serde_as, skip_serializing_none, BoolFromInt, DeserializeFromStr, SerializeDisplay,
+};
 use strum::{Display, EnumString};
 
 use crate::serde::{non_empty_str, null_empty_set, null_empty_vec};
@@ -244,11 +246,13 @@ pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(d: D) -> Result<IndexSet<S
     })
 }
 
+#[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default)]
 #[serde(default)]
 pub struct Bug {
     pub id: u64,
     #[serde(deserialize_with = "alias_to_set")]
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
     pub alias: IndexSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub assigned_to: Option<String>,
@@ -286,27 +290,38 @@ pub struct Bug {
     #[serde(deserialize_with = "unset_value_str")]
     pub severity: Option<String>,
     #[serde(deserialize_with = "null_empty_set")]
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
     pub groups: IndexSet<String>,
     #[serde(deserialize_with = "null_empty_set")]
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
     pub keywords: IndexSet<String>,
     #[serde(deserialize_with = "null_empty_set")]
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
     pub cc: IndexSet<String>,
     #[serde(deserialize_with = "null_empty_set")]
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
     pub blocks: IndexSet<u64>,
     #[serde(deserialize_with = "null_empty_set")]
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
     pub depends_on: IndexSet<u64>,
     #[serde(rename = "dupe_of")]
     pub duplicate_of: Option<u64>,
     #[serde(deserialize_with = "null_empty_vec")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub flags: Vec<BugFlag>,
     #[serde(deserialize_with = "null_empty_set")]
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
     pub tags: IndexSet<String>,
     #[serde(deserialize_with = "null_empty_set")]
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
     pub see_also: IndexSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub url: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub comments: Vec<Comment>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub attachments: Vec<Attachment>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub history: Vec<Event>,
 }
 
