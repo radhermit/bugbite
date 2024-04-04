@@ -905,9 +905,10 @@ pub(super) struct SearchOptions {
         long_help = wrapped_doc!("
             Read search attributes from a template.
 
-            Value must be the path to a valid search template file.
-            Templates use the TOML format and generally map long option names to
-            values.
+            Value must be the path to a valid template file. Templates use the
+            TOML format and generally map long option names to values.
+
+            Explicitly specified options override corresponding template values.
         ")
     )]
     from: Option<Utf8PathBuf>,

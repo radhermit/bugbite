@@ -311,11 +311,12 @@ pub(super) struct Command {
         long_help = wrapped_doc!(r#"
             Read attributes from a template.
 
-            Value must be the path to a valid template file. Templates
-            use the TOML format and generally map long option names to values.
+            Value must be the path to a valid template file. Templates use the
+            TOML format and generally map long option names to values.
 
-            Fields that don't match known bug field names are used for custom
-            fields.
+            Fields that don't match known bug field names target custom fields.
+
+            Explicitly specified options override corresponding template values.
 
             Example:
             - create bug using template
