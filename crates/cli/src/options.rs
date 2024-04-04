@@ -57,7 +57,7 @@ pub(super) struct ServiceCommand {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service() -> anyhow::Result<(String, Vec<String>)> {
+    pub(crate) fn service() -> anyhow::Result<(String, Vec<String>, Options)> {
         // parse service options
         let Ok(cmd) = Self::try_parse() else {
             // use main command parser if first arg is an option (e.g. --help or --version)
@@ -81,7 +81,7 @@ impl ServiceCommand {
 
         // early return for non-service subcommands
         if subcmds.contains(arg) && !services.contains(arg) {
-            return Ok((Default::default(), env::args().collect()));
+            return Ok((Default::default(), env::args().collect(), cmd.options));
         }
 
         let config = Config::load(cmd.options.bite.config.as_deref())?;
@@ -119,7 +119,7 @@ impl ServiceCommand {
         // append the remaining unparsed args
         args.extend(remaining);
 
-        Ok((base, args))
+        Ok((base, args, cmd.options))
     }
 }
 
@@ -249,12 +249,12 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, base: String) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, base: String, options: Options) -> anyhow::Result<ExitCode> {
         enable_logging(self.verbosity.log_level_filter());
 
         let client = Client::builder()
-            .insecure(self.options.bite.insecure)
-            .timeout(self.options.bite.timeout);
+            .insecure(options.bite.insecure)
+            .timeout(options.bite.timeout);
 
         self.subcmd.run(base, client).await
     }

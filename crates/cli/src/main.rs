@@ -15,8 +15,8 @@ async fn main() -> anyhow::Result<ExitCode> {
     utils::reset_sigpipe();
 
     // parse service options to determine the service type
-    let (base, args) = options::ServiceCommand::service()?;
+    let (base, args, options) = options::ServiceCommand::service()?;
     // parse remaining args and run command
     let cmd = options::Command::parse_from(args);
-    cmd.run(base).await
+    cmd.run(base, options).await
 }
