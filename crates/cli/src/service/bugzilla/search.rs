@@ -678,6 +678,7 @@ struct QueryOptions {
     #[arg(
         short = 'S',
         long,
+        value_name = "QUERY",
         long_help = wrapped_doc!("
             Search for bugs using quicksearch syntax.
 
