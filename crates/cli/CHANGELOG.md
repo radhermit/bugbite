@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.0.8
+
+### Added
+
+#### Bugzilla
+- attach: Support attachment compression.
+- attach: Support auto-compress and auto-truncate options.
+- search: Support logical OR and AND combinations.
+- search: Support loading and saving search parameters using templates.
+- search: Support JSON output via --json.
+
+#### Redmine
+- search: Add --dry-run/-n support.
+- search: Support loading and saving search parameters using templates.
+- search: Support JSON output via --json.
+
 ## 0.0.7
 
 ### Added

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.8
+
+### Added
+
+#### Bugzilla
+- attach: Support attachment compression.
+- attach: Support auto-compress and auto-truncate options.
+- search: Add support for logical OR and AND combinations.
+- search: Support loading and saving search parameters using templates.
+
+#### Redmine
+- search: Support loading and saving search parameters using templates.
+
 ## 0.0.7
 
 ### Added
