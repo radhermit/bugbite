@@ -176,7 +176,7 @@ struct Options {
         short = 'c',
         long,
         num_args = 0..=1,
-        conflicts_with_all = ["comment_private", "reply"],
+        conflicts_with = "reply",
         default_missing_value = "",
         long_help = wrapped_doc!("
             Add a comment.
@@ -187,21 +187,9 @@ struct Options {
     )]
     comment: Option<String>,
 
-    /// add a private comment
-    #[arg(
-        long,
-        num_args = 0..=1,
-        value_name = "COMMENT",
-        conflicts_with_all = ["comment", "reply"],
-        default_missing_value = "",
-        long_help = wrapped_doc!("
-            Add a private comment.
-
-            When no argument is specified, an editor is launched allowing for
-            interactive entry.
-        ")
-    )]
-    comment_private: Option<String>,
+    /// enable comment privacy
+    #[arg(short = 'P', long, num_args = 0, default_missing_value = "true")]
+    comment_is_private: Option<bool>,
 
     /// modify comment privacy
     #[arg(
@@ -475,8 +463,8 @@ impl From<Options> for Parameters {
             assignee: value.assignee,
             blocks: value.blocks,
             cc: value.cc,
-            comment_is_private: value.comment_private.as_ref().and(Some(true)),
-            comment: value.comment.or(value.comment_private),
+            comment: value.comment,
+            comment_is_private: value.comment_is_private,
             comment_privacy: value
                 .comment_privacy
                 .and_then(|x| x.range_or_set.map(|value| (value, x.is_private))),
@@ -521,7 +509,7 @@ pub(super) struct Command {
         num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
-        conflicts_with_all = ["comment", "comment_private"],
+        conflicts_with = "comment",
         help_heading = "Modify options",
         long_help = wrapped_doc!("
             Interactively reply to specific comments for a given bug.
@@ -545,7 +533,7 @@ pub(super) struct Command {
             > bite m 123 --reply
 
             - private reply to last comment
-            > bite m 123 --reply --private-comment
+            > bite m 123 --reply --comment-is-private
         ")
     )]
     reply: Option<Vec<usize>>,
