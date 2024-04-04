@@ -283,6 +283,7 @@ pub struct Parameters {
     pub cc: Option<Vec<SetChange<String>>>,
     pub comment: Option<String>,
     pub comment_is_private: Option<bool>,
+    pub comment_privacy: Option<(RangeOrSet<usize>, Option<bool>)>,
     pub component: Option<String>,
     pub depends: Option<Vec<SetChange<u64>>>,
     pub duplicate_of: Option<u64>,
@@ -292,7 +293,6 @@ pub struct Parameters {
     pub os: Option<String>,
     pub platform: Option<String>,
     pub priority: Option<String>,
-    pub private_comments: Option<(RangeOrSet<usize>, Option<bool>)>,
     pub product: Option<String>,
     pub qa: Option<String>,
     pub resolution: Option<String>,
@@ -326,6 +326,7 @@ impl Parameters {
             cc: self.cc.or(other.cc),
             comment: self.comment.or(other.comment),
             comment_is_private: self.comment_is_private.or(other.comment_is_private),
+            comment_privacy: self.comment_privacy.or(other.comment_privacy),
             component: self.component.or(other.component),
             depends: self.depends.or(other.depends),
             duplicate_of: self.duplicate_of.or(other.duplicate_of),
@@ -335,7 +336,6 @@ impl Parameters {
             os: self.os.or(other.os),
             platform: self.platform.or(other.platform),
             priority: self.priority.or(other.priority),
-            private_comments: self.private_comments.or(other.private_comments),
             product: self.product.or(other.product),
             qa: self.qa.or(other.qa),
             resolution: self.resolution.or(other.resolution),
@@ -432,7 +432,7 @@ impl Parameters {
             });
         }
 
-        if let Some((value, is_private)) = self.private_comments {
+        if let Some((value, is_private)) = self.comment_privacy {
             let id = match &ids[..] {
                 [x] => x,
                 _ => {

@@ -22,12 +22,6 @@ struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
     is_private: Option<bool>,
 }
 
-impl<T: FromStr + PartialOrd + Eq + Hash> CommentPrivacy<T> {
-    fn into_private_comments(self) -> Option<(RangeOrSet<T>, Option<bool>)> {
-        self.range_or_set.map(|x| (x, self.is_private))
-    }
-}
-
 impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for CommentPrivacy<T>
 where
     <T as FromStr>::Err: fmt::Display + fmt::Debug,
@@ -37,8 +31,6 @@ where
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (range_or_set, is_private) = if let Some((ids, value)) = s.split_once(':') {
             (Some(ids.parse()?), Some(value.parse()?))
-        } else if let Ok(value) = s.parse::<bool>() {
-            (None, Some(value))
         } else {
             (Some(s.parse()?), None)
         };
@@ -184,16 +176,65 @@ struct Options {
         short = 'c',
         long,
         num_args = 0..=1,
-        conflicts_with = "reply",
+        conflicts_with_all = ["comment_private", "reply"],
         default_missing_value = "",
         long_help = wrapped_doc!("
             Add a comment.
 
-            When no comment argument is specified, an editor is launched
-            allowing for interactive entry.
+            When no argument is specified, an editor is launched allowing for
+            interactive entry.
         ")
     )]
     comment: Option<String>,
+
+    /// add a private comment
+    #[arg(
+        long,
+        num_args = 0..=1,
+        value_name = "COMMENT",
+        conflicts_with_all = ["comment", "reply"],
+        default_missing_value = "",
+        long_help = wrapped_doc!("
+            Add a private comment.
+
+            When no argument is specified, an editor is launched allowing for
+            interactive entry.
+        ")
+    )]
+    comment_private: Option<String>,
+
+    /// modify comment privacy
+    #[arg(
+        long,
+        value_name = "VALUE",
+        long_help = wrapped_doc!("
+            Modify the privacy of existing comments.
+
+            The value must be comma-separated comment IDs local to the specified
+            bug ID starting at 0 for the bug description or a range of comment
+            IDs. An optional suffix consisting of boolean value in the form of
+            `:true` or `:false` can be included to enable or disable all comment
+            privacy respectively. Without this suffix, the privacy of all
+            matching comments is toggled.
+
+            Examples modifying bug 10:
+            - toggle comment 1 privacy
+            > bite m 10 --comment-privacy 1
+
+            - toggle comment 1 and 2 privacy
+            > bite m 10 --comment-privacy 1,2
+
+            - toggle all comment privacy
+            > bite m 10 --comment-privacy ..
+
+            - disable comment 1 and 2 privacy
+            > bite m 10 --comment-privacy 1,2:false
+
+            - mark comments 2-5 private
+            > bite m 10 --comment-privacy 2..=5:true
+        ")
+    )]
+    comment_privacy: Option<CommentPrivacy<usize>>,
 
     /// modify component
     #[arg(short = 'C', long)]
@@ -334,55 +375,6 @@ struct Options {
     #[arg(long)]
     priority: Option<String>,
 
-    /// modify comment privacy
-    #[arg(
-        short = 'P',
-        long,
-        value_name = "VALUE",
-        num_args = 0..=1,
-        default_missing_value = "true",
-        long_help = wrapped_doc!("
-            Modify the privacy of comments.
-
-            This option controls modifying the privacy of both existing comments
-            and those currently being created via the `--comment` or `--reply`
-            options.
-
-            To modify existing comments, the value must be comma-separated
-            comment IDs local to the specified bug ID starting at 0 for the bug
-            description or a range of comment IDs. An optional suffix consisting
-            of boolean value in the form of `:true` or `:false` can be included
-            to enable or disable all comment privacy respectively. Without this
-            suffix, the privacy of all matching comments is toggled.
-
-            To modify comments being created, either no argument can be used to
-            enable privacy or an explicit boolean.
-
-            Examples modifying bug 10:
-            - toggle comment 1 privacy
-            > bite m 10 --private-comment 1
-
-            - toggle comment 1 and 2 privacy
-            > bite m 10 --private-comment 1,2
-
-            - toggle all comment privacy
-            > bite m 10 --private-comment ..
-
-            - disable comment 1 and 2 privacy
-            > bite m 10 --private-comment 1,2:false
-
-            - mark comments 2-5 private
-            > bite m 10 --private-comment 2..=5:true
-
-            - mark created comment private
-            > bite m 10 --comment --private-comment
-
-            - mark created reply private
-            > bite m 10 --reply --private-comment
-        ")
-    )]
-    private_comment: Option<CommentPrivacy<usize>>,
-
     /// modify product
     #[arg(short, long)]
     product: Option<String>,
@@ -483,8 +475,11 @@ impl From<Options> for Parameters {
             assignee: value.assignee,
             blocks: value.blocks,
             cc: value.cc,
-            comment: value.comment,
-            comment_is_private: value.private_comment.as_ref().and_then(|x| x.is_private),
+            comment_is_private: value.comment_private.as_ref().and(Some(true)),
+            comment: value.comment.or(value.comment_private),
+            comment_privacy: value
+                .comment_privacy
+                .and_then(|x| x.range_or_set.map(|value| (value, x.is_private))),
             component: value.component,
             depends: value.depends,
             duplicate_of: value.duplicate_of,
@@ -494,9 +489,6 @@ impl From<Options> for Parameters {
             os: value.os,
             platform: value.platform,
             priority: value.priority,
-            private_comments: value
-                .private_comment
-                .and_then(|x| x.into_private_comments()),
             product: value.product,
             qa: value.qa,
             resolution: value.resolution,
@@ -529,7 +521,7 @@ pub(super) struct Command {
         num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
-        conflicts_with = "comment",
+        conflicts_with_all = ["comment", "comment_private"],
         help_heading = "Modify options",
         long_help = wrapped_doc!("
             Interactively reply to specific comments for a given bug.
