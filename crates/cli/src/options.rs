@@ -195,7 +195,7 @@ struct BiteOpts {
     insecure: bool,
     /// request timeout in seconds
     #[arg(short, long, value_name = "SECONDS", default_value = "30")]
-    timeout: u64,
+    timeout: f64,
 }
 
 #[derive(Debug, Args)]

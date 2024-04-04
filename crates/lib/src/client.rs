@@ -12,12 +12,12 @@ static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_V
 
 #[derive(Debug, Default)]
 pub struct ClientBuilder {
-    timeout: u64,
+    timeout: f64,
     insecure: bool,
 }
 
 impl ClientBuilder {
-    pub fn timeout(mut self, timeout: u64) -> Self {
+    pub fn timeout(mut self, timeout: f64) -> Self {
         self.timeout = timeout;
         self
     }
@@ -33,7 +33,7 @@ impl ClientBuilder {
             .user_agent(USER_AGENT)
             // TODO: switch to cookie_provider() once cookie (de)serialization is supported
             .cookie_store(true)
-            .timeout(Duration::from_secs(self.timeout))
+            .timeout(Duration::from_secs_f64(self.timeout))
             .danger_accept_invalid_certs(self.insecure)
     }
 }
@@ -65,6 +65,6 @@ impl Client {
     }
 
     pub fn builder() -> ClientBuilder {
-        ClientBuilder::default().timeout(30)
+        ClientBuilder::default().timeout(30.0)
     }
 }
