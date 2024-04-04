@@ -538,7 +538,7 @@ pub(super) struct Command {
     )]
     reply: Option<Vec<usize>>,
 
-    /// read attributes from a template
+    /// read attributes from template
     #[arg(
         long,
         help_heading = "Modify options",
@@ -556,7 +556,7 @@ pub(super) struct Command {
     )]
     from: Option<Utf8PathBuf>,
 
-    /// write attributes to a template
+    /// write attributes to template
     #[arg(
         long,
         help_heading = "Modify options",
@@ -650,14 +650,14 @@ impl Command {
 
         let mut params: Parameters = self.options.into();
 
-        // read modification attributes from a template
+        // read modification attributes from template
         if let Some(path) = self.from.as_ref() {
             let template = Parameters::from_path(path)?;
             // command-line options override template options
             params = params.merge(template);
         };
 
-        // write modification attributes to a template
+        // write modification attributes to template
         if let Some(path) = self.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&params)?;
@@ -665,7 +665,7 @@ impl Command {
             }
         }
 
-        // interactively create a reply or comment
+        // interactively create reply or comment
         if let Some(mut values) = self.reply {
             if ids.len() > 1 {
                 anyhow::bail!("reply invalid, targeting multiple bugs");

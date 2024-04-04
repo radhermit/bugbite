@@ -897,7 +897,7 @@ pub(super) struct SearchOptions {
     #[arg(long)]
     json: bool,
 
-    /// read attributes from a template
+    /// read attributes from template
     #[arg(
         long,
         value_name = "PATH",
@@ -912,7 +912,7 @@ pub(super) struct SearchOptions {
     )]
     from: Option<Utf8PathBuf>,
 
-    /// write attributes to a template
+    /// write attributes to template
     #[arg(
         long,
         value_name = "PATH",
@@ -943,14 +943,14 @@ impl Command {
         let fields = self.params.query.fields.clone();
         let mut params: Parameters = self.params.into();
 
-        // read attributes from a template
+        // read attributes from template
         if let Some(path) = self.search.from.as_ref() {
             let template = Parameters::from_path(path)?;
             // command-line options override template options
             params = params.merge(template);
         }
 
-        // write attributes to a template
+        // write attributes to template
         if let Some(path) = self.search.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&params)?;

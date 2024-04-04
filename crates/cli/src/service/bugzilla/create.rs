@@ -301,7 +301,7 @@ pub(super) struct Command {
     #[arg(short = 'n', long, help_heading = "Create options")]
     dry_run: bool,
 
-    /// read attributes from a template
+    /// read attributes from template
     #[arg(
         long,
         help_heading = "Create options",
@@ -347,7 +347,7 @@ pub(super) struct Command {
     )]
     from_bug: Option<u64>,
 
-    /// write attributes to a template
+    /// write attributes to template
     #[arg(
         long,
         help_heading = "Create options",
@@ -376,7 +376,7 @@ impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut params: Parameters = self.options.into();
 
-        // read attributes from a template
+        // read attributes from template
         if let Some(path) = self.from.as_ref() {
             let template = Parameters::from_path(path)?;
             // command-line options override template options
@@ -391,7 +391,7 @@ impl Command {
             params = params.merge(bug.into());
         }
 
-        // write attributes to a template
+        // write attributes to template
         if let Some(path) = self.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&params)?;
