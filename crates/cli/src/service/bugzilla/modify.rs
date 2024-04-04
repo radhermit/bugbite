@@ -645,27 +645,10 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 }
 
 impl Command {
-    pub(super) async fn run(mut self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
 
-        // interactively create a reply
-        if let Some(mut values) = self.reply {
-            if ids.len() > 1 {
-                anyhow::bail!("reply invalid, targeting multiple bugs");
-            }
-            let comment = get_reply(client, ids[0], &mut values).await?;
-            self.options.comment = Some(comment);
-        }
-
         let mut params: Parameters = self.options.into();
-
-        // interactively create comment
-        if let Some(value) = params.comment.as_ref() {
-            if value.trim().is_empty() {
-                let comment = edit_comment(value.trim())?;
-                params.comment = Some(comment);
-            }
-        }
 
         // read modification attributes from a template
         if let Some(path) = self.from.as_ref() {
@@ -679,6 +662,20 @@ impl Command {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&params)?;
                 fs::write(path, data)?;
+            }
+        }
+
+        // interactively create a reply or comment
+        if let Some(mut values) = self.reply {
+            if ids.len() > 1 {
+                anyhow::bail!("reply invalid, targeting multiple bugs");
+            }
+            let comment = get_reply(client, ids[0], &mut values).await?;
+            params.comment = Some(comment);
+        } else if let Some(value) = params.comment.as_ref() {
+            if value.trim().is_empty() {
+                let comment = edit_comment(value.trim())?;
+                params.comment = Some(comment);
             }
         }
 
