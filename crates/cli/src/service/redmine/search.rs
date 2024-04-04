@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
@@ -340,6 +341,10 @@ pub(super) struct SearchOptions {
     #[arg(short = 'n', long)]
     dry_run: bool,
 
+    /// output in JSON format
+    #[arg(long)]
+    json: bool,
+
     /// read attributes from a template
     #[arg(
         long,
@@ -405,8 +410,16 @@ impl Command {
             let url = client.search_url(params)?;
             launch_browser([url])?;
         } else if !self.search.dry_run {
-            let issues = client.search(params).await?;
-            render_search(issues, &fields)?;
+            let items = client.search(params).await?;
+            let mut stdout = stdout().lock();
+            if self.search.json {
+                for item in items {
+                    let data = serde_json::to_string(&item).expect("failed serializing item");
+                    writeln!(stdout, "{data}")?;
+                }
+            } else {
+                render_search(stdout, items, &fields)?;
+            }
         }
 
         Ok(ExitCode::SUCCESS)

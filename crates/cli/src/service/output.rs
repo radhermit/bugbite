@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::io::{stdout, IsTerminal, Write};
+use std::io::{stdout, IsTerminal};
 
 use bugbite::traits::RenderSearch;
 use itertools::Itertools;
@@ -37,12 +37,16 @@ where
     Ok(())
 }
 
-pub(crate) fn render_search<I, R, T>(items: I, fields: &[T]) -> Result<(), bugbite::Error>
+pub(crate) fn render_search<I, R, T, W>(
+    mut f: W,
+    items: I,
+    fields: &[T],
+) -> Result<(), bugbite::Error>
 where
     I: IntoIterator<Item = R>,
     R: RenderSearch<T>,
+    W: std::io::Write,
 {
-    let mut stdout = stdout().lock();
     let mut count = 0;
 
     for item in items {
@@ -50,7 +54,7 @@ where
         let line = item.render(fields);
         if !line.is_empty() {
             let data = truncate(&line, *COLUMNS);
-            writeln!(stdout, "{data}")?;
+            writeln!(f, "{data}")?;
         }
     }
 
