@@ -40,7 +40,7 @@ async fn single_bug() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug")).unwrap();
 
-    cmd("bite bugzilla get -ACH")
+    cmd("bite get -ACH")
         .arg("12345")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
@@ -48,7 +48,7 @@ async fn single_bug() {
         .success();
 
     // pull id from stdin
-    cmd("bite bugzilla get -ACH -")
+    cmd("bite get -ACH -")
         .write_stdin("12345\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
@@ -64,7 +64,7 @@ async fn nonexistent_bug() {
         .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
         .await;
 
-    cmd("bite bugzilla get")
+    cmd("bite get")
         .arg("1")
         .assert()
         .stdout("")
@@ -81,7 +81,7 @@ async fn multiple_bugs() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/multiple-bugs")).unwrap();
 
-    cmd("bite bugzilla get -ACH")
+    cmd("bite get -ACH")
         .args(["12345", "23456", "34567"])
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
@@ -89,7 +89,7 @@ async fn multiple_bugs() {
         .success();
 
     // pull ids from stdin
-    cmd("bite bugzilla get -ACH -")
+    cmd("bite get -ACH -")
         .write_stdin("12345\n23456\n34567\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))

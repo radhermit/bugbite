@@ -27,7 +27,7 @@ async fn creation() {
         .respond(200, TEST_DATA.join("create/creation.json"))
         .await;
 
-    cmd("bite bugzilla create")
+    cmd("bite create")
         .args(["--component", "TestComponent"])
         .args(["--product", "TestProduct"])
         .args(["--summary", "test"])
