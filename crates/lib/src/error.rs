@@ -22,13 +22,19 @@ pub enum Error {
     Redmine(String),
     #[error("{0}")]
     Request(reqwest::Error),
+    #[error("request timed out")]
+    Timeout,
     #[error("{0}")]
     Unsupported(String),
 }
 
 impl From<reqwest::Error> for Error {
     fn from(e: reqwest::Error) -> Self {
-        Error::Request(e.without_url())
+        if e.is_timeout() {
+            Error::Timeout
+        } else {
+            Error::Request(e.without_url())
+        }
     }
 }
 
