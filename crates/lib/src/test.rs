@@ -43,7 +43,7 @@ impl TestServer {
         Client::new(kind, self.uri()).unwrap()
     }
 
-    pub fn server(&self) -> &MockServer {
+    pub fn mock(&self) -> &MockServer {
         &self.server
     }
 
@@ -62,7 +62,7 @@ impl TestServer {
             ResponseTemplate::new(status).set_body_raw(json.as_bytes(), "application/json");
         Mock::given(matcher)
             .respond_with(template)
-            .mount(self.server())
+            .mount(&self.server)
             .await;
     }
 
@@ -70,7 +70,17 @@ impl TestServer {
         self.respond_match(matchers::any(), status, path).await
     }
 
+    pub async fn respond_custom<M>(&self, matcher: M, response: ResponseTemplate)
+    where
+        M: 'static + Match,
+    {
+        Mock::given(matcher)
+            .respond_with(response)
+            .mount(&self.server)
+            .await;
+    }
+
     pub async fn reset(&self) {
-        self.server().reset().await;
+        self.server.reset().await;
     }
 }
