@@ -108,6 +108,13 @@ struct Options {
             Targeting a directory will attach a compressed tarball of the given
             path. Without this option enabled, directory attachments will cause
             errors.
+
+            Examples modifying bug 10:
+            - attach compressed tarball
+            > bite at 10 path/to/dir --dir
+
+            - attach tarball compressed with zstd
+            > bite at 10 path/to/dir --dir --compress zstd
         ")
     )]
     dir: bool,
