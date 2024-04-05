@@ -1,0 +1,20 @@
+[package]
+name = "bugbite-python"
+version = "0.0.1"
+description = "Python bindings for bugbite"
+documentation = "https://github.com/radhermit/bugbite"
+homepage = "https://github.com/radhermit/bugbite"
+repository = "https://github.com/radhermit/bugbite"
+readme = "README.md"
+license = "MIT"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "bugbite"
+crate-type = ["cdylib"]
+
+[dependencies]
+bugbite = { path = "../lib", version = "0.0.9" }
+pyo3 = { version = "0.20", features = ["extension-module"] }

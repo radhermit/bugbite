@@ -1,0 +1,19 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "bugbite"
+description = "python bindings for bugbite"
+authors = [{name = "Tim Harder", email = "radhermit@gmail.com"}]
+requires-python = ">=3.11"
+keywords = ["gentoo"]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[tool.maturin]
+compatibility = "linux"
