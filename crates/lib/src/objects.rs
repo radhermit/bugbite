@@ -91,6 +91,12 @@ impl fmt::Display for Base64 {
     }
 }
 
+impl AsRef<[u8]> for Base64 {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
+}
+
 macro_rules! stringify {
     ($field:expr) => {
         if let Some(value) = $field.as_ref() {
