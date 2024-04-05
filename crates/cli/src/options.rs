@@ -1,6 +1,8 @@
 use std::collections::HashSet;
 use std::env;
+use std::ffi::OsStr;
 use std::io::stderr;
+use std::path::Path;
 use std::process::ExitCode;
 
 use bugbite::client::Client;
@@ -89,16 +91,26 @@ impl ServiceCommand {
         let base = cmd.options.service.base.as_deref();
         let service = cmd.options.service.service;
 
+        // determine running binary name for connection determination
+        let command = env::args()
+            .next()
+            .as_ref()
+            .map(Path::new)
+            .and_then(Path::file_name)
+            .and_then(OsStr::to_str)
+            .filter(|x| *x != env!("CARGO_BIN_NAME"))
+            .map(String::from);
+
         // determine service type
-        let (selected, base) = match (connection, base, service) {
-            (Some(name), _, _) => {
+        let (selected, base) = match (connection, base, service, command.as_deref()) {
+            (Some(name), _, _, _) | (None, None, None, Some(name)) => {
                 let (kind, base) = config.get(name)?;
                 if services.contains(arg) && kind.as_ref() != arg {
                     anyhow::bail!("{arg} not compatible with connection: {name}");
                 }
                 (kind, base)
             }
-            (None, Some(base), Some(service)) => (service, base.to_string()),
+            (None, Some(base), Some(service), _) => (service, base.to_string()),
             _ => {
                 if services.contains(arg) || arg.starts_with('-') {
                     Command::parse();
