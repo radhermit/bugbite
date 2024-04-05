@@ -9,7 +9,7 @@ use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::bugzilla::{
     search::{ChangeField, Match, OrderField, Parameters},
-    BugField,
+    BugField, FilterField, GroupField,
 };
 use bugbite::time::TimeDelta;
 use camino::Utf8PathBuf;
@@ -616,16 +616,24 @@ struct QueryOptions {
         long_help = wrapped_doc!("
             Restrict the data fields returned by the query.
 
-            By default, only the id and summary fields are returned. This
-            can be altered by specifying a custom list of fields which will
-            change the output format to a space separated list of the
-            field values for each item.
+            By default, only the id and summary fields are returned. This can be
+            altered by specifying a list of fields which will only return and
+            display the requested fields.
 
-            Possible values: {}",
+            Group fields relate to groups of bug fields and are most useful when
+            using JSON formatted output:
+
+            Example:
+            - render all bugs created in the past day in JSON
+            > bite s --created 1d -f all --json
+
+            Possible group fields: {}
+            Possible bug fields: {}",
+            GroupField::VARIANTS.join(", "),
             BugField::VARIANTS.join(", ")
         )
     )]
-    fields: Csv<BugField>,
+    fields: Csv<FilterField>,
 
     /// limit the number of results
     #[arg(

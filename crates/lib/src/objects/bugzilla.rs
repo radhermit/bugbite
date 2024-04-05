@@ -8,7 +8,7 @@ use std::{fmt, fs};
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
 use indexmap::IndexSet;
-use itertools::Itertools;
+use itertools::{Either, Itertools};
 use once_cell::sync::Lazy;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_with::{
@@ -18,7 +18,7 @@ use strum::{Display, EnumString};
 use tempfile::NamedTempFile;
 
 use crate::serde::{non_empty_str, null_empty_set, null_empty_vec};
-use crate::service::bugzilla::BugField;
+use crate::service::bugzilla::{BugField, FilterField, GroupField};
 use crate::traits::RenderSearch;
 use crate::Error;
 
@@ -427,6 +427,23 @@ impl RenderSearch<BugField> for Bug {
             [] => panic!("no fields defined"),
             [field] => field_to_string(field).trim().to_string(),
             fields => fields.iter().map(field_to_string).join(" "),
+        }
+    }
+}
+
+impl RenderSearch<FilterField> for Bug {
+    fn render(&self, fields: &[FilterField]) -> String {
+        let (bug_fields, group_fields): (Vec<_>, Vec<_>) =
+            fields.iter().partition_map(|x| match x {
+                FilterField::Bug(x) => Either::Left(*x),
+                FilterField::Group(x) => Either::Right(*x),
+            });
+        match (&bug_fields[..], &group_fields[..]) {
+            (fields @ [_, ..], _) => self.render(fields),
+            ([], x) if x.contains(&GroupField::All) || x.contains(&GroupField::Default) => {
+                self.render(&[BugField::Id, BugField::Summary])
+            }
+            _ => self.render(&[BugField::Id]),
         }
     }
 }
