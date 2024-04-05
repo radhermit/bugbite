@@ -97,11 +97,26 @@ struct Options {
     )]
     auto_truncate: Option<usize>,
 
+    /// support directory targets
+    #[arg(
+        short,
+        long,
+        conflicts_with = "mime",
+        long_help = wrapped_doc!("
+            Support directory targets for attachments.
+
+            Targeting a directory will attach a compressed tarball of the given
+            path. Without this option enabled, directory attachments will cause
+            errors.
+        ")
+    )]
+    dir: bool,
+
     /// specify the MIME type
     #[arg(
         short,
         long,
-        conflicts_with_all = ["compress", "auto_compress", "auto_truncate", "patch"],
+        conflicts_with_all = ["compress", "auto_compress", "auto_truncate", "dir", "patch"],
         long_help = wrapped_doc!("
             Specify the MIME type of the attachment.
 
@@ -199,6 +214,7 @@ impl Command {
             attachment.summary = self.options.summary.clone();
             attachment.comment = self.options.comment.clone();
             attachment.content_type = self.options.mime.clone();
+            attachment.dir = self.options.dir;
             attachment.is_patch = self.options.patch;
             attachment.is_private = self.options.private;
 

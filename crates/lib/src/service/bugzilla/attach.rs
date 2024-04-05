@@ -45,7 +45,8 @@ impl Compression {
             .map_err(|e| Error::InvalidValue(format!("invalid src: {path}: {e}")))?;
 
         let name = format!("{file_name}.{self}");
-        let dest = File::create(tempdir.join(&name)).unwrap();
+        let dest = File::create(tempdir.join(&name))
+            .map_err(|e| Error::InvalidValue(format!("failed creating file: {name}: {e}")))?;
         let tool = self.cmd();
         let mut cmd = Command::new(tool);
         cmd.arg("-c").stdin(src).stdout(dest);
@@ -81,6 +82,7 @@ pub struct CreateAttachment {
     pub summary: Option<String>,
     pub content_type: Option<String>,
     pub comment: Option<String>,
+    pub dir: bool,
     pub is_patch: bool,
     pub is_private: bool,
     pub compress: Option<Compression>,
@@ -102,6 +104,59 @@ fn get_mime_type<P: AsRef<Path>>(path: P, data: &[u8]) -> String {
     }
 }
 
+/// Create a tarball from a given source directory into a given destination file path.
+fn tar<P1, P2>(src: P1, dest_dir: P2) -> crate::Result<String>
+where
+    P1: AsRef<Utf8Path>,
+    P2: AsRef<Utf8Path>,
+{
+    let src = src.as_ref();
+    let dest_dir = dest_dir.as_ref();
+    let src = src
+        .canonicalize_utf8()
+        .map_err(|e| Error::InvalidValue(format!("invalid tarball source: {src}: {e}")))?;
+    let src_file_name = src
+        .file_name()
+        .ok_or_else(|| Error::InvalidValue(format!("invalid tarball source: {src}")))?;
+    let src_dir = src
+        .parent()
+        .ok_or_else(|| Error::InvalidValue(format!("invalid tarball source: {src}")))?;
+    let dest_file_name = format!("{src_file_name}.tar");
+    let dest = dest_dir.join(&dest_file_name);
+    let mut cmd = Command::new("tar");
+    cmd.args([
+        "-C",
+        src_dir.as_str(),
+        "-c",
+        src_file_name,
+        "-f",
+        dest.as_str(),
+    ]);
+
+    match cmd.status() {
+        Ok(status) => {
+            if !status.success() {
+                Err(Error::InvalidValue(format!(
+                    "failed creating tarball: {dest}"
+                )))
+            } else {
+                Ok(dest_file_name)
+            }
+        }
+        Err(e) => {
+            let msg = if e.kind() == io::ErrorKind::NotFound {
+                "tar not available".to_string()
+            } else {
+                e.to_string()
+            };
+
+            Err(Error::InvalidValue(format!(
+                "failed creating tarball: {dest}: {msg}"
+            )))
+        }
+    }
+}
+
 impl CreateAttachment {
     pub fn new<P>(path: P) -> crate::Result<Self>
     where
@@ -110,8 +165,9 @@ impl CreateAttachment {
         Ok(Self {
             path: path.as_ref().to_path_buf(),
             summary: None,
-            content_type: None,
             comment: None,
+            content_type: None,
+            dir: false,
             is_patch: false,
             is_private: false,
             compress: None,
@@ -141,15 +197,31 @@ impl CreateAttachment {
         self.auto_truncate = Some(count);
     }
 
-    fn build<S>(self, ids: &[S]) -> crate::Result<Attachment>
+    fn build<S>(mut self, ids: &[S], temp_dir_path: &Utf8Path) -> crate::Result<Attachment>
     where
         S: std::fmt::Display,
     {
         let mut path = self.path;
+        path = path
+            .canonicalize_utf8()
+            .map_err(|e| Error::InvalidValue(format!("invalid attachment source: {path}: {e}")))?;
         let mut file_name = path
             .file_name()
             .map(|s| s.to_string())
             .ok_or_else(|| Error::InvalidValue(format!("attachment missing file name: {path}")))?;
+        let metadata = fs::metadata(&path)
+            .map_err(|e| Error::InvalidValue(format!("failed reading metadata: {path}: {e}")))?;
+
+        // create directory tarball
+        if metadata.is_dir() && self.dir {
+            file_name = tar(&path, temp_dir_path)?;
+            path = temp_dir_path.join(&file_name);
+            // use default compression for tarball
+            if self.compress.is_none() {
+                self.compress = Some(Default::default());
+            }
+        }
+
         let mut data = fs::read(&path)
             .map_err(|e| Error::InvalidValue(format!("failed reading attachment: {path}: {e}")))?;
         let mut mime_type = get_mime_type(&path, &data);
@@ -164,15 +236,11 @@ impl CreateAttachment {
         // compress and/or truncate the file if requested
         if self.compress.is_some() || auto_compress(data.len()) || self.auto_truncate.is_some() {
             let compress = self.compress.unwrap_or_default();
-            let dir = tempfile::tempdir()
-                .map_err(|e| Error::InvalidValue(format!("failed acquiring temporary dir: {e}")))?;
-            let dir_path = Utf8Path::from_path(dir.path())
-                .ok_or_else(|| Error::InvalidValue("non-unicode temporary dir path".to_string()))?;
 
             // optionally truncate text files
             if let Some(count) = self.auto_truncate {
                 if mime_type.starts_with("text/") {
-                    path = dir_path.join(&file_name);
+                    path = temp_dir_path.join(&file_name);
                     let s = String::from_utf8(data).map_err(|e| {
                         Error::InvalidValue(format!("invalid attachment file: {path}: {e}"))
                     })?;
@@ -185,8 +253,8 @@ impl CreateAttachment {
             }
 
             if self.compress.is_some() || auto_compress(data.len()) {
-                file_name = compress.run(&path, dir_path)?;
-                let path = dir_path.join(&file_name);
+                file_name = compress.run(&path, temp_dir_path)?;
+                path = temp_dir_path.join(&file_name);
                 data = fs::read(&path).map_err(|e| {
                     Error::InvalidValue(format!(
                         "failed reading compressed attachment: {file_name}: {e}"
@@ -248,9 +316,15 @@ impl AttachRequest {
 
         let url = service.base().join(&format!("rest/bug/{id}/attachment"))?;
 
+        // create temporary directory used for creating transient attachment files
+        let temp_dir = tempfile::tempdir()
+            .map_err(|e| Error::InvalidValue(format!("failed acquiring temporary dir: {e}")))?;
+        let temp_dir_path = Utf8Path::from_path(temp_dir.path())
+            .ok_or_else(|| Error::InvalidValue("non-unicode temporary dir path".to_string()))?;
+
         let mut attachments = vec![];
         for attachment in create_attachments {
-            attachments.push(attachment.build(ids)?);
+            attachments.push(attachment.build(ids, temp_dir_path)?);
         }
 
         Ok(Self { url, attachments })
