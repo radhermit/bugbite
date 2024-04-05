@@ -4,6 +4,7 @@ use std::io::{stdout, IsTerminal};
 use bugbite::traits::RenderSearch;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
+use serde::Serialize;
 use tracing::info;
 
 use crate::service::Render;
@@ -37,24 +38,30 @@ where
     Ok(())
 }
 
-pub(crate) fn render_search<I, R, T, W>(
+pub(crate) fn render_search<I, V, T, W>(
     mut f: W,
     items: I,
     fields: &[T],
+    json: bool,
 ) -> Result<(), bugbite::Error>
 where
-    I: IntoIterator<Item = R>,
-    R: RenderSearch<T>,
+    I: IntoIterator<Item = V>,
+    V: RenderSearch<T> + Serialize,
     W: std::io::Write,
 {
     let mut count = 0;
 
     for item in items {
         count += 1;
-        let line = item.render(fields);
-        if !line.is_empty() {
-            let data = truncate(&line, *COLUMNS);
+        if json {
+            let data = serde_json::to_string(&item).expect("failed serializing item");
             writeln!(f, "{data}")?;
+        } else {
+            let line = item.render(fields);
+            if !line.is_empty() {
+                let data = truncate(&line, *COLUMNS);
+                writeln!(f, "{data}")?;
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{stdout, Write};
+use std::io::stdout;
 use std::process::ExitCode;
 use std::str::FromStr;
 
@@ -964,15 +964,8 @@ impl Command {
             launch_browser([url])?;
         } else if !self.search.dry_run {
             let items = client.search(params).await?;
-            let mut stdout = stdout().lock();
-            if self.search.json {
-                for item in items {
-                    let data = serde_json::to_string(&item).expect("failed serializing item");
-                    writeln!(stdout, "{data}")?;
-                }
-            } else {
-                render_search(stdout, items, &fields)?;
-            }
+            let stdout = stdout().lock();
+            render_search(stdout, items, &fields, self.search.json)?;
         }
 
         Ok(ExitCode::SUCCESS)
