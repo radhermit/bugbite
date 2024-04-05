@@ -32,7 +32,7 @@ pub struct Issue {
     pub created: Option<DateTime<Utc>>,
     #[serde(rename = "updated_on")]
     pub updated: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(skip_deserializing, skip_serializing)]
     pub comments: Vec<Comment>,
 }
 
