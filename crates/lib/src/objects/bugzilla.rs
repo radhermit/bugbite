@@ -317,11 +317,11 @@ pub struct Bug {
     pub see_also: IndexSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub url: Option<String>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(skip_deserializing, skip_serializing)]
     pub comments: Vec<Comment>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(skip_deserializing, skip_serializing)]
     pub attachments: Vec<Attachment>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(skip_deserializing, skip_serializing)]
     pub history: Vec<Event>,
 }
 
