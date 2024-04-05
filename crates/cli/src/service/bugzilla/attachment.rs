@@ -85,7 +85,7 @@ impl Command {
         } else if self.options.view {
             for attachment in attachments.iter().flatten() {
                 // TODO: support auto-decompressing standard archive formats
-                write!(stdout, "{}", attachment.read())?;
+                write!(stdout, "{}", attachment.read()?)?;
             }
         } else {
             let dir = &self.options.dir;
@@ -106,7 +106,7 @@ impl Command {
                 }
 
                 writeln!(stdout, "Saving attachment: {path}")?;
-                fs::write(&path, attachment.data())?;
+                fs::copy(attachment.path()?, &path)?;
             }
         }
 

@@ -1,19 +1,21 @@
 use std::cmp::Ordering;
 use std::collections::HashSet;
-use std::fmt;
 use std::hash::{Hash, Hasher};
+use std::path::Path;
 use std::str::FromStr;
+use std::{fmt, fs};
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
 use indexmap::IndexSet;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_with::{
     serde_as, skip_serializing_none, BoolFromInt, DeserializeFromStr, SerializeDisplay,
 };
 use strum::{Display, EnumString};
+use tempfile::NamedTempFile;
 
 use crate::serde::{non_empty_str, null_empty_set, null_empty_vec};
 use crate::service::bugzilla::BugField;
@@ -30,8 +32,24 @@ pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
         .collect()
 });
 
+/// Deserialize base64-encoded data into a temporary file.
+pub(crate) fn base64_to_tempfile<'de, D, E>(d: D) -> Result<Option<NamedTempFile>, E>
+where
+    D: Deserializer<'de>,
+    E: de::Error,
+{
+    let file = NamedTempFile::new()
+        .map_err(|e| E::custom(format!("failed creating temporary file: {e}")))?;
+    let data =
+        String::deserialize(d).map_err(|e| E::custom(format!("failed deserializing data: {e}")))?;
+    let data =
+        Base64::from_str(&data).map_err(|e| E::custom(format!("failed decoding data: {e}")))?;
+    fs::write(file.path(), data).map_err(|e| E::custom(format!("failed writing data: {e}")))?;
+    Ok(Some(file))
+}
+
 #[serde_as]
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Debug)]
 pub struct Attachment {
     pub id: u64,
     pub bug_id: u64,
@@ -50,22 +68,38 @@ pub struct Attachment {
     pub created: DateTime<Utc>,
     #[serde(rename = "last_change_time")]
     pub updated: DateTime<Utc>,
-    #[serde(default)]
-    data: Base64,
+    #[serde(default, rename = "data", deserialize_with = "base64_to_tempfile")]
+    file: Option<NamedTempFile>,
+}
+
+impl PartialEq for Attachment {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for Attachment {}
+
+impl Hash for Attachment {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
 }
 
 impl Attachment {
-    pub fn data(&self) -> &[u8] {
-        &self.data.0
+    pub fn path(&self) -> crate::Result<&Path> {
+        self.file.as_ref().map(|x| x.path()).ok_or_else(|| {
+            Error::InvalidValue(format!("attachment: {}: missing data", self.file_name))
+        })
     }
 
     pub fn human_size(&self) -> String {
         format_size(self.size, BINARY)
     }
 
-    pub fn read(&self) -> std::borrow::Cow<str> {
+    pub fn read(&self) -> crate::Result<String> {
         // TODO: auto-decompress standard archive formats
-        String::from_utf8_lossy(&self.data.0)
+        Ok(fs::read_to_string(self.path()?)?)
     }
 }
 
