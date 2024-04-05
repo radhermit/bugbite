@@ -10,10 +10,10 @@ pub(crate) use self::error::Error;
 #[pymodule]
 #[pyo3(name = "bugbite")]
 fn module(py: Python, m: &PyModule) -> PyResult<()> {
-    // register submodules so `from pkgcraft.eapi import Eapi` works as expected
+    // register submodules so `from bugbite.config import Config` works as expected
     m.add_wrapped(wrap_pymodule!(config::module))?;
     let sys_modules = py.import("sys")?.getattr("modules")?;
-    sys_modules.set_item("pkgcraft.config", m.getattr("config")?)?;
+    sys_modules.set_item("bugbite.config", m.getattr("config")?)?;
 
     m.add("BugbiteError", py.get_type::<error::BugbiteError>())?;
     Ok(())
