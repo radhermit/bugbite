@@ -136,19 +136,19 @@ struct AttributeOptions {
 
             Examples:
             - doesn't contain `value`
-            > bite s --alias !#value
+            > bite s --alias ~#value
 
             - equals `value`
             > bite s --alias =#value
 
             - doesn't equal `value`
-            > bite s --alias !=#value
+            > bite s --alias ~=#value
 
             - matches regex
             > bite s --alias r#test?.+
 
             - doesn't match regex
-            > bite s --alias !r#test?.+
+            > bite s --alias ~r#test?.+
         "#)
     )]
     alias: Option<Vec<ExistsOrValues<Match>>>,
@@ -186,19 +186,19 @@ struct AttributeOptions {
 
             Examples:
             - doesn't contain `value`
-            > bite s --attachments !#value
+            > bite s --attachments ~#value
 
             - equals `value`
             > bite s --attachments =#value
 
             - doesn't equal `value`
-            > bite s --attachments !=#value
+            > bite s --attachments ~=#value
 
             - matches regex
             > bite s --attachments r#test?.+
 
             - doesn't match regex
-            > bite s --attachments !r#test?.+
+            > bite s --attachments ~r#test?.+
 
             Multiple values can be specified in a comma-separated list and will
             match if any of the specified values match.
@@ -431,7 +431,7 @@ struct AttributeOptions {
             > bite s --status unconfirmed
 
             - unresolved bugs
-            > bite s --status !resolved
+            > bite s --status ~resolved
 
             Multiple values can be specified in with multiple options for
             logical OR.
@@ -502,7 +502,7 @@ struct RangeOptions {
             Restrict by the number of comments.
 
             Values can either be numbers, numbers prefixed with operators (e.g.
-            <, !=, >=), or ranges using the operators `..` and `..=`.
+            <, ~=, >=), or ranges using the operators `..` and `..=`.
 
             Examples:
             - equal to 10
@@ -510,7 +510,7 @@ struct RangeOptions {
             > bite s --comments "=10"
 
             - not equal to 10
-            > bite s --comments "!=10"
+            > bite s --comments "~=10"
 
             - greater than or equal to 10
             > bite s --comments ">=10"
@@ -528,7 +528,7 @@ struct RangeOptions {
             Restrict by the number of votes.
 
             Values can either be numbers, numbers prefixed with operators (e.g.
-            <, !=, >=), or ranges using the operators `..` and `..=`.
+            <, ~=, >=), or ranges using the operators `..` and `..=`.
 
             Examples:
             - equal to 10
@@ -536,7 +536,7 @@ struct RangeOptions {
             > bite s --votes "=10"
 
             - not equal to 10
-            > bite s --votes "!=10"
+            > bite s --votes "~=10"
 
             - greater than or equal to 10
             > bite s --votes ">=10"
