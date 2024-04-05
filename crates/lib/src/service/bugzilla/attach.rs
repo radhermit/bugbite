@@ -1,7 +1,7 @@
 use std::fs::{self, File};
 use std::path::Path;
 use std::process::Command;
-use std::str;
+use std::{io, str};
 
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
@@ -27,6 +27,16 @@ pub enum Compression {
 }
 
 impl Compression {
+    fn cmd(&self) -> &str {
+        match self {
+            Self::Bz2 => "bzip2",
+            Self::Gz => "gzip",
+            Self::Lz => "lzip",
+            Self::Xz => "xz",
+            Self::Zstd => "zstd",
+        }
+    }
+
     fn run(&self, path: &Utf8Path, tempdir: &Utf8Path) -> crate::Result<String> {
         let file_name = path
             .file_name()
@@ -36,51 +46,32 @@ impl Compression {
 
         let name = format!("{file_name}.{self}");
         let dest = File::create(tempdir.join(&name)).unwrap();
-
-        let mut cmd = match self {
-            Self::Bz2 => {
-                let mut cmd = Command::new("bzip2");
-                cmd.arg("-c").stdin(src).stdout(dest);
-                cmd
-            }
-            Self::Gz => {
-                let mut cmd = Command::new("gzip");
-                cmd.arg("-c").stdin(src).stdout(dest);
-                cmd
-            }
-            Self::Lz => {
-                let mut cmd = Command::new("lzip");
-                cmd.arg("-c").stdin(src).stdout(dest);
-                cmd
-            }
-            Self::Xz => {
-                let mut cmd = Command::new("xz");
-                cmd.arg("-c").stdin(src).stdout(dest);
-                cmd
-            }
-            Self::Zstd => {
-                let mut cmd = Command::new("zstd");
-                cmd.arg("-c").stdin(src).stdout(dest);
-                cmd
-            }
-        };
+        let tool = self.cmd();
+        let mut cmd = Command::new(tool);
+        cmd.arg("-c").stdin(src).stdout(dest);
 
         match cmd.status() {
             Ok(status) => {
                 if !status.success() {
-                    return Err(Error::InvalidValue(format!(
+                    Err(Error::InvalidValue(format!(
                         "failed compressing file: {path}"
-                    )));
+                    )))
+                } else {
+                    Ok(name)
                 }
             }
             Err(e) => {
-                return Err(Error::InvalidValue(format!(
-                    "failed compressing file: {path}: {e}"
-                )));
+                let msg = if e.kind() == io::ErrorKind::NotFound {
+                    format!("{tool} not available")
+                } else {
+                    e.to_string()
+                };
+
+                Err(Error::InvalidValue(format!(
+                    "failed compressing file: {path}: {msg}"
+                )))
             }
         }
-
-        Ok(name)
     }
 }
 
