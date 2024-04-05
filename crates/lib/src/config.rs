@@ -14,7 +14,8 @@ pub struct Config {
 
 impl Config {
     /// Load connection configuration from a given file path.
-    pub fn load(path: &Utf8Path) -> crate::Result<Self> {
+    pub fn load<P: AsRef<Utf8Path>>(path: P) -> crate::Result<Self> {
+        let path = path.as_ref();
         let data = fs::read_to_string(path)
             .map_err(|e| Error::Config(format!("failed loading config: {path}: {e}")))?;
         let config = toml::from_str(&data)
