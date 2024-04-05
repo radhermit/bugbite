@@ -20,6 +20,7 @@ use crate::Error;
 pub enum Compression {
     Bz2,
     Gz,
+    Lz,
     #[default]
     Xz,
     Zstd,
@@ -44,6 +45,11 @@ impl Compression {
             }
             Self::Gz => {
                 let mut cmd = Command::new("gzip");
+                cmd.arg("-c").stdin(src).stdout(dest);
+                cmd
+            }
+            Self::Lz => {
+                let mut cmd = Command::new("lzip");
                 cmd.arg("-c").stdin(src).stdout(dest);
                 cmd
             }
