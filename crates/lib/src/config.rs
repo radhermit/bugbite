@@ -1,13 +1,13 @@
 use std::fs;
 
 use camino::Utf8Path;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::service::ServiceKind;
 use crate::Error;
 
 /// Config support
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     connections: Vec<Connection>,
 }
@@ -29,7 +29,7 @@ impl Config {
 }
 
 /// Connection config support
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Connection {
     name: String,
     base: String,
