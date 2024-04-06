@@ -71,23 +71,25 @@ impl Command {
         let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
 
         while let Some((id, comments)) = data.next() {
-            // output bug ID header
-            let bug_id = format!("Bug: {id} ");
-            writeln!(stdout, "{bug_id}{}", "=".repeat(width - bug_id.len()))?;
+            if !comments.is_empty() {
+                // output bug ID header
+                let bug_id = format!("Bug: {id} ");
+                writeln!(stdout, "{bug_id}{}", "=".repeat(width - bug_id.len()))?;
 
-            let mut comments = comments.iter().peekable();
-            while let Some(comment) = comments.next() {
-                // render comment
-                comment.render(&mut stdout, width)?;
-                // add new line between comments
-                if comments.peek().is_some() {
+                let mut comments_iter = comments.iter().peekable();
+                while let Some(comment) = comments_iter.next() {
+                    // render comment
+                    comment.render(&mut stdout, width)?;
+                    // add new line between comments
+                    if comments_iter.peek().is_some() {
+                        writeln!(stdout)?;
+                    }
+                }
+
+                // add new line between bugs
+                if data.peek().is_some() {
                     writeln!(stdout)?;
                 }
-            }
-
-            // add new line between bugs
-            if data.peek().is_some() {
-                writeln!(stdout)?;
             }
         }
 
