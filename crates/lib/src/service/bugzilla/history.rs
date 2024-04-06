@@ -8,13 +8,14 @@ use crate::Error;
 #[derive(Debug)]
 pub(crate) struct HistoryRequest {
     url: url::Url,
+    params: Option<HistoryParams>,
 }
 
 impl HistoryRequest {
     pub(super) fn new<S>(
         service: &super::Service,
         ids: &[S],
-        created: Option<&TimeDelta>,
+        params: Option<HistoryParams>,
     ) -> crate::Result<Self>
     where
         S: std::fmt::Display,
@@ -31,12 +32,14 @@ impl HistoryRequest {
             url.query_pairs_mut().append_pair("ids", &id.to_string());
         }
 
-        if let Some(value) = created {
-            url.query_pairs_mut()
-                .append_pair("new_since", &value.to_string());
+        if let Some(params) = params.as_ref() {
+            if let Some(value) = params.created_after.as_ref() {
+                url.query_pairs_mut()
+                    .append_pair("new_since", &value.to_string());
+            }
         }
 
-        Ok(Self { url })
+        Ok(Self { url, params })
     }
 }
 
@@ -55,13 +58,62 @@ impl Request for HistoryRequest {
         };
 
         let mut history = vec![];
+        let params = self.params.unwrap_or_default();
+
         for mut bug in bugs {
-            let data = bug["history"].take();
-            let events = serde_json::from_value(data)
-                .map_err(|e| Error::InvalidValue(format!("failed deserializing events: {e}")))?;
-            history.push(events);
+            let Value::Array(data) = bug["history"].take() else {
+                return Err(Error::InvalidValue(
+                    "invalid service response to history request".to_string(),
+                ));
+            };
+
+            // deserialize and filter events
+            let mut bug_history = vec![];
+            for value in data {
+                let event: Event = serde_json::from_value(value)
+                    .map_err(|e| Error::InvalidValue(format!("failed deserializing event: {e}")))?;
+                if params.filter(&event) {
+                    bug_history.push(event);
+                }
+            }
+
+            history.push(bug_history);
         }
 
         Ok(history)
+    }
+}
+
+/// Construct bug history parameters.
+#[derive(Debug, Default)]
+pub struct HistoryParams {
+    created_after: Option<TimeDelta>,
+    creator: Option<String>,
+}
+
+impl HistoryParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    fn filter(&self, event: &Event) -> bool {
+        if let Some(value) = self.creator.as_ref() {
+            if !event.who.contains(value) {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    pub fn created_after(&mut self, interval: TimeDelta) {
+        self.created_after = Some(interval);
+    }
+
+    pub fn creator<S>(&mut self, value: S)
+    where
+        S: Into<String>,
+    {
+        self.creator = Some(value.into());
     }
 }

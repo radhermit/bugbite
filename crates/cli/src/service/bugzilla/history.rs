@@ -3,6 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::service::bugzilla::history::HistoryParams;
 use bugbite::time::TimeDelta;
 use clap::Args;
 
@@ -15,6 +16,10 @@ struct Options {
     /// event occurred at this time or later
     #[arg(short, long, value_name = "TIME")]
     created: Option<TimeDelta>,
+
+    /// user who made change
+    #[arg(short = 'R', long, value_name = "USER")]
+    creator: Option<String>,
 }
 
 #[derive(Debug, Args)]
@@ -30,11 +35,20 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-        let created = self.options.created.as_ref();
 
-        let events = client.history(ids, created).await?;
+        let mut params = HistoryParams::new();
+
+        if let Some(value) = self.options.created {
+            params.created_after(value);
+        }
+
+        if let Some(value) = self.options.creator {
+            params.creator(value);
+        }
+
+        let events = client.history(ids, Some(params)).await?;
         let mut data = ids.iter().zip(events).peekable();
         let mut stdout = stdout().lock();
 

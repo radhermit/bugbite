@@ -4,12 +4,10 @@ use tracing::info;
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::{
     attach::CreateAttachment,
-    comment::CommentParams,
-    create,
+    comment, create, history,
     modify::{self, BugChange},
     search, {Config, Service},
 };
-use crate::time::TimeDelta;
 use crate::traits::{Request, WebService};
 
 #[derive(Debug)]
@@ -63,7 +61,7 @@ impl Client {
     pub async fn comment<S>(
         &self,
         ids: &[S],
-        params: Option<CommentParams>,
+        params: Option<comment::CommentParams>,
     ) -> crate::Result<Vec<Vec<Comment>>>
     where
         S: std::fmt::Display,
@@ -91,12 +89,12 @@ impl Client {
     pub async fn history<S>(
         &self,
         ids: &[S],
-        created: Option<&TimeDelta>,
+        params: Option<history::HistoryParams>,
     ) -> crate::Result<Vec<Vec<Event>>>
     where
         S: std::fmt::Display,
     {
-        let request = self.service.history_request(ids, created)?;
+        let request = self.service.history_request(ids, params)?;
         request.send(&self.service).await
     }
 

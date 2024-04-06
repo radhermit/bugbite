@@ -11,7 +11,6 @@ use url::Url;
 
 use crate::objects::Ids;
 use crate::service::ServiceKind;
-use crate::time::TimeDelta;
 use crate::traits::{Api, WebService};
 use crate::Error;
 
@@ -20,7 +19,7 @@ mod attachment;
 pub mod comment;
 pub mod create;
 mod get;
-mod history;
+pub mod history;
 pub mod modify;
 pub mod search;
 
@@ -129,12 +128,12 @@ impl Service {
     pub(crate) fn history_request<S>(
         &self,
         ids: &[S],
-        created: Option<&TimeDelta>,
+        params: Option<history::HistoryParams>,
     ) -> crate::Result<history::HistoryRequest>
     where
         S: std::fmt::Display,
     {
-        history::HistoryRequest::new(self, ids, created)
+        history::HistoryRequest::new(self, ids, params)
     }
 }
 

@@ -62,6 +62,7 @@ impl Request for CommentRequest {
         // alias so we assume the response is in the same order as the request.
         let mut comments = vec![];
         let params = self.params.unwrap_or_default();
+
         for (_id, mut data) in data {
             let Value::Array(data) = data["comments"].take() else {
                 return Err(Error::InvalidValue(
