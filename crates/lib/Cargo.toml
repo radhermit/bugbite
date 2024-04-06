@@ -48,9 +48,9 @@ url = { version = "2.5.0", features = ["serde"] }
 wiremock = { version = "0.6.0", optional = true }
 
 [dependencies.reqwest]
-version = "0.12.2"
+version = "0.12.3"
 default-features = false
-features = ["cookies", "json", "rustls-tls", "trust-dns"]
+features = ["cookies", "hickory-dns", "json", "rustls-tls"]
 
 [dev-dependencies]
 tokio = { version = "1.37.0", features = ["full"] }

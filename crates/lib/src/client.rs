@@ -29,6 +29,7 @@ impl ClientBuilder {
 
     pub fn build(self) -> reqwest::ClientBuilder {
         reqwest::Client::builder()
+            .hickory_dns(true)
             .use_rustls_tls()
             .user_agent(USER_AGENT)
             // TODO: switch to cookie_provider() once cookie (de)serialization is supported
