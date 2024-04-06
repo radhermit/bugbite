@@ -33,15 +33,31 @@ impl Command {
     pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let created = self.options.created.as_ref();
+
         let events = client.history(ids, created).await?;
-        let mut events = events.iter().flatten().peekable();
+        let mut data = ids.iter().zip(events).peekable();
         let mut stdout = stdout().lock();
 
         // text wrap width
         let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
-        while let Some(event) = events.next() {
-            event.render(&mut stdout, width)?;
-            if events.peek().is_some() {
+
+        while let Some((id, events)) = data.next() {
+            // output bug ID header
+            let bug_id = format!("Bug: {id} ");
+            writeln!(stdout, "{bug_id}{}", "=".repeat(width - bug_id.len()))?;
+
+            let mut events = events.iter().peekable();
+            while let Some(event) = events.next() {
+                // render event
+                event.render(&mut stdout, width)?;
+                // add new line between events
+                if events.peek().is_some() {
+                    writeln!(stdout)?;
+                }
+            }
+
+            // add new line between bugs
+            if data.peek().is_some() {
                 writeln!(stdout)?;
             }
         }

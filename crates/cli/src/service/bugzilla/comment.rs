@@ -64,14 +64,29 @@ impl Command {
         }
 
         let comments = client.comment(ids, Some(params)).await?;
-        let mut comments = comments.iter().flatten().peekable();
+        let mut data = ids.iter().zip(comments).peekable();
         let mut stdout = stdout().lock();
 
         // text wrap width
         let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
-        while let Some(comment) = comments.next() {
-            comment.render(&mut stdout, width)?;
-            if comments.peek().is_some() {
+
+        while let Some((id, comments)) = data.next() {
+            // output bug ID header
+            let bug_id = format!("Bug: {id} ");
+            writeln!(stdout, "{bug_id}{}", "=".repeat(width - bug_id.len()))?;
+
+            let mut comments = comments.iter().peekable();
+            while let Some(comment) = comments.next() {
+                // render comment
+                comment.render(&mut stdout, width)?;
+                // add new line between comments
+                if comments.peek().is_some() {
+                    writeln!(stdout)?;
+                }
+            }
+
+            // add new line between bugs
+            if data.peek().is_some() {
                 writeln!(stdout)?;
             }
         }
