@@ -328,7 +328,19 @@ impl Parameters {
         let mut query = QueryBuilder::new(service);
 
         if let Some(values) = self.status {
-            query.or(|query| values.into_iter().for_each(|x| query.status(x)));
+            // separate aliases from values
+            let (aliases, values): (Vec<_>, Vec<_>) =
+                values.into_iter().partition(|x| x.starts_with('@'));
+
+            // combine aliases via logical OR
+            for value in aliases {
+                query.status(value);
+            }
+
+            // combine values via logical OR
+            if !values.is_empty() {
+                query.or(|query| values.into_iter().for_each(|x| query.status(x)));
+            }
         } else {
             // only return open bugs by default
             query.status("@open");
@@ -910,6 +922,8 @@ impl QueryBuilder<'_> {
     }
 
     fn status<S: AsRef<str>>(&mut self, value: S) {
+        // TODO: Consider reverting to converting aliases into regular values so
+        // advanced fields can be used in all cases.
         match value.as_ref() {
             "@open" => self.append("bug_status", "__open__"),
             "@closed" => self.append("bug_status", "__closed__"),
