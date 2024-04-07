@@ -551,7 +551,7 @@ struct RangeOptions {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Change options")]
 struct ChangeOptions {
-    /// fields changed at this time or later
+    /// fields changed within time interval
     #[arg(
         long,
         value_name = "FIELD[,...]=TIME",
