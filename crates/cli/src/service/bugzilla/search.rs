@@ -702,11 +702,11 @@ struct QueryOptions {
 #[clap(next_help_heading = "Time options")]
 struct TimeOptions {
     /// restrict by creation time
-    #[arg(short, long, value_name = "TIME", value_delimiter = ',')]
+    #[arg(short, long, value_name = "TIME")]
     created: Option<RangeOrValue<TimeDelta>>,
 
     /// restrict by modification time
-    #[arg(short, long, value_name = "TIME", value_delimiter = ',')]
+    #[arg(short, long, value_name = "TIME")]
     modified: Option<RangeOrValue<TimeDelta>>,
 }
 
