@@ -182,7 +182,7 @@ pub struct Parameters {
 
     pub blocks: Option<Vec<ExistsOrValues<i64>>>,
     pub depends: Option<Vec<ExistsOrValues<i64>>>,
-    pub ids: Option<Vec<i64>>,
+    pub ids: Option<Vec<RangeOrValue<i64>>>,
     pub priority: Option<Vec<Match>>,
     pub severity: Option<Vec<Match>>,
     pub version: Option<Vec<Match>>,
@@ -701,11 +701,17 @@ impl<'a> QueryBuilder<'a> {
 }
 
 impl QueryBuilder<'_> {
-    fn id(&mut self, value: i64) {
-        if value >= 0 {
-            self.advanced_field("bug_id", "equals", value);
-        } else {
-            self.advanced_field("bug_id", "notequals", value.abs());
+    fn id(&mut self, value: RangeOrValue<i64>) {
+        match value {
+            RangeOrValue::Value(value) => {
+                if value >= 0 {
+                    self.advanced_field("bug_id", "equals", value);
+                } else {
+                    self.advanced_field("bug_id", "notequals", value.abs());
+                }
+            }
+            RangeOrValue::RangeOp(value) => self.range_op("bug_id", value),
+            RangeOrValue::Range(value) => self.range("bug_id", value),
         }
     }
 

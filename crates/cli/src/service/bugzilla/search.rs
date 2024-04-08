@@ -342,15 +342,11 @@ struct AttributeOptions {
         long_help = wrapped_doc!("
             Restrict by ID.
 
-            Regular values search for exact bug identifiers and multiple values
-            can be specified in multiple options for logical OR.
+            Regular values search for exact bug identifiers.
 
             Examples:
             - ID equal to 10
             > bite s --id 10
-
-            - IDs 10 or 20
-            > bite s --id 10 --id 20
 
             Values can use the `-` prefix to search for identifiers not equal to
             the value.
@@ -359,6 +355,19 @@ struct AttributeOptions {
             - all bugs except 10
             > bite s --id=-10
 
+            Multiple values can be specified in multiple options for logical OR.
+
+            - IDs 10 or 20
+            > bite s --id 10 --id 20
+
+            ID ranges are supported.
+
+            - IDs greater than or equal to 10
+            > bite s --id >=10
+
+            - IDs between 10 and 20
+            > bite s --id 10..20
+
             Values are taken from standard input when `-`.
 
             Example:
@@ -366,7 +375,7 @@ struct AttributeOptions {
             > cat file | bite s --id -
         ")
     )]
-    id: Option<Vec<MaybeStdinVec<i64>>>,
+    id: Option<Vec<MaybeStdinVec<RangeOrValue<i64>>>>,
 
     /// restrict by keyword
     #[arg(
