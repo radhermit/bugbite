@@ -11,7 +11,7 @@ use crate::args::ExistsOrValues;
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{self, Order, OrderType};
-use crate::time::TimeDelta;
+use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, Request, WebService};
 use crate::Error;
 
@@ -49,7 +49,7 @@ impl<'a> QueryBuilder<'a> {
         self.insert(field.api(), status);
     }
 
-    fn time(&mut self, field: &str, value: RangeOrValue<TimeDelta>) {
+    fn time(&mut self, field: &str, value: RangeOrValue<TimeDeltaOrStatic>) {
         match value {
             RangeOrValue::Value(value) => {
                 let value = value.api();
@@ -126,9 +126,9 @@ pub struct Parameters {
     pub relates: Option<ExistsOrValues<u64>>,
     pub ids: Option<Vec<u64>>,
 
-    pub created: Option<RangeOrValue<TimeDelta>>,
-    pub modified: Option<RangeOrValue<TimeDelta>>,
-    pub closed: Option<RangeOrValue<TimeDelta>>,
+    pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
+    pub modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
+    pub closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     pub limit: Option<u64>,
     pub order: Option<Vec<Order<OrderField>>>,

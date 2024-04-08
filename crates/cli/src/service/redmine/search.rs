@@ -8,7 +8,7 @@ use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::redmine::search::{OrderField, Parameters};
 use bugbite::service::redmine::IssueField;
-use bugbite::time::TimeDelta;
+use bugbite::time::TimeDeltaOrStatic;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use strum::VariantNames;
@@ -273,15 +273,15 @@ struct AttributeOptions {
 struct TimeOptions {
     /// restrict by creation time
     #[arg(short, long, value_name = "TIME")]
-    created: Option<RangeOrValue<TimeDelta>>,
+    created: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     /// restrict by modification time
     #[arg(short, long, value_name = "TIME")]
-    modified: Option<RangeOrValue<TimeDelta>>,
+    modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     /// restrict by closed time
     #[arg(short = 'C', long, value_name = "TIME")]
-    closed: Option<RangeOrValue<TimeDelta>>,
+    closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 }
 
 /// Available search parameters.
