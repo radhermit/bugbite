@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 use crate::objects::bugzilla::Event;
-use crate::time::TimeDelta;
+use crate::time::TimeDeltaOrStatic;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
@@ -87,7 +87,7 @@ impl Request for HistoryRequest {
 /// Construct bug history parameters.
 #[derive(Debug, Default)]
 pub struct HistoryParams {
-    created_after: Option<TimeDelta>,
+    created_after: Option<TimeDeltaOrStatic>,
     creator: Option<String>,
 }
 
@@ -106,7 +106,7 @@ impl HistoryParams {
         true
     }
 
-    pub fn created_after(&mut self, interval: TimeDelta) {
+    pub fn created_after(&mut self, interval: TimeDeltaOrStatic) {
         self.created_after = Some(interval);
     }
 
