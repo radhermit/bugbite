@@ -1089,13 +1089,15 @@ impl QueryBuilder<'_> {
     {
         match value {
             Range::Range(r) => {
-                self.advanced_field(field, "greaterthaneq", r.start);
-                self.advanced_field(field, "lessthan", r.end);
+                self.and(|query| {
+                    query.advanced_field(field, "greaterthaneq", r.start);
+                    query.advanced_field(field, "lessthan", r.end);
+                });
             }
-            Range::Inclusive(r) => {
-                self.advanced_field(field, "greaterthaneq", r.start());
-                self.advanced_field(field, "lessthaneq", r.end());
-            }
+            Range::Inclusive(r) => self.and(|query| {
+                query.advanced_field(field, "greaterthaneq", r.start());
+                query.advanced_field(field, "lessthaneq", r.end());
+            }),
             Range::To(r) => {
                 self.advanced_field(field, "lessthan", r.end);
             }
