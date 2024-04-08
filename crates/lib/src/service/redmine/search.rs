@@ -49,19 +49,54 @@ impl<'a> QueryBuilder<'a> {
         self.insert(field.api(), status);
     }
 
+    fn id<I>(&mut self, values: I) -> crate::Result<()>
+    where
+        I: IntoIterator<Item = RangeOrValue<u64>>,
+    {
+        let (ids, ranges): (Vec<_>, Vec<_>) = values
+            .into_iter()
+            .partition(|x| matches!(x, RangeOrValue::Value(_)));
+
+        if !ids.is_empty() && !ranges.is_empty() {
+            return Err(Error::InvalidValue(
+                "IDs and ID ranges specified".to_string(),
+            ));
+        }
+
+        if !ids.is_empty() {
+            self.insert("issue_id", ids.iter().join(","));
+        }
+
+        match &ranges[..] {
+            [] => (),
+            [value] => match value {
+                RangeOrValue::RangeOp(value) => self.range_op("issue_id", value),
+                RangeOrValue::Range(value) => self.range("issue_id", value),
+                RangeOrValue::Value(_) => (),
+            },
+            _ => {
+                return Err(Error::InvalidValue(
+                    "multiple ID ranges specified".to_string(),
+                ))
+            }
+        }
+
+        Ok(())
+    }
+
     fn time(&mut self, field: &str, value: RangeOrValue<TimeDeltaOrStatic>) {
         match value {
             RangeOrValue::Value(value) => {
                 let value = value.api();
                 self.insert(field, format!(">={value}"));
             }
-            RangeOrValue::RangeOp(value) => self.range_op(field, value),
-            RangeOrValue::Range(value) => self.range(field, value),
+            RangeOrValue::RangeOp(value) => self.range_op(field, &value),
+            RangeOrValue::Range(value) => self.range(field, &value),
         }
     }
 
     // Redmine doesn't support native < or > operators so use <= and >= for them.
-    fn range_op<T>(&mut self, field: &str, value: RangeOp<T>)
+    fn range_op<T>(&mut self, field: &str, value: &RangeOp<T>)
     where
         T: Api + Eq,
     {
@@ -85,7 +120,7 @@ impl<'a> QueryBuilder<'a> {
         }
     }
 
-    fn range<T>(&mut self, field: &str, value: Range<T>)
+    fn range<T>(&mut self, field: &str, value: &Range<T>)
     where
         T: Api + Eq,
     {
@@ -124,7 +159,7 @@ pub struct Parameters {
     pub blocks: Option<ExistsOrValues<u64>>,
     pub blocked: Option<ExistsOrValues<u64>>,
     pub relates: Option<ExistsOrValues<u64>>,
-    pub ids: Option<Vec<u64>>,
+    pub ids: Option<Vec<RangeOrValue<u64>>>,
 
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
     pub modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
@@ -229,7 +264,7 @@ impl Parameters {
         }
 
         if let Some(values) = self.ids {
-            query.insert("issue_id", values.iter().join(","));
+            query.id(values)?;
         }
 
         if let Some(value) = self.closed {

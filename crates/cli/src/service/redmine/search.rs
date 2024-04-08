@@ -257,7 +257,7 @@ struct AttributeOptions {
 
     /// restrict by ID
     #[arg(long, value_name = "ID[,...]", value_delimiter = ',')]
-    id: Option<Vec<MaybeStdinVec<u64>>>,
+    id: Option<Vec<MaybeStdinVec<RangeOrValue<u64>>>>,
 
     /// restrict by status
     #[arg(
