@@ -125,10 +125,12 @@ where
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Ok(value) = s.parse() {
             Ok(RangeOrValue::Value(value))
-        } else if let Ok(value) = RangeOp::from_str(s) {
+        } else if let Ok(value) = s.parse() {
             Ok(RangeOrValue::RangeOp(value))
+        } else if let Ok(value) = s.parse() {
+            Ok(RangeOrValue::Range(value))
         } else {
-            Ok(RangeOrValue::Range(s.parse()?))
+            Err(Error::InvalidValue(format!("invalid range or value: {s}")))
         }
     }
 }

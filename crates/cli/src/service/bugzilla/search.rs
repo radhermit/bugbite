@@ -11,7 +11,7 @@ use bugbite::service::bugzilla::{
     search::{ChangeField, Match, OrderField, Parameters},
     BugField, FilterField, GroupField,
 };
-use bugbite::time::TimeDelta;
+use bugbite::time::TimeDeltaOrStatic;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use crossterm::style::Stylize;
@@ -32,7 +32,7 @@ fn change_field(s: &str) -> anyhow::Result<ChangeField> {
 #[derive(Debug, Clone)]
 struct Changed {
     fields: Vec<ChangeField>,
-    interval: RangeOrValue<TimeDelta>,
+    interval: RangeOrValue<TimeDeltaOrStatic>,
 }
 
 impl FromStr for Changed {
@@ -703,11 +703,11 @@ struct QueryOptions {
 struct TimeOptions {
     /// restrict by creation time
     #[arg(short, long, value_name = "TIME")]
-    created: Option<RangeOrValue<TimeDelta>>,
+    created: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     /// restrict by modification time
     #[arg(short, long, value_name = "TIME")]
-    modified: Option<RangeOrValue<TimeDelta>>,
+    modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
 }
 
 #[derive(Debug, Args)]

@@ -14,7 +14,7 @@ use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{self, Order, OrderType};
-use crate::time::TimeDelta;
+use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, Request, WebService};
 use crate::Error;
 
@@ -159,7 +159,7 @@ pub struct Parameters {
     pub whiteboard: Option<Vec<ExistsOrValues<Match>>>,
     pub url: Option<Vec<ExistsOrValues<Match>>>,
 
-    pub changed: Option<Vec<(Vec<ChangeField>, RangeOrValue<TimeDelta>)>>,
+    pub changed: Option<Vec<(Vec<ChangeField>, RangeOrValue<TimeDeltaOrStatic>)>>,
     pub changed_by: Option<Vec<(Vec<ChangeField>, Vec<String>)>>,
     pub changed_from: Option<Vec<(ChangeField, String)>>,
     pub changed_to: Option<Vec<(ChangeField, String)>>,
@@ -177,8 +177,8 @@ pub struct Parameters {
     pub limit: Option<u64>,
     pub order: Option<Vec<Order<OrderField>>>,
 
-    pub created: Option<RangeOrValue<TimeDelta>>,
-    pub modified: Option<RangeOrValue<TimeDelta>>,
+    pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
+    pub modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     pub blocks: Option<Vec<ExistsOrValues<i64>>>,
     pub depends: Option<Vec<ExistsOrValues<i64>>>,
@@ -304,12 +304,12 @@ impl Parameters {
         self
     }
 
-    pub fn created(mut self, value: RangeOrValue<TimeDelta>) -> Self {
+    pub fn created(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
         self.created = Some(value);
         self
     }
 
-    pub fn modified(mut self, value: RangeOrValue<TimeDelta>) -> Self {
+    pub fn modified(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
         self.modified = Some(value);
         self
     }
@@ -755,7 +755,7 @@ impl QueryBuilder<'_> {
         self.advanced_field("resolution", value.op, value);
     }
 
-    fn created(&mut self, value: RangeOrValue<TimeDelta>) {
+    fn created(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) {
         match value {
             RangeOrValue::Value(value) => {
                 self.advanced_field("creation_ts", "greaterthaneq", value)
@@ -765,7 +765,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn modified(&mut self, value: RangeOrValue<TimeDelta>) {
+    fn modified(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) {
         match value {
             RangeOrValue::Value(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
             RangeOrValue::RangeOp(value) => self.range_op("delta_ts", value),
@@ -811,7 +811,7 @@ impl QueryBuilder<'_> {
 
     fn changed<'a, I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (ChangeField, &'a RangeOrValue<TimeDelta>)>,
+        I: IntoIterator<Item = (ChangeField, &'a RangeOrValue<TimeDeltaOrStatic>)>,
     {
         for (field, target) in values {
             let field = field.api();
