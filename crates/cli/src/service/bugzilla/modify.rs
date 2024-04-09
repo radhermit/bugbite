@@ -631,7 +631,7 @@ async fn get_reply(
 fn edit_comment(data: &str) -> anyhow::Result<String> {
     let temp_file = NamedTempFile::new()?;
     if !data.is_empty() {
-        fs::write(&temp_file, data)?;
+        fs::write(&temp_file, data).context("failed saving comment file")?;
     }
 
     loop {
@@ -639,7 +639,7 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
         if !status.success() {
             anyhow::bail!("failed editing reply content");
         }
-        let comment = fs::read_to_string(&temp_file)?;
+        let comment = fs::read_to_string(&temp_file).context("failed reading comment file")?;
         if comment != data || confirm("No changes made to comment, submit anyway?", false)? {
             return Ok(comment.trim().to_string());
         }

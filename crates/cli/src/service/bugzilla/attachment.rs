@@ -2,6 +2,7 @@ use std::fs;
 use std::io::{stdout, Write};
 use std::process::ExitCode;
 
+use anyhow::Context;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use camino::Utf8PathBuf;
@@ -89,12 +90,12 @@ impl Command {
             }
         } else {
             let dir = &self.options.dir;
-            fs::create_dir_all(dir)?;
+            fs::create_dir_all(dir).context("failed creating attachments directory")?;
             for attachment in attachments.iter().flatten() {
                 // use per-bug directories when requesting attachments from multiple bugs
                 let path = if multiple_bugs {
                     let dir = dir.join(attachment.bug_id.to_string());
-                    fs::create_dir_all(&dir)?;
+                    fs::create_dir_all(&dir).context("failed creating attachments directory")?;
                     dir.join(&attachment.file_name)
                 } else {
                     dir.join(&attachment.file_name)
@@ -106,7 +107,7 @@ impl Command {
                 }
 
                 writeln!(stdout, "Saving attachment: {path}")?;
-                fs::copy(attachment.path()?, &path)?;
+                fs::copy(attachment.path()?, &path).context("failed saving attachment")?;
             }
         }
 
