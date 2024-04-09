@@ -3,6 +3,7 @@ use std::io::stdout;
 use std::process::ExitCode;
 use std::str::FromStr;
 
+use anyhow::Context;
 use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::RangeOrValue;
@@ -972,7 +973,7 @@ impl Command {
         if let Some(path) = self.search.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&params)?;
-                fs::write(path, data)?;
+                fs::write(path, data).context("failed writing template")?;
             }
         }
 
