@@ -4,7 +4,7 @@ use std::str::FromStr;
 use std::{fmt, fs};
 
 use anyhow::Context;
-use bugbite::args::MaybeStdinVec;
+use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::modify::{Parameters, RangeOrSet, SetChange};
@@ -184,9 +184,11 @@ struct Options {
 
             When no argument is specified, an editor is launched allowing for
             interactive entry.
+
+            Taken from standard input when `-`.
         ")
     )]
-    comment: Option<String>,
+    comment: Option<MaybeStdin<String>>,
 
     /// load comment from file
     #[arg(
@@ -475,7 +477,7 @@ impl From<Options> for Parameters {
             assignee: value.assignee,
             blocks: value.blocks,
             cc: value.cc,
-            comment: value.comment,
+            comment: value.comment.map(|x| x.into_inner()),
             comment_from: value.comment_from,
             comment_is_private: value.comment_is_private,
             comment_privacy: value
