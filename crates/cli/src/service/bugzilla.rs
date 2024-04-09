@@ -66,7 +66,7 @@ impl Command {
 enum Subcommand {
     /// Create attachments
     #[command(alias = "at")]
-    Attach(attach::Command),
+    Attach(Box<attach::Command>),
     /// Get attachments
     #[command(alias = "a")]
     Attachment(attachment::Command),
