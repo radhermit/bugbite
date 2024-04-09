@@ -177,7 +177,7 @@ struct Options {
         short = 'c',
         long,
         num_args = 0..=1,
-        conflicts_with = "reply",
+        conflicts_with_all = ["comment_from", "reply"],
         default_missing_value = "",
         long_help = wrapped_doc!("
             Add a comment.
@@ -187,6 +187,17 @@ struct Options {
         ")
     )]
     comment: Option<String>,
+
+    /// load comment from file
+    #[arg(
+        short = 'F',
+        long,
+        num_args = 0..=1,
+        conflicts_with_all = ["comment", "reply"],
+        value_name = "PATH",
+        value_hint = ValueHint::FilePath,
+    )]
+    comment_from: Option<Utf8PathBuf>,
 
     /// enable comment privacy
     #[arg(short = 'P', long, num_args = 0, default_missing_value = "true")]
@@ -271,7 +282,7 @@ struct Options {
 
     /// add/remove flags
     #[arg(
-        short = 'F',
+        short,
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
@@ -465,6 +476,7 @@ impl From<Options> for Parameters {
             blocks: value.blocks,
             cc: value.cc,
             comment: value.comment,
+            comment_from: value.comment_from,
             comment_is_private: value.comment_is_private,
             comment_privacy: value
                 .comment_privacy
@@ -510,7 +522,7 @@ pub(super) struct Command {
         num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
-        conflicts_with = "comment",
+        conflicts_with_all = ["comment", "comment_from"],
         help_heading = "Modify options",
         long_help = wrapped_doc!("
             Interactively reply to specific comments for a given bug.
@@ -673,6 +685,10 @@ impl Command {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
             }
             let comment = get_reply(client, ids[0], &mut values).await?;
+            params.comment = Some(comment);
+        } else if let Some(path) = params.comment_from.take() {
+            let comment =
+                fs::read_to_string(path).context("failed reading comment file: {path}")?;
             params.comment = Some(comment);
         } else if let Some(value) = params.comment.as_ref() {
             if value.trim().is_empty() {

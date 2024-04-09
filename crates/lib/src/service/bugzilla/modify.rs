@@ -2,7 +2,7 @@ use std::hash::Hash;
 use std::str::FromStr;
 use std::{fmt, fs};
 
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -282,6 +282,7 @@ pub struct Parameters {
     pub blocks: Option<Vec<SetChange<u64>>>,
     pub cc: Option<Vec<SetChange<String>>>,
     pub comment: Option<String>,
+    pub comment_from: Option<Utf8PathBuf>,
     pub comment_is_private: Option<bool>,
     pub comment_privacy: Option<(RangeOrSet<usize>, Option<bool>)>,
     pub component: Option<String>,
@@ -325,6 +326,7 @@ impl Parameters {
             blocks: self.blocks.or(other.blocks),
             cc: self.cc.or(other.cc),
             comment: self.comment.or(other.comment),
+            comment_from: self.comment_from.or(other.comment_from),
             comment_is_private: self.comment_is_private.or(other.comment_is_private),
             comment_privacy: self.comment_privacy.or(other.comment_privacy),
             component: self.component.or(other.component),
@@ -428,6 +430,14 @@ impl Parameters {
         if let Some(value) = self.comment {
             params.comment = Some(Comment {
                 body: value,
+                is_private: self.comment_is_private.unwrap_or_default(),
+            });
+        } else if let Some(path) = self.comment_from.as_ref() {
+            let data = fs::read_to_string(path).map_err(|e| {
+                Error::InvalidValue(format!("failed reading comment file: {path}: {e}"))
+            })?;
+            params.comment = Some(Comment {
+                body: data,
                 is_private: self.comment_is_private.unwrap_or_default(),
             });
         }
