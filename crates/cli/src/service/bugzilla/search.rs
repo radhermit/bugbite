@@ -340,6 +340,9 @@ struct AttributeOptions {
     /// restrict by ID
     #[arg(
         long,
+        num_args = 1,
+        value_name = "ID[,...]",
+        value_delimiter = ',',
         long_help = wrapped_doc!("
             Restrict by ID.
 
@@ -356,10 +359,11 @@ struct AttributeOptions {
             - all bugs except 10
             > bite s --id=-10
 
-            Multiple values can be specified in multiple options for logical OR.
+            Multiple values can be specified in a comma-separated list for
+            logical OR.
 
             - IDs 10 or 20
-            > bite s --id 10 --id 20
+            > bite s --id 10,20
 
             ID ranges are supported.
 
@@ -426,7 +430,9 @@ struct AttributeOptions {
     #[arg(
         short,
         long,
-        value_name = "VALUE",
+        value_name = "VALUE[,...]",
+        value_delimiter = ',',
+        num_args = 1,
         long_help = wrapped_doc!("
             Restrict by status.
 
@@ -443,12 +449,12 @@ struct AttributeOptions {
             - unresolved bugs
             > bite s --status ~resolved
 
-            Multiple values can be specified in with multiple options for
+            Multiple values can be specified in a comma-separated list for
             logical OR.
 
             Examples:
             - confirmed or verified bugs
-            > bite s --status confirmed --status verified
+            > bite s --status confirmed,verified
 
             The aliases `@open`, `@closed`, and `@all` can be used to search for
             open, closed, and all bugs, respectively.
