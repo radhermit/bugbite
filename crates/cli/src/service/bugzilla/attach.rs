@@ -86,7 +86,8 @@ struct Options {
             given.
 
             This option works in coordination with --auto-compress using the
-            file size limit to trigger when a text file is truncated.
+            file size limit to trigger when a text file is truncated. If the
+            option is not specified the default value will be used for it.
 
             Examples modifying bug 10:
             - auto-truncate to 1000 lines
