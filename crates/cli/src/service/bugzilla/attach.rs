@@ -32,7 +32,8 @@ struct Options {
         long_help = wrapped_doc!("
             Compress attachments.
 
-            The value must be the compression variant to use.
+            The value must be the compression variant to use or can be skipped
+            to use the default compression: xz.
 
             Examples modifying bug 10:
             - compress attachment using the default compression type
