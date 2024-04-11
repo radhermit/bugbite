@@ -202,7 +202,22 @@ struct Options {
     comment_from: Option<Utf8PathBuf>,
 
     /// enable comment privacy
-    #[arg(short = 'P', long, num_args = 0, default_missing_value = "true")]
+    #[arg(
+        short = 'P',
+        long,
+        num_args = 0,
+        default_missing_value = "true",
+        long_help = wrapped_doc!("
+            Mark created comment as private.
+
+            Examples modifying bug 10:
+            - create a private comment
+            > bite m 10 --comment test --comment-is-private
+
+            - private reply to last comment
+            > bite m 10 --reply --comment-is-private
+        ")
+    )]
     comment_is_private: Option<bool>,
 
     /// modify comment privacy
@@ -546,9 +561,6 @@ pub(super) struct Command {
 
             - reply to the last comment
             > bite m 123 --reply
-
-            - private reply to last comment
-            > bite m 123 --reply --comment-is-private
         ")
     )]
     reply: Option<Vec<usize>>,
