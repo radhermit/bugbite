@@ -236,10 +236,10 @@ impl CreateAttachment {
             .map_err(|e| Error::InvalidValue(format!("failed reading attachment: {path}: {e}")))?;
         let mut mime_type = get_mime_type(&path, &data);
 
-        // determine file size
-        let auto_compress = |size: usize| -> bool {
+        // determine if a file of a given size will be auto-compressed
+        let auto_compress = |bytes: usize| -> bool {
             self.auto_compress
-                .map(|x| x * 1e6 < size as f64)
+                .map(|x| x * 1e6 < bytes as f64)
                 .unwrap_or_default()
         };
 
