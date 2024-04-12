@@ -76,17 +76,37 @@ impl Compression {
     }
 }
 
+/// Attachment creation object.
 #[derive(Debug)]
 pub struct CreateAttachment {
+    /// Path to the attachment.
     path: Utf8PathBuf,
+
+    /// Attachment summary, by default the filename is used on submission.
     pub summary: Option<String>,
+
+    /// MIME type of the attachment.
     pub content_type: Option<String>,
+
+    /// Comment related to the attachment.
     pub comment: Option<String>,
+
+    /// Support creating tarballs of directory path contents.
     pub dir: bool,
+
+    /// Attachment is a patch file.
     pub is_patch: bool,
+
+    /// Mark the attachment private on creation.
     pub is_private: bool,
+
+    /// Compress the attachment using a given compression type.
     pub compress: Option<Compression>,
+
+    /// Automatically compress the attachment if it exceeds a given size in Mb.
     pub auto_compress: Option<f64>,
+
+    /// Automatically truncate plain text attachments if exceeding a number of lines.
     pub auto_truncate: Option<usize>,
 }
 
