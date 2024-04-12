@@ -219,7 +219,7 @@ impl Command {
     pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
         let mut attachments = vec![];
         for file in &self.args.files {
-            let mut attachment = CreateAttachment::new(file)?;
+            let mut attachment = CreateAttachment::new(file);
             attachment.summary = self.options.summary.clone();
             attachment.comment = self.options.comment.clone();
             attachment.content_type = self.options.mime.clone();

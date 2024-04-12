@@ -158,11 +158,11 @@ where
 }
 
 impl CreateAttachment {
-    pub fn new<P>(path: P) -> crate::Result<Self>
+    pub fn new<P>(path: P) -> Self
     where
         P: AsRef<Utf8Path>,
     {
-        Ok(Self {
+        Self {
             path: path.as_ref().to_path_buf(),
             summary: None,
             comment: None,
@@ -173,7 +173,7 @@ impl CreateAttachment {
             compress: None,
             auto_compress: None,
             auto_truncate: None,
-        })
+        }
     }
 
     /// Compress an attachment using a specified compression type.
