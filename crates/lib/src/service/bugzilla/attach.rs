@@ -13,6 +13,7 @@ use crate::objects::Base64;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
+/// Compression variants supported by attachments.
 #[derive(
     Display, EnumIter, EnumString, VariantNames, Default, Eq, PartialEq, Debug, Clone, Copy,
 )]
@@ -178,10 +179,8 @@ where
 }
 
 impl CreateAttachment {
-    pub fn new<P>(path: P) -> Self
-    where
-        P: AsRef<Utf8Path>,
-    {
+    /// Create a new attachment using a given path.
+    pub fn new<P: AsRef<Utf8Path>>(path: P) -> Self {
         Self {
             path: path.as_ref().to_path_buf(),
             summary: None,
@@ -207,6 +206,7 @@ impl CreateAttachment {
         self.auto_truncate = Some(count);
     }
 
+    /// Build an attachment for request submission.
     fn build<S>(mut self, ids: &[S], temp_dir_path: &Utf8Path) -> crate::Result<Attachment>
     where
         S: std::fmt::Display,
@@ -287,6 +287,7 @@ impl CreateAttachment {
     }
 }
 
+/// Attachment object used for request submission.
 #[derive(Serialize, Debug)]
 struct Attachment {
     ids: Vec<String>,
