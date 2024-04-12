@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.0.9
+
+### Changed
+
+#### Bugzilla
+- Deserialize attachments into temporary files instead of directly into memory.
+- search: Use ~ instead of ! for inversion operators.
+
+### Added
+
+#### Bugzilla
+- attach: Support targeting directories for attachment creation.
+- attach: Add lzip compression support.
+- search: Support ranges of ID values.
+- search: Support static datetime values for relevant options.
+- history: Add request parameter support and filtering.
+
+#### Redmine
+- search: Support static datetime values for relevant options.
+
 ## 0.0.8
 
 ### Added

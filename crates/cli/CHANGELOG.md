@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.0.9
+
+### Changed
+
+#### Bugzilla
+- search: Revert to using comma-separated values for --id and --status.
+- search: Drop support for comma-separated time values.
+- Use bug ID headers for comment and history command output.
+
+### Added
+
+- Support determining connection via binary symlink.
+
+#### Bugzilla
+- attach: Support targeting directories via -d/--dir.
+- search: Support using group fields for -f/--fields values.
+- search: Support ranges of ID values.
+- search: Support static datetime values for relevant options.
+- modify: Support standard input for -c/--comment.
+- history: Add request parameter support and filtering.
+
+#### Redmine
+- search: Support static datetime values for relevant options.
+
 ## 0.0.8
 
 ### Added
