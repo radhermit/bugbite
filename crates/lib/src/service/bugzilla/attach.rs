@@ -104,7 +104,7 @@ pub struct CreateAttachment {
     /// Compress the attachment using a given compression type.
     pub compress: Option<Compression>,
 
-    /// Automatically compress the attachment if it exceeds a given size in Mb.
+    /// Automatically compress the attachment if it exceeds a given size in MB.
     pub auto_compress: Option<f64>,
 
     /// Automatically truncate plain text attachments if exceeding a number of lines.
