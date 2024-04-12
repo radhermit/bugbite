@@ -37,6 +37,14 @@ replace-with = "vendored-sources"
 directory = "vendor"
 EOF
 
+# remove unused, windows-only static libs to decrease archive size
+#
+# TODO: drop this once `cargo vendor` supports platform targeting:
+# https://github.com/rust-lang/cargo/issues/7058
+rm -fr vendor/winapi-*gnu*/lib/*.a
+rm -fr vendor/windows_*gnu*/lib/*.a
+rm -fr vendor/windows_*msvc*/lib/*.lib
+
 popd >/dev/null
 
 # move release to repo dir
