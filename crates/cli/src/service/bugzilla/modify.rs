@@ -194,7 +194,6 @@ struct Options {
     #[arg(
         short = 'F',
         long,
-        num_args = 0..=1,
         conflicts_with_all = ["comment", "reply"],
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
