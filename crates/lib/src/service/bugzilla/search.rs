@@ -935,7 +935,7 @@ impl QueryBuilder<'_> {
             "@closed" => self.append("bug_status", "__closed__"),
             "@all" => self.append("bug_status", "__all__"),
             value => {
-                if let Some(value) = value.strip_prefix('!') {
+                if let Some(value) = value.strip_prefix('~') {
                     self.advanced_field("bug_status", "notequals", value)
                 } else {
                     self.advanced_field("bug_status", "equals", value)

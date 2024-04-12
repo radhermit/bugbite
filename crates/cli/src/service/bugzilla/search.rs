@@ -439,7 +439,7 @@ struct AttributeOptions {
             By default, searches with no status parameter only target open bugs.
             This option supports extending searches to closed bugs.
 
-            Regular values search for case-insensitive matches. The prefix `!`
+            Regular values search for case-insensitive matches. The prefix `~`
             can be used to search for all non-matches instead.
 
             Examples:
