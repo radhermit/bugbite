@@ -55,18 +55,12 @@ where
 }
 
 pub(crate) fn launch_editor<P: AsRef<Path>>(path: P) -> Result<ExitStatus> {
-    let path = path.as_ref();
-    if let Ok(exe) = env::var("EDITOR") {
-        Command::new(&exe)
-            .arg(path)
-            .status()
-            .with_context(|| format!("failed launching editor: {exe}"))
-    } else {
-        Command::new("xdg-open")
-            .arg(path)
-            .status()
-            .context("failed launching editor via xdg-open")
-    }
+    let editor = env::var("EDITOR");
+    let exe = editor.as_deref().unwrap_or("xdg-open");
+    Command::new(exe)
+        .arg(path.as_ref())
+        .status()
+        .context("failed launching editor via {exe}")
 }
 
 pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {
