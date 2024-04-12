@@ -197,6 +197,15 @@ struct Options {
         conflicts_with_all = ["comment", "reply"],
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
+        long_help = wrapped_doc!("
+            Add a comment using content from a file.
+
+            The value must be the path to a valid comment file.
+
+            Example modifying bug 10:
+            - create a comment from a file
+            > bite m 10 --comment-from path/to/file.txt
+        ")
     )]
     comment_from: Option<Utf8PathBuf>,
 
@@ -212,6 +221,9 @@ struct Options {
             Examples modifying bug 10:
             - create a private comment
             > bite m 10 --comment test --comment-is-private
+
+            - create a private comment from a file
+            > bite m 10 --comment-from path/to/file.txt --comment-is-private
 
             - private reply to last comment
             > bite m 10 --reply --comment-is-private
