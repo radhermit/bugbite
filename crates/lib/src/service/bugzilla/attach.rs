@@ -176,16 +176,6 @@ impl CreateAttachment {
         }
     }
 
-    /// Compress an attachment using a specified compression type.
-    pub fn compress(&mut self, compress: Compression) {
-        self.compress = Some(compress);
-    }
-
-    /// Conditionally compress an attachment if larger than a given size in MB.
-    pub fn auto_compress(&mut self, size: f64) {
-        self.auto_compress = Some(size);
-    }
-
     /// Conditionally truncate a text attachment to the last count of lines.
     ///
     /// If the attachment MIME type does not match text/* this setting is ignored.

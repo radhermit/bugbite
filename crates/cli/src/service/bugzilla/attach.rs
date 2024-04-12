@@ -226,13 +226,8 @@ impl Command {
             attachment.dir = self.options.dir;
             attachment.is_patch = self.options.patch;
             attachment.is_private = self.options.private;
-
-            if let Some(value) = self.options.compress {
-                attachment.compress(value);
-            }
-            if let Some(value) = self.options.auto_compress {
-                attachment.auto_compress(value);
-            }
+            attachment.compress = self.options.compress;
+            attachment.auto_compress = self.options.auto_compress;
             if let Some(value) = self.options.auto_truncate {
                 attachment.auto_truncate(value);
             }
