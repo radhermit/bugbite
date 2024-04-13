@@ -157,17 +157,19 @@ struct Options {
             `@me` can also be used for the service's configured user if one
             exists.
 
+            - add yourself to the CC list
+            > bite m 10 --cc @me
+
             Prefixing values with `+` or `-` adds or removes from the list,
             respectively. Unprefixed values will be added to the list.
 
+            - remove yourself from the CC list
+            > bite m 10 --cc=-@me
+
             Multiple arguments can be specified in a comma-separated list.
 
-            Examples modifying bug 123:
-            - add yourself to the CC list
-            > bite m 123 --cc @me
-
-            - remove yourself from the CC list
-            > bite m 123 --cc=-@me
+            - add and remove addresses from the CC list
+            > bite m 10 --cc=+test1@email.com,-test2@email.com
         ")
     )]
     cc: Option<Vec<SetChange<String>>>,
