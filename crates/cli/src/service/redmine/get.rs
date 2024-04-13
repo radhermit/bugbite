@@ -14,15 +14,14 @@ struct Options {
     #[arg(short = 'C', long)]
     no_comments: bool,
 
-    /// open issues in browser
+    /// open in browser
     #[arg(
         short,
         long,
         long_help = wrapped_doc!("
             Open issues in a browser.
 
-            This functionality requires xdg-open with a valid, preferred browser
-            set for http(s) URLs.
+            This functionality uses xdg-open to open URLs.
         ")
     )]
     browser: bool,

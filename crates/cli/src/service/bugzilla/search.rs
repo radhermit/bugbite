@@ -900,15 +900,14 @@ impl From<Params> for Parameters {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Search options")]
 pub(super) struct SearchOptions {
-    /// open query in a browser
+    /// open in browser
     #[arg(
         short,
         long,
         long_help = wrapped_doc!("
-            Open query in a browser.
+            Open the query in a browser.
 
-            This functionality requires xdg-open with a valid, preferred browser
-            set for http(s) URLs.
+            This functionality uses xdg-open to open URLs.
         ")
     )]
     browser: bool,
