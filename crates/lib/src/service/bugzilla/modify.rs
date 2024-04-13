@@ -123,11 +123,7 @@ impl Request for ModifyRequest {
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
         let params = self.params.encode(service, self.ids).await?;
-        let request = service
-            .client()
-            .put(self.url)
-            .json(&params)
-            .inject_auth(service, true)?;
+        let request = service.client().put(self.url).json(&params).auth(service)?;
         let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let data = data["bugs"].take();

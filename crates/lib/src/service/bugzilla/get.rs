@@ -78,7 +78,7 @@ impl Request for GetRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.url).inject_auth(service, false)?;
+        let request = service.client().get(self.url).auth_optional(service)?;
         let (bugs, attachments, comments, history) = (
             request.send(),
             self.attachments.map(|r| r.send(service)),

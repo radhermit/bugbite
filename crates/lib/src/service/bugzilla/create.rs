@@ -25,7 +25,7 @@ impl Request for CreateRequest {
             .client()
             .post(self.url)
             .json(&params)
-            .inject_auth(service, true)?;
+            .auth(service)?;
         let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let id = serde_json::from_value(data["id"].take())

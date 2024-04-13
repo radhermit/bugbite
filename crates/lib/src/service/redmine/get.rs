@@ -63,7 +63,7 @@ impl Request for GetRequest {
             .urls
             .into_iter()
             .map(|u| service.client().get(u))
-            .map(|r| r.inject_auth(service, false).map(|r| r.send()))
+            .map(|r| r.auth_optional(service).map(|r| r.send()))
             .try_collect()?;
 
         let mut issues = vec![];

@@ -70,21 +70,22 @@ impl Request for NullRequest {
     }
 }
 
+/// Inject service authentication data into a request.
 pub(crate) trait InjectAuth: Sized {
-    fn inject_auth<'a, W: WebService<'a>>(
-        self,
-        service: &'a W,
-        required: bool,
-    ) -> crate::Result<Self>;
+    /// Authentication required for request.
+    fn auth<'a, W: WebService<'a>>(self, service: &'a W) -> crate::Result<Self>;
+
+    /// Authentication optional for request.
+    fn auth_optional<'a, W: WebService<'a>>(self, service: &'a W) -> crate::Result<Self>;
 }
 
 impl InjectAuth for RequestBuilder {
-    fn inject_auth<'a, W: WebService<'a>>(
-        self,
-        service: &'a W,
-        required: bool,
-    ) -> crate::Result<Self> {
-        service.inject_auth(self, required)
+    fn auth<'a, W: WebService<'a>>(self, service: &'a W) -> crate::Result<Self> {
+        service.inject_auth(self, true)
+    }
+
+    fn auth_optional<'a, W: WebService<'a>>(self, service: &'a W) -> crate::Result<Self> {
+        service.inject_auth(self, false)
     }
 }
 

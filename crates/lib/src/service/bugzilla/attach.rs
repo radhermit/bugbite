@@ -351,7 +351,7 @@ impl Request for AttachRequest {
             .attachments
             .into_iter()
             .map(|x| service.client().post(self.url.clone()).json(&x))
-            .map(|r| r.inject_auth(service, true).map(|r| r.send()))
+            .map(|r| r.auth(service).map(|r| r.send()))
             .try_collect()?;
 
         let mut attachment_ids = vec![];
