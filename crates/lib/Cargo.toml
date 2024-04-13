@@ -1,6 +1,6 @@
 [package]
 name = "bugbite"
-version = "0.0.9"
+version = "0.0.10"
 description = "library for bug, issue, and ticket mangling"
 documentation = "https://github.com/radhermit/bugbite"
 homepage = "https://github.com/radhermit/bugbite"
