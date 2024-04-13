@@ -23,8 +23,8 @@ mod search;
 #[derive(Debug, clap::Args)]
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
-    /// key or token
-    #[arg(short = 'k', long, env = "BUGBITE_KEY")]
+    /// API key
+    #[arg(short, long, env = "BUGBITE_KEY")]
     key: Option<String>,
 
     /// username
