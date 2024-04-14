@@ -1,0 +1,72 @@
+= bite(1)
+Tim Harder
+:doctype: manpage
+:manmanual: BITE
+:mansource: BITE
+:man-linkstyle: pass:[blue R < >]
+
+== Name
+
+bite - a command line tool for bug, issue, and ticket mangling
+
+== Synopsis
+
+*bite* [_OPTIONS_]... <_COMMAND_> [_ARGS_]
+
+*bite* [-h|--help|-V|--version]
+
+== Description
+
+Bite is a command line tool for interacting with bug, issue, and ticket
+tracking services. It aims to provide access to common functionality such as
+searching, requesting, creating, and modifying bugs, issues, or tickets in
+addition to other actions provided by a service.
+
+== Usage
+
+Bite automatically injects service subcommands so they aren't required for
+quicker, command-line entry if desired.
+
+== Options
+
+*-h, --help*::
+    Print help output and exit.
+
+*-V, --version*::
+    Print version and exit.
+
+== Environment variables
+
+*BUGBITE_CONNECTION*::
+    Use a pre-configured connection.
++
+Connections can be defined in the user config in addition to other locations.
++
+.Precendence order from lowest to highest
+- internal config
+- user config
+- environment
+- command option
+- symlinked command
+
+*BUGBITE_BASE*::
+    Specify the service URL to connect to.
++
+For example, a bugzilla service could use `https://bugzilla.kernel.org`.
+
+*BUGBITE_SERVICE*::
+    Specify the service type to use.
++
+.Available services
+- bugzilla
+- github
+- redmine
+
+== Resources
+
+*Project web site:* https://github.com/radhermit/bugbite
+
+== Copying
+
+Copyright (C) 2024 {author} +
+Free use of this software is granted under the terms of the Apache-2.0 or MIT License.
