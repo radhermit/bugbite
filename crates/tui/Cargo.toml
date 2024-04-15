@@ -21,4 +21,4 @@ path = "src/main.rs"
 anyhow = "1.0.82"
 bugbite = { path = "../lib", version = "0.0.10" }
 crossterm = "0.27.0"
-ratatui = "0.26.1"
+ratatui = "0.26.2"
