@@ -1,0 +1,27 @@
+name: doc
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - "crates/*/doc/**"
+      - "doc/**"
+      - ".github/workflows/doc.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/*/doc/**"
+      - "doc/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: asciidoctor/docker-asciidoctor
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build docs
+      run: make -C doc
