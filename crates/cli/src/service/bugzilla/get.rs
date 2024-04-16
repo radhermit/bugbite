@@ -5,7 +5,7 @@ use bugbite::client::bugzilla::Client;
 use clap::Args;
 
 use crate::service::output::render_items;
-use crate::utils::{launch_browser, wrapped_doc};
+use crate::utils::launch_browser;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Get options")]
@@ -29,33 +29,13 @@ pub(super) struct Command {
     options: Options,
 
     /// open in browser
-    #[arg(
-        short,
-        long,
-        long_help = wrapped_doc!("
-            Open bugs in a browser.
-
-            This functionality uses xdg-open to open URLs.
-        ")
-    )]
+    #[arg(short, long)]
     browser: bool,
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs or aliases
-    #[clap(
-        required = true,
-        help_heading = "Arguments",
-        long_help = wrapped_doc!("
-            IDs or aliases of bugs to fetch.
-
-            Taken from standard input when `-`.
-
-            Example:
-            - fetch all matching bugs
-            > bite s bugbite -f id | bite g -
-        ")
-    )]
+    #[clap(required = true, help_heading = "Arguments")]
     ids: Vec<MaybeStdinVec<String>>,
 }
 
