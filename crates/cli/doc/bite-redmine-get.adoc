@@ -1,0 +1,58 @@
+= bite-redmine-get(1)
+:doctype: manpage
+:man-linkstyle: pass:[blue R < >]
+
+== Name
+
+bite-redmine-get - get issues
+
+== Synopsis
+
+*bite redmine get* [<options>] [<ids>]
+
+*bite redmine get* [-h|--help]
+
+== Description
+
+Get issues.
+
+== Global Options
+
+*-v, --verbose*::
+    Increase logging verbosity.
+
+*-q, --quiet*::
+    Decrease logging verbosity.
+
+*-h, --help*::
+    Print help output and exit.
+
+== Get options
+
+*-C, --no-comments*::
+    Disable comments.
+
+*-b, --browser*::
+    Open in a browser.
++
+This functionality uses `xdg-open` to open URLs.
+
+== Arguments
+
+IDs of issues to fetch.
+
+Taken from standard input when `-`.
+
+== Examples
+
+- Get issue 123:
++
+----
+$ bite get 123
+----
+
+- Fetch all matching issues:
++
+----
+$ bite search bugbite -f id | bite get -
+----
