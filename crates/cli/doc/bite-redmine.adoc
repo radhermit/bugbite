@@ -1,0 +1,33 @@
+= bite-redmine(1)
+:doctype: manpage
+:man-linkstyle: pass:[blue R < >]
+
+== Name
+
+bite-redmine - Redmine service support
+
+== Synopsis
+
+*bite redmine* [<options>] <command> [<args>]
+
+*bite redmine* [-h|--help]
+
+== Description
+
+Redmine service support.
+
+== Options
+
+*-h, --help*::
+    Print help output and exit.
+
+== Environment variables
+
+*BUGBITE_KEY*::
+	Set the API key for service access.
+
+*BUGBITE_USER*::
+	Set the username for service access.
+
+*BUGBITE_PASS*::
+	Set the password for service access.
