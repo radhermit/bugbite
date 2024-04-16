@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::io::{stdout, IsTerminal};
+use std::io::{stdout, IsTerminal, Write};
 
 use bugbite::traits::RenderSearch;
 use itertools::Itertools;
@@ -87,6 +87,7 @@ where
     };
 
     for item in items {
+        writeln!(stdout, "{}", "=".repeat(width))?;
         item.render(&mut stdout, width)?;
     }
 
