@@ -7,12 +7,10 @@ use std::process::ExitCode;
 
 use bugbite::client::Client;
 use bugbite::service::ServiceKind;
-use bugbite::services::SERVICES;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, Parser, ValueHint};
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
-use itertools::Itertools;
 use strum::VariantNames;
 use tracing_log::AsTrace;
 
@@ -139,44 +137,10 @@ impl ServiceCommand {
 #[clap(next_help_heading = "Service")]
 struct ServiceOpts {
     /// use pre-configured connection
-    #[arg(
-        short,
-        long,
-        env = "BUGBITE_CONNECTION",
-        long_help = wrapped_doc!("
-            Use a pre-configured connection by its alias.
-
-            Connections can be defined in the user config. The precedence order
-            when overlapping connection names exist or when multiple locations
-            are defined is as follows from lowest to highest: internal, user
-            config, environment, and command option. Specifying a connection
-            always overrides the manual --base and --service settings.
-
-            The following connections are defined internally in bugbite
-            for ease of use:
-
-            {}
-
-            It's also possible to specify a target connection via the
-            environment variable seen below.",
-            SERVICES.iter()
-                .map(|(name, config)| format!("{name}: {config}"))
-                .sorted().join("\n")
-        )
-    )]
+    #[arg(short, long, env = "BUGBITE_CONNECTION")]
     connection: Option<String>,
     /// base service URL
-    #[arg(
-        short,
-        long,
-        env = "BUGBITE_BASE",
-        long_help = wrapped_doc!("
-            Specify the service URL to connect to.
-
-            For example, a bugzilla service would use `https://bugzilla.kernel.org`
-            and a github service would use `https://github.com/radhermit/bugbite`.
-        ")
-    )]
+    #[arg(short, long, env = "BUGBITE_BASE")]
     base: Option<String>,
     /// service type
     #[arg(
@@ -186,12 +150,6 @@ struct ServiceOpts {
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(ServiceKind::VARIANTS)
             .map(|s| s.parse::<ServiceKind>().unwrap()),
-        long_help = wrapped_doc!("
-            Specify the service type to use.
-
-            Possible values: {}",
-            ServiceKind::VARIANTS.join(", ")
-        )
     )]
     service: Option<ServiceKind>,
 }
@@ -222,15 +180,7 @@ pub(crate) struct Options {
 #[command(
     name = "bite",
     version,
-    author = clap::crate_authors!(),
     about = "command line tool for mangling bugs, issues, and tickets",
-    long_about = wrapped_doc!("
-        Bite is a command line tool that aids interaction with a subset of the
-        myriad bug, issue, and ticket trackers accessible online. It tries to
-        support a consistent interface to search, request, modify, and create
-        bugs (or their variants) in addition to other actions a service
-        provides access to.
-    "),
     disable_help_subcommand = true,
     term_width = *COLUMNS,
     help_template = wrapped_doc!("
@@ -239,12 +189,6 @@ pub(crate) struct Options {
         {about}
 
         {usage-heading} {usage}
-
-        Bite automatically injects service subcommands so they shouldn't be
-        specified for quicker command-line access if desired. In general they
-        aren't necessary except when trying to view the service specific help
-        options via -h/--help. In addition, common service action subcommands
-        are aliased to their first letter.
 
         {all-args}{after-help}
     ")
