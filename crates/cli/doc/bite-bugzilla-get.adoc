@@ -1,0 +1,64 @@
+= bite-bugzilla-get(1)
+:doctype: manpage
+:man-linkstyle: pass:[blue R < >]
+
+== Name
+
+bite-bugzilla-get - get bugs
+
+== Synopsis
+
+*bite bugzilla get* [<options>] [<ids>]
+
+*bite bugzilla get* [-h|--help]
+
+== Description
+
+Get bugs.
+
+== Global Options
+
+*-v, --verbose*::
+    Increase logging verbosity.
+
+*-q, --quiet*::
+    Decrease logging verbosity.
+
+*-h, --help*::
+    Print help output and exit.
+
+== Get options
+
+*-A, --no-attachments*::
+    Disable attachments.
+
+*-C, --no-comments*::
+    Disable comments.
+
+*-H, --no-history*::
+    Disable history.
+
+*-b, --browser*::
+    Open bugs in a browser.
++
+This functionality uses `xdg-open` to open URLs.
+
+== Arguments
+
+IDs or aliases of bugs to fetch.
+
+Taken from standard input when `-`.
+
+== Examples
+
+- Get bug 123:
++
+----
+$ bite get 123
+----
+
+- Fetch all matching bugs:
++
+----
+$ bite search bugbite -f id | bite get -
+----
