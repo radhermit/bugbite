@@ -27,6 +27,17 @@ Redmine service support.
 *-h, --help*::
     Print help output and exit.
 
+== Authentication
+
+*-k, --key*::
+	Set the API key for service access.
+
+*-u, --user*::
+	Set the username for service access.
+
+*-p, --password*::
+	Set the password for service access.
+
 == Environment variables
 
 *BUGBITE_KEY*::
