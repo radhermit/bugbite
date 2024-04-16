@@ -2,4 +2,4 @@ all: man
 .PHONY: all man
 
 man:
-	make -C ../crates/cli/doc
+	DESTDIR="$(shell pwd)/../target/doc/cli" make -C ../crates/cli/doc
