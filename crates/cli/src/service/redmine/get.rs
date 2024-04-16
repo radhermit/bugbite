@@ -54,6 +54,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_examples(&["redmine", "get"]);
+        subcmd_parse_doc(&["redmine", "get"]);
     }
 }
