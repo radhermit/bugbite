@@ -1,0 +1,33 @@
+= bite-bugzilla(1)
+:doctype: manpage
+:man-linkstyle: pass:[blue R < >]
+
+== Name
+
+bite-bugzilla - Bugzilla service support
+
+== Synopsis
+
+*bite bugzilla* [<options>] <command> [<args>]
+
+*bite bugzilla* [-h|--help]
+
+== Description
+
+Bugzilla service support.
+
+== Options
+
+*-h, --help*::
+    Print help output and exit.
+
+== Environment variables
+
+*BUGBITE_KEY*::
+	Set the API key for service access.
+
+*BUGBITE_USER*::
+	Set the username for service access.
+
+*BUGBITE_PASS*::
+	Set the password for service access.
