@@ -52,3 +52,16 @@ Explicitly specified options override corresponding template values.
 +
 Combining this option with -n/--dry-run allows creating search templates
 without service interaction.
+
+== Time options
+
+// TODO: include external doc describing time value format
+
+*-c, --created*::
+    Restrict by creation time.
+
+*-m, --modified*::
+    Restrict by modification time.
+
+*-c, --closed*::
+    Restrict by closed time.
