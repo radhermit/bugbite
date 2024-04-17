@@ -1,0 +1,54 @@
+= bite-redmine-search(1)
+:doctype: manpage
+:man-linkstyle: pass:[blue R < >]
+
+== Name
+
+bite-redmine-search - search issues
+
+== Synopsis
+
+*bite redmine search* [<options>]
+
+*bite redmine search* [-h|--help]
+
+== Description
+
+Search issues.
+
+== Global Options
+
+*-v, --verbose*::
+    Increase logging verbosity.
+
+*-q, --quiet*::
+    Decrease logging verbosity.
+
+*-h, --help*::
+    Print help output and exit.
+
+== Search options
+
+*-b, --browser*::
+    Open in a browser.
++
+This functionality uses `xdg-open` to open URLs.
+
+*-n, --dry-run*::
+    Skip service interaction.
+
+*--json*::
+    Output in JSON format.
+
+*--from=<path>*::
+    Read search attributes from a template.
++
+Template files use the TOML format and generally map long option names to values.
++
+Explicitly specified options override corresponding template values.
+
+*--to=<path>*::
+    Write search attributes to a template.
++
+Combining this option with -n/--dry-run allows creating search templates
+without service interaction.
