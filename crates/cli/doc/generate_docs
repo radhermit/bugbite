@@ -33,8 +33,9 @@ def main(args):
     for file in files:
         try:
             name, section, _ext = file.split(".")
+            section = int(section)
         except ValueError:
-            raise RuntimeError(f"file missing man section: {file}")
+            raise RuntimeError(f"invalid file name: {file}")
 
         # write stub files
         if args.html:
