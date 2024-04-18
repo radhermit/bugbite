@@ -64,13 +64,13 @@ def main(args):
 
     # generate html docs
     if args.html:
-        cmd = ["asciidoctor", "-b", "html", "-D", html_dest_dir] + html_stubs
-        subprocess.run(cmd, check=True)
+        cmd = f"asciidoctor -b html --failure-level WARNING -D {html_dest_dir}"
+        subprocess.run(cmd.split() + html_stubs, check=True)
 
     # generate man pages
     if args.man:
-        cmd = ["asciidoctor", "-b", "manpage", "-D", man_dest_dir] + man_stubs
-        subprocess.run(cmd, check=True)
+        cmd = f"asciidoctor -b manpage --failure-level WARNING -D {man_dest_dir}"
+        subprocess.run(cmd.split() + man_stubs, check=True)
 
 
 if __name__ == "__main__":
