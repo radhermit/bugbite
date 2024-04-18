@@ -6,7 +6,7 @@ bite - a command line tool for bug, issue, and ticket mangling
 
 == Synopsis
 
-*bite* [_OPTIONS_]... <_COMMAND_> [_ARGS_]
+*bite* [<options>] <subcommand> [<args>]
 
 *bite* [-h|--help|-V|--version]
 
@@ -84,6 +84,14 @@ For example, a bugzilla service could use `https://bugzilla.kernel.org`.
 - bugzilla
 - github
 - redmine
+
+== Subcommands
+
+linkcmd:bite-bugzilla[1]::
+    bugzilla service support
+
+linkcmd:bite-redmine[1]::
+    redmine service support
 
 == Resources
 
