@@ -53,6 +53,38 @@ Explicitly specified options override corresponding template values.
 Combining this option with -n/--dry-run allows creating search templates
 without service interaction.
 
+== Query options
+
+*-f, --fields=<field[,...]>*::
+    Restrict the data fields returned by the query.
++
+By default, only the id and subject fields are returned. This can be altered by
+specifying a custom list of comma-separated field while will change the output
+format to a space-separated list of the field values.
+
+// TODO: add list of possible fields
+
+*-l, --limit=<value>*::
+    Limit the number of results.
++
+If the value is higher than the maximum limit that value is used instead and if
+the limit is set to zero, the default limit is used. Note that the maximum and
+default limits are generally not equal, with most instances using 100 and 25,
+respectively.
+
+*-o, --order=<field[,...]>*::
+    Order the query results.
++
+Fields can be prefixed with `-` or `+` to sorting in descending or ascending
+order, respectively. Unprefixed fields use ascending order.
++
+Multiple fields can be specifying in a comma-separated list which sort the
+results by each field in order.
++
+If an invalid sorting request is made, the default ordering will be used.
+
+// TODO: add list of possible fields
+
 == Time options
 
 // TODO: include external doc describing time value format

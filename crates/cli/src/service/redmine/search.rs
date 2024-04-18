@@ -12,7 +12,6 @@ use bugbite::service::redmine::IssueField;
 use bugbite::time::TimeDeltaOrStatic;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
-use strum::VariantNames;
 
 use crate::service::output::render_search;
 use crate::utils::{confirm, launch_browser, wrapped_doc};
@@ -21,62 +20,15 @@ use crate::utils::{confirm, launch_browser, wrapped_doc};
 #[clap(next_help_heading = "Query options")]
 struct QueryOptions {
     /// fields to output
-    #[arg(
-        short,
-        long,
-        value_name = "FIELD[,...]",
-        default_value = "id,subject",
-        long_help = wrapped_doc!("
-            Restrict the data fields returned by the query.
-
-            By default, only the id and subject fields are returned. This can be
-            altered by specifying a custom list of fields which will change the
-            output format to a space separated list of the field values for each
-            item.
-
-            Possible values: {}",
-            IssueField::VARIANTS.join(", ")
-        )
-    )]
+    #[arg(short, long, value_name = "FIELD[,...]", default_value = "id,subject")]
     fields: Csv<IssueField>,
 
     /// limit the number of results
-    #[arg(
-        short,
-        long,
-        long_help = wrapped_doc!("
-            Limit the number of results.
-
-            If the value is higher than the maximum limit that value is used
-            instead and if the limit is set to zero, the default limit is used.
-            Note that the maximum limit and default limit are generally not
-            equal, most instances default to 100 and 25, respectively.
-        ")
-    )]
+    #[arg(short, long)]
     limit: Option<u64>,
 
     /// order query results
-    #[arg(
-        short,
-        long,
-        value_name = "FIELD[,...]",
-        long_help = wrapped_doc!("
-            Perform server-side sorting on the query.
-
-            Fields can be prefixed with `-` or `+` to sort in descending or
-            ascending order, respectively. Unprefixed fields will use ascending
-            order.
-
-            Multiple fields are supported via comma-separated lists which sort
-            the data response by the each field in order.
-
-            Note that if an invalid sorting request is made, sorting will
-            fallback to the service default.
-
-            Possible values: {}",
-            OrderField::VARIANTS.join(", ")
-        )
-    )]
+    #[arg(short, long, value_name = "FIELD[,...]")]
     order: Option<Csv<Order<OrderField>>>,
 }
 
@@ -402,6 +354,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_examples(&["redmine", "search"]);
+        subcmd_parse_doc(&["redmine", "search"]);
     }
 }
