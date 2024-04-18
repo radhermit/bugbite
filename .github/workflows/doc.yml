@@ -30,6 +30,10 @@ jobs:
         # notify github this isn't a jekyll site
         touch target/doc/cli/html/.nojekyll
 
+    # upload-pages-artifact doesn't work with busybox tar provided by the container
+    - name: Install GNU tar
+      run: apk add tar
+
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
