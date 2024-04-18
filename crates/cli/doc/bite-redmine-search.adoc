@@ -92,8 +92,17 @@ Multiple fields can be specifying in a comma-separated list which sort the
 results by each field in order.
 +
 If an invalid sorting request is made, the default ordering will be used.
-
-// TODO: add list of possible fields
++
+.Possible values:
+- *assignee*: person the issue is assigned to
+- *closed*: time when the issue was closed
+- *created*: time when the issue was created
+- *id*: issue ID
+- *priority*: issue priority
+- *status*: issue status
+- *subject*: issue subject
+- *tracker*: issue type
+- *updated*: time when the issue was last updated
 
 == Time options
 
