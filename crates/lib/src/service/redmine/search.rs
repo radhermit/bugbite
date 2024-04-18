@@ -382,14 +382,23 @@ impl Api for ExistsField {
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, PartialEq, Eq, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
+    /// person the issue is assigned to
     Assignee,
+    /// time when the issue was closed
     Closed,
+    /// time when the issue was created
     Created,
+    /// issue ID
     Id,
+    /// issue priority
     Priority,
+    /// issue status
     Status,
+    /// issue subject
     Subject,
+    /// issue type
     Tracker,
+    /// time when the issue was last updated
     Updated,
 }
 
