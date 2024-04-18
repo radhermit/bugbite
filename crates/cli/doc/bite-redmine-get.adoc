@@ -1,5 +1,6 @@
 = bite-redmine-get(1)
 :doctype: manpage
+:source-highlighter: rouge
 :man-linkstyle: pass:[blue R < >]
 
 == Name
