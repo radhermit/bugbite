@@ -57,15 +57,17 @@ pub(super) struct ServiceCommand {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service() -> anyhow::Result<(String, Vec<String>, Options)> {
+    pub(crate) fn service<I, T>(args: I) -> anyhow::Result<(String, Vec<String>, Options)>
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<String>,
+    {
+        let args: Vec<_> = args.into_iter().map(Into::into).collect();
+
         // parse service options
-        let Ok(cmd) = Self::try_parse() else {
+        let Ok(cmd) = Self::try_parse_from(&args) else {
             // use main command parser if first arg is an option (e.g. --help or --version)
-            if env::args()
-                .nth(1)
-                .map(|x| x.starts_with('-'))
-                .unwrap_or(true)
-            {
+            if args.get(1).map(|x| x.starts_with('-')).unwrap_or(true) {
                 Command::parse();
             }
             // fallback to service parser to handle service restriction failures
@@ -81,7 +83,7 @@ impl ServiceCommand {
 
         // early return for non-service subcommands
         if subcmds.contains(arg) && !services.contains(arg) {
-            return Ok((Default::default(), env::args().collect(), cmd.options));
+            return Ok((Default::default(), args, cmd.options));
         }
 
         let config = Config::load(cmd.options.bite.config.as_deref())?;
@@ -90,8 +92,8 @@ impl ServiceCommand {
         let service = cmd.options.service.service;
 
         // determine running binary name for connection determination
-        let command = env::args()
-            .next()
+        let command = args
+            .first()
             .as_ref()
             .map(Path::new)
             .and_then(Path::file_name)
@@ -119,7 +121,7 @@ impl ServiceCommand {
         };
 
         // construct new args for the main command to parse
-        let mut args = vec![env::args().next().unwrap_or_default()];
+        let mut args = vec![args.into_iter().next().unwrap_or_default()];
 
         // inject subcommand for requested service type if missing
         if !subcmds.contains(arg) {
@@ -213,5 +215,17 @@ impl Command {
             .timeout(options.bite.timeout);
 
         self.subcmd.run(base, client).await
+    }
+
+    pub(crate) fn parse_args<I, T>(args: I) -> anyhow::Result<(String, Options, Self)>
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<String>,
+    {
+        // parse service options to determine the service type
+        let (base, args, options) = ServiceCommand::service(args)?;
+        // parse remaining args
+        let cmd = Self::try_parse_from(args)?;
+        Ok((base, options, cmd))
     }
 }

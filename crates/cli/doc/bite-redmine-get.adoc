@@ -45,14 +45,16 @@ Taken from standard input when `-`.
 
 == Examples
 
-- Get issue 123:
+- Get ruby issue 123:
 +
+[source,console]
 ----
-$ bite get 123
+$ bite -c ruby get 123
 ----
 
-- Fetch all matching issues:
+- Fetch all ruby issues with `test` in the subject excluding comments:
 +
+[source,console]
 ----
-$ bite search bugbite -f id | bite get -
+$ bite -c ruby search test -f id | bite -c ruby get -C -
 ----
