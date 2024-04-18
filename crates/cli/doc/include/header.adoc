@@ -1,6 +1,5 @@
 ifeval::["{backend}" == "manpage"]
 = {docname}(1)
-Tim Harder
 :manmanual: BITE
 :mansource: BITE
 :man-linkstyle: pass:[blue R < >]

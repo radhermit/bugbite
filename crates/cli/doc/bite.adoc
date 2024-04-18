@@ -88,8 +88,3 @@ For example, a bugzilla service could use `https://bugzilla.kernel.org`.
 == Resources
 
 *Project web site:* https://github.com/radhermit/bugbite
-
-== Copying
-
-Copyright (C) 2024 {author} +
-Free use of this software is granted under the terms of the Apache-2.0 or MIT License.
