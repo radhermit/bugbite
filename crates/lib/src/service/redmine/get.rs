@@ -90,7 +90,7 @@ impl Request for GetRequest {
                     issue.comments.push(Comment {
                         count,
                         text,
-                        creator: issue.creator.clone().unwrap(),
+                        user: issue.author.clone().unwrap(),
                         created: issue.created.unwrap(),
                     });
                 }

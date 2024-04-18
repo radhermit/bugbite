@@ -79,7 +79,7 @@ impl Render for Comment {
         } else {
             write!(f, "Description ")?;
         }
-        writeln!(f, "by {}, {}", self.creator, self.created)?;
+        writeln!(f, "by {}, {}", self.user, self.created)?;
         writeln!(f, "{}", "-".repeat(width))?;
         // wrap comment text
         let wrapped = textwrap::wrap(self.text.trim(), width);
@@ -91,7 +91,7 @@ impl Render for Issue {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         output_field_wrapped!(f, "Subject", &self.subject, width);
         output_field!(f, "Assignee", &self.assigned_to, width);
-        output_field!(f, "Reporter", &self.creator, width);
+        output_field!(f, "Reporter", &self.author, width);
         output_field!(f, "Status", &self.status, width);
         output_field!(f, "Tracker", &self.tracker, width);
         output_field!(f, "Priority", &self.priority, width);

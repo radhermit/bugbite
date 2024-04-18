@@ -24,8 +24,7 @@ pub struct Issue {
     pub status: Option<FieldValue>,
     pub tracker: Option<FieldValue>,
     pub priority: Option<FieldValue>,
-    #[serde(rename = "author")]
-    pub creator: Option<Person>,
+    pub author: Option<Person>,
     #[serde(rename = "closed_on")]
     pub closed: Option<DateTime<Utc>>,
     #[serde(rename = "created_on")]
@@ -95,8 +94,7 @@ pub struct Comment {
     pub count: u64,
     #[serde(rename = "notes", default, deserialize_with = "null_empty_str")]
     pub text: String,
-    #[serde(rename = "user")]
-    pub creator: Person,
+    pub user: Person,
     #[serde(rename = "created_on")]
     pub created: DateTime<Utc>,
 }
@@ -111,7 +109,7 @@ impl RenderSearch<IssueField> for Issue {
                 IssueField::Status => format!("{:<20}", stringify!(self.status)),
                 IssueField::Tracker => format!("{:<20}", stringify!(self.tracker)),
                 IssueField::Priority => format!("{:<20}", stringify!(self.priority)),
-                IssueField::Creator => format!("{:<20}", stringify!(self.creator)),
+                IssueField::Author => format!("{:<20}", stringify!(self.author)),
                 IssueField::Closed => stringify!(self.closed),
                 IssueField::Created => stringify!(self.created),
                 IssueField::Updated => stringify!(self.updated),

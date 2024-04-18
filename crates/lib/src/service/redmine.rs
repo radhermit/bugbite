@@ -180,12 +180,12 @@ impl<'a> WebService<'a> for Service {
 pub enum IssueField {
     /// person the issue is assigned to
     Assignee,
+    /// person who created the issue
+    Author,
     /// time when the issue was closed
     Closed,
     /// time when the issue was created
     Created,
-    /// person who created the issue
-    Creator,
     /// issue ID
     Id,
     /// issue priority
