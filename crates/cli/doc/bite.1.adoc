@@ -1,10 +1,3 @@
-= bite(1)
-Tim Harder
-:doctype: manpage
-:manmanual: BITE
-:mansource: BITE
-:man-linkstyle: pass:[blue R < >]
-
 == Name
 
 bite - a command line tool for bug, issue, and ticket mangling

@@ -1,8 +1,3 @@
-= bite-redmine-search(1)
-:doctype: manpage
-:source-highlighter: rouge
-:man-linkstyle: pass:[blue R < >]
-
 == Name
 
 bite-redmine-search - search issues

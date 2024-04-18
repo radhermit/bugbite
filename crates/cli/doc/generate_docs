@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+#
+# Generate html docs and man pages for bugbite-cli.
+
+import argparse
+import glob
+import os
+from pathlib import Path
+import subprocess
+import sys
+from tempfile import TemporaryDirectory
+import textwrap
+
+def main(args):
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    tempdir = TemporaryDirectory(dir=script_dir)
+    destdir = Path(args.destdir)
+    html_dest_dir = destdir / "html"
+    html_temp_dir = Path(tempdir.name) / "html"
+    man_dest_dir = destdir / "man"
+    man_temp_dir = Path(tempdir.name) / "man"
+
+    # create doc dirs
+    if args.html:
+        os.makedirs(html_dest_dir, exist_ok=True)
+        os.makedirs(html_temp_dir, exist_ok=True)
+    if args.man:
+        os.makedirs(man_dest_dir, exist_ok=True)
+        os.makedirs(man_temp_dir, exist_ok=True)
+
+    files = glob.glob("*.adoc")
+    html_stubs, man_stubs = [], []
+    for file in files:
+        try:
+            name, section, _ext = file.split(".")
+        except ValueError:
+            raise RuntimeError(f"file missing man section: {file}")
+
+        # write stub files
+        if args.html:
+            html_stub = html_temp_dir / f"{name}.adoc"
+            html_stub.write_text(textwrap.dedent(f"""\
+                = {name}
+                :source-highlighter: rouge
+
+                include::../../{file}[]
+            """))
+            html_stubs.append(html_stub)
+
+        if args.man:
+            man_stub = man_temp_dir / f"{name}.adoc"
+            man_stub.write_text(textwrap.dedent(f"""\
+                = {name}({section})
+                Tim Harder
+                :doctype: manpage
+                :manmanual: BITE
+                :mansource: BITE
+                :man-linkstyle: pass:[blue R < >]
+
+                include::../../{file}[]
+            """))
+            man_stubs.append(man_stub)
+
+    # generate html docs
+    if args.html:
+        cmd = ["asciidoctor", "-b", "html", "-D", html_dest_dir] + html_stubs
+        subprocess.run(cmd, check=True)
+
+    # generate man pages
+    if args.man:
+        cmd = ["asciidoctor", "-b", "manpage", "-D", man_dest_dir] + man_stubs
+        subprocess.run(cmd, check=True)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--html", action="store_true")
+    parser.add_argument("--man", action="store_true")
+    parser.add_argument("--destdir")
+    main(parser.parse_args())

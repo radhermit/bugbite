@@ -1,8 +1,6 @@
-DESTDIR ?= build/man
-docs := $(wildcard *.adoc)
-options := -b manpage
-all: man
-.PHONY: all man
+DESTDIR ?= build
+all: doc
+.PHONY: all doc
 
-man:
-	asciidoctor $(docs) $(options) -D "${DESTDIR}"
+doc:
+	./generate_docs --html --man --destdir "${DESTDIR}"
