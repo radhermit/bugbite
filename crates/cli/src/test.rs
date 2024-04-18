@@ -42,7 +42,7 @@ pub(crate) fn subcmd_parse_doc(subcmds: &[&str]) {
         }
     }
 
-    let file_name = format!("bite-{}.adoc", subcmds.iter().join("-"));
+    let file_name = format!("bite-{}.1.adoc", subcmds.iter().join("-"));
     let file = build_path!(env!("CARGO_MANIFEST_DIR"), "doc", &file_name);
     let doc = fs::read_to_string(file).unwrap();
     for line in doc.lines() {
