@@ -1,0 +1,4 @@
+= Bugbite
+
+linkcmd:bite[1]::
+    command line client
