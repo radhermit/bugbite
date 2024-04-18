@@ -53,7 +53,7 @@ Taken from standard input when `-`.
 $ bite -c ruby get 123
 ----
 
-- Fetch all ruby issues with `test` in the subject excluding comments:
+- Fetch all ruby issues with `test` in the subject and only output the issue field values:
 +
 [source,console]
 ----

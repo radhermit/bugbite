@@ -1,5 +1,6 @@
 = bite-bugzilla-get(1)
 :doctype: manpage
+:source-highlighter: rouge
 :man-linkstyle: pass:[blue R < >]
 
 == Name
@@ -51,14 +52,16 @@ Taken from standard input when `-`.
 
 == Examples
 
-- Get bug 123:
+- Get gentoo bug 123:
 +
+[source,console]
 ----
-$ bite get 123
+$ bite -c gentoo get 123
 ----
 
-- Fetch all matching bugs:
+- Fetch all gentoo bugs with `test` in the summary and only output the bug field values:
 +
+[source,console]
 ----
-$ bite search bugbite -f id | bite get -
+$ bite -c gentoo search test -f id | bite -c gentoo get -ACH -
 ----
