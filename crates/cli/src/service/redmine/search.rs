@@ -43,20 +43,6 @@ struct AttributeOptions {
         default_missing_value = "true",
         hide_possible_values = true,
         value_name = "BOOL",
-        long_help = wrapped_doc!("
-            Restrict by assignee status.
-
-            With no argument, all matches with assignees are returned. If the
-            value is `true` or `false`, all matches with or without assignees
-            are returned, respectively.
-
-            Examples:
-            - assigned
-            > bite s --assignee
-
-            - unassigned
-            > bite s --assignee false
-        ")
     )]
     assignee: Option<bool>,
 

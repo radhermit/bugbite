@@ -105,6 +105,31 @@ If an invalid sorting request is made, the default ordering will be used.
 - *tracker*: issue type
 - *updated*: time when the issue was last updated
 
+== Attribute options
+
+*-a, --assignee [<bool>]*::
+    Restrict by assignee status.
++
+With no argument, all matches with assignees are returned. If the value is
+`true` or `false`, all matches with or without assignees are returned,
+respectively.
++
+.Examples
++
+- search for all assigned ruby issues:
++
+[source,console]
+----
+$ bite -c ruby search --assignee
+----
++
+- search for all unassigned ruby issues:
++
+[source,console]
+----
+$ bite -c ruby search --assignee false
+----
+
 == Time options
 
 // TODO: include external doc describing time value format
