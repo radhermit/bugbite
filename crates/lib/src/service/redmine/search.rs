@@ -384,6 +384,8 @@ impl Api for ExistsField {
 pub enum OrderField {
     /// person the issue is assigned to
     Assignee,
+    /// person who created the issue
+    Author,
     /// time when the issue was closed
     Closed,
     /// time when the issue was created
@@ -406,6 +408,7 @@ impl Api for OrderField {
     fn api(&self) -> String {
         let value = match self {
             Self::Assignee => "assigned_to",
+            Self::Author => "author",
             Self::Closed => "closed_on",
             Self::Created => "created_on",
             Self::Id => "id",

@@ -95,6 +95,7 @@ If an invalid sorting request is made, the default ordering will be used.
 +
 .Possible values:
 - *assignee*: person the issue is assigned to
+- *author*: person who created the issue
 - *closed*: time when the issue was closed
 - *created*: time when the issue was created
 - *id*: issue ID
