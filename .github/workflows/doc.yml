@@ -32,9 +32,11 @@ jobs:
 
     # upload-pages-artifact doesn't work with busybox tar provided by the container
     - name: Install GNU tar
+      if: ${{ github.ref_name == 'main' && github.repository == 'radhermit/bugbite' }}
       run: apk add tar
 
     - name: Upload artifact
+      if: ${{ github.ref_name == 'main' && github.repository == 'radhermit/bugbite' }}
       uses: actions/upload-pages-artifact@v3
       with:
         path: target/doc/cli/html
