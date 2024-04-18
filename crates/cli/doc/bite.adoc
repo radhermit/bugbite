@@ -85,7 +85,7 @@ For example, a bugzilla service could use `https://bugzilla.kernel.org`.
 *BUGBITE_SERVICE*::
     Specify the service type to use.
 +
-.Available services
+.Available services:
 - bugzilla
 - github
 - redmine

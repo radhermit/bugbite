@@ -61,8 +61,18 @@ without service interaction.
 By default, only the id and subject fields are returned. This can be altered by
 specifying a custom list of comma-separated field while will change the output
 format to a space-separated list of the field values.
-
-// TODO: add list of possible fields
++
+.Possible values:
+- *assignee*: person the issue is assigned to
+- *closed*: time when the issue was closed
+- *created*: time when the issue was created
+- *creator*: person who created the issue
+- *id*: issue ID
+- *priority*: issue priority
+- *status*: issue status
+- *subject*: issue subject
+- *tracker*: issue type
+- *updated*: time when the issue was last updated
 
 *-l, --limit=<value>*::
     Limit the number of results.
