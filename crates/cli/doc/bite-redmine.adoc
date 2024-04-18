@@ -46,3 +46,11 @@ Redmine service support.
 
 *BUGBITE_PASS*::
 	Set the password for service access.
+
+== Subcommands
+
+linkcmd:bite-redmine-get[1]::
+	get issues
+
+linkcmd:bite-redmine-search[1]::
+	search issues

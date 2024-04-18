@@ -46,3 +46,8 @@ Bugzilla service support.
 
 *BUGBITE_PASS*::
 	Set the password for service access.
+
+== Subcommands
+
+linkcmd:bite-bugzilla-get[1]::
+	get bugs
