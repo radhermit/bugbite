@@ -1,7 +1,6 @@
 use std::fmt;
 use std::str::FromStr;
 
-use itertools::Itertools;
 use ordered_multimap::ListOrderedMultimap;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::VariantNames;
@@ -84,12 +83,9 @@ impl<T: FromStr + VariantNames> FromStr for Order<T> {
         } else {
             (OrderType::Ascending, s.strip_prefix('+').unwrap_or(s))
         };
-        let field = field.parse().map_err(|_| {
-            let possible = T::VARIANTS.iter().join(", ");
-            Error::InvalidValue(format!(
-                "unknown search field: {field}\n  [possible values: {possible}]"
-            ))
-        })?;
+        let field = field
+            .parse()
+            .map_err(|_| Error::InvalidValue(format!("unknown search field: {field}")))?;
         Ok(Self { order, field })
     }
 }
