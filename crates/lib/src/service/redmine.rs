@@ -2,7 +2,7 @@ use std::fmt;
 
 use reqwest::{ClientBuilder, RequestBuilder};
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString, VariantNames};
+use strum::{Display, EnumString, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
@@ -175,17 +175,17 @@ impl<'a> WebService<'a> for Service {
     }
 }
 
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Eq, PartialEq, Hash, Clone, Copy)]
+#[derive(Display, EnumString, VariantNames, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum IssueField {
-    Id,
     Assignee,
-    Subject,
-    Creator,
     Closed,
     Created,
+    Creator,
+    Id,
     Priority,
     Status,
+    Subject,
     Tracker,
     Updated,
 }
