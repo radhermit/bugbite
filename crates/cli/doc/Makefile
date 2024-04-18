@@ -1,6 +1,9 @@
 DESTDIR ?= build
-all: doc
-.PHONY: all doc
+all: html man
+.PHONY: all html man
 
-doc:
-	./generate_docs --html --man --destdir "${DESTDIR}"
+html:
+	asciidoctor -b html5 $(wildcard *.adoc) -D "${DESTDIR}/html"
+
+man:
+	asciidoctor -b manpage $(wildcard *.adoc) -D "${DESTDIR}/man"

@@ -1,3 +1,5 @@
+include::include/header.adoc[]
+
 == Name
 
 bite-redmine - Redmine service support
