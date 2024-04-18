@@ -277,7 +277,7 @@ impl CreateAttachment {
         Ok(Attachment {
             ids: ids.iter().map(|s| s.to_string()).collect(),
             data: Base64(data),
-            content_type: mime_type,
+            content_type: self.content_type.unwrap_or(mime_type),
             file_name: file_name.clone(),
             summary: self.summary.unwrap_or(file_name),
             comment: self.comment.unwrap_or_default(),
