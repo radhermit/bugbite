@@ -85,7 +85,7 @@ respectively.
 *-o, --order=<field[,...]>*::
     Order the query results.
 +
-Fields can be prefixed with `-` or `+` to sorting in descending or ascending
+Fields can be prefixed with `-` or `+` to sort in descending or ascending
 order, respectively. Unprefixed fields use ascending order.
 +
 Multiple fields can be specifying in a comma-separated list which sort the
