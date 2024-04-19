@@ -6,9 +6,11 @@ bite-bugzilla-get - get bugs
 
 == Synopsis
 
-*bite bugzilla get* [<options>] [<ids>]
+*bite bugzilla get* [<options>] [<ids>]::
+    Fetch and output bugs.
 
-*bite bugzilla get* [-h|--help]
+*bite bugzilla get* [-h|--help]::
+    Output help information.
 
 == Description
 

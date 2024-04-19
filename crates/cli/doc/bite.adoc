@@ -6,9 +6,11 @@ bite - a command line tool for bug, issue, and ticket mangling
 
 == Synopsis
 
-*bite* [<options>] <subcommand> [<args>]
+*bite* [<options>] <subcommand> [<args>]::
+    Run a subcommand.
 
-*bite* [-h|--help|-V|--version]
+*bite* [-h|--help|-V|--version]::
+    Output help or version information.
 
 == Description
 

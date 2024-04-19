@@ -6,9 +6,11 @@ bite-redmine-get - get issues
 
 == Synopsis
 
-*bite redmine get* [<options>] [<ids>]
+*bite redmine get* [<options>] [<ids>]::
+    Fetch and output issues.
 
-*bite redmine get* [-h|--help]
+*bite redmine get* [-h|--help]::
+    Output help information.
 
 == Description
 

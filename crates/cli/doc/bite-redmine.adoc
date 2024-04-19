@@ -6,9 +6,11 @@ bite-redmine - Redmine service support
 
 == Synopsis
 
-*bite redmine* [<options>] <command> [<args>]
+*bite redmine* [<options>] <command> [<args>]::
+    Run a redmine subcommand.
 
-*bite redmine* [-h|--help]
+*bite redmine* [-h|--help]::
+    Output help information.
 
 == Description
 

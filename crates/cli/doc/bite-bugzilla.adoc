@@ -6,9 +6,11 @@ bite-bugzilla - Bugzilla service support
 
 == Synopsis
 
-*bite bugzilla* [<options>] <command> [<args>]
+*bite bugzilla* [<options>] <command> [<args>]::
+    Run a bugzilla subcommand.
 
-*bite bugzilla* [-h|--help]
+*bite bugzilla* [-h|--help]::
+    Output help information.
 
 == Description
 
