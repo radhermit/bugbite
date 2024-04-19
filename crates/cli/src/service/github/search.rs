@@ -3,13 +3,12 @@ use std::process::ExitCode;
 
 use bugbite::args::Csv;
 use bugbite::client::github::Client;
-use bugbite::service::github::search::{Parameters, SearchOrder, SearchTerm};
+use bugbite::service::github::search::{Parameters, SearchOrder};
 use clap::Args;
 use itertools::Itertools;
-use strum::VariantNames;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::utils::{wrapped_doc, COLUMNS};
+use crate::utils::COLUMNS;
 
 /// Available search parameters.
 #[derive(Debug, Args)]
@@ -24,19 +23,7 @@ struct Params {
         short = 'S',
         long,
         help_heading = "Search related",
-        value_name = "TERM",
-        long_help = wrapped_doc!("
-            Perform server-side sorting on the given query.
-
-            Sorting in descending order can be done by prefixing a given term
-            with '-'; otherwise, sorting is performed in ascending order by
-            default. Note that using a single descending order argument requires
-            using '=' between the option and value such as `-S=-created` or
-            `--sort=-comments`.
-
-            Possible values: {}",
-            SearchTerm::VARIANTS.join(", ")
-        )
+        value_name = "TERM"
     )]
     order: Option<SearchOrder>,
 
