@@ -13,6 +13,9 @@ pub fn current_dir() -> crate::Result<Utf8PathBuf> {
 }
 
 /// Try to get the MIME type of a file path using the `file` utility.
+///
+/// Note that `file` can misidentify plain text file types as various text/* subtypes depending
+/// on formatting within the file.
 pub(crate) fn get_mime_type<P: AsRef<Utf8Path>>(path: P) -> crate::Result<String> {
     let output = Command::new("file")
         .args(["-b", "--mime-type"])

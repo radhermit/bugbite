@@ -131,7 +131,12 @@ struct Options {
 
             This option is unnecessary for regular usage since the MIME type is
             automatically detected using `file` with a fallback to internal
-            inference of common file types.
+            inference of common file types; however, `file` often misidentifies
+            plain text file types so text/plain may need to be forcibly set.
+
+            Example modifying bug 10:
+            - attach build.log with forced MIME type
+            > bite at 10 path/to/build.log --mime text/plain
         ")
     )]
     mime: Option<String>,
