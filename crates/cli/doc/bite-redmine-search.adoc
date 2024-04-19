@@ -161,3 +161,7 @@ bite -c ruby search --attachments test,log
 
 *-c, --closed*::
     Restrict by closed time.
+
+== See Also
+
+linkcmd:bite-redmine[1]

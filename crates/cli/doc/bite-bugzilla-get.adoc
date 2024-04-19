@@ -60,3 +60,7 @@ bite -c gentoo get 123 -ACH
 .Get all gentoo bugs created in the last day:
 [source,console]
 bite -c gentoo search -c 1d -f id | bite -c gentoo get -
+
+== See Also
+
+linkcmd:bite-bugzilla[1]

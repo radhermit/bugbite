@@ -51,3 +51,7 @@ Bugzilla service support.
 
 linkcmd:bite-bugzilla-get[1]::
 	get bugs
+
+== See Also
+
+linkcmd:bite[1]

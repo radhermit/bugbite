@@ -54,3 +54,7 @@ linkcmd:bite-redmine-get[1]::
 
 linkcmd:bite-redmine-search[1]::
 	search issues
+
+== See Also
+
+linkcmd:bite[1]

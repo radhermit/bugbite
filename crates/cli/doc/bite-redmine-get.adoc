@@ -54,3 +54,7 @@ bite -c ruby get 123 -C
 .Get all ruby issues created in the last day:
 [source,console]
 bite -c ruby search -c 1d -f id | bite -c ruby get -
+
+== See Also
+
+linkcmd:bite-redmine[1]
