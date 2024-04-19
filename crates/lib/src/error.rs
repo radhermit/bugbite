@@ -30,10 +30,12 @@ pub enum Error {
 
 impl From<reqwest::Error> for Error {
     fn from(e: reqwest::Error) -> Self {
+        // drop URL from error to avoid potentially leaking authentication parameters
+        let e = e.without_url();
         if e.is_timeout() {
             Error::Timeout
         } else {
-            Error::Request(e.without_url())
+            Error::Request(e)
         }
     }
 }
