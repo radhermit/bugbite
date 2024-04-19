@@ -52,10 +52,13 @@ Bugzilla service support.
 == Subcommands
 
 linkcmd:bite-bugzilla-comment[1]::
-	get comments
+	get bug comments
 
 linkcmd:bite-bugzilla-get[1]::
 	get bugs
+
+linkcmd:bite-bugzilla-history[1]::
+	get bug changes
 
 == See Also
 

@@ -2,19 +2,19 @@ include::include/header.adoc[]
 
 == Name
 
-bite-bugzilla-comment - get bug comments
+bite-bugzilla-history - get bug changes
 
 == Synopsis
 
-*bite bugzilla comment* [<options>] <ids>::
-    Fetch and output bug comments.
+*bite bugzilla history* [<options>] <ids>::
+    Fetch and output bug changes.
 
-*bite bugzilla comment* [-h|--help]::
+*bite bugzilla history* [-h|--help]::
     Output help information.
 
 == Description
 
-Get bug comments.
+Get bug changes.
 
 == Global Options
 
@@ -27,10 +27,7 @@ Get bug comments.
 *-h, --help*::
     Print help output and exit.
 
-== Comment options
-
-*-a, --attachment=[<bool>]*::
-    Restrict by attachments.
+== History options
 
 *-c, --created*::
     Restrict by creation time.
@@ -41,7 +38,7 @@ Get bug comments.
 == Arguments
 
 *<ids>*::
-    Bug IDs or aliases of comments to fetch.
+    Bug IDs or aliases of changes to fetch.
 +
 Taken from standard input when `-`.
 

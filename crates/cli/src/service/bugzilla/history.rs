@@ -88,6 +88,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_examples(&["bugzilla", "history"]);
+        subcmd_parse_doc(&["bugzilla", "history"]);
     }
 }
