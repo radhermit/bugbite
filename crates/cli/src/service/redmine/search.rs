@@ -52,34 +52,6 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
-        long_help = wrapped_doc!(r#"
-            Restrict query by attachments.
-
-            With no argument, all matches with attachments are returned. If the
-            value is `true` or `false`, all matches with or without attachments
-            are returned, respectively.
-
-            Examples:
-            - existence
-            > bite s --attachments
-
-            - nonexistence
-            > bite s --attachments false
-
-            Regular string values search for matching substrings in an
-            attachment's file name.
-
-            Example:
-            - contains `value`
-            > bite s --attachments value
-
-            Multiple values can be specified in a comma-separated list and will
-            match if all of the specified values match.
-
-            Example:
-            - equals `test1` and `test2`
-            > bite s --attachments test1,test2
-        "#)
     )]
     attachments: Option<ExistsOrValues<String>>,
 

@@ -105,28 +105,49 @@ If an invalid sorting request is made, the default ordering will be used.
 
 == Attribute options
 
-*-a, --assignee [<bool>]*::
+*-a, --assignee=[<bool>]*::
     Restrict by assignee status.
 +
 With no argument, all matches with assignees are returned. If the value is
 `true` or `false`, all matches with or without assignees are returned,
 respectively.
 +
-.Examples
+.Search for assigned ruby issues:
+[source,shell]
+bite -c ruby search --assignee
 +
-- search for all assigned ruby issues:
+.Search for unassigned ruby issues:
+[source,shell]
+bite -c ruby search --assignee false
+
+*--attachments=[<value>[,...]]*::
+    Restrict by attachments.
 +
-[source,console]
-----
-$ bite -c ruby search --assignee
-----
+With no argument, all matches with attachments are returned. If the
+value is `true` or `false`, all matches with or without attachments
+are returned, respectively.
 +
-- search for all unassigned ruby issues:
+Regular string values search for matching substrings in an
+attachment's file name.
 +
-[source,console]
-----
-$ bite -c ruby search --assignee false
-----
+Multiple values can be specified in a comma-separated list and will
+match if all of the specified values match.
++
+.Search for ruby issues with attachments:
+[source,shell]
+bite -c ruby search --attachments
++
+.Search for ruby issues without attachments:
+[source,shell]
+bite -c ruby search --attachments false
++
+.Search for ruby issues with file names containing `test`:
+[source,shell]
+bite -c ruby search --attachments test
++
+.Search for ruby issues with file names containing `test` and `log`:
+[source,shell]
+bite -c ruby search --attachments test,log
 
 == Time options
 
