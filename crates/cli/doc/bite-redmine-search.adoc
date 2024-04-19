@@ -113,11 +113,11 @@ With no argument, all matches with assignees are returned. If the value is
 respectively.
 +
 .Search for assigned ruby issues:
-[source,shell]
+[source,console]
 bite -c ruby search --assignee
 +
 .Search for unassigned ruby issues:
-[source,shell]
+[source,console]
 bite -c ruby search --assignee false
 
 *--attachments=[<value>[,...]]*::
@@ -134,19 +134,19 @@ Multiple values can be specified in a comma-separated list and will
 match if all of the specified values match.
 +
 .Search for ruby issues with attachments:
-[source,shell]
+[source,console]
 bite -c ruby search --attachments
 +
 .Search for ruby issues without attachments:
-[source,shell]
+[source,console]
 bite -c ruby search --attachments false
 +
 .Search for ruby issues with file names containing `test`:
-[source,shell]
+[source,console]
 bite -c ruby search --attachments test
 +
 .Search for ruby issues with file names containing `test` and `log`:
-[source,shell]
+[source,console]
 bite -c ruby search --attachments test,log
 
 == Time options
