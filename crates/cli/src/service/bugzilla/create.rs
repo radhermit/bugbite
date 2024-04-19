@@ -16,7 +16,7 @@ use crate::utils::{confirm, wrapped_doc};
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
-struct Options {
+struct Params {
     /// set aliases
     #[arg(
         short = 'A',
@@ -261,8 +261,8 @@ struct Options {
     whiteboard: Option<String>,
 }
 
-impl From<Options> for Parameters {
-    fn from(value: Options) -> Self {
+impl From<Params> for Parameters {
+    fn from(value: Params) -> Self {
         Self {
             alias: value.alias,
             assignee: value.assignee,
@@ -297,15 +297,15 @@ impl From<Options> for Parameters {
 }
 
 #[derive(Debug, Args)]
-pub(super) struct Command {
+#[clap(next_help_heading = "Create options")]
+pub(super) struct Options {
     /// skip service interaction
-    #[arg(short = 'n', long, help_heading = "Create options")]
+    #[arg(short = 'n', long)]
     dry_run: bool,
 
     /// read attributes from template
     #[arg(
         long,
-        help_heading = "Create options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
         conflicts_with = "from_bug",
@@ -329,7 +329,6 @@ pub(super) struct Command {
     /// read attributes from an existing bug
     #[arg(
         long,
-        help_heading = "Create options",
         value_name = "ID",
         conflicts_with = "from",
         long_help = wrapped_doc!("
@@ -352,7 +351,6 @@ pub(super) struct Command {
     /// write attributes to template
     #[arg(
         long,
-        help_heading = "Create options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
         long_help = wrapped_doc!("
@@ -369,21 +367,27 @@ pub(super) struct Command {
         ")
     )]
     to: Option<Utf8PathBuf>,
+}
 
+#[derive(Debug, Args)]
+pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
+
+    #[clap(flatten)]
+    params: Params,
 }
 
 impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
-        let mut params: Parameters = self.options.into();
+        let mut params: Parameters = self.params.into();
 
         // read attributes from template
-        if let Some(path) = self.from.as_ref() {
+        if let Some(path) = self.options.from.as_ref() {
             let template = Parameters::from_path(path)?;
-            // command-line options override template options
+            // command-line parameters override template values
             params = params.merge(template);
-        } else if let Some(id) = self.from_bug {
+        } else if let Some(id) = self.options.from_bug {
             let bug = client
                 .get(&[id], false, false, false)
                 .await?
@@ -394,14 +398,14 @@ impl Command {
         }
 
         // write attributes to template
-        if let Some(path) = self.to.as_ref() {
+        if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&params)?;
                 fs::write(path, data).context("failed writing template")?;
             }
         }
 
-        if !self.dry_run {
+        if !self.options.dry_run {
             let mut stdout = stdout().lock();
             let id = client.create(params).await?;
             if stdout.is_terminal() {

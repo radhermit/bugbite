@@ -52,7 +52,7 @@ impl<T: FromStr + PartialOrd + Eq + Hash> fmt::Display for CommentPrivacy<T> {
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
-struct Options {
+struct Params {
     /// add/remove/set aliases
     #[arg(
         short = 'A',
@@ -498,8 +498,8 @@ struct Options {
     whiteboard: Option<String>,
 }
 
-impl From<Options> for Parameters {
-    fn from(value: Options) -> Self {
+impl From<Params> for Parameters {
+    fn from(value: Params) -> Self {
         Self {
             alias: value.alias,
             assignee: value.assignee,
@@ -540,9 +540,10 @@ impl From<Options> for Parameters {
 }
 
 #[derive(Debug, Args)]
-pub(super) struct Command {
+#[clap(next_help_heading = "Modify options")]
+pub(super) struct Options {
     /// skip service interaction
-    #[arg(short = 'n', long, help_heading = "Modify options")]
+    #[arg(short = 'n', long)]
     dry_run: bool,
 
     /// reply to specific comments
@@ -553,7 +554,6 @@ pub(super) struct Command {
         value_name = "ID[,...]",
         value_delimiter = ',',
         conflicts_with_all = ["comment", "comment_from"],
-        help_heading = "Modify options",
         long_help = wrapped_doc!("
             Interactively reply to specific comments for a given bug.
 
@@ -581,7 +581,6 @@ pub(super) struct Command {
     /// read attributes from template
     #[arg(
         long,
-        help_heading = "Modify options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
         long_help = wrapped_doc!("
@@ -600,7 +599,6 @@ pub(super) struct Command {
     /// write attributes to template
     #[arg(
         long,
-        help_heading = "Modify options",
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
         long_help = wrapped_doc!("
@@ -613,9 +611,15 @@ pub(super) struct Command {
         ")
     )]
     to: Option<Utf8PathBuf>,
+}
 
+#[derive(Debug, Args)]
+pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
+
+    #[clap(flatten)]
+    params: Params,
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
@@ -688,18 +692,17 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-
-        let mut params: Parameters = self.options.into();
+        let mut params: Parameters = self.params.into();
 
         // read modification attributes from template
-        if let Some(path) = self.from.as_ref() {
+        if let Some(path) = self.options.from.as_ref() {
             let template = Parameters::from_path(path)?;
-            // command-line options override template options
+            // command-line parameters override template values
             params = params.merge(template);
         };
 
         // write modification attributes to template
-        if let Some(path) = self.to.as_ref() {
+        if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&params)?;
                 fs::write(path, data).context("failed writing template")?;
@@ -707,7 +710,7 @@ impl Command {
         }
 
         // interactively create reply or comment
-        if let Some(mut values) = self.reply {
+        if let Some(mut values) = self.options.reply {
             if ids.len() > 1 {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
             }
@@ -724,7 +727,7 @@ impl Command {
             }
         }
 
-        if !self.dry_run {
+        if !self.options.dry_run {
             let changes = client.modify(ids, params).await?;
             for change in changes {
                 info!("{change}");

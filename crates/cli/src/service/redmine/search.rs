@@ -154,7 +154,7 @@ impl From<Params> for Parameters {
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Search options")]
-pub(super) struct SearchOptions {
+pub(super) struct Options {
     /// open in browser
     #[arg(short, long)]
     browser: bool,
@@ -187,7 +187,7 @@ pub(super) struct SearchOptions {
 #[derive(Debug, Args)]
 pub(super) struct Command {
     #[clap(flatten)]
-    search: SearchOptions,
+    options: Options,
 
     #[clap(flatten)]
     params: Params,
@@ -199,27 +199,27 @@ impl Command {
         let mut params: Parameters = self.params.into();
 
         // read attributes from template
-        if let Some(path) = self.search.from.as_ref() {
+        if let Some(path) = self.options.from.as_ref() {
             let template = Parameters::from_path(path)?;
-            // command-line options override template options
+            // command-line parameters override template values
             params = params.merge(template);
         }
 
         // write attributes to template
-        if let Some(path) = self.search.to.as_ref() {
+        if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&params)?;
                 fs::write(path, data).context("failed writing template")?;
             }
         }
 
-        if self.search.browser {
+        if self.options.browser {
             let url = client.search_url(params)?;
             launch_browser([url])?;
-        } else if !self.search.dry_run {
+        } else if !self.options.dry_run {
             let items = client.search(params).await?;
             let stdout = stdout().lock();
-            render_search(stdout, items, &fields, self.search.json)?;
+            render_search(stdout, items, &fields, self.options.json)?;
         }
 
         Ok(ExitCode::SUCCESS)
