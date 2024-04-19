@@ -381,6 +381,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_examples(&["bugzilla", "create"]);
+        subcmd_parse_doc(&["bugzilla", "create"]);
     }
 }
