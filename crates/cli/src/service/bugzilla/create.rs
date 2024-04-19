@@ -12,76 +12,25 @@ use clap::{Args, ValueHint};
 use itertools::Itertools;
 use tracing::info;
 
-use crate::utils::{confirm, wrapped_doc};
+use crate::utils::confirm;
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct Params {
     /// set aliases
-    #[arg(
-        short = 'A',
-        long,
-        value_name = "VALUE[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Set aliases.
-
-            The values must be unique aliases for a bug, using existing aliases
-            will cause the service to return an error.
-
-            Multiple arguments can be specified in a comma-separated list or via
-            multiple options.
-        ")
-    )]
+    #[arg(short = 'A', long, value_name = "VALUE[,...]", value_delimiter = ',')]
     alias: Option<Vec<String>>,
 
     /// set assignee
-    #[arg(
-        short,
-        long,
-        value_name = "USER",
-        long_help = wrapped_doc!("
-            Assign a bug to a user.
-
-            The value must be an email address for a service user. The alias
-            `@me` can be used for the service's configured user if one exists.
-        ")
-    )]
+    #[arg(short, long, value_name = "USER")]
     assignee: Option<String>,
 
     /// set blockers
-    #[arg(
-        short,
-        long,
-        value_name = "ID[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Set blockers.
-
-            Values must be valid IDs for existing bugs.
-
-            Multiple arguments can be specified in a comma-separated list or via
-            multiple options.
-
-            Values are taken from standard input when `-`.
-        ")
-    )]
+    #[arg(short, long, value_name = "ID[,...]", value_delimiter = ',')]
     blocks: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// set CC users
-    #[arg(
-        long,
-        value_name = "USER[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Set users in the CC list.
-
-            Values must be email addresses for service users.
-
-            Multiple arguments can be specified in a comma-separated list or via
-            multiple options.
-        ")
-    )]
+    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
     cc: Option<Vec<String>>,
 
     /// set component
@@ -93,33 +42,11 @@ struct Params {
         long = "cf",
         num_args = 2,
         value_names = ["NAME", "VALUE"],
-        long_help = wrapped_doc!("
-            Set custom fields.
-
-            The values must be valid custom field names followed by their value.
-
-            Multiple arguments can be specified via multiple options.
-        ")
     )]
     custom_fields: Option<Vec<String>>,
 
     /// set dependencies
-    #[arg(
-        short,
-        long,
-        value_name = "ID[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Set dependencies.
-
-            Values must be valid IDs for existing bugs.
-
-            Multiple arguments can be specified in a comma-separated list or via
-            multiple options.
-
-            Values are taken from standard input when `-`.
-        ")
-    )]
+    #[arg(short, long, value_name = "ID[,...]", value_delimiter = ',')]
     depends: Option<Vec<MaybeStdinVec<u64>>>,
 
     /// set description
@@ -127,21 +54,7 @@ struct Params {
     description: Option<String>,
 
     /// set flags
-    #[arg(
-        short = 'F',
-        long,
-        value_name = "VALUE[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Set flags.
-
-            Values must be valid flags composed of the flag name followed by its
-            status. Supported statuses include `+`, `-`, and `?`.
-
-            Multiple arguments can be specified in a comma-separated list or via
-            multiple options.
-        ")
-    )]
+    #[arg(short = 'F', long, value_name = "VALUE[,...]", value_delimiter = ',')]
     flags: Option<Vec<Flag>>,
 
     /// set groups
@@ -151,33 +64,11 @@ struct Params {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Set groups.
-
-            Values must be valid service groups. No arguments may be used to
-            avoid adding the bug to all default groups for the targeted product.
-
-            Multiple arguments can be specified in a comma-separated list or via
-            multiple options.
-        ")
     )]
     groups: Option<Vec<String>>,
 
     /// set keywords
-    #[arg(
-        short,
-        long,
-        value_name = "VALUE[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Set keywords.
-
-            Values must be valid keywords.
-
-            Multiple arguments can be specified in a comma-separated list or via
-            multiple options.
-        ")
-    )]
+    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
     keywords: Option<Vec<String>>,
 
     /// set operating system
@@ -197,17 +88,7 @@ struct Params {
     product: Option<String>,
 
     /// set QA contact
-    #[arg(
-        long,
-        value_name = "USER",
-        long_help = wrapped_doc!("
-            Set the QA contact for a bug.
-
-            The value must be an email address for a service user. The alias
-            `@me` can also be used for the service's configured user if one
-            exists.
-        ")
-    )]
+    #[arg(long, value_name = "USER")]
     qa: Option<String>,
 
     /// set resolution
@@ -215,21 +96,7 @@ struct Params {
     resolution: Option<String>,
 
     /// set external bug URLs
-    #[arg(
-        short = 'U',
-        long,
-        value_name = "VALUE[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Set URLs to bugs in external trackers.
-
-            Values must be valid URLs to bugs, issues, or tickets in external
-            trackers.
-
-            Multiple arguments can be specified in a comma-separated list or via
-            multiple options.
-        ")
-    )]
+    #[arg(short = 'U', long, value_name = "VALUE[,...]", value_delimiter = ',')]
     see_also: Option<Vec<String>>,
 
     /// set severity

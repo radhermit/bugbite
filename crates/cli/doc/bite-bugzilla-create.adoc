@@ -35,8 +35,8 @@ Create bug.
 *--from*=<path>::
     Read attributes from a template.
 +
-Value must be the path to a valid template file. Templates use the
-TOML format and generally map long option names to values.
+Value must be the path to a valid template file. Templates use the TOML format
+and generally map long option names to values.
 +
 Fields that don't match known bug field names target custom fields.
 +
@@ -49,12 +49,11 @@ bite -c gentoo create --from path/to/new.toml -S summary -D description
 *--from-bug*=<id>::
     Read attributes from an existing bug.
 +
-Value must be the ID of an existing bug which will be used to
-pre-populate the relevant, required fields for creation.
+Value must be the ID of an existing bug which will be used to pre-populate the
+relevant, required fields for creation.
 +
-Combining this option with -n/--dry-run and --to allows creating
-templates using existing bugs to edit and use later without creating
-a new bug.
+Combining this option with -n/--dry-run and --to allows creating templates
+using existing bugs to edit and use later without creating a new bug.
 +
 .Create gentoo bug using existing bug:
 [source,console]
@@ -65,12 +64,146 @@ bite -c gentoo create --from-bug 123 --to path/to/new.toml --dry-run
 +
 Value is the file path where the TOML template file will be written.
 +
-Combining this option with -n/--dry-run allows creating templates
-without any service interaction.
+Combining this option with -n/--dry-run allows creating templates without any
+service interaction.
 +
 .Create template using specified values:
 [source,console]
 bite -c gentoo create -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
+
+== Attribute options
+
+*-A, --alias*=<value[,...]>::
+    Set aliases.
++
+The values must be unique aliases for a bug, using existing aliases will cause
+the service to return an error.
++
+Multiple arguments can be specified in a comma-separated list or via multiple
+options.
+
+*-a, --assignee*=<user>::
+    Assign a bug to a user.
++
+The value must be an email address for a service user. The alias `@me` can be
+used for the service's configured user if one exists.
+
+*-b, --blocks*=<id[,...]>::
+    Set blockers.
++
+Values must be valid IDs for existing bugs.
++
+Multiple arguments can be specified in a comma-separated list or via multiple
+options.
++
+Values are taken from standard input when `-`.
+
+*--cc*=<user[,...]>::
+    Set users in the CC list.
++
+Values must be email addresses for service users.
++
+Multiple arguments can be specified in a comma-separated list or via multiple
+options.
+
+*-C, --component*=<value>::
+    Set the component.
+
+*--cf* <name> <value>::
+    Set custom fields.
++
+The values must be valid custom field names followed by their value.
++
+Multiple arguments can be specified via multiple options.
+
+*-d, --depends*=<id[,...]>::
+    Set dependencies.
++
+Values must be valid IDs for existing bugs.
++
+Multiple arguments can be specified in a comma-separated list or via multiple
+options.
++
+Values are taken from standard input when `-`.
+
+*-D, --description*=<value>::
+    Set the description.
+
+*-F, --flags*=<value[,...]>::
+    Set flags.
++
+Values must be valid flags composed of the flag name followed by its status.
+Supported statuses include `+`, `-`, and `?`.
++
+Multiple arguments can be specified in a comma-separated list or via multiple
+options.
+
+*-g, --groups*=<value[,...]>::
+    Set groups.
++
+Values must be valid service groups. No arguments may be used to avoid adding
+the bug to all default groups for the targeted product.
++
+Multiple arguments can be specified in a comma-separated list or via multiple
+options.
+
+*-k, --keywords*=<value[,...]>::
+    Set keywords.
++
+Values must be valid keywords.
++
+Multiple arguments can be specified in a comma-separated list or via multiple
+options.
+
+*--os*=<value>::
+    Set operating system.
+
+*--platform*=<value>::
+    Set platform.
+
+*--priority*=<value>::
+    Set priority.
+
+*-p, --product*=<value>::
+    Set product.
+
+*--qa*=<user>::
+    Set the QA contact.
++
+The value must be an email address for a service user. The alias `@me` can also
+be used for the service's configured user if one exists.
+
+*-r, --resolution*=<value>::
+    Set resolution.
+
+*-U, --see-also*=<value[,...]>::
+    Set URLs to bugs in external trackers.
++
+Values must be valid URLs to bugs, issues, or tickets in external trackers.
++
+Multiple arguments can be specified in a comma-separated list or via multiple
+options.
+
+*--severity*=<value>::
+    Set severity.
+
+*-s, --status*=<value>::
+    Set status.
+
+*-S, --summary*=<value>::
+    Set summary.
+
+*-T, --target*=<value>::
+    Set target milestone.
+
+*-u, --url*=<value>::
+    Set URL.
+
+*-V, --version*=<value>::
+    Set version.
+
+*-w, --whiteboard*=<value>::
+    Set whiteboard.
 
 == See Also
 
