@@ -309,43 +309,11 @@ pub(super) struct Options {
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
         conflicts_with = "from_bug",
-        long_help = wrapped_doc!(r#"
-            Read attributes from a template.
-
-            Value must be the path to a valid template file. Templates use the
-            TOML format and generally map long option names to values.
-
-            Fields that don't match known bug field names target custom fields.
-
-            Explicitly specified options override corresponding template values.
-
-            Example:
-            - create bug using template
-            > bite c --from path/to/new.toml -S "summary" -D "description"
-        "#)
     )]
     from: Option<Utf8PathBuf>,
 
     /// read attributes from an existing bug
-    #[arg(
-        long,
-        value_name = "ID",
-        conflicts_with = "from",
-        long_help = wrapped_doc!("
-            Read attributes from an existing bug.
-
-            Value must be the ID of an existing bug which will be used to
-            pre-populate the relevant, required fields for creation.
-
-            Combining this option with -n/--dry-run and --to allows creating
-            templates using existing bugs to edit and use later without creating
-            a new bug.
-
-            Example:
-            - create template using existing bug
-            > bite c --from-bug 123 --to path/to/new.toml --dry-run
-        ")
-    )]
+    #[arg(long, value_name = "ID", conflicts_with = "from")]
     from_bug: Option<u64>,
 
     /// write attributes to template
@@ -353,18 +321,6 @@ pub(super) struct Options {
         long,
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = wrapped_doc!("
-            Write attributes to a template.
-
-            Value is the file path where the TOML template file will be written.
-
-            Combining this option with -n/--dry-run allows creating templates
-            without any service interaction.
-
-            Example:
-            - create template using specified values
-            > bite c -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
-        ")
     )]
     to: Option<Utf8PathBuf>,
 }

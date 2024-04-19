@@ -54,6 +54,9 @@ Bugzilla service support.
 linkcmd:bite-bugzilla-comment[1]::
 	get bug comments
 
+linkcmd:bite-bugzilla-create[1]::
+	create bug
+
 linkcmd:bite-bugzilla-get[1]::
 	get bugs
 

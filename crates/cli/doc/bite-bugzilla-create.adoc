@@ -1,0 +1,77 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-create - create bug
+
+== Synopsis
+
+*bite bugzilla create* <options>::
+	Create bug.
+
+*bite bugzilla create* [-h|--help]::
+    Output help information.
+
+== Description
+
+Create bug.
+
+== Global Options
+
+*-v, --verbose*::
+    Increase logging verbosity.
+
+*-q, --quiet*::
+    Decrease logging verbosity.
+
+*-h, --help*::
+    Print help output and exit.
+
+== Create options
+
+*-n, --dry-run*::
+    Skip service interaction.
+
+*--from*=<path>::
+    Read attributes from a template.
++
+Value must be the path to a valid template file. Templates use the
+TOML format and generally map long option names to values.
++
+Fields that don't match known bug field names target custom fields.
++
+Command-line parameters override corresponding template values.
++
+.Create gentoo bug using template:
+[source,console]
+bite -c gentoo create --from path/to/new.toml -S summary -D description
+
+*--from-bug*=<id>::
+    Read attributes from an existing bug.
++
+Value must be the ID of an existing bug which will be used to
+pre-populate the relevant, required fields for creation.
++
+Combining this option with -n/--dry-run and --to allows creating
+templates using existing bugs to edit and use later without creating
+a new bug.
++
+.Create gentoo bug using existing bug:
+[source,console]
+bite -c gentoo create --from-bug 123 --to path/to/new.toml --dry-run
+
+*--to*=<path>::
+    Write attributes to a template.
++
+Value is the file path where the TOML template file will be written.
++
+Combining this option with -n/--dry-run allows creating templates
+without any service interaction.
++
+.Create template using specified values:
+[source,console]
+bite -c gentoo create -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
+
+== See Also
+
+linkcmd:bite-bugzilla[1]
