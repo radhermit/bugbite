@@ -6,7 +6,7 @@ bite-redmine-search - search issues
 
 == Synopsis
 
-*bite redmine search* [<options>]
+*bite redmine search* [<options>] [<terms>]
 
 *bite redmine search* [-h|--help]
 
@@ -235,6 +235,20 @@ bite -c ruby search --relates 10,11
 +
 Values are taken from standard input when `-`.
 
+*--id*::
+    Restrict by ID.
++
+Values search for matching issue IDs and multiple values can be
+specified in a comma-separated list, matching if any of the specified
+IDs match.
++
+Values are taken from standard input when `-`.
+
+*-s, --status*::
+    Restrict by status.
++
+Query issue status from the following options: open, closed, and all.
+
 == Time options
 
 // TODO: include external doc describing time value format
@@ -247,6 +261,17 @@ Values are taken from standard input when `-`.
 
 *-c, --closed*::
     Restrict by closed time.
+
+== Arguments
+
+*[<terms>]*::
+    Strings to search for in the subject.
++
+Taken from standard input when `-`.
++
+.Search for ruby issues with `test` in the subject:
+[source,console]
+bite -c ruby search test
 
 == See Also
 
