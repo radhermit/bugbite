@@ -225,7 +225,7 @@ impl Command {
         // parse service options to determine the service type
         let (base, args, options) = ServiceCommand::service(args)?;
         // parse remaining args
-        let cmd = Self::try_parse_from(args)?;
+        let cmd = Self::parse_from(args);
         Ok((base, options, cmd))
     }
 }
