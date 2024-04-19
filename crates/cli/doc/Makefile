@@ -3,7 +3,7 @@ all: html man
 .PHONY: all html man
 
 html:
-	asciidoctor -I . -r asciidoctor -b html5 $(wildcard *.adoc) -D "${DESTDIR}/html"
+	asciidoctor -I . -r adoc_exts -b html5 $(wildcard *.adoc) -D "${DESTDIR}/html"
 
 man:
-	asciidoctor -I . -r asciidoctor -b manpage $(wildcard bite*.adoc) -D "${DESTDIR}/man"
+	asciidoctor -I . -r adoc_exts -b manpage $(wildcard bite*.adoc) -D "${DESTDIR}/man"
