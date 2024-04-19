@@ -47,6 +47,10 @@ Taken from standard input when `-`.
 [source,shell]
 bite -c ruby get 123
 
-.Fetch all ruby issues with `test` in the subject and only output the issue field values:
+.Get gentoo bug 123 and only output field values:
 [source,shell]
-bite -c ruby search test -f id | bite -c ruby get -C -
+bite -c ruby get 123 -C
+
+.Get all ruby issues created in the last day:
+[source,shell]
+bite -c ruby search -c 1d -f id | bite -c ruby get -

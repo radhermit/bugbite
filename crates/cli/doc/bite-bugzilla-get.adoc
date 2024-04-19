@@ -53,6 +53,10 @@ Taken from standard input when `-`.
 [source,shell]
 bite -c gentoo get 123
 
-.Fetch all gentoo bugs with `test` in the summary and only output the bug field values:
+.Get gentoo bug 123 and only output field values:
 [source,shell]
-bite -c gentoo search test -f id | bite -c gentoo get -ACH -
+bite -c gentoo get 123 -ACH
+
+.Get all gentoo bugs created in the last day:
+[source,shell]
+bite -c gentoo search -c 1d -f id | bite -c gentoo get -
