@@ -68,10 +68,10 @@ impl ServiceCommand {
         let Ok(cmd) = Self::try_parse_from(&args) else {
             // use main command parser if first arg is an option (e.g. --help or --version)
             if args.get(1).map(|x| x.starts_with('-')).unwrap_or(true) {
-                Command::parse();
+                Command::parse_from(&args);
             }
             // fallback to service parser to handle service restriction failures
-            Self::parse();
+            Self::parse_from(&args);
             anyhow::bail!("failed parsing service options");
         };
 
@@ -113,7 +113,7 @@ impl ServiceCommand {
             (None, Some(base), Some(service), _) => (service, base.to_string()),
             _ => {
                 if services.contains(arg) || arg.starts_with('-') {
-                    Command::parse();
+                    Command::parse_from(&args);
                 }
 
                 anyhow::bail!("no connection specified");
