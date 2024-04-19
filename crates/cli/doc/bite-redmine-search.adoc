@@ -149,6 +149,92 @@ bite -c ruby search --attachments test
 [source,console]
 bite -c ruby search --attachments test,log
 
+*-B, --blocks=[<ID>[,...]]*::
+    Restrict by blockers.
++
+With no argument, all blocking matches are returned. If the value is `true` or
+`false`, all blocking and non-blocking matches are returned, respectively.
++
+.Search for ruby issue blockers:
+[source,console]
+bite -c ruby search --blocks
++
+.Search for non-blocking ruby issues:
+[source,console]
+bite -c ruby search --blocks false
++
+Regular values search for matching blockers and multiple values can be
+specified in a comma-separated list, matching if any of the specified blockers
+match.
++
+.Search for ruby issues blocking issue #10:
+[source,console]
+bite -c ruby search --blocks 10
++
+.Search for ruby issues blocking issues #10 or #11:
+[source,console]
+bite -c ruby search --blocks 10,11
++
+Values are taken from standard input when `-`.
+
+*-D, --blocked=[<ID>[,...]]*::
+    Restrict by dependencies.
++
+With no argument, all matches with dependencies are returned. If the value is
+`true` or `false`, all matches with or without dependencies are returned,
+respectively.
++
+.Search for ruby issues with dependencies:
+[source,console]
+bite -c ruby search --blocked
++
+.Search for ruby issues without dependencies:
+[source,console]
+bite -c ruby search --blocked false
++
+Regular values search for matching dependencies and multiple values can be
+specified in a comma-separated list, matching if any of the specified
+dependencies match.
++
+.Search for ruby issues blocked on issue #10:
+[source,console]
+bite -c ruby search --blocked 10
++
+.Search for ruby issues blocked on issues #10 or #11:
+[source,console]
+bite -c ruby search --blocked 10,11
++
+Values are taken from standard input when `-`.
+
+*-R, --relates=[<ID>[,...]]*::
+    Restrict by relations.
++
+With no argument, all matches with relations are returned. If the value is
+`true` or `false`, all matches with or without relations are returned,
+respectively.
++
+.Search for ruby issues with relations:
+[source,console]
+bite -c ruby search --relates
++
+.Search for ruby issues without relations:
+[source,console]
+bite -c ruby search --relates false
++
+Regular values search for matching relations and multiple values can be
+specified in a comma-separated list, matching if any of the specified
+relations match.
++
+.Search for ruby issues related to issue #10:
+[source,console]
+bite -c ruby search --relates 10
++
+.Search for ruby issues related to issues #10 or #11:
+[source,console]
+bite -c ruby search --relates 10,11
++
+Values are taken from standard input when `-`.
+
 == Time options
 
 // TODO: include external doc describing time value format

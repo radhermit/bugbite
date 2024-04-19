@@ -14,7 +14,7 @@ use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 
 use crate::service::output::render_search;
-use crate::utils::{confirm, launch_browser, wrapped_doc};
+use crate::utils::{confirm, launch_browser};
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Query options")]
@@ -62,33 +62,6 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = wrapped_doc!("
-            Restrict by blockers.
-
-            With no argument, all matches with blockers are returned. If the
-            value is `true` or `false`, all matches with or without blockers are
-            returned, respectively.
-
-            Examples:
-            - existence
-            > bite s --blocks
-
-            - nonexistence
-            > bite s --blocks false
-
-            Regular values search for matching blockers and multiple values can
-            be specified in a comma-separated list, matching if any of the
-            specified blockers match.
-
-            Examples:
-            - blocked on 10
-            > bite s --blocks 10
-
-            - blocked on 10 and 11
-            > bite s --blocks 10,11
-
-            Values are taken from standard input when `-`.
-        ")
     )]
     blocks: Option<ExistsOrValues<MaybeStdinVec<u64>>>,
 
@@ -99,33 +72,6 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = wrapped_doc!("
-            Restrict by dependencies.
-
-            With no argument, all matches with dependencies are returned. If the
-            value is `true` or `false`, all matches with or without dependencies
-            are returned, respectively.
-
-            Examples:
-            - existence
-            > bite s --blocked
-
-            - nonexistence
-            > bite s --blocked false
-
-            Regular values search for matching dependencies and multiple values can
-            be specified in a comma-separated list, matching if any of the
-            specified dependencies match.
-
-            Examples:
-            - blocked on 10
-            > bite s --blocked 10
-
-            - blocked on 10 and 11
-            > bite s --blocked 10,11
-
-            Values are taken from standard input when `-`.
-        ")
     )]
     blocked: Option<ExistsOrValues<MaybeStdinVec<u64>>>,
 
@@ -136,33 +82,6 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = wrapped_doc!("
-            Restrict by related issues.
-
-            With no argument, all matches with relations are returned. If the
-            value is `true` or `false`, all matches with or without relations
-            are returned, respectively.
-
-            Examples:
-            - existence
-            > bite s --relates
-
-            - nonexistence
-            > bite s --relates false
-
-            Regular values search for matching relations and multiple values can
-            be specified in a comma-separated list, matching if any of the
-            specified relations match.
-
-            Examples:
-            - relates to 10
-            > bite s --relates 10
-
-            - relates to 10 and 11
-            > bite s --relates 10,11
-
-            Values are taken from standard input when `-`.
-        ")
     )]
     relates: Option<ExistsOrValues<MaybeStdinVec<u64>>>,
 
