@@ -103,6 +103,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_examples(&["bugzilla", "comment"]);
+        subcmd_parse_doc(&["bugzilla", "comment"]);
     }
 }

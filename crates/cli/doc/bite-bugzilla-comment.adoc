@@ -1,0 +1,50 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-comment - get comments
+
+== Synopsis
+
+*bite bugzilla comment* [<options>] <ids>::
+    Fetch and output comments.
+
+*bite bugzilla comment* [-h|--help]::
+    Output help information.
+
+== Description
+
+Get comments.
+
+== Global Options
+
+*-v, --verbose*::
+    Increase logging verbosity.
+
+*-q, --quiet*::
+    Decrease logging verbosity.
+
+*-h, --help*::
+    Print help output and exit.
+
+== Comment options
+
+*-a, --attachment=[<bool>]*::
+    Restrict by attachments.
+
+*-c, --created*::
+    Restrict by creation time.
+
+*-R, --creator*::
+    Restrict by creator.
+
+== Arguments
+
+*<ids>*::
+    Bug IDs or aliases of comments to fetch.
++
+Taken from standard input when `-`.
+
+== See Also
+
+linkcmd:bite-bugzilla[1]
