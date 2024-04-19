@@ -1,10 +1,11 @@
+use std::collections::HashMap;
 use std::fs::{self, File};
-use std::path::Path;
 use std::process::Command;
 use std::{io, str};
 
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
+use once_cell::sync::Lazy;
 use serde::Serialize;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 use url::Url;
@@ -12,6 +13,13 @@ use url::Url;
 use crate::objects::Base64;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
+
+/// Remap MIME types misidentified by `file`.
+static MIME_MAPPING: Lazy<HashMap<(&str, &str), &str>> = Lazy::new(|| {
+    [(("text/x-makefile", "build.log"), "text/plain")]
+        .into_iter()
+        .collect()
+});
 
 /// Compression variants supported by attachments.
 #[derive(
@@ -113,9 +121,15 @@ pub struct CreateAttachment {
 
 // Try to detect data content type use `file` then via `infer, and finally falling back to
 // generic text-based vs binary data.
-fn get_mime_type<P: AsRef<Path>>(path: P, data: &[u8]) -> String {
+fn get_mime_type<P: AsRef<Utf8Path>>(path: P, data: &[u8]) -> String {
+    let path = path.as_ref();
     if let Ok(value) = crate::utils::get_mime_type(path) {
-        value
+        let file_name = path.file_name().unwrap_or_default();
+        MIME_MAPPING
+            .get(&(&value, file_name))
+            .cloned()
+            .unwrap_or(&value)
+            .to_string()
     } else if let Some(kind) = infer::get(data) {
         kind.mime_type().to_string()
     } else if str::from_utf8(data).is_ok() {

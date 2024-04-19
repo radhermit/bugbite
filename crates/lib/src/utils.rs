@@ -1,8 +1,7 @@
-use std::path::Path;
 use std::process::Command;
 use std::str;
 
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::Error;
 
@@ -14,7 +13,7 @@ pub fn current_dir() -> crate::Result<Utf8PathBuf> {
 }
 
 /// Try to get the MIME type of a file path using the `file` utility.
-pub(crate) fn get_mime_type<P: AsRef<Path>>(path: P) -> crate::Result<String> {
+pub(crate) fn get_mime_type<P: AsRef<Utf8Path>>(path: P) -> crate::Result<String> {
     let output = Command::new("file")
         .args(["-b", "--mime-type"])
         .arg(path.as_ref())
