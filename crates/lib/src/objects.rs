@@ -146,7 +146,7 @@ impl<T: fmt::Display + Eq> fmt::Display for RangeOrValue<T> {
 }
 
 static RANGE_OP_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"^(?<op>[<>]=?|~?=)(?<value>.+)$").unwrap());
+    Lazy::new(|| Regex::new(r"^(?<op>[<>]=?|!?=)(?<value>.+)$").unwrap());
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub enum RangeOp<T: PartialEq + Eq> {
@@ -176,7 +176,7 @@ where
                 "<" => Ok(Self::Less(value)),
                 "<=" => Ok(Self::LessOrEqual(value)),
                 "=" => Ok(Self::Equal(value)),
-                "~=" => Ok(Self::NotEqual(value)),
+                "!=" => Ok(Self::NotEqual(value)),
                 ">=" => Ok(Self::GreaterOrEqual(value)),
                 ">" => Ok(Self::Greater(value)),
                 _ => panic!("invalid RangeOp regex"),
@@ -193,7 +193,7 @@ impl<T: fmt::Display + Eq> fmt::Display for RangeOp<T> {
             Self::Less(value) => write!(f, "<{value}"),
             Self::LessOrEqual(value) => write!(f, "<={value}"),
             Self::Equal(value) => write!(f, "={value}"),
-            Self::NotEqual(value) => write!(f, "~={value}"),
+            Self::NotEqual(value) => write!(f, "!={value}"),
             Self::GreaterOrEqual(value) => write!(f, ">={value}"),
             Self::Greater(value) => write!(f, ">{value}"),
         }
