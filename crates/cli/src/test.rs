@@ -52,6 +52,7 @@ pub(crate) fn subcmd_parse_doc(subcmds: &[&str]) {
             if let Some(line) = lines.next() {
                 for cmd in line.split(" | ").filter(|x| x.starts_with("bite ")) {
                     let args = shlex::split(cmd).unwrap();
+                    // TODO: fix parse_args() to return errors for tests instead of exiting
                     let result = Command::parse_args(args);
                     reset_stdin();
                     assert!(
