@@ -356,15 +356,25 @@ impl From<u64> for IdOrAlias {
 )]
 #[strum(serialize_all = "kebab-case")]
 pub enum BugField {
+    /// Unique aliases for the bug.
     Alias,
+    /// User the bug is assigned to.
     Assignee,
+    /// Bugs that are blocked by this bug.
     Blocks,
+    /// Users in the CC list.
     Cc,
+    /// Name of the bug component.
     Component,
+    /// Time when the bug was created.
     Created,
+    /// User who created the bug.
     Creator,
+    /// Bug completion date.
     Deadline,
+    /// Dependencies of the bug.
     Depends,
+    /// Bug ID that this bug is a duplicate of.
     DuplicateOf,
     Flags,
     Id,
@@ -373,15 +383,19 @@ pub enum BugField {
     Platform,
     Priority,
     Product,
+    /// User who is the QA contact.
     Qa,
     Resolution,
+    /// URLs to external trackers.
     SeeAlso,
     Severity,
     Status,
     Summary,
     Tags,
     Target,
+    /// Time when the bug was last updated.
     Updated,
+    /// URL related to the bug.
     Url,
     Version,
     Whiteboard,
