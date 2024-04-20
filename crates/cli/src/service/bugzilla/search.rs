@@ -103,54 +103,6 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
-        long_help = wrapped_doc!(r#"
-            Restrict query by an alias.
-
-            With no argument, all bugs with aliases are returned. If the value
-            is `true` or `false`, all bugs with or without aliases are returned,
-            respectively.
-
-            Examples:
-            - existence
-            > bite s --alias
-
-            - nonexistence
-            > bite s --alias false
-
-            Regular values search for matching substrings and multiple values
-            can be specified in a comma-separated list for logical AND or
-            multiple options for logical OR.
-
-            Examples:
-            - contains `value`
-            > bite s --alias value
-
-            - contains `value1` and `value2`
-            > bite s --alias value1,value1
-
-            - contains `value1` or `value2`
-            > bite s --alias value1 --alias value1
-
-            Values can use match operator prefixes to alter their query
-            application. Note that some operators may need to be escaped when
-            used in the shell environment.
-
-            Examples:
-            - doesn't contain `value`
-            > bite s --alias ~#value
-
-            - equals `value`
-            > bite s --alias =#value
-
-            - doesn't equal `value`
-            > bite s --alias ~=#value
-
-            - matches regex
-            > bite s --alias r#test?.+
-
-            - doesn't match regex
-            > bite s --alias ~r#test?.+
-        "#)
     )]
     alias: Option<Vec<ExistsOrValues<Match>>>,
 

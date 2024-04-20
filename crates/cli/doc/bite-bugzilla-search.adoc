@@ -6,7 +6,7 @@ bite-bugzilla-search - search bugs
 
 == Synopsis
 
-*bite bugzilla search* [<options>] [<term>]::
+*bite bugzilla search* [<options>] [<terms>]::
     Search bugs.
 
 *bite bugzilla search* [-h|--help]::
@@ -108,6 +108,39 @@ target, url, version, votes, whiteboard
 For more information see:
 https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
 
+== Attribute options
+
+*-A, --alias*=<value[,...]>::
+    Restrict by alias.
++
+With no argument, all bugs with aliases are returned. If the value
+is `true` or `false`, all bugs with or without aliases are returned,
+respectively.
++
+.With aliases:
+[source,console]
+bite -c gentoo search --alias
++
+.Without aliases:
+[source,console]
+bite -c gentoo search --alias false
++
+Regular values search for matching substrings and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR. Values can also use match operators to alter their query
+application. See the <<Match Operators>> section for more details.
++
+.Contains `value`:
+[source,console]
+bite -c gentoo search --alias value
++
+.Contains `value1` and `value2`:
+[source,console]
+bite -c gentoo search --alias value1,value1
++
+.Contains `value1` or `value2`:
+bite -c gentoo search --alias value1 --alias value1
+
 == Range options
 
 *--comments*=<value>::
@@ -131,6 +164,8 @@ https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
     Restrict by fields changed to a given value.
 
 == Time options
+
+// TODO: include external doc describing time value format
 
 *-c, --created*=<time>::
     Restrict by creation time.
@@ -178,6 +213,54 @@ Taken from standard input when `-`.
 .Search for bugs with `test` in the summary:
 [source,console]
 bite -c gentoo search test
+
+== Match Operators
+
+Various restrictions can use match operators to alter a value's query
+application. Values with no or unknown operators default to case-insensitive
+substring matching.
+
+.Supported operators:
+- `s` -- case-insensitive substring
+- `cs` -- case-sensitive substring
+- `!` -- doesn't contain case-insensitive substring
+- `=` -- equals
+- `!=` -- not equals
+- `r` -- matches regular expression
+- `!r` -- doesn't match regular expression
+
+Operators are applied to values as prefixes using `#` between the operator and
+value. Note that some operators may need to be escaped or the entire value
+wrapped in single quotes when used in the shell environment. See the following
+examples for proper usage:
+
+.Contains `value`, `VaLuE`, or other case-insensitive permutations:
+[source,console]
+bite -c gentoo search --alias 's#value'
+
+.Contains `value`:
+[source,console]
+bite -c gentoo search --alias 'cs#value'
+
+.Doesn't contain `value`, `VaLuE`, or other case-insensitive permutations:
+[source,console]
+bite -c gentoo search --alias '!#value'
+
+.Equals `value`:
+[source,console]
+bite -c gentoo search --alias '=#value'
+
+.Doesn't equal `value`:
+[source,console]
+bite -c gentoo search --alias '!=#value'
+
+.Matches regex:
+[source,console]
+bite -c gentoo search --alias 'r#test?.+'
+
+.Doesn't match regex:
+[source,console]
+bite -c gentoo search --alias '!r#test?.+'
 
 == See Also
 
