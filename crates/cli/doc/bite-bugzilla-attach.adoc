@@ -1,0 +1,151 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-attach - create attachments
+
+== Synopsis
+
+*bite bugzilla attach* [<options>] [id[,...]] <files>::
+    Create attachments.
+
+*bite bugzilla attach* [-h|--help]::
+    Output help information.
+
+== Description
+
+Create attachments.
+
+== Global Options
+
+*-v, --verbose*::
+    Increase logging verbosity.
+
+*-q, --quiet*::
+    Decrease logging verbosity.
+
+*-h, --help*::
+    Print help output and exit.
+
+== Attachment options
+
+*-c, --comment*::
+    Comment to add with the attachment.
+
+*-C, --compress*::
+    Compress attachments.
++
+The value must be the compression variant to use or can be skipped to use the
+default: xz. Using compression requires the related utility installed.
++
+.Compress attachment using the default type:
+[source,console]
+bite -c gentoo attach 10 file --compress
++
+.Compress attachment using zstd:
+[source,console]
+bite -c gentoo attach 10 file --compress zstd
++
+.Available compression variants and the tools they require:
+- bz2: bzip2
+- gz: gzip
+- lz: lzip
+- xz: xz
+- zstd: zstd
+
+*--auto-compress*::
+    Auto-compress attachments larger than a given size.
++
+The value must be the file size limit in MB above which attachments will be
+compressed, defaulting to 1MB when not given.
++
+.Auto-compress using the defaults:
+[source,console]
+bite -c gentoo attach 10 file --auto-compress
++
+.Auto-compress using zstd with 5MB size limit:
+[source,console]
+bite -c gentoo attach 10 file --auto-compress 5 --compress zstd
+
+*--auto-truncate*::
+    Auto-truncate text attachments to a given number of lines.
++
+The value must be the number of lines to which the file will be truncated
+starting from the end, defaulting to 1000 lines when not given.
++
+This option works in coordination with --auto-compress using the file size
+limit to trigger when a text file is truncated. If the option is not specified
+the default value will be used for it.
++
+.Auto-truncate to 1000 lines:
+[source,console]
+bite -c gentoo attach 10 file.txt --auto-truncate
++
+.Auto-truncate to 5000 lines and compress using zstd:
+[source,console]
+bite -c gentoo attach 10 file.txt --auto-truncate 5000 --compress zstd
+
+*-d, --dir*::
+    Support directory targets for attachments.
++
+Targeting a directory will attach a compressed tarball of the given path.
+Without this option enabled, directory attachments will cause errors.
++
+.Attach compressed tarball:
+[source,console]
+bite -c gentoo attach 10 path/to/dir --dir
++
+.Attach tarball compressed with zstd:
+[source,console]
+bite -c gentoo attach 10 path/to/dir --compress zstd
+
+*-m, --mime*::
+    Specify the MIME type of the attachment.
++
+This option is unnecessary for regular usage since bugbite automatically
+determines the MIME type using `file` with a fallback to data inference for
+common file types; however, `file` often misidentifies plain text file types so
+text/plain may need to be forced.
++
+.Attach build.log with forced MIME type:
+[source,console]
+bite -c gentoo attach 10 build.log --mime text/plain
+
+*-p, --patch*::
+    Mark attachment as a patch.
+
+*-P, --private*::
+    Mark attachment private.
+
+*-s, --summary*::
+    A short description of the attachment.
++
+By default the file name is used when this is not specified.
+
+== Arguments
+
+<id[,...]>::
+    IDs or aliases of bugs to create attachments for.
++
+Taken from standard input when `-`.
++
+.Attach to all matching bugs:
+[source,console]
+bite -c gentoo search bugbite -f id | bite -c gentoo attach - path/to/file
+
+.Attach to multiple bugs:
+[source,console]
+bite -c gentoo attach 3,4,5 file
+
+<files>::
+    Paths to attachment files.
++
+Multiple attachments can be created by specifying multiple paths.
++
+.Attach multiple files:
+[source,console]
+bite -c gentoo attach 3 file1 file2 file3
+
+== See Also
+
+linkcmd:bite-bugzilla[1]

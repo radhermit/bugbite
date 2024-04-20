@@ -51,6 +51,9 @@ Bugzilla service support.
 
 == Subcommands
 
+linkcmd:bite-bugzilla-attach[1]::
+	create attachments
+
 linkcmd:bite-bugzilla-comment[1]::
 	get bug comments
 
