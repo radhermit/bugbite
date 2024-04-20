@@ -901,15 +901,7 @@ impl From<Params> for Parameters {
 #[clap(next_help_heading = "Search options")]
 pub(super) struct Options {
     /// open in browser
-    #[arg(
-        short,
-        long,
-        long_help = wrapped_doc!("
-            Open the query in a browser.
-
-            This functionality uses xdg-open to open URLs.
-        ")
-    )]
+    #[arg(short, long)]
     browser: bool,
 
     /// skip service interaction
@@ -925,14 +917,6 @@ pub(super) struct Options {
         long,
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = wrapped_doc!("
-            Read search attributes from a template.
-
-            Value must be the path to a valid template file. Templates use the
-            TOML format and generally map long option names to values.
-
-            Explicitly specified options override corresponding template values.
-        ")
     )]
     from: Option<Utf8PathBuf>,
 
@@ -941,14 +925,6 @@ pub(super) struct Options {
         long,
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = wrapped_doc!("
-            Write search attributes to a template.
-
-            Value is the file path where the TOML template file will be written.
-
-            Combining this option with -n/--dry-run allows creating search
-            templates without any service interaction.
-        ")
     )]
     to: Option<Utf8PathBuf>,
 }
@@ -1001,6 +977,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_examples(&["bugzilla", "search"]);
+        subcmd_parse_doc(&["bugzilla", "search"]);
     }
 }

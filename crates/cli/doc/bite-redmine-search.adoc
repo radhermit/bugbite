@@ -50,8 +50,7 @@ Explicitly specified options override corresponding template values.
 *--to=<path>*::
     Write search attributes to a template.
 +
-Combining this option with -n/--dry-run allows creating search templates
-without service interaction.
+Combining with --dry-run allows creating templates without service interaction.
 
 == Query options
 

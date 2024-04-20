@@ -69,6 +69,9 @@ linkcmd:bite-bugzilla-history[1]::
 linkcmd:bite-bugzilla-modify[1]::
 	modify bugs
 
+linkcmd:bite-bugzilla-search[1]::
+	search bugs
+
 == See Also
 
 linkcmd:bite[1]
