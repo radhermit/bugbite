@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.0.10
+
+### Changed
+
+#### Bugzilla
+
+- search: Re-add explicit case-insensitive substring match operator.
+- search: Revert to using `!` instead of `~` for logical NOT.
+
+### Fixed
+
+#### Bugzilla
+
+- attach: Respect explicit MIME type for attachments.
+
 ## 0.0.9
 
 ### Changed

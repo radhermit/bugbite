@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.0.10
+
+### Changed
+
+- Move long help for commands into external documentation. Use the man pages or
+  online docs for additional information beyond what -h/--help provides.
+
+#### Bugzilla
+
+- search: Use comma-separated values instead of multiple options combined via
+  logical OR for bug fields that are unique, e.g. -C/--component values.
+
 ## 0.0.9
 
 ### Changed
