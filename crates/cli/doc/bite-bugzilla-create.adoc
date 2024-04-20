@@ -16,16 +16,7 @@ bite-bugzilla-create - create bug
 
 Create bug.
 
-== Global Options
-
-*-v, --verbose*::
-    Increase logging verbosity.
-
-*-q, --quiet*::
-    Decrease logging verbosity.
-
-*-h, --help*::
-    Print help output and exit.
+include::include/global-options.adoc[]
 
 == Create options
 

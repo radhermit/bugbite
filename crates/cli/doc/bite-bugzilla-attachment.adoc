@@ -16,16 +16,7 @@ bite-bugzilla-attachment - get attachments
 
 Get attachments.
 
-== Global Options
-
-*-v, --verbose*::
-    Increase logging verbosity.
-
-*-q, --quiet*::
-    Decrease logging verbosity.
-
-*-h, --help*::
-    Print help output and exit.
+include::include/global-options.adoc[]
 
 == Attachment options
 
