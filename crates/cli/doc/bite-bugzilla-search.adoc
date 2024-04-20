@@ -525,11 +525,10 @@ Note that a bug's description is counted as a comment, but does not increment
 the overall comment count shown by the `get` or `comment` subcommands.
 +
 .Exactly ten comments:
-  bite -c gentoo search --comments 10
-  bite -c gentoo search --comments '=10'
+ bite -c gentoo search --comments 10
 +
 .At least ten comments:
- bite -c gentoo search --comments ">=10"
+ bite -c gentoo search --comments '>=10'
 +
 .Between five and ten comments:
  bite -c gentoo search --comments 5..10
@@ -544,8 +543,8 @@ Note that a bug's description is counted as a comment, but does not increment
 the overall comment count shown by the `get` or `comment` subcommands.
 +
 .Exactly ten votes:
-  bite -c gentoo search --votes 10
-  bite -c gentoo search --votes '=10'
+ bite -c gentoo search --votes 10
+ bite -c gentoo search --votes '=10'
 +
 .At least ten votes:
  bite -c gentoo search --votes ">=10"
