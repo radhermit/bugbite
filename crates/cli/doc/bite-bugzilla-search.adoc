@@ -52,6 +52,71 @@ Explicitly specified options override corresponding template values.
 +
 Combining with --dry-run allows creating templates without service interaction.
 
+== Query options
+
+*-f, --fields=<field[,...]>*::
+    Restrict the data fields returned by the query.
++
+By default, only the id and subject fields are returned. This can be altered by
+specifying a custom list of comma-separated field while will change the output
+format to a space-separated list of the field values.
++
+Group fields relate to groups of bug fields and are most useful when using JSON
+formatted output:
++
+.Return all bugs created in the past day rendered in JSON:
+[source,console]
+bite -c gentoo search --created 1d -f all --json
++
+// TODO: link to rust docs for field descriptions
+Possible group fields: all, default, extra, custom
++
+Possible bug fields: alias, assignee, blocks, cc, component, created, creator
+deadline, depends, duplicate-of, flags, id, keywords, os, platform, priority,
+product, qa, resolution, see-also, severity, status, summary, tags, target,
+updated, url, version, whiteboard
+
+*-l, --limit=<value>*::
+    Limit the number of results.
++
+If the value is higher than the maximum service limit that value is used
+instead. If the limit is set to zero, all matching results are returned.
+
+*-o, --order=<field[,...]>*::
+    Order the query results.
++
+Fields can be prefixed with `-` or `+` to sort in descending or ascending
+order, respectively. Unprefixed fields will use ascending order.
++
+Multiple fields are supported via comma-separated lists which sort by each
+field in order.
++
+Note that if an invalid sorting request is made, sorting will fallback to the
+service default.
++
+Ordering is especially useful in combination with -l/--limit to get the first
+or last results of an ordered match.
++
+.Top ten bugs by votes:
+[source,console]
+bite -c gentoo search --limit 10 --order=-votes
++
+.Highest comment count:
+[source,console]
+bite -c gentoo search --limit 1 --order=-comments
++
+// TODO: link to rust docs for field descriptions
+Possible values: alias, assignee, blocks, comments, component, created,
+deadline, depends, flags, id, keywords, last-visit, modified, os, platform,
+priority, product, qa, reporter, resolution, severity, status, summary, tags,
+target, url, version, votes, whiteboard
+
+*-S, --quicksearch=<query>*::
+    Search for bugs using quicksearch syntax.
++
+For more information see:
+https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
+
 == Arguments
 
 *[<terms>]*::

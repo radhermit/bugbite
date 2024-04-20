@@ -10,7 +10,7 @@ use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::bugzilla::{
     search::{ChangeField, Match, OrderField, Parameters},
-    BugField, FilterField, GroupField,
+    FilterField,
 };
 use bugbite::time::TimeDeltaOrStatic;
 use camino::Utf8PathBuf;
@@ -624,93 +624,19 @@ struct ChangeOptions {
 #[clap(next_help_heading = "Query options")]
 struct QueryOptions {
     /// fields to output
-    #[arg(
-        short,
-        long,
-        value_name = "FIELD[,...]",
-        default_value = "id,summary",
-        long_help = wrapped_doc!("
-            Restrict the data fields returned by the query.
-
-            By default, only the id and summary fields are returned. This can be
-            altered by specifying a list of fields which will only return and
-            display the requested fields.
-
-            Group fields relate to groups of bug fields and are most useful when
-            using JSON formatted output:
-
-            Example:
-            - render all bugs created in the past day in JSON
-            > bite s --created 1d -f all --json
-
-            Possible group fields: {}
-            Possible bug fields: {}",
-            GroupField::VARIANTS.join(", "),
-            BugField::VARIANTS.join(", ")
-        )
-    )]
+    #[arg(short, long, value_name = "FIELD[,...]", default_value = "id,summary")]
     fields: Csv<FilterField>,
 
     /// limit the number of results
-    #[arg(
-        short,
-        long,
-        long_help = wrapped_doc!("
-            Limit the number of results.
-
-            If the value is higher than the maximum service limit that value is
-            used instead. If the limit is set to zero, all matching results are
-            returned.
-        ")
-    )]
+    #[arg(short, long)]
     limit: Option<u64>,
 
     /// order query results
-    #[arg(
-        short,
-        long,
-        value_name = "FIELD[,...]",
-        long_help = wrapped_doc!("
-            Perform server-side sorting on the query.
-
-            Fields can be prefixed with `-` or `+` to sort in descending or
-            ascending order, respectively. Unprefixed fields will use ascending
-            order.
-
-            Multiple fields are supported via comma-separated lists which sort
-            by each field in order.
-
-            Note that if an invalid sorting request is made, sorting will
-            fallback to the service default.
-
-            Ordering is especially useful in combination with -l/--limit to get
-            the first or last results of an ordered match.
-
-            Examples:
-            - top ten bugs by votes
-            > bite s --limit 10 --order=-votes
-
-            - highest comment count
-            > bite s --limit 1 --order=-comments
-
-            Possible values: {}",
-            OrderField::VARIANTS.join(", ")
-        )
-    )]
+    #[arg(short, long, value_name = "FIELD[,...]")]
     order: Option<Csv<Order<OrderField>>>,
 
     /// search using quicksearch syntax
-    #[arg(
-        short = 'S',
-        long,
-        value_name = "QUERY",
-        long_help = wrapped_doc!("
-            Search for bugs using quicksearch syntax.
-
-            For more information see:
-            https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
-        ")
-    )]
+    #[arg(short = 'S', long, value_name = "QUERY")]
     quicksearch: Option<String>,
 }
 
