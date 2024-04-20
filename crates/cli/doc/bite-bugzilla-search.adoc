@@ -665,7 +665,7 @@ examples for proper usage:
 
 .Supported operators:
 - `<` -- less than
-- `<=` -- less than or equal
+- `+<=+` -- less than or equal
 - `=` -- equal
 - `!=` -- not equal
 - `>=` -- greater than or equal
