@@ -45,11 +45,11 @@ a new bug comment.
 +
 Multiple arguments can be specified in a comma-separated list.
 +
-.Reply to comments 1 and 2 on bug 123:
+.Reply to comments 1 and 2:
 [source,console]
 bite -c gentoo modify 123 --reply 1,2
 +
-.Reply to the last comment on bug 123:
+.Reply to the last comment:
 [source,console]
 bite -c gentoo modify 123 --reply
 
@@ -63,7 +63,7 @@ Fields that don't match known bug field names target custom fields.
 +
 Command-line parameters override corresponding template values.
 +
-.Modify bug 123 using template:
+.Modify bug using template:
 [source,console]
 bite -c gentoo modify 123 --from path/to/new.toml -c "modified using template"
 
@@ -78,6 +78,324 @@ service interaction.
 .Create template using specified values:
 [source,console]
 bite -c gentoo modify 123 -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
+
+== Attribute options
+
+*-A, --alias*=<value[,...]>::
+    Add, remove, or set aliases.
++
+Values must be unique when adding or setting and are ignored when missing when
+removing.
++
+Prefixing values with `+` or `-` adds or removes from the list, respectively.
+Unprefixed values are treated as set values and override the entire list,
+ignoring any prefixed values.
++
+Multiple arguments can be specified in a comma-separated list while no
+arguments removes the entire list.
++
+.Add alias `a1`:
+[source,console]
+bite -c gentoo modify 10 --alias +a1
++
+.Add alias `a2` and remove `a1`:
+[source,console]
+bite -c gentoo modify 10 --alias +a2,-a1
++
+.Set aliases to `a3`:
+[source,console]
+bite -c gentoo modify 10 --alias a3
+
+*-a, --assignee*=<user>::
+    Assign a bug to a user.
++
+The value must be an email address for a service user. The alias `@me` can also
+be used for the service's configured user if one exists.
++
+No argument or an empty string will reset the field to the default for target
+component.
++
+.Assign to yourself:
+[source,console]
+bite -c gentoo modify 123 --assignee @me
++
+.Reset assignee to the default value:
+[source,console]
+bite -c gentoo modify 123 --assignee
+
+*-b, --blocks*=<id[,...]>::
+    Add, remove, or set blockers.
++
+Values must be valid IDs for existing bugs.
++
+Prefixing values with `+` or `-` adds or removes from the list, respectively.
+Unprefixed values are treated as set values and override the entire list,
+ignoring any prefixed values.
++
+Multiple arguments can be specified in a comma-separated list while no
+arguments removes the entire list.
++
+.Add blocker on bug 1:
+[source,console]
+bite -c gentoo modify 10 --blocks +1
++
+.Add bug 2 and remove bug 1 blockers:
+[source,console]
+bite -c gentoo modify 10 --blocks +2,-1
++
+.Set blockers to bug 3:
+[source,console]
+bite -c gentoo modify 10 --blocks 3
+
+*--cc*=<user[,...]>::
+    Add or remove users from the CC list.
++
+Values must be email addresses for service users. The alias `@me` can also be
+used for the service's configured user if one exists.
++
+.Add yourself to the CC list:
+[source,console]
+bite -c gentoo modify 10 --cc @me
++
+Prefixing values with `+` or `-` adds or removes from the list, respectively.
+Unprefixed values will be added to the list.
++
+.Remove yourself from the CC list:
+[source,console]
+bite -c gentoo modify 10 --cc=-@me
++
+Multiple arguments can be specified in a comma-separated list.
++
+.Add and remove addresses from the CC list:
+bite -c gentoo modify 10 --cc=+test1@email.com,-test2@email.com
+
+*-c, --comment*=<value>::
+    Add a comment.
++
+When no argument is specified, an editor is launched for interactive entry.
++
+Taken from standard input when `-`.
+
+*-F, --comment-from*=<path>::
+    Add a comment using file content.
++
+The value must be the path to a valid comment file.
++
+.Create a comment from a file:
+[source,console]
+bite -c gentoo modify 10 --comment-from path/to/file.txt
+
+*-P, --comment-is-private*::
+    Mark created comment as private.
++
+.Create a private comment:
+[source,console]
+bite -c gentoo modify 10 --comment test --comment-is-private
++
+.Create a private comment from a file:
+[source,console]
+bite -c gentoo modify 10 --comment-from path/to/file.txt --comment-is-private
++
+.Create a private reply to last comment:
+[source,console]
+bite -c gentoo modify 10 --reply --comment-is-private
+
+*--comment-privacy=<value>*::
+    Modify the privacy of existing comments.
++
+The value must be comma-separated comment IDs local to the specified bug ID
+starting at 0 for the bug description or a range of comment IDs. An optional
+suffix consisting of boolean value in the form of `:true` or `:false` can be
+included to enable or disable all comment privacy respectively. Without this
+suffix, the privacy of all matching comments is toggled.
++
+.Toggle comment 1 privacy:
+[source,console]
+bite -c gentoo modify 10 --comment-privacy 1
++
+.Toggle comment 1 and 2 privacy:
+[source,console]
+bite -c gentoo modify 10 --comment-privacy 1,2
++
+.Toggle all comment privacy:
+[source,console]
+bite -c gentoo modify 10 --comment-privacy ..
++
+.Disable comment 1 and 2 privacy:
+[source,console]
+bite -c gentoo modify 10 --comment-privacy 1,2:false
++
+.Mark comments 2-5 private:
+[source,console]
+bite -c gentoo modify 10 --comment-privacy 2..=5:true
+
+*-C, --component=<value>*::
+    Modify component.
+
+*--cf <name> <value>*::
+    Modify custom fields.
+
+*-d, --depends*=<id[,...]>::
+    Add, remove, or set dependencies.
++
+Values must be valid IDs for existing bugs.
++
+Prefixing values with `+` or `-` adds or removes from the list, respectively.
+Unprefixed values are treated as set values and override the entire list,
+ignoring any prefixed values.
++
+Multiple arguments can be specified in a comma-separated list while no
+arguments removes the entire list.
++
+.Add dependency on bug 1:
+[source,console]
+bite -c gentoo modify 10 --depends +1
++
+.Add bug 2 and remove bug 1 dependencies:
+[source,console]
+bite -c gentoo modify 10 --depends +2,-1
++
+.Set dependencies to bug 3:
+[source,console]
+bite -c gentoo modify 10 --depends 3
+
+*-D, --duplicate-of*=<id>::
+    Mark as a duplicate of the specified bug.
+
+*-f, --flags*=<value[,...]>::
+    Add or remove flags.
++
+Values must be valid flags composed of the flag name followed by its status.
+Supported statuses include `+`, `-`, and `?`. In addition, the special status
+`X` removes a flag.
++
+Multiple arguments can be specified in a comma-separated list.
++
+.Add `test?` flag:
+[source,console]
+bite -c gentoo modify 10 --flags "test?"
++
+.Add `check+` and remove `test?` flags:
+[source,console]
+bite -c gentoo modify 10 --flags check+,testX
+
+*-g, --groups*=<value[,...]>::
+    Add or remove groups.
++
+Values must be valid service groups.
++
+Prefixing values with `+` or `-` adds or removes from the list, respectively.
+Unprefixed values will be added to the list.
++
+Multiple arguments can be specified in a comma-separated list.
++
+.Add to `admin` group:
+[source,console]
+bite -c gentoo modify 10 --groups +admin
++
+.Add `test` and remove `admin` groups:
+[source,console]
+bite -c gentoo modify 10 --groups +test,-admin
+
+*-k, --keywords*=<value[,...]>::
+    Add, remove, or set keywords.
++
+Values must be valid keywords.
++
+Prefixing values with `+` or `-` adds or removes from the list, respectively.
+Unprefixed values are treated as set values and override the entire list,
+ignoring any prefixed values.
++
+Multiple arguments can be specified in a comma-separated list while no
+arguments removes the entire list.
++
+.Add `key` keyword:
+[source,console]
+bite -c gentoo modify 10 --keywords +key
++
+.Add `test` and remove `key` keywords:
+[source,console]
+bite -c gentoo modify 10 --keywords +test,-key
++
+.Set keywords to `verify`:
+[source,console]
+bite -c gentoo modify 10 --keywords verify
+
+*--os*=<value>::
+    Modify operating system.
+
+*--platform*=<value>::
+    Modify platform.
+
+*--priority*=<value>::
+    Modify priority.
+
+*-p, --product*=<value>::
+    Modify product.
+
+*--qa*=<user>::
+    Assign a QA contact for the bug.
++
+The value must be an email address for a service user. The alias `@me` can also
+be used for the service's configured user if one exists.
++
+No argument or an empty string will reset the field to the default for target
+component.
++
+.Assign to yourself:
+[source,console]
+bite -c gentoo modify 123 --qa @me
++
+.Reset to default:
+[source,console]
+bite -c gentoo modify 123 --qa
+
+*-r, --resolution*=<value>::
+    Modify resolution.
+
+*-U, --see-also*=<value[,...]>::
+    Add or remove URLs to bugs in external trackers.
++
+Values must be valid URLs to bugs, issues, or tickets in external trackers or
+IDs to existing bugs for the targeted service.
++
+Prefixing values with `+` or `-` adds or removes from the list, respectively.
+Unprefixed values will be added to the list.
++
+Multiple arguments can be specified in a comma-separated list.
++
+.Add URL to bug 2:
+[source,console]
+bite -c gentoo modify 10 --see-also 2
++
+.Add bug 3 and remove bug 2 URLs:
+[source,console]
+bite -c gentoo modify 10 --see-also=+3,-2
++
+.Add URL to external bug:
+[source,console]
+bite -c gentoo modify 10 --see-also https://url/to/bug/5
+
+*--severity*=<value>::
+    Modify severity.
+
+*-s, --status*=<value>::
+    Modify status.
+
+*-S, --summary*=<value>::
+    Modify summary.
+
+*-T, --target*=<value>::
+    Modify target milestone.
+
+*-u, --url*=<value>::
+    Modify URL.
+
+*-V, --version*=<value>::
+    Modify version.
+
+*-w, --whiteboard*=<value>::
+    Modify whiteboard.
 
 == Arguments
 

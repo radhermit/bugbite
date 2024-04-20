@@ -14,7 +14,7 @@ use itertools::Itertools;
 use tempfile::NamedTempFile;
 use tracing::info;
 
-use crate::utils::{confirm, launch_editor, wrapped_doc};
+use crate::utils::{confirm, launch_editor};
 
 #[derive(Debug, Clone)]
 struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
@@ -60,29 +60,6 @@ struct Params {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Add, remove, or set aliases.
-
-            Values must be unique when adding or setting and are ignored when
-            missing when removing.
-
-            Prefixing values with `+` or `-` adds or removes from the list,
-            respectively. Unprefixed values are treated as set values and
-            override the entire list, ignoring any prefixed values.
-
-            Multiple arguments can be specified in a comma-separated list while
-            no arguments removes the entire list.
-
-            Examples modifying bug 10:
-            - add `a1`
-            > bite m 10 --alias +a1
-
-            - add `a2` and remove `a1`
-            > bite m 10 --alias +a2,-a1
-
-            - set to `a3`
-            > bite m 10 --alias a3
-        ")
     )]
     alias: Option<Vec<SetChange<String>>>,
 
@@ -93,23 +70,6 @@ struct Params {
         value_name = "USER",
         num_args = 0..=1,
         default_missing_value = "",
-        long_help = wrapped_doc!(r#"
-            Assign a bug to a user.
-
-            The value must be an email address for a service user. The alias
-            `@me` can also be used for the service's configured user if one
-            exists.
-
-            No argument or an empty string will reset the field to the default
-            for target component.
-
-            Example modifying bug 123:
-            - assign to yourself
-            > bite m 123 --assignee @me
-
-            - reset to default
-            > bite m 123 --assignee ""
-        "#)
     )]
     assignee: Option<String>,
 
@@ -120,58 +80,11 @@ struct Params {
         num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Add, remove, or set blockers.
-
-            Values must be valid IDs for existing bugs.
-
-            Prefixing values with `+` or `-` adds or removes from the list,
-            respectively. Unprefixed values are treated as set values and
-            override the entire list, ignoring any prefixed values.
-
-            Multiple arguments can be specified in a comma-separated list while
-            no arguments removes the entire list.
-
-            Examples modifying bug 10:
-            - add 1
-            > bite m 10 --blocks +1
-
-            - add 2 and remove 1
-            > bite m 10 --blocks +2,-1
-
-            - set to 3
-            > bite m 10 --blocks 3
-        ")
     )]
     blocks: Option<Vec<SetChange<u64>>>,
 
     /// add/remove CC users
-    #[arg(
-        long,
-        value_name = "USER[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Add or remove users from the CC list.
-
-            Values must be email addresses for service users. The alias
-            `@me` can also be used for the service's configured user if one
-            exists.
-
-            - add yourself to the CC list
-            > bite m 10 --cc @me
-
-            Prefixing values with `+` or `-` adds or removes from the list,
-            respectively. Unprefixed values will be added to the list.
-
-            - remove yourself from the CC list
-            > bite m 10 --cc=-@me
-
-            Multiple arguments can be specified in a comma-separated list.
-
-            - add and remove addresses from the CC list
-            > bite m 10 --cc=+test1@email.com,-test2@email.com
-        ")
-    )]
+    #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
     cc: Option<Vec<SetChange<String>>>,
 
     /// add a comment
@@ -181,14 +94,6 @@ struct Params {
         num_args = 0..=1,
         conflicts_with_all = ["comment_from", "reply"],
         default_missing_value = "",
-        long_help = wrapped_doc!("
-            Add a comment.
-
-            When no argument is specified, an editor is launched allowing for
-            interactive entry.
-
-            Taken from standard input when `-`.
-        ")
     )]
     comment: Option<MaybeStdin<String>>,
 
@@ -199,71 +104,15 @@ struct Params {
         conflicts_with_all = ["comment", "reply"],
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = wrapped_doc!("
-            Add a comment using content from a file.
-
-            The value must be the path to a valid comment file.
-
-            Example modifying bug 10:
-            - create a comment from a file
-            > bite m 10 --comment-from path/to/file.txt
-        ")
     )]
     comment_from: Option<Utf8PathBuf>,
 
     /// enable comment privacy
-    #[arg(
-        short = 'P',
-        long,
-        num_args = 0,
-        default_missing_value = "true",
-        long_help = wrapped_doc!("
-            Mark created comment as private.
-
-            Examples modifying bug 10:
-            - create a private comment
-            > bite m 10 --comment test --comment-is-private
-
-            - create a private comment from a file
-            > bite m 10 --comment-from path/to/file.txt --comment-is-private
-
-            - private reply to last comment
-            > bite m 10 --reply --comment-is-private
-        ")
-    )]
+    #[arg(short = 'P', long, num_args = 0, default_missing_value = "true")]
     comment_is_private: Option<bool>,
 
     /// modify comment privacy
-    #[arg(
-        long,
-        value_name = "VALUE",
-        long_help = wrapped_doc!("
-            Modify the privacy of existing comments.
-
-            The value must be comma-separated comment IDs local to the specified
-            bug ID starting at 0 for the bug description or a range of comment
-            IDs. An optional suffix consisting of boolean value in the form of
-            `:true` or `:false` can be included to enable or disable all comment
-            privacy respectively. Without this suffix, the privacy of all
-            matching comments is toggled.
-
-            Examples modifying bug 10:
-            - toggle comment 1 privacy
-            > bite m 10 --comment-privacy 1
-
-            - toggle comment 1 and 2 privacy
-            > bite m 10 --comment-privacy 1,2
-
-            - toggle all comment privacy
-            > bite m 10 --comment-privacy ..
-
-            - disable comment 1 and 2 privacy
-            > bite m 10 --comment-privacy 1,2:false
-
-            - mark comments 2-5 private
-            > bite m 10 --comment-privacy 2..=5:true
-        ")
-    )]
+    #[arg(long, value_name = "VALUE")]
     comment_privacy: Option<CommentPrivacy<usize>>,
 
     /// modify component
@@ -281,28 +130,6 @@ struct Params {
         num_args = 0..=1,
         value_name = "ID[,...]",
         value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Add, remove, or set dependencies.
-
-            Values must be valid IDs for existing bugs.
-
-            Prefixing values with `+` or `-` adds or removes from the list,
-            respectively. Unprefixed values are treated as set values and
-            override the entire list, ignoring any prefixed values.
-
-            Multiple arguments can be specified in a comma-separated list while
-            no arguments removes the entire list.
-
-            Examples modifying bug 10:
-            - add 1
-            > bite m 10 --depends +1
-
-            - add 2 and remove 1
-            > bite m 10 --depends +2,-1
-
-            - set to 3
-            > bite m 10 --depends 3
-        ")
     )]
     depends: Option<Vec<SetChange<u64>>>,
 
@@ -311,54 +138,11 @@ struct Params {
     duplicate_of: Option<u64>,
 
     /// add/remove flags
-    #[arg(
-        short,
-        long,
-        value_name = "VALUE[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!(r#"
-            Add or remove flags.
-
-            Values must be valid flags composed of the flag name followed by its
-            status. Supported statuses include `+`, `-`, and `?`. In addition,
-            the special status `X` removes a flag.
-
-            Multiple arguments can be specified in a comma-separated list.
-
-            Examples modifying bug 10:
-            - add `test?`
-            > bite m 10 --flags "test?"
-
-            - add `check+` and remove `test?`
-            > bite m 10 --flags check+,testX
-        "#)
-    )]
+    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
     flags: Option<Vec<Flag>>,
 
     /// add/remove groups
-    #[arg(
-        short,
-        long,
-        value_name = "VALUE[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Add or remove groups.
-
-            Values must be valid service groups.
-
-            Prefixing values with `+` or `-` adds or removes from the list,
-            respectively. Unprefixed values will be added to the list.
-
-            Multiple arguments can be specified in a comma-separated list.
-
-            Examples modifying bug 10:
-            - add `admin`
-            > bite m 10 --groups +admin
-
-            - add `test` and remove `admin`
-            > bite m 10 --groups +test,-admin
-        ")
-    )]
+    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
     groups: Option<Vec<SetChange<String>>>,
 
     /// add/remove/set keywords
@@ -368,28 +152,6 @@ struct Params {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Add, remove, or set keywords.
-
-            Values must be valid keywords.
-
-            Prefixing values with `+` or `-` adds or removes from the list,
-            respectively. Unprefixed values are treated as set values and
-            override the entire list, ignoring any prefixed values.
-
-            Multiple arguments can be specified in a comma-separated list while
-            no arguments removes the entire list.
-
-            Examples modifying bug 10:
-            - add `key`
-            > bite m 10 --keywords +key
-
-            - add `test` and remove `key`
-            > bite m 10 --keywords +test,-key
-
-            - set to `verify`
-            > bite m 10 --keywords verify
-        ")
     )]
     keywords: Option<Vec<SetChange<String>>>,
 
@@ -415,23 +177,6 @@ struct Params {
         value_name = "USER",
         num_args = 0..=1,
         default_missing_value = "",
-        long_help = wrapped_doc!(r#"
-            Assign a QA contact for the bug.
-
-            The value must be an email address for a service user. The alias
-            `@me` can also be used for the service's configured user if one
-            exists.
-
-            No argument or an empty string will reset the field to the default
-            for target component.
-
-            Examples modifying bug 123:
-            - assign to yourself
-            > bite m 123 --qa @me
-
-            - reset to default
-            > bite m 123 --qa
-        "#)
     )]
     qa: Option<String>,
 
@@ -440,33 +185,7 @@ struct Params {
     resolution: Option<String>,
 
     /// add/remove bug URLs
-    #[arg(
-        short = 'U',
-        long,
-        value_name = "VALUE[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Add or remove URLs to bugs in external trackers.
-
-            Values must be valid URLs to bugs, issues, or tickets in external
-            trackers or IDs to existing bugs for the targeted service.
-
-            Prefixing values with `+` or `-` adds or removes from the list,
-            respectively. Unprefixed values will be added to the list.
-
-            Multiple arguments can be specified in a comma-separated list.
-
-            Examples modifying bug 10:
-            - add URL to bug 2
-            > bite m 10 --see-also 2
-
-            - add bug 3 URL and remove 2
-            > bite m 10 --see-also=+3,-2
-
-            - add URL to external bug
-            > bite m 10 --see-also https://url/to/bug/5
-        ")
-    )]
+    #[arg(short = 'U', long, value_name = "VALUE[,...]", value_delimiter = ',')]
     see_also: Option<Vec<SetChange<String>>>,
 
     /// modify severity
@@ -585,15 +304,7 @@ pub(super) struct Command {
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs or aliases
-    #[clap(
-        help_heading = "Arguments",
-        required_unless_present = "dry_run",
-        long_help = wrapped_doc!("
-            IDs of bugs to modify.
-
-            Taken from standard input when `-`.
-        ")
-    )]
+    #[clap(help_heading = "Arguments", required_unless_present = "dry_run")]
     ids: Vec<MaybeStdinVec<String>>,
 }
 
