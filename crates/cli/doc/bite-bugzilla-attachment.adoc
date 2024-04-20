@@ -1,0 +1,63 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-attachment - get attachments
+
+== Synopsis
+
+*bite bugzilla attachment* [<options>] <id[,...]>::
+    Get attachments.
+
+*bite bugzilla attachment* [-h|--help]::
+    Output help information.
+
+== Description
+
+Get attachments.
+
+== Global Options
+
+*-v, --verbose*::
+    Increase logging verbosity.
+
+*-q, --quiet*::
+    Decrease logging verbosity.
+
+*-h, --help*::
+    Print help output and exit.
+
+== Attachment options
+
+*-l, --list*::
+    List attachment metadata.
+
+*-V, --view*::
+    Output attachment data.
+
+*-i, --item-ids*::
+    Treat ID arguments as bug IDs or aliases, not attachment IDs.
++
+Regular ID arguments relate to individual attachment IDs. Using this option
+pulls all attachments from the related bugs.
++
+Note that when saving multiple attachments from multiple bugs, subdirectories
+named after the bug IDs are automatically used in order to avoid file name
+overlap.
+
+*-d, --dir* <path>::
+    Save attachments to a specified directory.
++
+By default, attachments are saved to the current working directory and this
+allows altering that target directory.
+
+== Arguments
+
+<id[,...]>::
+    Attachment IDs or bug IDs/aliases.
++
+Taken from standard input when `-`.
+
+== See Also
+
+linkcmd:bite-bugzilla[1]

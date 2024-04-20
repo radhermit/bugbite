@@ -9,10 +9,10 @@ use camino::Utf8PathBuf;
 use clap::Args;
 
 use crate::service::Render;
-use crate::utils::{wrapped_doc, COLUMNS};
+use crate::utils::COLUMNS;
 
 #[derive(Debug, Args)]
-#[clap(next_help_heading = "Attachments options")]
+#[clap(next_help_heading = "Attachment options")]
 struct Options {
     /// list attachment metadata
     #[arg(short, long, conflicts_with_all = ["dir", "view"])]
@@ -23,36 +23,11 @@ struct Options {
     view: bool,
 
     /// request attachments from bug IDs or aliases
-    #[arg(
-        short,
-        long,
-        value_name = "BOOL",
-        long_help = wrapped_doc!("
-            Treat IDs as bug IDs or aliases, not attachment IDs.
-
-            Regular ID arguments relate to individual attachment IDs. Using this
-            option pulls all attachments from the related bugs.
-
-            Note that when saving multiple attachments from multiple bugs,
-            subdirectories named after the bug IDs are automatically used in
-            order to avoid file name overlap.
-        ")
-    )]
+    #[arg(short, long)]
     item_ids: bool,
 
     /// save attachments into a base directory
-    #[arg(
-        short,
-        long,
-        value_name = "PATH",
-        default_value = ".",
-        long_help = wrapped_doc!("
-            Save attachments to a specified directory.
-
-            By default, attachments are saved to the current working directory
-            and this allows altering that target directory.
-        ")
-    )]
+    #[arg(short, long, value_name = "PATH", default_value = ".")]
     dir: Utf8PathBuf,
 }
 
@@ -121,6 +96,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_examples(&["bugzilla", "attachment"]);
+        subcmd_parse_doc(&["bugzilla", "attachment"]);
     }
 }
