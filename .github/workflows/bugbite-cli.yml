@@ -23,8 +23,8 @@ jobs:
 
     - name: Create archive
       run: |
-        # install GNU tar
-        apk add tar
+        # install GNU tar and xz
+        apk add tar xz
         # create archive
         cd target/doc/cli
         tar -cv -I "xz -9 -T0" -f ${{ github.ref_name }}-docs.tar.xz *
