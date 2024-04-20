@@ -117,6 +117,66 @@ target, url, version, votes, whiteboard
 For more information see:
 https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
 
+== Range options
+
+*--comments*=<value>::
+    Restrict by comments.
+
+*--votes*=<value>::
+    Restrict by votes.
+
+== Change options
+
+*--changed*=<field[,...]=time>::
+    Restrict by fields changed within a time interval.
+
+*--changed-by*=<field[,...]=user[,...]>::
+    Restrict by fields changed by a given user.
+
+*--changed-from* <field>=<value>::
+    Restrict by fields changed from a given value.
+
+*--changed-to* <field>=<value>::
+    Restrict by fields changed to a given value.
+
+== Time options
+
+*-c, --created*=<time>::
+    Restrict by creation time.
+
+*-m, --modified*=<time>::
+    Restrict by modification time.
+
+== User options
+
+*-a, --assignee*=<user[,...]>::
+    Restrict by assignee user.
+
+*--attacher*=<user[,...]>::
+    Restrict by attachment creation user.
+
+*--cc*=<user[,...]>::
+    Restrict by CC list user.
+
+*--commenter*=<user[,...]>::
+    Restrict by commenting user.
+
+*--flagger*=<user[,...]>::
+    Restrict by flag creation user.
+
+*--qa*=<user[,...]>::
+    Restrict by QA contact user.
+
+*-R, --reporter*=<user[,...]>::
+    Restrict by reporting user.
+
+== Content options
+
+*--comment*=<term>::
+    Strings to search for in the comments.
++
+Taken from standard input when `-`.
+
 == Arguments
 
 *[<terms>]*::
