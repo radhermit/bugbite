@@ -69,11 +69,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: man
+        path: man
 
     - name: Download generated shell completion
       uses: actions/download-artifact@v4
       with:
         name: shellcomp
+        path: shell
 
     - name: Create archive
       run: |
