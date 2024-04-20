@@ -1,0 +1,91 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-modify - modify bugs
+
+== Synopsis
+
+*bite bugzilla modify* <options> <ids>::
+    Modify bugs.
+
+*bite bugzilla modify* [-h|--help]::
+    Output help information.
+
+== Description
+
+Modify bugs.
+
+== Global Options
+
+*-v, --verbose*::
+    Increase logging verbosity.
+
+*-q, --quiet*::
+    Decrease logging verbosity.
+
+*-h, --help*::
+    Print help output and exit.
+
+== Modify options
+
+*-n, --dry-run*::
+    Skip service interaction.
+
+*-R, --reply*::
+    Interactively reply to specific comments for a given bug.
++
+Values must be valid comment IDs specific to the bug, starting at 0 for the
+description. If no value is specified the last comment will be used.
++
+This option forces interactive usage, launching an editor pre-populated with
+the selected comments allowing the user to respond in a style reminiscent of
+threaded messages on a mailing list. On completion, the data is used to create
+a new bug comment.
++
+Multiple arguments can be specified in a comma-separated list.
++
+.Reply to comments 1 and 2 on bug 123:
+[source,console]
+bite -c gentoo modify 123 --reply 1,2
++
+.Reply to the last comment on bug 123:
+[source,console]
+bite -c gentoo modify 123 --reply
+
+*--from*=<path>::
+    Read attributes from a template.
++
+Value must be the path to a valid template file. Templates use the TOML format
+and generally map long option names to values.
++
+Fields that don't match known bug field names target custom fields.
++
+Command-line parameters override corresponding template values.
++
+.Modify bug 123 using template:
+[source,console]
+bite -c gentoo modify 123 --from path/to/new.toml -c "modified using template"
+
+*--to*=<path>::
+    Write attributes to a template.
++
+Value is the file path where the TOML template file will be written.
++
+Combining this option with -n/--dry-run allows creating templates without any
+service interaction.
++
+.Create template using specified values:
+[source,console]
+bite -c gentoo modify 123 -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
+
+== Arguments
+
+<ids>::
+    IDs of bugs to modify.
++
+Taken from standard input when `-`.
+
+== See Also
+
+linkcmd:bite-bugzilla[1]

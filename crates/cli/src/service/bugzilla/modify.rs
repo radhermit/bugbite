@@ -554,27 +554,6 @@ pub(super) struct Options {
         value_name = "ID[,...]",
         value_delimiter = ',',
         conflicts_with_all = ["comment", "comment_from"],
-        long_help = wrapped_doc!("
-            Interactively reply to specific comments for a given bug.
-
-            Values must be valid comment IDs specific to the bug, starting at 0
-            for the description. If no value is specified the last comment will
-            be used.
-
-            This option forces interactive usage, launching an editor
-            pre-populated with the selected comments allowing the user to
-            respond in a style reminiscent of threaded messages on a mailing
-            list. On completion, the data is used to create a new bug comment.
-
-            Multiple arguments can be specified in a comma-separated list.
-
-            Examples modifying bug 123:
-            - reply to comments 1 and 2
-            > bite m 123 --reply 1,2
-
-            - reply to the last comment
-            > bite m 123 --reply
-        ")
     )]
     reply: Option<Vec<usize>>,
 
@@ -583,16 +562,6 @@ pub(super) struct Options {
         long,
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = wrapped_doc!("
-            Read modification attributes from a template.
-
-            Value must be the path to a valid template file. Templates use the
-            TOML format and generally map long option names to values.
-
-            Fields that don't match known bug field names target custom fields.
-
-            Explicitly specified options override corresponding template values.
-        ")
     )]
     from: Option<Utf8PathBuf>,
 
@@ -601,14 +570,6 @@ pub(super) struct Options {
         long,
         value_name = "PATH",
         value_hint = ValueHint::FilePath,
-        long_help = wrapped_doc!("
-            Write modification attributes to a template.
-
-            Value is the file path where the TOML template file will be written.
-
-            Combining this option with -n/--dry-run allows creating modify
-            templates without any service interaction.
-        ")
     )]
     to: Option<Utf8PathBuf>,
 }
@@ -744,6 +705,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_examples(&["bugzilla", "modify"]);
+        subcmd_parse_doc(&["bugzilla", "modify"]);
     }
 }
