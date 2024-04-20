@@ -110,9 +110,8 @@ https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
 *-A, --alias*=<value[,...]>::
     Restrict by alias.
 +
-With no argument, all bugs with aliases are returned. If the value
-is `true` or `false`, all bugs with or without aliases are returned,
-respectively.
+With no argument, all bugs with aliases are returned. If the value is `true` or
+`false`, all bugs with or without aliases are returned, respectively.
 +
 .With aliases:
  bite -c gentoo search --alias
@@ -134,15 +133,430 @@ application. See the <<Match Operators>> section for more details.
 .Contains `value1` or `value2`:
  bite -c gentoo search --alias value1 --alias value1
 
+*--attachments*=<value[,...]>::
+    Restrict by attachments.
++
+With no argument, all bugs with attachments are returned. If the value is
+`true` or `false`, all bugs with or without attachments are returned,
+respectively.
++
+.With attachments:
+ bite -c gentoo search --attachments
++
+.Without attachments:
+ bite -c gentoo search --attachments false
++
+Regular string values search for matching substrings in an attachment's
+description or file name. Values can also use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list and will match if
+any of the specified values match.
++
+.Attachment description or file name contains `log` or `test`:
+ bite -c gentoo search --attachments log,test
+
+*-B, --blocks*=<id[,...]>::
+    Restrict by blockers.
++
+With no argument, all bugs with blockers are returned. If the value is `true`
+or `false`, all bugs with or without blockers are returned, respectively.
++
+.With blockers:
+ bite -c gentoo search --blocks
++
+.Without blockers:
+ bite -c gentoo search --blocks false
++
+Regular values search for matching blockers and multiple values can
+be specified in a comma-separated list for logical AND or multiple
+options for logical OR.
++
+.Blocked on bug 10:
+ bite -c gentoo search --blocks 10
++
+.Blocked on bugs 10 and 11:
+ bite -c gentoo search --blocks 10,11
++
+.Blocked on bugs 10 or 11:
+ bite -c gentoo search --blocks 10 --blocks 11
++
+Values can use the `-` prefix to search for non-blockers.
++
+.Not blocked on bug 10:
+ bite -c gentoo search --blocks=-10
++
+.Blocked on bug 10 but not bug 11:
+ bite -c gentoo search --blocks 10,-11
++
+Values are taken from standard input when `-`.
+
+*-C, --component*=<value[,...]>::
+    Restrict by component.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list for logical OR.
+
+*--cf <name> <value>*::
+    Restrict by custom field.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
+
+*-D, --depends*=<id[,...]>::
+    Restrict by dependencies.
++
+With no argument, all bugs with dependencies are returned. If the value is
+`true` or `false`, all bugs with or without dependencies are returned,
+respectively.
++
+.With dependencies:
+ bite -c gentoo search --depends
++
+.Without dependencies:
+ bite -c gentoo search --depends false
++
+Regular values search for matching dependencies and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR.
++
+.Depends on bug 10:
+ bite -c gentoo search --depends 10
++
+.Depends on bugs 10 and 11:
+ bite -c gentoo search --depends 10,11
++
+.Depends on bugs 10 or 11:
+ bite -c gentoo search --depends 10 --depends 11
++
+Values can use the `-` prefix to search for non-dependencies.
++
+.Doesn't depend on bug 10:
+ bite -c gentoo search --depends=-10
++
+.Depends on bug 10 but not 11:
+ bite -c gentoo search --depends 10,-11
++
+Values are taken from standard input when `-`.
+
+*-F, --flags*=<value[,...]>::
+    Restrict by flag.
++
+With no argument, all bugs with flags are returned. If the value is `true` or
+`false`, all bugs with or without flags are returned, respectively.
++
+.With flags:
+ bite -c gentoo search --flags
++
+.Without flags:
+ bite -c gentoo search --flags false
++
+Regular values search for matching substrings and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR. Values can also use match operators to alter their query
+application. See the <<Match Operators>> section for more details.
++
+.Contains `value`:
+ bite -c gentoo search --flags value
++
+.Contains `value1` and `value2`:
+ bite -c gentoo search --flags value1,value1
++
+.Contains `value1` or `value2`:
+ bite -c gentoo search --flags value1 --flags value1
+
+*-g, --groups*=<value[,...]>::
+    Restrict by group.
++
+With no argument, all bugs with groups are returned. If the value is `true` or
+`false`, all bugs with or without groups are returned, respectively.
++
+.With groups:
+ bite -c gentoo search --groups
++
+.Without groups:
+ bite -c gentoo search --groups false
++
+Regular values search for matching substrings and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR. Values can also use match operators to alter their query
+application. See the <<Match Operators>> section for more details.
++
+.Contains `value`:
+ bite -c gentoo search --groups value
++
+.Contains `value1` and `value2`:
+ bite -c gentoo search --groups value1,value1
++
+.Contains `value1` or `value2`:
+ bite -c gentoo search --groups value1 --groups value1
+
+*--id*=<id[,...]>::
+    Restrict by ID.
++
+Regular values search for exact bug identifiers.
++
+.Equal to 10:
+ bite -c gentoo search --id 10
++
+Values can use the `-` prefix to search for identifiers not equal to the value.
++
+.Not equal to 10:
+ bite -c gentoo search --id=-10
++
+Multiple values can be specified in a comma-separated list for logical OR.
++
+.Bugs 10 or 20:
+ bite -c gentoo search --id 10,20
++
+ID ranges are supported.
++
+.IDs greater than or equal to 10:
+ bite -c gentoo search --id '>=10'
++
+.IDs between 10 and 20:
+ bite -c gentoo search --id 10..20
++
+Values are taken from standard input when `-`.
++
+.Any ID matching values taken from a file:
+ cat file | bite -c gentoo search --id -
+
+*-k, --keywords*=<value[,...]>::
+    Restrict by keyword.
++
+With no argument, all bugs with keywords are returned. If the value is `true`
+or `false`, all bugs with or without keywords are returned, respectively.
++
+.With keywords:
+ bite -c gentoo search --keywords
++
+.Without keywords:
+ bite -c gentoo search --keywords false
++
+Regular values search for matching substrings and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR. Values can also use match operators to alter their query
+application. See the <<Match Operators>> section for more details.
++
+.Contains `value`:
+ bite -c gentoo search --keywords value
++
+.Contains `value1` and `value2`:
+ bite -c gentoo search --keywords value1,value1
++
+.Contains `value1` or `value2`:
+ bite -c gentoo search --keywords value1 --keywords value1
+
+*--os*=<value[,...]>::
+    Restrict by operating system.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list for logical OR.
+
+*--platform*=<value[,...]>::
+    Restrict by platform.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list for logical OR.
+
+*--priority*=<value[,...]>::
+    Restrict by priority.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list for logical OR.
+
+*-p, --product*=<value[,...]>::
+    Restrict by product.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list for logical OR.
+
+*-r, --resolution*=<value[,...]>::
+    Restrict by resolution.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list for logical OR.
+
+*-U, --see-also*=<value[,...]>::
+    Restrict by tracker URLs.
++
+With no argument, all bugs with tracker URLs are returned. If the value is
+`true` or `false`, all bugs with or without tracker URLs are returned,
+respectively.
++
+.With tracker URLs:
+ bite -c gentoo search --see-also
++
+.Without tracker URLs:
+ bite -c gentoo search --see-also false
++
+Regular values search for matching substrings and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR. Values can also use match operators to alter their query
+application. See the <<Match Operators>> section for more details.
+
+*--severity*=<value[,...]>::
+    Restrict by severity.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list for logical OR.
+
+*-s, --status*=<value[,...]>::
+    Restrict by status.
++
+By default, searches with no status parameter only target open bugs. This
+option supports extending searches to closed bugs.
++
+Regular values search for case-insensitive matches. The prefix `!` can be used
+to search for all non-matches instead.
++
+.Unconfirmed bugs:
+ bite -c gentoo search --status unconfirmed
++
+.Unresolved bugs:
+ bite -c gentoo search --status '!resolved'
++
+Multiple values can be specified in a comma-separated list for logical OR.
++
+.Confirmed or verified bugs:
+ bite -c gentoo search --status confirmed,verified
++
+The aliases `@open`, `@closed`, and `@all` can be used to search for open,
+closed, and all bugs, respectively.
++
+.Closed bugs with bugbite in the summary:
+ bite -c gentoo search --status @closed bugbite
++
+.All bugs assigned to yourself:
+ bite -c gentoo search --status @all --assignee @me
+
+*-t, --tags*=<value[,...]>::
+    Restrict by personal tags.
++
+With no argument, all bugs with personal tags are returned. If the value is
+`true` or `false`, all bugs with or without personal tags are returned,
+respectively.
++
+.With personal tags:
+ bite -c gentoo search --tags
++
+.Without personal tags:
+ bite -c gentoo search --tags false
++
+Regular values search for matching substrings and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR. Values can also use match operators to alter their query
+application. See the <<Match Operators>> section for more details.
+
+*-T, --target*=<value[,...]>::
+    Restrict by target milestone.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list for logical OR.
+
+*-u, --url*=<value[,...]>::
+    Restrict by URL.
++
+With no argument, all bugs with a URL are returned. If the value is `true` or
+`false`, all bugs with or without URLs are returned, respectively.
++
+.With URL:
+ bite -c gentoo search --url
++
+.Without URL:
+ bite -c gentoo search --url false
++
+Regular values search for matching substrings and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR. Values can also use match operators to alter their query
+application. See the <<Match Operators>> section for more details.
+
+*-V, --version*=<value[,...]>::
+    Restrict by version.
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more details.
++
+Multiple values can be specified in a comma-separated list for logical OR.
+
+*-w, --whiteboard*=<value[,...]>::
+    Restrict by whiteboard.
++
+With no argument, all bugs with whiteboard info are returned. If the value is
+`true` or `false`, all bugs with or without whiteboard info are returned,
+respectively.
++
+.With whiteboard:
+ bite -c gentoo search --whiteboard
++
+.Without whiteboard:
+ bite -c gentoo search --whiteboard false
++
+Regular values search for matching substrings and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR. Values can also use match operators to alter their query
+application. See the <<Match Operators>> section for more details.
+
 == Range options
 
 *--comments*=<value>::
-    Restrict by comments.
+    Restrict by the number of comments.
++
+Values can either be numbers, numbers prefixed with operators (see section
+<<Range Operators>>), or ranges (see section <<Ranges>>).
++
+Note that a bug's description is counted as a comment, but does not increment
+the overall comment count shown by the `get` or `comment` subcommands.
++
+.Exactly ten comments:
+  bite -c gentoo search --comments 10
+  bite -c gentoo search --comments '=10'
++
+.At least ten comments:
+ bite -c gentoo search --comments ">=10"
++
+.Between five and ten comments:
+ bite -c gentoo search --comments 5..10
 
 *--votes*=<value>::
-    Restrict by votes.
+    Restrict by the number of votes.
++
+Values can either be numbers, numbers prefixed with operators (see section
+<<Range Operators>>), or ranges (see section <<Ranges>>).
++
+Note that a bug's description is counted as a comment, but does not increment
+the overall comment count shown by the `get` or `comment` subcommands.
++
+.Exactly ten votes:
+  bite -c gentoo search --votes 10
+  bite -c gentoo search --votes '=10'
++
+.At least ten votes:
+ bite -c gentoo search --votes ">=10"
++
+.Between five and ten votes:
+ bite -c gentoo search --votes 5..10
 
 == Change options
+
+// TODO: list possible change fields
 
 *--changed*=<field[,...]=time>::
     Restrict by fields changed within a time interval.
@@ -216,8 +630,8 @@ substring matching.
 - `s` -- case-insensitive substring
 - `cs` -- case-sensitive substring
 - `!` -- doesn't contain case-insensitive substring
-- `=` -- equals
-- `!=` -- not equals
+- `=` -- equal
+- `!=` -- not equal
 - `r` -- matches regular expression
 - `!r` -- doesn't match regular expression
 
@@ -246,6 +660,24 @@ examples for proper usage:
 
 .Doesn't match regex:
  bite -c gentoo search --alias '!r#test?.+'
+
+== Range Operators
+
+.Supported operators:
+- `<` -- less than
+- `<=` -- less than or equal
+- `=` -- equal
+- `!=` -- not equal
+- `>=` -- greater than or equal
+- `>` -- greater than
+
+== Ranges
+
+// TODO: add examples and more in-depth range descriptions
+
+.Supported operators:
+- `..` -- non-inclusive range
+- `..=` -- inclusive range
 
 == See Also
 

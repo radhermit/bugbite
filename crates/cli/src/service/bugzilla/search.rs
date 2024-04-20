@@ -20,7 +20,7 @@ use itertools::Itertools;
 use strum::VariantNames;
 
 use crate::service::output::render_search;
-use crate::utils::{confirm, launch_browser, wrapped_doc};
+use crate::utils::{confirm, launch_browser};
 
 /// Parse a string into a ChangeField, adding possible values to the error on failure.
 fn change_field(s: &str) -> anyhow::Result<ChangeField> {
@@ -112,54 +112,6 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
-        long_help = wrapped_doc!(r#"
-            Restrict query by attachments.
-
-            With no argument, all matches with attachments are returned. If the
-            value is `true` or `false`, all matches with or without attachments
-            are returned, respectively.
-
-            Examples:
-            - existence
-            > bite s --attachments
-
-            - nonexistence
-            > bite s --attachments false
-
-            Regular string values search for matching substrings in an
-            attachment's description or file name.
-
-            Example:
-            - contains `value`
-            > bite s --attachments value
-
-            Values can use string matching prefixes to alter their application
-            to queries. Note that some match operators may need to be escaped
-            when used in the shell environment.
-
-            Examples:
-            - doesn't contain `value`
-            > bite s --attachments ~#value
-
-            - equals `value`
-            > bite s --attachments =#value
-
-            - doesn't equal `value`
-            > bite s --attachments ~=#value
-
-            - matches regex
-            > bite s --attachments r#test?.+
-
-            - doesn't match regex
-            > bite s --attachments ~r#test?.+
-
-            Multiple values can be specified in a comma-separated list and will
-            match if any of the specified values match.
-
-            Example:
-            - equals `test1` or `test2`
-            > bite s --attachments =#test1,=#test2
-        "#)
     )]
     attachments: Option<ExistsOrValues<Match>>,
 
@@ -170,51 +122,12 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = wrapped_doc!("
-            Restrict by blockers.
-
-            With no argument, all matches with blockers are returned. If the
-            value is `true` or `false`, all matches with or without blockers are
-            returned, respectively.
-
-            Examples:
-            - existence
-            > bite s --blocks
-
-            - nonexistence
-            > bite s --blocks false
-
-            Regular values search for matching blockers and multiple values can
-            be specified in a comma-separated list for logical AND or multiple
-            options for logical OR.
-
-            Examples:
-            - blocked on 10
-            > bite s --blocks 10
-
-            - blocked on 10 and 11
-            > bite s --blocks 10,11
-
-            - blocked on 10 or 11
-            > bite s --blocks 10 --blocks 11
-
-            Values can use the `-` prefix to search for non-blockers.
-
-            Examples:
-            - isn't blocked on 10
-            > bite s --blocks=-10
-
-            - blocked on 10 but not 11
-            > bite s --blocks 10,-11
-
-            Values are taken from standard input when `-`.
-        ")
     )]
     blocks: Option<Vec<ExistsOrValues<MaybeStdinVec<i64>>>>,
 
     /// restrict by component
-    #[arg(short = 'C', long, value_name = "VALUE")]
-    component: Option<Vec<Match>>,
+    #[arg(short = 'C', long, value_name = "VALUE[,...]")]
+    component: Option<Csv<Match>>,
 
     /// restrict by custom field
     #[arg(long = "cf", num_args = 2, value_names = ["NAME", "VALUE"])]
@@ -227,45 +140,6 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "ID[,...]",
         default_missing_value = "true",
-        long_help = wrapped_doc!("
-            Restrict by dependencies.
-
-            With no argument, all matches with dependencies are returned. If the
-            value is `true` or `false`, all matches with or without dependencies
-            are returned, respectively.
-
-            Examples:
-            - existence
-            > bite s --depends
-
-            - nonexistence
-            > bite s --depends false
-
-            Regular values search for matching dependencies and multiple values can
-            be specified in a comma-separated list for logical AND or multiple
-            options for logical OR.
-
-            Examples:
-            - depends on 10
-            > bite s --depends 10
-
-            - depends on 10 and 11
-            > bite s --depends 10,11
-
-            - depends on 10 or 11
-            > bite s --depends 10 --depends 11
-
-            Values can use the `-` prefix to search for non-dependencies.
-
-            Examples:
-            - doesn't depend on 10
-            > bite s --depends=-10
-
-            - depends on 10 but not 11
-            > bite s --depends 10,-11
-
-            Values are taken from standard input when `-`.
-        ")
     )]
     depends: Option<Vec<ExistsOrValues<MaybeStdinVec<i64>>>>,
 
@@ -290,48 +164,7 @@ struct AttributeOptions {
     groups: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by ID
-    #[arg(
-        long,
-        num_args = 1,
-        value_name = "ID[,...]",
-        value_delimiter = ',',
-        long_help = wrapped_doc!("
-            Restrict by ID.
-
-            Regular values search for exact bug identifiers.
-
-            Examples:
-            - ID equal to 10
-            > bite s --id 10
-
-            Values can use the `-` prefix to search for identifiers not equal to
-            the value.
-
-            Examples:
-            - all bugs except 10
-            > bite s --id=-10
-
-            Multiple values can be specified in a comma-separated list for
-            logical OR.
-
-            - IDs 10 or 20
-            > bite s --id 10,20
-
-            ID ranges are supported.
-
-            - IDs greater than or equal to 10
-            > bite s --id >=10
-
-            - IDs between 10 and 20
-            > bite s --id 10..20
-
-            Values are taken from standard input when `-`.
-
-            Example:
-            - Any ID matching values taken from a file
-            > cat file | bite s --id -
-        ")
-    )]
+    #[arg(long, num_args = 1, value_name = "ID[,...]", value_delimiter = ',')]
     id: Option<Vec<MaybeStdinVec<RangeOrValue<i64>>>>,
 
     /// restrict by keyword
@@ -344,27 +177,27 @@ struct AttributeOptions {
     )]
     keywords: Option<Vec<ExistsOrValues<Match>>>,
 
-    /// restrict by OS
-    #[arg(long, value_name = "VALUE")]
-    os: Option<Vec<Match>>,
+    /// restrict by operating system
+    #[arg(long, value_name = "VALUE[,...]")]
+    os: Option<Csv<Match>>,
 
     /// restrict by platform
-    #[arg(long, value_name = "VALUE")]
-    platform: Option<Vec<Match>>,
+    #[arg(long, value_name = "VALUE[,...]")]
+    platform: Option<Csv<Match>>,
 
     /// restrict by priority
-    #[arg(long, value_name = "VALUE")]
-    priority: Option<Vec<Match>>,
+    #[arg(long, value_name = "VALUE[,...]")]
+    priority: Option<Csv<Match>>,
 
     /// restrict by product
-    #[arg(short, long, value_name = "VALUE")]
-    product: Option<Vec<Match>>,
+    #[arg(short, long, value_name = "VALUE[,...]")]
+    product: Option<Csv<Match>>,
 
     /// restrict by resolution
-    #[arg(short, long, value_name = "VALUE")]
-    resolution: Option<Vec<Match>>,
+    #[arg(short, long, value_name = "VALUE[,...]")]
+    resolution: Option<Csv<Match>>,
 
-    /// restrict by external URLs
+    /// restrict by tracker URLs
     #[arg(
         short = 'U',
         long,
@@ -375,8 +208,8 @@ struct AttributeOptions {
     see_also: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by severity
-    #[arg(long, value_name = "VALUE")]
-    severity: Option<Vec<Match>>,
+    #[arg(long, value_name = "VALUE[,...]")]
+    severity: Option<Csv<Match>>,
 
     /// restrict by status
     #[arg(
@@ -384,40 +217,7 @@ struct AttributeOptions {
         long,
         value_name = "VALUE[,...]",
         value_delimiter = ',',
-        num_args = 1,
-        long_help = wrapped_doc!("
-            Restrict by status.
-
-            By default, searches with no status parameter only target open bugs.
-            This option supports extending searches to closed bugs.
-
-            Regular values search for case-insensitive matches. The prefix `~`
-            can be used to search for all non-matches instead.
-
-            Examples:
-            - unconfirmed bugs
-            > bite s --status unconfirmed
-
-            - unresolved bugs
-            > bite s --status ~resolved
-
-            Multiple values can be specified in a comma-separated list for
-            logical OR.
-
-            Examples:
-            - confirmed or verified bugs
-            > bite s --status confirmed,verified
-
-            The aliases `@open`, `@closed`, and `@all` can be used to search for
-            open, closed, and all bugs, respectively.
-
-            Examples:
-            - closed bugs with bugbite in the summary
-            > bite s --status @closed bugbite
-
-            - all bugs assigned to yourself
-            > bite s --status @all --assignee @me
-        ")
+        num_args = 1
     )]
     status: Option<Vec<String>>,
 
@@ -432,8 +232,8 @@ struct AttributeOptions {
     tags: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by target milestone
-    #[arg(short = 'T', long, value_name = "VALUE")]
-    target: Option<Vec<Match>>,
+    #[arg(short = 'T', long, value_name = "VALUE[,...]")]
+    target: Option<Csv<Match>>,
 
     /// restrict by URL
     #[arg(
@@ -446,8 +246,8 @@ struct AttributeOptions {
     url: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by version
-    #[arg(short = 'V', long, value_name = "VALUE")]
-    version: Option<Vec<Match>>,
+    #[arg(short = 'V', long, value_name = "VALUE[,...]")]
+    version: Option<Csv<Match>>,
 
     /// restrict by whiteboard
     #[arg(
@@ -464,55 +264,11 @@ struct AttributeOptions {
 #[clap(next_help_heading = "Range options")]
 struct RangeOptions {
     /// restrict by comments
-    #[arg(
-        long,
-        long_help = wrapped_doc!(r#"
-            Restrict by the number of comments.
-
-            Values can either be numbers, numbers prefixed with operators (e.g.
-            <, ~=, >=), or ranges using the operators `..` and `..=`.
-
-            Examples:
-            - equal to 10
-            > bite s --comments 10
-            > bite s --comments "=10"
-
-            - not equal to 10
-            > bite s --comments "~=10"
-
-            - greater than or equal to 10
-            > bite s --comments ">=10"
-
-            - between 5 and 10
-            > bite s --comments 5..10
-        "#)
-    )]
+    #[arg(long)]
     comments: Option<RangeOrValue<u64>>,
 
     /// restrict by votes
-    #[arg(
-        long,
-        long_help = wrapped_doc!(r#"
-            Restrict by the number of votes.
-
-            Values can either be numbers, numbers prefixed with operators (e.g.
-            <, ~=, >=), or ranges using the operators `..` and `..=`.
-
-            Examples:
-            - equal to 10
-            > bite s --votes 10
-            > bite s --votes "=10"
-
-            - not equal to 10
-            > bite s --votes "~=10"
-
-            - greater than or equal to 10
-            > bite s --votes ">=10"
-
-            - between 5 and 10
-            > bite s --votes 5..10
-        "#)
-    )]
+    #[arg(long)]
     votes: Option<RangeOrValue<u64>>,
 }
 
@@ -520,55 +276,19 @@ struct RangeOptions {
 #[clap(next_help_heading = "Change options")]
 struct ChangeOptions {
     /// fields changed within time interval
-    #[arg(
-        long,
-        value_name = "FIELD[,...]=TIME",
-        long_help = wrapped_doc!("
-            Restrict by fields changed within a time interval.
-
-            Possible fields: {}",
-            ChangeField::VARIANTS.join(", ")
-        )
-    )]
+    #[arg(long, value_name = "FIELD[,...]=TIME")]
     changed: Option<Vec<Changed>>,
 
     /// fields changed by users
-    #[arg(
-        long,
-        value_name = "FIELD[,...]=USER[,...]",
-        long_help = wrapped_doc!("
-            Restrict by fields changed by a given user.
-
-            Possible fields: {}",
-            ChangeField::VARIANTS.join(", ")
-        )
-    )]
+    #[arg(long, value_name = "FIELD[,...]=USER[,...]")]
     changed_by: Option<Vec<ChangedBy>>,
 
     /// fields changed from a value
-    #[arg(
-        long,
-        value_name = "FIELD=VALUE",
-        long_help = wrapped_doc!("
-            Restrict by fields changed from a given value.
-
-            Possible fields: {}",
-            ChangeField::VARIANTS.join(", ")
-        )
-    )]
+    #[arg(long, value_name = "FIELD=VALUE")]
     changed_from: Option<Vec<ChangedValue>>,
 
     /// fields changed to a value
-    #[arg(
-        long,
-        value_name = "FIELD=VALUE",
-        long_help = wrapped_doc!("
-            Restrict by fields changed to a given value.
-
-            Possible fields: {}",
-            ChangeField::VARIANTS.join(", ")
-        )
-    )]
+    #[arg(long, value_name = "FIELD=VALUE")]
     changed_to: Option<Vec<ChangedValue>>,
 }
 
@@ -705,16 +425,16 @@ impl From<Params> for Parameters {
                 .depends
                 .map(|x| x.into_iter().map(|x| x.flatten()).collect()),
             ids: value.attr.id.map(|x| x.into_iter().flatten().collect()),
-            priority: value.attr.priority,
-            severity: value.attr.severity,
-            version: value.attr.version,
-            component: value.attr.component,
-            product: value.attr.product,
-            platform: value.attr.platform,
-            os: value.attr.os,
-            resolution: value.attr.resolution,
+            priority: value.attr.priority.map(|x| x.into_inner()),
+            severity: value.attr.severity.map(|x| x.into_inner()),
+            version: value.attr.version.map(|x| x.into_inner()),
+            component: value.attr.component.map(|x| x.into_inner()),
+            product: value.attr.product.map(|x| x.into_inner()),
+            platform: value.attr.platform.map(|x| x.into_inner()),
+            os: value.attr.os.map(|x| x.into_inner()),
+            resolution: value.attr.resolution.map(|x| x.into_inner()),
             status: value.attr.status,
-            target: value.attr.target,
+            target: value.attr.target.map(|x| x.into_inner()),
 
             changed: value
                 .change
