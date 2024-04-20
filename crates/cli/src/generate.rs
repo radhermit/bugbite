@@ -23,9 +23,5 @@ fn main() -> anyhow::Result<()> {
         clap_complete::generate_to(shell, &mut cmd, "bite", "shell")?;
     }
 
-    // generate man pages
-    fs::create_dir_all("man").expect("failed creating output directory");
-    clap_mangen::generate_to(cmd, "man")?;
-
     Ok(())
 }

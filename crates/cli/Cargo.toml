@@ -32,8 +32,8 @@ required-features = ["test-bugzilla"]
 
 [features]
 default = []
-# build documentation and shell completion
-generate = ["dep:clap_complete", "dep:clap_mangen"]
+# build shell completion
+generate = ["dep:clap_complete"]
 # test support
 test = ["bugbite/test"]
 # bugzilla integration tests that require a local instance
@@ -45,7 +45,6 @@ bugbite = { path = "../lib", version = "0.0.10" }
 camino = { version = "1.1.6", features = ["serde1"] }
 clap = { version = "4.5.4", features = ["cargo", "derive", "env", "wrap_help"] }
 clap_complete = { version = "4.5.2", optional = true }
-clap_mangen = { version = "0.2.20", optional = true }
 clap-verbosity-flag = "2.2.0"
 crossterm = "0.27.0"
 enum-as-inner = "0.6.0"
