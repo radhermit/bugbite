@@ -43,16 +43,13 @@ Taken from standard input when `-`.
 == Examples
 
 .Get gentoo bug 123:
-[source,console]
-bite -c gentoo get 123
+ bite -c gentoo get 123
 
 .Get gentoo bug 123 and only output field values:
-[source,console]
-bite -c gentoo get 123 -ACH
+ bite -c gentoo get 123 -ACH
 
 .Get all gentoo bugs created in the last day:
-[source,console]
-bite -c gentoo search -c 1d -f id | bite -c gentoo get -
+ bite -c gentoo search -c 1d -f id | bite -c gentoo get -
 
 == See Also
 

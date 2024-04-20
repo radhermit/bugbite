@@ -56,8 +56,7 @@ Group fields relate to groups of bug fields and are most useful when using JSON
 formatted output:
 +
 .Return all bugs created in the past day rendered in JSON:
-[source,console]
-bite -c gentoo search --created 1d -f all --json
+ bite -c gentoo search --created 1d -f all --json
 +
 // TODO: link to rust docs for field descriptions
 Possible group fields: all, default, extra, custom
@@ -89,12 +88,10 @@ Ordering is especially useful in combination with -l/--limit to get the first
 or last results of an ordered match.
 +
 .Top ten bugs by votes:
-[source,console]
-bite -c gentoo search --limit 10 --order=-votes
+ bite -c gentoo search --limit 10 --order=-votes
 +
 .Highest comment count:
-[source,console]
-bite -c gentoo search --limit 1 --order=-comments
+ bite -c gentoo search --limit 1 --order=-comments
 +
 // TODO: link to rust docs for field descriptions
 Possible values: alias, assignee, blocks, comments, component, created,
@@ -118,12 +115,10 @@ is `true` or `false`, all bugs with or without aliases are returned,
 respectively.
 +
 .With aliases:
-[source,console]
-bite -c gentoo search --alias
+ bite -c gentoo search --alias
 +
 .Without aliases:
-[source,console]
-bite -c gentoo search --alias false
+ bite -c gentoo search --alias false
 +
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
@@ -131,15 +126,13 @@ logical OR. Values can also use match operators to alter their query
 application. See the <<Match Operators>> section for more details.
 +
 .Contains `value`:
-[source,console]
-bite -c gentoo search --alias value
+ bite -c gentoo search --alias value
 +
 .Contains `value1` and `value2`:
-[source,console]
-bite -c gentoo search --alias value1,value1
+ bite -c gentoo search --alias value1,value1
 +
 .Contains `value1` or `value2`:
-bite -c gentoo search --alias value1 --alias value1
+ bite -c gentoo search --alias value1 --alias value1
 
 == Range options
 
@@ -211,8 +204,7 @@ Taken from standard input when `-`.
 Taken from standard input when `-`.
 +
 .Search for bugs with `test` in the summary:
-[source,console]
-bite -c gentoo search test
+ bite -c gentoo search test
 
 == Match Operators
 
@@ -235,32 +227,25 @@ wrapped in single quotes when used in the shell environment. See the following
 examples for proper usage:
 
 .Contains `value`, `VaLuE`, or other case-insensitive permutations:
-[source,console]
-bite -c gentoo search --alias 's#value'
+ bite -c gentoo search --alias 's#value'
 
 .Contains `value`:
-[source,console]
-bite -c gentoo search --alias 'cs#value'
+ bite -c gentoo search --alias 'cs#value'
 
 .Doesn't contain `value`, `VaLuE`, or other case-insensitive permutations:
-[source,console]
-bite -c gentoo search --alias '!#value'
+ bite -c gentoo search --alias '!#value'
 
 .Equals `value`:
-[source,console]
-bite -c gentoo search --alias '=#value'
+ bite -c gentoo search --alias '=#value'
 
 .Doesn't equal `value`:
-[source,console]
-bite -c gentoo search --alias '!=#value'
+ bite -c gentoo search --alias '!=#value'
 
 .Matches regex:
-[source,console]
-bite -c gentoo search --alias 'r#test?.+'
+ bite -c gentoo search --alias 'r#test?.+'
 
 .Doesn't match regex:
-[source,console]
-bite -c gentoo search --alias '!r#test?.+'
+ bite -c gentoo search --alias '!r#test?.+'
 
 == See Also
 
