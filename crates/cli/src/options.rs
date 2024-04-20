@@ -137,7 +137,7 @@ impl ServiceCommand {
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Service")]
-struct ServiceOpts {
+struct ServiceOptions {
     /// use pre-configured connection
     #[arg(short, long, env = "BUGBITE_CONNECTION")]
     connection: Option<String>,
@@ -158,7 +158,7 @@ struct ServiceOpts {
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Bite options")]
-struct BiteOpts {
+struct BiteOptions {
     /// load config from a custom path
     #[arg(long, value_name = "PATH", value_hint = ValueHint::FilePath)]
     config: Option<Utf8PathBuf>,
@@ -173,9 +173,9 @@ struct BiteOpts {
 #[derive(Debug, Args)]
 pub(crate) struct Options {
     #[clap(flatten)]
-    bite: BiteOpts,
+    bite: BiteOptions,
     #[clap(flatten)]
-    service: ServiceOpts,
+    service: ServiceOptions,
 }
 
 #[derive(Debug, Parser)]
