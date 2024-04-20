@@ -122,7 +122,7 @@ With no argument, all bugs with aliases are returned. If the value is `true` or
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
-application. See the <<Match Operators>> section for more details.
+application. See the <<Match Operators>> section for more information.
 +
 .Contains `value`:
  bite -c gentoo search --alias value
@@ -148,7 +148,7 @@ respectively.
 +
 Regular string values search for matching substrings in an attachment's
 description or file name. Values can also use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list and will match if
 any of the specified values match.
@@ -195,7 +195,7 @@ Values are taken from standard input when `-`.
     Restrict by component.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
@@ -203,7 +203,7 @@ Multiple values can be specified in a comma-separated list for logical OR.
     Restrict by custom field.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 
 *-D, --depends*=<id[,...]>::
     Restrict by dependencies.
@@ -256,7 +256,7 @@ With no argument, all bugs with flags are returned. If the value is `true` or
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
-application. See the <<Match Operators>> section for more details.
+application. See the <<Match Operators>> section for more information.
 +
 .Contains `value`:
  bite -c gentoo search --flags value
@@ -282,7 +282,7 @@ With no argument, all bugs with groups are returned. If the value is `true` or
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
-application. See the <<Match Operators>> section for more details.
+application. See the <<Match Operators>> section for more information.
 +
 .Contains `value`:
  bite -c gentoo search --groups value
@@ -311,15 +311,14 @@ Multiple values can be specified in a comma-separated list for logical OR.
 .Bugs 10 or 20:
  bite -c gentoo search --id 10,20
 +
-ID ranges are supported.
+Range values are supported, (see sections <<Range Operators>> and <<Ranges>>
+for more information, and values are taken from standard input when `-`.
 +
 .IDs greater than or equal to 10:
  bite -c gentoo search --id '>=10'
 +
 .IDs between 10 and 20:
  bite -c gentoo search --id 10..20
-+
-Values are taken from standard input when `-`.
 +
 .Any ID matching values taken from a file:
  cat file | bite -c gentoo search --id -
@@ -339,7 +338,7 @@ or `false`, all bugs with or without keywords are returned, respectively.
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
-application. See the <<Match Operators>> section for more details.
+application. See the <<Match Operators>> section for more information.
 +
 .Contains `value`:
  bite -c gentoo search --keywords value
@@ -354,7 +353,7 @@ application. See the <<Match Operators>> section for more details.
     Restrict by operating system.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
@@ -362,7 +361,7 @@ Multiple values can be specified in a comma-separated list for logical OR.
     Restrict by platform.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
@@ -370,7 +369,7 @@ Multiple values can be specified in a comma-separated list for logical OR.
     Restrict by priority.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
@@ -378,7 +377,7 @@ Multiple values can be specified in a comma-separated list for logical OR.
     Restrict by product.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
@@ -386,7 +385,7 @@ Multiple values can be specified in a comma-separated list for logical OR.
     Restrict by resolution.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
@@ -406,13 +405,13 @@ respectively.
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
-application. See the <<Match Operators>> section for more details.
+application. See the <<Match Operators>> section for more information.
 
 *--severity*=<value[,...]>::
     Restrict by severity.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
@@ -461,13 +460,13 @@ respectively.
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
-application. See the <<Match Operators>> section for more details.
+application. See the <<Match Operators>> section for more information.
 
 *-T, --target*=<value[,...]>::
     Restrict by target milestone.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
@@ -486,13 +485,13 @@ With no argument, all bugs with a URL are returned. If the value is `true` or
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
-application. See the <<Match Operators>> section for more details.
+application. See the <<Match Operators>> section for more information.
 
 *-V, --version*=<value[,...]>::
     Restrict by version.
 +
 Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more details.
+query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
@@ -512,7 +511,7 @@ respectively.
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
-application. See the <<Match Operators>> section for more details.
+application. See the <<Match Operators>> section for more information.
 
 == Range options
 
