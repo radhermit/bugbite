@@ -228,7 +228,7 @@ impl Command {
 
     /// Create a custom clap error.
     fn error(kind: ErrorKind, message: impl std::fmt::Display) -> clap::error::Error {
-        Command::command().error(kind, message)
+        Self::command().error(kind, message)
     }
 
     /// Try parsing arguments from a given source.
