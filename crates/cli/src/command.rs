@@ -223,9 +223,19 @@ impl Command {
         match Self::try_parse_args(env::args()) {
             Ok((base, options, cmd)) => {
                 enable_logging(cmd.verbosity.log_level_filter());
+
                 let client = Client::builder()
                     .insecure(options.bite.insecure)
                     .timeout(options.bite.timeout);
+
+                // TODO: drop this once stable rust supports `unix_sigpipe`,
+                // see https://github.com/rust-lang/rust/issues/97889.
+                //
+                // Reset SIGPIPE to the default behavior since rust ignores it by default.
+                unsafe {
+                    libc::signal(libc::SIGPIPE, libc::SIG_DFL);
+                }
+
                 cmd.subcmd.run(base, client).await
             }
             Err(e) => e.exit(),
