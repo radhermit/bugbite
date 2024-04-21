@@ -817,15 +817,15 @@ impl QueryBuilder<'_> {
     }
 
     fn attachment_is_obsolete(&mut self, value: bool) {
-        self.advanced_field("attachments.isobsolete", "equals", value as u64);
+        self.boolean("attachments.isobsolete", value)
     }
 
     fn attachment_is_patch(&mut self, value: bool) {
-        self.advanced_field("attachments.ispatch", "equals", value as u64);
+        self.boolean("attachments.ispatch", value)
     }
 
     fn attachment_is_private(&mut self, value: bool) {
-        self.advanced_field("attachments.isprivate", "equals", value as u64);
+        self.boolean("attachments.isprivate", value)
     }
 
     fn qa<V: Into<Match>>(&mut self, value: V) {
@@ -1094,6 +1094,12 @@ impl QueryBuilder<'_> {
         let status = if status { "isnotempty" } else { "isempty" };
         self.insert(format!("f{num}"), field.api());
         self.insert(format!("o{num}"), status);
+    }
+
+    /// Match bugs with boolean field values.
+    fn boolean<F: Api>(&mut self, field: F, status: bool) {
+        let status = if status { 1 } else { 0 };
+        self.advanced_field(field, "equals", status);
     }
 
     fn blocks(&mut self, value: i64) {
