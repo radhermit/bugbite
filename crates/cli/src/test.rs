@@ -3,7 +3,7 @@ use std::{env, fs};
 
 use bugbite::test::{build_path, reset_stdin};
 
-use crate::options::Command;
+use crate::command::Command;
 
 /// Parse examples from documentation.
 pub(crate) fn subcmd_parse_doc(doc: &str) {

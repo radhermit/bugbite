@@ -6,8 +6,8 @@ use std::{env, fs, io};
 use clap::{CommandFactory, ValueEnum};
 use clap_complete::Shell;
 
+mod command;
 mod config;
-mod options;
 mod service;
 mod subcmds;
 mod test;
@@ -15,7 +15,7 @@ mod utils;
 
 fn main() -> anyhow::Result<()> {
     let args: Vec<_> = env::args().collect();
-    let mut cmd = options::Command::command();
+    let mut cmd = command::Command::command();
 
     // generate shell completions
     fs::create_dir_all("shell").expect("failed creating output directory");
