@@ -633,31 +633,31 @@ substring matching.
 - `r` -- matches regular expression
 - `!r` -- doesn't match regular expression
 
-Operators are applied to values as prefixes using `#` between the operator and
-value. Note that some operators may need to be escaped or the entire value
-wrapped in single quotes when used in the shell environment. See the following
-examples for proper usage:
+Operators are applied to values in prefixes with a single space between,
+wrapping the entire string in quotes. Note that operators using `!` will
+require using single quotes in shell environments that perform command
+expansion. See the following examples for proper usage:
 
 .Contains `value`, `VaLuE`, or other case-insensitive permutations:
- bite -c gentoo search --alias 's#value'
+ bite -c gentoo search --alias 's value'
 
 .Contains `value`:
- bite -c gentoo search --alias 'cs#value'
+ bite -c gentoo search --alias 'cs value'
 
 .Doesn't contain `value`, `VaLuE`, or other case-insensitive permutations:
- bite -c gentoo search --alias '!#value'
+ bite -c gentoo search --alias '! value'
 
 .Equals `value`:
- bite -c gentoo search --alias '=#value'
+ bite -c gentoo search --alias '= value'
 
 .Doesn't equal `value`:
- bite -c gentoo search --alias '!=#value'
+ bite -c gentoo search --alias '!= value'
 
 .Matches regex:
- bite -c gentoo search --alias 'r#test?.+'
+ bite -c gentoo search --alias 'r test?.+'
 
 .Doesn't match regex:
- bite -c gentoo search --alias '!r#test?.+'
+ bite -c gentoo search --alias '!r test?.+'
 
 == Range Operators
 

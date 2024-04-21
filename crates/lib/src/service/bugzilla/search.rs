@@ -119,7 +119,7 @@ impl FromStr for Match {
 
 impl From<&str> for Match {
     fn from(s: &str) -> Self {
-        let (op, value) = match s.split_once('#') {
+        let (op, value) = match s.split_once(' ') {
             Some(("s", value)) => (MatchOp::Substring, value.into()),
             Some(("cs", value)) => (MatchOp::CaseSubstring, value.into()),
             Some(("!", value)) => (MatchOp::NotSubstring, value.into()),
