@@ -412,6 +412,28 @@ struct UserOptions {
     reporter: Option<Vec<Csv<Match>>>,
 }
 
+#[derive(Debug, Args)]
+#[clap(next_help_heading = "Comment options")]
+struct CommentOptions {
+    /// strings to search for in comments
+    #[clap(long, value_name = "TERM")]
+    comment: Option<Vec<MaybeStdinVec<Match>>>,
+
+    /// restrict by private status
+    #[arg(
+        long,
+        num_args = 0..=1,
+        default_missing_value = "true",
+        value_name = "BOOL",
+        hide_possible_values = true,
+    )]
+    comment_is_private: Option<bool>,
+
+    /// restrict by tag
+    #[arg(long, value_name = "VALUE[,...]")]
+    comment_tag: Option<Vec<Csv<Match>>>,
+}
+
 /// Available search parameters.
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
@@ -439,9 +461,8 @@ struct Params {
     #[clap(flatten)]
     user: UserOptions,
 
-    /// strings to search for in comments
-    #[clap(long, value_name = "TERM", help_heading = "Content options")]
-    comment: Option<Vec<MaybeStdinVec<Match>>>,
+    #[clap(flatten)]
+    comment: CommentOptions,
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
@@ -547,7 +568,16 @@ impl From<Params> for Parameters {
                 .reporter
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
 
-            comment: value.comment.map(|x| x.into_iter().flatten().collect()),
+            comment: value
+                .comment
+                .comment
+                .map(|x| x.into_iter().flatten().collect()),
+            comment_is_private: value.comment.comment_is_private,
+            comment_tag: value
+                .comment
+                .comment_tag
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+
             summary: value.summary.map(|x| x.into_iter().flatten().collect()),
 
             custom_fields: value.attr.custom_fields.map(|x| {

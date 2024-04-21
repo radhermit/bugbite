@@ -636,12 +636,26 @@ the overall comment count shown by the `get` or `comment` subcommands.
 *-R, --reporter*=<user[,...]>::
     Restrict by reporting user.
 
-== Content options
+== Comment options
 
 *--comment*=<term>::
     Strings to search for in the comments.
 +
 Taken from standard input when `-`.
+
+*--comment-is-private*=[<bool>]::
+    Restrict by comment private status.
+
+*--comment-tag*=<value[,...]>::
+    Restrict by comment tag.
++
+Values search for matching substrings and multiple values can be specified in a
+comma-separated list for logical AND or multiple options for logical OR. Match
+operators can also be used alter query application, see the <<Match Operators>>
+section for more information.
++
+.Search for comments tagged as spam:
+ bite -c gentoo search --comment-tag spam
 
 == Arguments
 

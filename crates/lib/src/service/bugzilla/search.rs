@@ -188,6 +188,10 @@ pub struct Parameters {
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
     pub modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
+    pub comment: Option<Vec<Match>>,
+    pub comment_is_private: Option<bool>,
+    pub comment_tag: Option<Vec<Vec<Match>>>,
+
     pub blocks: Option<Vec<ExistsOrValues<i64>>>,
     pub depends: Option<Vec<ExistsOrValues<i64>>>,
     pub ids: Option<Vec<RangeOrValue<i64>>>,
@@ -203,7 +207,6 @@ pub struct Parameters {
     pub target: Option<Vec<Match>>,
     pub comments: Option<RangeOrValue<u64>>,
     pub votes: Option<RangeOrValue<u64>>,
-    pub comment: Option<Vec<Match>>,
     pub summary: Option<Vec<Match>>,
     pub quicksearch: Option<String>,
     pub custom_fields: Option<Vec<(String, Match)>>,
@@ -262,6 +265,10 @@ impl Parameters {
             created: self.created.or(other.created),
             modified: self.modified.or(other.modified),
 
+            comment: self.comment.or(other.comment),
+            comment_is_private: self.comment_is_private.or(other.comment_is_private),
+            comment_tag: self.comment_tag.or(other.comment_tag),
+
             blocks: self.blocks.or(other.blocks),
             depends: self.depends.or(other.depends),
             ids: self.ids.or(other.ids),
@@ -277,7 +284,6 @@ impl Parameters {
             target: self.target.or(other.target),
             comments: self.comments.or(other.comments),
             votes: self.votes.or(other.votes),
-            comment: self.comment.or(other.comment),
             summary: self.summary.or(other.summary),
             quicksearch: self.quicksearch.or(other.quicksearch),
             custom_fields: self.custom_fields.or(other.custom_fields),
@@ -590,6 +596,18 @@ impl Parameters {
             query.op_field("AND", "longdesc", values)
         }
 
+        if let Some(value) = self.comment_is_private {
+            query.comment_is_private(value);
+        }
+
+        if let Some(values) = self.comment_tag {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.into_iter().for_each(|x| query.comment_tag(x)))
+                }
+            });
+        }
+
         if let Some(values) = self.summary {
             query.op_field("AND", "short_desc", values)
         }
@@ -826,6 +844,15 @@ impl QueryBuilder<'_> {
 
     fn attachment_is_private(&mut self, value: bool) {
         self.boolean("attachments.isprivate", value)
+    }
+
+    fn comment_is_private(&mut self, value: bool) {
+        self.boolean("longdescs.isprivate", value)
+    }
+
+    fn comment_tag<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("comment_tag", value.op, value);
     }
 
     fn qa<V: Into<Match>>(&mut self, value: V) {
