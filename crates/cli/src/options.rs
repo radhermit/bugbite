@@ -66,7 +66,7 @@ impl ServiceCommand {
         I: IntoIterator<Item = T>,
         T: Into<String>,
     {
-        let args: Vec<_> = args.into_iter().map(Into::into).collect();
+        let mut args: Vec<_> = args.into_iter().map(Into::into).collect();
 
         let cmd = match Self::try_parse_from(&args) {
             Ok(cmd) => cmd,
@@ -132,7 +132,7 @@ impl ServiceCommand {
         };
 
         // construct new args for the main command to parse
-        let mut args = vec![args.into_iter().next().unwrap_or_default()];
+        args.drain(1..);
 
         // inject subcommand for requested service type if missing
         if !subcmds.contains(arg) {
