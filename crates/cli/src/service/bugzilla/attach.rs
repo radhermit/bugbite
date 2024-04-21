@@ -151,6 +151,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_doc(&["bugzilla", "attach"]);
+        subcmd_parse_doc("bite-bugzilla-attach");
     }
 }

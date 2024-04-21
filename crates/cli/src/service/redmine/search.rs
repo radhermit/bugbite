@@ -232,6 +232,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_doc(&["redmine", "search"]);
+        subcmd_parse_doc("bite-redmine-search");
     }
 }

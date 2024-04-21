@@ -64,6 +64,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_doc(&["bugzilla", "get"]);
+        subcmd_parse_doc("bite-bugzilla-get");
     }
 }
