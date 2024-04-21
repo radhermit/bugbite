@@ -87,7 +87,7 @@ service default.
 Ordering is especially useful in combination with -l/--limit to get the first
 or last results of an ordered match.
 +
-.Top ten bugs by votes:
+.Top ten by votes:
  bite -c gentoo search --limit 10 --order=-votes
 +
 .Highest comment count:
@@ -654,7 +654,7 @@ comma-separated list for logical AND or multiple options for logical OR. Match
 operators can also be used alter query application, see the <<Match Operators>>
 section for more information.
 +
-.Search for comments tagged as spam:
+.Comments tagged as spam:
  bite -c gentoo search --comment-tag spam
 
 == Arguments
@@ -664,7 +664,7 @@ section for more information.
 +
 Taken from standard input when `-`.
 +
-.Search for bugs with `test` in the summary:
+.Summary contains `test`:
  bite -c gentoo search test
 
 == Match Operators
