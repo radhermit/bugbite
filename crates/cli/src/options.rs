@@ -219,14 +219,17 @@ pub(crate) struct Command {
 
 impl Command {
     /// Run the command.
-    pub(super) async fn run(self, base: String, options: Options) -> anyhow::Result<ExitCode> {
-        enable_logging(self.verbosity.log_level_filter());
-
-        let client = Client::builder()
-            .insecure(options.bite.insecure)
-            .timeout(options.bite.timeout);
-
-        self.subcmd.run(base, client).await
+    pub(super) async fn run() -> anyhow::Result<ExitCode> {
+        match Self::try_parse_args(env::args()) {
+            Ok((base, options, cmd)) => {
+                enable_logging(cmd.verbosity.log_level_filter());
+                let client = Client::builder()
+                    .insecure(options.bite.insecure)
+                    .timeout(options.bite.timeout);
+                cmd.subcmd.run(base, client).await
+            }
+            Err(e) => e.exit(),
+        }
     }
 
     /// Create a custom clap error.
