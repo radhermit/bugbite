@@ -88,7 +88,7 @@ impl ServiceCommand {
         }
 
         let config = Config::load(cmd.options.bite.config.as_deref())
-            .map_err(|e| Self::command().error(ErrorKind::InvalidValue, e))?;
+            .map_err(|e| Command::error(ErrorKind::InvalidValue, e))?;
         let connection = cmd.options.service.connection.as_deref();
         let base = cmd.options.service.base.as_deref();
         let service = cmd.options.service.service;
@@ -108,10 +108,10 @@ impl ServiceCommand {
             (Some(name), _, _, _) | (None, None, None, Some(name)) => {
                 let (kind, base) = config
                     .get(name)
-                    .map_err(|e| Self::command().error(ErrorKind::InvalidValue, e))?;
+                    .map_err(|e| Command::error(ErrorKind::InvalidValue, e))?;
                 if services.contains(arg) && kind.as_ref() != arg {
                     let msg = format!("{arg} not compatible with connection: {name}");
-                    return Err(Self::command().error(ErrorKind::InvalidValue, msg));
+                    return Err(Command::error(ErrorKind::InvalidValue, msg));
                 }
                 (kind, base)
             }
@@ -121,9 +121,10 @@ impl ServiceCommand {
                     Command::try_parse_from(&args)?;
                 }
 
-                return Err(
-                    Self::command().error(ErrorKind::InvalidValue, "no connection specified")
-                );
+                return Err(Command::error(
+                    ErrorKind::MissingRequiredArgument,
+                    "no connection specified",
+                ));
             }
         };
 
@@ -214,6 +215,7 @@ pub(crate) struct Command {
 }
 
 impl Command {
+    /// Run the command.
     pub(super) async fn run(self, base: String, options: Options) -> anyhow::Result<ExitCode> {
         enable_logging(self.verbosity.log_level_filter());
 
@@ -224,6 +226,12 @@ impl Command {
         self.subcmd.run(base, client).await
     }
 
+    /// Create a custom clap error.
+    fn error(kind: ErrorKind, message: impl std::fmt::Display) -> clap::error::Error {
+        Command::command().error(kind, message)
+    }
+
+    /// Try parsing arguments from a given source.
     pub(crate) fn try_parse_args<I, T>(args: I) -> clap::error::Result<(String, Options, Self)>
     where
         I: IntoIterator<Item = T>,
