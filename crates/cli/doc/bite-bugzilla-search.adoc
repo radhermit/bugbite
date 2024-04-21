@@ -101,9 +101,6 @@ target, url, version, votes, whiteboard
 
 *-S, --quicksearch=<query>*::
     Search for bugs using quicksearch syntax.
-+
-For more information see:
-https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html
 
 == Attribute options
 
