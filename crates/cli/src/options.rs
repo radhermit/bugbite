@@ -9,7 +9,8 @@ use bugbite::client::Client;
 use bugbite::service::ServiceKind;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
-use clap::{Args, Parser, ValueHint};
+use clap::error::ErrorKind;
+use clap::{Args, CommandFactory, Parser, ValueHint};
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
 use strum::VariantNames;
 use tracing_log::AsTrace;
@@ -57,22 +58,22 @@ pub(super) struct ServiceCommand {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service<I, T>(args: I) -> anyhow::Result<(String, Vec<String>, Options)>
+    pub(crate) fn service<I, T>(args: I) -> clap::error::Result<(String, Vec<String>, Options)>
     where
         I: IntoIterator<Item = T>,
         T: Into<String>,
     {
         let args: Vec<_> = args.into_iter().map(Into::into).collect();
 
-        // parse service options
-        let Ok(cmd) = Self::try_parse_from(&args) else {
-            // use main command parser if first arg is an option (e.g. --help or --version)
-            if args.get(1).map(|x| x.starts_with('-')).unwrap_or(true) {
-                Command::parse_from(&args);
+        let cmd = match Self::try_parse_from(&args) {
+            Ok(cmd) => cmd,
+            Err(e) => {
+                // use main command parser if first arg is an option (e.g. --help or --version)
+                if args.get(1).map(|x| x.starts_with('-')).unwrap_or(true) {
+                    Command::try_parse_from(&args)?;
+                }
+                return Err(e);
             }
-            // fallback to service parser to handle service restriction failures
-            Self::parse_from(&args);
-            anyhow::bail!("failed parsing service options");
         };
 
         let remaining = cmd.remaining;
@@ -86,7 +87,8 @@ impl ServiceCommand {
             return Ok((Default::default(), args, cmd.options));
         }
 
-        let config = Config::load(cmd.options.bite.config.as_deref())?;
+        let config = Config::load(cmd.options.bite.config.as_deref())
+            .map_err(|e| Self::command().error(ErrorKind::InvalidValue, e))?;
         let connection = cmd.options.service.connection.as_deref();
         let base = cmd.options.service.base.as_deref();
         let service = cmd.options.service.service;
@@ -104,19 +106,24 @@ impl ServiceCommand {
         // determine service type
         let (selected, base) = match (connection, base, service, command.as_deref()) {
             (Some(name), _, _, _) | (None, None, None, Some(name)) => {
-                let (kind, base) = config.get(name)?;
+                let (kind, base) = config
+                    .get(name)
+                    .map_err(|e| Self::command().error(ErrorKind::InvalidValue, e))?;
                 if services.contains(arg) && kind.as_ref() != arg {
-                    anyhow::bail!("{arg} not compatible with connection: {name}");
+                    let msg = format!("{arg} not compatible with connection: {name}");
+                    return Err(Self::command().error(ErrorKind::InvalidValue, msg));
                 }
                 (kind, base)
             }
             (None, Some(base), Some(service), _) => (service, base.to_string()),
             _ => {
                 if services.contains(arg) || arg.starts_with('-') {
-                    Command::parse_from(&args);
+                    Command::try_parse_from(&args)?;
                 }
 
-                anyhow::bail!("no connection specified");
+                return Err(
+                    Self::command().error(ErrorKind::InvalidValue, "no connection specified")
+                );
             }
         };
 
@@ -217,7 +224,7 @@ impl Command {
         self.subcmd.run(base, client).await
     }
 
-    pub(crate) fn parse_args<I, T>(args: I) -> anyhow::Result<(String, Options, Self)>
+    pub(crate) fn try_parse_args<I, T>(args: I) -> clap::error::Result<(String, Options, Self)>
     where
         I: IntoIterator<Item = T>,
         T: Into<String>,
@@ -225,7 +232,7 @@ impl Command {
         // parse service options to determine the service type
         let (base, args, options) = ServiceCommand::service(args)?;
         // parse remaining args
-        let cmd = Self::parse_from(args);
+        let cmd = Self::try_parse_from(args)?;
         Ok((base, options, cmd))
     }
 }

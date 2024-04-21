@@ -13,6 +13,8 @@ async fn main() -> anyhow::Result<ExitCode> {
     // reset SIGPIPE behavior since rust ignores it by default
     utils::reset_sigpipe();
 
-    let (base, options, cmd) = options::Command::parse_args(env::args())?;
-    cmd.run(base, options).await
+    match options::Command::try_parse_args(env::args()) {
+        Ok((base, options, cmd)) => cmd.run(base, options).await,
+        Err(e) => e.exit(),
+    }
 }
