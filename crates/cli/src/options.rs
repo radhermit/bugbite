@@ -58,7 +58,10 @@ pub(super) struct ServiceCommand {
 }
 
 impl ServiceCommand {
-    pub(crate) fn service<I, T>(args: I) -> clap::error::Result<(String, Vec<String>, Options)>
+    /// Try parsing arguments from a given source.
+    pub(crate) fn try_parse_args<I, T>(
+        args: I,
+    ) -> clap::error::Result<(String, Vec<String>, Options)>
     where
         I: IntoIterator<Item = T>,
         T: Into<String>,
@@ -238,7 +241,7 @@ impl Command {
         T: Into<String>,
     {
         // parse service options to determine the service type
-        let (base, args, options) = ServiceCommand::service(args)?;
+        let (base, args, options) = ServiceCommand::try_parse_args(args)?;
         // parse remaining args
         let cmd = Self::try_parse_from(args)?;
         Ok((base, options, cmd))
