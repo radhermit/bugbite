@@ -670,43 +670,41 @@ Taken from standard input when `-`.
 == Match Operators
 
 Various restrictions can use match operators to alter a value's query
-application. Values with no or unknown operators default to case-insensitive
-substring matching.
+application. Values with no or unknown operators default to substring matching.
 
 .Supported operators:
-- `s` -- case-insensitive substring
-- `cs` -- case-sensitive substring
-- `!` -- doesn't contain case-insensitive substring
-- `=` -- equal
-- `!=` -- not equal
-- `r` -- matches regular expression
-- `!r` -- doesn't match regular expression
+- `=~` -- contains case-sensitive substring
+- `~~` -- contains substring
+- `!~` -- doesn't contain substring
+- `==` -- equal to value
+- `!=` -- not equal to value
+- `=*` -- matches regular expression
+- `!*` -- doesn't match regular expression
 
-Operators are applied to values in prefixes with a single space between,
-wrapping the entire string in quotes. Note that operators using `!` will
-require using single quotes in shell environments that perform command
-expansion. See the following examples for proper usage:
-
-.Contains `value`, `VaLuE`, or other case-insensitive permutations:
- bite -c gentoo search --alias 's value'
+Operators are applied as prefixes to values with a single space between,
+wrapping the entire string in single quotes to avoid various shell expansion
+support. See the following examples for proper usage:
 
 .Contains `value`:
- bite -c gentoo search --alias 'cs value'
+ bite -c gentoo search --alias '=~ value'
+
+.Contains `value`, `VaLuE`, or other case-insensitive permutations:
+ bite -c gentoo search --alias '~~ value'
 
 .Doesn't contain `value`, `VaLuE`, or other case-insensitive permutations:
- bite -c gentoo search --alias '! value'
+ bite -c gentoo search --alias '!~ value'
 
 .Equals `value`:
- bite -c gentoo search --alias '= value'
+ bite -c gentoo search --alias '== value'
 
 .Doesn't equal `value`:
  bite -c gentoo search --alias '!= value'
 
 .Matches regex:
- bite -c gentoo search --alias 'r test?.+'
+ bite -c gentoo search --alias '=* test?.+'
 
 .Doesn't match regex:
- bite -c gentoo search --alias '!r test?.+'
+ bite -c gentoo search --alias '!* test?.+'
 
 == Range Operators
 

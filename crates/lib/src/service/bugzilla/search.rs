@@ -51,15 +51,19 @@ impl SearchRequest {
 /// Advanced field matching operators.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum MatchOp {
-    /// case-sensitive substring matching
+    /// Contains case-sensitive substring.
     CaseSubstring,
-    /// case-insensitive substring matching
+    /// Contains substring.
     Substring,
-    /// inverted, case-insensitive substring matching
+    /// Doesn't contain substring.
     NotSubstring,
+    /// Equal to value.
     Equals,
+    /// Not equal to value.
     NotEquals,
+    /// Matches regular expression.
     Regexp,
+    /// Doesn't match regular expression.
     NotRegexp,
 }
 
@@ -120,13 +124,13 @@ impl FromStr for Match {
 impl From<&str> for Match {
     fn from(s: &str) -> Self {
         let (op, value) = match s.split_once(' ') {
-            Some(("s", value)) => (MatchOp::Substring, value.into()),
-            Some(("cs", value)) => (MatchOp::CaseSubstring, value.into()),
-            Some(("!", value)) => (MatchOp::NotSubstring, value.into()),
-            Some(("=", value)) => (MatchOp::Equals, value.into()),
+            Some(("=~", value)) => (MatchOp::CaseSubstring, value.into()),
+            Some(("~~", value)) => (MatchOp::Substring, value.into()),
+            Some(("!~", value)) => (MatchOp::NotSubstring, value.into()),
+            Some(("==", value)) => (MatchOp::Equals, value.into()),
             Some(("!=", value)) => (MatchOp::NotEquals, value.into()),
-            Some(("r", value)) => (MatchOp::Regexp, value.into()),
-            Some(("!r", value)) => (MatchOp::NotRegexp, value.into()),
+            Some(("=*", value)) => (MatchOp::Regexp, value.into()),
+            Some(("!*", value)) => (MatchOp::NotRegexp, value.into()),
             _ => (MatchOp::Substring, s.into()),
         };
 
