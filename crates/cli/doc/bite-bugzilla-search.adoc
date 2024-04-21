@@ -513,6 +513,41 @@ specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
 application. See the <<Match Operators>> section for more information.
 
+== Attachment options
+
+*--attachment-description*=<value[,...]>::
+    Restrict by attachment description.
++
+Values search for matching substrings and multiple values can be specified in a
+comma-separated list for logical AND or multiple options for logical OR. Match
+operators can also be used alter query application, see the <<Match Operators>>
+section for more information.
+
+*--attachment-filename*=<value[,...]>::
+    Restrict by attachment file name.
++
+Values search for matching substrings and multiple values can be specified in a
+comma-separated list for logical AND or multiple options for logical OR. Match
+operators can also be used alter query application, see the <<Match Operators>>
+section for more information.
+
+*--attachment-mime*=<value[,...]>::
+    Restrict by attachment MIME type.
++
+Values search for matching substrings and multiple values can be specified in a
+comma-separated list for logical AND or multiple options for logical OR. Match
+operators can also be used alter query application, see the <<Match Operators>>
+section for more information.
+
+*--attachment-is-obsolete*=[<bool>]::
+    Restrict by attachment obsolete status.
+
+*--attachment-is-patch*=[<bool>]::
+    Restrict by attachment patch status.
+
+*--attachment-is-private*=[<bool>]::
+    Restrict by attachment private status.
+
 == Range options
 
 *--comments*=<value>::

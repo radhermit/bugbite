@@ -160,6 +160,13 @@ pub struct Parameters {
     pub whiteboard: Option<Vec<ExistsOrValues<Match>>>,
     pub url: Option<Vec<ExistsOrValues<Match>>>,
 
+    pub attachment_description: Option<Vec<Vec<Match>>>,
+    pub attachment_filename: Option<Vec<Vec<Match>>>,
+    pub attachment_mime: Option<Vec<Vec<Match>>>,
+    pub attachment_is_obsolete: Option<bool>,
+    pub attachment_is_patch: Option<bool>,
+    pub attachment_is_private: Option<bool>,
+
     pub changed: Option<Vec<(Vec<ChangeField>, RangeOrValue<TimeDeltaOrStatic>)>>,
     pub changed_by: Option<Vec<(Vec<ChangeField>, Vec<String>)>>,
     pub changed_from: Option<Vec<(ChangeField, String)>>,
@@ -227,6 +234,13 @@ impl Parameters {
             tags: self.tags.or(other.tags),
             whiteboard: self.whiteboard.or(other.whiteboard),
             url: self.url.or(other.url),
+
+            attachment_description: self.attachment_description.or(other.attachment_description),
+            attachment_filename: self.attachment_filename.or(other.attachment_filename),
+            attachment_mime: self.attachment_mime.or(other.attachment_mime),
+            attachment_is_obsolete: self.attachment_is_obsolete.or(other.attachment_is_obsolete),
+            attachment_is_patch: self.attachment_is_patch.or(other.attachment_is_patch),
+            attachment_is_private: self.attachment_is_private.or(other.attachment_is_private),
 
             changed: self.changed.or(other.changed),
             changed_by: self.changed_by.or(other.changed_by),
@@ -662,6 +676,46 @@ impl Parameters {
             query.custom_fields(values);
         }
 
+        if let Some(values) = self.attachment_description {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| {
+                        value
+                            .into_iter()
+                            .for_each(|x| query.attachment_description(x))
+                    })
+                }
+            });
+        }
+
+        if let Some(values) = self.attachment_filename {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.into_iter().for_each(|x| query.attachment_filename(x)))
+                }
+            });
+        }
+
+        if let Some(values) = self.attachment_mime {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.into_iter().for_each(|x| query.attachment_mime(x)))
+                }
+            });
+        }
+
+        if let Some(value) = self.attachment_is_obsolete {
+            query.attachment_is_obsolete(value);
+        }
+
+        if let Some(value) = self.attachment_is_patch {
+            query.attachment_is_patch(value);
+        }
+
+        if let Some(value) = self.attachment_is_private {
+            query.attachment_is_private(value);
+        }
+
         Ok(query.encode())
     }
 }
@@ -745,6 +799,33 @@ impl QueryBuilder<'_> {
         self.advanced_count += 1;
         let num = self.advanced_count;
         self.insert(format!("f{num}"), "CP");
+    }
+
+    fn attachment_description<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("attachments.description", value.op, value);
+    }
+
+    fn attachment_filename<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("attachments.filename", value.op, value);
+    }
+
+    fn attachment_mime<V: Into<Match>>(&mut self, value: V) {
+        let value = value.into();
+        self.advanced_field("attachments.mimetype", value.op, value);
+    }
+
+    fn attachment_is_obsolete(&mut self, value: bool) {
+        self.advanced_field("attachments.isobsolete", "equals", value as u64);
+    }
+
+    fn attachment_is_patch(&mut self, value: bool) {
+        self.advanced_field("attachments.ispatch", "equals", value as u64);
+    }
+
+    fn attachment_is_private(&mut self, value: bool) {
+        self.advanced_field("attachments.isprivate", "equals", value as u64);
     }
 
     fn qa<V: Into<Match>>(&mut self, value: V) {

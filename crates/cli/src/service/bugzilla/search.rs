@@ -261,6 +261,52 @@ struct AttributeOptions {
 }
 
 #[derive(Debug, Args)]
+#[clap(next_help_heading = "Attachment options")]
+struct AttachmentOptions {
+    /// restrict by description
+    #[arg(long, value_name = "VALUE[,...]")]
+    attachment_description: Option<Vec<Csv<Match>>>,
+
+    /// restrict by file name
+    #[arg(long, value_name = "VALUE[,...]")]
+    attachment_filename: Option<Vec<Csv<Match>>>,
+
+    /// restrict by MIME type
+    #[arg(long, value_name = "VALUE[,...]")]
+    attachment_mime: Option<Vec<Csv<Match>>>,
+
+    /// restrict by obsolete status
+    #[arg(
+        long,
+        num_args = 0..=1,
+        default_missing_value = "true",
+        value_name = "BOOL",
+        hide_possible_values = true,
+    )]
+    attachment_is_obsolete: Option<bool>,
+
+    /// restrict by patch status
+    #[arg(
+        long,
+        num_args = 0..=1,
+        default_missing_value = "true",
+        value_name = "BOOL",
+        hide_possible_values = true,
+    )]
+    attachment_is_patch: Option<bool>,
+
+    /// restrict by private status
+    #[arg(
+        long,
+        num_args = 0..=1,
+        default_missing_value = "true",
+        value_name = "BOOL",
+        hide_possible_values = true,
+    )]
+    attachment_is_private: Option<bool>,
+}
+
+#[derive(Debug, Args)]
 #[clap(next_help_heading = "Range options")]
 struct RangeOptions {
     /// restrict by comments
@@ -379,6 +425,9 @@ struct Params {
     attr: AttributeOptions,
 
     #[clap(flatten)]
+    attach: AttachmentOptions,
+
+    #[clap(flatten)]
     range: RangeOptions,
 
     #[clap(flatten)]
@@ -435,6 +484,22 @@ impl From<Params> for Parameters {
             resolution: value.attr.resolution.map(|x| x.into_inner()),
             status: value.attr.status,
             target: value.attr.target.map(|x| x.into_inner()),
+
+            attachment_description: value
+                .attach
+                .attachment_description
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            attachment_filename: value
+                .attach
+                .attachment_filename
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            attachment_mime: value
+                .attach
+                .attachment_mime
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            attachment_is_obsolete: value.attach.attachment_is_obsolete,
+            attachment_is_patch: value.attach.attachment_is_patch,
+            attachment_is_private: value.attach.attachment_is_private,
 
             changed: value
                 .change
