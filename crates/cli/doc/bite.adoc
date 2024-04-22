@@ -21,7 +21,7 @@ functionality provided by a service.
 
 == Usage
 
-Bite support multiple service variants via subcommands, providing a common
+Bite supports multiple service variants via subcommands, providing a common
 interface between them. However, specifying service commands is unnecessary as
 they are auto-injected from the required connection options.
 
@@ -71,15 +71,6 @@ include::include/global-options.adoc[]
 
 *BUGBITE_CONNECTION*::
     Use a pre-configured connection.
-+
-Connections can be defined in the user config in addition to other locations.
-+
-.Precendence order from lowest to highest
-- internal config
-- user config
-- environment
-- command option
-- symlinked command
 
 *BUGBITE_BASE*::
     Specify the service URL to connect to.
