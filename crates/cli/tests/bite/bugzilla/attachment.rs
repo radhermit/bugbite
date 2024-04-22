@@ -74,17 +74,17 @@ async fn list_single_without_data() {
 }
 
 #[tokio::test]
-async fn view_single_with_plain_text() {
+async fn output_stdout_with_plain_text() {
     let server = start_server().await;
     server
         .respond(200, TEST_DATA.join("attachment/single-plain-text.json"))
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-plain-text")).unwrap();
 
-    for opt in ["-V", "--view"] {
+    for opt in ["-o", "--output"] {
         cmd("bite attachment")
             .arg("123")
-            .arg(opt)
+            .args([opt, "-"])
             .assert()
             .stdout(predicate::str::diff(expected.clone()))
             .stderr("")

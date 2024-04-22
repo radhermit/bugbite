@@ -115,7 +115,11 @@ impl Render for Attachment {
         // output additional attachment info on request
         let line = format!(
             "  ({}) {}, created by {}, {}",
-            if self.is_patch { "patch" } else { &self.content_type },
+            if self.is_patch {
+                "patch"
+            } else {
+                &self.content_type
+            },
             self.human_size(),
             self.creator,
             self.updated

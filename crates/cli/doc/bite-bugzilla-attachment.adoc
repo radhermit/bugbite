@@ -23,8 +23,10 @@ include::include/global-options.adoc[]
 *-l, --list*::
     List attachment metadata.
 
-*-V, --view*::
-    Output attachment data.
+*-o, --output* [<file>]::
+    Output attachment data to a specified file.
++
+Use `-` for standard output.
 
 *-i, --item-ids*::
     Treat ID arguments as bug IDs or aliases, not attachment IDs.

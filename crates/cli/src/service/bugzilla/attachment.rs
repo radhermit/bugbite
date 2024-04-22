@@ -15,12 +15,17 @@ use crate::utils::COLUMNS;
 #[clap(next_help_heading = "Attachment options")]
 struct Options {
     /// list attachment metadata
-    #[arg(short, long, conflicts_with_all = ["dir", "view"])]
+    #[arg(short, long, conflicts_with_all = ["dir", "output"])]
     list: bool,
 
     /// output attachment data
-    #[arg(short = 'V', long, conflicts_with_all = ["dir", "list", "item_ids"])]
-    view: bool,
+    #[arg(
+        short,
+        long,
+        conflicts_with_all = ["dir", "list", "item_ids"],
+        value_name = "FILE",
+    )]
+    output: Option<String>,
 
     /// request attachments from bug IDs or aliases
     #[arg(short, long)]
@@ -58,10 +63,14 @@ impl Command {
             for attachment in attachments.iter().flatten() {
                 attachment.render(&mut stdout, *COLUMNS)?;
             }
-        } else if self.options.view {
-            for attachment in attachments.iter().flatten() {
-                // TODO: support auto-decompressing standard archive formats
-                write!(stdout, "{}", attachment.read()?)?;
+        } else if let Some(name) = self.options.output.as_deref() {
+            if let Some(attachment) = attachments.iter().flatten().next() {
+                let data = attachment.read()?;
+                if name == "-" {
+                    write!(stdout, "{data}")?;
+                } else {
+                    fs::write(name, &data).context("failed writing file")?;
+                }
             }
         } else {
             let dir = &self.options.dir;
