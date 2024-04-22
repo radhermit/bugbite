@@ -22,7 +22,7 @@ struct Options {
     #[arg(
         short,
         long,
-        conflicts_with_all = ["dir", "list", "item_ids"],
+        conflicts_with_all = ["dir", "list"],
         value_name = "FILE",
     )]
     output: Option<String>,
@@ -55,27 +55,32 @@ impl Command {
 
         let get_data = !self.options.list;
         let multiple_bugs = self.options.item_ids && ids.len() > 1;
-        let attachments = client
+        let attachments: Vec<_> = client
             .attachment(ids, self.options.item_ids, get_data)
-            .await?;
+            .await?
+            .into_iter()
+            .flatten()
+            .collect();
 
         if self.options.list {
-            for attachment in attachments.iter().flatten() {
+            for attachment in attachments {
                 attachment.render(&mut stdout, *COLUMNS)?;
             }
         } else if let Some(name) = self.options.output.as_deref() {
-            if let Some(attachment) = attachments.iter().flatten().next() {
+            for attachment in attachments {
                 let data = attachment.read()?;
                 if name == "-" {
-                    write!(stdout, "{data}")?;
+                    stdout
+                        .write_all(&data)
+                        .context("failed writing to standard output")?;
                 } else {
-                    fs::write(name, &data).context("failed writing file")?;
+                    fs::write(name, &data).context("failed writing to file: {name}")?;
                 }
             }
         } else {
             let dir = &self.options.dir;
             fs::create_dir_all(dir).context("failed creating attachments directory")?;
-            for attachment in attachments.iter().flatten() {
+            for attachment in attachments {
                 // use per-bug directories when requesting attachments from multiple bugs
                 let path = if multiple_bugs {
                     let dir = dir.join(attachment.bug_id.to_string());

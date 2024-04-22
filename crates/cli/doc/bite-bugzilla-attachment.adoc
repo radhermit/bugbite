@@ -24,7 +24,9 @@ include::include/global-options.adoc[]
     List attachment metadata.
 
 *-o, --output* [<file>]::
-    Output attachment data to a specified file.
+    Output attachment to a specified file.
++
+Note that multiple attachments will be output to the same location.
 +
 Use `-` for standard output.
 
