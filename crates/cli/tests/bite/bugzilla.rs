@@ -13,6 +13,7 @@ mod comment;
 mod create;
 mod get;
 mod history;
+mod modify;
 mod search;
 
 static TEST_DATA: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("bugbite/bugzilla"));
