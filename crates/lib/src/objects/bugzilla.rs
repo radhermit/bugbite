@@ -97,9 +97,9 @@ impl Attachment {
         format_size(self.size, BINARY)
     }
 
-    pub fn read(&self) -> crate::Result<String> {
+    pub fn read(&self) -> crate::Result<Vec<u8>> {
         // TODO: auto-decompress standard archive formats
-        Ok(fs::read_to_string(self.path()?)?)
+        Ok(fs::read(self.path()?)?)
     }
 }
 
