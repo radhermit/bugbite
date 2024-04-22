@@ -65,18 +65,7 @@ impl ServiceCommand {
         T: Into<String>,
     {
         let mut args: Vec<_> = args.into_iter().map(Into::into).collect();
-
-        let cmd = match Self::try_parse_from(&args) {
-            Ok(cmd) => cmd,
-            Err(e) => {
-                // use main command parser if first arg is an option (e.g. --help or --version)
-                if args.get(1).map(|x| x.starts_with('-')).unwrap_or(true) {
-                    Command::try_parse_from(&args)?;
-                }
-                return Err(e);
-            }
-        };
-
+        let cmd = Self::try_parse_from(&args)?;
         let remaining = cmd.remaining;
         // pull the first, remaining argument
         let arg = remaining.first().map(|x| x.as_str()).unwrap_or_default();
