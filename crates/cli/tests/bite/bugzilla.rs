@@ -23,6 +23,11 @@ async fn start_server() -> TestServer {
     let server = TestServer::new().await;
     env::set_var("BUGBITE_BASE", server.uri());
     env::set_var("BUGBITE_SERVICE", "bugzilla");
+    server
+}
+
+async fn start_server_with_auth() -> TestServer {
+    let server = start_server().await;
     env::set_var("BUGBITE_USER", "bugbite@bugbite.test");
     env::set_var("BUGBITE_PASS", "bugbite");
     server

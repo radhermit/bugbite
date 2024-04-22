@@ -21,7 +21,7 @@ fn aliases() {
 
 #[tokio::test]
 async fn creation() {
-    let server = start_server().await;
+    let server = start_server_with_auth().await;
 
     server
         .respond(200, TEST_DATA.join("create/creation.json"))
