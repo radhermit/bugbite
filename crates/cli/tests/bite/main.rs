@@ -42,11 +42,12 @@ fn help() {
 // verify version support isn't mangled by service subcommand injection
 #[test]
 fn version() {
+    let version = env!("CARGO_PKG_VERSION");
     for opt in ["-V", "--version"] {
         cmd("bite")
             .arg(opt)
             .assert()
-            .stdout(predicate::str::starts_with("bite"))
+            .stdout(predicate::str::diff(format!("bite {version}")).trim())
             .stderr("")
             .success();
     }
