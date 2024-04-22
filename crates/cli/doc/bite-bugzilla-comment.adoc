@@ -20,7 +20,7 @@ include::include/global-options.adoc[]
 
 == Comment options
 
-*-a, --attachment=[<bool>]*::
+*-a, --attachment [<bool>]*::
     Restrict by attachments.
 
 *-c, --created*::

@@ -31,21 +31,21 @@ This functionality uses `xdg-open` to open URLs.
 *--json*::
     Output in JSON format.
 
-*--from=<path>*::
+*--from <path>*::
     Read search attributes from a template.
 +
 Template files use the TOML format and generally map long option names to values.
 +
 Explicitly specified options override corresponding template values.
 
-*--to=<path>*::
+*--to <path>*::
     Write search attributes to a template.
 +
 Combining with --dry-run allows creating templates without service interaction.
 
 == Query options
 
-*-f, --fields=<field[,...]>*::
+*-f, --fields <field[,...]>*::
     Restrict the data fields returned by the query.
 +
 By default, only the id and subject fields are returned. This can be altered by
@@ -66,13 +66,13 @@ deadline, depends, duplicate-of, flags, id, keywords, os, platform, priority,
 product, qa, resolution, see-also, severity, status, summary, tags, target,
 updated, url, version, whiteboard
 
-*-l, --limit=<value>*::
+*-l, --limit <value>*::
     Limit the number of results.
 +
 If the value is higher than the maximum service limit that value is used
 instead. If the limit is set to zero, all matching results are returned.
 
-*-o, --order=<field[,...]>*::
+*-o, --order <field[,...]>*::
     Order the query results.
 +
 Fields can be prefixed with `-` or `+` to sort in descending or ascending
@@ -99,12 +99,12 @@ deadline, depends, flags, id, keywords, last-visit, modified, os, platform,
 priority, product, qa, reporter, resolution, severity, status, summary, tags,
 target, url, version, votes, whiteboard
 
-*-S, --quicksearch=<query>*::
+*-S, --quicksearch <query>*::
     Search for bugs using quicksearch syntax.
 
 == Attribute options
 
-*-A, --alias*=<value[,...]>::
+*-A, --alias* <value[,...]>::
     Restrict by alias.
 +
 With no argument, all bugs with aliases are returned. If the value is `true` or
@@ -130,7 +130,7 @@ application. See the <<Match Operators>> section for more information.
 .Contains `value1` or `value2`:
  bite -c gentoo search --alias value1 --alias value1
 
-*--attachments*=<value[,...]>::
+*--attachments* <value[,...]>::
     Restrict by attachments.
 +
 With no argument, all bugs with attachments are returned. If the value is
@@ -153,7 +153,7 @@ any of the specified values match.
 .Attachment description or file name contains `log` or `test`:
  bite -c gentoo search --attachments log,test
 
-*-B, --blocks*=<id[,...]>::
+*-B, --blocks* <id[,...]>::
     Restrict by blockers.
 +
 With no argument, all bugs with blockers are returned. If the value is `true`
@@ -188,7 +188,7 @@ Values can use the `-` prefix to search for non-blockers.
 +
 Values are taken from standard input when `-`.
 
-*-C, --component*=<value[,...]>::
+*-C, --component* <value[,...]>::
     Restrict by component.
 +
 Values search for matching substrings or can use match operators to alter their
@@ -202,7 +202,7 @@ Multiple values can be specified in a comma-separated list for logical OR.
 Values search for matching substrings or can use match operators to alter their
 query application. See the <<Match Operators>> section for more information.
 
-*-D, --depends*=<id[,...]>::
+*-D, --depends* <id[,...]>::
     Restrict by dependencies.
 +
 With no argument, all bugs with dependencies are returned. If the value is
@@ -238,7 +238,7 @@ Values can use the `-` prefix to search for non-dependencies.
 +
 Values are taken from standard input when `-`.
 
-*-F, --flags*=<value[,...]>::
+*-F, --flags* <value[,...]>::
     Restrict by flag.
 +
 With no argument, all bugs with flags are returned. If the value is `true` or
@@ -264,7 +264,7 @@ application. See the <<Match Operators>> section for more information.
 .Contains `value1` or `value2`:
  bite -c gentoo search --flags value1 --flags value1
 
-*-g, --groups*=<value[,...]>::
+*-g, --groups* <value[,...]>::
     Restrict by group.
 +
 With no argument, all bugs with groups are returned. If the value is `true` or
@@ -290,7 +290,7 @@ application. See the <<Match Operators>> section for more information.
 .Contains `value1` or `value2`:
  bite -c gentoo search --groups value1 --groups value1
 
-*--id*=<id[,...]>::
+*--id* <id[,...]>::
     Restrict by ID.
 +
 Regular values search for exact bug identifiers.
@@ -320,7 +320,7 @@ for more information, and values are taken from standard input when `-`.
 .Any ID matching values taken from a file:
  cat file | bite -c gentoo search --id -
 
-*-k, --keywords*=<value[,...]>::
+*-k, --keywords* <value[,...]>::
     Restrict by keyword.
 +
 With no argument, all bugs with keywords are returned. If the value is `true`
@@ -346,7 +346,7 @@ application. See the <<Match Operators>> section for more information.
 .Contains `value1` or `value2`:
  bite -c gentoo search --keywords value1 --keywords value1
 
-*--os*=<value[,...]>::
+*--os* <value[,...]>::
     Restrict by operating system.
 +
 Values search for matching substrings or can use match operators to alter their
@@ -354,7 +354,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*--platform*=<value[,...]>::
+*--platform* <value[,...]>::
     Restrict by platform.
 +
 Values search for matching substrings or can use match operators to alter their
@@ -362,7 +362,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*--priority*=<value[,...]>::
+*--priority* <value[,...]>::
     Restrict by priority.
 +
 Values search for matching substrings or can use match operators to alter their
@@ -370,7 +370,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*-p, --product*=<value[,...]>::
+*-p, --product* <value[,...]>::
     Restrict by product.
 +
 Values search for matching substrings or can use match operators to alter their
@@ -378,7 +378,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*-r, --resolution*=<value[,...]>::
+*-r, --resolution* <value[,...]>::
     Restrict by resolution.
 +
 Values search for matching substrings or can use match operators to alter their
@@ -386,7 +386,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*-U, --see-also*=<value[,...]>::
+*-U, --see-also* <value[,...]>::
     Restrict by tracker URLs.
 +
 With no argument, all bugs with tracker URLs are returned. If the value is
@@ -404,7 +404,7 @@ specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
 application. See the <<Match Operators>> section for more information.
 
-*--severity*=<value[,...]>::
+*--severity* <value[,...]>::
     Restrict by severity.
 +
 Values search for matching substrings or can use match operators to alter their
@@ -412,7 +412,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*-s, --status*=<value[,...]>::
+*-s, --status* <value[,...]>::
     Restrict by status.
 +
 By default, searches with no status parameter only target open bugs. This
@@ -441,7 +441,7 @@ closed, and all bugs, respectively.
 .All bugs assigned to yourself:
  bite -c gentoo search --status @all --assignee @me
 
-*-t, --tags*=<value[,...]>::
+*-t, --tags* <value[,...]>::
     Restrict by personal tags.
 +
 With no argument, all bugs with personal tags are returned. If the value is
@@ -459,7 +459,7 @@ specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
 application. See the <<Match Operators>> section for more information.
 
-*-T, --target*=<value[,...]>::
+*-T, --target* <value[,...]>::
     Restrict by target milestone.
 +
 Values search for matching substrings or can use match operators to alter their
@@ -467,7 +467,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*-u, --url*=<value[,...]>::
+*-u, --url* <value[,...]>::
     Restrict by URL.
 +
 With no argument, all bugs with a URL are returned. If the value is `true` or
@@ -484,7 +484,7 @@ specified in a comma-separated list for logical AND or multiple options for
 logical OR. Values can also use match operators to alter their query
 application. See the <<Match Operators>> section for more information.
 
-*-V, --version*=<value[,...]>::
+*-V, --version* <value[,...]>::
     Restrict by version.
 +
 Values search for matching substrings or can use match operators to alter their
@@ -492,7 +492,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*-w, --whiteboard*=<value[,...]>::
+*-w, --whiteboard* <value[,...]>::
     Restrict by whiteboard.
 +
 With no argument, all bugs with whiteboard info are returned. If the value is
@@ -512,7 +512,7 @@ application. See the <<Match Operators>> section for more information.
 
 == Attachment options
 
-*--attachment-description*=<value[,...]>::
+*--attachment-description* <value[,...]>::
     Restrict by attachment description.
 +
 Values search for matching substrings and multiple values can be specified in a
@@ -520,7 +520,7 @@ comma-separated list for logical AND or multiple options for logical OR. Match
 operators can also be used alter query application, see the <<Match Operators>>
 section for more information.
 
-*--attachment-filename*=<value[,...]>::
+*--attachment-filename* <value[,...]>::
     Restrict by attachment file name.
 +
 Values search for matching substrings and multiple values can be specified in a
@@ -528,7 +528,7 @@ comma-separated list for logical AND or multiple options for logical OR. Match
 operators can also be used alter query application, see the <<Match Operators>>
 section for more information.
 
-*--attachment-mime*=<value[,...]>::
+*--attachment-mime* <value[,...]>::
     Restrict by attachment MIME type.
 +
 Values search for matching substrings and multiple values can be specified in a
@@ -536,18 +536,18 @@ comma-separated list for logical AND or multiple options for logical OR. Match
 operators can also be used alter query application, see the <<Match Operators>>
 section for more information.
 
-*--attachment-is-obsolete*=[<bool>]::
+*--attachment-is-obsolete* [<bool>]::
     Restrict by attachment obsolete status.
 
-*--attachment-is-patch*=[<bool>]::
+*--attachment-is-patch* [<bool>]::
     Restrict by attachment patch status.
 
-*--attachment-is-private*=[<bool>]::
+*--attachment-is-private* [<bool>]::
     Restrict by attachment private status.
 
 == Range options
 
-*--comments*=<value>::
+*--comments* <value>::
     Restrict by the number of comments.
 +
 Values can either be numbers, numbers prefixed with operators (see section
@@ -565,7 +565,7 @@ the overall comment count shown by the `get` or `comment` subcommands.
 .Between five and ten comments:
  bite -c gentoo search --comments 5..10
 
-*--votes*=<value>::
+*--votes* <value>::
     Restrict by the number of votes.
 +
 Values can either be numbers, numbers prefixed with operators (see section
@@ -588,62 +588,62 @@ the overall comment count shown by the `get` or `comment` subcommands.
 
 // TODO: list possible change fields
 
-*--changed*=<field[,...]=time>::
+*--changed* <field[,...]=time>::
     Restrict by fields changed within a time interval.
 
-*--changed-by*=<field[,...]=user[,...]>::
+*--changed-by* <field[,...]=user[,...]>::
     Restrict by fields changed by a given user.
 
-*--changed-from* <field>=<value>::
+*--changed-from* <field> <value>::
     Restrict by fields changed from a given value.
 
-*--changed-to* <field>=<value>::
+*--changed-to* <field> <value>::
     Restrict by fields changed to a given value.
 
 == Time options
 
 // TODO: include external doc describing time value format
 
-*-c, --created*=<time>::
+*-c, --created* <time>::
     Restrict by creation time.
 
-*-m, --modified*=<time>::
+*-m, --modified* <time>::
     Restrict by modification time.
 
 == User options
 
-*-a, --assignee*=<user[,...]>::
+*-a, --assignee* <user[,...]>::
     Restrict by assignee user.
 
-*--attacher*=<user[,...]>::
+*--attacher* <user[,...]>::
     Restrict by attachment creation user.
 
-*--cc*=<user[,...]>::
+*--cc* <user[,...]>::
     Restrict by CC list user.
 
-*--commenter*=<user[,...]>::
+*--commenter* <user[,...]>::
     Restrict by commenting user.
 
-*--flagger*=<user[,...]>::
+*--flagger* <user[,...]>::
     Restrict by flag creation user.
 
-*--qa*=<user[,...]>::
+*--qa* <user[,...]>::
     Restrict by QA contact user.
 
-*-R, --reporter*=<user[,...]>::
+*-R, --reporter* <user[,...]>::
     Restrict by reporting user.
 
 == Comment options
 
-*--comment*=<term>::
+*--comment* <term>::
     Strings to search for in the comments.
 +
 Taken from standard input when `-`.
 
-*--comment-is-private*=[<bool>]::
+*--comment-is-private* [<bool>]::
     Restrict by comment private status.
 
-*--comment-tag*=<value[,...]>::
+*--comment-tag* <value[,...]>::
     Restrict by comment tag.
 +
 Values search for matching substrings and multiple values can be specified in a

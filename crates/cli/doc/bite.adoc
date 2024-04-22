@@ -47,24 +47,24 @@ include::include/global-options.adoc[]
 
 == Bite Options
 
-*--config=<path>*::
+*--config <path>*::
     Load a config from a custom path.
 
 *--insecure*::
     Ignore invalid service certificates when connecting.
 
-*-t, --timeout=<seconds>*::
+*-t, --timeout <seconds>*::
     Set the request timeout in seconds, defaults to 30.
 
 == Service Options
 
-*-c, --connection=<name>*::
+*-c, --connection <name>*::
     Use a pre-configured connection.
 
-*-b, --base=<url>*::
+*-b, --base <url>*::
     Specify the service URL to connect to.
 
-*-s, --service=<type>*::
+*-s, --service <type>*::
     Specify the service type to use.
 
 == Environment variables

@@ -31,21 +31,21 @@ This functionality uses `xdg-open` to open URLs.
 *--json*::
     Output in JSON format.
 
-*--from=<path>*::
+*--from <path>*::
     Read search attributes from a template.
 +
 Template files use the TOML format and generally map long option names to values.
 +
 Explicitly specified options override corresponding template values.
 
-*--to=<path>*::
+*--to <path>*::
     Write search attributes to a template.
 +
 Combining with --dry-run allows creating templates without service interaction.
 
 == Query options
 
-*-f, --fields=<field[,...]>*::
+*-f, --fields <field[,...]>*::
     Restrict the data fields returned by the query.
 +
 By default, only the id and subject fields are returned. This can be altered by
@@ -64,7 +64,7 @@ format to a space-separated list of the field values.
 - *tracker*: issue type
 - *updated*: time when the issue was last updated
 
-*-l, --limit=<value>*::
+*-l, --limit <value>*::
     Limit the number of results.
 +
 If the value is higher than the maximum limit that value is used instead and if
@@ -72,7 +72,7 @@ the limit is set to zero, the default limit is used. Note that the maximum and
 default limits are generally not equal, with most instances using 100 and 25,
 respectively.
 
-*-o, --order=<field[,...]>*::
+*-o, --order <field[,...]>*::
     Order the query results.
 +
 Fields can be prefixed with `-` or `+` to sort in descending or ascending
@@ -97,7 +97,7 @@ If an invalid sorting request is made, the default ordering will be used.
 
 == Attribute options
 
-*-a, --assignee=[<bool>]*::
+*-a, --assignee [<bool>]*::
     Restrict by assignee status.
 +
 With no argument, all matches with assignees are returned. If the value is
@@ -110,7 +110,7 @@ respectively.
 .Search for unassigned ruby issues:
  bite -c ruby search --assignee false
 
-*--attachments=[<value>[,...]]*::
+*--attachments [<value>[,...]]*::
     Restrict by attachments.
 +
 With no argument, all matches with attachments are returned. If the
@@ -135,7 +135,7 @@ match if all of the specified values match.
 .Search for ruby issues with file names containing `test` and `log`:
  bite -c ruby search --attachments test,log
 
-*-B, --blocks=[<ID>[,...]]*::
+*-B, --blocks [<ID>[,...]]*::
     Restrict by blockers.
 +
 With no argument, all blocking matches are returned. If the value is `true` or
@@ -159,7 +159,7 @@ match.
 +
 Values are taken from standard input when `-`.
 
-*-D, --blocked=[<ID>[,...]]*::
+*-D, --blocked [<ID>[,...]]*::
     Restrict by dependencies.
 +
 With no argument, all matches with dependencies are returned. If the value is
@@ -184,7 +184,7 @@ dependencies match.
 +
 Values are taken from standard input when `-`.
 
-*-R, --relates=[<ID>[,...]]*::
+*-R, --relates [<ID>[,...]]*::
     Restrict by relations.
 +
 With no argument, all matches with relations are returned. If the value is

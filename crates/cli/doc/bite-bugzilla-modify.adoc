@@ -42,7 +42,7 @@ Multiple arguments can be specified in a comma-separated list.
 .Reply to the last comment:
  bite -c gentoo modify 123 --reply
 
-*--from*=<path>::
+*--from* <path>::
     Read attributes from a template.
 +
 Value must be the path to a valid template file. Templates use the TOML format
@@ -55,7 +55,7 @@ Command-line parameters override corresponding template values.
 .Modify bug using template:
  bite -c gentoo modify 123 --from path/to/new.toml -c "modified using template"
 
-*--to*=<path>::
+*--to* <path>::
     Write attributes to a template.
 +
 Value is the file path where the TOML template file will be written.
@@ -68,7 +68,7 @@ service interaction.
 
 == Attribute options
 
-*-A, --alias*=<value[,...]>::
+*-A, --alias* <value[,...]>::
     Add, remove, or set aliases.
 +
 Values must be unique when adding or setting and are ignored when missing when
@@ -90,7 +90,7 @@ arguments removes the entire list.
 .Set aliases to `a3`:
  bite -c gentoo modify 10 --alias a3
 
-*-a, --assignee*=<user>::
+*-a, --assignee* <user>::
     Assign a bug to a user.
 +
 The value must be an email address for a service user. The alias `@me` can also
@@ -105,7 +105,7 @@ component.
 .Reset assignee to the default value:
  bite -c gentoo modify 123 --assignee
 
-*-b, --blocks*=<id[,...]>::
+*-b, --blocks* <id[,...]>::
     Add, remove, or set blockers.
 +
 Values must be valid IDs for existing bugs.
@@ -126,7 +126,7 @@ arguments removes the entire list.
 .Set blockers to bug 3:
  bite -c gentoo modify 10 --blocks 3
 
-*--cc*=<user[,...]>::
+*--cc* <user[,...]>::
     Add or remove users from the CC list.
 +
 Values must be email addresses for service users. The alias `@me` can also be
@@ -146,14 +146,14 @@ Multiple arguments can be specified in a comma-separated list.
 .Add and remove addresses from the CC list:
 bite -c gentoo modify 10 --cc=+test1@email.com,-test2@email.com
 
-*-c, --comment*=<value>::
+*-c, --comment* <value>::
     Add a comment.
 +
 When no argument is specified, an editor is launched for interactive entry.
 +
 Taken from standard input when `-`.
 
-*-F, --comment-from*=<path>::
+*-F, --comment-from* <path>::
     Add a comment using file content.
 +
 The value must be the path to a valid comment file.
@@ -173,7 +173,7 @@ The value must be the path to a valid comment file.
 .Create a private reply to last comment:
  bite -c gentoo modify 10 --reply --comment-is-private
 
-*--comment-privacy=<value>*::
+*--comment-privacy <value>*::
     Modify the privacy of existing comments.
 +
 The value must be comma-separated comment IDs local to the specified bug ID
@@ -197,13 +197,13 @@ suffix, the privacy of all matching comments is toggled.
 .Mark comments 2-5 private:
  bite -c gentoo modify 10 --comment-privacy 2..=5:true
 
-*-C, --component=<value>*::
+*-C, --component <value>*::
     Modify component.
 
 *--cf <name> <value>*::
     Modify custom fields.
 
-*-d, --depends*=<id[,...]>::
+*-d, --depends* <id[,...]>::
     Add, remove, or set dependencies.
 +
 Values must be valid IDs for existing bugs.
@@ -224,10 +224,10 @@ arguments removes the entire list.
 .Set dependencies to bug 3:
  bite -c gentoo modify 10 --depends 3
 
-*-D, --duplicate-of*=<id>::
+*-D, --duplicate-of* <id>::
     Mark as a duplicate of the specified bug.
 
-*-f, --flags*=<value[,...]>::
+*-f, --flags* <value[,...]>::
     Add or remove flags.
 +
 Values must be valid flags composed of the flag name followed by its status.
@@ -242,7 +242,7 @@ Multiple arguments can be specified in a comma-separated list.
 .Add `check+` and remove `test?` flags:
  bite -c gentoo modify 10 --flags check+,testX
 
-*-g, --groups*=<value[,...]>::
+*-g, --groups* <value[,...]>::
     Add or remove groups.
 +
 Values must be valid service groups.
@@ -258,7 +258,7 @@ Multiple arguments can be specified in a comma-separated list.
 .Add `test` and remove `admin` groups:
  bite -c gentoo modify 10 --groups +test,-admin
 
-*-k, --keywords*=<value[,...]>::
+*-k, --keywords* <value[,...]>::
     Add, remove, or set keywords.
 +
 Values must be valid keywords.
@@ -279,19 +279,19 @@ arguments removes the entire list.
 .Set keywords to `verify`:
  bite -c gentoo modify 10 --keywords verify
 
-*--os*=<value>::
+*--os* <value>::
     Modify operating system.
 
-*--platform*=<value>::
+*--platform* <value>::
     Modify platform.
 
-*--priority*=<value>::
+*--priority* <value>::
     Modify priority.
 
-*-p, --product*=<value>::
+*-p, --product* <value>::
     Modify product.
 
-*--qa*=<user>::
+*--qa* <user>::
     Assign a QA contact for the bug.
 +
 The value must be an email address for a service user. The alias `@me` can also
@@ -306,10 +306,10 @@ component.
 .Reset to default:
  bite -c gentoo modify 123 --qa
 
-*-r, --resolution*=<value>::
+*-r, --resolution* <value>::
     Modify resolution.
 
-*-U, --see-also*=<value[,...]>::
+*-U, --see-also* <value[,...]>::
     Add or remove URLs to bugs in external trackers.
 +
 Values must be valid URLs to bugs, issues, or tickets in external trackers or
@@ -329,25 +329,25 @@ Multiple arguments can be specified in a comma-separated list.
 .Add URL to external bug:
  bite -c gentoo modify 10 --see-also https://url/to/bug/5
 
-*--severity*=<value>::
+*--severity* <value>::
     Modify severity.
 
-*-s, --status*=<value>::
+*-s, --status* <value>::
     Modify status.
 
-*-S, --summary*=<value>::
+*-S, --summary* <value>::
     Modify summary.
 
-*-T, --target*=<value>::
+*-T, --target* <value>::
     Modify target milestone.
 
-*-u, --url*=<value>::
+*-u, --url* <value>::
     Modify URL.
 
-*-V, --version*=<value>::
+*-V, --version* <value>::
     Modify version.
 
-*-w, --whiteboard*=<value>::
+*-w, --whiteboard* <value>::
     Modify whiteboard.
 
 == Arguments

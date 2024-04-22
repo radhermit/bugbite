@@ -23,7 +23,7 @@ include::include/global-options.adoc[]
 *-n, --dry-run*::
     Skip service interaction.
 
-*--from*=<path>::
+*--from* <path>::
     Read attributes from a template.
 +
 Value must be the path to a valid template file. Templates use the TOML format
@@ -36,7 +36,7 @@ Command-line parameters override corresponding template values.
 .Create gentoo bug using template:
  bite -c gentoo create --from path/to/new.toml -S summary -D description
 
-*--from-bug*=<id>::
+*--from-bug* <id>::
     Read attributes from an existing bug.
 +
 Value must be the ID of an existing bug which will be used to pre-populate the
@@ -48,7 +48,7 @@ using existing bugs to edit and use later without creating a new bug.
 .Create gentoo bug using existing bug:
  bite -c gentoo create --from-bug 123 --to path/to/new.toml --dry-run
 
-*--to*=<path>::
+*--to* <path>::
     Write attributes to a template.
 +
 Value is the file path where the TOML template file will be written.
@@ -61,7 +61,7 @@ service interaction.
 
 == Attribute options
 
-*-A, --alias*=<value[,...]>::
+*-A, --alias* <value[,...]>::
     Set aliases.
 +
 The values must be unique aliases for a bug, using existing aliases will cause
@@ -70,13 +70,13 @@ the service to return an error.
 Multiple arguments can be specified in a comma-separated list or via multiple
 options.
 
-*-a, --assignee*=<user>::
+*-a, --assignee* <user>::
     Assign a bug to a user.
 +
 The value must be an email address for a service user. The alias `@me` can be
 used for the service's configured user if one exists.
 
-*-b, --blocks*=<id[,...]>::
+*-b, --blocks* <id[,...]>::
     Set blockers.
 +
 Values must be valid IDs for existing bugs.
@@ -86,7 +86,7 @@ options.
 +
 Values are taken from standard input when `-`.
 
-*--cc*=<user[,...]>::
+*--cc* <user[,...]>::
     Set users in the CC list.
 +
 Values must be email addresses for service users.
@@ -94,7 +94,7 @@ Values must be email addresses for service users.
 Multiple arguments can be specified in a comma-separated list or via multiple
 options.
 
-*-C, --component*=<value>::
+*-C, --component* <value>::
     Set the component.
 
 *--cf* <name> <value>::
@@ -104,7 +104,7 @@ The values must be valid custom field names followed by their value.
 +
 Multiple arguments can be specified via multiple options.
 
-*-d, --depends*=<id[,...]>::
+*-d, --depends* <id[,...]>::
     Set dependencies.
 +
 Values must be valid IDs for existing bugs.
@@ -114,10 +114,10 @@ options.
 +
 Values are taken from standard input when `-`.
 
-*-D, --description*=<value>::
+*-D, --description* <value>::
     Set the description.
 
-*-F, --flags*=<value[,...]>::
+*-F, --flags* <value[,...]>::
     Set flags.
 +
 Values must be valid flags composed of the flag name followed by its status.
@@ -126,7 +126,7 @@ Supported statuses include `+`, `-`, and `?`.
 Multiple arguments can be specified in a comma-separated list or via multiple
 options.
 
-*-g, --groups*=<value[,...]>::
+*-g, --groups* <value[,...]>::
     Set groups.
 +
 Values must be valid service groups. No arguments may be used to avoid adding
@@ -135,7 +135,7 @@ the bug to all default groups for the targeted product.
 Multiple arguments can be specified in a comma-separated list or via multiple
 options.
 
-*-k, --keywords*=<value[,...]>::
+*-k, --keywords* <value[,...]>::
     Set keywords.
 +
 Values must be valid keywords.
@@ -143,28 +143,28 @@ Values must be valid keywords.
 Multiple arguments can be specified in a comma-separated list or via multiple
 options.
 
-*--os*=<value>::
+*--os* <value>::
     Set operating system.
 
-*--platform*=<value>::
+*--platform* <value>::
     Set platform.
 
-*--priority*=<value>::
+*--priority* <value>::
     Set priority.
 
-*-p, --product*=<value>::
+*-p, --product* <value>::
     Set product.
 
-*--qa*=<user>::
+*--qa* <user>::
     Set the QA contact.
 +
 The value must be an email address for a service user. The alias `@me` can also
 be used for the service's configured user if one exists.
 
-*-r, --resolution*=<value>::
+*-r, --resolution* <value>::
     Set resolution.
 
-*-U, --see-also*=<value[,...]>::
+*-U, --see-also* <value[,...]>::
     Set URLs to bugs in external trackers.
 +
 Values must be valid URLs to bugs, issues, or tickets in external trackers.
@@ -172,25 +172,25 @@ Values must be valid URLs to bugs, issues, or tickets in external trackers.
 Multiple arguments can be specified in a comma-separated list or via multiple
 options.
 
-*--severity*=<value>::
+*--severity* <value>::
     Set severity.
 
-*-s, --status*=<value>::
+*-s, --status* <value>::
     Set status.
 
-*-S, --summary*=<value>::
+*-S, --summary* <value>::
     Set summary.
 
-*-T, --target*=<value>::
+*-T, --target* <value>::
     Set target milestone.
 
-*-u, --url*=<value>::
+*-u, --url* <value>::
     Set URL.
 
-*-V, --version*=<value>::
+*-V, --version* <value>::
     Set version.
 
-*-w, --whiteboard*=<value>::
+*-w, --whiteboard* <value>::
     Set whiteboard.
 
 == See Also
