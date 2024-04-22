@@ -20,6 +20,21 @@ fn aliases() {
 }
 
 #[tokio::test]
+async fn auth_required() {
+    let _server = start_server().await;
+
+    cmd("bite create")
+        .args(["--component", "TestComponent"])
+        .args(["--product", "TestProduct"])
+        .args(["--summary", "test"])
+        .args(["--description", "test"])
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff("Error: authentication required").trim())
+        .failure();
+}
+
+#[tokio::test]
 async fn creation() {
     let server = start_server_with_auth().await;
 
