@@ -15,9 +15,9 @@ bite - a command line tool for bug, issue, and ticket mangling
 == Description
 
 Bite is a command line tool for interacting with bug, issue, and ticket
-tracking services. It aims to provide access to common functionality such as
-searching, requesting, creating, and modifying bugs, issues, or tickets in
-addition to other actions provided by a service.
+trackers. It aims to support common actions such as searching, requesting,
+creating, and modifying bugs, issues, or tickets in addition to other
+functionality provided by a service.
 
 == Usage
 
@@ -26,17 +26,10 @@ quicker, command-line entry if desired.
 
 == Options
 
-*-v, --verbose*::
-    Increase logging verbosity.
-
-*-q, --quiet*::
-    Decrease logging verbosity.
-
-*-h, --help*::
-    Print help output and exit.
-
 *-V, --version*::
     Print version and exit.
+
+include::include/global-options.adoc[]
 
 == Bite Options
 
