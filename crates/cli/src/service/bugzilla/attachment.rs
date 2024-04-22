@@ -19,7 +19,7 @@ struct Options {
     list: bool,
 
     /// output attachment data
-    #[arg(short = 'V', long, conflicts_with_all = ["dir", "list"])]
+    #[arg(short = 'V', long, conflicts_with_all = ["dir", "list", "item_ids"])]
     view: bool,
 
     /// request attachments from bug IDs or aliases
