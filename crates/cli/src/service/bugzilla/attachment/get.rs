@@ -56,7 +56,7 @@ impl Command {
         let get_data = !self.options.list;
         let multiple_bugs = self.options.item_ids && ids.len() > 1;
         let attachments: Vec<_> = client
-            .attachment(ids, self.options.item_ids, get_data)
+            .attachment_get(ids, self.options.item_ids, get_data)
             .await?
             .into_iter()
             .flatten()

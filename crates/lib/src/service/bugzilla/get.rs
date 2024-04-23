@@ -5,14 +5,14 @@ use crate::objects::bugzilla::Bug;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
-use super::attachment::AttachmentRequest;
+use super::attachment::get::AttachmentGetRequest;
 use super::comment::CommentRequest;
 use super::history::HistoryRequest;
 
 #[derive(Debug)]
 pub(crate) struct GetRequest {
     url: Url,
-    attachments: Option<AttachmentRequest>,
+    attachments: Option<AttachmentGetRequest>,
     comments: Option<CommentRequest>,
     history: Option<HistoryRequest>,
 }
@@ -49,7 +49,7 @@ impl GetRequest {
             .append_pair("exclude_fields", "update_token");
 
         let attachments = if attachments {
-            Some(service.attachment_request(ids, true, false)?)
+            Some(service.attachment_get_request(ids, true, false)?)
         } else {
             None
         };

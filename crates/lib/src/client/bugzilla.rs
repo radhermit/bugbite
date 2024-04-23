@@ -3,8 +3,7 @@ use tracing::info;
 
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::{
-    attach::CreateAttachment,
-    comment, create, history,
+    attachment, comment, create, history,
     modify::{self, BugChange},
     search, {Config, Service},
 };
@@ -33,19 +32,19 @@ impl Client {
         Ok(format!("{base}/buglist.cgi?{params}"))
     }
 
-    pub async fn attach<S>(
+    pub async fn attachment_create<S>(
         &self,
         ids: &[S],
-        attachments: Vec<CreateAttachment>,
+        attachments: Vec<attachment::create::CreateAttachment>,
     ) -> crate::Result<Vec<Vec<u64>>>
     where
         S: std::fmt::Display,
     {
-        let request = self.service.attach_request(ids, attachments)?;
+        let request = self.service.attachment_create_request(ids, attachments)?;
         request.send(&self.service).await
     }
 
-    pub async fn attachment<S>(
+    pub async fn attachment_get<S>(
         &self,
         ids: &[S],
         bugs: bool,
@@ -54,7 +53,19 @@ impl Client {
     where
         S: std::fmt::Display,
     {
-        let request = self.service.attachment_request(ids, bugs, data)?;
+        let request = self.service.attachment_get_request(ids, bugs, data)?;
+        request.send(&self.service).await
+    }
+
+    pub async fn attachment_update<S>(
+        &self,
+        ids: &[S],
+        params: attachment::update::Parameters,
+    ) -> crate::Result<Vec<u64>>
+    where
+        S: std::fmt::Display,
+    {
+        let request = self.service.attachment_update_request(ids, params)?;
         request.send(&self.service).await
     }
 

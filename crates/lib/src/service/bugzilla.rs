@@ -14,8 +14,7 @@ use crate::service::ServiceKind;
 use crate::traits::{Api, WebService};
 use crate::Error;
 
-pub mod attach;
-mod attachment;
+pub mod attachment;
 pub mod comment;
 pub mod create;
 mod get;
@@ -86,23 +85,23 @@ impl Service {
         }
     }
 
-    pub(crate) fn attach_request<S>(
+    pub(crate) fn attachment_create_request<S>(
         &self,
         ids: &[S],
-        attachments: Vec<attach::CreateAttachment>,
-    ) -> crate::Result<attach::AttachRequest>
+        attachments: Vec<attachment::create::CreateAttachment>,
+    ) -> crate::Result<attachment::create::AttachmentCreateRequest>
     where
         S: std::fmt::Display,
     {
-        attach::AttachRequest::new(self, ids, attachments)
+        attachment::create::AttachmentCreateRequest::new(self, ids, attachments)
     }
 
-    pub(crate) fn attachment_request<S>(
+    pub(crate) fn attachment_get_request<S>(
         &self,
         ids: &[S],
         bugs: bool,
         data: bool,
-    ) -> crate::Result<attachment::AttachmentRequest>
+    ) -> crate::Result<attachment::get::AttachmentGetRequest>
     where
         S: std::fmt::Display,
     {
@@ -111,7 +110,18 @@ impl Service {
         } else {
             Ids::object(ids)
         };
-        attachment::AttachmentRequest::new(self, ids, data)
+        attachment::get::AttachmentGetRequest::new(self, ids, data)
+    }
+
+    pub(crate) fn attachment_update_request<S>(
+        &self,
+        ids: &[S],
+        params: attachment::update::Parameters,
+    ) -> crate::Result<attachment::update::AttachmentUpdateRequest>
+    where
+        S: std::fmt::Display,
+    {
+        attachment::update::AttachmentUpdateRequest::new(self, ids, params)
     }
 
     pub(crate) fn comment_request<S>(

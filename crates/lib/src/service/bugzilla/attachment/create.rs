@@ -9,6 +9,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use url::Url;
 
 use crate::objects::Base64;
+use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
@@ -300,14 +301,14 @@ struct Attachment {
 }
 
 #[derive(Debug)]
-pub(crate) struct AttachRequest {
+pub(crate) struct AttachmentCreateRequest {
     url: Url,
     attachments: Vec<Attachment>,
 }
 
-impl AttachRequest {
+impl AttachmentCreateRequest {
     pub(crate) fn new<S>(
-        service: &super::Service,
+        service: &Service,
         ids: &[S],
         create_attachments: Vec<CreateAttachment>,
     ) -> crate::Result<Self>
@@ -341,9 +342,9 @@ impl AttachRequest {
     }
 }
 
-impl Request for AttachRequest {
+impl Request for AttachmentCreateRequest {
     type Output = Vec<Vec<u64>>;
-    type Service = super::Service;
+    type Service = Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
         let futures: Vec<_> = self

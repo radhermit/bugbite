@@ -26,6 +26,9 @@ linkcmd:bite-bugzilla-attachment-create[1]::
 linkcmd:bite-bugzilla-attachment-get[1]::
 	get bugs
 
+linkcmd:bite-bugzilla-attachment-update[1]::
+	update attachment metadata
+
 == See Also
 
 linkcmd:bite-bugzilla[1]

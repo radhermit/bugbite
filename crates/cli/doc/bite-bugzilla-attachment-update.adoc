@@ -1,0 +1,53 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-attachment-update - update attachment metadata
+
+== Synopsis
+
+*bite bugzilla attachment update* [<options>] [id[,...]]::
+    Update attachment metadata.
+
+*bite bugzilla attachment update* [-h|--help]::
+    Output help information.
+
+== Description
+
+Update attachment metadata.
+
+include::include/global-options.adoc[]
+
+== Attachment options
+
+*-c, --comment* <value>::
+    Comment related to the attachment.
+
+*-d, --description* <value>::
+    A short description of the attachment.
+
+*-f, --file-name* <value>::
+    File name of the attachment.
+
+*-m, --mime* <type>::
+    Specify the MIME type of the attachment.
+
+*-o, --obsolete* [<bool>]::
+    Mark attachment obsolete.
+
+*-p, --patch* [<bool>]::
+    Mark attachment as a patch.
+
+*-P, --private* [<bool>]::
+    Mark attachment private.
+
+== Arguments
+
+<id[,...]>::
+    Attachment IDs.
++
+Taken from standard input when `-`.
+
+== See Also
+
+linkcmd:bite-bugzilla-attachment[1]

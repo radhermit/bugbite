@@ -2,7 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
-use bugbite::service::bugzilla::attach::{Compression, CreateAttachment};
+use bugbite::service::bugzilla::attachment::create::{Compression, CreateAttachment};
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};
@@ -118,8 +118,8 @@ impl Command {
         let mut attachments = vec![];
         for file in &self.args.files {
             let mut attachment = CreateAttachment::new(file);
-            attachment.description = self.options.description.clone();
             attachment.comment = self.options.comment.clone();
+            attachment.description = self.options.description.clone();
             attachment.mime_type = self.options.mime.clone();
             attachment.dir = self.options.dir;
             attachment.is_patch = self.options.patch;
@@ -134,7 +134,7 @@ impl Command {
         }
 
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
-        let attachment_ids = client.attach(ids, attachments).await?;
+        let attachment_ids = client.attachment_create(ids, attachments).await?;
 
         let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
         for (file, ids) in self.args.files.iter().zip(attachment_ids.iter()) {
