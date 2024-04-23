@@ -30,16 +30,16 @@ include::include/global-options.adoc[]
     File name of the attachment.
 
 *-m, --mime* <type>::
-    Specify the MIME type of the attachment.
+    MIME type of the attachment.
 
 *-o, --obsolete* [<bool>]::
-    Mark attachment obsolete.
+    Toggle obsolete status.
 
 *-p, --patch* [<bool>]::
-    Mark attachment as a patch.
+    Toggle patch status.
 
 *-P, --private* [<bool>]::
-    Mark attachment private.
+    Toggle private status.
 
 == Arguments
 
