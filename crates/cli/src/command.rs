@@ -47,6 +47,7 @@ fn enable_logging(verbosity: LevelFilter) {
 pub(super) struct ServiceCommand {
     #[clap(flatten)]
     options: Options,
+
     #[arg(
         num_args = ..,
         trailing_var_arg = true,
@@ -124,14 +125,16 @@ impl ServiceCommand {
 }
 
 #[derive(Debug, Args)]
-#[clap(next_help_heading = "Service")]
+#[clap(next_help_heading = "Service Options")]
 struct ServiceOptions {
     /// use pre-configured connection
     #[arg(short, long, env = "BUGBITE_CONNECTION")]
     connection: Option<String>,
+
     /// base service URL
     #[arg(short, long, env = "BUGBITE_BASE")]
     base: Option<String>,
+
     /// service type
     #[arg(
         short,
@@ -145,14 +148,16 @@ struct ServiceOptions {
 }
 
 #[derive(Debug, Args)]
-#[clap(next_help_heading = "Bite options")]
+#[clap(next_help_heading = "Bite Options")]
 struct BiteOptions {
     /// load config from a custom path
     #[arg(long, value_name = "PATH", value_hint = ValueHint::FilePath)]
     config: Option<Utf8PathBuf>,
+
     /// ignore invalid service certificates
     #[arg(long)]
     insecure: bool,
+
     /// request timeout in seconds
     #[arg(short, long, value_name = "SECONDS", default_value = "30")]
     timeout: f64,
@@ -162,6 +167,7 @@ struct BiteOptions {
 pub(crate) struct Options {
     #[clap(flatten)]
     bite: BiteOptions,
+
     #[clap(flatten)]
     service: ServiceOptions,
 }
