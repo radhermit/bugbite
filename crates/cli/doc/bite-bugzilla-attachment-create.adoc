@@ -23,6 +23,11 @@ include::include/global-options.adoc[]
 *-c, --comment* <value>::
     Comment to add with the attachment.
 
+*-d, --description* <value>::
+    A short description of the attachment.
++
+By default the file name is used when this is not specified.
+
 *-C, --compress* [<variant>]::
     Compress attachments.
 +
@@ -70,7 +75,7 @@ the default value will be used for it.
 .Auto-truncate to 5000 lines and compress using zstd:
  bite -c gentoo attachment create 10 file.txt --auto-truncate 5000 --compress zstd
 
-*-d, --dir*::
+*--dir*::
     Support directory targets for attachments.
 +
 Targeting a directory will attach a compressed tarball of the given path.
@@ -98,11 +103,6 @@ text/plain may need to be forced.
 
 *-P, --private*::
     Mark attachment private.
-
-*-s, --summary* <value>::
-    A short description of the attachment.
-+
-By default the file name is used when this is not specified.
 
 == Arguments
 

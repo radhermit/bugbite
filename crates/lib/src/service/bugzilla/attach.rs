@@ -82,14 +82,14 @@ pub struct CreateAttachment {
     /// Path to the attachment.
     path: Utf8PathBuf,
 
-    /// Attachment summary, by default the filename is used on submission.
-    pub summary: Option<String>,
-
-    /// MIME type of the attachment.
-    pub content_type: Option<String>,
-
     /// Comment related to the attachment.
     pub comment: Option<String>,
+
+    /// Attachment description, by default the filename is used on submission.
+    pub description: Option<String>,
+
+    /// MIME type of the attachment.
+    pub mime_type: Option<String>,
 
     /// Support creating tarballs of directory path contents.
     pub dir: bool,
@@ -182,9 +182,9 @@ impl CreateAttachment {
     pub fn new<P: AsRef<Utf8Path>>(path: P) -> Self {
         Self {
             path: path.as_ref().to_path_buf(),
-            summary: None,
             comment: None,
-            content_type: None,
+            description: None,
+            mime_type: None,
             dir: false,
             is_patch: false,
             is_private: false,
@@ -276,9 +276,9 @@ impl CreateAttachment {
         Ok(Attachment {
             ids: ids.iter().map(|s| s.to_string()).collect(),
             data: Base64(data),
-            content_type: self.content_type.unwrap_or(mime_type),
+            content_type: self.mime_type.unwrap_or(mime_type),
             file_name: file_name.clone(),
-            summary: self.summary.unwrap_or(file_name),
+            summary: self.description.unwrap_or(file_name),
             comment: self.comment.unwrap_or_default(),
             is_patch: self.is_patch,
             is_private: self.is_private,

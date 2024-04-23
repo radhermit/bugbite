@@ -17,6 +17,10 @@ struct Options {
     #[arg(short, long)]
     comment: Option<String>,
 
+    /// attachment description
+    #[arg(short, long)]
+    description: Option<String>,
+
     /// compress attachment
     #[arg(
         short = 'C',
@@ -51,13 +55,14 @@ struct Options {
     auto_truncate: Option<usize>,
 
     /// support directory targets
-    #[arg(short, long, conflicts_with = "mime")]
+    #[arg(long, conflicts_with = "mime")]
     dir: bool,
 
-    /// specify the MIME type
+    /// attachment MIME type
     #[arg(
         short,
         long,
+        value_name = "TYPE",
         conflicts_with_all = ["compress", "auto_compress", "auto_truncate", "dir", "patch"],
     )]
     mime: Option<String>,
@@ -73,10 +78,6 @@ struct Options {
     /// attachment is private
     #[arg(short = 'P', long)]
     private: bool,
-
-    /// short description of the attachment
-    #[arg(short, long)]
-    summary: Option<String>,
 }
 
 #[derive(Debug, Args)]
@@ -117,9 +118,9 @@ impl Command {
         let mut attachments = vec![];
         for file in &self.args.files {
             let mut attachment = CreateAttachment::new(file);
-            attachment.summary = self.options.summary.clone();
+            attachment.description = self.options.description.clone();
             attachment.comment = self.options.comment.clone();
-            attachment.content_type = self.options.mime.clone();
+            attachment.mime_type = self.options.mime.clone();
             attachment.dir = self.options.dir;
             attachment.is_patch = self.options.patch;
             attachment.is_private = self.options.private;
