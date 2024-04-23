@@ -178,14 +178,23 @@ where
 impl CreateAttachment {
     /// Create a new attachment using a given path.
     pub fn new<P: AsRef<Utf8Path>>(path: P) -> Self {
+        let path = path.as_ref();
+
+        // use default compression for directory targets
+        let compress = if path.is_dir() {
+            Some(Default::default())
+        } else {
+            None
+        };
+
         Self {
-            path: path.as_ref().to_path_buf(),
+            path: path.to_path_buf(),
             comment: None,
             description: None,
             mime_type: None,
             is_patch: false,
             is_private: false,
-            compress: None,
+            compress,
             auto_compress: None,
             auto_truncate: None,
         }
@@ -215,7 +224,7 @@ impl CreateAttachment {
     }
 
     /// Build an attachment for request submission.
-    fn build<S>(mut self, ids: &[S], temp_dir_path: &Utf8Path) -> crate::Result<Attachment>
+    fn build<S>(self, ids: &[S], temp_dir_path: &Utf8Path) -> crate::Result<Attachment>
     where
         S: std::fmt::Display,
     {
@@ -232,10 +241,6 @@ impl CreateAttachment {
         if path.is_dir() {
             file_name = tar(&path, temp_dir_path)?;
             path = temp_dir_path.join(&file_name);
-            // use default compression for tarball
-            if self.compress.is_none() {
-                self.compress = Some(Default::default());
-            }
         }
 
         let mut data = fs::read(&path)
