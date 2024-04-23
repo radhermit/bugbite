@@ -90,10 +90,7 @@ pub struct CreateAttachment {
     pub description: Option<String>,
 
     /// MIME type of the attachment.
-    pub mime_type: Option<String>,
-
-    /// Support creating tarballs of directory path contents.
-    pub dir: bool,
+    mime_type: Option<String>,
 
     /// Attachment is a patch file.
     pub is_patch: bool,
@@ -108,7 +105,7 @@ pub struct CreateAttachment {
     pub auto_compress: Option<f64>,
 
     /// Automatically truncate plain text attachments if exceeding a number of lines.
-    pub auto_truncate: Option<usize>,
+    auto_truncate: Option<usize>,
 }
 
 // Try to detect data content type use `file` then via `infer, and finally falling back to
@@ -186,12 +183,23 @@ impl CreateAttachment {
             comment: None,
             description: None,
             mime_type: None,
-            dir: false,
             is_patch: false,
             is_private: false,
             compress: None,
             auto_compress: None,
             auto_truncate: None,
+        }
+    }
+
+    /// Set the attachment MIME type.
+    pub fn mime_type<S: std::fmt::Display>(&mut self, value: S) -> crate::Result<()> {
+        if self.path.is_dir() {
+            Err(Error::InvalidValue(
+                "MIME type invalid for directory targets".to_string(),
+            ))
+        } else {
+            self.mime_type = Some(value.to_string());
+            Ok(())
         }
     }
 
@@ -219,11 +227,9 @@ impl CreateAttachment {
             .file_name()
             .map(|s| s.to_string())
             .ok_or_else(|| Error::InvalidValue(format!("attachment missing file name: {path}")))?;
-        let metadata = fs::metadata(&path)
-            .map_err(|e| Error::InvalidValue(format!("failed reading metadata: {path}: {e}")))?;
 
         // create directory tarball
-        if metadata.is_dir() && self.dir {
+        if path.is_dir() {
             file_name = tar(&path, temp_dir_path)?;
             path = temp_dir_path.join(&file_name);
             // use default compression for tarball

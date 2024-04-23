@@ -54,16 +54,12 @@ struct Options {
     )]
     auto_truncate: Option<usize>,
 
-    /// support directory targets
-    #[arg(long, conflicts_with = "mime")]
-    dir: bool,
-
     /// attachment MIME type
     #[arg(
         short,
         long,
         value_name = "TYPE",
-        conflicts_with_all = ["compress", "auto_compress", "auto_truncate", "dir", "patch"],
+        conflicts_with_all = ["compress", "auto_compress", "auto_truncate", "patch"],
     )]
     mime: Option<String>,
 
@@ -120,8 +116,9 @@ impl Command {
             let mut attachment = CreateAttachment::new(file);
             attachment.comment = self.options.comment.clone();
             attachment.description = self.options.description.clone();
-            attachment.mime_type = self.options.mime.clone();
-            attachment.dir = self.options.dir;
+            if let Some(value) = self.options.mime.as_deref() {
+                attachment.mime_type(value)?;
+            }
             attachment.is_patch = self.options.patch;
             attachment.is_private = self.options.private;
             attachment.compress = self.options.compress;
