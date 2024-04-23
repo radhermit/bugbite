@@ -3,13 +3,13 @@ use tempfile::NamedTempFile;
 
 use crate::command::cmd;
 
-use super::*;
+use crate::bugzilla::*;
 
 #[test]
 fn aliases() {
-    for subcmd in ["at", "attach"] {
+    for subcmd in ["c", "create"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla")
+            cmd("bite bugzilla attachment")
                 .arg(subcmd)
                 .arg(opt)
                 .assert()
@@ -26,7 +26,7 @@ async fn auth_required() {
     let file = NamedTempFile::new().unwrap();
     let path = file.path().to_str().unwrap();
 
-    cmd("bite attach 1")
+    cmd("bite attachment create 1")
         .arg(path)
         .assert()
         .stdout("")

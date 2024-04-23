@@ -11,7 +11,6 @@ use crate::utils::truncate;
 use super::output::*;
 use super::Render;
 
-mod attach;
 mod attachment;
 mod comment;
 mod create;
@@ -64,12 +63,9 @@ impl Command {
 
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
-    /// Create attachments
-    #[command(alias = "at")]
-    Attach(Box<attach::Command>),
-    /// Get attachments
+    /// Attachment commands
     #[command(alias = "a")]
-    Attachment(attachment::Command),
+    Attachment(Box<attachment::Command>),
     /// Get comments
     Comment(comment::Command),
     /// Create bug
@@ -91,7 +87,6 @@ enum Subcommand {
 impl Subcommand {
     async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Attach(cmd) => cmd.run(client).await,
             Self::Attachment(cmd) => cmd.run(client).await,
             Self::Comment(cmd) => cmd.run(client).await,
             Self::Create(cmd) => cmd.run(client).await,

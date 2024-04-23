@@ -42,11 +42,8 @@ include::include/global-options.adoc[]
 
 == Subcommands
 
-linkcmd:bite-bugzilla-attach[1]::
-	create attachments
-
 linkcmd:bite-bugzilla-attachment[1]::
-	get attachments
+	attachment commands
 
 linkcmd:bite-bugzilla-comment[1]::
 	get bug comments
