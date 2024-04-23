@@ -16,5 +16,5 @@ name = "bugbite"
 crate-type = ["cdylib"]
 
 [dependencies]
-bugbite = { path = "../lib", version = "0.0.10" }
+bugbite = { path = "../lib", version = "0.0.11" }
 pyo3 = { version = "0.20.3", features = ["extension-module"] }
