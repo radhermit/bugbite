@@ -65,7 +65,7 @@ impl Request for AttachmentGetRequest {
                 for (id, values) in data {
                     let Value::Array(data) = values else {
                         return Err(Error::InvalidValue(
-                            "invalid service response to get request".to_string(),
+                            "invalid service response to attachment get request".to_string(),
                         ));
                     };
 
