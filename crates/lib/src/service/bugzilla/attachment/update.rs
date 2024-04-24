@@ -3,6 +3,7 @@ use serde_json::Value;
 use serde_with::skip_serializing_none;
 use url::Url;
 
+use crate::objects::bugzilla::Flag;
 use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
@@ -16,11 +17,14 @@ pub struct Parameters {
     /// Attachment description.
     pub description: Option<String>,
 
-    /// Attachment file name.
-    pub file_name: Option<String>,
+    /// Attachment flags.
+    pub flags: Option<Vec<Flag>>,
 
     /// MIME type of the attachment.
     pub mime_type: Option<String>,
+
+    /// Attachment file name.
+    pub name: Option<String>,
 
     /// Attachment is obsolete.
     pub is_obsolete: Option<bool>,
@@ -37,13 +41,14 @@ impl Parameters {
     fn encode(self, ids: Vec<String>) -> RequestParameters {
         RequestParameters {
             ids,
-            file_name: self.file_name,
+            file_name: self.name,
             summary: self.description,
             comment: self.comment,
             content_type: self.mime_type,
             is_patch: self.is_patch,
             is_private: self.is_private,
             is_obsolete: self.is_obsolete,
+            flags: self.flags,
         }
     }
 }
@@ -60,6 +65,7 @@ struct RequestParameters {
     is_patch: Option<bool>,
     is_private: Option<bool>,
     is_obsolete: Option<bool>,
+    flags: Option<Vec<Flag>>,
 }
 
 #[derive(Debug)]

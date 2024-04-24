@@ -26,11 +26,14 @@ include::include/global-options.adoc[]
 *-d, --description* <value>::
     A short description of the attachment.
 
-*-f, --file-name* <value>::
-    File name of the attachment.
+*-f, --flags* <value>[,...]::
+    Modify attachment flags.
 
 *-m, --mime* <type>::
     MIME type of the attachment.
+
+*-n, --name* <value>::
+    File name of the attachment.
 
 *-o, --obsolete* [<bool>]::
     Toggle obsolete status.

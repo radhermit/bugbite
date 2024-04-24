@@ -2,6 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::update::Parameters;
 use clap::Args;
 
@@ -16,13 +17,17 @@ struct Options {
     #[arg(short, long, value_name = "VALUE")]
     description: Option<String>,
 
-    /// attachment file name
-    #[arg(short, long, value_name = "VALUE")]
-    file_name: Option<String>,
+    /// add/remove flags
+    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    flags: Option<Vec<Flag>>,
 
     /// attachment MIME type
     #[arg(short, long, value_name = "TYPE", conflicts_with_all = ["patch"])]
     mime: Option<String>,
+
+    /// attachment file name
+    #[arg(short = 'n', long, value_name = "VALUE")]
+    name: Option<String>,
 
     /// attachment is obsolete
     #[arg(
@@ -84,8 +89,9 @@ impl Command {
         let params = Parameters {
             comment: self.options.comment,
             description: self.options.description,
-            file_name: self.options.file_name,
+            flags: self.options.flags,
             mime_type: self.options.mime,
+            name: self.options.name,
             is_obsolete: self.options.obsolete,
             is_patch: self.options.patch,
             is_private: self.options.private,
