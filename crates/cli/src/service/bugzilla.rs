@@ -66,7 +66,7 @@ enum Subcommand {
     /// Attachment commands
     #[command(alias = "a")]
     Attachment(Box<attachment::Command>),
-    /// Get comments
+    /// Get bug comments
     Comment(comment::Command),
     /// Create bug
     #[command(alias = "c")]
@@ -74,7 +74,7 @@ enum Subcommand {
     /// Get bugs
     #[command(alias = "g")]
     Get(get::Command),
-    /// Get changes
+    /// Get bug changes
     History(history::Command),
     /// Modify bugs
     #[command(alias = "m")]
