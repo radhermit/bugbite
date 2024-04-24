@@ -31,6 +31,33 @@ By default the submitted file name is used.
 *-f, --flags* <value>[,...]::
     Attachment flags.
 
+*-m, --mime* <type>::
+    Specify the MIME type of the attachment.
++
+This option is unnecessary for regular usage since bugbite automatically
+determines the MIME type using `file` with a fallback to data inference for
+common file types; however, `file` often misidentifies plain text file types so
+text/plain may need to be forced.
++
+In addition, setting the MIME type isn't allowed for directory targets as it is
+automatically determined.
++
+.Attach build.log with forced MIME type:
+ bite -c gentoo attachment create 10 build.log --mime text/plain
+
+*-n, --name* <value>::
+    File name of the attachment.
++
+By default the submitted file name is used.
+
+*-p, --patch*::
+    Mark attachment as a patch.
+
+*-P, --private*::
+    Mark attachment private.
+
+== Compression options
+
 *-C, --compress* [<variant>]::
     Compress attachments.
 +
@@ -77,31 +104,6 @@ the default value will be used for it.
 +
 .Auto-truncate to 5000 lines and compress using zstd:
  bite -c gentoo attachment create 10 file.txt --auto-truncate 5000 --compress zstd
-
-*-m, --mime* <type>::
-    Specify the MIME type of the attachment.
-+
-This option is unnecessary for regular usage since bugbite automatically
-determines the MIME type using `file` with a fallback to data inference for
-common file types; however, `file` often misidentifies plain text file types so
-text/plain may need to be forced.
-+
-In addition, setting the MIME type isn't allowed for directory targets as it is
-automatically determined.
-+
-.Attach build.log with forced MIME type:
- bite -c gentoo attachment create 10 build.log --mime text/plain
-
-*-n, --name* <value>::
-    File name of the attachment.
-+
-By default the submitted file name is used.
-
-*-p, --patch*::
-    Mark attachment as a patch.
-
-*-P, --private*::
-    Mark attachment private.
 
 == Arguments
 

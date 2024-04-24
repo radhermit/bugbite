@@ -26,39 +26,6 @@ struct Options {
     #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
     flags: Option<Vec<Flag>>,
 
-    /// compress attachment
-    #[arg(
-        short = 'C',
-        long,
-        conflicts_with_all = ["mime", "patch"],
-        num_args = 0..=1,
-        default_missing_value = "xz",
-        hide_possible_values = true,
-        value_parser = PossibleValuesParser::new(Compression::VARIANTS)
-            .map(|s| s.parse::<Compression>().unwrap()),
-    )]
-    compress: Option<Compression>,
-
-    /// auto-compress attachment
-    #[arg(
-        long,
-        value_name = "SIZE",
-        num_args = 0..=1,
-        default_missing_value = "1.0",
-        conflicts_with_all = ["mime", "patch"],
-    )]
-    auto_compress: Option<f64>,
-
-    /// auto-truncate text attachment
-    #[arg(
-        long,
-        value_name = "LINES",
-        num_args = 0..=1,
-        default_missing_value = "1000",
-        conflicts_with_all = ["mime", "patch"],
-    )]
-    auto_truncate: Option<usize>,
-
     /// attachment MIME type
     #[arg(
         short,
@@ -83,6 +50,43 @@ struct Options {
     /// attachment is private
     #[arg(short = 'P', long)]
     private: bool,
+}
+
+#[derive(Debug, Args)]
+#[clap(next_help_heading = "Compression options")]
+struct CompressionOptions {
+    /// compress attachment
+    #[arg(
+        short = 'C',
+        long,
+        num_args = 0..=1,
+        default_missing_value = "xz",
+        hide_possible_values = true,
+        value_parser = PossibleValuesParser::new(Compression::VARIANTS)
+            .map(|s| s.parse::<Compression>().unwrap()),
+        conflicts_with_all = ["mime", "patch"],
+    )]
+    compress: Option<Compression>,
+
+    /// auto-compress attachment
+    #[arg(
+        long,
+        value_name = "SIZE",
+        num_args = 0..=1,
+        default_missing_value = "1.0",
+        conflicts_with_all = ["mime", "patch"],
+    )]
+    auto_compress: Option<f64>,
+
+    /// auto-truncate text attachment
+    #[arg(
+        long,
+        value_name = "LINES",
+        num_args = 0..=1,
+        default_missing_value = "1000",
+        conflicts_with_all = ["mime", "patch"],
+    )]
+    auto_truncate: Option<usize>,
 }
 
 #[derive(Debug, Args)]
@@ -115,6 +119,9 @@ pub(super) struct Command {
     options: Options,
 
     #[clap(flatten)]
+    compression: CompressionOptions,
+
+    #[clap(flatten)]
     args: Arguments,
 }
 
@@ -132,9 +139,9 @@ impl Command {
             attachment.name = self.options.name.clone();
             attachment.is_patch = self.options.patch;
             attachment.is_private = self.options.private;
-            attachment.compress = self.options.compress;
-            attachment.auto_compress = self.options.auto_compress;
-            if let Some(value) = self.options.auto_truncate {
+            attachment.compress = self.compression.compress;
+            attachment.auto_compress = self.compression.auto_compress;
+            if let Some(value) = self.compression.auto_truncate {
                 attachment.auto_truncate(value);
             }
 
