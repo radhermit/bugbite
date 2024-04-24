@@ -28,7 +28,7 @@ enum Subcommand {
     #[command(alias = "g")]
     Get(get::Command),
 
-    /// Update attachment metadata
+    /// Update attachments
     #[command(alias = "u")]
     Update(update::Command),
 }

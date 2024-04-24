@@ -2,19 +2,19 @@ include::include/header.adoc[]
 
 == Name
 
-bite-bugzilla-attachment-update - update attachment metadata
+bite-bugzilla-attachment-update - update attachments
 
 == Synopsis
 
 *bite bugzilla attachment update* [<options>] [id[,...]]::
-    Update attachment metadata.
+    Update attachments.
 
 *bite bugzilla attachment update* [-h|--help]::
     Output help information.
 
 == Description
 
-Update attachment metadata.
+Update attachments.
 
 include::include/global-options.adoc[]
 
