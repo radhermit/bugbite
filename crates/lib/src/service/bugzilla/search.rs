@@ -190,7 +190,7 @@ pub struct Parameters {
     pub order: Option<Vec<Order<OrderField>>>,
 
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
-    pub modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
+    pub updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     pub comment: Option<Vec<Match>>,
     pub comment_is_private: Option<bool>,
@@ -267,7 +267,7 @@ impl Parameters {
             order: self.order.or(other.order),
 
             created: self.created.or(other.created),
-            modified: self.modified.or(other.modified),
+            updated: self.updated.or(other.updated),
 
             comment: self.comment.or(other.comment),
             comment_is_private: self.comment_is_private.or(other.comment_is_private),
@@ -334,8 +334,8 @@ impl Parameters {
         self
     }
 
-    pub fn modified(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
-        self.modified = Some(value);
+    pub fn updated(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+        self.updated = Some(value);
         self
     }
 
@@ -686,8 +686,8 @@ impl Parameters {
             query.created(value);
         }
 
-        if let Some(value) = self.modified {
-            query.modified(value);
+        if let Some(value) = self.updated {
+            query.updated(value);
         }
 
         if let Some(value) = self.quicksearch {
@@ -884,7 +884,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn modified(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) {
+    fn updated(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) {
         match value {
             RangeOrValue::Value(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
             RangeOrValue::RangeOp(value) => self.range_op("delta_ts", value),
@@ -1372,7 +1372,6 @@ pub enum OrderField {
     Id,
     Keywords,
     LastVisit,
-    Modified,
     Os,
     Platform,
     Priority,
@@ -1385,6 +1384,7 @@ pub enum OrderField {
     Summary,
     Tags,
     Target,
+    Updated,
     Url,
     Version,
     Votes,
@@ -1406,7 +1406,6 @@ impl Api for OrderField {
             Self::Id => "bug_id",
             Self::Keywords => "keywords",
             Self::LastVisit => "last_visit_ts",
-            Self::Modified => "changeddate",
             Self::Os => "op_sys",
             Self::Platform => "platform",
             Self::Priority => "priority",
@@ -1419,6 +1418,7 @@ impl Api for OrderField {
             Self::Summary => "short_desc",
             Self::Tags => "tag",
             Self::Target => "target_milestone",
+            Self::Updated => "changeddate",
             Self::Url => "bug_file_loc",
             Self::Version => "version",
             Self::Votes => "votes",

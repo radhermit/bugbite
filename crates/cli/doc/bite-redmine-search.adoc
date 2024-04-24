@@ -230,8 +230,8 @@ Query issue status from the following options: open, closed, and all.
 *-c, --created*::
     Restrict by creation time.
 
-*-m, --modified*::
-    Restrict by modification time.
+*-u, --updated*::
+    Restrict by update time.
 
 *-c, --closed*::
     Restrict by closed time.

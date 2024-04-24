@@ -107,12 +107,12 @@ impl Attachment {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum Modification<'a> {
+pub enum BugUpdate<'a> {
     Comment(&'a Comment),
     Event(&'a Event),
 }
 
-impl Modification<'_> {
+impl BugUpdate<'_> {
     fn date(&self) -> &DateTime<Utc> {
         match self {
             Self::Comment(comment) => &comment.created,
@@ -121,13 +121,13 @@ impl Modification<'_> {
     }
 }
 
-impl Ord for Modification<'_> {
+impl Ord for BugUpdate<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.date().cmp(other.date())
     }
 }
 
-impl PartialOrd for Modification<'_> {
+impl PartialOrd for BugUpdate<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
@@ -383,9 +383,9 @@ impl From<Bug> for Item {
 }
 
 impl Bug {
-    pub fn events(&self) -> impl Iterator<Item = Modification> {
-        let comments = self.comments.iter().map(Modification::Comment);
-        let history = self.history.iter().map(Modification::Event);
+    pub fn updates(&self) -> impl Iterator<Item = BugUpdate> {
+        let comments = self.comments.iter().map(BugUpdate::Comment);
+        let history = self.history.iter().map(BugUpdate::Event);
         comments.chain(history).sorted()
     }
 }

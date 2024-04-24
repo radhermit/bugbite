@@ -162,7 +162,7 @@ pub struct Parameters {
     pub ids: Option<Vec<RangeOrValue<u64>>>,
 
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
-    pub modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
+    pub updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
     pub closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     pub limit: Option<u64>,
@@ -190,7 +190,7 @@ impl Parameters {
             relates: self.relates.or(other.relates),
             ids: self.ids.or(other.ids),
             created: self.created.or(other.created),
-            modified: self.modified.or(other.modified),
+            updated: self.updated.or(other.updated),
             closed: self.closed.or(other.closed),
             limit: self.limit.or(other.limit),
             order: self.order.or(other.order),
@@ -275,7 +275,7 @@ impl Parameters {
             query.time("created_on", value);
         }
 
-        if let Some(value) = self.modified {
+        if let Some(value) = self.updated {
             query.time("updated_on", value);
         }
 

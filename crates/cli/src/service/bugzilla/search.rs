@@ -237,7 +237,6 @@ struct AttributeOptions {
 
     /// restrict by URL
     #[arg(
-        short = 'u',
         long,
         value_name = "VALUE[,...]",
         num_args = 0..=1,
@@ -365,9 +364,9 @@ struct TimeOptions {
     #[arg(short, long, value_name = "TIME")]
     created: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
-    /// restrict by modification time
+    /// restrict by update time
     #[arg(short, long, value_name = "TIME")]
-    modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
+    updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
 }
 
 #[derive(Debug, Args)]
@@ -543,7 +542,7 @@ impl From<Params> for Parameters {
             votes: value.range.votes,
 
             created: value.time.created,
-            modified: value.time.modified,
+            updated: value.time.updated,
 
             assignee: value
                 .user

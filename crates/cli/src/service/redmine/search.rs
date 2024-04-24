@@ -106,9 +106,9 @@ struct TimeOptions {
     #[arg(short, long, value_name = "TIME")]
     created: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
-    /// restrict by modification time
+    /// restrict by update time
     #[arg(short, long, value_name = "TIME")]
-    modified: Option<RangeOrValue<TimeDeltaOrStatic>>,
+    updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     /// restrict by closed time
     #[arg(short = 'C', long, value_name = "TIME")]
@@ -142,7 +142,7 @@ impl From<Params> for Parameters {
             relates: value.attr.relates.map(|x| x.flatten()),
             ids: value.attr.id.map(|x| x.into_iter().flatten().collect()),
             created: value.time.created,
-            modified: value.time.modified,
+            updated: value.time.updated,
             closed: value.time.closed,
             status: value.attr.status,
             limit: value.query.limit,

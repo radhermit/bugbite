@@ -95,9 +95,9 @@ or last results of an ordered match.
 +
 // TODO: link to rust docs for field descriptions
 Possible values: alias, assignee, blocks, comments, component, created,
-deadline, depends, flags, id, keywords, last-visit, modified, os, platform,
-priority, product, qa, reporter, resolution, severity, status, summary, tags,
-target, url, version, votes, whiteboard
+deadline, depends, flags, id, keywords, last-visit, os, platform, priority,
+product, qa, reporter, resolution, severity, status, summary, tags, target,
+updated, url, version, votes, whiteboard
 
 *-S, --quicksearch <query>*::
     Search for bugs using quicksearch syntax.
@@ -467,7 +467,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*-u, --url* <value[,...]>::
+*--url* <value[,...]>::
     Restrict by URL.
 +
 With no argument, all bugs with a URL are returned. If the value is `true` or
@@ -607,8 +607,8 @@ the overall comment count shown by the `get` or `comment` subcommands.
 *-c, --created* <time>::
     Restrict by creation time.
 
-*-m, --modified* <time>::
-    Restrict by modification time.
+*-u, --updated* <time>::
+    Restrict by update time.
 
 == User options
 

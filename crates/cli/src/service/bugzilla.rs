@@ -181,7 +181,7 @@ impl Render for Change {
     }
 }
 
-impl Render for Modification<'_> {
+impl Render for BugUpdate<'_> {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
         match self {
             Self::Comment(comment) => comment.render(f, width),
@@ -241,10 +241,10 @@ impl Render for Bug {
             }
         }
 
-        // render both comments and changes in order of occurrence if either exist
-        for e in self.events() {
+        // render updates in order of occurrence
+        for update in self.updates() {
             writeln!(f)?;
-            e.render(f, width)?;
+            update.render(f, width)?;
         }
 
         Ok(())
