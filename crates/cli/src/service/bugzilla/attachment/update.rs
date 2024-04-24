@@ -9,27 +9,27 @@ use clap::Args;
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attachment options")]
 struct Options {
-    /// attachment comment
+    /// update comment
     #[arg(short, long, value_name = "VALUE")]
     comment: Option<String>,
 
-    /// attachment description
+    /// update description
     #[arg(short, long, value_name = "VALUE")]
     description: Option<String>,
 
-    /// add/remove flags
+    /// update flags
     #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
     flags: Option<Vec<Flag>>,
 
-    /// attachment MIME type
+    /// update MIME type
     #[arg(short, long, value_name = "TYPE", conflicts_with_all = ["patch"])]
     mime: Option<String>,
 
-    /// attachment file name
+    /// update file name
     #[arg(short, long, value_name = "VALUE")]
     name: Option<String>,
 
-    /// attachment is obsolete
+    /// update obsolete status
     #[arg(
         short,
         long,
@@ -40,7 +40,7 @@ struct Options {
     )]
     obsolete: Option<bool>,
 
-    /// attachment is a patch
+    /// update patch status
     #[arg(
         short,
         long,
@@ -52,7 +52,7 @@ struct Options {
     )]
     patch: Option<bool>,
 
-    /// attachment is private
+    /// update private status
     #[arg(
         short = 'P',
         long,

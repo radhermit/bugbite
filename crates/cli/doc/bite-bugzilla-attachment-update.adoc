@@ -21,28 +21,28 @@ include::include/global-options.adoc[]
 == Attachment options
 
 *-c, --comment* <value>::
-    Comment related to the attachment.
+    Update comment.
 
 *-d, --description* <value>::
-    A short description of the attachment.
+    Update description.
 
 *-f, --flags* <value>[,...]::
-    Modify attachment flags.
+    Update flags.
 
 *-m, --mime* <type>::
-    MIME type of the attachment.
+    Update MIME type.
 
 *-n, --name* <value>::
-    File name of the attachment.
+    Update file name.
 
 *-o, --obsolete* [<bool>]::
-    Toggle obsolete status.
+    Update obsolete status.
 
 *-p, --patch* [<bool>]::
-    Toggle patch status.
+    Update patch status.
 
 *-P, --private* [<bool>]::
-    Toggle private status.
+    Update private status.
 
 == Arguments
 
