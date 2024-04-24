@@ -5,9 +5,11 @@ use std::{io, str};
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
 use serde::Serialize;
+use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 use url::Url;
 
+use crate::objects::bugzilla::Flag;
 use crate::objects::Base64;
 use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, Request, WebService};
@@ -88,6 +90,9 @@ pub struct CreateAttachment {
 
     /// Attachment description, by default the filename is used on submission.
     pub description: Option<String>,
+
+    /// Attachment flags.
+    pub flags: Option<Vec<Flag>>,
 
     /// MIME type of the attachment.
     mime_type: Option<String>,
@@ -191,6 +196,7 @@ impl CreateAttachment {
             path: path.to_path_buf(),
             comment: None,
             description: None,
+            flags: None,
             mime_type: None,
             is_patch: false,
             is_private: false,
@@ -294,11 +300,13 @@ impl CreateAttachment {
             comment: self.comment.unwrap_or_default(),
             is_patch: self.is_patch,
             is_private: self.is_private,
+            flags: self.flags,
         })
     }
 }
 
 /// Attachment object used for request submission.
+#[skip_serializing_none]
 #[derive(Serialize, Debug)]
 struct Attachment {
     ids: Vec<String>,
@@ -309,6 +317,7 @@ struct Attachment {
     comment: String,
     is_patch: bool,
     is_private: bool,
+    flags: Option<Vec<Flag>>,
 }
 
 #[derive(Debug)]

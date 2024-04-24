@@ -2,6 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::create::{Compression, CreateAttachment};
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
@@ -20,6 +21,10 @@ struct Options {
     /// attachment description
     #[arg(short, long)]
     description: Option<String>,
+
+    /// attachment flags
+    #[arg(short, long, value_name = "VALUE[,...]", value_delimiter = ',')]
+    flags: Option<Vec<Flag>>,
 
     /// compress attachment
     #[arg(
@@ -116,6 +121,7 @@ impl Command {
             let mut attachment = CreateAttachment::new(file);
             attachment.comment = self.options.comment.clone();
             attachment.description = self.options.description.clone();
+            attachment.flags = self.options.flags.clone();
             if let Some(value) = self.options.mime.as_deref() {
                 attachment.mime_type(value)?;
             }

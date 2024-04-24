@@ -28,6 +28,9 @@ include::include/global-options.adoc[]
 +
 By default the file name is used when this is not specified.
 
+*-f, --flags* <value>[,...]::
+    Attachment flags.
+
 *-C, --compress* [<variant>]::
     Compress attachments.
 +
