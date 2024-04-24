@@ -26,7 +26,7 @@ include::include/global-options.adoc[]
 *-d, --description* <value>::
     A short description of the attachment.
 +
-By default the file name is used when this is not specified.
+By default the submitted file name is used.
 
 *-f, --flags* <value>[,...]::
     Attachment flags.
@@ -92,6 +92,11 @@ automatically determined.
 .Attach build.log with forced MIME type:
  bite -c gentoo attachment create 10 build.log --mime text/plain
 
+*-n, --name* <value>::
+    File name of the attachment.
++
+By default the submitted file name is used.
+
 *-p, --patch*::
     Mark attachment as a patch.
 
@@ -114,10 +119,10 @@ Taken from standard input when `-`.
 <files>::
     Paths to attachment files.
 +
-Multiple attachments can be created by specifying multiple paths.
+Multiple attachments can be created by specifying multiple files.
 +
 .Attach multiple files:
- bite -c gentoo attachment create 3 file1 file2 file3
+ bite -c gentoo attachment create 3 file1 file2 path/to/file3
 
 == Examples
 

@@ -68,6 +68,10 @@ struct Options {
     )]
     mime: Option<String>,
 
+    /// attachment file name
+    #[arg(short, long, value_name = "VALUE")]
+    name: Option<String>,
+
     /// attachment is a patch
     #[arg(
         short,
@@ -125,6 +129,7 @@ impl Command {
             if let Some(value) = self.options.mime.as_deref() {
                 attachment.mime_type(value)?;
             }
+            attachment.name = self.options.name.clone();
             attachment.is_patch = self.options.patch;
             attachment.is_private = self.options.private;
             attachment.compress = self.options.compress;

@@ -88,7 +88,7 @@ pub struct CreateAttachment {
     /// Comment related to the attachment.
     pub comment: Option<String>,
 
-    /// Attachment description, by default the filename is used on submission.
+    /// Attachment description, by default the submitted file name is used.
     pub description: Option<String>,
 
     /// Attachment flags.
@@ -96,6 +96,9 @@ pub struct CreateAttachment {
 
     /// MIME type of the attachment.
     mime_type: Option<String>,
+
+    /// Attachment file name, by default the submitted file name is used.
+    pub name: Option<String>,
 
     /// Attachment is a patch file.
     pub is_patch: bool,
@@ -198,6 +201,7 @@ impl CreateAttachment {
             description: None,
             flags: None,
             mime_type: None,
+            name: None,
             is_patch: false,
             is_private: false,
             compress,
@@ -295,7 +299,7 @@ impl CreateAttachment {
             ids: ids.iter().map(|s| s.to_string()).collect(),
             data: Base64(data),
             content_type: self.mime_type.unwrap_or(mime_type),
-            file_name: file_name.clone(),
+            file_name: self.name.unwrap_or(file_name.clone()),
             summary: self.description.unwrap_or(file_name),
             comment: self.comment.unwrap_or_default(),
             is_patch: self.is_patch,
