@@ -1,3 +1,4 @@
+use serde_json::Value;
 use url::Url;
 
 use crate::objects::bugzilla::Attachment;
@@ -10,6 +11,7 @@ use crate::Error;
 pub(crate) struct AttachmentGetRequest {
     ids: Ids,
     url: Url,
+    data: bool,
 }
 
 impl AttachmentGetRequest {
@@ -39,7 +41,7 @@ impl AttachmentGetRequest {
             url.query_pairs_mut().append_pair("exclude_fields", "data");
         }
 
-        Ok(Self { ids, url })
+        Ok(Self { ids, url, data })
     }
 }
 
@@ -54,27 +56,47 @@ impl Request for AttachmentGetRequest {
         match self.ids {
             Ids::Item(_) => {
                 let data = data["bugs"].take();
-                let serde_json::value::Value::Object(data) = data else {
+                let Value::Object(data) = data else {
                     panic!("invalid bugzilla attachment response");
                 };
                 // Bugzilla's response always uses bug IDs even if attachments were requested via
                 // alias so we assume the response is in the same order as the request.
-                let mut bug_attachments = vec![];
-                for (_id, values) in data {
-                    let attachments = serde_json::from_value(values).map_err(|e| {
-                        Error::InvalidValue(format!("failed deserializing attachments: {e}"))
-                    })?;
-                    bug_attachments.push(attachments);
+                let mut attachments = vec![];
+                for (id, values) in data {
+                    let Value::Array(data) = values else {
+                        return Err(Error::InvalidValue(
+                            "invalid service response to get request".to_string(),
+                        ));
+                    };
+
+                    let mut bug_attachments = vec![];
+                    for attachment in data {
+                        // skip deserializing deleted attachments when retrieving data
+                        if !self.data || !attachment["data"].is_null() {
+                            let attachment = serde_json::from_value(attachment).map_err(|_| {
+                                Error::InvalidValue(format!("invalid attachment for bug {id}"))
+                            })?;
+                            bug_attachments.push(attachment);
+                        }
+                    }
+
+                    attachments.push(bug_attachments);
                 }
-                Ok(bug_attachments)
+                Ok(attachments)
             }
             Ids::Object(ids) => {
                 let mut data = data["attachments"].take();
                 let mut attachments = vec![];
                 for id in ids {
                     let data = data[&id].take();
-                    let attachment = serde_json::from_value(data)
-                        .map_err(|_| Error::InvalidValue(format!("unknown attachment ID: {id}")))?;
+                    if self.data && data["data"].is_null() {
+                        return Err(Error::InvalidValue(format!(
+                            "can't retrieve deleted attachment: {id}"
+                        )));
+                    }
+                    let attachment = serde_json::from_value(data).map_err(|_| {
+                        Error::InvalidValue(format!("failed deserializing attachment: {id}"))
+                    })?;
                     attachments.push(attachment);
                 }
                 Ok(vec![attachments])
