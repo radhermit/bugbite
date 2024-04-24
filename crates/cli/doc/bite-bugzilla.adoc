@@ -57,11 +57,11 @@ linkcmd:bite-bugzilla-get[1]::
 linkcmd:bite-bugzilla-history[1]::
 	get bug changes
 
-linkcmd:bite-bugzilla-update[1]::
-	update bugs
-
 linkcmd:bite-bugzilla-search[1]::
 	search bugs
+
+linkcmd:bite-bugzilla-update[1]::
+	update bugs
 
 == See Also
 
