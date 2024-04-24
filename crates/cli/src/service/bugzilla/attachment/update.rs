@@ -26,7 +26,7 @@ struct Options {
     mime: Option<String>,
 
     /// attachment file name
-    #[arg(short = 'n', long, value_name = "VALUE")]
+    #[arg(short, long, value_name = "VALUE")]
     name: Option<String>,
 
     /// attachment is obsolete
