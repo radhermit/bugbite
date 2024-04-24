@@ -68,6 +68,9 @@ pub struct Attachment {
     pub created: DateTime<Utc>,
     #[serde(rename = "last_change_time")]
     pub updated: DateTime<Utc>,
+    #[serde(deserialize_with = "null_empty_vec")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub flags: Vec<BugFlag>,
     #[serde(default, rename = "data", deserialize_with = "base64_to_tempfile")]
     file: Option<NamedTempFile>,
 }
