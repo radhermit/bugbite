@@ -69,8 +69,8 @@ impl<'a> WebService<'a> for Service {
     type GetRequest = get::GetRequest;
     type CreateRequest = NullRequest;
     type CreateParams = ();
-    type ModifyRequest = NullRequest;
-    type ModifyParams = ();
+    type UpdateRequest = NullRequest;
+    type UpdateParams = ();
     type SearchRequest = search::SearchRequest;
     type SearchParams = search::Parameters;
 

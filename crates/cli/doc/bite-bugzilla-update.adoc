@@ -2,23 +2,23 @@ include::include/header.adoc[]
 
 == Name
 
-bite-bugzilla-modify - modify bugs
+bite-bugzilla-update - update bugs
 
 == Synopsis
 
-*bite bugzilla modify* <options> <ids>::
-    Modify bugs.
+*bite bugzilla update* <options> <ids>::
+    Update bugs.
 
-*bite bugzilla modify* [-h|--help]::
+*bite bugzilla update* [-h|--help]::
     Output help information.
 
 == Description
 
-Modify bugs.
+Update bugs.
 
 include::include/global-options.adoc[]
 
-== Modify options
+== Update options
 
 *-n, --dry-run*::
     Skip service interaction.
@@ -37,10 +37,10 @@ a new bug comment.
 Multiple arguments can be specified in a comma-separated list.
 +
 .Reply to comments 1 and 2:
- bite -c gentoo modify 123 --reply 1,2
+ bite -c gentoo update 123 --reply 1,2
 +
 .Reply to the last comment:
- bite -c gentoo modify 123 --reply
+ bite -c gentoo update 123 --reply
 
 *--from* <path>::
     Read attributes from a template.
@@ -52,8 +52,8 @@ Fields that don't match known bug field names target custom fields.
 +
 Command-line parameters override corresponding template values.
 +
-.Modify bug using template:
- bite -c gentoo modify 123 --from path/to/new.toml -c "modified using template"
+.Update bug using template:
+ bite -c gentoo update 123 --from path/to/new.toml -c "updated using template"
 
 *--to* <path>::
     Write attributes to a template.
@@ -64,7 +64,7 @@ Combining this option with -n/--dry-run allows creating templates without any
 service interaction.
 +
 .Create template using specified values:
- bite -c gentoo modify 123 -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
+ bite -c gentoo update 123 -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
 
 == Attribute options
 
@@ -82,13 +82,13 @@ Multiple arguments can be specified in a comma-separated list while no
 arguments removes the entire list.
 +
 .Add alias `a1`:
- bite -c gentoo modify 10 --alias +a1
+ bite -c gentoo update 10 --alias +a1
 +
 .Add alias `a2` and remove `a1`:
- bite -c gentoo modify 10 --alias +a2,-a1
+ bite -c gentoo update 10 --alias +a2,-a1
 +
 .Set aliases to `a3`:
- bite -c gentoo modify 10 --alias a3
+ bite -c gentoo update 10 --alias a3
 
 *-a, --assignee* <user>::
     Assign a bug to a user.
@@ -100,10 +100,10 @@ No argument or an empty string will reset the field to the default for target
 component.
 +
 .Assign to yourself:
- bite -c gentoo modify 123 --assignee @me
+ bite -c gentoo update 123 --assignee @me
 +
 .Reset assignee to the default value:
- bite -c gentoo modify 123 --assignee
+ bite -c gentoo update 123 --assignee
 
 *-b, --blocks* <id[,...]>::
     Add, remove, or set blockers.
@@ -118,13 +118,13 @@ Multiple arguments can be specified in a comma-separated list while no
 arguments removes the entire list.
 +
 .Add blocker on bug 1:
- bite -c gentoo modify 10 --blocks +1
+ bite -c gentoo update 10 --blocks +1
 +
 .Add bug 2 and remove bug 1 blockers:
- bite -c gentoo modify 10 --blocks +2,-1
+ bite -c gentoo update 10 --blocks +2,-1
 +
 .Set blockers to bug 3:
- bite -c gentoo modify 10 --blocks 3
+ bite -c gentoo update 10 --blocks 3
 
 *--cc* <user[,...]>::
     Add or remove users from the CC list.
@@ -133,18 +133,18 @@ Values must be email addresses for service users. The alias `@me` can also be
 used for the service's configured user if one exists.
 +
 .Add yourself to the CC list:
- bite -c gentoo modify 10 --cc @me
+ bite -c gentoo update 10 --cc @me
 +
 Prefixing values with `+` or `-` adds or removes from the list, respectively.
 Unprefixed values will be added to the list.
 +
 .Remove yourself from the CC list:
- bite -c gentoo modify 10 --cc=-@me
+ bite -c gentoo update 10 --cc=-@me
 +
 Multiple arguments can be specified in a comma-separated list.
 +
 .Add and remove addresses from the CC list:
-bite -c gentoo modify 10 --cc=+test1@email.com,-test2@email.com
+bite -c gentoo update 10 --cc=+test1@email.com,-test2@email.com
 
 *-c, --comment* <value>::
     Add a comment.
@@ -159,22 +159,22 @@ Taken from standard input when `-`.
 The value must be the path to a valid comment file.
 +
 .Create a comment from a file:
- bite -c gentoo modify 10 --comment-from path/to/file.txt
+ bite -c gentoo update 10 --comment-from path/to/file.txt
 
 *-P, --comment-is-private*::
     Mark created comment as private.
 +
 .Create a private comment:
- bite -c gentoo modify 10 --comment test --comment-is-private
+ bite -c gentoo update 10 --comment test --comment-is-private
 +
 .Create a private comment from a file:
- bite -c gentoo modify 10 --comment-from path/to/file.txt --comment-is-private
+ bite -c gentoo update 10 --comment-from path/to/file.txt --comment-is-private
 +
 .Create a private reply to last comment:
- bite -c gentoo modify 10 --reply --comment-is-private
+ bite -c gentoo update 10 --reply --comment-is-private
 
 *--comment-privacy <value>*::
-    Modify the privacy of existing comments.
+    Update the privacy of existing comments.
 +
 The value must be comma-separated comment IDs local to the specified bug ID
 starting at 0 for the bug description or a range of comment IDs. An optional
@@ -183,25 +183,25 @@ included to enable or disable all comment privacy respectively. Without this
 suffix, the privacy of all matching comments is toggled.
 +
 .Toggle comment 1 privacy:
- bite -c gentoo modify 10 --comment-privacy 1
+ bite -c gentoo update 10 --comment-privacy 1
 +
 .Toggle comment 1 and 2 privacy:
- bite -c gentoo modify 10 --comment-privacy 1,2
+ bite -c gentoo update 10 --comment-privacy 1,2
 +
 .Toggle all comment privacy:
- bite -c gentoo modify 10 --comment-privacy ..
+ bite -c gentoo update 10 --comment-privacy ..
 +
 .Disable comment 1 and 2 privacy:
- bite -c gentoo modify 10 --comment-privacy 1,2:false
+ bite -c gentoo update 10 --comment-privacy 1,2:false
 +
 .Mark comments 2-5 private:
- bite -c gentoo modify 10 --comment-privacy 2..=5:true
+ bite -c gentoo update 10 --comment-privacy 2..=5:true
 
 *-C, --component <value>*::
-    Modify component.
+    Update component.
 
 *--cf <name> <value>*::
-    Modify custom fields.
+    Update custom fields.
 
 *-d, --depends* <id[,...]>::
     Add, remove, or set dependencies.
@@ -216,13 +216,13 @@ Multiple arguments can be specified in a comma-separated list while no
 arguments removes the entire list.
 +
 .Add dependency on bug 1:
- bite -c gentoo modify 10 --depends +1
+ bite -c gentoo update 10 --depends +1
 +
 .Add bug 2 and remove bug 1 dependencies:
- bite -c gentoo modify 10 --depends +2,-1
+ bite -c gentoo update 10 --depends +2,-1
 +
 .Set dependencies to bug 3:
- bite -c gentoo modify 10 --depends 3
+ bite -c gentoo update 10 --depends 3
 
 *-D, --duplicate-of* <id>::
     Mark as a duplicate of the specified bug.
@@ -237,10 +237,10 @@ Supported statuses include `+`, `-`, and `?`. In addition, the special status
 Multiple arguments can be specified in a comma-separated list.
 +
 .Add `test?` flag:
- bite -c gentoo modify 10 --flags "test?"
+ bite -c gentoo update 10 --flags "test?"
 +
 .Add `check+` and remove `test?` flags:
- bite -c gentoo modify 10 --flags check+,testX
+ bite -c gentoo update 10 --flags check+,testX
 
 *-g, --groups* <value[,...]>::
     Add or remove groups.
@@ -253,10 +253,10 @@ Unprefixed values will be added to the list.
 Multiple arguments can be specified in a comma-separated list.
 +
 .Add to `admin` group:
- bite -c gentoo modify 10 --groups +admin
+ bite -c gentoo update 10 --groups +admin
 +
 .Add `test` and remove `admin` groups:
- bite -c gentoo modify 10 --groups +test,-admin
+ bite -c gentoo update 10 --groups +test,-admin
 
 *-k, --keywords* <value[,...]>::
     Add, remove, or set keywords.
@@ -271,25 +271,25 @@ Multiple arguments can be specified in a comma-separated list while no
 arguments removes the entire list.
 +
 .Add `key` keyword:
- bite -c gentoo modify 10 --keywords +key
+ bite -c gentoo update 10 --keywords +key
 +
 .Add `test` and remove `key` keywords:
- bite -c gentoo modify 10 --keywords +test,-key
+ bite -c gentoo update 10 --keywords +test,-key
 +
 .Set keywords to `verify`:
- bite -c gentoo modify 10 --keywords verify
+ bite -c gentoo update 10 --keywords verify
 
 *--os* <value>::
-    Modify operating system.
+    Update operating system.
 
 *--platform* <value>::
-    Modify platform.
+    Update platform.
 
 *--priority* <value>::
-    Modify priority.
+    Update priority.
 
 *-p, --product* <value>::
-    Modify product.
+    Update product.
 
 *--qa* <user>::
     Assign a QA contact for the bug.
@@ -301,13 +301,13 @@ No argument or an empty string will reset the field to the default for target
 component.
 +
 .Assign to yourself:
- bite -c gentoo modify 123 --qa @me
+ bite -c gentoo update 123 --qa @me
 +
 .Reset to default:
- bite -c gentoo modify 123 --qa
+ bite -c gentoo update 123 --qa
 
 *-r, --resolution* <value>::
-    Modify resolution.
+    Update resolution.
 
 *-U, --see-also* <value[,...]>::
     Add or remove URLs to bugs in external trackers.
@@ -321,39 +321,39 @@ Unprefixed values will be added to the list.
 Multiple arguments can be specified in a comma-separated list.
 +
 .Add URL to bug 2:
- bite -c gentoo modify 10 --see-also 2
+ bite -c gentoo update 10 --see-also 2
 +
 .Add bug 3 and remove bug 2 URLs:
- bite -c gentoo modify 10 --see-also=+3,-2
+ bite -c gentoo update 10 --see-also=+3,-2
 +
 .Add URL to external bug:
- bite -c gentoo modify 10 --see-also https://url/to/bug/5
+ bite -c gentoo update 10 --see-also https://url/to/bug/5
 
 *--severity* <value>::
-    Modify severity.
+    Update severity.
 
 *-s, --status* <value>::
-    Modify status.
+    Update status.
 
 *-S, --summary* <value>::
-    Modify summary.
+    Update summary.
 
 *-T, --target* <value>::
-    Modify target milestone.
+    Update target milestone.
 
 *-u, --url* <value>::
-    Modify URL.
+    Update URL.
 
 *-V, --version* <value>::
-    Modify version.
+    Update version.
 
 *-w, --whiteboard* <value>::
-    Modify whiteboard.
+    Update whiteboard.
 
 == Arguments
 
 <ids>::
-    IDs of bugs to modify.
+    IDs of bugs to update.
 +
 Taken from standard input when `-`.
 

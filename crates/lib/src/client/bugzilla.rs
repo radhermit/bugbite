@@ -3,9 +3,9 @@ use tracing::info;
 
 use crate::objects::bugzilla::{Attachment, Bug, Comment, Event};
 use crate::service::bugzilla::{
-    attachment, comment, create, history,
-    modify::{self, BugChange},
-    search, {Config, Service},
+    attachment, comment, create, history, search,
+    update::{self, BugChange},
+    {Config, Service},
 };
 use crate::traits::{Request, WebService};
 
@@ -114,15 +114,15 @@ impl Client {
         request.send(&self.service).await
     }
 
-    pub async fn modify<S>(
+    pub async fn update<S>(
         &self,
         ids: &[S],
-        params: modify::Parameters,
+        params: update::Parameters,
     ) -> crate::Result<Vec<BugChange>>
     where
         S: std::fmt::Display,
     {
-        let request = self.service.modify_request(ids, params)?;
+        let request = self.service.update_request(ids, params)?;
         request.send(&self.service).await
     }
 

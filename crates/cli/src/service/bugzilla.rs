@@ -16,8 +16,8 @@ mod comment;
 mod create;
 mod get;
 mod history;
-mod modify;
 mod search;
+mod update;
 
 #[derive(Debug, clap::Args)]
 #[clap(next_help_heading = "Authentication")]
@@ -66,22 +66,28 @@ enum Subcommand {
     /// Attachment commands
     #[command(alias = "a")]
     Attachment(Box<attachment::Command>),
+
     /// Get bug comments
     Comment(comment::Command),
+
     /// Create bug
     #[command(alias = "c")]
     Create(Box<create::Command>),
+
     /// Get bugs
     #[command(alias = "g")]
     Get(get::Command),
+
     /// Get bug changes
     History(history::Command),
-    /// Modify bugs
-    #[command(alias = "m")]
-    Modify(Box<modify::Command>),
+
     /// Search bugs
     #[command(alias = "s")]
     Search(Box<search::Command>),
+
+    /// Update bugs
+    #[command(alias = "u")]
+    Update(Box<update::Command>),
 }
 
 impl Subcommand {
@@ -92,7 +98,7 @@ impl Subcommand {
             Self::Create(cmd) => cmd.run(client).await,
             Self::Get(cmd) => cmd.run(client).await,
             Self::History(cmd) => cmd.run(client).await,
-            Self::Modify(cmd) => cmd.run(client).await,
+            Self::Update(cmd) => cmd.run(client).await,
             Self::Search(cmd) => cmd.run(client).await,
         }
     }

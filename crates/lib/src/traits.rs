@@ -101,8 +101,8 @@ pub(crate) trait WebService<'a>: fmt::Display {
     type GetRequest: Request;
     type CreateRequest: Request;
     type CreateParams;
-    type ModifyRequest: Request;
-    type ModifyParams;
+    type UpdateRequest: Request;
+    type UpdateParams;
     type SearchRequest: Request;
     type SearchParams;
 
@@ -159,17 +159,17 @@ pub(crate) trait WebService<'a>: fmt::Display {
         )))
     }
 
-    /// Create a modify request for bugs, issues, or tickets.
-    fn modify_request<S>(
+    /// Create an update request for bugs, issues, or tickets.
+    fn update_request<S>(
         &self,
         _ids: &[S],
-        _params: Self::ModifyParams,
-    ) -> crate::Result<Self::ModifyRequest>
+        _params: Self::UpdateParams,
+    ) -> crate::Result<Self::UpdateRequest>
     where
         S: std::fmt::Display,
     {
         Err(Error::Unsupported(format!(
-            "{}: modify requests unsupported",
+            "{}: update requests unsupported",
             self.kind()
         )))
     }

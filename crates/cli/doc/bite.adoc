@@ -16,7 +16,7 @@ bite - a command line tool for bug, issue, and ticket mangling
 
 Bite is a command line tool for interacting with bug, issue, and ticket
 trackers. It aims to support common actions such as searching, requesting,
-creating, and modifying bugs, issues, or tickets in addition to other
+creating, and updating bugs, issues, or tickets in addition to other
 functionality provided by a service.
 
 == Usage

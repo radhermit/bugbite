@@ -7,7 +7,7 @@ use anyhow::Context;
 use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
-use bugbite::service::bugzilla::modify::{Parameters, RangeOrSet, SetChange};
+use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
@@ -63,7 +63,7 @@ struct Params {
     )]
     alias: Option<Vec<SetChange<String>>>,
 
-    /// modify assignee
+    /// update assignee
     #[arg(
         short,
         long,
@@ -111,15 +111,15 @@ struct Params {
     #[arg(short = 'P', long, num_args = 0, default_missing_value = "true")]
     comment_is_private: Option<bool>,
 
-    /// modify comment privacy
+    /// update comment privacy
     #[arg(long, value_name = "VALUE")]
     comment_privacy: Option<CommentPrivacy<usize>>,
 
-    /// modify component
+    /// update component
     #[arg(short = 'C', long)]
     component: Option<String>,
 
-    /// modify custom field
+    /// update custom field
     #[arg(long = "cf", num_args = 2, value_names = ["NAME", "VALUE"])]
     custom_fields: Option<Vec<String>>,
 
@@ -155,23 +155,23 @@ struct Params {
     )]
     keywords: Option<Vec<SetChange<String>>>,
 
-    /// modify operating system
+    /// update operating system
     #[arg(long)]
     os: Option<String>,
 
-    /// modify platform
+    /// update platform
     #[arg(long)]
     platform: Option<String>,
 
-    /// modify priority
+    /// update priority
     #[arg(long)]
     priority: Option<String>,
 
-    /// modify product
+    /// update product
     #[arg(short, long)]
     product: Option<String>,
 
-    /// modify QA contact
+    /// update QA contact
     #[arg(
         long,
         value_name = "USER",
@@ -180,7 +180,7 @@ struct Params {
     )]
     qa: Option<String>,
 
-    /// modify resolution
+    /// update resolution
     #[arg(short, long)]
     resolution: Option<String>,
 
@@ -188,31 +188,31 @@ struct Params {
     #[arg(short = 'U', long, value_name = "VALUE[,...]", value_delimiter = ',')]
     see_also: Option<Vec<SetChange<String>>>,
 
-    /// modify severity
+    /// update severity
     #[arg(long)]
     severity: Option<String>,
 
-    /// modify status
+    /// update status
     #[arg(short, long)]
     status: Option<String>,
 
-    /// modify summary
+    /// update summary
     #[arg(short = 'S', long)]
     summary: Option<String>,
 
-    /// modify target milestone
+    /// update target milestone
     #[arg(short = 'T', long, value_name = "MILESTONE")]
     target: Option<String>,
 
-    /// modify URL
+    /// update URL
     #[arg(short = 'u', long)]
     url: Option<String>,
 
-    /// modify version
+    /// update version
     #[arg(short = 'V', long)]
     version: Option<String>,
 
-    /// modify whiteboard
+    /// update whiteboard
     #[arg(short, long)]
     whiteboard: Option<String>,
 }
@@ -259,7 +259,7 @@ impl From<Params> for Parameters {
 }
 
 #[derive(Debug, Args)]
-#[clap(next_help_heading = "Modify options")]
+#[clap(next_help_heading = "Update options")]
 pub(super) struct Options {
     /// skip service interaction
     #[arg(short = 'n', long)]
@@ -366,14 +366,14 @@ impl Command {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let mut params: Parameters = self.params.into();
 
-        // read modification attributes from template
+        // read attributes from template
         if let Some(path) = self.options.from.as_ref() {
             let template = Parameters::from_path(path)?;
             // command-line parameters override template values
             params = params.merge(template);
         };
 
-        // write modification attributes to template
+        // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
                 let data = toml::to_string(&params)?;
@@ -400,7 +400,7 @@ impl Command {
         }
 
         if !self.options.dry_run {
-            let changes = client.modify(ids, params).await?;
+            let changes = client.update(ids, params).await?;
             for change in changes {
                 info!("{change}");
             }
@@ -416,6 +416,6 @@ mod tests {
 
     #[test]
     fn examples() {
-        subcmd_parse_doc("bite-bugzilla-modify");
+        subcmd_parse_doc("bite-bugzilla-update");
     }
 }

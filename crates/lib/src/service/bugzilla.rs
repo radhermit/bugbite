@@ -19,8 +19,8 @@ pub mod comment;
 pub mod create;
 mod get;
 pub mod history;
-pub mod modify;
 pub mod search;
+pub mod update;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
@@ -174,8 +174,8 @@ impl<'a> WebService<'a> for Service {
     type GetRequest = get::GetRequest;
     type CreateRequest = create::CreateRequest;
     type CreateParams = create::Parameters;
-    type ModifyRequest = modify::ModifyRequest;
-    type ModifyParams = modify::Parameters;
+    type UpdateRequest = update::UpdateRequest;
+    type UpdateParams = update::Parameters;
     type SearchRequest = search::SearchRequest;
     type SearchParams = search::Parameters;
 
@@ -249,15 +249,15 @@ impl<'a> WebService<'a> for Service {
         create::CreateRequest::new(self, params)
     }
 
-    fn modify_request<S>(
+    fn update_request<S>(
         &self,
         ids: &[S],
-        params: Self::ModifyParams,
-    ) -> crate::Result<Self::ModifyRequest>
+        params: Self::UpdateParams,
+    ) -> crate::Result<Self::UpdateRequest>
     where
         S: std::fmt::Display,
     {
-        modify::ModifyRequest::new(self, ids, params)
+        update::UpdateRequest::new(self, ids, params)
     }
 
     fn search_request(&self, params: Self::SearchParams) -> crate::Result<Self::SearchRequest> {

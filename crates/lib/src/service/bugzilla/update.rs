@@ -46,7 +46,7 @@ pub struct BugChange {
 impl fmt::Display for BugChange {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "=== Bug #{} ===", self.id)?;
-        write!(f, "--- Modified fields ---")?;
+        write!(f, "--- Updated fields ---")?;
         if !self.changes.is_empty() {
             for (name, change) in &self.changes {
                 write!(f, "\n{name}: {change}")?;
@@ -111,13 +111,13 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
 }
 
 #[derive(Debug)]
-pub(crate) struct ModifyRequest {
+pub(crate) struct UpdateRequest {
     url: url::Url,
     ids: Vec<String>,
     params: Parameters,
 }
 
-impl Request for ModifyRequest {
+impl Request for UpdateRequest {
     type Output = Vec<BugChange>;
     type Service = super::Service;
 
@@ -138,7 +138,7 @@ impl Request for ModifyRequest {
     }
 }
 
-impl ModifyRequest {
+impl UpdateRequest {
     pub(super) fn new<S>(
         service: &super::Service,
         ids: &[S],
@@ -269,7 +269,7 @@ impl fmt::Display for Comment {
     }
 }
 
-/// Bug modification parameters.
+/// Bug update parameters.
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct Parameters {
@@ -500,7 +500,7 @@ impl Parameters {
     }
 }
 
-/// Internal bug modification request parameters.
+/// Internal bug update request parameters.
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
 /// information.

@@ -6,7 +6,7 @@ use super::*;
 
 #[test]
 fn aliases() {
-    for subcmd in ["m", "modify"] {
+    for subcmd in ["u", "update"] {
         for opt in ["-h", "--help"] {
             cmd("bite bugzilla")
                 .arg(subcmd)
@@ -23,7 +23,7 @@ fn aliases() {
 async fn auth_required() {
     let _server = start_server().await;
 
-    cmd("bite modify 1 -A test")
+    cmd("bite update 1 -A test")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())
