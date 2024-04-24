@@ -6,10 +6,10 @@ bite-bugzilla-create - create bug
 
 == Synopsis
 
-*bite bugzilla create* <options>::
-	Create bug.
+*bite bugzilla <create|c>* <options>::
+    Create bug.
 
-*bite bugzilla create* [-h|--help]::
+*bite bugzilla <create|c>* [-h|--help]::
     Output help information.
 
 == Description

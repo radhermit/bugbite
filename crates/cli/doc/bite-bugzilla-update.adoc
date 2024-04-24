@@ -6,10 +6,10 @@ bite-bugzilla-update - update bugs
 
 == Synopsis
 
-*bite bugzilla update* <options> <ids>::
+*bite bugzilla <update|u>* <options> <ids>::
     Update bugs.
 
-*bite bugzilla update* [-h|--help]::
+*bite bugzilla <update|u>* [-h|--help]::
     Output help information.
 
 == Description

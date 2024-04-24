@@ -6,10 +6,10 @@ bite-redmine-search - search issues
 
 == Synopsis
 
-*bite redmine search* [<options>] [<terms>]::
+*bite redmine <search|s>* [<options>] [<terms>]::
     Query and output issues.
 
-*bite redmine search* [-h|--help]::
+*bite redmine <search|s>* [-h|--help]::
     Output help information.
 
 == Description

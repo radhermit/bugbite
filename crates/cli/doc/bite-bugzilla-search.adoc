@@ -6,10 +6,10 @@ bite-bugzilla-search - search bugs
 
 == Synopsis
 
-*bite bugzilla search* [<options>] [<terms>]::
+*bite bugzilla <search|s>* [<options>] [<terms>]::
     Search bugs.
 
-*bite bugzilla search* [-h|--help]::
+*bite bugzilla <search|s>* [-h|--help]::
     Output help information.
 
 == Description

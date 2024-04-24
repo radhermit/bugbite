@@ -6,10 +6,10 @@ bite-bugzilla-attachment-create - create attachments
 
 == Synopsis
 
-*bite bugzilla attachment create* [<options>] [id[,...]] <files>::
+*bite bugzilla attachment <create|c>* [<options>] [id[,...]] <files>::
     Create attachments.
 
-*bite bugzilla attachment create* [-h|--help]::
+*bite bugzilla attachment <create|c>* [-h|--help]::
     Output help information.
 
 == Description

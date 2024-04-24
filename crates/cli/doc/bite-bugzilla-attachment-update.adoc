@@ -6,10 +6,10 @@ bite-bugzilla-attachment-update - update attachments
 
 == Synopsis
 
-*bite bugzilla attachment update* [<options>] [id[,...]]::
+*bite bugzilla attachment <update|u>* [<options>] [id[,...]]::
     Update attachments.
 
-*bite bugzilla attachment update* [-h|--help]::
+*bite bugzilla attachment <update|u>* [-h|--help]::
     Output help information.
 
 == Description

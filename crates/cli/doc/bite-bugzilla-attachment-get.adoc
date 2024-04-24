@@ -6,10 +6,10 @@ bite-bugzilla-attachment-get - get attachments
 
 == Synopsis
 
-*bite bugzilla attachment get* [<options>] <id[,...]>::
+*bite bugzilla attachment <get|g>* [<options>] <id[,...]>::
     Get attachments.
 
-*bite bugzilla attachment get* [-h|--help]::
+*bite bugzilla attachment <get|g>* [-h|--help]::
     Output help information.
 
 == Description
