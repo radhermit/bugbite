@@ -41,6 +41,21 @@ async fn nonexistent_bug() {
 }
 
 #[tokio::test]
+async fn deleted_attachment() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("attachment/deleted.json"))
+        .await;
+
+    cmd("bite attachment get 21")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff("Error: can't retrieve deleted attachment: 21").trim())
+        .failure();
+}
+
+#[tokio::test]
 async fn list_single_without_data() {
     let server = start_server().await;
 

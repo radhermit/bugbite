@@ -1,0 +1,20 @@
+{
+  "attachments": {
+    "21": {
+      "bug_id": 51,
+      "content_type": "text/plain",
+      "creation_time": "2024-04-05T22:08:51Z",
+      "creator": "bugbite@bugbite.test",
+      "file_name": "foo.tar.xz",
+      "flags": [],
+      "id": 21,
+      "is_obsolete": 1,
+      "is_patch": 0,
+      "is_private": 0,
+      "last_change_time": "2024-04-05T22:08:51Z",
+      "size": 0,
+      "summary": "foo.tar.xz"
+    }
+  },
+  "bugs": {}
+}
