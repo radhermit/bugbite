@@ -100,10 +100,14 @@ impl Subcommand {
 
 impl Render for Attachment {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
+        let deleted = if self.size == 0 { " (deleted)" } else { "" };
         let line = if self.summary != self.file_name {
-            format!("{}: {} ({})", self.id, self.summary, self.file_name)
+            format!(
+                "{}: {} ({}){deleted}",
+                self.id, self.summary, self.file_name
+            )
         } else {
-            format!("{}: {}", self.id, self.summary)
+            format!("{}: {}{deleted}", self.id, self.summary)
         };
         writeln!(f, "{}", truncate(&line, width))?;
 
