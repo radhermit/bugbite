@@ -8,6 +8,7 @@ use crate::service::{Config, ServiceKind};
 pub static SERVICES: Lazy<IndexMap<String, Config>> = Lazy::new(|| {
     use ServiceKind::*;
     [
+        (Bugzilla, "freebsd", "https://bugs.freebsd.org/bugzilla/"),
         (Bugzilla, "gentoo", "https://bugs.gentoo.org/"),
         (Bugzilla, "gcc", "https://gcc.gnu.org/bugzilla/"),
         (Bugzilla, "glibc", "https://sourceware.org/bugzilla/"),
