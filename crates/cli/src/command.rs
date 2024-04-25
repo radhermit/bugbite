@@ -98,6 +98,7 @@ impl ServiceCommand {
             }
             (None, Some(base), Some(service)) => (service, base.to_string()),
             _ => {
+                // handle -h/--help options
                 if services.contains(arg) || arg.starts_with('-') {
                     Command::try_parse_from(&args)?;
                 }
