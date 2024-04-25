@@ -154,6 +154,7 @@ pub struct Comment {
     #[serde(rename = "creation_time")]
     pub created: DateTime<Utc>,
     pub is_private: bool,
+    #[serde(default)]
     pub tags: IndexSet<String>,
 }
 
