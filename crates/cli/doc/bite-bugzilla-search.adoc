@@ -610,7 +610,15 @@ the overall comment count shown by the `get` or `comment` subcommands.
 *-u, --updated* <time>::
     Restrict by update time.
 
-== User options
+== User Options
+
+All user-related options search for matching substrings by default. Multiple
+values can be specified in a comma-separated list for logical AND or multiple
+options for logical OR. Values can also use match operators to alter their
+query application. See the <<Match Operators>> section for more information.
+
+In addition, the alias `@me` is supported if a user account is specified for the
+current service connection.
 
 *-a, --assignee* <user[,...]>::
     Restrict by assignee user.
@@ -618,8 +626,19 @@ the overall comment count shown by the `get` or `comment` subcommands.
 *--attacher* <user[,...]>::
     Restrict by attachment creation user.
 
-*--cc* <user[,...]>::
-    Restrict by CC list user.
+*--cc* [<user[,...]>]::
+    Restrict by CC user.
++
+With no argument, all bugs with CC users are returned. If the value is `true`
+or `false`, all bugs with or without CC users are returned, respectively.
++
+.With CC:
+ bite -c gentoo search --cc
++
+.Without CC:
+ bite -c gentoo search --cc false
++
+See the information above in the <<User Options>> section for regular values.
 
 *--commenter* <user[,...]>::
     Restrict by commenting user.
@@ -627,8 +646,20 @@ the overall comment count shown by the `get` or `comment` subcommands.
 *--flagger* <user[,...]>::
     Restrict by flag creation user.
 
-*--qa* <user[,...]>::
+*--qa* [<user[,...]>]::
     Restrict by QA contact user.
++
+With no argument, all bugs with QA contacts are returned. If the value is
+`true` or `false`, all bugs with or without QA contacts are returned,
+respectively.
++
+.With QA contact:
+ bite -c gentoo search --qa
++
+.Without QA contact:
+ bite -c gentoo search --qa false
++
+See the information above in the <<User Options>> section for regular values.
 
 *-R, --reporter* <user[,...]>::
     Restrict by reporting user.
