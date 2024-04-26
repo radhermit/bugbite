@@ -41,7 +41,10 @@ Explicitly specified options override corresponding template values.
 *--to <path>*::
     Write search attributes to a template.
 +
-Combining with --dry-run allows creating templates without service interaction.
+Combining with `-n/--dry-run` allows creating templates without service interaction.
++
+.Create a template:
+ bite -c gentoo search -c 1d -n --to template.toml
 
 == Query options
 
