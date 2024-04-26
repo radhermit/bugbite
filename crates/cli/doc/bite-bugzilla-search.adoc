@@ -671,8 +671,8 @@ application. Values with no or unknown operators default to substring matching.
 
 .Supported operators:
 - `=~` -- contains case-sensitive substring
-- `~~` -- contains substring
-- `!~` -- doesn't contain substring
+- `~~` -- contains case-insensitive substring
+- `!~` -- doesn't contain case-insensitive substring
 - `==` -- equal to value
 - `!=` -- not equal to value
 - `=*` -- matches regular expression
@@ -680,7 +680,7 @@ application. Values with no or unknown operators default to substring matching.
 
 Operators are applied as prefixes to values with a single space between,
 wrapping the entire string in single quotes to avoid various shell expansion
-support. See the following examples for proper usage:
+support. See the following examples searching aliases for proper usage:
 
 .Contains `value`:
  bite -c gentoo search --alias '=~ value'
