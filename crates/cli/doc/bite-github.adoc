@@ -1,0 +1,28 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-github - GitHub service support
+
+== Synopsis
+
+*bite github* [<options>] <command> [<args>]::
+    Run a github subcommand.
+
+*bite github* [-h|--help]::
+    Output help information.
+
+== Description
+
+GitHub service support.
+
+include::include/global-options.adoc[]
+
+== Subcommands
+
+linkcmd:bite-github-get[1]::
+    get issues
+
+== See Also
+
+linkcmd:bite[1]

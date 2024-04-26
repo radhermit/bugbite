@@ -90,6 +90,9 @@ For example, a bugzilla service could use `https://bugzilla.kernel.org`.
 linkcmd:bite-bugzilla[1]::
     bugzilla service support
 
+linkcmd:bite-github[1]::
+    github service support
+
 linkcmd:bite-redmine[1]::
     redmine service support
 
