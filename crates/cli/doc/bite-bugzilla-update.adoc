@@ -53,7 +53,7 @@ Fields that don't match known bug field names target custom fields.
 Command-line parameters override corresponding template values.
 +
 .Update bug using template:
- bite -c gentoo update 123 --from path/to/new.toml -c "updated using template"
+ bite -c gentoo update 123 --from path/to/new.toml -c 'updated using template'
 
 *--to* <path>::
     Write attributes to a template.
@@ -237,7 +237,7 @@ Supported statuses include `+`, `-`, and `?`. In addition, the special status
 Multiple arguments can be specified in a comma-separated list.
 +
 .Add `test?` flag:
- bite -c gentoo update 10 --flags "test?"
+ bite -c gentoo update 10 --flags 'test?'
 +
 .Add `check+` and remove `test?` flags:
  bite -c gentoo update 10 --flags check+,testX
