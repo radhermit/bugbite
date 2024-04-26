@@ -8,4 +8,4 @@ Library and tools for bug, issue, and ticket mangling.
 - [bite] (bugbite-cli): CLI client
 - chew (bugbite-tui): TUI client
 
-[bite]: <https://radhermit.github.io/bugbite/bite.html>
+[bite]: <https://github.com/radhermit/bugbite/tree/main/crates/cli>
