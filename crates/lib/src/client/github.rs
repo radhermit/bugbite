@@ -21,16 +21,8 @@ impl Client {
         &self.service
     }
 
-    pub async fn get(
-        &self,
-        ids: &[u64],
-        attachments: bool,
-        comments: bool,
-        history: bool,
-    ) -> crate::Result<Vec<Issue>> {
-        let request = self
-            .service
-            .get_request(ids, attachments, comments, history)?;
+    pub async fn get(&self, ids: &[u64]) -> crate::Result<Vec<Issue>> {
+        let request = self.service.get_request(ids, false, false, false)?;
         request.send(&self.service).await
     }
 

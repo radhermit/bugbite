@@ -4,7 +4,8 @@ use super::Item;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Issue {
-    id: String,
+    pub id: u64,
+    pub title: Option<String>,
 }
 
 impl Issue {

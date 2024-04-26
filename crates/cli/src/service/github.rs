@@ -1,7 +1,12 @@
 use std::process::ExitCode;
 
 use bugbite::client::{github::Client, ClientBuilder};
+use bugbite::objects::github::*;
 use bugbite::service::github::Config;
+use itertools::Itertools;
+
+use super::output::*;
+use super::Render;
 
 mod get;
 mod search;
@@ -63,5 +68,14 @@ impl Subcommand {
             Self::Get(cmd) => cmd.run(client).await,
             Self::Search(cmd) => cmd.run(client).await,
         }
+    }
+}
+
+impl Render for Issue {
+    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
+        output_field_wrapped!(f, "Title", &self.title, width);
+        writeln!(f, "{:<12} : {}", "ID", self.id)?;
+
+        Ok(())
     }
 }
