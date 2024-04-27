@@ -356,7 +356,7 @@ Multiple arguments can be specified in a comma-separated list.
 == Arguments
 
 <ids>::
-    IDs of bugs to update.
+    IDs or aliases of bugs to update.
 +
 Taken from standard input when `-`.
 
