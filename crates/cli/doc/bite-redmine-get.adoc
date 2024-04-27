@@ -36,13 +36,13 @@ Taken from standard input when `-`.
 
 == Examples
 
-.Get ruby issue 123:
+.Get issue 123:
  bite -c ruby get 123
 
-.Get gentoo bug 123 and only output field values:
+.Get issue 123 and only output field values:
  bite -c ruby get 123 -C
 
-.Get all ruby issues created in the last day:
+.Get all issues created in the last day:
  bite -c ruby search -c 1d -f id | bite -c ruby get -
 
 == See Also

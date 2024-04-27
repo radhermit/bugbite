@@ -33,7 +33,7 @@ Fields that don't match known bug field names target custom fields.
 +
 Command-line parameters override corresponding template values.
 +
-.Create gentoo bug using template:
+.Create bug using template:
  bite -c gentoo create --from path/to/new.toml -S summary -D description
 
 *--from-bug* <id>::
@@ -45,7 +45,7 @@ relevant, required fields for creation.
 Combining this option with -n/--dry-run and --to allows creating templates
 using existing bugs to edit and use later without creating a new bug.
 +
-.Create gentoo bug using existing bug:
+.Create bug using existing bug:
  bite -c gentoo create --from-bug 123 --to path/to/new.toml --dry-run
 
 *--to* <path>::
