@@ -154,7 +154,7 @@ When no argument is specified, an editor is launched for interactive entry.
 Taken from standard input when `-`.
 
 *-F, --comment-from* <path>::
-    Add a comment using file content.
+    Add a comment from a file.
 +
 The value must be the path to a valid comment file.
 +
