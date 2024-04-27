@@ -144,7 +144,7 @@ Unprefixed values will be added to the list.
 Multiple arguments can be specified in a comma-separated list.
 +
 .Add and remove addresses from the CC list:
-bite -c gentoo update 10 --cc=+test1@email.com,-test2@email.com
+ bite -c gentoo update 10 --cc=+test1@email.com,-test2@email.com
 
 *-c, --comment* <value>::
     Add a comment.
