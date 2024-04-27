@@ -6,8 +6,8 @@ bite-bugzilla-get - get bugs
 
 == Synopsis
 
-*bite bugzilla <get|g>* [<options>] [<ids>]::
-    Fetch and output bugs.
+*bite bugzilla <get|g>* [<options>] <ids>::
+    Get bugs.
 
 *bite bugzilla <get|g>* [-h|--help]::
     Output help information.
@@ -36,8 +36,9 @@ This functionality uses `xdg-open` to open URLs.
 
 == Arguments
 
-IDs or aliases of bugs to fetch.
-
+<ids>::
+    IDs or aliases of bugs to fetch.
++
 Taken from standard input when `-`.
 
 == Examples
