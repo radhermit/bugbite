@@ -87,7 +87,7 @@ struct Params {
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
     cc: Option<Vec<SetChange<String>>>,
 
-    /// add a comment
+    /// add comment
     #[arg(
         short,
         long,
@@ -97,7 +97,7 @@ struct Params {
     )]
     comment: Option<MaybeStdin<String>>,
 
-    /// load comment from file
+    /// add comment from file
     #[arg(
         short = 'F',
         long,
@@ -387,10 +387,6 @@ impl Command {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
             }
             let comment = get_reply(client, ids[0], &mut values).await?;
-            params.comment = Some(comment);
-        } else if let Some(path) = params.comment_from.take() {
-            let comment =
-                fs::read_to_string(path).context("failed reading comment file: {path}")?;
             params.comment = Some(comment);
         } else if let Some(value) = params.comment.as_ref() {
             if value.trim().is_empty() {
