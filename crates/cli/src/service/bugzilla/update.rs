@@ -89,7 +89,7 @@ struct Params {
 
     /// add a comment
     #[arg(
-        short = 'c',
+        short,
         long,
         num_args = 0..=1,
         conflicts_with_all = ["comment_from", "reply"],
@@ -205,7 +205,7 @@ struct Params {
     target: Option<String>,
 
     /// update URL
-    #[arg(short = 'u', long)]
+    #[arg(short, long)]
     url: Option<String>,
 
     /// update version
