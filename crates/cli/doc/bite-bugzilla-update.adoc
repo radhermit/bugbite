@@ -102,7 +102,7 @@ component.
 .Assign to yourself:
  bite -c gentoo update 123 --assignee @me
 +
-.Reset assignee to the default value:
+.Reset to default:
  bite -c gentoo update 123 --assignee
 
 *-b, --blocks* <id[,...]>::
@@ -226,6 +226,9 @@ arguments removes the entire list.
 
 *-D, --duplicate-of* <id>::
     Mark as a duplicate of the specified bug.
++
+.Duplicate of bug 20:
+ bite -c gentoo update 10 --duplicate-of 20
 
 *-f, --flags* <value[,...]>::
     Add or remove flags.
@@ -320,7 +323,7 @@ Unprefixed values will be added to the list.
 +
 Multiple arguments can be specified in a comma-separated list.
 +
-.Add URL to bug 2:
+.Add bug 2 URL:
  bite -c gentoo update 10 --see-also 2
 +
 .Add bug 3 and remove bug 2 URLs:
