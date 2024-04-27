@@ -14,7 +14,15 @@ bite-bugzilla-get - get bugs
 
 == Description
 
-Get bugs.
+The `get` command fetches and outputs data related to the specified bugs. In
+addition to bug fields this includes the attachments, comments, and changes of
+the bug. See the options below to alter the output by skipping data types.
+
+Note that this command isn't meant for returning individual field values,
+instead use the `search` command similar to the following:
+
+.Output bug 10's summary:
+ bite -c gentoo search --id 10 -f summary -s @all
 
 include::include/global-options.adoc[]
 
