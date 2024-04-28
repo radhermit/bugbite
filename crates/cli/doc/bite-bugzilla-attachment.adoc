@@ -7,7 +7,7 @@ bite-bugzilla-attachment - attachment support
 == Synopsis
 
 *bite bugzilla <attachment|a>* [<options>] <command> [<args>]::
-    Run an attachment subcommand.
+    Run attachment commands.
 
 *bite bugzilla <attachment|a>* [-h|--help]::
     Output help information.
