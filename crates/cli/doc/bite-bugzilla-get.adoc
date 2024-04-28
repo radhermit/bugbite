@@ -38,7 +38,7 @@ include::include/global-options.adoc[]
     Disable history.
 
 *-b, --browser*::
-    Open bugs in a browser.
+    Open in a browser.
 +
 This functionality uses `xdg-open` to open URLs.
 
