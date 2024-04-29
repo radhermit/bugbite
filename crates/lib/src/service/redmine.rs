@@ -75,6 +75,13 @@ impl Service {
         let base = self.config.web_base.as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
+
+    /// Return the website URL for a query.
+    pub fn search_url(&self, params: search::Parameters) -> crate::Result<String> {
+        let base = self.base().as_str().trim_end_matches('/');
+        let params = params.encode(self)?;
+        Ok(format!("{base}/issues?set_filter=1&{params}"))
+    }
 }
 
 impl fmt::Display for Service {

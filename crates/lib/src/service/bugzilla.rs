@@ -75,6 +75,13 @@ impl Service {
         format!("{base}/show_bug.cgi?id={id}")
     }
 
+    /// Return the website URL for a query.
+    pub fn search_url(&self, params: search::Parameters) -> crate::Result<String> {
+        let base = self.base().as_str().trim_end_matches('/');
+        let params = params.encode(self)?;
+        Ok(format!("{base}/buglist.cgi?{params}"))
+    }
+
     /// Substitute user alias for matching value.
     // TODO: support pulling aliases from the config?
     pub(crate) fn replace_user_alias<'a>(&'a self, value: &'a str) -> &str {

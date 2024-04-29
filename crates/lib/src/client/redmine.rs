@@ -21,13 +21,6 @@ impl Client {
         &self.service
     }
 
-    /// Return the website URL for a query.
-    pub fn search_url(&self, params: search::Parameters) -> crate::Result<String> {
-        let base = self.service.base().as_str().trim_end_matches('/');
-        let params = params.encode(&self.service)?;
-        Ok(format!("{base}/issues?set_filter=1&{params}"))
-    }
-
     pub async fn get<S>(
         &self,
         ids: &[S],

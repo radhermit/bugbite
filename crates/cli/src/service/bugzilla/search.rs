@@ -651,7 +651,7 @@ impl Command {
         }
 
         if self.options.browser {
-            let url = client.search_url(params)?;
+            let url = client.service().search_url(params)?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
             let items = client.search(params).await?;
