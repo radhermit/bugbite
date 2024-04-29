@@ -110,8 +110,6 @@ pub(crate) trait WebService<'a>: fmt::Display {
     fn base(&self) -> &Url;
     /// Return the service variant.
     fn kind(&self) -> ServiceKind;
-    /// Return the service client.
-    fn client(&self) -> &reqwest::Client;
     /// Return the current service user if one exists.
     fn user(&self) -> Option<&str> {
         None

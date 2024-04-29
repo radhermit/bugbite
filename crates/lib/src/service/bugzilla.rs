@@ -198,10 +198,6 @@ impl<'a> WebService<'a> for Service {
         self.config.kind()
     }
 
-    fn client(&self) -> &reqwest::Client {
-        &self.client
-    }
-
     fn inject_auth(
         &self,
         request: RequestBuilder,

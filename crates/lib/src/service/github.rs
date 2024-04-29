@@ -45,14 +45,14 @@ impl Config {
 #[derive(Debug)]
 pub struct Service {
     config: Config,
-    client: reqwest::Client,
+    _client: reqwest::Client,
 }
 
 impl Service {
     pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
         Ok(Self {
             config,
-            client: builder.build()?,
+            _client: builder.build()?,
         })
     }
 
@@ -86,10 +86,6 @@ impl<'a> WebService<'a> for Service {
 
     fn kind(&self) -> ServiceKind {
         self.config.kind()
-    }
-
-    fn client(&self) -> &reqwest::Client {
-        &self.client
     }
 }
 

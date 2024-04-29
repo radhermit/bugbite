@@ -62,7 +62,7 @@ impl Request for GetRequest {
         let futures: Vec<_> = self
             .urls
             .into_iter()
-            .map(|u| service.client().get(u))
+            .map(|u| service.client.get(u))
             .map(|r| r.auth_optional(service).map(|r| r.send()))
             .try_collect()?;
 

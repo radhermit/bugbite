@@ -21,11 +21,7 @@ impl Request for CreateRequest {
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
         let params = self.params.encode(service)?;
-        let request = service
-            .client()
-            .post(self.url)
-            .json(&params)
-            .auth(service)?;
+        let request = service.client.post(self.url).json(&params).auth(service)?;
         let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let id = serde_json::from_value(data["id"].take())

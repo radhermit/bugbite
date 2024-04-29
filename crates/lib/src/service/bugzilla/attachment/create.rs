@@ -374,7 +374,7 @@ impl Request for AttachmentCreateRequest {
         let futures: Vec<_> = self
             .attachments
             .into_iter()
-            .map(|x| service.client().post(self.url.clone()).json(&x))
+            .map(|x| service.client.post(self.url.clone()).json(&x))
             .map(|r| r.auth(service).map(|r| r.send()))
             .try_collect()?;
 

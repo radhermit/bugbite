@@ -50,7 +50,7 @@ impl Request for AttachmentGetRequest {
     type Service = Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client().get(self.url).auth_optional(service)?;
+        let request = service.client.get(self.url).auth_optional(service)?;
         let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         match self.ids {
