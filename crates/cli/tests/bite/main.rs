@@ -10,6 +10,7 @@ use command::cmd;
 
 mod bugzilla;
 mod command;
+mod redmine;
 mod show;
 
 pub(crate) static TEST_DATA_PATH: Lazy<Utf8PathBuf> =
