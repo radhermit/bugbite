@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::client::ClientBuilder;
+use bugbite::service::ClientBuilder;
 use strum::VariantNames;
 
 use crate::service::*;

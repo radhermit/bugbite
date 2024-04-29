@@ -2,8 +2,8 @@ use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::Csv;
-use bugbite::client::github::Client;
 use bugbite::service::github::search::{Parameters, SearchOrder};
+use bugbite::service::github::Service;
 use bugbite::traits::Request;
 use clap::Args;
 use itertools::Itertools;
@@ -46,11 +46,11 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let params: Parameters = self.params.into();
 
-        let request = client.service().search(params)?;
-        let issues = request.send(client.service()).await?;
+        let request = service.search(params)?;
+        let issues = request.send(service).await?;
         let mut stdout = stdout().lock();
         let mut count = 0;
 

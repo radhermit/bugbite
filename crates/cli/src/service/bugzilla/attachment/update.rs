@@ -1,9 +1,9 @@
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
-use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::update::Parameters;
+use bugbite::service::bugzilla::Service;
 use bugbite::traits::Request;
 use clap::Args;
 
@@ -85,7 +85,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
         let params = Parameters {
             comment: self.options.comment,
@@ -98,8 +98,8 @@ impl Command {
             is_private: self.options.private,
         };
 
-        let request = client.service().attachment_update(ids, params)?;
-        let _ = request.send(client.service()).await?;
+        let request = service.attachment_update(ids, params)?;
+        let _ = request.send(service).await?;
 
         Ok(ExitCode::SUCCESS)
     }

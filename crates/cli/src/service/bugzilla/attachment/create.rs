@@ -1,9 +1,9 @@
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
-use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::create::{Compression, CreateAttachment};
+use bugbite::service::bugzilla::Service;
 use bugbite::traits::Request;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
@@ -127,7 +127,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
         let mut attachments = vec![];
         for file in &self.args.files {
             let mut attachment = CreateAttachment::new(file);
@@ -150,8 +150,8 @@ impl Command {
         }
 
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
-        let request = client.service().attachment_create(ids, attachments)?;
-        let attachment_ids = request.send(client.service()).await?;
+        let request = service.attachment_create(ids, attachments)?;
+        let attachment_ids = request.send(service).await?;
 
         let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
         for (file, ids) in self.args.files.iter().zip(attachment_ids.iter()) {

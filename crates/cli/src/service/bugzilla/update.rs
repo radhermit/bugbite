@@ -5,9 +5,9 @@ use std::{fmt, fs};
 
 use anyhow::Context;
 use bugbite::args::{MaybeStdin, MaybeStdinVec};
-use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange};
+use bugbite::service::bugzilla::Service;
 use bugbite::traits::Request;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
@@ -311,13 +311,13 @@ pub(super) struct Command {
 
 /// Interactively create a reply, pulling specified comments for pre-population.
 async fn get_reply(
-    client: &Client,
+    service: &Service,
     id: &str,
     comment_ids: &mut Vec<usize>,
 ) -> anyhow::Result<String> {
-    let request = client.service().comment(&[id], None)?;
+    let request = service.comment(&[id], None)?;
     let comments = request
-        .send(client.service())
+        .send(service)
         .await?
         .into_iter()
         .next()
@@ -364,7 +364,7 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 }
 
 impl Command {
-    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let mut params: Parameters = self.params.into();
 
@@ -388,7 +388,7 @@ impl Command {
             if ids.len() > 1 {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
             }
-            let comment = get_reply(client, ids[0], &mut values).await?;
+            let comment = get_reply(service, ids[0], &mut values).await?;
             params.comment = Some(comment);
         } else if let Some(value) = params.comment.as_ref() {
             if value.trim().is_empty() {
@@ -398,8 +398,8 @@ impl Command {
         }
 
         if !self.options.dry_run {
-            let request = client.service().update(ids, params)?;
-            let changes = request.send(client.service()).await?;
+            let request = service.update(ids, params)?;
+            let changes = request.send(service).await?;
             for change in changes {
                 info!("{change}");
             }

@@ -1,8 +1,10 @@
 use std::process::ExitCode;
 
-use bugbite::client::{bugzilla::Client, ClientBuilder};
 use bugbite::objects::bugzilla::*;
-use bugbite::service::bugzilla::Config;
+use bugbite::service::{
+    bugzilla::{Config, Service},
+    ClientBuilder,
+};
 use itertools::Itertools;
 use tracing::info;
 
@@ -55,8 +57,9 @@ impl Command {
         config.user = self.auth.user;
         config.password = self.auth.password;
 
-        let client = Client::new(config, builder.build())?;
-        self.cmd.run(&client).await
+        let service = Service::new(config, builder)?;
+        info!("Service: {service}");
+        self.cmd.run(&service).await
     }
 }
 
@@ -90,15 +93,15 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Attachment(cmd) => cmd.run(client).await,
-            Self::Comment(cmd) => cmd.run(client).await,
-            Self::Create(cmd) => cmd.run(client).await,
-            Self::Get(cmd) => cmd.run(client).await,
-            Self::History(cmd) => cmd.run(client).await,
-            Self::Update(cmd) => cmd.run(client).await,
-            Self::Search(cmd) => cmd.run(client).await,
+            Self::Attachment(cmd) => cmd.run(service).await,
+            Self::Comment(cmd) => cmd.run(service).await,
+            Self::Create(cmd) => cmd.run(service).await,
+            Self::Get(cmd) => cmd.run(service).await,
+            Self::History(cmd) => cmd.run(service).await,
+            Self::Update(cmd) => cmd.run(service).await,
+            Self::Search(cmd) => cmd.run(service).await,
         }
     }
 }

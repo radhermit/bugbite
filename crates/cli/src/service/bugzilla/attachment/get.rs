@@ -4,7 +4,7 @@ use std::process::ExitCode;
 
 use anyhow::Context;
 use bugbite::args::MaybeStdinVec;
-use bugbite::client::bugzilla::Client;
+use bugbite::service::bugzilla::Service;
 use bugbite::traits::Request;
 use camino::Utf8PathBuf;
 use clap::Args;
@@ -50,21 +50,14 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(&self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let mut stdout = stdout().lock();
 
         let get_data = !self.options.list;
         let multiple_bugs = self.options.item_ids && ids.len() > 1;
-        let request = client
-            .service()
-            .attachment_get(ids, self.options.item_ids, get_data)?;
-        let attachments: Vec<_> = request
-            .send(client.service())
-            .await?
-            .into_iter()
-            .flatten()
-            .collect();
+        let request = service.attachment_get(ids, self.options.item_ids, get_data)?;
+        let attachments: Vec<_> = request.send(service).await?.into_iter().flatten().collect();
 
         if self.options.list {
             for attachment in attachments {

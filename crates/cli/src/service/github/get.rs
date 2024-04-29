@@ -1,7 +1,7 @@
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
-use bugbite::client::github::Client;
+use bugbite::service::github::Service;
 use bugbite::traits::Request;
 use clap::Args;
 
@@ -29,15 +29,15 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
 
         if self.options.browser {
-            let urls = ids.iter().map(|id| client.service().item_url(id));
+            let urls = ids.iter().map(|id| service.item_url(id));
             launch_browser(urls)?;
         } else {
-            let request = client.service().get(ids, false)?;
-            let issues = request.send(client.service()).await?;
+            let request = service.get(ids, false)?;
+            let issues = request.send(service).await?;
             render_items(issues)?;
         }
 

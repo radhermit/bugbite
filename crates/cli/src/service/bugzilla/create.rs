@@ -4,9 +4,9 @@ use std::process::ExitCode;
 
 use anyhow::Context;
 use bugbite::args::MaybeStdinVec;
-use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::create::Parameters;
+use bugbite::service::bugzilla::Service;
 use bugbite::traits::Request;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
@@ -203,7 +203,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let mut params: Parameters = self.params.into();
 
         // read attributes from template
@@ -212,9 +212,9 @@ impl Command {
             // command-line parameters override template values
             params = params.merge(template);
         } else if let Some(id) = self.options.from_bug {
-            let request = client.service().get(&[id], false, false, false)?;
+            let request = service.get(&[id], false, false, false)?;
             let bug = request
-                .send(client.service())
+                .send(service)
                 .await?
                 .into_iter()
                 .next()
@@ -232,8 +232,8 @@ impl Command {
 
         if !self.options.dry_run {
             let mut stdout = stdout().lock();
-            let request = client.service().create(params)?;
-            let id = request.send(client.service()).await?;
+            let request = service.create(params)?;
+            let id = request.send(service).await?;
             if stdout.is_terminal() {
                 info!("Created bug {id}");
             } else {

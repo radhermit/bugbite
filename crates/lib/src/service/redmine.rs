@@ -1,6 +1,6 @@
 use std::fmt;
 
-use reqwest::{ClientBuilder, RequestBuilder};
+use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, VariantNames};
 use tracing::{debug, trace};
@@ -9,7 +9,7 @@ use url::Url;
 use crate::traits::{WebClient, WebService};
 use crate::Error;
 
-use super::ServiceKind;
+use super::{ClientBuilder, ServiceKind};
 
 pub mod get;
 pub mod search;
@@ -58,12 +58,12 @@ impl Config {
 // TODO: remove this once authentication support is added
 #[derive(Debug)]
 pub struct Service {
-    pub(crate) config: Config,
+    config: Config,
     client: reqwest::Client,
 }
 
 impl Service {
-    pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+    pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
         Ok(Self {
             config,
             client: builder.build()?,

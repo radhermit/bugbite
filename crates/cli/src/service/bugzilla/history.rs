@@ -2,8 +2,8 @@ use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
-use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::history::HistoryParams;
+use bugbite::service::bugzilla::Service;
 use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::Request;
 use clap::Args;
@@ -36,7 +36,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
 
         let mut params = HistoryParams::new();
@@ -49,8 +49,8 @@ impl Command {
             params.creator(value);
         }
 
-        let request = client.service().history(ids, Some(params))?;
-        let events = request.send(client.service()).await?;
+        let request = service.history(ids, Some(params))?;
+        let events = request.send(service).await?;
         let mut data = ids.iter().zip(events).peekable();
         let mut stdout = stdout().lock();
 

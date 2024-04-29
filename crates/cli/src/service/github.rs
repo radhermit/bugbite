@@ -1,9 +1,12 @@
 use std::process::ExitCode;
 
-use bugbite::client::{github::Client, ClientBuilder};
 use bugbite::objects::github::*;
-use bugbite::service::github::Config;
+use bugbite::service::{
+    github::{Config, Service},
+    ClientBuilder,
+};
 use itertools::Itertools;
+use tracing::info;
 
 use super::output::*;
 use super::Render;
@@ -46,8 +49,9 @@ impl Command {
         let mut config = Config::new(&base)?;
         config.token = self.auth.token;
 
-        let client = Client::new(config, builder.build())?;
-        self.cmd.run(&client).await
+        let service = Service::new(config, builder)?;
+        info!("Service: {service}");
+        self.cmd.run(&service).await
     }
 }
 
@@ -62,10 +66,10 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Get(cmd) => cmd.run(client).await,
-            Self::Search(cmd) => cmd.run(client).await,
+            Self::Get(cmd) => cmd.run(service).await,
+            Self::Search(cmd) => cmd.run(service).await,
         }
     }
 }

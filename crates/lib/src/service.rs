@@ -1,4 +1,5 @@
 use std::fmt;
+use std::time::Duration;
 
 use enum_as_inner::EnumAsInner;
 use serde::{Deserialize, Serialize};
@@ -6,11 +7,14 @@ use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{AsRefStr, Display, EnumIter, EnumString, VariantNames};
 use url::Url;
 
+use crate::traits::WebClient;
+use crate::Error;
+
 pub mod bugzilla;
 pub mod github;
 pub mod redmine;
 
-use crate::traits::WebClient;
+static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"));
 
 /// Supported service variants
 #[derive(
@@ -83,6 +87,46 @@ impl Config {
 impl fmt::Display for Config {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{} -- {}", self.kind(), self.base())
+    }
+}
+
+#[derive(Debug)]
+pub struct ClientBuilder {
+    timeout: f64,
+    insecure: bool,
+}
+
+impl Default for ClientBuilder {
+    fn default() -> Self {
+        Self {
+            timeout: 30.0,
+            insecure: false,
+        }
+    }
+}
+
+impl ClientBuilder {
+    pub fn timeout(mut self, timeout: f64) -> Self {
+        self.timeout = timeout;
+        self
+    }
+
+    pub fn insecure(mut self, insecure: bool) -> Self {
+        self.insecure = insecure;
+        self
+    }
+
+    pub fn build(self) -> crate::Result<reqwest::Client> {
+        reqwest::Client::builder()
+            .hickory_dns(true)
+            .use_rustls_tls()
+            .user_agent(USER_AGENT)
+            // TODO: switch to cookie_provider() once cookie (de)serialization is supported
+            .cookie_store(true)
+            .timeout(Duration::from_secs_f64(self.timeout))
+            .danger_accept_invalid_certs(self.insecure)
+            .build()
+            .map_err(|e| Error::InvalidValue(format!("failed creating client: {e}")))
     }
 }
 

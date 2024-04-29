@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::fmt;
 use std::str::FromStr;
 
-use reqwest::{ClientBuilder, RequestBuilder};
+use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{Display, EnumIter, EnumString, VariantNames};
@@ -10,9 +10,10 @@ use tracing::{debug, trace};
 use url::Url;
 
 use crate::objects::Ids;
-use crate::service::ServiceKind;
 use crate::traits::{Api, WebClient, WebService};
 use crate::Error;
+
+use super::{ClientBuilder, ServiceKind};
 
 pub mod attachment;
 pub mod comment;
@@ -62,7 +63,7 @@ pub struct Service {
 }
 
 impl Service {
-    pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+    pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
         Ok(Self {
             config,
             client: builder.build()?,
@@ -489,4 +490,50 @@ impl Api for FilterField {
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct ServiceCache {
     fields: HashSet<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::test::{TestServer, TESTDATA_PATH};
+    use crate::traits::Request;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn get() {
+        let path = TESTDATA_PATH.join("bugzilla");
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        server.respond(200, path.join("get/single-bug.json")).await;
+        let request = service.get(&[12345], false, false, false).unwrap();
+        let bugs = request.send(&service).await.unwrap();
+        assert_eq!(bugs.len(), 1);
+        let bug = &bugs[0];
+        assert_eq!(bug.id, 12345);
+
+        server.reset().await;
+
+        server
+            .respond(404, path.join("errors/nonexistent-bug.json"))
+            .await;
+        let request = service.get(&[1], false, false, false).unwrap();
+        let result = request.send(&service).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn search() {
+        let path = TESTDATA_PATH.join("bugzilla");
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        server.respond(200, path.join("search/ids.json")).await;
+        let query = search::Parameters::new().summary(["test"]);
+        let request = service.search(query).unwrap();
+        let bugs = request.send(&service).await.unwrap();
+        assert_eq!(bugs.len(), 5);
+    }
 }

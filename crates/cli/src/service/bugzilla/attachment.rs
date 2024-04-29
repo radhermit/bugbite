@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::client::bugzilla::Client;
+use bugbite::service::bugzilla::Service;
 
 mod create;
 mod get;
@@ -13,8 +13,8 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
-        self.command.run(client).await
+    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+        self.command.run(service).await
     }
 }
 
@@ -34,11 +34,11 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Create(cmd) => cmd.run(client).await,
-            Self::Get(cmd) => cmd.run(client).await,
-            Self::Update(cmd) => cmd.run(client).await,
+            Self::Create(cmd) => cmd.run(service).await,
+            Self::Get(cmd) => cmd.run(service).await,
+            Self::Update(cmd) => cmd.run(service).await,
         }
     }
 }

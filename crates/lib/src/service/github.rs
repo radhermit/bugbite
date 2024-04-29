@@ -1,13 +1,12 @@
 use std::fmt;
 
-use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::traits::{WebClient, WebService};
 use crate::Error;
 
-use super::ServiceKind;
+use super::{ClientBuilder, ServiceKind};
 
 mod get;
 pub mod search;
@@ -49,7 +48,7 @@ pub struct Service {
 }
 
 impl Service {
-    pub(crate) fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+    pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
         Ok(Self {
             config,
             _client: builder.build()?,

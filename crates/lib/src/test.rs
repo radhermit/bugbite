@@ -4,8 +4,6 @@ use camino::Utf8Path;
 use wiremock::{matchers, Match, Mock, MockServer, ResponseTemplate};
 
 use crate::args::maybe_stdin::STDIN_HAS_BEEN_USED;
-use crate::client::Client;
-use crate::service::ServiceKind;
 
 /// Reset standard input argument usage flag.
 pub fn reset_stdin() {
@@ -37,10 +35,6 @@ impl TestServer {
         let server = MockServer::start().await;
         let uri = server.uri();
         Self { server, uri }
-    }
-
-    pub fn client(&self, kind: ServiceKind) -> Client {
-        Client::new(kind, self.uri()).unwrap()
     }
 
     pub fn mock(&self) -> &MockServer {

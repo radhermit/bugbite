@@ -4,11 +4,11 @@ use std::process::ExitCode;
 
 use anyhow::Context;
 use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
-use bugbite::client::redmine::Client;
 use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::redmine::search::{OrderField, Parameters};
 use bugbite::service::redmine::IssueField;
+use bugbite::service::redmine::Service;
 use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::Request;
 use camino::Utf8PathBuf;
@@ -195,7 +195,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let fields = self.params.query.fields.clone();
         let mut params: Parameters = self.params.into();
 
@@ -215,11 +215,11 @@ impl Command {
         }
 
         if self.options.browser {
-            let url = client.service().search_url(params)?;
+            let url = service.search_url(params)?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
-            let request = client.service().search(params)?;
-            let items = request.send(client.service()).await?;
+            let request = service.search(params)?;
+            let items = request.send(service).await?;
             let stdout = stdout().lock();
             render_search(stdout, items, &fields, self.options.json)?;
         }

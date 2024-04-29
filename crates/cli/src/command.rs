@@ -3,8 +3,7 @@ use std::env;
 use std::io::stderr;
 use std::process::ExitCode;
 
-use bugbite::client::Client;
-use bugbite::service::ServiceKind;
+use bugbite::service::{ClientBuilder, ServiceKind};
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::error::ErrorKind;
@@ -209,7 +208,7 @@ impl Command {
             Ok((base, options, cmd)) => {
                 enable_logging(cmd.verbosity.log_level_filter());
 
-                let client = Client::builder()
+                let builder = ClientBuilder::default()
                     .insecure(options.bite.insecure)
                     .timeout(options.bite.timeout);
 
@@ -221,7 +220,7 @@ impl Command {
                     libc::signal(libc::SIGPIPE, libc::SIG_DFL);
                 }
 
-                cmd.subcmd.run(base, client).await
+                cmd.subcmd.run(base, builder).await
             }
             Err(e) => e.exit(),
         }
