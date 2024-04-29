@@ -28,7 +28,6 @@ struct Authentication {
 }
 
 #[derive(Debug, clap::Args)]
-#[clap(next_help_heading = "Redmine")]
 pub(crate) struct Command {
     #[clap(flatten)]
     auth: Authentication,

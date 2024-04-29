@@ -36,7 +36,6 @@ struct Authentication {
 }
 
 #[derive(Debug, clap::Args)]
-#[clap(next_help_heading = "Bugzilla")]
 pub(crate) struct Command {
     #[clap(flatten)]
     auth: Authentication,
