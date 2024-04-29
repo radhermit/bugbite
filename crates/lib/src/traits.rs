@@ -64,18 +64,6 @@ pub trait Request {
     fn send(self, service: &Self::Service) -> impl Future<Output = crate::Result<Self::Output>>;
 }
 
-/// Placeholder request that does nothing.
-pub(crate) struct NullRequest;
-
-impl Request for NullRequest {
-    type Output = ();
-    type Service = ();
-
-    async fn send(self, _service: &Self::Service) -> crate::Result<Self::Output> {
-        Ok(())
-    }
-}
-
 /// Inject service authentication data into a request.
 pub(crate) trait InjectAuth: Sized {
     /// Authentication required for request.
