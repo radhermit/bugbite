@@ -1,6 +1,19 @@
+use std::env;
+
+use bugbite::test::TestServer;
 use predicates::str::contains;
 
 use crate::command::cmd;
+
+mod get;
+
+async fn start_server() -> TestServer {
+    let server = TestServer::new().await;
+    let base = server.uri();
+    env::set_var("BUGBITE_BASE", format!("{base}/projects/test"));
+    env::set_var("BUGBITE_SERVICE", "redmine");
+    server
+}
 
 #[test]
 fn incompatible_connection() {
