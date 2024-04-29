@@ -133,7 +133,7 @@ struct ServiceOptions {
     connection: Option<String>,
 
     /// base service URL
-    #[arg(short, long, env = "BUGBITE_BASE")]
+    #[arg(short, long, env = "BUGBITE_BASE", conflicts_with = "connection")]
     base: Option<String>,
 
     /// service type
@@ -141,6 +141,7 @@ struct ServiceOptions {
         short,
         long,
         env = "BUGBITE_SERVICE",
+        conflicts_with = "connection",
         hide_possible_values = true,
         value_parser = PossibleValuesParser::new(ServiceKind::VARIANTS)
             .map(|s| s.parse::<ServiceKind>().unwrap()),
