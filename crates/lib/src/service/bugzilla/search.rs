@@ -21,7 +21,7 @@ use crate::Error;
 use super::{BugField, FilterField};
 
 #[derive(Debug)]
-pub(crate) struct SearchRequest {
+pub struct SearchRequest {
     url: url::Url,
 }
 
@@ -43,7 +43,7 @@ impl Request for SearchRequest {
 impl SearchRequest {
     pub(super) fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
         let params = params.encode(service)?;
-        let url = service.base().join(&format!("rest/bug?{params}"))?;
+        let url = service.config.base.join(&format!("rest/bug?{params}"))?;
         Ok(Self { url })
     }
 }
@@ -92,7 +92,7 @@ pub struct Match {
 impl Match {
     /// Substitute user alias for matching value.
     fn replace_user_alias(mut self, service: &super::Service) -> Self {
-        if let Some(user) = service.user() {
+        if let Some(user) = service.config.user.as_deref() {
             if self.value == "@me" {
                 self.value = user.to_string();
             }

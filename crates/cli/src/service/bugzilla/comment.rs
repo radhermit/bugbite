@@ -5,6 +5,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::comment::CommentParams;
 use bugbite::time::TimeDeltaOrStatic;
+use bugbite::traits::Request;
 use clap::Args;
 
 use crate::service::Render;
@@ -63,7 +64,8 @@ impl Command {
             params.creator(value);
         }
 
-        let comments = client.comment(ids, Some(params)).await?;
+        let request = client.service().comment(ids, Some(params))?;
+        let comments = request.send(client.service()).await?;
         let mut data = ids.iter().zip(comments).peekable();
         let mut stdout = stdout().lock();
 

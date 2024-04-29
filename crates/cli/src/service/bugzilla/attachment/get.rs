@@ -5,6 +5,7 @@ use std::process::ExitCode;
 use anyhow::Context;
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::traits::Request;
 use camino::Utf8PathBuf;
 use clap::Args;
 
@@ -55,8 +56,11 @@ impl Command {
 
         let get_data = !self.options.list;
         let multiple_bugs = self.options.item_ids && ids.len() > 1;
-        let attachments: Vec<_> = client
-            .attachment_get(ids, self.options.item_ids, get_data)
+        let request = client
+            .service()
+            .attachment_get(ids, self.options.item_ids, get_data)?;
+        let attachments: Vec<_> = request
+            .send(client.service())
             .await?
             .into_iter()
             .flatten()

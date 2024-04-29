@@ -4,6 +4,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::create::{Compression, CreateAttachment};
+use bugbite::traits::Request;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};
@@ -149,7 +150,8 @@ impl Command {
         }
 
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
-        let attachment_ids = client.attachment_create(ids, attachments).await?;
+        let request = client.service().attachment_create(ids, attachments)?;
+        let attachment_ids = request.send(client.service()).await?;
 
         let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
         for (file, ids) in self.args.files.iter().zip(attachment_ids.iter()) {

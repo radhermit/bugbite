@@ -10,7 +10,7 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct CreateRequest {
+pub struct CreateRequest {
     url: url::Url,
     params: Parameters,
 }
@@ -33,7 +33,7 @@ impl Request for CreateRequest {
 impl CreateRequest {
     pub(super) fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
         Ok(Self {
-            url: service.base().join("rest/bug")?,
+            url: service.config.base.join("rest/bug")?,
             params,
         })
     }

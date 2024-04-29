@@ -325,7 +325,7 @@ struct Attachment {
 }
 
 #[derive(Debug)]
-pub(crate) struct AttachmentCreateRequest {
+pub struct AttachmentCreateRequest {
     url: Url,
     attachments: Vec<Attachment>,
 }
@@ -349,7 +349,10 @@ impl AttachmentCreateRequest {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
-        let url = service.base().join(&format!("rest/bug/{id}/attachment"))?;
+        let url = service
+            .config
+            .base
+            .join(&format!("rest/bug/{id}/attachment"))?;
 
         // create temporary directory used for creating transient attachment files
         let temp_dir = tempfile::tempdir()

@@ -3,7 +3,7 @@ use tracing::debug;
 use crate::objects::github::Issue;
 use crate::traits::Request;
 
-pub(crate) struct GetRequest(Vec<reqwest::Request>);
+pub struct GetRequest(Vec<reqwest::Request>);
 
 impl Request for GetRequest {
     type Output = Vec<Issue>;

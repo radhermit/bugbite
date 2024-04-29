@@ -4,6 +4,7 @@ use std::process::ExitCode;
 use bugbite::args::Csv;
 use bugbite::client::github::Client;
 use bugbite::service::github::search::{Parameters, SearchOrder};
+use bugbite::traits::Request;
 use clap::Args;
 use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
@@ -48,7 +49,8 @@ impl Command {
     pub(super) async fn run(self, client: &Client) -> anyhow::Result<ExitCode> {
         let params: Parameters = self.params.into();
 
-        let issues = client.search(params).await?;
+        let request = client.service().search(params)?;
+        let issues = request.send(client.service()).await?;
         let mut stdout = stdout().lock();
         let mut count = 0;
 

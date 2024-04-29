@@ -111,7 +111,7 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
 }
 
 #[derive(Debug)]
-pub(crate) struct UpdateRequest {
+pub struct UpdateRequest {
     url: url::Url,
     ids: Vec<String>,
     params: Parameters,
@@ -152,7 +152,7 @@ impl UpdateRequest {
         };
 
         Ok(Self {
-            url: service.base().join(&format!("rest/bug/{id}"))?,
+            url: service.config.base.join(&format!("rest/bug/{id}"))?,
             ids: ids.iter().map(|x| x.to_string()).collect(),
             params,
         })

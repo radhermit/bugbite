@@ -7,6 +7,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::create::Parameters;
+use bugbite::traits::Request;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
@@ -211,8 +212,9 @@ impl Command {
             // command-line parameters override template values
             params = params.merge(template);
         } else if let Some(id) = self.options.from_bug {
-            let bug = client
-                .get(&[id], false, false, false)
+            let request = client.service().get(&[id], false, false, false)?;
+            let bug = request
+                .send(client.service())
                 .await?
                 .into_iter()
                 .next()
@@ -230,7 +232,8 @@ impl Command {
 
         if !self.options.dry_run {
             let mut stdout = stdout().lock();
-            let id = client.create(params).await?;
+            let request = client.service().create(params)?;
+            let id = request.send(client.service()).await?;
             if stdout.is_terminal() {
                 info!("Created bug {id}");
             } else {

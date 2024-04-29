@@ -24,8 +24,6 @@ pub enum Error {
     Request(reqwest::Error),
     #[error("request timed out")]
     Timeout,
-    #[error("{0}")]
-    Unsupported(String),
 }
 
 impl From<reqwest::Error> for Error {

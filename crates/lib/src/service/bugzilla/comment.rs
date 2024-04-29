@@ -6,7 +6,7 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct CommentRequest {
+pub struct CommentRequest {
     url: url::Url,
     params: Option<CommentParams>,
 }
@@ -24,7 +24,10 @@ impl CommentRequest {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
-        let mut url = service.base().join(&format!("rest/bug/{id}/comment"))?;
+        let mut url = service
+            .config
+            .base
+            .join(&format!("rest/bug/{id}/comment"))?;
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.

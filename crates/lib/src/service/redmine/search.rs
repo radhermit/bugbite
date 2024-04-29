@@ -328,14 +328,14 @@ impl Parameters {
 }
 
 #[derive(Debug)]
-pub(crate) struct SearchRequest {
+pub struct SearchRequest {
     url: url::Url,
 }
 
 impl SearchRequest {
     pub(super) fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
         let params = params.encode(service)?;
-        let url = service.base().join(&format!("issues.json?{params}"))?;
+        let url = service.config.base.join(&format!("issues.json?{params}"))?;
         Ok(Self { url })
     }
 }

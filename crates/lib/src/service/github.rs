@@ -4,7 +4,7 @@ use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::traits::{NullRequest, WebService};
+use crate::traits::{WebClient, WebService};
 use crate::Error;
 
 use super::ServiceKind;
@@ -61,6 +61,17 @@ impl Service {
         let base = self.base().as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
+
+    pub fn get<S>(&self, _ids: &[S], _comments: bool) -> crate::Result<get::GetRequest>
+    where
+        S: std::fmt::Display,
+    {
+        todo!("get requests unsupported")
+    }
+
+    pub fn search(&self, _params: search::Parameters) -> crate::Result<search::SearchRequest> {
+        todo!("search requests unsupported")
+    }
 }
 
 impl fmt::Display for Service {
@@ -72,14 +83,9 @@ impl fmt::Display for Service {
 impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
-    type GetRequest = get::GetRequest;
-    type CreateRequest = NullRequest;
-    type CreateParams = ();
-    type UpdateRequest = NullRequest;
-    type UpdateParams = ();
-    type SearchRequest = search::SearchRequest;
-    type SearchParams = search::Parameters;
+}
 
+impl<'a> WebClient<'a> for Service {
     fn base(&self) -> &Url {
         self.config.base()
     }

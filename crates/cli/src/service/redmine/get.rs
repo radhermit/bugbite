@@ -2,6 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::redmine::Client;
+use bugbite::traits::Request;
 use clap::Args;
 
 use crate::service::output::render_items;
@@ -40,7 +41,8 @@ impl Command {
             launch_browser(urls)?;
         } else {
             let comments = !self.options.no_comments;
-            let issues = client.get(ids, false, comments).await?;
+            let request = client.service().get(ids, false, comments)?;
+            let issues = request.send(client.service()).await?;
             render_items(issues)?;
         }
 

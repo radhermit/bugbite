@@ -5,6 +5,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::service::bugzilla::history::HistoryParams;
 use bugbite::time::TimeDeltaOrStatic;
+use bugbite::traits::Request;
 use clap::Args;
 
 use crate::service::Render;
@@ -48,7 +49,8 @@ impl Command {
             params.creator(value);
         }
 
-        let events = client.history(ids, Some(params)).await?;
+        let request = client.service().history(ids, Some(params))?;
+        let events = request.send(client.service()).await?;
         let mut data = ids.iter().zip(events).peekable();
         let mut stdout = stdout().lock();
 

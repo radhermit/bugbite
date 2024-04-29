@@ -13,6 +13,7 @@ use bugbite::service::bugzilla::{
     FilterField,
 };
 use bugbite::time::TimeDeltaOrStatic;
+use bugbite::traits::Request;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use crossterm::style::Stylize;
@@ -654,7 +655,8 @@ impl Command {
             let url = client.service().search_url(params)?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
-            let items = client.search(params).await?;
+            let request = client.service().search(params)?;
+            let items = request.send(client.service()).await?;
             let stdout = stdout().lock();
             render_search(stdout, items, &fields, self.options.json)?;
         }

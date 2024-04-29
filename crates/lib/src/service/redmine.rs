@@ -6,12 +6,12 @@ use strum::{Display, EnumString, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
-use crate::traits::{NullRequest, WebService};
+use crate::traits::{WebClient, WebService};
 use crate::Error;
 
 use super::ServiceKind;
 
-mod get;
+pub mod get;
 pub mod search;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -82,6 +82,22 @@ impl Service {
         let params = params.encode(self)?;
         Ok(format!("{base}/issues?set_filter=1&{params}"))
     }
+
+    pub fn get<S>(
+        &self,
+        ids: &[S],
+        attachments: bool,
+        comments: bool,
+    ) -> crate::Result<get::GetRequest>
+    where
+        S: std::fmt::Display,
+    {
+        get::GetRequest::new(self, ids, attachments, comments)
+    }
+
+    pub fn search(&self, params: search::Parameters) -> crate::Result<search::SearchRequest> {
+        search::SearchRequest::new(self, params)
+    }
 }
 
 impl fmt::Display for Service {
@@ -93,21 +109,6 @@ impl fmt::Display for Service {
 impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
-    type GetRequest = get::GetRequest;
-    type CreateRequest = NullRequest;
-    type CreateParams = ();
-    type UpdateRequest = NullRequest;
-    type UpdateParams = ();
-    type SearchRequest = search::SearchRequest;
-    type SearchParams = search::Parameters;
-
-    fn base(&self) -> &Url {
-        self.config.base()
-    }
-
-    fn kind(&self) -> ServiceKind {
-        self.config.kind()
-    }
 
     fn inject_auth(
         &self,
@@ -159,22 +160,15 @@ impl<'a> WebService<'a> for Service {
             }
         }
     }
+}
 
-    fn get_request<S>(
-        &self,
-        ids: &[S],
-        attachments: bool,
-        comments: bool,
-        _history: bool,
-    ) -> crate::Result<Self::GetRequest>
-    where
-        S: std::fmt::Display,
-    {
-        get::GetRequest::new(self, ids, attachments, comments)
+impl<'a> WebClient<'a> for Service {
+    fn base(&self) -> &Url {
+        self.config.base()
     }
 
-    fn search_request(&self, params: Self::SearchParams) -> crate::Result<Self::SearchRequest> {
-        search::SearchRequest::new(self, params)
+    fn kind(&self) -> ServiceKind {
+        self.config.kind()
     }
 }
 

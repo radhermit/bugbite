@@ -4,6 +4,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::update::Parameters;
+use bugbite::traits::Request;
 use clap::Args;
 
 #[derive(Debug, Args)]
@@ -97,7 +98,8 @@ impl Command {
             is_private: self.options.private,
         };
 
-        let _ = client.attachment_update(ids, params).await?;
+        let request = client.service().attachment_update(ids, params)?;
+        let _ = request.send(client.service()).await?;
 
         Ok(ExitCode::SUCCESS)
     }

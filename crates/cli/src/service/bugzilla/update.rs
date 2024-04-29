@@ -8,6 +8,7 @@ use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::client::bugzilla::Client;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange};
+use bugbite::traits::Request;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
@@ -314,8 +315,9 @@ async fn get_reply(
     id: &str,
     comment_ids: &mut Vec<usize>,
 ) -> anyhow::Result<String> {
-    let comments = client
-        .comment(&[id], None)
+    let request = client.service().comment(&[id], None)?;
+    let comments = request
+        .send(client.service())
         .await?
         .into_iter()
         .next()
@@ -396,7 +398,8 @@ impl Command {
         }
 
         if !self.options.dry_run {
-            let changes = client.update(ids, params).await?;
+            let request = client.service().update(ids, params)?;
+            let changes = request.send(client.service()).await?;
             for change in changes {
                 info!("{change}");
             }

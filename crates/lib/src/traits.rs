@@ -1,10 +1,10 @@
 use std::fmt;
+use std::future::Future;
 
 use reqwest::RequestBuilder;
 use url::Url;
 
 use crate::service::ServiceKind;
-use crate::Error;
 
 /// Return true if a type contains a given object, otherwise false.
 pub trait Contains<T> {
@@ -57,11 +57,11 @@ impl<T: Api> Api for &T {
     }
 }
 
-pub(crate) trait Request {
+pub trait Request {
     type Output;
     type Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output>;
+    fn send(self, service: &Self::Service) -> impl Future<Output = crate::Result<Self::Output>>;
 }
 
 /// Placeholder request that does nothing.
@@ -98,22 +98,6 @@ impl InjectAuth for RequestBuilder {
 pub(crate) trait WebService<'a>: fmt::Display {
     const API_VERSION: &'static str;
     type Response;
-    type GetRequest: Request;
-    type CreateRequest: Request;
-    type CreateParams;
-    type UpdateRequest: Request;
-    type UpdateParams;
-    type SearchRequest: Request;
-    type SearchParams;
-
-    /// Return the base URL for a service.
-    fn base(&self) -> &Url;
-    /// Return the service variant.
-    fn kind(&self) -> ServiceKind;
-    /// Return the current service user if one exists.
-    fn user(&self) -> Option<&str> {
-        None
-    }
 
     /// Inject authentication into a request before it's sent.
     fn inject_auth(
@@ -126,57 +110,13 @@ pub(crate) trait WebService<'a>: fmt::Display {
 
     /// Parse a raw response into a service response.
     async fn parse_response(&self, _response: reqwest::Response) -> crate::Result<Self::Response> {
-        Err(Error::Unsupported(format!(
-            "{}: request parsing unsupported",
-            self.kind()
-        )))
+        todo!("request parsing unsupported")
     }
+}
 
-    /// Create a request for bugs, issues, or tickets by their IDs.
-    fn get_request<S>(
-        &self,
-        _ids: &[S],
-        _attachments: bool,
-        _comments: bool,
-        _history: bool,
-    ) -> crate::Result<Self::GetRequest>
-    where
-        S: std::fmt::Display,
-    {
-        Err(Error::Unsupported(format!(
-            "{}: get requests unsupported",
-            self.kind()
-        )))
-    }
-
-    /// Create a creation request for a bug, issue, or ticket.
-    fn create_request(&self, _params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
-        Err(Error::Unsupported(format!(
-            "{}: create requests unsupported",
-            self.kind()
-        )))
-    }
-
-    /// Create an update request for bugs, issues, or tickets.
-    fn update_request<S>(
-        &self,
-        _ids: &[S],
-        _params: Self::UpdateParams,
-    ) -> crate::Result<Self::UpdateRequest>
-    where
-        S: std::fmt::Display,
-    {
-        Err(Error::Unsupported(format!(
-            "{}: update requests unsupported",
-            self.kind()
-        )))
-    }
-
-    /// Create a search request for bugs, issues, or tickets.
-    fn search_request(&self, _query: Self::SearchParams) -> crate::Result<Self::SearchRequest> {
-        Err(Error::Unsupported(format!(
-            "{}: search requests unsupported",
-            self.kind()
-        )))
-    }
+pub trait WebClient<'a> {
+    /// Return the base URL for a service.
+    fn base(&self) -> &Url;
+    /// Return the service variant.
+    fn kind(&self) -> ServiceKind;
 }

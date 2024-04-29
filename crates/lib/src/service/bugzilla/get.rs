@@ -10,7 +10,7 @@ use super::comment::CommentRequest;
 use super::history::HistoryRequest;
 
 #[derive(Debug)]
-pub(crate) struct GetRequest {
+pub struct GetRequest {
     url: Url,
     attachments: Option<AttachmentGetRequest>,
     comments: Option<CommentRequest>,
@@ -32,7 +32,7 @@ impl GetRequest {
             return Err(Error::InvalidRequest("no IDs specified".to_string()));
         };
 
-        let mut url = service.base().join(&format!("rest/bug/{id}"))?;
+        let mut url = service.config.base.join(&format!("rest/bug/{id}"))?;
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
@@ -49,7 +49,7 @@ impl GetRequest {
             .append_pair("exclude_fields", "update_token");
 
         let attachments = if attachments {
-            Some(service.attachment_get_request(ids, true, false)?)
+            Some(service.attachment_get(ids, true, false)?)
         } else {
             None
         };

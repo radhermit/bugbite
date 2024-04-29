@@ -10,7 +10,7 @@ pub mod bugzilla;
 pub mod github;
 pub mod redmine;
 
-use crate::traits::WebService;
+use crate::traits::WebClient;
 
 /// Supported service variants
 #[derive(

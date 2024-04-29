@@ -69,7 +69,7 @@ struct RequestParameters {
 }
 
 #[derive(Debug)]
-pub(crate) struct AttachmentUpdateRequest {
+pub struct AttachmentUpdateRequest {
     url: Url,
     ids: Vec<String>,
     params: Parameters,
@@ -85,7 +85,10 @@ impl AttachmentUpdateRequest {
         };
 
         Ok(Self {
-            url: service.base().join(&format!("rest/bug/attachment/{id}"))?,
+            url: service
+                .config
+                .base
+                .join(&format!("rest/bug/attachment/{id}"))?,
             ids: ids.iter().map(|x| x.to_string()).collect(),
             params,
         })

@@ -59,7 +59,7 @@ pub enum SearchTerm {
     Updated,
 }
 
-pub(crate) struct SearchRequest(reqwest::Request);
+pub struct SearchRequest(reqwest::Request);
 
 impl Request for SearchRequest {
     type Output = Vec<Issue>;

@@ -11,7 +11,7 @@ use url::Url;
 
 use crate::objects::Ids;
 use crate::service::ServiceKind;
-use crate::traits::{Api, WebService};
+use crate::traits::{Api, WebClient, WebService};
 use crate::Error;
 
 pub mod attachment;
@@ -70,7 +70,7 @@ impl Service {
     }
 
     /// Return the website URL for an item ID.
-    pub fn item_url<I: std::fmt::Display>(&self, id: I) -> String {
+    pub fn item_url<I: fmt::Display>(&self, id: I) -> String {
         let base = self.base().as_str().trim_end_matches('/');
         format!("{base}/show_bug.cgi?id={id}")
     }
@@ -86,31 +86,31 @@ impl Service {
     // TODO: support pulling aliases from the config?
     pub(crate) fn replace_user_alias<'a>(&'a self, value: &'a str) -> &str {
         if value == "@me" {
-            self.user().unwrap_or(value)
+            self.config.user.as_deref().unwrap_or(value)
         } else {
             value
         }
     }
 
-    pub(crate) fn attachment_create_request<S>(
+    pub fn attachment_create<S>(
         &self,
         ids: &[S],
         attachments: Vec<attachment::create::CreateAttachment>,
     ) -> crate::Result<attachment::create::AttachmentCreateRequest>
     where
-        S: std::fmt::Display,
+        S: fmt::Display,
     {
         attachment::create::AttachmentCreateRequest::new(self, ids, attachments)
     }
 
-    pub(crate) fn attachment_get_request<S>(
+    pub fn attachment_get<S>(
         &self,
         ids: &[S],
         bugs: bool,
         data: bool,
     ) -> crate::Result<attachment::get::AttachmentGetRequest>
     where
-        S: std::fmt::Display,
+        S: fmt::Display,
     {
         let ids = if bugs {
             Ids::item(ids)
@@ -120,37 +120,69 @@ impl Service {
         attachment::get::AttachmentGetRequest::new(self, ids, data)
     }
 
-    pub(crate) fn attachment_update_request<S>(
+    pub fn attachment_update<S>(
         &self,
         ids: &[S],
         params: attachment::update::Parameters,
     ) -> crate::Result<attachment::update::AttachmentUpdateRequest>
     where
-        S: std::fmt::Display,
+        S: fmt::Display,
     {
         attachment::update::AttachmentUpdateRequest::new(self, ids, params)
     }
 
-    pub(crate) fn comment_request<S>(
+    pub fn comment<S>(
         &self,
         ids: &[S],
         params: Option<comment::CommentParams>,
     ) -> crate::Result<comment::CommentRequest>
     where
-        S: std::fmt::Display,
+        S: fmt::Display,
     {
         comment::CommentRequest::new(self, ids, params)
     }
 
-    pub(crate) fn history_request<S>(
+    pub fn create(&self, params: create::Parameters) -> crate::Result<create::CreateRequest> {
+        create::CreateRequest::new(self, params)
+    }
+
+    pub fn get<S>(
+        &self,
+        ids: &[S],
+        attachments: bool,
+        comments: bool,
+        history: bool,
+    ) -> crate::Result<get::GetRequest>
+    where
+        S: fmt::Display,
+    {
+        get::GetRequest::new(self, ids, attachments, comments, history)
+    }
+
+    pub fn history<S>(
         &self,
         ids: &[S],
         params: Option<history::HistoryParams>,
     ) -> crate::Result<history::HistoryRequest>
     where
-        S: std::fmt::Display,
+        S: fmt::Display,
     {
         history::HistoryRequest::new(self, ids, params)
+    }
+
+    pub fn search(&self, params: search::Parameters) -> crate::Result<search::SearchRequest> {
+        search::SearchRequest::new(self, params)
+    }
+
+    pub fn update<S>(
+        &self,
+        ids: &[S],
+        params: update::Parameters,
+    ) -> crate::Result<update::UpdateRequest>
+    where
+        S: fmt::Display,
+    {
+        update::UpdateRequest::new(self, ids, params)
     }
 }
 
@@ -178,25 +210,6 @@ impl fmt::Display for Service {
 impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
-    type GetRequest = get::GetRequest;
-    type CreateRequest = create::CreateRequest;
-    type CreateParams = create::Parameters;
-    type UpdateRequest = update::UpdateRequest;
-    type UpdateParams = update::Parameters;
-    type SearchRequest = search::SearchRequest;
-    type SearchParams = search::Parameters;
-
-    fn base(&self) -> &Url {
-        self.config.base()
-    }
-
-    fn user(&self) -> Option<&str> {
-        self.config.user.as_deref()
-    }
-
-    fn kind(&self) -> ServiceKind {
-        self.config.kind()
-    }
 
     fn inject_auth(
         &self,
@@ -234,37 +247,15 @@ impl<'a> WebService<'a> for Service {
             }
         }
     }
+}
 
-    fn get_request<S>(
-        &self,
-        ids: &[S],
-        attachments: bool,
-        comments: bool,
-        history: bool,
-    ) -> crate::Result<Self::GetRequest>
-    where
-        S: std::fmt::Display,
-    {
-        get::GetRequest::new(self, ids, attachments, comments, history)
+impl<'a> WebClient<'a> for Service {
+    fn base(&self) -> &Url {
+        self.config.base()
     }
 
-    fn create_request(&self, params: Self::CreateParams) -> crate::Result<Self::CreateRequest> {
-        create::CreateRequest::new(self, params)
-    }
-
-    fn update_request<S>(
-        &self,
-        ids: &[S],
-        params: Self::UpdateParams,
-    ) -> crate::Result<Self::UpdateRequest>
-    where
-        S: std::fmt::Display,
-    {
-        update::UpdateRequest::new(self, ids, params)
-    }
-
-    fn search_request(&self, params: Self::SearchParams) -> crate::Result<Self::SearchRequest> {
-        search::SearchRequest::new(self, params)
+    fn kind(&self) -> ServiceKind {
+        self.config.kind()
     }
 }
 

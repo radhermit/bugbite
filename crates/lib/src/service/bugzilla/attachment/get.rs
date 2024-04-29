@@ -8,7 +8,7 @@ use crate::traits::{InjectAuth, Request, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub(crate) struct AttachmentGetRequest {
+pub struct AttachmentGetRequest {
     ids: Ids,
     url: Url,
     data: bool,
@@ -20,14 +20,20 @@ impl AttachmentGetRequest {
         // documentation, but exists in older RPC-based docs.
         let mut url = match ids.as_slice() {
             IdsSlice::Item([id, remaining_ids @ ..]) => {
-                let mut url = service.base().join(&format!("rest/bug/{id}/attachment"))?;
+                let mut url = service
+                    .config
+                    .base
+                    .join(&format!("rest/bug/{id}/attachment"))?;
                 for id in remaining_ids {
                     url.query_pairs_mut().append_pair("ids", id.as_str());
                 }
                 url
             }
             IdsSlice::Object([id, remaining_ids @ ..]) => {
-                let mut url = service.base().join(&format!("rest/bug/attachment/{id}"))?;
+                let mut url = service
+                    .config
+                    .base
+                    .join(&format!("rest/bug/attachment/{id}"))?;
                 for id in remaining_ids {
                     url.query_pairs_mut()
                         .append_pair("attachment_ids", id.as_str());

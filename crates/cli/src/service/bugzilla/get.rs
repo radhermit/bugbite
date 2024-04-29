@@ -2,6 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::client::bugzilla::Client;
+use bugbite::traits::Request;
 use clap::Args;
 
 use crate::service::output::render_items;
@@ -50,7 +51,8 @@ impl Command {
             let attachments = !self.options.no_attachments;
             let comments = !self.options.no_comments;
             let history = !self.options.no_history;
-            let bugs = client.get(ids, attachments, comments, history).await?;
+            let request = client.service().get(ids, attachments, comments, history)?;
+            let bugs = request.send(client.service()).await?;
             render_items(bugs)?;
         }
 
