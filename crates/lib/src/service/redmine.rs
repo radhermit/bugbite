@@ -88,15 +88,15 @@ impl Service {
         ids: &[S],
         attachments: bool,
         comments: bool,
-    ) -> crate::Result<get::GetRequest>
+    ) -> crate::Result<get::Request>
     where
         S: std::fmt::Display,
     {
-        get::GetRequest::new(self, ids, attachments, comments)
+        get::Request::new(self, ids, attachments, comments)
     }
 
-    pub fn search(&self, params: search::Parameters) -> crate::Result<search::SearchRequest> {
-        Ok(search::SearchRequest::new(params))
+    pub fn search(&self, params: search::Parameters) -> crate::Result<search::Request> {
+        Ok(search::Request::new(params))
     }
 }
 

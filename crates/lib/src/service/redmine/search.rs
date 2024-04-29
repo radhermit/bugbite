@@ -328,17 +328,17 @@ impl Parameters {
 }
 
 #[derive(Debug)]
-pub struct SearchRequest {
+pub struct Request {
     params: Parameters,
 }
 
-impl SearchRequest {
+impl Request {
     pub(super) fn new(params: Parameters) -> Self {
         Self { params }
     }
 }
 
-impl RequestSend for SearchRequest {
+impl RequestSend for Request {
     type Output = Vec<Issue>;
     type Service = super::Service;
 

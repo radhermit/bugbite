@@ -325,12 +325,12 @@ struct Attachment {
 }
 
 #[derive(Debug)]
-pub struct AttachmentCreateRequest {
+pub struct Request {
     url: Url,
     attachments: Vec<Attachment>,
 }
 
-impl AttachmentCreateRequest {
+impl Request {
     pub(crate) fn new<S>(
         service: &Service,
         ids: &[S],
@@ -369,7 +369,7 @@ impl AttachmentCreateRequest {
     }
 }
 
-impl RequestSend for AttachmentCreateRequest {
+impl RequestSend for Request {
     type Output = Vec<Vec<u64>>;
     type Service = Service;
 

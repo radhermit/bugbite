@@ -21,11 +21,11 @@ use crate::Error;
 use super::{BugField, FilterField};
 
 #[derive(Debug)]
-pub struct SearchRequest {
+pub struct Request {
     params: Parameters,
 }
 
-impl RequestSend for SearchRequest {
+impl RequestSend for Request {
     type Output = Vec<Bug>;
     type Service = super::Service;
 
@@ -42,7 +42,7 @@ impl RequestSend for SearchRequest {
     }
 }
 
-impl SearchRequest {
+impl Request {
     pub(super) fn new(params: Parameters) -> Self {
         Self { params }
     }

@@ -8,13 +8,13 @@ use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub struct AttachmentGetRequest {
+pub struct Request {
     ids: Ids,
     url: Url,
     data: bool,
 }
 
-impl AttachmentGetRequest {
+impl Request {
     pub(crate) fn new(service: &Service, ids: Ids, data: bool) -> crate::Result<Self> {
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
@@ -51,7 +51,7 @@ impl AttachmentGetRequest {
     }
 }
 
-impl RequestSend for AttachmentGetRequest {
+impl RequestSend for Request {
     type Output = Vec<Vec<Attachment>>;
     type Service = Service;
 

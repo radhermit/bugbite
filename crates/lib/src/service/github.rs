@@ -61,14 +61,14 @@ impl Service {
         format!("{base}/issues/{id}")
     }
 
-    pub fn get<S>(&self, _ids: &[S], _comments: bool) -> crate::Result<get::GetRequest>
+    pub fn get<S>(&self, _ids: &[S], _comments: bool) -> crate::Result<get::Request>
     where
         S: std::fmt::Display,
     {
         todo!("get requests unsupported")
     }
 
-    pub fn search(&self, _params: search::Parameters) -> crate::Result<search::SearchRequest> {
+    pub fn search(&self, _params: search::Parameters) -> crate::Result<search::Request> {
         todo!("search requests unsupported")
     }
 }

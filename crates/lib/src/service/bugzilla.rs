@@ -97,11 +97,11 @@ impl Service {
         &self,
         ids: &[S],
         attachments: Vec<attachment::create::CreateAttachment>,
-    ) -> crate::Result<attachment::create::AttachmentCreateRequest>
+    ) -> crate::Result<attachment::create::Request>
     where
         S: fmt::Display,
     {
-        attachment::create::AttachmentCreateRequest::new(self, ids, attachments)
+        attachment::create::Request::new(self, ids, attachments)
     }
 
     pub fn attachment_get<S>(
@@ -109,7 +109,7 @@ impl Service {
         ids: &[S],
         bugs: bool,
         data: bool,
-    ) -> crate::Result<attachment::get::AttachmentGetRequest>
+    ) -> crate::Result<attachment::get::Request>
     where
         S: fmt::Display,
     {
@@ -118,33 +118,33 @@ impl Service {
         } else {
             Ids::object(ids)
         };
-        attachment::get::AttachmentGetRequest::new(self, ids, data)
+        attachment::get::Request::new(self, ids, data)
     }
 
     pub fn attachment_update<S>(
         &self,
         ids: &[S],
         params: attachment::update::Parameters,
-    ) -> crate::Result<attachment::update::AttachmentUpdateRequest>
+    ) -> crate::Result<attachment::update::Request>
     where
         S: fmt::Display,
     {
-        attachment::update::AttachmentUpdateRequest::new(self, ids, params)
+        attachment::update::Request::new(self, ids, params)
     }
 
     pub fn comment<S>(
         &self,
         ids: &[S],
         params: Option<comment::CommentParams>,
-    ) -> crate::Result<comment::CommentRequest>
+    ) -> crate::Result<comment::Request>
     where
         S: fmt::Display,
     {
-        comment::CommentRequest::new(self, ids, params)
+        comment::Request::new(self, ids, params)
     }
 
-    pub fn create(&self, params: create::Parameters) -> crate::Result<create::CreateRequest> {
-        create::CreateRequest::new(self, params)
+    pub fn create(&self, params: create::Parameters) -> crate::Result<create::Request> {
+        create::Request::new(self, params)
     }
 
     pub fn get<S>(
@@ -153,37 +153,33 @@ impl Service {
         attachments: bool,
         comments: bool,
         history: bool,
-    ) -> crate::Result<get::GetRequest>
+    ) -> crate::Result<get::Request>
     where
         S: fmt::Display,
     {
-        get::GetRequest::new(self, ids, attachments, comments, history)
+        get::Request::new(self, ids, attachments, comments, history)
     }
 
     pub fn history<S>(
         &self,
         ids: &[S],
         params: Option<history::HistoryParams>,
-    ) -> crate::Result<history::HistoryRequest>
+    ) -> crate::Result<history::Request>
     where
         S: fmt::Display,
     {
-        history::HistoryRequest::new(self, ids, params)
+        history::Request::new(self, ids, params)
     }
 
-    pub fn search(&self, params: search::Parameters) -> crate::Result<search::SearchRequest> {
-        Ok(search::SearchRequest::new(params))
+    pub fn search(&self, params: search::Parameters) -> crate::Result<search::Request> {
+        Ok(search::Request::new(params))
     }
 
-    pub fn update<S>(
-        &self,
-        ids: &[S],
-        params: update::Parameters,
-    ) -> crate::Result<update::UpdateRequest>
+    pub fn update<S>(&self, ids: &[S], params: update::Parameters) -> crate::Result<update::Request>
     where
         S: fmt::Display,
     {
-        update::UpdateRequest::new(self, ids, params)
+        update::Request::new(self, ids, params)
     }
 }
 

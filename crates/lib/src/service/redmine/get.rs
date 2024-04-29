@@ -7,13 +7,13 @@ use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub struct GetRequest {
+pub struct Request {
     ids: Vec<String>,
     urls: Vec<Url>,
     comments: bool,
 }
 
-impl GetRequest {
+impl Request {
     pub(crate) fn new<S>(
         service: &super::Service,
         ids: &[S],
@@ -54,7 +54,7 @@ impl GetRequest {
     }
 }
 
-impl RequestSend for GetRequest {
+impl RequestSend for Request {
     type Output = Vec<Issue>;
     type Service = super::Service;
 

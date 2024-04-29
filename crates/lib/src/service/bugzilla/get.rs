@@ -5,19 +5,17 @@ use crate::objects::bugzilla::Bug;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-use super::attachment::get::AttachmentGetRequest;
-use super::comment::CommentRequest;
-use super::history::HistoryRequest;
+use super::{attachment, comment, history};
 
 #[derive(Debug)]
-pub struct GetRequest {
+pub struct Request {
     url: Url,
-    attachments: Option<AttachmentGetRequest>,
-    comments: Option<CommentRequest>,
-    history: Option<HistoryRequest>,
+    attachments: Option<attachment::get::Request>,
+    comments: Option<comment::Request>,
+    history: Option<history::Request>,
 }
 
-impl GetRequest {
+impl Request {
     pub(super) fn new<S>(
         service: &super::Service,
         ids: &[S],
@@ -54,12 +52,12 @@ impl GetRequest {
             None
         };
         let comments = if comments {
-            Some(CommentRequest::new(service, ids, None)?)
+            Some(service.comment(ids, None)?)
         } else {
             None
         };
         let history = if history {
-            Some(HistoryRequest::new(service, ids, None)?)
+            Some(service.history(ids, None)?)
         } else {
             None
         };
@@ -73,7 +71,7 @@ impl GetRequest {
     }
 }
 
-impl RequestSend for GetRequest {
+impl RequestSend for Request {
     type Output = Vec<Bug>;
     type Service = super::Service;
 

@@ -69,13 +69,13 @@ struct RequestParameters {
 }
 
 #[derive(Debug)]
-pub struct AttachmentUpdateRequest {
+pub struct Request {
     url: Url,
     ids: Vec<String>,
     params: Parameters,
 }
 
-impl AttachmentUpdateRequest {
+impl Request {
     pub(crate) fn new<S>(service: &Service, ids: &[S], params: Parameters) -> crate::Result<Self>
     where
         S: std::fmt::Display,
@@ -95,7 +95,7 @@ impl AttachmentUpdateRequest {
     }
 }
 
-impl RequestSend for AttachmentUpdateRequest {
+impl RequestSend for Request {
     type Output = Vec<u64>;
     type Service = Service;
 

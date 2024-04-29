@@ -13,8 +13,6 @@ use crate::serde::non_empty_str;
 use crate::traits::{Contains, InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-use super::comment::CommentRequest;
-
 /// Changes made to a field.
 #[derive(Deserialize, Debug, Eq, PartialEq, Hash)]
 pub struct FieldChange {
@@ -111,13 +109,13 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
 }
 
 #[derive(Debug)]
-pub struct UpdateRequest {
+pub struct Request {
     url: url::Url,
     ids: Vec<String>,
     params: Parameters,
 }
 
-impl RequestSend for UpdateRequest {
+impl RequestSend for Request {
     type Output = Vec<BugChange>;
     type Service = super::Service;
 
@@ -138,7 +136,7 @@ impl RequestSend for UpdateRequest {
     }
 }
 
-impl UpdateRequest {
+impl Request {
     pub(super) fn new<S>(
         service: &super::Service,
         ids: &[S],
@@ -447,7 +445,8 @@ impl Parameters {
                     ))
                 }
             };
-            let comments = CommentRequest::new(service, &[id], None)?
+            let comments = service
+                .comment(&[id], None)?
                 .send(service)
                 .await?
                 .into_iter()

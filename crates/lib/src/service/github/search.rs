@@ -59,9 +59,9 @@ pub enum SearchTerm {
     Updated,
 }
 
-pub struct SearchRequest(reqwest::Request);
+pub struct Request(reqwest::Request);
 
-impl RequestSend for SearchRequest {
+impl RequestSend for Request {
     type Output = Vec<Issue>;
     type Service = super::Service;
 

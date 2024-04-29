@@ -6,12 +6,12 @@ use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub struct HistoryRequest {
+pub struct Request {
     url: url::Url,
     params: Option<HistoryParams>,
 }
 
-impl HistoryRequest {
+impl Request {
     pub(super) fn new<S>(
         service: &super::Service,
         ids: &[S],
@@ -46,7 +46,7 @@ impl HistoryRequest {
     }
 }
 
-impl RequestSend for HistoryRequest {
+impl RequestSend for Request {
     type Output = Vec<Vec<Event>>;
     type Service = super::Service;
 
