@@ -329,14 +329,12 @@ impl Parameters {
 
 #[derive(Debug)]
 pub struct SearchRequest {
-    url: url::Url,
+    params: Parameters,
 }
 
 impl SearchRequest {
-    pub(super) fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
-        let params = params.encode(service)?;
-        let url = service.config.base.join(&format!("issues.json?{params}"))?;
-        Ok(Self { url })
+    pub(super) fn new(params: Parameters) -> Self {
+        Self { params }
     }
 }
 
@@ -345,7 +343,9 @@ impl Request for SearchRequest {
     type Service = super::Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client.get(self.url).auth_optional(service)?;
+        let params = self.params.encode(service)?;
+        let url = service.config.base.join(&format!("issues.json?{params}"))?;
+        let request = service.client.get(url).auth_optional(service)?;
         let response = request.send().await?;
         let mut data = service.parse_response(response).await?;
         let data = data["issues"].take();

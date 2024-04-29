@@ -172,7 +172,7 @@ impl Service {
     }
 
     pub fn search(&self, params: search::Parameters) -> crate::Result<search::SearchRequest> {
-        search::SearchRequest::new(self, params)
+        Ok(search::SearchRequest::new(params))
     }
 
     pub fn update<S>(
