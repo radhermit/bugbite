@@ -5,7 +5,7 @@ use url::Url;
 
 use crate::objects::bugzilla::Flag;
 use crate::service::bugzilla::Service;
-use crate::traits::{InjectAuth, Request, WebService};
+use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 /// Attachment update parameters.
@@ -95,7 +95,7 @@ impl AttachmentUpdateRequest {
     }
 }
 
-impl Request for AttachmentUpdateRequest {
+impl RequestSend for AttachmentUpdateRequest {
     type Output = Vec<u64>;
     type Service = Service;
 

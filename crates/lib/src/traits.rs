@@ -57,7 +57,7 @@ impl<T: Api> Api for &T {
     }
 }
 
-pub trait Request {
+pub trait RequestSend {
     type Output;
     type Service;
 

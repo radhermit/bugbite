@@ -15,7 +15,7 @@ use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{self, Order, OrderType};
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{Api, InjectAuth, Request, WebService};
+use crate::traits::{Api, InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -25,7 +25,7 @@ pub struct SearchRequest {
     params: Parameters,
 }
 
-impl Request for SearchRequest {
+impl RequestSend for SearchRequest {
     type Output = Vec<Bug>;
     type Service = super::Service;
 

@@ -4,7 +4,7 @@ use url::Url;
 use crate::objects::bugzilla::Attachment;
 use crate::objects::{Ids, IdsSlice};
 use crate::service::bugzilla::Service;
-use crate::traits::{InjectAuth, Request, WebService};
+use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -51,7 +51,7 @@ impl AttachmentGetRequest {
     }
 }
 
-impl Request for AttachmentGetRequest {
+impl RequestSend for AttachmentGetRequest {
     type Output = Vec<Vec<Attachment>>;
     type Service = Service;
 

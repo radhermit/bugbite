@@ -4,7 +4,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::update::Parameters;
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::Request;
+use bugbite::traits::RequestSend;
 use clap::Args;
 
 #[derive(Debug, Args)]

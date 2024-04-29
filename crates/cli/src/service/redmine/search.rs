@@ -10,7 +10,7 @@ use bugbite::service::redmine::search::{OrderField, Parameters};
 use bugbite::service::redmine::IssueField;
 use bugbite::service::redmine::Service;
 use bugbite::time::TimeDeltaOrStatic;
-use bugbite::traits::Request;
+use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 

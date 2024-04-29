@@ -495,7 +495,7 @@ pub struct ServiceCache {
 #[cfg(test)]
 mod tests {
     use crate::test::{TestServer, TESTDATA_PATH};
-    use crate::traits::Request;
+    use crate::traits::RequestSend;
 
     use super::*;
 

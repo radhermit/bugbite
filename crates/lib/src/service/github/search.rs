@@ -7,7 +7,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use tracing::debug;
 
 use crate::objects::github::Issue;
-use crate::traits::Request;
+use crate::traits::RequestSend;
 use crate::Error;
 
 /// Issue search parameters.
@@ -61,7 +61,7 @@ pub enum SearchTerm {
 
 pub struct SearchRequest(reqwest::Request);
 
-impl Request for SearchRequest {
+impl RequestSend for SearchRequest {
     type Output = Vec<Issue>;
     type Service = super::Service;
 

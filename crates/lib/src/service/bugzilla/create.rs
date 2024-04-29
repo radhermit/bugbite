@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::objects::bugzilla::{Bug, Flag};
-use crate::traits::{InjectAuth, Request, WebService};
+use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -15,7 +15,7 @@ pub struct CreateRequest {
     params: Parameters,
 }
 
-impl Request for CreateRequest {
+impl RequestSend for CreateRequest {
     type Output = u64;
     type Service = super::Service;
 

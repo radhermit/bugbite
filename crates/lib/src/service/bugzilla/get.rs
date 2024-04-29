@@ -2,7 +2,7 @@ use serde_json::Value;
 use url::Url;
 
 use crate::objects::bugzilla::Bug;
-use crate::traits::{InjectAuth, Request, WebService};
+use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 use super::attachment::get::AttachmentGetRequest;
@@ -73,7 +73,7 @@ impl GetRequest {
     }
 }
 
-impl Request for GetRequest {
+impl RequestSend for GetRequest {
     type Output = Vec<Bug>;
     type Service = super::Service;
 

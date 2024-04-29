@@ -4,7 +4,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::create::{Compression, CreateAttachment};
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::Request;
+use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};

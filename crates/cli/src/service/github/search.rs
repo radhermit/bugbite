@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use bugbite::args::Csv;
 use bugbite::service::github::search::{Parameters, SearchOrder};
 use bugbite::service::github::Service;
-use bugbite::traits::Request;
+use bugbite::traits::RequestSend;
 use clap::Args;
 use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;

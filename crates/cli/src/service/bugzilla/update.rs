@@ -8,7 +8,7 @@ use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange};
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::Request;
+use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;

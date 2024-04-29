@@ -10,7 +10,7 @@ use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 
 use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
-use crate::traits::{Contains, InjectAuth, Request, WebService};
+use crate::traits::{Contains, InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 use super::comment::CommentRequest;
@@ -117,7 +117,7 @@ pub struct UpdateRequest {
     params: Parameters,
 }
 
-impl Request for UpdateRequest {
+impl RequestSend for UpdateRequest {
     type Output = Vec<BugChange>;
     type Service = super::Service;
 

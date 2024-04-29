@@ -12,7 +12,7 @@ use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{self, Order, OrderType};
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{Api, InjectAuth, Request, WebService};
+use crate::traits::{Api, InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -338,7 +338,7 @@ impl SearchRequest {
     }
 }
 
-impl Request for SearchRequest {
+impl RequestSend for SearchRequest {
     type Output = Vec<Issue>;
     type Service = super::Service;
 

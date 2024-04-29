@@ -3,7 +3,7 @@ use reqwest::StatusCode;
 use url::Url;
 
 use crate::objects::redmine::{Comment, Issue};
-use crate::traits::{InjectAuth, Request, WebService};
+use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -54,7 +54,7 @@ impl GetRequest {
     }
 }
 
-impl Request for GetRequest {
+impl RequestSend for GetRequest {
     type Output = Vec<Issue>;
     type Service = super::Service;
 

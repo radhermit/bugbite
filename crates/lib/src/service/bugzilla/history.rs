@@ -2,7 +2,7 @@ use serde_json::Value;
 
 use crate::objects::bugzilla::Event;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{InjectAuth, Request, WebService};
+use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -46,7 +46,7 @@ impl HistoryRequest {
     }
 }
 
-impl Request for HistoryRequest {
+impl RequestSend for HistoryRequest {
     type Output = Vec<Vec<Event>>;
     type Service = super::Service;
 

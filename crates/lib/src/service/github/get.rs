@@ -1,11 +1,11 @@
 use tracing::debug;
 
 use crate::objects::github::Issue;
-use crate::traits::Request;
+use crate::traits::RequestSend;
 
 pub struct GetRequest(Vec<reqwest::Request>);
 
-impl Request for GetRequest {
+impl RequestSend for GetRequest {
     type Output = Vec<Issue>;
     type Service = super::Service;
 

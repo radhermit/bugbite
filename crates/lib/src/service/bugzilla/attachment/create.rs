@@ -12,7 +12,7 @@ use url::Url;
 use crate::objects::bugzilla::Flag;
 use crate::objects::Base64;
 use crate::service::bugzilla::Service;
-use crate::traits::{InjectAuth, Request, WebService};
+use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 /// Compression variants supported by attachments.
@@ -369,7 +369,7 @@ impl AttachmentCreateRequest {
     }
 }
 
-impl Request for AttachmentCreateRequest {
+impl RequestSend for AttachmentCreateRequest {
     type Output = Vec<Vec<u64>>;
     type Service = Service;
 

@@ -5,7 +5,7 @@ use std::process::ExitCode;
 use anyhow::Context;
 use bugbite::args::MaybeStdinVec;
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::Request;
+use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
 use clap::Args;
 

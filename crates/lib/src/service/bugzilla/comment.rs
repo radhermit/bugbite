@@ -2,7 +2,7 @@ use serde_json::Value;
 
 use crate::objects::bugzilla::Comment;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{InjectAuth, Request, WebService};
+use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
@@ -46,7 +46,7 @@ impl CommentRequest {
     }
 }
 
-impl Request for CommentRequest {
+impl RequestSend for CommentRequest {
     type Output = Vec<Vec<Comment>>;
     type Service = super::Service;
 

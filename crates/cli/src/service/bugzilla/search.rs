@@ -13,7 +13,7 @@ use bugbite::service::bugzilla::{
     FilterField,
 };
 use bugbite::time::TimeDeltaOrStatic;
-use bugbite::traits::Request;
+use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use crossterm::style::Stylize;

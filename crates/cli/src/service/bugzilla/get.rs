@@ -2,7 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::Request;
+use bugbite::traits::RequestSend;
 use clap::Args;
 
 use crate::service::output::render_items;
