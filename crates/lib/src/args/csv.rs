@@ -9,13 +9,11 @@ use crate::Error;
 
 /// Supported service variants
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
-pub struct Csv<T: fmt::Display + FromStr> {
-    values: Vec<T>,
-}
+pub struct Csv<T: fmt::Display + FromStr>(Vec<T>);
 
 impl<T: fmt::Display + FromStr> Csv<T> {
     pub fn into_inner(self) -> Vec<T> {
-        self.values
+        self.0
     }
 }
 
@@ -40,13 +38,13 @@ where
             })
             .try_collect()?;
 
-        Ok(Self { values })
+        Ok(Self(values))
     }
 }
 
 impl<T: fmt::Display + FromStr> fmt::Display for Csv<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.values.iter().join(","))
+        write!(f, "{}", self.0.iter().join(","))
     }
 }
 
@@ -55,7 +53,7 @@ impl<T: fmt::Display + FromStr> IntoIterator for Csv<T> {
     type IntoIter = std::vec::IntoIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.values.into_iter()
+        self.0.into_iter()
     }
 }
 
@@ -63,12 +61,12 @@ impl<T: fmt::Display + FromStr> Deref for Csv<T> {
     type Target = [T];
 
     fn deref(&self) -> &[T] {
-        self.values.deref()
+        self.0.deref()
     }
 }
 
 impl<T: fmt::Display + FromStr> DerefMut for Csv<T> {
     fn deref_mut(&mut self) -> &mut [T] {
-        self.values.deref_mut()
+        self.0.deref_mut()
     }
 }
