@@ -1,4 +1,5 @@
 [![ci](https://github.com/radhermit/bugbite/workflows/ci/badge.svg)](https://github.com/radhermit/bugbite/actions/workflows/ci.yml)
+[![coverage](https://codecov.io/gh/radhermit/bugbite/branch/main/graph/badge.svg)](https://codecov.io/gh/radhermit/bugbite)
 
 # Bugbite
 
