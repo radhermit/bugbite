@@ -92,7 +92,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install cargo-llvm-cov
-      if: ${{ matrix.rust-version == 'stable' }}
+      if: ${{ matrix.rust-version == 'stable' && runner.os == 'Linux' }}
       uses: taiki-e/install-action@cargo-llvm-cov
 
     - name: Install cargo-nextest
@@ -107,7 +107,7 @@ jobs:
         fi
 
     - name: Upload build artifacts
-      if: ${{ matrix.rust-version == 'stable' }}
+      if: ${{ matrix.rust-version == 'stable' && runner.os == 'Linux' }}
       uses: actions/upload-artifact@v4
       with:
         name: coverage
