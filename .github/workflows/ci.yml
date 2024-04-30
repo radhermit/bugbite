@@ -100,7 +100,7 @@ jobs:
 
     - name: Build and run tests
       run: |
-        if [[ ${{ matrix.rust-version }} == 'stable' ]]; then
+        if [[ ${{ matrix.rust-version }} == 'stable' && runner.os == 'Linux' ]]; then
           cargo llvm-cov nextest --features test --workspace --tests --lcov --output-path lcov.info
         else
           cargo nextest run --features test --workspace --tests
