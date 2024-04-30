@@ -1,6 +1,7 @@
 use std::{env, fs};
 
 use predicates::prelude::*;
+use predicates::str::contains;
 use tempfile::tempdir;
 
 use crate::command::cmd;
@@ -20,6 +21,16 @@ fn aliases() {
                 .success();
         }
     }
+}
+
+#[test]
+fn missing_ids() {
+    cmd("bite bugzilla attachment get")
+        .assert()
+        .stdout("")
+        .stderr(contains("required arguments were not provided"))
+        .failure()
+        .code(2);
 }
 
 #[tokio::test]
