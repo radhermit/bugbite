@@ -31,11 +31,224 @@ impl RequestSend for Request {
 }
 
 impl Request {
-    pub(super) fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
+    pub fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
         Ok(Self {
             url: service.config.base.join("rest/bug")?,
             params,
         })
+    }
+
+    pub fn alias<I, S>(mut self, value: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.params.alias = Some(value.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn assignee<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.assignee = Some(value.into());
+        self
+    }
+
+    pub fn blocks<I>(mut self, value: I) -> Self
+    where
+        I: IntoIterator<Item = u64>,
+    {
+        self.params.blocks = Some(value.into_iter().collect());
+        self
+    }
+
+    pub fn cc<I, S>(mut self, value: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.params.cc = Some(value.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn component<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.component = Some(value.into());
+        self
+    }
+
+    pub fn depends<I>(mut self, value: I) -> Self
+    where
+        I: IntoIterator<Item = u64>,
+    {
+        self.params.depends = Some(value.into_iter().collect());
+        self
+    }
+
+    pub fn description<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.description = Some(value.into());
+        self
+    }
+
+    pub fn flags<I, T>(mut self, value: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<Flag>,
+    {
+        self.params.flags = Some(value.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn groups<I, S>(mut self, value: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.params.groups = Some(value.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn keywords<I, S>(mut self, value: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.params.keywords = Some(value.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn os<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.os = Some(value.into());
+        self
+    }
+
+    pub fn platform<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.platform = Some(value.into());
+        self
+    }
+
+    pub fn priority<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.priority = Some(value.into());
+        self
+    }
+
+    pub fn product<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.product = Some(value.into());
+        self
+    }
+
+    pub fn qa<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.qa = Some(value.into());
+        self
+    }
+
+    pub fn resolution<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.resolution = Some(value.into());
+        self
+    }
+
+    pub fn see_also<I, S>(mut self, value: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.params.see_also = Some(value.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn severity<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.severity = Some(value.into());
+        self
+    }
+
+    pub fn status<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.status = Some(value.into());
+        self
+    }
+
+    pub fn summary<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.summary = Some(value.into());
+        self
+    }
+
+    pub fn target<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.target = Some(value.into());
+        self
+    }
+
+    pub fn url<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.url = Some(value.into());
+        self
+    }
+
+    pub fn version<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.version = Some(value.into());
+        self
+    }
+
+    pub fn whiteboard<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.whiteboard = Some(value.into());
+        self
+    }
+
+    pub fn custom_fields<I, S1, S2>(mut self, value: I) -> Self
+    where
+        I: IntoIterator<Item = (S1, S2)>,
+        S1: Into<String>,
+        S2: Into<String>,
+    {
+        self.params.custom_fields = Some(
+            value
+                .into_iter()
+                .map(|(k, v)| (k.into(), v.into()))
+                .collect(),
+        );
+        self
     }
 }
 

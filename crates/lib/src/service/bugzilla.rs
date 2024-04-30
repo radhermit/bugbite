@@ -143,8 +143,8 @@ impl Service {
         comment::Request::new(self, ids, params)
     }
 
-    pub fn create(&self, params: create::Parameters) -> crate::Result<create::Request> {
-        create::Request::new(self, params)
+    pub fn create(&self) -> crate::Result<create::Request> {
+        create::Request::new(self, Default::default())
     }
 
     pub fn get<S>(
