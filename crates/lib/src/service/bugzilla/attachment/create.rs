@@ -1,6 +1,6 @@
 use std::fs::{self, File};
 use std::process::Command;
-use std::{io, str};
+use std::{fmt, io, str};
 
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
@@ -79,43 +79,6 @@ impl Compression {
     }
 }
 
-/// Attachment creation object.
-#[derive(Debug)]
-pub struct CreateAttachment {
-    /// Path to the attachment.
-    path: Utf8PathBuf,
-
-    /// Comment related to the attachment.
-    pub comment: Option<String>,
-
-    /// Attachment description, by default the submitted file name is used.
-    pub description: Option<String>,
-
-    /// Attachment flags.
-    pub flags: Option<Vec<Flag>>,
-
-    /// MIME type of the attachment.
-    mime_type: Option<String>,
-
-    /// Attachment file name, by default the submitted file name is used.
-    pub name: Option<String>,
-
-    /// Attachment is a patch file.
-    pub is_patch: bool,
-
-    /// Mark the attachment private on creation.
-    pub is_private: bool,
-
-    /// Compress the attachment using a given compression type.
-    pub compress: Option<Compression>,
-
-    /// Automatically compress the attachment if it exceeds a given size in MB.
-    pub auto_compress: Option<f64>,
-
-    /// Automatically truncate plain text attachments if exceeding a number of lines.
-    auto_truncate: Option<usize>,
-}
-
 // Try to detect data content type use `file` then via `infer, and finally falling back to
 // generic text-based vs binary data.
 fn get_mime_type<P: AsRef<Utf8Path>>(path: P, data: &[u8]) -> String {
@@ -183,6 +146,43 @@ where
     }
 }
 
+/// Attachment creation object.
+#[derive(Debug)]
+pub struct CreateAttachment {
+    /// Path to the attachment.
+    path: Utf8PathBuf,
+
+    /// Comment related to the attachment.
+    pub comment: Option<String>,
+
+    /// Attachment description, by default the submitted file name is used.
+    pub description: Option<String>,
+
+    /// Attachment flags.
+    pub flags: Option<Vec<Flag>>,
+
+    /// MIME type of the attachment.
+    mime_type: Option<String>,
+
+    /// Attachment file name, by default the submitted file name is used.
+    pub name: Option<String>,
+
+    /// Attachment is a patch file.
+    pub is_patch: Option<bool>,
+
+    /// Mark the attachment private on creation.
+    pub is_private: Option<bool>,
+
+    /// Compress the attachment using a given compression type.
+    pub compress: Option<Compression>,
+
+    /// Automatically compress the attachment if it exceeds a given size in MB.
+    pub auto_compress: Option<f64>,
+
+    /// Automatically truncate plain text attachments if exceeding a number of lines.
+    auto_truncate: Option<usize>,
+}
+
 impl CreateAttachment {
     /// Create a new attachment using a given path.
     pub fn new<P: AsRef<Utf8Path>>(path: P) -> Self {
@@ -202,42 +202,89 @@ impl CreateAttachment {
             flags: None,
             mime_type: None,
             name: None,
-            is_patch: false,
-            is_private: false,
+            is_patch: None,
+            is_private: None,
             compress,
             auto_compress: None,
             auto_truncate: None,
         }
     }
 
+    /// Set the attachment comment.
+    pub fn comment<S: fmt::Display>(mut self, value: Option<S>) -> Self {
+        self.comment = value.map(|s| s.to_string());
+        self
+    }
+
+    /// Set the attachment description.
+    pub fn flags<I>(mut self, value: Option<I>) -> Self
+    where
+        I: IntoIterator<Item = Flag>,
+    {
+        self.flags = value.map(|i| i.into_iter().collect());
+        self
+    }
+
+    /// Set the attachment description.
+    pub fn description<S: fmt::Display>(mut self, value: Option<S>) -> Self {
+        self.description = value.map(|s| s.to_string());
+        self
+    }
+
     /// Set the attachment MIME type.
-    pub fn mime_type<S: std::fmt::Display>(&mut self, value: S) -> crate::Result<()> {
-        if self.path.is_dir() {
-            Err(Error::InvalidValue(
-                "MIME type invalid for directory targets".to_string(),
-            ))
-        } else {
-            self.mime_type = Some(value.to_string());
-            Ok(())
-        }
+    pub fn mime_type<S: fmt::Display>(mut self, value: Option<S>) -> Self {
+        self.mime_type = value.map(|s| s.to_string());
+        self
+    }
+
+    /// Set the attachment name.
+    pub fn name<S: fmt::Display>(mut self, value: Option<S>) -> Self {
+        self.name = value.map(|s| s.to_string());
+        self
+    }
+
+    /// Compress the attachment using a given compression type.
+    pub fn compress(mut self, value: Option<Compression>) -> Self {
+        self.compress = value;
+        self
+    }
+
+    /// Automatically compress the attachment if it exceeds a given size in MB.
+    pub fn auto_compress(mut self, value: Option<f64>) -> Self {
+        self.auto_compress = value;
+        self
     }
 
     /// Conditionally truncate a text attachment to the last count of lines.
     ///
     /// If the attachment MIME type does not match text/* this setting is ignored.
-    pub fn auto_truncate(&mut self, count: usize) {
+    pub fn auto_truncate(mut self, value: Option<usize>) -> Self {
         // inject file size compression trigger if none was specified
         if self.auto_compress.is_none() {
             self.auto_compress = Some(1.0);
         }
-        self.auto_truncate = Some(count);
+        self.auto_truncate = value;
+        self
+    }
+
+    /// Attachment is a patch file.
+    pub fn is_patch(mut self, value: Option<bool>) -> Self {
+        self.is_patch = value;
+        self
+    }
+
+    /// Mark the attachment private on creation.
+    pub fn is_private(mut self, value: Option<bool>) -> Self {
+        self.is_private = value;
+        self
     }
 
     /// Build an attachment for request submission.
-    fn build<S>(self, ids: &[S], temp_dir_path: &Utf8Path) -> crate::Result<Attachment>
-    where
-        S: std::fmt::Display,
-    {
+    fn build<S: fmt::Display>(
+        self,
+        ids: &[S],
+        temp_dir_path: &Utf8Path,
+    ) -> crate::Result<Attachment> {
         let mut path = self.path;
         path = path
             .canonicalize_utf8()
@@ -248,7 +295,20 @@ impl CreateAttachment {
             .ok_or_else(|| Error::InvalidValue(format!("attachment missing file name: {path}")))?;
 
         // create directory tarball
+        let is_patch = self.is_patch.unwrap_or_default();
         if path.is_dir() {
+            if let Some(value) = self.mime_type.as_deref() {
+                return Err(Error::InvalidValue(format!(
+                    "MIME type invalid for directory targets: {value}"
+                )));
+            };
+
+            if is_patch {
+                return Err(Error::InvalidValue(
+                    "patch type invalid for directory targets".to_string(),
+                ));
+            };
+
             file_name = tar(&path, temp_dir_path)?;
             path = temp_dir_path.join(&file_name);
         }
@@ -302,8 +362,8 @@ impl CreateAttachment {
             file_name: self.name.unwrap_or(file_name.clone()),
             summary: self.description.unwrap_or(file_name),
             comment: self.comment.unwrap_or_default(),
-            is_patch: self.is_patch,
-            is_private: self.is_private,
+            is_patch,
+            is_private: self.is_private.unwrap_or_default(),
             flags: self.flags,
         })
     }
@@ -331,14 +391,11 @@ pub struct Request {
 }
 
 impl Request {
-    pub(crate) fn new<S>(
+    pub(crate) fn new<S: fmt::Display>(
         service: &Service,
         ids: &[S],
         create_attachments: Vec<CreateAttachment>,
-    ) -> crate::Result<Self>
-    where
-        S: std::fmt::Display,
-    {
+    ) -> crate::Result<Self> {
         if create_attachments.is_empty() {
             return Err(Error::InvalidRequest(
                 "no attachments specified".to_string(),

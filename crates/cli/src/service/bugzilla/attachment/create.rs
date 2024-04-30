@@ -44,13 +44,24 @@ struct Options {
     #[arg(
         short,
         long,
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "true",
+        hide_possible_values = true,
         conflicts_with_all = ["compress", "auto_compress", "auto_truncate", "mime"],
     )]
-    patch: bool,
+    patch: Option<bool>,
 
     /// attachment is private
-    #[arg(short = 'P', long)]
-    private: bool,
+    #[arg(
+        short = 'P',
+        long,
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "true",
+        hide_possible_values = true,
+    )]
+    private: Option<bool>,
 }
 
 #[derive(Debug, Args)]
@@ -128,26 +139,24 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
-        let mut attachments = vec![];
-        for file in &self.args.files {
-            let mut attachment = CreateAttachment::new(file);
-            attachment.comment = self.options.comment.clone();
-            attachment.description = self.options.description.clone();
-            attachment.flags = self.options.flags.clone();
-            if let Some(value) = self.options.mime.as_deref() {
-                attachment.mime_type(value)?;
-            }
-            attachment.name = self.options.name.clone();
-            attachment.is_patch = self.options.patch;
-            attachment.is_private = self.options.private;
-            attachment.compress = self.compression.compress;
-            attachment.auto_compress = self.compression.auto_compress;
-            if let Some(value) = self.compression.auto_truncate {
-                attachment.auto_truncate(value);
-            }
-
-            attachments.push(attachment);
-        }
+        let attachments: Vec<_> = self
+            .args
+            .files
+            .iter()
+            .map(|file| {
+                CreateAttachment::new(file)
+                    .comment(self.options.comment.as_deref())
+                    .description(self.options.description.as_deref())
+                    .flags(self.options.flags.clone())
+                    .mime_type(self.options.mime.as_deref())
+                    .name(self.options.name.as_deref())
+                    .compress(self.compression.compress)
+                    .auto_compress(self.compression.auto_compress)
+                    .auto_truncate(self.compression.auto_truncate)
+                    .is_patch(self.options.patch)
+                    .is_private(self.options.private)
+            })
+            .collect();
 
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
         let request = service.attachment_create(ids, attachments)?;

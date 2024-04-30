@@ -50,10 +50,10 @@ automatically determined.
 +
 By default the submitted file name is used.
 
-*-p, --patch*::
+*-p, --patch* [<bool>]::
     Mark attachment as a patch.
 
-*-P, --private*::
+*-P, --private* [<bool>]::
     Mark attachment private.
 
 == Compression options
