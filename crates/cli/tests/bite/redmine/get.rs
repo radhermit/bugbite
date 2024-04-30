@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use predicates::prelude::*;
+use predicates::str::contains;
 use wiremock::{matchers, ResponseTemplate};
 
 use crate::command::cmd;
@@ -27,7 +28,7 @@ fn missing_ids() {
     cmd("bite redmine get")
         .assert()
         .stdout("")
-        .stderr(predicate::str::is_empty().not())
+        .stderr(contains("required arguments were not provided"))
         .failure()
         .code(2);
 }
