@@ -31,7 +31,7 @@ pub struct Issue {
     pub created: Option<DateTime<Utc>>,
     #[serde(rename = "updated_on")]
     pub updated: Option<DateTime<Utc>>,
-    #[serde(skip_deserializing, skip_serializing)]
+    #[serde(skip)]
     pub comments: Vec<Comment>,
 }
 

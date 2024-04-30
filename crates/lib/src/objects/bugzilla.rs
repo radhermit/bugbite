@@ -355,11 +355,11 @@ pub struct Bug {
     pub see_also: IndexSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub url: Option<String>,
-    #[serde(skip_deserializing, skip_serializing)]
+    #[serde(skip)]
     pub comments: Vec<Comment>,
-    #[serde(skip_deserializing, skip_serializing)]
+    #[serde(skip)]
     pub attachments: Vec<Attachment>,
-    #[serde(skip_deserializing, skip_serializing)]
+    #[serde(skip)]
     pub history: Vec<Event>,
 }
 
