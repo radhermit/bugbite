@@ -1,4 +1,5 @@
 use predicates::prelude::*;
+use predicates::str::contains;
 
 use crate::command::cmd;
 
@@ -17,6 +18,16 @@ fn aliases() {
                 .success();
         }
     }
+}
+
+#[test]
+fn missing_ids() {
+    cmd("bite bugzilla update -A test")
+        .assert()
+        .stdout("")
+        .stderr(contains("required arguments were not provided"))
+        .failure()
+        .code(2);
 }
 
 #[tokio::test]
