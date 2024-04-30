@@ -91,11 +91,29 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Install cargo-llvm-cov
+      if: ${{ matrix.rust-version == 'stable' }}
+      uses: taiki-e/install-action@cargo-llvm-cov
+
     - name: Install cargo-nextest
       uses: taiki-e/install-action@nextest
 
     - name: Build and run tests
-      run: cargo nextest run --features test --workspace --tests
+      run: |
+        if [[ ${{ matrix.rust-version }} == 'stable' ]]; then
+          cargo llvm-cov nextest --features test --workspace --tests --lcov --output-path lcov.info
+        else
+          cargo nextest run --features test --workspace --tests
+        fi
+
+    - name: Upload build artifacts
+      if: ${{ matrix.rust-version == 'stable' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage
+        path: lcov.info
+        if-no-files-found: error
+        retention-days: 3
 
     - name: Save cache
       if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
@@ -108,3 +126,23 @@ jobs:
           ~/.cargo/git/db
           target
         key: ${{ steps.restore-cache.outputs.cache-primary-key }}
+
+  coverage:
+    if: ${{ github.ref_name == 'main' }}
+    needs: test
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: coverage/lcov.info
+        fail_ci_if_error: true
