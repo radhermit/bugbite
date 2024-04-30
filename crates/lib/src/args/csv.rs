@@ -32,13 +32,13 @@ where
             return Err(Error::InvalidValue("empty Csv string".to_string()));
         }
 
-        let mut values = vec![];
-        for item in items {
-            let value = item
-                .parse()
-                .map_err(|e| Error::InvalidValue(format!("{item}: {e}")))?;
-            values.push(value);
-        }
+        let values = items
+            .into_iter()
+            .map(|x| {
+                x.parse()
+                    .map_err(|e| Error::InvalidValue(format!("{x}: {e}")))
+            })
+            .try_collect()?;
 
         Ok(Self { values })
     }
