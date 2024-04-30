@@ -1,7 +1,6 @@
 use std::fs;
 
 use predicates::prelude::*;
-use predicates::str::contains;
 
 use crate::command::cmd;
 
@@ -39,7 +38,9 @@ fn multiple_stdin() {
         .write_stdin("12345\n")
         .assert()
         .stdout("")
-        .stderr(contains("stdin argument used more than once"))
+        .stderr(predicate::str::contains(
+            "stdin argument used more than once",
+        ))
         .failure()
         .code(2);
 }

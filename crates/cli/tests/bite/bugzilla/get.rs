@@ -2,7 +2,6 @@ use std::fs;
 use std::time::Duration;
 
 use predicates::prelude::*;
-use predicates::str::contains;
 use wiremock::{matchers, ResponseTemplate};
 
 use crate::command::cmd;
@@ -29,7 +28,9 @@ fn missing_ids() {
     cmd("bite bugzilla get")
         .assert()
         .stdout("")
-        .stderr(contains("required arguments were not provided"))
+        .stderr(predicate::str::contains(
+            "required arguments were not provided",
+        ))
         .failure()
         .code(2);
 }
