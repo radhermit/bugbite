@@ -1,9 +1,10 @@
-use std::str;
-
+use bugbite::traits::RequestSend;
 use predicates::prelude::*;
 use tempfile::tempdir;
 
 use crate::command::cmd;
+
+use super::SERVICE;
 
 #[test]
 fn bug_id_output() {
@@ -14,12 +15,18 @@ fn bug_id_output() {
         .success();
 }
 
-#[test]
-fn from_bug() {
-    let output = cmd!("bite create -S summary -C TestComponent -p TestProduct -D description")
-        .output()
+#[tokio::test]
+async fn from_bug() {
+    let id = SERVICE
+        .create()
+        .unwrap()
+        .summary("summary")
+        .component("TestComponent")
+        .product("TestProduct")
+        .description("description")
+        .send(&SERVICE)
+        .await
         .unwrap();
-    let id = str::from_utf8(&output.stdout).unwrap().trim();
 
     cmd!("bite create -S summary -D description --from-bug {id}")
         .assert()
@@ -28,12 +35,18 @@ fn from_bug() {
         .success();
 }
 
-#[test]
-fn from_template() {
-    let output = cmd!("bite create -S summary -C TestComponent -p TestProduct -D description")
-        .output()
+#[tokio::test]
+async fn from_template() {
+    let id = SERVICE
+        .create()
+        .unwrap()
+        .summary("summary")
+        .component("TestComponent")
+        .product("TestProduct")
+        .description("description")
+        .send(&SERVICE)
+        .await
         .unwrap();
-    let id = str::from_utf8(&output.stdout).unwrap().trim();
 
     let dir = tempdir().unwrap();
     let path = dir.path().join("template");

@@ -1,8 +1,18 @@
 use std::env;
 
+use bugbite::service::bugzilla::{Config, Service};
+use once_cell::sync::Lazy;
+
 mod command;
 mod create;
 mod search;
+
+pub(crate) static SERVICE: Lazy<Service> = Lazy::new(|| {
+    let mut config = Config::new("http://127.0.0.1:8080/").unwrap();
+    config.user = Some("bugbite@bugbite.test".to_string());
+    config.password = Some("bugbite".to_string());
+    Service::new(config, Default::default()).unwrap()
+});
 
 /// Initialization for all test executables.
 #[ctor::ctor]

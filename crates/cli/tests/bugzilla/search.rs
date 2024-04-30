@@ -1,19 +1,26 @@
-use std::str;
-
+use bugbite::traits::RequestSend;
 use predicates::prelude::*;
 
 use crate::command::cmd;
 
-#[test]
-fn id() {
-    let output = cmd!("bite create -S summary -C TestComponent -p TestProduct -D description")
-        .output()
+use super::SERVICE;
+
+#[tokio::test]
+async fn id() {
+    let id = SERVICE
+        .create()
+        .unwrap()
+        .summary("summary")
+        .component("TestComponent")
+        .product("TestProduct")
+        .description("description")
+        .send(&SERVICE)
+        .await
         .unwrap();
-    let id = str::from_utf8(&output.stdout).unwrap().trim();
 
     cmd!("bite search --id {id} --fields id")
         .assert()
-        .stdout(predicate::eq(id).trim())
+        .stdout(predicate::eq(id.to_string()).trim())
         .stderr("")
         .success();
 }
