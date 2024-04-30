@@ -7,11 +7,12 @@ use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::Error;
 
-/// Supported service variants
+/// Comma-separated value support.
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
 pub struct Csv<T: fmt::Display + FromStr>(Vec<T>);
 
 impl<T: fmt::Display + FromStr> Csv<T> {
+    /// Convert into the vector of comma-separated values.
     pub fn into_inner(self) -> Vec<T> {
         self.0
     }
