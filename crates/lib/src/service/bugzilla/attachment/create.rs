@@ -417,10 +417,10 @@ impl Request {
         let temp_dir_path = Utf8Path::from_path(temp_dir.path())
             .ok_or_else(|| Error::InvalidValue("non-unicode temporary dir path".to_string()))?;
 
-        let mut attachments = vec![];
-        for attachment in create_attachments {
-            attachments.push(attachment.build(ids, temp_dir_path)?);
-        }
+        let attachments: Vec<_> = create_attachments
+            .into_iter()
+            .map(|x| x.build(ids, temp_dir_path))
+            .try_collect()?;
 
         Ok(Self { url, attachments })
     }
