@@ -103,7 +103,6 @@ jobs:
         # set up environment for coverage support
         if [[ ${{ matrix.rust-version }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
           source <(cargo llvm-cov show-env --export-prefix)
-          cargo llvm-cov clean --workspace
         fi
 
         cargo nextest run --features test --workspace --tests
