@@ -175,8 +175,9 @@ impl Service {
         search::Request::new(Default::default())
     }
 
-    pub fn update<S>(&self, ids: &[S]) -> crate::Result<update::Request>
+    pub fn update<I, S>(&self, ids: I) -> crate::Result<update::Request>
     where
+        I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
         update::Request::new(self, ids, Default::default())

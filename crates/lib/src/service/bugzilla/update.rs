@@ -137,17 +137,19 @@ impl RequestSend for Request {
 }
 
 impl Request {
-    pub fn new<S>(service: &super::Service, ids: &[S], params: Parameters) -> crate::Result<Self>
+    pub fn new<I, S>(service: &super::Service, ids: I, params: Parameters) -> crate::Result<Self>
     where
+        I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        let [id, ..] = ids else {
-            return Err(Error::InvalidRequest("no IDs specified".to_string()));
-        };
+        let ids: Vec<_> = ids.into_iter().map(|s| s.to_string()).collect();
+        let id = ids
+            .first()
+            .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
         Ok(Self {
             url: service.config.base.join(&format!("rest/bug/{id}"))?,
-            ids: ids.iter().map(|x| x.to_string()).collect(),
+            ids,
             params,
         })
     }
