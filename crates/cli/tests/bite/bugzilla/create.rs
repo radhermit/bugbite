@@ -1,4 +1,5 @@
 use predicates::prelude::*;
+use tempfile::tempdir;
 
 use crate::command::cmd;
 
@@ -47,6 +48,39 @@ async fn creation() {
         .args(["--product", "TestProduct"])
         .args(["--summary", "test"])
         .args(["--description", "test"])
+        .assert()
+        .stdout("123\n")
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
+async fn templates() {
+    let server = start_server_with_auth().await;
+
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("template");
+    let path = path.to_str().unwrap();
+
+    // create template
+    cmd("bite create --dry-run")
+        .args(["--component", "TestComponent"])
+        .args(["--product", "TestProduct"])
+        .args(["--summary", "test"])
+        .args(["--description", "test"])
+        .args(["--to", path])
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    server
+        .respond(200, TEST_DATA.join("create/creation.json"))
+        .await;
+
+    // create bug from template
+    cmd("bite create")
+        .args(["--from", path])
         .assert()
         .stdout("123\n")
         .stderr("")
