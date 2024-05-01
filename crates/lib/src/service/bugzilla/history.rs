@@ -12,17 +12,19 @@ pub struct Request {
 }
 
 impl Request {
-    pub(super) fn new<S>(
+    pub(super) fn new<I, S>(
         service: &super::Service,
-        ids: &[S],
+        ids: I,
         params: Option<HistoryParams>,
     ) -> crate::Result<Self>
     where
+        I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
-        let [id, remaining_ids @ ..] = ids else {
-            return Err(Error::InvalidRequest("no IDs specified".to_string()));
-        };
+        let mut ids = ids.into_iter().map(|s| s.to_string());
+        let id = ids
+            .next()
+            .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
         let mut url = service
             .config
@@ -31,8 +33,8 @@ impl Request {
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
-        for id in remaining_ids {
-            url.query_pairs_mut().append_pair("ids", &id.to_string());
+        for id in ids {
+            url.query_pairs_mut().append_pair("ids", &id);
         }
 
         if let Some(params) = params.as_ref() {
