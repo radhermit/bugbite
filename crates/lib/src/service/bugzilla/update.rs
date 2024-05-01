@@ -444,7 +444,7 @@ impl Parameters {
                 }
             };
             let comments = service
-                .comment(&[id], None)?
+                .comment([id], None)?
                 .send(service)
                 .await?
                 .into_iter()
