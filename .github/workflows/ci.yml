@@ -100,15 +100,17 @@ jobs:
 
     - name: Build and run tests
       run: |
+        # set up environment for coverage support
         if [[ ${{ matrix.rust-version }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
-          # set environment variables to get coverage from external binaries
           source <(cargo llvm-cov show-env --export-prefix)
-          # remove any existing artifacts that may affect coverage
           cargo llvm-cov clean --workspace
-          # run tests while recording coverage
-          cargo llvm-cov nextest --features test --workspace --tests --lcov --output-path lcov.info
-        else
-          cargo nextest run --features test --workspace --tests
+        fi
+
+        cargo nextest run --features test --workspace --tests
+
+        # generate coverage report
+        if [[ ${{ matrix.rust-version }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
+          cargo llvm-cov report --lcov --output-path lcov.info
         fi
 
     - name: Upload build artifacts
