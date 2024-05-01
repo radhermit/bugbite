@@ -93,12 +93,13 @@ impl Service {
         }
     }
 
-    pub fn attachment_create<S>(
+    pub fn attachment_create<I, S>(
         &self,
-        ids: &[S],
+        ids: I,
         attachments: Vec<attachment::create::CreateAttachment>,
     ) -> crate::Result<attachment::create::Request>
     where
+        I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
         attachment::create::Request::new(self, ids, attachments)

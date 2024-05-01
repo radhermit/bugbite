@@ -280,11 +280,7 @@ impl CreateAttachment {
     }
 
     /// Build an attachment for request submission.
-    fn build<S: fmt::Display>(
-        self,
-        ids: &[S],
-        temp_dir_path: &Utf8Path,
-    ) -> crate::Result<Attachment> {
+    fn build(self, ids: &[String], temp_dir_path: &Utf8Path) -> crate::Result<Attachment> {
         let mut path = self.path;
         path = path
             .canonicalize_utf8()
@@ -356,7 +352,7 @@ impl CreateAttachment {
         }
 
         Ok(Attachment {
-            ids: ids.iter().map(|s| s.to_string()).collect(),
+            ids: ids.to_vec(),
             data: Base64(data),
             content_type: self.mime_type.unwrap_or(mime_type),
             file_name: self.name.unwrap_or(file_name.clone()),
@@ -391,20 +387,25 @@ pub struct Request {
 }
 
 impl Request {
-    pub(crate) fn new<S: fmt::Display>(
+    pub(crate) fn new<I, S>(
         service: &Service,
-        ids: &[S],
+        ids: I,
         create_attachments: Vec<CreateAttachment>,
-    ) -> crate::Result<Self> {
+    ) -> crate::Result<Self>
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
         if create_attachments.is_empty() {
             return Err(Error::InvalidRequest(
                 "no attachments specified".to_string(),
             ));
         };
 
-        let [id, ..] = &ids else {
-            return Err(Error::InvalidRequest("no IDs specified".to_string()));
-        };
+        let ids: Vec<_> = ids.into_iter().map(|s| s.to_string()).collect();
+        let id = ids
+            .first()
+            .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
         let url = service
             .config
@@ -419,7 +420,7 @@ impl Request {
 
         let attachments: Vec<_> = create_attachments
             .into_iter()
-            .map(|x| x.build(ids, temp_dir_path))
+            .map(|x| x.build(&ids, temp_dir_path))
             .try_collect()?;
 
         Ok(Self { url, attachments })
