@@ -43,8 +43,63 @@ impl RequestSend for Request {
 }
 
 impl Request {
-    pub(super) fn new(params: Parameters) -> Self {
+    pub fn new(params: Parameters) -> Self {
         Self { params }
+    }
+
+    pub fn order<I>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = Order<OrderField>>,
+    {
+        self.params.order = Some(values.into_iter().collect());
+        self
+    }
+
+    pub fn fields<I, F>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = F>,
+        F: Into<FilterField>,
+    {
+        self.params.fields = Some(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn status<I, S>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.params.status = Some(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn summary<I, S>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<Match>,
+    {
+        self.params.summary = Some(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn created(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+        self.params.created = Some(value);
+        self
+    }
+
+    pub fn updated(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+        self.params.updated = Some(value);
+        self
+    }
+
+    pub fn limit(mut self, value: u64) -> Self {
+        self.params.limit = Some(value);
+        self
+    }
+
+    pub fn quicksearch<S: Into<String>>(mut self, value: S) -> Self {
+        self.params.quicksearch = Some(value.into());
+        self
     }
 }
 
@@ -292,61 +347,6 @@ impl Parameters {
             quicksearch: self.quicksearch.or(other.quicksearch),
             custom_fields: self.custom_fields.or(other.custom_fields),
         }
-    }
-
-    pub fn order<I>(mut self, values: I) -> Self
-    where
-        I: IntoIterator<Item = Order<OrderField>>,
-    {
-        self.order = Some(values.into_iter().collect());
-        self
-    }
-
-    pub fn fields<I, F>(mut self, values: I) -> Self
-    where
-        I: IntoIterator<Item = F>,
-        F: Into<FilterField>,
-    {
-        self.fields = Some(values.into_iter().map(Into::into).collect());
-        self
-    }
-
-    pub fn status<I, S>(mut self, values: I) -> Self
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
-    {
-        self.status = Some(values.into_iter().map(Into::into).collect());
-        self
-    }
-
-    pub fn summary<I, S>(mut self, values: I) -> Self
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        self.summary = Some(values.into_iter().map(Into::into).collect());
-        self
-    }
-
-    pub fn created(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
-        self.created = Some(value);
-        self
-    }
-
-    pub fn updated(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
-        self.updated = Some(value);
-        self
-    }
-
-    pub fn limit(mut self, value: u64) -> Self {
-        self.limit = Some(value);
-        self
-    }
-
-    pub fn quicksearch<S: Into<String>>(mut self, value: S) -> Self {
-        self.quicksearch = Some(value.into());
-        self
     }
 
     pub(crate) fn encode(self, service: &super::Service) -> crate::Result<String> {

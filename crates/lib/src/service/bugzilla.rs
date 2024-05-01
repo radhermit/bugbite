@@ -171,8 +171,8 @@ impl Service {
         history::Request::new(self, ids, params)
     }
 
-    pub fn search(&self, params: search::Parameters) -> crate::Result<search::Request> {
-        Ok(search::Request::new(params))
+    pub fn search(&self) -> search::Request {
+        search::Request::new(Default::default())
     }
 
     pub fn update<S>(&self, ids: &[S]) -> crate::Result<update::Request>
@@ -527,8 +527,7 @@ mod tests {
         let service = Service::new(config, Default::default()).unwrap();
 
         server.respond(200, path.join("search/ids.json")).await;
-        let query = search::Parameters::new().summary(["test"]);
-        let request = service.search(query).unwrap();
+        let request = service.search().summary(["test"]);
         let bugs = request.send(&service).await.unwrap();
         assert_eq!(bugs.len(), 5);
     }
