@@ -175,11 +175,11 @@ impl Service {
         Ok(search::Request::new(params))
     }
 
-    pub fn update<S>(&self, ids: &[S], params: update::Parameters) -> crate::Result<update::Request>
+    pub fn update<S>(&self, ids: &[S]) -> crate::Result<update::Request>
     where
         S: fmt::Display,
     {
-        update::Request::new(self, ids, params)
+        update::Request::new(self, ids, Default::default())
     }
 }
 

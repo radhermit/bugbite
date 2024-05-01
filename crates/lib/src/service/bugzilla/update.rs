@@ -137,11 +137,7 @@ impl RequestSend for Request {
 }
 
 impl Request {
-    pub(super) fn new<S>(
-        service: &super::Service,
-        ids: &[S],
-        params: Parameters,
-    ) -> crate::Result<Self>
+    pub fn new<S>(service: &super::Service, ids: &[S], params: Parameters) -> crate::Result<Self>
     where
         S: fmt::Display,
     {
