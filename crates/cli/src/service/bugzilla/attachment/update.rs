@@ -2,14 +2,14 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
-use bugbite::service::bugzilla::attachment::update::Parameters;
+use bugbite::service::bugzilla::attachment::update::{Parameters, Request};
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
 use clap::Args;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Attachment options")]
-struct Options {
+struct Params {
     /// update comment
     #[arg(short, long, value_name = "VALUE")]
     comment: Option<String>,
@@ -65,6 +65,21 @@ struct Options {
     private: Option<bool>,
 }
 
+impl From<Params> for Parameters {
+    fn from(value: Params) -> Self {
+        Self {
+            comment: value.comment,
+            description: value.description,
+            flags: value.flags,
+            mime_type: value.mime,
+            name: value.name,
+            obsolete: value.obsolete,
+            patch: value.patch,
+            private: value.private,
+        }
+    }
+}
+
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Arguments")]
 struct Arguments {
@@ -78,7 +93,7 @@ struct Arguments {
 #[derive(Debug, Args)]
 pub(super) struct Command {
     #[clap(flatten)]
-    options: Options,
+    params: Params,
 
     #[clap(flatten)]
     args: Arguments,
@@ -87,18 +102,7 @@ pub(super) struct Command {
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
-        let params = Parameters {
-            comment: self.options.comment,
-            description: self.options.description,
-            flags: self.options.flags,
-            mime_type: self.options.mime,
-            name: self.options.name,
-            is_obsolete: self.options.obsolete,
-            is_patch: self.options.patch,
-            is_private: self.options.private,
-        };
-
-        let request = service.attachment_update(ids, params)?;
+        let request = Request::new(service, ids, self.params.into())?;
         let _ = request.send(service).await?;
 
         Ok(ExitCode::SUCCESS)

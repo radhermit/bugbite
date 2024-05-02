@@ -122,16 +122,12 @@ impl Service {
         attachment::get::Request::new(self, ids, data)
     }
 
-    pub fn attachment_update<I, S>(
-        &self,
-        ids: I,
-        params: attachment::update::Parameters,
-    ) -> crate::Result<attachment::update::Request>
+    pub fn attachment_update<I, S>(&self, ids: I) -> crate::Result<attachment::update::Request>
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        attachment::update::Request::new(self, ids, params)
+        attachment::update::Request::new(self, ids, Default::default())
     }
 
     pub fn comment<I, S>(&self, ids: I) -> crate::Result<comment::Request>

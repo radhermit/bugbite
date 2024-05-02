@@ -27,13 +27,13 @@ pub struct Parameters {
     pub name: Option<String>,
 
     /// Attachment is obsolete.
-    pub is_obsolete: Option<bool>,
+    pub obsolete: Option<bool>,
 
     /// Attachment is a patch file.
-    pub is_patch: Option<bool>,
+    pub patch: Option<bool>,
 
     /// Mark the attachment private on creation.
-    pub is_private: Option<bool>,
+    pub private: Option<bool>,
 }
 
 impl Parameters {
@@ -45,9 +45,9 @@ impl Parameters {
             summary: self.description,
             comment: self.comment,
             content_type: self.mime_type,
-            is_patch: self.is_patch,
-            is_private: self.is_private,
-            is_obsolete: self.is_obsolete,
+            is_patch: self.patch,
+            is_private: self.private,
+            is_obsolete: self.obsolete,
             flags: self.flags,
         }
     }
@@ -76,7 +76,7 @@ pub struct Request {
 }
 
 impl Request {
-    pub(crate) fn new<I, S>(service: &Service, ids: I, params: Parameters) -> crate::Result<Self>
+    pub fn new<I, S>(service: &Service, ids: I, params: Parameters) -> crate::Result<Self>
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
