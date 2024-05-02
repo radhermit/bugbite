@@ -159,16 +159,12 @@ impl Service {
         get::Request::new(self, ids, attachments, comments, history)
     }
 
-    pub fn history<I, S>(
-        &self,
-        ids: I,
-        params: Option<history::HistoryParams>,
-    ) -> crate::Result<history::Request>
+    pub fn history<I, S>(&self, ids: I) -> crate::Result<history::Request>
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        history::Request::new(self, ids, params)
+        history::Request::new(self, ids, Default::default())
     }
 
     pub fn search(&self) -> search::Request {

@@ -57,7 +57,7 @@ impl Request {
             None
         };
         let history = if history {
-            Some(service.history(ids, None)?)
+            Some(service.history(ids)?)
         } else {
             None
         };

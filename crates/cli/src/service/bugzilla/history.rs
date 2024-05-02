@@ -2,7 +2,7 @@ use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
-use bugbite::service::bugzilla::history::HistoryParams;
+use bugbite::service::bugzilla::history::{Parameters, Request};
 use bugbite::service::bugzilla::Service;
 use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::RequestSend;
@@ -13,7 +13,7 @@ use crate::utils::COLUMNS;
 
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "History options")]
-struct Options {
+struct Params {
     /// event occurred at this time or later
     #[arg(short, long, value_name = "TIME")]
     created: Option<TimeDeltaOrStatic>,
@@ -23,10 +23,19 @@ struct Options {
     creator: Option<String>,
 }
 
+impl From<Params> for Parameters {
+    fn from(value: Params) -> Self {
+        Self {
+            created_after: value.created,
+            creator: value.creator,
+        }
+    }
+}
+
 #[derive(Debug, Args)]
 pub(super) struct Command {
     #[clap(flatten)]
-    options: Options,
+    params: Params,
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
@@ -37,19 +46,8 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
-        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-
-        let mut params = HistoryParams::new();
-
-        if let Some(value) = self.options.created {
-            params.created_after(value);
-        }
-
-        if let Some(value) = self.options.creator {
-            params.creator(value);
-        }
-
-        let request = service.history(ids, Some(params))?;
+        let ids: Vec<_> = self.ids.iter().flatten().collect();
+        let request = Request::new(service, &ids, self.params.into())?;
         let events = request.send(service).await?;
         let mut data = ids.iter().zip(events).peekable();
         let mut stdout = stdout().lock();

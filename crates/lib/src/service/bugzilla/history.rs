@@ -8,15 +8,11 @@ use crate::Error;
 #[derive(Debug)]
 pub struct Request {
     url: url::Url,
-    params: Option<HistoryParams>,
+    params: Parameters,
 }
 
 impl Request {
-    pub(super) fn new<I, S>(
-        service: &super::Service,
-        ids: I,
-        params: Option<HistoryParams>,
-    ) -> crate::Result<Self>
+    pub fn new<I, S>(service: &super::Service, ids: I, params: Parameters) -> crate::Result<Self>
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -37,11 +33,9 @@ impl Request {
             url.query_pairs_mut().append_pair("ids", &id);
         }
 
-        if let Some(params) = params.as_ref() {
-            if let Some(value) = params.created_after.as_ref() {
-                url.query_pairs_mut()
-                    .append_pair("new_since", &value.to_string());
-            }
+        if let Some(value) = params.created_after.as_ref() {
+            url.query_pairs_mut()
+                .append_pair("new_since", &value.to_string());
         }
 
         Ok(Self { url, params })
@@ -63,7 +57,6 @@ impl RequestSend for Request {
         };
 
         let mut history = vec![];
-        let params = self.params.unwrap_or_default();
 
         for mut bug in bugs {
             let Value::Array(data) = bug["history"].take() else {
@@ -77,7 +70,7 @@ impl RequestSend for Request {
             for value in data {
                 let event: Event = serde_json::from_value(value)
                     .map_err(|e| Error::InvalidValue(format!("failed deserializing event: {e}")))?;
-                if params.filter(&event) {
+                if self.params.filter(&event) {
                     bug_history.push(event);
                 }
             }
@@ -91,12 +84,12 @@ impl RequestSend for Request {
 
 /// Construct bug history parameters.
 #[derive(Debug, Default)]
-pub struct HistoryParams {
-    created_after: Option<TimeDeltaOrStatic>,
-    creator: Option<String>,
+pub struct Parameters {
+    pub created_after: Option<TimeDeltaOrStatic>,
+    pub creator: Option<String>,
 }
 
-impl HistoryParams {
+impl Parameters {
     pub fn new() -> Self {
         Self::default()
     }
