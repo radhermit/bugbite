@@ -52,7 +52,7 @@ impl Request {
             None
         };
         let comments = if comments {
-            Some(service.comment(ids, None)?)
+            Some(service.comment(ids)?)
         } else {
             None
         };

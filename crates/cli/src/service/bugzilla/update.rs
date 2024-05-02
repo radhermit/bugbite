@@ -315,8 +315,8 @@ async fn get_reply(
     id: &str,
     comment_ids: &mut Vec<usize>,
 ) -> anyhow::Result<String> {
-    let request = service.comment([id], None)?;
-    let comments = request
+    let comments = service
+        .comment([id])?
         .send(service)
         .await?
         .into_iter()

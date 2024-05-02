@@ -8,15 +8,11 @@ use crate::Error;
 #[derive(Debug)]
 pub struct Request {
     url: url::Url,
-    params: Option<CommentParams>,
+    params: Parameters,
 }
 
 impl Request {
-    pub(super) fn new<I, S>(
-        service: &super::Service,
-        ids: I,
-        params: Option<CommentParams>,
-    ) -> crate::Result<Self>
+    pub fn new<I, S>(service: &super::Service, ids: I, params: Parameters) -> crate::Result<Self>
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -37,11 +33,9 @@ impl Request {
             url.query_pairs_mut().append_pair("ids", &id);
         }
 
-        if let Some(params) = params.as_ref() {
-            if let Some(value) = params.created_after.as_ref() {
-                url.query_pairs_mut()
-                    .append_pair("new_since", &value.to_string());
-            }
+        if let Some(value) = params.created_after.as_ref() {
+            url.query_pairs_mut()
+                .append_pair("new_since", &value.to_string());
         }
 
         Ok(Self { url, params })
@@ -66,7 +60,6 @@ impl RequestSend for Request {
         // Bugzilla's response always uses bug IDs even if attachments were requested via
         // alias so we assume the response is in the same order as the request.
         let mut comments = vec![];
-        let params = self.params.unwrap_or_default();
 
         for (_id, mut data) in data {
             let Value::Array(data) = data["comments"].take() else {
@@ -81,7 +74,7 @@ impl RequestSend for Request {
                 let comment: Comment = serde_json::from_value(value).map_err(|e| {
                     Error::InvalidValue(format!("failed deserializing comment: {e}"))
                 })?;
-                if params.filter(&comment) {
+                if self.params.filter(&comment) {
                     bug_comments.push(comment);
                 }
             }
@@ -94,13 +87,13 @@ impl RequestSend for Request {
 
 /// Construct bug comment parameters.
 #[derive(Debug, Default)]
-pub struct CommentParams {
-    attachment: Option<bool>,
-    created_after: Option<TimeDeltaOrStatic>,
-    creator: Option<String>,
+pub struct Parameters {
+    pub attachment: Option<bool>,
+    pub created_after: Option<TimeDeltaOrStatic>,
+    pub creator: Option<String>,
 }
 
-impl CommentParams {
+impl Parameters {
     pub fn new() -> Self {
         Self::default()
     }

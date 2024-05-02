@@ -134,16 +134,12 @@ impl Service {
         attachment::update::Request::new(self, ids, params)
     }
 
-    pub fn comment<I, S>(
-        &self,
-        ids: I,
-        params: Option<comment::CommentParams>,
-    ) -> crate::Result<comment::Request>
+    pub fn comment<I, S>(&self, ids: I) -> crate::Result<comment::Request>
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        comment::Request::new(self, ids, params)
+        comment::Request::new(self, ids, Default::default())
     }
 
     pub fn create(&self) -> crate::Result<create::Request> {
