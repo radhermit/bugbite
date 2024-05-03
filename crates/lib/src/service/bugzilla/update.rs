@@ -353,6 +353,7 @@ impl Parameters {
         ids: Vec<String>,
     ) -> crate::Result<RequestParameters> {
         let mut params = RequestParameters {
+            ids,
             alias: self.alias.map(|x| x.into_iter().collect()),
             blocks: self.blocks.map(|x| x.into_iter().collect()),
             component: self.component,
@@ -435,7 +436,7 @@ impl Parameters {
         }
 
         if let Some((value, is_private)) = self.comment_privacy {
-            let id = match &ids[..] {
+            let id = match &params.ids[..] {
                 [x] => x,
                 _ => {
                     return Err(Error::InvalidValue(
@@ -504,6 +505,7 @@ impl Parameters {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
 struct RequestParameters {
+    ids: Vec<String>,
     alias: Option<SetChanges<String>>,
     assigned_to: Option<String>,
     blocks: Option<SetChanges<u64>>,
@@ -515,7 +517,6 @@ struct RequestParameters {
     dupe_of: Option<u64>,
     flags: Option<Vec<Flag>>,
     groups: Option<Changes<String>>,
-    ids: Option<Vec<String>>,
     keywords: Option<SetChanges<String>>,
     op_sys: Option<String>,
     platform: Option<String>,
