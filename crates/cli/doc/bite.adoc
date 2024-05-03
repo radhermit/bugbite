@@ -38,17 +38,23 @@ full action commands is supported as well:
  # search for all Gentoo bugs created in the past week with attachments
  bite -c gentoo search -c 1d --attachments
 
-== Options
-
-*-V, --version*::
-    Print version and exit.
-
 include::include/global-options.adoc[]
 
-== Bite Options
+== Options
 
 *--config <path>*::
     Load a config from a custom path.
+
+*-c, --connection <name>*::
+    Define a service connection to use.
++
+This can either be a pre-configured connection name or a manual connection of
+the form `<SERVICE>@<URL>`, for example `bugzilla@https://bugzilla.kernel.org`.
++
+.Available services:
+- bugzilla
+- github
+- redmine
 
 *--insecure*::
     Ignore invalid service certificates when connecting.
@@ -56,34 +62,13 @@ include::include/global-options.adoc[]
 *-t, --timeout <seconds>*::
     Set the request timeout in seconds, defaults to 30.
 
-== Service Options
-
-*-c, --connection <name>*::
-    Use a pre-configured connection.
-
-*-b, --base <url>*::
-    Specify the service URL to connect to.
-
-*-s, --service <type>*::
-    Specify the service type to use.
+*-V, --version*::
+    Print version and exit.
 
 == Environment variables
 
 *BUGBITE_CONNECTION*::
-    Use a pre-configured connection.
-
-*BUGBITE_BASE*::
-    Specify the service URL to connect to.
-+
-For example, a bugzilla service could use `https://bugzilla.kernel.org`.
-
-*BUGBITE_SERVICE*::
-    Specify the service type to use.
-+
-.Available services:
-- bugzilla
-- github
-- redmine
+    Define a service connection to use.
 
 == Subcommands
 

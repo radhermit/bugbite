@@ -65,22 +65,3 @@ fn unknown_connection() {
             .failure();
     }
 }
-
-#[test]
-fn service_arg_conflicts() {
-    // -c/--connection can't be used with -s/--service
-    cmd("bite -c gentoo -s redmine")
-        .assert()
-        .stdout("")
-        .stderr(contains("--connection"))
-        .code(2)
-        .failure();
-
-    // -c/--connection can't be used with -b/--base
-    cmd("bite -c gentoo -b https://service/url")
-        .assert()
-        .stdout("")
-        .stderr(contains("--connection"))
-        .code(2)
-        .failure();
-}

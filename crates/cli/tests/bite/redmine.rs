@@ -10,8 +10,10 @@ mod get;
 async fn start_server() -> TestServer {
     let server = TestServer::new().await;
     let base = server.uri();
-    env::set_var("BUGBITE_BASE", format!("{base}/projects/test"));
-    env::set_var("BUGBITE_SERVICE", "redmine");
+    env::set_var(
+        "BUGBITE_CONNECTION",
+        format!("redmine@{base}/projects/test"),
+    );
     server
 }
 
@@ -23,7 +25,9 @@ fn incompatible_connection() {
             .arg("redmine")
             .assert()
             .stdout("")
-            .stderr(contains("redmine not compatible with connection: gentoo"))
+            .stderr(contains(
+                "redmine not compatible with connection service: bugzilla",
+            ))
             .failure();
     }
 }

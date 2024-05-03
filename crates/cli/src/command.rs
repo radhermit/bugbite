@@ -5,7 +5,6 @@ use std::process::ExitCode;
 
 use bugbite::service::{ClientBuilder, ServiceKind};
 use camino::Utf8PathBuf;
-use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::error::ErrorKind;
 use clap::{Args, CommandFactory, Parser, ValueHint};
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
@@ -77,44 +76,50 @@ impl ServiceCommand {
             return Ok((Default::default(), args, cmd.options));
         }
 
-        let config = Config::load(cmd.options.bite.config.as_deref())
+        let config = Config::load(cmd.options.config.as_deref())
             .map_err(|e| Command::error(ErrorKind::InvalidValue, e))?;
-        let connection = cmd.options.service.connection.as_deref();
-        let base = cmd.options.service.base.as_deref();
-        let service = cmd.options.service.service;
 
-        // determine service type
-        let (selected, base) = match (connection, base, service) {
-            (Some(name), _, _) => {
-                let (kind, base) = config
-                    .get(name)
-                    .map_err(|e| Command::error(ErrorKind::InvalidValue, e))?;
-                if services.contains(arg) && kind.as_ref() != arg {
-                    let msg = format!("{arg} not compatible with connection: {name}");
-                    return Err(Command::error(ErrorKind::InvalidValue, msg));
-                }
-                (kind, base)
+        let Some(connection) = cmd.options.connection.as_deref() else {
+            // handle -h/--help options
+            if services.contains(arg) || arg.starts_with('-') {
+                Command::try_parse_from(&args)?;
             }
-            (None, Some(base), Some(service)) => (service, base.to_string()),
-            _ => {
-                // handle -h/--help options
-                if services.contains(arg) || arg.starts_with('-') {
-                    Command::try_parse_from(&args)?;
-                }
 
-                return Err(Command::error(
-                    ErrorKind::MissingRequiredArgument,
-                    "no connection specified",
-                ));
+            return Err(Command::error(
+                ErrorKind::MissingRequiredArgument,
+                "no connection specified",
+            ));
+        };
+
+        // parse manual connection string
+        let manual_connection = |value: &str| -> anyhow::Result<(ServiceKind, String)> {
+            if let Some((service, base)) = value.split_once('@') {
+                let kind = service
+                    .parse()
+                    .map_err(|_| anyhow::anyhow!("unknown service: {service}"))?;
+                Ok((kind, base.to_string()))
+            } else {
+                anyhow::bail!("unknown connection: {value}")
             }
         };
+
+        // pull from config with fallback to manual connection
+        let (service, base) = config
+            .get(connection)
+            .or_else(|_| manual_connection(connection))
+            .map_err(|e| Command::error(ErrorKind::InvalidValue, e))?;
+
+        if services.contains(arg) && service.as_ref() != arg {
+            let msg = format!("{arg} not compatible with connection service: {service}");
+            return Err(Command::error(ErrorKind::InvalidValue, msg));
+        }
 
         // construct new args for the main command to parse
         args.drain(1..);
 
         // inject subcommand for requested service type if missing
         if !subcmds.contains(arg) {
-            args.push(selected.to_string());
+            args.push(service.to_string());
         }
 
         // append the remaining unparsed args
@@ -125,35 +130,14 @@ impl ServiceCommand {
 }
 
 #[derive(Debug, Args)]
-#[clap(next_help_heading = "Service Options")]
-struct ServiceOptions {
-    /// use pre-configured connection
-    #[arg(short, long, env = "BUGBITE_CONNECTION")]
-    connection: Option<String>,
-
-    /// base service URL
-    #[arg(short, long, env = "BUGBITE_BASE", conflicts_with = "connection")]
-    base: Option<String>,
-
-    /// service type
-    #[arg(
-        short,
-        long,
-        env = "BUGBITE_SERVICE",
-        conflicts_with = "connection",
-        hide_possible_values = true,
-        value_parser = PossibleValuesParser::new(ServiceKind::VARIANTS)
-            .map(|s| s.parse::<ServiceKind>().unwrap()),
-    )]
-    service: Option<ServiceKind>,
-}
-
-#[derive(Debug, Args)]
-#[clap(next_help_heading = "Bite Options")]
-struct BiteOptions {
+pub(crate) struct Options {
     /// load config from a custom path
     #[arg(long, value_name = "PATH", value_hint = ValueHint::FilePath)]
     config: Option<Utf8PathBuf>,
+
+    /// service connection
+    #[arg(short, long, env = "BUGBITE_CONNECTION")]
+    connection: Option<String>,
 
     /// ignore invalid service certificates
     #[arg(long)]
@@ -162,15 +146,6 @@ struct BiteOptions {
     /// request timeout in seconds
     #[arg(short, long, value_name = "SECONDS", default_value = "30")]
     timeout: f64,
-}
-
-#[derive(Debug, Args)]
-pub(crate) struct Options {
-    #[clap(flatten)]
-    bite: BiteOptions,
-
-    #[clap(flatten)]
-    service: ServiceOptions,
 }
 
 #[derive(Debug, Parser)]
@@ -192,10 +167,10 @@ pub(crate) struct Options {
 )]
 pub(crate) struct Command {
     #[clap(flatten)]
-    verbosity: Verbosity<WarnLevel>,
+    options: Options,
 
     #[clap(flatten)]
-    options: Options,
+    verbosity: Verbosity<WarnLevel>,
 
     #[command(subcommand)]
     subcmd: Subcommand,
@@ -209,8 +184,8 @@ impl Command {
                 enable_logging(cmd.verbosity.log_level_filter());
 
                 let builder = ClientBuilder::default()
-                    .insecure(options.bite.insecure)
-                    .timeout(options.bite.timeout);
+                    .insecure(options.insecure)
+                    .timeout(options.timeout);
 
                 // TODO: drop this once stable rust supports `unix_sigpipe`,
                 // see https://github.com/rust-lang/rust/issues/97889.
