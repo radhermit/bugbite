@@ -3,8 +3,9 @@ use std::process::ExitCode;
 use bugbite::objects::bugzilla::*;
 use bugbite::service::{
     bugzilla::{Config, Service},
-    ClientBuilder,
+    ClientBuilder, ServiceKind,
 };
+use clap::Args;
 use itertools::Itertools;
 use tracing::info;
 
@@ -21,7 +22,7 @@ mod history;
 mod search;
 mod update;
 
-#[derive(Debug, clap::Args)]
+#[derive(Debug, Args)]
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
     /// API key
@@ -37,8 +38,11 @@ struct Authentication {
     password: Option<String>,
 }
 
-#[derive(Debug, clap::Args)]
+#[derive(Debug, Args)]
 pub(crate) struct Command {
+    #[clap(flatten)]
+    service: super::ServiceOptions,
+
     #[clap(flatten)]
     auth: Authentication,
 
@@ -47,15 +51,25 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) async fn run(
-        self,
-        base: String,
-        builder: ClientBuilder,
-    ) -> anyhow::Result<ExitCode> {
-        let mut config = Config::new(&base)?;
+    pub(crate) async fn run(self, config: &crate::config::Config) -> anyhow::Result<ExitCode> {
+        let connection = self.service.connection.as_str();
+        let url = if ["https://", "http://"]
+            .iter()
+            .any(|s| connection.starts_with(s))
+        {
+            Ok(connection)
+        } else {
+            config.get_kind(ServiceKind::Bugzilla, connection)
+        }?;
+
+        let mut config = Config::new(url)?;
         config.key = self.auth.key;
         config.user = self.auth.user;
         config.password = self.auth.password;
+
+        let builder = ClientBuilder::default()
+            .insecure(self.service.insecure)
+            .timeout(self.service.timeout);
 
         let service = Service::new(config, builder)?;
         info!("Service: {service}");

@@ -3,7 +3,7 @@ use std::process::ExitCode;
 use bugbite::objects::github::*;
 use bugbite::service::{
     github::{Config, Service},
-    ClientBuilder,
+    ClientBuilder, ServiceKind,
 };
 use itertools::Itertools;
 use tracing::info;
@@ -24,9 +24,8 @@ struct Authentication {
 
 #[derive(Debug, clap::Args)]
 pub(crate) struct Command {
-    /// project to target
-    #[arg(short, long)]
-    project: Option<String>,
+    #[clap(flatten)]
+    service: super::ServiceOptions,
 
     #[clap(flatten)]
     auth: Authentication,
@@ -36,18 +35,23 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) async fn run(
-        self,
-        base: String,
-        builder: ClientBuilder,
-    ) -> anyhow::Result<ExitCode> {
-        let base = match self.project.as_ref() {
-            Some(project) => format!("https://github.com/{project}"),
-            None => base,
-        };
+    pub(crate) async fn run(self, config: &crate::config::Config) -> anyhow::Result<ExitCode> {
+        let connection = self.service.connection.as_str();
+        let url = if ["https://", "http://"]
+            .iter()
+            .any(|s| connection.starts_with(s))
+        {
+            Ok(connection)
+        } else {
+            config.get_kind(ServiceKind::Github, connection)
+        }?;
 
-        let mut config = Config::new(&base)?;
+        let mut config = Config::new(url)?;
         config.token = self.auth.token;
+
+        let builder = ClientBuilder::default()
+            .insecure(self.service.insecure)
+            .timeout(self.service.timeout);
 
         let service = Service::new(config, builder)?;
         info!("Service: {service}");

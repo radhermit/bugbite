@@ -18,7 +18,7 @@ async fn id() {
         .await
         .unwrap();
 
-    cmd!("bite search --id {id} --fields id")
+    cmd!("bite bugzilla search --id {id} --fields id")
         .assert()
         .stdout(predicate::eq(id.to_string()).trim())
         .stderr("")

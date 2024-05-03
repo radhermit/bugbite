@@ -41,7 +41,7 @@ async fn timeout() {
     let template = ResponseTemplate::new(200).set_delay(delay);
     server.respond_custom(matchers::any(), template).await;
 
-    cmd("bite -t 0.25 get 1")
+    cmd("bite redmine -t 0.25 get 1")
         .assert()
         .stdout("")
         .stderr("Error: request timed out\n")

@@ -36,11 +36,15 @@ impl Config {
         }
     }
 
-    /// Return a pre-configured service by its connection name.
-    pub(crate) fn get(&self, name: &str) -> anyhow::Result<(ServiceKind, String)> {
+    /// Return a pre-configured service URL by its connection name and kind.
+    pub(crate) fn get_kind<'a>(&'a self, kind: ServiceKind, name: &str) -> anyhow::Result<&'a str> {
         match (self.connections.get(name), SERVICES.get(name)) {
             (Some(service), _) | (_, Some(service)) => {
-                Ok((service.kind(), service.base().to_string()))
+                if service.kind() == kind {
+                    Ok(service.base().as_str())
+                } else {
+                    Err(anyhow!("incompatible connection: {name}"))
+                }
             }
             _ => Err(anyhow!("unknown connection: {name}")),
         }

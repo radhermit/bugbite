@@ -10,36 +10,32 @@ mod get;
 async fn start_server() -> TestServer {
     let server = TestServer::new().await;
     let base = server.uri();
-    env::set_var(
-        "BUGBITE_CONNECTION",
-        format!("redmine@{base}/projects/test"),
-    );
+    env::set_var("BUGBITE_CONNECTION", format!("{base}/projects/test"));
     server
 }
 
 #[test]
 fn incompatible_connection() {
     for opt in ["-c", "--connection"] {
-        cmd("bite")
+        cmd("bite redmine")
             .args([opt, "gentoo"])
-            .arg("redmine")
+            .args(["search", "test"])
             .assert()
             .stdout("")
-            .stderr(contains(
-                "redmine not compatible with connection service: bugzilla",
-            ))
+            .stderr(contains("incompatible connection: gentoo"))
             .failure();
     }
 }
 
 #[test]
-fn no_connection() {
-    for action in ["s", "search"] {
+fn unknown_connection() {
+    for opt in ["-c", "--connection"] {
         cmd("bite redmine")
-            .args([action, "-c", "1d"])
+            .args([opt, "unknown"])
+            .args(["search", "test"])
             .assert()
             .stdout("")
-            .stderr(contains("no connection specified"))
+            .stderr(contains("unknown connection: unknown"))
             .failure();
     }
 }

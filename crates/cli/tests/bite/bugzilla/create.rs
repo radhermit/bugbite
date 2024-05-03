@@ -24,7 +24,7 @@ fn aliases() {
 async fn auth_required() {
     let _server = start_server().await;
 
-    cmd("bite create")
+    cmd("bite bugzilla create")
         .args(["--component", "TestComponent"])
         .args(["--product", "TestProduct"])
         .args(["--summary", "test"])
@@ -43,7 +43,7 @@ async fn creation() {
         .respond(200, TEST_DATA.join("create/creation.json"))
         .await;
 
-    cmd("bite create")
+    cmd("bite bugzilla create")
         .args(["--component", "TestComponent"])
         .args(["--product", "TestProduct"])
         .args(["--summary", "test"])
@@ -63,7 +63,7 @@ async fn templates() {
     let path = path.to_str().unwrap();
 
     // create template
-    cmd("bite create --dry-run")
+    cmd("bite bugzilla create --dry-run")
         .args(["--component", "TestComponent"])
         .args(["--product", "TestProduct"])
         .args(["--summary", "test"])
@@ -79,7 +79,7 @@ async fn templates() {
         .await;
 
     // create bug from template
-    cmd("bite create")
+    cmd("bite bugzilla create")
         .args(["--from", path])
         .assert()
         .stdout("123\n")

@@ -4,7 +4,6 @@ use bugbite::test::build_path;
 use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
 use predicates::prelude::*;
-use predicates::str::contains;
 
 use command::cmd;
 
@@ -51,17 +50,5 @@ fn version() {
             .stdout(predicate::str::diff(format!("bite {version}")).trim())
             .stderr("")
             .success();
-    }
-}
-
-#[test]
-fn unknown_connection() {
-    for opt in ["-c", "--connection"] {
-        cmd("bite")
-            .args([opt, "unknown", "--help"])
-            .assert()
-            .stdout("")
-            .stderr(contains("unknown connection: unknown"))
-            .failure();
     }
 }

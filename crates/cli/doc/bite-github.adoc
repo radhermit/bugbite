@@ -18,6 +18,8 @@ GitHub service support.
 
 include::include/global-options.adoc[]
 
+include::include/service-options.adoc[]
+
 == Subcommands
 
 linkcmd:bite-github-get[1]::

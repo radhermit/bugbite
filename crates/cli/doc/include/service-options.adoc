@@ -1,0 +1,12 @@
+== Service Options
+
+*-c, --connection <name>*::
+    Define a service connection to use.
++
+This can either be a pre-configured connection name or a service URL.
+
+*--insecure*::
+    Ignore invalid service certificates when connecting.
+
+*-t, --timeout <seconds>*::
+    Set the request timeout in seconds, defaults to 30.

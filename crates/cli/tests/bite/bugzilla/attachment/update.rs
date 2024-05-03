@@ -23,7 +23,7 @@ fn aliases() {
 async fn auth_required() {
     let _server = start_server().await;
 
-    cmd("bite attachment update 1 -p")
+    cmd("bite bugzilla attachment update 1 -p")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())

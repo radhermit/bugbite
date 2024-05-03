@@ -26,7 +26,7 @@ async fn auth_required() {
     let file = NamedTempFile::new().unwrap();
     let path = file.path().to_str().unwrap();
 
-    cmd("bite attachment create 1")
+    cmd("bite bugzilla attachment create 1")
         .arg(path)
         .assert()
         .stdout("")

@@ -8,7 +8,7 @@ use super::SERVICE;
 
 #[test]
 fn bug_id_output() {
-    cmd!("bite create -S summary -C TestComponent -p TestProduct -D description")
+    cmd!("bite bugzilla create -S summary -C TestComponent -p TestProduct -D description")
         .assert()
         .stdout(predicate::str::is_match(r"^\d+$").unwrap().trim())
         .stderr("")
@@ -28,7 +28,7 @@ async fn from_bug() {
         .await
         .unwrap();
 
-    cmd!("bite create -S summary -D description --from-bug {id}")
+    cmd!("bite bugzilla create -S summary -D description --from-bug {id}")
         .assert()
         .stdout(predicate::str::is_match(r"^\d+$").unwrap().trim())
         .stderr("")
@@ -53,14 +53,14 @@ async fn from_template() {
     let path = path.to_str().unwrap();
 
     // create template from bug
-    cmd!("bite create --from-bug {id} --to {path} --dry-run")
+    cmd!("bite bugzilla create --from-bug {id} --to {path} --dry-run")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // use template to create bug
-    cmd!("bite create --from {path} -S summary -D description")
+    cmd!("bite bugzilla create --from {path} -S summary -D description")
         .assert()
         .stdout(predicate::str::is_match(r"^\d+$").unwrap().trim())
         .stderr("")

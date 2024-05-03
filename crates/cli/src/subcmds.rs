@@ -1,8 +1,8 @@
 use std::process::ExitCode;
 
-use bugbite::service::ClientBuilder;
 use strum::VariantNames;
 
+use crate::config::Config;
 use crate::service::*;
 
 mod show;
@@ -24,11 +24,11 @@ pub(crate) enum Subcommand {
 }
 
 impl Subcommand {
-    pub(crate) async fn run(self, base: String, client: ClientBuilder) -> anyhow::Result<ExitCode> {
+    pub(crate) async fn run(self, config: &Config) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Bugzilla(cmd) => cmd.run(base, client).await,
-            Self::Github(cmd) => cmd.run(base, client).await,
-            Self::Redmine(cmd) => cmd.run(base, client).await,
+            Self::Bugzilla(cmd) => cmd.run(config).await,
+            Self::Github(cmd) => cmd.run(config).await,
+            Self::Redmine(cmd) => cmd.run(config).await,
             Self::Show(cmd) => cmd.run(),
         }
     }

@@ -44,7 +44,7 @@ Explicitly specified options override corresponding template values.
 Combining with `-n/--dry-run` allows creating templates without service interaction.
 +
 .Create a template:
- bite -c gentoo search -c 1d -n --to template.toml
+ bite bugzilla -c gentoo search -c 1d -n --to template.toml
 
 == Query options
 
@@ -59,7 +59,7 @@ Group fields relate to groups of bug fields and are most useful when using JSON
 formatted output:
 +
 .Return all bugs created in the past day rendered in JSON:
- bite -c gentoo search --created 1d -f all --json
+ bite bugzilla -c gentoo search --created 1d -f all --json
 +
 // TODO: link to rust docs for field descriptions
 Possible group fields: all, default, extra, custom
@@ -91,10 +91,10 @@ Ordering is especially useful in combination with -l/--limit to get the first
 or last results of an ordered match.
 +
 .Top ten by votes:
- bite -c gentoo search --limit 10 --order=-votes
+ bite bugzilla -c gentoo search --limit 10 --order=-votes
 +
 .Highest comment count:
- bite -c gentoo search --limit 1 --order=-comments
+ bite bugzilla -c gentoo search --limit 1 --order=-comments
 +
 // TODO: link to rust docs for field descriptions
 Possible values: alias, assignee, blocks, comments, component, created,
@@ -114,10 +114,10 @@ With no argument, all bugs with aliases are returned. If the value is `true` or
 `false`, all bugs with or without aliases are returned, respectively.
 +
 .With aliases:
- bite -c gentoo search --alias
+ bite bugzilla -c gentoo search --alias
 +
 .Without aliases:
- bite -c gentoo search --alias false
+ bite bugzilla -c gentoo search --alias false
 +
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
@@ -125,13 +125,13 @@ logical OR. Values can also use match operators to alter their query
 application. See the <<Match Operators>> section for more information.
 +
 .Contains `value`:
- bite -c gentoo search --alias value
+ bite bugzilla -c gentoo search --alias value
 +
 .Contains `value1` and `value2`:
- bite -c gentoo search --alias value1,value1
+ bite bugzilla -c gentoo search --alias value1,value1
 +
 .Contains `value1` or `value2`:
- bite -c gentoo search --alias value1 --alias value1
+ bite bugzilla -c gentoo search --alias value1 --alias value1
 
 *--attachments* <value[,...]>::
     Restrict by attachments.
@@ -141,10 +141,10 @@ With no argument, all bugs with attachments are returned. If the value is
 respectively.
 +
 .With attachments:
- bite -c gentoo search --attachments
+ bite bugzilla -c gentoo search --attachments
 +
 .Without attachments:
- bite -c gentoo search --attachments false
+ bite bugzilla -c gentoo search --attachments false
 +
 Regular string values search for matching substrings in an attachment's
 description or file name. Values can also use match operators to alter their
@@ -154,7 +154,7 @@ Multiple values can be specified in a comma-separated list and will match if
 any of the specified values match.
 +
 .Attachment description or file name contains `log` or `test`:
- bite -c gentoo search --attachments log,test
+ bite bugzilla -c gentoo search --attachments log,test
 
 *-B, --blocks* <id[,...]>::
     Restrict by blockers.
@@ -163,31 +163,31 @@ With no argument, all bugs with blockers are returned. If the value is `true`
 or `false`, all bugs with or without blockers are returned, respectively.
 +
 .With blockers:
- bite -c gentoo search --blocks
+ bite bugzilla -c gentoo search --blocks
 +
 .Without blockers:
- bite -c gentoo search --blocks false
+ bite bugzilla -c gentoo search --blocks false
 +
 Regular values search for matching blockers and multiple values can
 be specified in a comma-separated list for logical AND or multiple
 options for logical OR.
 +
 .Blocked on bug 10:
- bite -c gentoo search --blocks 10
+ bite bugzilla -c gentoo search --blocks 10
 +
 .Blocked on bugs 10 and 11:
- bite -c gentoo search --blocks 10,11
+ bite bugzilla -c gentoo search --blocks 10,11
 +
 .Blocked on bugs 10 or 11:
- bite -c gentoo search --blocks 10 --blocks 11
+ bite bugzilla -c gentoo search --blocks 10 --blocks 11
 +
 Values can use the `-` prefix to search for non-blockers.
 +
 .Not blocked on bug 10:
- bite -c gentoo search --blocks=-10
+ bite bugzilla -c gentoo search --blocks=-10
 +
 .Blocked on bug 10 but not bug 11:
- bite -c gentoo search --blocks 10,-11
+ bite bugzilla -c gentoo search --blocks 10,-11
 +
 Values are taken from standard input when `-`.
 
@@ -213,31 +213,31 @@ With no argument, all bugs with dependencies are returned. If the value is
 respectively.
 +
 .With dependencies:
- bite -c gentoo search --depends
+ bite bugzilla -c gentoo search --depends
 +
 .Without dependencies:
- bite -c gentoo search --depends false
+ bite bugzilla -c gentoo search --depends false
 +
 Regular values search for matching dependencies and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
 logical OR.
 +
 .Depends on bug 10:
- bite -c gentoo search --depends 10
+ bite bugzilla -c gentoo search --depends 10
 +
 .Depends on bugs 10 and 11:
- bite -c gentoo search --depends 10,11
+ bite bugzilla -c gentoo search --depends 10,11
 +
 .Depends on bugs 10 or 11:
- bite -c gentoo search --depends 10 --depends 11
+ bite bugzilla -c gentoo search --depends 10 --depends 11
 +
 Values can use the `-` prefix to search for non-dependencies.
 +
 .Doesn't depend on bug 10:
- bite -c gentoo search --depends=-10
+ bite bugzilla -c gentoo search --depends=-10
 +
 .Depends on bug 10 but not 11:
- bite -c gentoo search --depends 10,-11
+ bite bugzilla -c gentoo search --depends 10,-11
 +
 Values are taken from standard input when `-`.
 
@@ -248,10 +248,10 @@ With no argument, all bugs with flags are returned. If the value is `true` or
 `false`, all bugs with or without flags are returned, respectively.
 +
 .With flags:
- bite -c gentoo search --flags
+ bite bugzilla -c gentoo search --flags
 +
 .Without flags:
- bite -c gentoo search --flags false
+ bite bugzilla -c gentoo search --flags false
 +
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
@@ -259,13 +259,13 @@ logical OR. Values can also use match operators to alter their query
 application. See the <<Match Operators>> section for more information.
 +
 .Contains `value`:
- bite -c gentoo search --flags value
+ bite bugzilla -c gentoo search --flags value
 +
 .Contains `value1` and `value2`:
- bite -c gentoo search --flags value1,value1
+ bite bugzilla -c gentoo search --flags value1,value1
 +
 .Contains `value1` or `value2`:
- bite -c gentoo search --flags value1 --flags value1
+ bite bugzilla -c gentoo search --flags value1 --flags value1
 
 *-g, --groups* <value[,...]>::
     Restrict by group.
@@ -274,10 +274,10 @@ With no argument, all bugs with groups are returned. If the value is `true` or
 `false`, all bugs with or without groups are returned, respectively.
 +
 .With groups:
- bite -c gentoo search --groups
+ bite bugzilla -c gentoo search --groups
 +
 .Without groups:
- bite -c gentoo search --groups false
+ bite bugzilla -c gentoo search --groups false
 +
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
@@ -285,13 +285,13 @@ logical OR. Values can also use match operators to alter their query
 application. See the <<Match Operators>> section for more information.
 +
 .Contains `value`:
- bite -c gentoo search --groups value
+ bite bugzilla -c gentoo search --groups value
 +
 .Contains `value1` and `value2`:
- bite -c gentoo search --groups value1,value1
+ bite bugzilla -c gentoo search --groups value1,value1
 +
 .Contains `value1` or `value2`:
- bite -c gentoo search --groups value1 --groups value1
+ bite bugzilla -c gentoo search --groups value1 --groups value1
 
 *--id* <id[,...]>::
     Restrict by ID.
@@ -299,29 +299,29 @@ application. See the <<Match Operators>> section for more information.
 Regular values search for exact bug identifiers.
 +
 .Equal to 10:
- bite -c gentoo search --id 10
+ bite bugzilla -c gentoo search --id 10
 +
 Values can use the `-` prefix to search for identifiers not equal to the value.
 +
 .Not equal to 10:
- bite -c gentoo search --id=-10
+ bite bugzilla -c gentoo search --id=-10
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 +
 .Bugs 10 or 20:
- bite -c gentoo search --id 10,20
+ bite bugzilla -c gentoo search --id 10,20
 +
 Range values are supported, (see sections <<Range Operators>> and <<Ranges>>
 for more information, and values are taken from standard input when `-`.
 +
 .IDs greater than or equal to 10:
- bite -c gentoo search --id '>=10'
+ bite bugzilla -c gentoo search --id '>=10'
 +
 .IDs between 10 and 20:
- bite -c gentoo search --id 10..20
+ bite bugzilla -c gentoo search --id 10..20
 +
 .Any ID matching values taken from a file:
- cat file | bite -c gentoo search --id -
+ cat file | bite bugzilla -c gentoo search --id -
 
 *-k, --keywords* <value[,...]>::
     Restrict by keyword.
@@ -330,10 +330,10 @@ With no argument, all bugs with keywords are returned. If the value is `true`
 or `false`, all bugs with or without keywords are returned, respectively.
 +
 .With keywords:
- bite -c gentoo search --keywords
+ bite bugzilla -c gentoo search --keywords
 +
 .Without keywords:
- bite -c gentoo search --keywords false
+ bite bugzilla -c gentoo search --keywords false
 +
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
@@ -341,13 +341,13 @@ logical OR. Values can also use match operators to alter their query
 application. See the <<Match Operators>> section for more information.
 +
 .Contains `value`:
- bite -c gentoo search --keywords value
+ bite bugzilla -c gentoo search --keywords value
 +
 .Contains `value1` and `value2`:
- bite -c gentoo search --keywords value1,value1
+ bite bugzilla -c gentoo search --keywords value1,value1
 +
 .Contains `value1` or `value2`:
- bite -c gentoo search --keywords value1 --keywords value1
+ bite bugzilla -c gentoo search --keywords value1 --keywords value1
 
 *--os* <value[,...]>::
     Restrict by operating system.
@@ -397,10 +397,10 @@ With no argument, all bugs with tracker URLs are returned. If the value is
 respectively.
 +
 .With tracker URLs:
- bite -c gentoo search --see-also
+ bite bugzilla -c gentoo search --see-also
 +
 .Without tracker URLs:
- bite -c gentoo search --see-also false
+ bite bugzilla -c gentoo search --see-also false
 +
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
@@ -425,24 +425,24 @@ Regular values search for case-insensitive matches. The prefix `!` can be used
 to search for all non-matches instead.
 +
 .Unconfirmed bugs:
- bite -c gentoo search --status unconfirmed
+ bite bugzilla -c gentoo search --status unconfirmed
 +
 .Unresolved bugs:
- bite -c gentoo search --status '!resolved'
+ bite bugzilla -c gentoo search --status '!resolved'
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 +
 .Confirmed or verified bugs:
- bite -c gentoo search --status confirmed,verified
+ bite bugzilla -c gentoo search --status confirmed,verified
 +
 The aliases `@open`, `@closed`, and `@all` can be used to search for open,
 closed, and all bugs, respectively.
 +
 .Closed bugs with bugbite in the summary:
- bite -c gentoo search --status @closed bugbite
+ bite bugzilla -c gentoo search --status @closed bugbite
 +
 .All bugs assigned to yourself:
- bite -c gentoo search --status @all --assignee @me
+ bite bugzilla -c gentoo search --status @all --assignee @me
 
 *-t, --tags* <value[,...]>::
     Restrict by personal tags.
@@ -452,10 +452,10 @@ With no argument, all bugs with personal tags are returned. If the value is
 respectively.
 +
 .With personal tags:
- bite -c gentoo search --tags
+ bite bugzilla -c gentoo search --tags
 +
 .Without personal tags:
- bite -c gentoo search --tags false
+ bite bugzilla -c gentoo search --tags false
 +
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
@@ -477,10 +477,10 @@ With no argument, all bugs with a URL are returned. If the value is `true` or
 `false`, all bugs with or without URLs are returned, respectively.
 +
 .With URL:
- bite -c gentoo search --url
+ bite bugzilla -c gentoo search --url
 +
 .Without URL:
- bite -c gentoo search --url false
+ bite bugzilla -c gentoo search --url false
 +
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
@@ -503,10 +503,10 @@ With no argument, all bugs with whiteboard info are returned. If the value is
 respectively.
 +
 .With whiteboard:
- bite -c gentoo search --whiteboard
+ bite bugzilla -c gentoo search --whiteboard
 +
 .Without whiteboard:
- bite -c gentoo search --whiteboard false
+ bite bugzilla -c gentoo search --whiteboard false
 +
 Regular values search for matching substrings and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
@@ -560,13 +560,13 @@ Note that a bug's description is counted as a comment, but does not increment
 the overall comment count shown by the `get` or `comment` subcommands.
 +
 .Exactly ten comments:
- bite -c gentoo search --comments 10
+ bite bugzilla -c gentoo search --comments 10
 +
 .At least ten comments:
- bite -c gentoo search --comments '>=10'
+ bite bugzilla -c gentoo search --comments '>=10'
 +
 .Between five and ten comments:
- bite -c gentoo search --comments 5..10
+ bite bugzilla -c gentoo search --comments 5..10
 
 *--votes* <value>::
     Restrict by the number of votes.
@@ -578,14 +578,14 @@ Note that a bug's description is counted as a comment, but does not increment
 the overall comment count shown by the `get` or `comment` subcommands.
 +
 .Exactly ten votes:
- bite -c gentoo search --votes 10
- bite -c gentoo search --votes '=10'
+ bite bugzilla -c gentoo search --votes 10
+ bite bugzilla -c gentoo search --votes '=10'
 +
 .At least ten votes:
- bite -c gentoo search --votes '>=10'
+ bite bugzilla -c gentoo search --votes '>=10'
 +
 .Between five and ten votes:
- bite -c gentoo search --votes 5..10
+ bite bugzilla -c gentoo search --votes 5..10
 
 == Change options
 
@@ -628,7 +628,7 @@ current service connection.
     Restrict by assignee user.
 +
 .All bugs assigned to yourself:
- bite -c gentoo search --assignee @me
+ bite bugzilla -c gentoo search --assignee @me
 
 *--attacher* <user[,...]>::
     Restrict by attachment creation user.
@@ -640,10 +640,10 @@ With no argument, all bugs with CC users are returned. If the value is `true`
 or `false`, all bugs with or without CC users are returned, respectively.
 +
 .With CC:
- bite -c gentoo search --cc
+ bite bugzilla -c gentoo search --cc
 +
 .Without CC:
- bite -c gentoo search --cc false
+ bite bugzilla -c gentoo search --cc false
 +
 See the information above in the <<User Options>> section for regular values.
 
@@ -661,10 +661,10 @@ With no argument, all bugs with QA contacts are returned. If the value is
 respectively.
 +
 .With QA contact:
- bite -c gentoo search --qa
+ bite bugzilla -c gentoo search --qa
 +
 .Without QA contact:
- bite -c gentoo search --qa false
+ bite bugzilla -c gentoo search --qa false
 +
 See the information above in the <<User Options>> section for regular values.
 
@@ -690,7 +690,7 @@ operators can also be used alter query application, see the <<Match Operators>>
 section for more information.
 +
 .Comments tagged as spam:
- bite -c gentoo search --comment-tag spam
+ bite bugzilla -c gentoo search --comment-tag spam
 
 == Arguments
 
@@ -700,7 +700,7 @@ section for more information.
 Taken from standard input when `-`.
 +
 .Summary contains `test`:
- bite -c gentoo search test
+ bite bugzilla -c gentoo search test
 
 == Match Operators
 
@@ -721,25 +721,25 @@ wrapping the entire string in single quotes to avoid various shell expansion
 support. See the following examples searching aliases for proper usage:
 
 .Contains `value`:
- bite -c gentoo search --alias '=~ value'
+ bite bugzilla -c gentoo search --alias '=~ value'
 
 .Contains `value`, `VaLuE`, or other case-insensitive permutations:
- bite -c gentoo search --alias '~~ value'
+ bite bugzilla -c gentoo search --alias '~~ value'
 
 .Doesn't contain `value`, `VaLuE`, or other case-insensitive permutations:
- bite -c gentoo search --alias '!~ value'
+ bite bugzilla -c gentoo search --alias '!~ value'
 
 .Equals `value`:
- bite -c gentoo search --alias '== value'
+ bite bugzilla -c gentoo search --alias '== value'
 
 .Doesn't equal `value`:
- bite -c gentoo search --alias '!= value'
+ bite bugzilla -c gentoo search --alias '!= value'
 
 .Matches regex:
- bite -c gentoo search --alias '=* test?.+'
+ bite bugzilla -c gentoo search --alias '=* test?.+'
 
 .Doesn't match regex:
- bite -c gentoo search --alias '!* test?.+'
+ bite bugzilla -c gentoo search --alias '!* test?.+'
 
 == Range Operators
 

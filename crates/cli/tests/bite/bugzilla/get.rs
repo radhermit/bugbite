@@ -42,7 +42,7 @@ async fn timeout() {
     let template = ResponseTemplate::new(200).set_delay(delay);
     server.respond_custom(matchers::any(), template).await;
 
-    cmd("bite -t 0.25 get 1")
+    cmd("bite bugzilla -t 0.25 get 1")
         .assert()
         .stdout("")
         .stderr("Error: request timed out\n")
@@ -58,7 +58,7 @@ async fn single_bug() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug")).unwrap();
 
-    cmd("bite get -ACH")
+    cmd("bite bugzilla get -ACH")
         .arg("12345")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
@@ -66,7 +66,7 @@ async fn single_bug() {
         .success();
 
     // pull id from stdin
-    cmd("bite get -ACH -")
+    cmd("bite bugzilla get -ACH -")
         .write_stdin("12345\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
@@ -82,7 +82,7 @@ async fn nonexistent_bug() {
         .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
         .await;
 
-    cmd("bite get")
+    cmd("bite bugzilla get")
         .arg("1")
         .assert()
         .stdout("")
@@ -99,7 +99,7 @@ async fn multiple_bugs() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/multiple-bugs")).unwrap();
 
-    cmd("bite get -ACH")
+    cmd("bite bugzilla get -ACH")
         .args(["12345", "23456", "34567"])
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
@@ -107,7 +107,7 @@ async fn multiple_bugs() {
         .success();
 
     // pull ids from stdin
-    cmd("bite get -ACH -")
+    cmd("bite bugzilla get -ACH -")
         .write_stdin("12345\n23456\n34567\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))

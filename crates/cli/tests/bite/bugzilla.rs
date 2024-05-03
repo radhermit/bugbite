@@ -20,7 +20,7 @@ static TEST_OUTPUT: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join(
 
 async fn start_server() -> TestServer {
     let server = TestServer::new().await;
-    env::set_var("BUGBITE_CONNECTION", format!("bugzilla@{}", server.uri()));
+    env::set_var("BUGBITE_CONNECTION", server.uri());
     server
 }
 
@@ -34,26 +34,25 @@ async fn start_server_with_auth() -> TestServer {
 #[test]
 fn incompatible_connection() {
     for opt in ["-c", "--connection"] {
-        cmd("bite")
+        cmd("bite bugzilla")
             .args([opt, "ruby"])
-            .arg("bugzilla")
+            .args(["search", "test"])
             .assert()
             .stdout("")
-            .stderr(contains(
-                "bugzilla not compatible with connection service: redmine",
-            ))
+            .stderr(contains("incompatible connection: ruby"))
             .failure();
     }
 }
 
 #[test]
-fn no_connection() {
-    for action in ["s", "search"] {
+fn unknown_connection() {
+    for opt in ["-c", "--connection"] {
         cmd("bite bugzilla")
-            .args([action, "-c", "1d"])
+            .args([opt, "unknown"])
+            .args(["search", "test"])
             .assert()
             .stdout("")
-            .stderr(contains("no connection specified"))
+            .stderr(contains("unknown connection: unknown"))
             .failure();
     }
 }

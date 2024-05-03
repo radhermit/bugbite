@@ -18,6 +18,8 @@ Bugzilla service support.
 
 include::include/global-options.adoc[]
 
+include::include/service-options.adoc[]
+
 == Authentication
 
 *-k, --key*::

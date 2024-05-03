@@ -43,7 +43,7 @@ async fn nonexistent_bug() {
         .await;
 
     for opt in ["-i", "--item-ids"] {
-        cmd("bite attachment get")
+        cmd("bite bugzilla attachment get")
             .args([opt, "1"])
             .assert()
             .stdout("")
@@ -60,7 +60,7 @@ async fn deleted_attachment() {
         .respond(200, TEST_DATA.join("attachment/deleted.json"))
         .await;
 
-    cmd("bite attachment get 21")
+    cmd("bite bugzilla attachment get 21")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: can't retrieve deleted attachment: 21").trim())
@@ -79,7 +79,7 @@ async fn list_single_without_data() {
 
     // default output
     for opt in ["-l", "--list"] {
-        cmd("bite attachment get")
+        cmd("bite bugzilla attachment get")
             .arg("123")
             .arg(opt)
             .assert()
@@ -90,7 +90,7 @@ async fn list_single_without_data() {
 
     // verbose output
     for opt in ["-l", "--list"] {
-        cmd("bite attachment get -v")
+        cmd("bite bugzilla attachment get -v")
             .arg("123")
             .arg(opt)
             .assert()
@@ -109,7 +109,7 @@ async fn output_stdout_with_plain_text() {
     let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-plain-text")).unwrap();
 
     for opt in ["-o", "--output"] {
-        cmd("bite attachment get")
+        cmd("bite bugzilla attachment get")
             .arg("123")
             .args([opt, "-"])
             .assert()
@@ -132,7 +132,7 @@ async fn save_single_with_plain_text() {
     // save files to the current working directory
     env::set_current_dir(dir_path).unwrap();
 
-    cmd("bite attachment get")
+    cmd("bite bugzilla attachment get")
         .arg("123")
         .assert()
         .stdout(predicate::str::diff("Saving attachment: ./test.txt\n"))
@@ -155,7 +155,7 @@ async fn save_single_existing_error() {
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
 
-    cmd("bite attachment get")
+    cmd("bite bugzilla attachment get")
         .arg("123")
         .args(["-d", dir_path])
         .assert()
@@ -166,7 +166,7 @@ async fn save_single_existing_error() {
         .success();
 
     // re-running causes a file existence failure
-    cmd("bite attachment get")
+    cmd("bite bugzilla attachment get")
         .arg("123")
         .args(["-d", dir_path])
         .assert()
@@ -189,7 +189,7 @@ async fn single_bug_with_no_attachments() {
         .await;
 
     for opt in ["-i", "--item-ids"] {
-        cmd("bite attachment get")
+        cmd("bite bugzilla attachment get")
             .args([opt, "12345"])
             .assert()
             .stdout("")
@@ -210,7 +210,7 @@ async fn multiple_bugs_with_no_attachments() {
         .await;
 
     for opt in ["-i", "--item-ids"] {
-        cmd("bite attachment get")
+        cmd("bite bugzilla attachment get")
             .args([opt, "12345", "23456", "34567"])
             .assert()
             .stdout("")
@@ -233,7 +233,7 @@ async fn save_multiple_with_plain_text() {
     env::set_current_dir(dir_path).unwrap();
 
     let ids = ["12345", "23456", "34567"];
-    cmd("bite attachment get -i")
+    cmd("bite bugzilla attachment get -i")
         .args(ids)
         .assert()
         .stdout(predicate::str::is_empty().not())

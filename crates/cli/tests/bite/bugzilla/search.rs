@@ -53,7 +53,7 @@ async fn ids_only() {
     let expected = fs::read_to_string(TEST_OUTPUT.join("search/ids")).unwrap();
 
     for opt in ["-f", "--fields"] {
-        cmd("bite search")
+        cmd("bite bugzilla search")
             .args([opt, "id", "test"])
             .assert()
             .stdout(predicate::str::diff(expected.clone()))

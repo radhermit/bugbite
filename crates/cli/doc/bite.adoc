@@ -19,48 +19,12 @@ trackers. It aims to support common actions such as searching, requesting,
 creating, and updating bugs, issues, or tickets in addition to other
 functionality provided by a service.
 
-== Usage
-
-Bite supports multiple service variants via subcommands, providing a common
-interface between them. However, specifying service commands is unnecessary as
-they are auto-injected from the required connection options.
-
-For example the quickest way to use `bite` interactively is to set the
-environment variable `BUGBITE_CONNECTION` and use action aliases:
-
- # search for all Linux kernel bugs created in the last week
- export BUGBITE_CONNECTION=linux
- bite s -c 1w
-
-Alternatively, the somewhat more verbose method using the connection option and
-full action commands is supported as well:
-
- # search for all Gentoo bugs created in the past week with attachments
- bite -c gentoo search -c 1d --attachments
-
 include::include/global-options.adoc[]
 
 == Options
 
 *--config <path>*::
     Load a config from a custom path.
-
-*-c, --connection <name>*::
-    Define a service connection to use.
-+
-This can either be a pre-configured connection name or a manual connection of
-the form `<SERVICE>@<URL>`, for example `bugzilla@https://bugzilla.kernel.org`.
-+
-.Available services:
-- bugzilla
-- github
-- redmine
-
-*--insecure*::
-    Ignore invalid service certificates when connecting.
-
-*-t, --timeout <seconds>*::
-    Set the request timeout in seconds, defaults to 30.
 
 *-V, --version*::
     Print version and exit.

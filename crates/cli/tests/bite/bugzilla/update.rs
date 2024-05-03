@@ -35,7 +35,7 @@ fn missing_ids() {
 async fn auth_required() {
     let _server = start_server().await;
 
-    cmd("bite update 1 -A test")
+    cmd("bite bugzilla update 1 -A test")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())

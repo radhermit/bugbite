@@ -105,10 +105,10 @@ With no argument, all matches with assignees are returned. If the value is
 respectively.
 +
 .Search for assigned ruby issues:
- bite -c ruby search --assignee
+ bite redmine -c ruby search --assignee
 +
 .Search for unassigned ruby issues:
- bite -c ruby search --assignee false
+ bite redmine -c ruby search --assignee false
 
 *--attachments [<value>[,...]]*::
     Restrict by attachments.
@@ -124,16 +124,16 @@ Multiple values can be specified in a comma-separated list and will
 match if all of the specified values match.
 +
 .Search for ruby issues with attachments:
- bite -c ruby search --attachments
+ bite redmine -c ruby search --attachments
 +
 .Search for ruby issues without attachments:
- bite -c ruby search --attachments false
+ bite redmine -c ruby search --attachments false
 +
 .Search for ruby issues with file names containing `test`:
- bite -c ruby search --attachments test
+ bite redmine -c ruby search --attachments test
 +
 .Search for ruby issues with file names containing `test` and `log`:
- bite -c ruby search --attachments test,log
+ bite redmine -c ruby search --attachments test,log
 
 *-B, --blocks [<ID>[,...]]*::
     Restrict by blockers.
@@ -142,20 +142,20 @@ With no argument, all blocking matches are returned. If the value is `true` or
 `false`, all blocking and non-blocking matches are returned, respectively.
 +
 .Search for ruby issue blockers:
- bite -c ruby search --blocks
+ bite redmine -c ruby search --blocks
 +
 .Search for non-blocking ruby issues:
- bite -c ruby search --blocks false
+ bite redmine -c ruby search --blocks false
 +
 Regular values search for matching blockers and multiple values can be
 specified in a comma-separated list, matching if any of the specified blockers
 match.
 +
 .Search for ruby issues blocking issue #10:
- bite -c ruby search --blocks 10
+ bite redmine -c ruby search --blocks 10
 +
 .Search for ruby issues blocking issues #10 or #11:
- bite -c ruby search --blocks 10,11
+ bite redmine -c ruby search --blocks 10,11
 +
 Values are taken from standard input when `-`.
 
@@ -167,20 +167,20 @@ With no argument, all matches with dependencies are returned. If the value is
 respectively.
 +
 .Search for ruby issues with dependencies:
- bite -c ruby search --blocked
+ bite redmine -c ruby search --blocked
 +
 .Search for ruby issues without dependencies:
- bite -c ruby search --blocked false
+ bite redmine -c ruby search --blocked false
 +
 Regular values search for matching dependencies and multiple values can be
 specified in a comma-separated list, matching if any of the specified
 dependencies match.
 +
 .Search for ruby issues blocked on issue #10:
- bite -c ruby search --blocked 10
+ bite redmine -c ruby search --blocked 10
 +
 .Search for ruby issues blocked on issues #10 or #11:
- bite -c ruby search --blocked 10,11
+ bite redmine -c ruby search --blocked 10,11
 +
 Values are taken from standard input when `-`.
 
@@ -192,20 +192,20 @@ With no argument, all matches with relations are returned. If the value is
 respectively.
 +
 .Search for ruby issues with relations:
- bite -c ruby search --relates
+ bite redmine -c ruby search --relates
 +
 .Search for ruby issues without relations:
- bite -c ruby search --relates false
+ bite redmine -c ruby search --relates false
 +
 Regular values search for matching relations and multiple values can be
 specified in a comma-separated list, matching if any of the specified
 relations match.
 +
 .Search for ruby issues related to issue #10:
- bite -c ruby search --relates 10
+ bite redmine -c ruby search --relates 10
 +
 .Search for ruby issues related to issues #10 or #11:
- bite -c ruby search --relates 10,11
+ bite redmine -c ruby search --relates 10,11
 +
 Values are taken from standard input when `-`.
 
@@ -244,7 +244,7 @@ Query issue status from the following options: open, closed, and all.
 Taken from standard input when `-`.
 +
 .Search for ruby issues with `test` in the subject:
- bite -c ruby search test
+ bite redmine -c ruby search test
 
 == See Also
 
