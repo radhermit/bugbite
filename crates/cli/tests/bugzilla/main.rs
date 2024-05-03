@@ -7,10 +7,14 @@ mod command;
 mod create;
 mod search;
 
+const BASE: &str = "http://127.0.0.1:8080/";
+const USER: &str = "bugbite@bugbite.test";
+const PASSWORD: &str = "bugbite";
+
 pub(crate) static SERVICE: Lazy<Service> = Lazy::new(|| {
-    let mut config = Config::new("http://127.0.0.1:8080/").unwrap();
-    config.user = Some("bugbite@bugbite.test".to_string());
-    config.password = Some("bugbite".to_string());
+    let mut config = Config::new(BASE).unwrap();
+    config.user = Some(USER.to_string());
+    config.password = Some(PASSWORD.to_string());
     Service::new(config, Default::default()).unwrap()
 });
 
@@ -25,8 +29,8 @@ fn initialize() {
     }
 
     // use local bugzilla instance
-    env::set_var("BUGBITE_BASE", "http://127.0.0.1:8080/");
+    env::set_var("BUGBITE_BASE", BASE);
     env::set_var("BUGBITE_SERVICE", "bugzilla");
-    env::set_var("BUGBITE_USER", "bugbite@bugbite.test");
-    env::set_var("BUGBITE_PASS", "bugbite");
+    env::set_var("BUGBITE_USER", USER);
+    env::set_var("BUGBITE_PASS", PASSWORD);
 }
