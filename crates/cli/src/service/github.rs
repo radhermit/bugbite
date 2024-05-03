@@ -18,8 +18,12 @@ mod search;
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
     /// GitHub personal access token
-    #[arg(short, long)]
-    token: Option<String>,
+    #[arg(short, long, env = "BUGBITE_KEY")]
+    key: Option<String>,
+
+    /// username
+    #[arg(short, long, env = "BUGBITE_USER")]
+    user: Option<String>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -47,7 +51,7 @@ impl Command {
         }?;
 
         let mut config = Config::new(url)?;
-        config.token = self.auth.token;
+        config.token = self.auth.key;
 
         let builder = ClientBuilder::default()
             .insecure(self.service.insecure)
