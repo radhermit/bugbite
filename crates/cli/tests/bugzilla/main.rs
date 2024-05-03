@@ -6,6 +6,7 @@ use once_cell::sync::Lazy;
 mod command;
 mod create;
 mod search;
+mod update;
 
 const BASE: &str = "http://127.0.0.1:8080/";
 const USER: &str = "bugbite@bugbite.test";
