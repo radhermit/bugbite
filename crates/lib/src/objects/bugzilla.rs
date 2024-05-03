@@ -48,29 +48,57 @@ where
     Ok(Some(file))
 }
 
+/// A file attachment on a bug.
 #[serde_as]
 #[derive(Deserialize, Debug)]
 pub struct Attachment {
+    /// Unique attachment identifier.
     pub id: u64,
+
+    /// Bug identifier the attachment is related to.
     pub bug_id: u64,
+
+    /// File name of the attachment.
     pub file_name: String,
+
+    /// Description of the attachment.
     pub summary: String,
+
+    /// Size of the attachment in bytes.
     pub size: u64,
+
+    /// Login identifier of the attachment's creator.
     pub creator: String,
+
+    /// MIME type of the attachment.
     pub content_type: String,
+
+    /// Attachment is private.
     #[serde_as(as = "BoolFromInt")]
     pub is_private: bool,
+
+    /// Attachment is obsolete.
     #[serde_as(as = "BoolFromInt")]
     pub is_obsolete: bool,
+
+    /// Attachment is a patch.
     #[serde_as(as = "BoolFromInt")]
     pub is_patch: bool,
+
+    /// Creation time of the attachment.
     #[serde(rename = "creation_time")]
     pub created: DateTime<Utc>,
+
+    /// Last update time of the attachment.
     #[serde(rename = "last_change_time")]
     pub updated: DateTime<Utc>,
+
+    /// Flags of the attachment.
     #[serde(deserialize_with = "null_empty_vec")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub flags: Vec<BugFlag>,
+
+    /// Attachment data.
     #[serde(default, rename = "data", deserialize_with = "base64_to_tempfile")]
     file: Option<NamedTempFile>,
 }
