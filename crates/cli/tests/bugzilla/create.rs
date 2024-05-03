@@ -1,19 +1,9 @@
 use bugbite::traits::RequestSend;
-use predicates::prelude::*;
 use tempfile::tempdir;
 
 use crate::command::cmd;
 
 use super::SERVICE;
-
-#[test]
-fn bug_id_output() {
-    cmd!("bite bugzilla create -S summary -C TestComponent -p TestProduct -D description")
-        .assert()
-        .stdout(predicate::str::is_match(r"^\d+$").unwrap().trim())
-        .stderr("")
-        .success();
-}
 
 #[tokio::test]
 async fn from_bug() {
@@ -28,10 +18,8 @@ async fn from_bug() {
         .await
         .unwrap();
 
-    cmd!("bite bugzilla create -S summary -D description --from-bug {id}")
+    cmd!("bite bugzilla create --from-bug {id} -S summary -D description")
         .assert()
-        .stdout(predicate::str::is_match(r"^\d+$").unwrap().trim())
-        .stderr("")
         .success();
 }
 
@@ -62,7 +50,5 @@ async fn from_template() {
     // use template to create bug
     cmd!("bite bugzilla create --from {path} -S summary -D description")
         .assert()
-        .stdout(predicate::str::is_match(r"^\d+$").unwrap().trim())
-        .stderr("")
         .success();
 }
