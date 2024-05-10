@@ -9,12 +9,13 @@ pub(crate) use self::error::Error;
 /// Python library for bugbite.
 #[pymodule]
 #[pyo3(name = "bugbite")]
-fn module(py: Python, m: &PyModule) -> PyResult<()> {
+fn ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // register submodules so `from bugbite.config import Config` works as expected
-    m.add_wrapped(wrap_pymodule!(config::module))?;
-    let sys_modules = py.import("sys")?.getattr("modules")?;
+    let py = m.py();
+    m.add_wrapped(wrap_pymodule!(config::ext))?;
+    let sys_modules = py.import_bound("sys")?.getattr("modules")?;
     sys_modules.set_item("bugbite.config", m.getattr("config")?)?;
 
-    m.add("BugbiteError", py.get_type::<error::BugbiteError>())?;
+    m.add("BugbiteError", py.get_type_bound::<error::BugbiteError>())?;
     Ok(())
 }

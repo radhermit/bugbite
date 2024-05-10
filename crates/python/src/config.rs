@@ -43,7 +43,7 @@ impl Connection {
 
 #[pymodule]
 #[pyo3(name = "config")]
-pub(super) fn module(_py: Python, m: &PyModule) -> PyResult<()> {
+pub(super) fn ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Config>()?;
     Ok(())
 }
