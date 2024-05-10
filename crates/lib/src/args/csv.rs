@@ -26,13 +26,9 @@ where
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
-        let items: Vec<_> = s.split(',').filter(|x| !x.is_empty()).collect();
-        if items.is_empty() {
-            return Err(Error::InvalidValue("empty Csv string".to_string()));
-        }
-
-        let values = items
-            .into_iter()
+        let values: Vec<_> = s
+            .split(',')
+            .filter(|x| !x.is_empty())
             .map(|x| {
                 x.parse()
                     .map_err(|e| Error::InvalidValue(format!("{x}: {e}")))
