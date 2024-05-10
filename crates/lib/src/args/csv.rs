@@ -110,9 +110,10 @@ mod tests {
             ("a,b", vec!["a", "b"], "a,b"),
         ] {
             let csv: Csv<String> = value.parse().unwrap();
+            assert_eq!(&csv, &parsed);
             assert_eq!(&csv, parsed.as_slice());
             assert_eq!(csv.to_string(), display);
-            assert_eq!(csv.into_inner(), parsed.as_slice());
+            assert_eq!(csv.into_inner(), parsed);
         }
 
         // number values
@@ -122,9 +123,10 @@ mod tests {
             ("1,2", vec![1, 2], "1,2"),
         ] {
             let csv: Csv<u64> = value.parse().unwrap();
+            assert_eq!(&csv, &parsed);
             assert_eq!(&csv, parsed.as_slice());
             assert_eq!(csv.to_string(), display);
-            assert_eq!(csv.into_inner(), parsed.as_slice());
+            assert_eq!(csv.into_inner(), parsed);
         }
 
         // invalid values
