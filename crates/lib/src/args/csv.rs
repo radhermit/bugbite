@@ -94,3 +94,35 @@ where
         self.0 == other
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse() {
+        for (value, parsed, display) in [
+            ("", vec![], ""),
+            (",", vec![], ""),
+            (",,", vec![], ""),
+            ("a", vec!["a"], "a"),
+            ("a,b", vec!["a", "b"], "a,b"),
+        ] {
+            let csv: Csv<String> = value.parse().unwrap();
+            assert_eq!(&csv, parsed.as_slice());
+            assert_eq!(csv.to_string(), display);
+            assert_eq!(csv.into_inner(), parsed.as_slice());
+        }
+    }
+
+    #[test]
+    fn deref() {
+        let mut csv: Csv<String> = "a,b".parse().unwrap();
+        // immutable deref
+        assert_eq!(&csv, &["a", "b"]);
+        assert_eq!(csv.len(), 2);
+        // mutable deref
+        csv[1] = "c".to_string();
+        assert_eq!(&csv, &["a", "c"]);
+    }
+}
