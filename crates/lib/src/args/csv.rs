@@ -8,7 +8,7 @@ use serde_with::{DeserializeFromStr, SerializeDisplay};
 use crate::Error;
 
 /// Comma-separated value support.
-#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub struct Csv<T: fmt::Display + FromStr>(Vec<T>);
 
 impl<T: fmt::Display + FromStr> Csv<T> {
@@ -65,5 +65,32 @@ impl<T: fmt::Display + FromStr> Deref for Csv<T> {
 impl<T: fmt::Display + FromStr> DerefMut for Csv<T> {
     fn deref_mut(&mut self) -> &mut [T] {
         self.0.deref_mut()
+    }
+}
+
+impl<T, U> PartialEq<Vec<U>> for Csv<T>
+where
+    T: fmt::Display + FromStr + PartialEq<U>,
+{
+    fn eq(&self, other: &Vec<U>) -> bool {
+        &self.0 == other
+    }
+}
+
+impl<T, U> PartialEq<[U]> for Csv<T>
+where
+    T: fmt::Display + FromStr + PartialEq<U>,
+{
+    fn eq(&self, other: &[U]) -> bool {
+        self.0 == other
+    }
+}
+
+impl<T, U, const N: usize> PartialEq<[U; N]> for Csv<T>
+where
+    T: fmt::Display + FromStr + PartialEq<U>,
+{
+    fn eq(&self, other: &[U; N]) -> bool {
+        self.0 == other
     }
 }
