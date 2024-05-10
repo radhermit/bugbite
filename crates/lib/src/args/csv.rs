@@ -101,6 +101,7 @@ mod tests {
 
     #[test]
     fn parse() {
+        // string values
         for (value, parsed, display) in [
             ("", vec![], ""),
             (",", vec![], ""),
@@ -112,6 +113,23 @@ mod tests {
             assert_eq!(&csv, parsed.as_slice());
             assert_eq!(csv.to_string(), display);
             assert_eq!(csv.into_inner(), parsed.as_slice());
+        }
+
+        // number values
+        for (value, parsed, display) in [
+            ("", vec![], ""),
+            ("1", vec![1], "1"),
+            ("1,2", vec![1, 2], "1,2"),
+        ] {
+            let csv: Csv<u64> = value.parse().unwrap();
+            assert_eq!(&csv, parsed.as_slice());
+            assert_eq!(csv.to_string(), display);
+            assert_eq!(csv.into_inner(), parsed.as_slice());
+        }
+
+        // invalid values
+        for value in ["a", "."] {
+            assert!(value.parse::<Csv<u64>>().is_err());
         }
     }
 
