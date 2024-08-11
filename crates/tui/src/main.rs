@@ -40,6 +40,6 @@ fn ui(frame: &mut Frame) {
     frame.render_widget(
         Paragraph::new("Hello World!")
             .block(Block::default().title("Greeting").borders(Borders::ALL)),
-        frame.size(),
+        frame.area(),
     );
 }
