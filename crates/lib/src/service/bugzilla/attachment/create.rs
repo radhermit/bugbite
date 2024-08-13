@@ -260,7 +260,7 @@ impl CreateAttachment {
     /// If the attachment MIME type does not match text/* this setting is ignored.
     pub fn auto_truncate(mut self, value: Option<usize>) -> Self {
         // inject file size compression trigger if none was specified
-        if self.auto_compress.is_none() {
+        if value.is_some() && self.auto_compress.is_none() {
             self.auto_compress = Some(1.0);
         }
         self.auto_truncate = value;
@@ -313,6 +313,21 @@ impl CreateAttachment {
             .map_err(|e| Error::InvalidValue(format!("failed reading attachment: {path}: {e}")))?;
         let mut mime_type = get_mime_type(&path, &data);
 
+        // optionally truncate text files
+        if let Some(count) = self.auto_truncate {
+            if mime_type.starts_with("text/") {
+                path = temp_dir_path.join(&file_name);
+                let s = String::from_utf8(data).map_err(|e| {
+                    Error::InvalidValue(format!("invalid attachment file: {path}: {e}"))
+                })?;
+                let content: Vec<_> = s.lines().rev().take(count).collect();
+                data = content.into_iter().rev().join("\n").into_bytes();
+                fs::write(&path, &data).map_err(|e| {
+                    Error::InvalidValue(format!("failed writing truncated file: {e}"))
+                })?;
+            }
+        }
+
         // determine if a file of a given size will be auto-compressed
         let auto_compress = |bytes: usize| -> bool {
             self.auto_compress
@@ -320,35 +335,17 @@ impl CreateAttachment {
                 .unwrap_or_default()
         };
 
-        // compress and/or truncate the file if requested
-        if self.compress.is_some() || auto_compress(data.len()) || self.auto_truncate.is_some() {
+        // compress file if forced or triggered by size
+        if (self.compress.is_some() && self.auto_compress.is_none()) || auto_compress(data.len()) {
             let compress = self.compress.unwrap_or_default();
-
-            // optionally truncate text files
-            if let Some(count) = self.auto_truncate {
-                if mime_type.starts_with("text/") {
-                    path = temp_dir_path.join(&file_name);
-                    let s = String::from_utf8(data).map_err(|e| {
-                        Error::InvalidValue(format!("invalid attachment file: {path}: {e}"))
-                    })?;
-                    let content: Vec<_> = s.lines().rev().take(count).collect();
-                    data = content.into_iter().rev().join("\n").into_bytes();
-                    fs::write(&path, &data).map_err(|e| {
-                        Error::InvalidValue(format!("failed writing truncated file: {e}"))
-                    })?;
-                }
-            }
-
-            if self.compress.is_some() || auto_compress(data.len()) {
-                file_name = compress.run(&path, temp_dir_path)?;
-                path = temp_dir_path.join(&file_name);
-                data = fs::read(&path).map_err(|e| {
-                    Error::InvalidValue(format!(
-                        "failed reading compressed attachment: {file_name}: {e}"
-                    ))
-                })?;
-                mime_type = get_mime_type(path, &data);
-            }
+            file_name = compress.run(&path, temp_dir_path)?;
+            path = temp_dir_path.join(&file_name);
+            data = fs::read(&path).map_err(|e| {
+                Error::InvalidValue(format!(
+                    "failed reading compressed attachment: {file_name}: {e}"
+                ))
+            })?;
+            mime_type = get_mime_type(path, &data);
         }
 
         Ok(Attachment {
