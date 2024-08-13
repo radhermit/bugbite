@@ -313,27 +313,29 @@ impl CreateAttachment {
             .map_err(|e| Error::InvalidValue(format!("failed reading attachment: {path}: {e}")))?;
         let mut mime_type = get_mime_type(&path, &data);
 
-        // optionally truncate text files
-        if let Some(count) = self.auto_truncate {
-            if mime_type.starts_with("text/") {
-                path = temp_dir_path.join(&file_name);
-                let s = String::from_utf8(data).map_err(|e| {
-                    Error::InvalidValue(format!("invalid attachment file: {path}: {e}"))
-                })?;
-                let content: Vec<_> = s.lines().rev().take(count).collect();
-                data = content.into_iter().rev().join("\n").into_bytes();
-                fs::write(&path, &data).map_err(|e| {
-                    Error::InvalidValue(format!("failed writing truncated file: {e}"))
-                })?;
-            }
-        }
-
         // determine if a file of a given size will be auto-compressed
         let auto_compress = |bytes: usize| -> bool {
             self.auto_compress
                 .map(|x| x * 1e6 < bytes as f64)
                 .unwrap_or_default()
         };
+
+        // optionally truncate text files
+        if auto_compress(data.len()) {
+            if let Some(count) = self.auto_truncate {
+                if mime_type.starts_with("text/") {
+                    path = temp_dir_path.join(&file_name);
+                    let s = String::from_utf8(data).map_err(|e| {
+                        Error::InvalidValue(format!("invalid attachment file: {path}: {e}"))
+                    })?;
+                    let content: Vec<_> = s.lines().rev().take(count).collect();
+                    data = content.into_iter().rev().join("\n").into_bytes();
+                    fs::write(&path, &data).map_err(|e| {
+                        Error::InvalidValue(format!("failed writing truncated file: {e}"))
+                    })?;
+                }
+            }
+        }
 
         // compress file if forced or triggered by size
         if (self.compress.is_some() && self.auto_compress.is_none()) || auto_compress(data.len()) {
