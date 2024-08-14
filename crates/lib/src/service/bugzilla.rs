@@ -495,21 +495,39 @@ mod tests {
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
+        // missing IDs
         server.respond(200, path.join("get/single-bug.json")).await;
-        let request = service.get(&[12345], false, false, false).unwrap();
-        let bugs = request.send(&service).await.unwrap();
-        assert_eq!(bugs.len(), 1);
-        let bug = &bugs[0];
-        assert_eq!(bug.id, 12345);
+        let ids = Vec::<u32>::new();
+        let request = service.get(&ids, false, false, false);
+        assert!(request.is_err());
 
         server.reset().await;
 
+        // nonexistent bug
         server
             .respond(404, path.join("errors/nonexistent-bug.json"))
             .await;
         let request = service.get(&[1], false, false, false).unwrap();
         let result = request.send(&service).await;
         assert!(result.is_err());
+
+        server.reset().await;
+
+        // invalid response
+        server.respond(200, path.join("get/invalid.json")).await;
+        let request = service.get(&[12345], false, false, false).unwrap();
+        let result = request.send(&service).await;
+        assert!(result.is_err());
+
+        server.reset().await;
+
+        // valid request
+        server.respond(200, path.join("get/single-bug.json")).await;
+        let request = service.get(&[12345], false, false, false).unwrap();
+        let bugs = request.send(&service).await.unwrap();
+        assert_eq!(bugs.len(), 1);
+        let bug = &bugs[0];
+        assert_eq!(bug.id, 12345);
     }
 
     #[tokio::test]
