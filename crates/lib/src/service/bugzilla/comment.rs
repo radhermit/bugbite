@@ -35,7 +35,7 @@ impl Request {
 
         if let Some(value) = params.created_after.as_ref() {
             url.query_pairs_mut()
-                .append_pair("new_since", &value.to_string());
+                .append_pair("new_since", value.as_ref());
         }
 
         Ok(Self { url, params })

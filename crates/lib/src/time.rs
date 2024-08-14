@@ -62,6 +62,12 @@ impl fmt::Display for TimeStatic {
     }
 }
 
+impl AsRef<str> for TimeStatic {
+    fn as_ref(&self) -> &str {
+        &self.raw
+    }
+}
+
 impl Api for TimeStatic {
     fn api(&self) -> String {
         self.value.format("%Y-%m-%dT%H:%M:%SZ").to_string()
@@ -132,6 +138,12 @@ impl fmt::Display for TimeDelta {
     }
 }
 
+impl AsRef<str> for TimeDelta {
+    fn as_ref(&self) -> &str {
+        &self.raw
+    }
+}
+
 impl Api for TimeDelta {
     fn api(&self) -> String {
         let datetime = Utc::now() - self.delta();
@@ -162,6 +174,15 @@ impl fmt::Display for TimeDeltaOrStatic {
         match self {
             Self::Delta(value) => value.fmt(f),
             Self::Static(value) => value.fmt(f),
+        }
+    }
+}
+
+impl AsRef<str> for TimeDeltaOrStatic {
+    fn as_ref(&self) -> &str {
+        match self {
+            Self::Delta(value) => value.as_ref(),
+            Self::Static(value) => value.as_ref(),
         }
     }
 }
