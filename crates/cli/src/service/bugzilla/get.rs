@@ -48,10 +48,11 @@ impl Command {
             let urls = ids.iter().map(|id| service.item_url(id));
             launch_browser(urls)?;
         } else {
-            let attachments = !self.options.no_attachments;
-            let comments = !self.options.no_comments;
-            let history = !self.options.no_history;
-            let request = service.get(ids, attachments, comments, history)?;
+            let request = service
+                .get(ids)?
+                .attachments(!self.options.no_attachments)
+                .comments(!self.options.no_comments)
+                .history(!self.options.no_history);
             let bugs = request.send(service).await?;
             render_items(bugs)?;
         }

@@ -140,17 +140,12 @@ impl Service {
         create::Request::new(self, Default::default())
     }
 
-    pub fn get<S>(
-        &self,
-        ids: &[S],
-        attachments: bool,
-        comments: bool,
-        history: bool,
-    ) -> crate::Result<get::Request>
+    pub fn get<I, S>(&self, ids: I) -> crate::Result<get::Request>
     where
+        I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        get::Request::new(self, ids, attachments, comments, history)
+        get::Request::new(self, ids)
     }
 
     pub fn history<I, S>(&self, ids: I) -> crate::Result<history::Request>
@@ -496,7 +491,7 @@ mod tests {
         // missing IDs
         server.respond(200, path.join("get/single-bug.json")).await;
         let ids = Vec::<u32>::new();
-        let request = service.get(&ids, false, false, false);
+        let request = service.get(ids);
         assert!(request.is_err());
 
         server.reset().await;
@@ -505,7 +500,7 @@ mod tests {
         server
             .respond(404, path.join("errors/nonexistent-bug.json"))
             .await;
-        let request = service.get(&[1], false, false, false).unwrap();
+        let request = service.get([1]).unwrap();
         let result = request.send(&service).await;
         assert!(result.is_err());
 
@@ -513,7 +508,7 @@ mod tests {
 
         // invalid response
         server.respond(200, path.join("get/invalid.json")).await;
-        let request = service.get(&[12345], false, false, false).unwrap();
+        let request = service.get([12345]).unwrap();
         let result = request.send(&service).await;
         assert!(result.is_err());
 
@@ -521,7 +516,7 @@ mod tests {
 
         // valid request
         server.respond(200, path.join("get/single-bug.json")).await;
-        let request = service.get(&[12345], false, false, false).unwrap();
+        let request = service.get([12345]).unwrap();
         let bugs = request.send(&service).await.unwrap();
         assert_eq!(bugs.len(), 1);
         let bug = &bugs[0];

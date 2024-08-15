@@ -36,7 +36,7 @@ async fn from_template() {
         .success();
 
     let bug = SERVICE
-        .get(&[id], false, false, false)
+        .get([id])
         .unwrap()
         .send(&SERVICE)
         .await
@@ -77,7 +77,7 @@ async fn multiple_bugs() {
         .success();
 
     let (bug1, bug2) = SERVICE
-        .get(&[id1, id2], false, false, false)
+        .get([id1, id2])
         .unwrap()
         .send(&SERVICE)
         .await

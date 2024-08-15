@@ -8,34 +8,32 @@ use crate::Error;
 use super::{attachment, comment, history};
 
 #[derive(Debug)]
-pub struct Request {
+pub struct Request<'a> {
     url: Url,
+    ids: Vec<String>,
+    service: &'a super::Service,
     attachments: Option<attachment::get_item::Request>,
     comments: Option<comment::Request>,
     history: Option<history::Request>,
 }
 
-impl Request {
-    pub(super) fn new<S>(
-        service: &super::Service,
-        ids: &[S],
-        attachments: bool,
-        comments: bool,
-        history: bool,
-    ) -> crate::Result<Self>
+impl<'a> Request<'a> {
+    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> crate::Result<Self>
     where
+        I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
-        let [id, remaining_ids @ ..] = ids else {
-            return Err(Error::InvalidRequest("no IDs specified".to_string()));
-        };
+        let ids: Vec<_> = ids.into_iter().map(|s| s.to_string()).collect();
+        let id = ids
+            .first()
+            .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
         let mut url = service.config.base.join(&format!("rest/bug/{id}"))?;
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
-        for id in remaining_ids {
-            url.query_pairs_mut().append_pair("ids", &id.to_string());
+        for id in &ids[1..] {
+            url.query_pairs_mut().append_pair("ids", id);
         }
 
         // include personal tags
@@ -46,32 +44,47 @@ impl Request {
         url.query_pairs_mut()
             .append_pair("exclude_fields", "update_token");
 
-        let attachments = if attachments {
-            Some(service.attachment_get_item(ids)?.data(false))
-        } else {
-            None
-        };
-        let comments = if comments {
-            Some(service.comment(ids)?)
-        } else {
-            None
-        };
-        let history = if history {
-            Some(service.history(ids)?)
-        } else {
-            None
-        };
-
         Ok(Self {
             url,
-            attachments,
-            comments,
-            history,
+            ids,
+            service,
+            attachments: None,
+            comments: None,
+            history: None,
         })
+    }
+
+    /// Enable or disable fetching bug attachments.
+    pub fn attachments(mut self, fetch: bool) -> Self {
+        if fetch {
+            self.attachments = Some(
+                self.service
+                    .attachment_get_item(&self.ids)
+                    .unwrap()
+                    .data(false),
+            );
+        }
+        self
+    }
+
+    /// Enable or disable fetching bug comments.
+    pub fn comments(mut self, fetch: bool) -> Self {
+        if fetch {
+            self.comments = Some(self.service.comment(&self.ids).unwrap());
+        }
+        self
+    }
+
+    /// Enable or disable fetching bug changes.
+    pub fn history(mut self, fetch: bool) -> Self {
+        if fetch {
+            self.history = Some(self.service.history(&self.ids).unwrap());
+        }
+        self
     }
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = Vec<Bug>;
     type Service = super::Service;
 
