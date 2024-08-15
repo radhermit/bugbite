@@ -47,7 +47,7 @@ impl Request {
             .append_pair("exclude_fields", "update_token");
 
         let attachments = if attachments {
-            Some(service.attachment_get_item(ids)?)
+            Some(service.attachment_get_item(ids)?.data(false))
         } else {
             None
         };
