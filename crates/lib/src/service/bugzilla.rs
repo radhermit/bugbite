@@ -9,7 +9,6 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
-use crate::objects::Ids;
 use crate::traits::{Api, WebClient, WebService};
 use crate::Error;
 
@@ -105,21 +104,20 @@ impl Service {
         attachment::create::Request::new(self, ids, attachments)
     }
 
-    pub fn attachment_get<S>(
-        &self,
-        ids: &[S],
-        bugs: bool,
-        data: bool,
-    ) -> crate::Result<attachment::get::Request>
+    pub fn attachment_get<I, S>(&self, ids: I) -> crate::Result<attachment::get::Request>
     where
+        I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        let ids = if bugs {
-            Ids::item(ids)
-        } else {
-            Ids::object(ids)
-        };
-        attachment::get::Request::new(self, ids, data)
+        attachment::get::Request::new(self, ids)
+    }
+
+    pub fn attachment_get_item<I, S>(&self, ids: I) -> crate::Result<attachment::get_item::Request>
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        attachment::get_item::Request::new(self, ids)
     }
 
     pub fn attachment_update<I, S>(&self, ids: I) -> crate::Result<attachment::update::Request>

@@ -52,12 +52,16 @@ pub(super) struct Command {
 impl Command {
     pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
+        let multiple_bugs = self.options.item_ids && ids.len() > 1;
         let mut stdout = stdout().lock();
 
-        let get_data = !self.options.list;
-        let multiple_bugs = self.options.item_ids && ids.len() > 1;
-        let request = service.attachment_get(ids, self.options.item_ids, get_data)?;
-        let attachments: Vec<_> = request.send(service).await?.into_iter().flatten().collect();
+        let attachments: Vec<_> = if self.options.item_ids {
+            let request = service.attachment_get_item(ids)?.data(!self.options.list);
+            request.send(service).await?.into_iter().flatten().collect()
+        } else {
+            let request = service.attachment_get(ids)?.data(!self.options.list);
+            request.send(service).await?
+        };
 
         if self.options.list {
             for attachment in attachments {

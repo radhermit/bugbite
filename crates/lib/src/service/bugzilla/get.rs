@@ -10,7 +10,7 @@ use super::{attachment, comment, history};
 #[derive(Debug)]
 pub struct Request {
     url: Url,
-    attachments: Option<attachment::get::Request>,
+    attachments: Option<attachment::get_item::Request>,
     comments: Option<comment::Request>,
     history: Option<history::Request>,
 }
@@ -47,7 +47,7 @@ impl Request {
             .append_pair("exclude_fields", "update_token");
 
         let attachments = if attachments {
-            Some(service.attachment_get(ids, true, false)?)
+            Some(service.attachment_get_item(ids)?)
         } else {
             None
         };
