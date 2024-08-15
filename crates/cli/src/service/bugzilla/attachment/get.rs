@@ -55,7 +55,7 @@ impl Command {
         let multiple_bugs = self.options.item_ids && ids.len() > 1;
         let mut stdout = stdout().lock();
 
-        let attachments: Vec<_> = if self.options.item_ids {
+        let attachments = if self.options.item_ids {
             let request = service.attachment_get_item(ids)?.data(!self.options.list);
             request.send(service).await?.into_iter().flatten().collect()
         } else {
