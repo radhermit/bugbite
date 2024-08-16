@@ -89,7 +89,7 @@ impl RequestSend for Request<'_> {
             .service
             .client
             .get(self.url()?)
-            .auth_optional(self.service)?;
+            .auth_optional(self.service);
 
         // send data requests
         let attachments = self.attachments.map(|r| r.send());

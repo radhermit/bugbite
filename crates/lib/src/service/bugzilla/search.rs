@@ -36,7 +36,7 @@ impl RequestSend for Request<'_> {
             .config
             .base
             .join(&format!("rest/bug?{params}"))?;
-        let request = self.service.client.get(url).auth_optional(self.service)?;
+        let request = self.service.client.get(url).auth_optional(self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();

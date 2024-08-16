@@ -66,7 +66,7 @@ impl RequestSend for Request<'_> {
             .service
             .client
             .get(self.url()?)
-            .auth_optional(self.service)?;
+            .auth_optional(self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let Value::Array(bugs) = data["bugs"].take() else {

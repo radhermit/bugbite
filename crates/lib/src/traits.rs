@@ -69,7 +69,7 @@ pub(crate) trait InjectAuth: Sized {
     fn auth<'a, W: WebService<'a>>(self, service: &'a W) -> crate::Result<Self>;
 
     /// Authentication optional for request.
-    fn auth_optional<'a, W: WebService<'a>>(self, service: &'a W) -> crate::Result<Self>;
+    fn auth_optional<'a, W: WebService<'a>>(self, service: &'a W) -> Self;
 }
 
 impl InjectAuth for RequestBuilder {
@@ -77,8 +77,10 @@ impl InjectAuth for RequestBuilder {
         service.inject_auth(self, true)
     }
 
-    fn auth_optional<'a, W: WebService<'a>>(self, service: &'a W) -> crate::Result<Self> {
-        service.inject_auth(self, false)
+    fn auth_optional<'a, W: WebService<'a>>(self, service: &'a W) -> Self {
+        service
+            .inject_auth(self, false)
+            .expect("failed injecting optional auth")
     }
 }
 
