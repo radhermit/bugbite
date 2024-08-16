@@ -1,5 +1,7 @@
+use indexmap::IndexSet;
 use itertools::Itertools;
 use reqwest::StatusCode;
+use strum::Display;
 use url::Url;
 
 use crate::objects::redmine::{Comment, Issue};
@@ -9,8 +11,7 @@ use crate::Error;
 pub struct Request {
     ids: Vec<String>,
     urls: Vec<Url>,
-    comments: bool,
-    fields: Vec<String>,
+    fields: IndexSet<Field>,
 }
 
 impl Request {
@@ -35,19 +36,33 @@ impl Request {
         Ok(Self {
             ids: request_ids,
             urls,
-            comments: false,
-            fields: vec![],
+            fields: Default::default(),
         })
+    }
+
+    /// Enable or disable fetching attachments.
+    pub fn attachments(mut self, fetch: bool) -> Self {
+        if fetch {
+            self.fields.insert(Field::Attachments);
+        }
+        self
     }
 
     /// Enable or disable fetching comments.
     pub fn comments(mut self, fetch: bool) -> Self {
         if fetch {
-            self.comments = true;
-            self.fields.push("journals".to_string());
+            self.fields.insert(Field::Journals);
         }
         self
     }
+}
+
+/// Bug fields composed of value arrays.
+#[derive(Display, Debug, Eq, PartialEq, Hash, Clone, Copy)]
+#[strum(serialize_all = "snake_case")]
+enum Field {
+    Attachments,
+    Journals,
 }
 
 impl RequestSend for Request {
@@ -85,7 +100,7 @@ impl RequestSend for Request {
             let mut issue: Issue = serde_json::from_value(data)
                 .map_err(|e| Error::InvalidValue(format!("failed deserializing issue: {e}")))?;
 
-            if self.comments {
+            if self.fields.contains(&Field::Journals) {
                 let mut count = 0;
                 // treat description as a comment
                 if let Some(text) = issue.description.take() {
