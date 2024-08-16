@@ -96,7 +96,7 @@ impl Service {
         &self,
         ids: I,
         attachments: Vec<attachment::create::CreateAttachment>,
-    ) -> crate::Result<attachment::create::Request>
+    ) -> attachment::create::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,

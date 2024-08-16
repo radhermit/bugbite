@@ -382,52 +382,40 @@ struct Attachment {
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
-    url: Url,
-    attachments: Vec<Attachment>,
+    ids: Vec<String>,
+    attachments: Vec<CreateAttachment>,
 }
 
 impl<'a> Request<'a> {
     pub(crate) fn new<I, S>(
         service: &'a Service,
         ids: I,
-        create_attachments: Vec<CreateAttachment>,
-    ) -> crate::Result<Self>
+        attachments: Vec<CreateAttachment>,
+    ) -> Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        if create_attachments.is_empty() {
-            return Err(Error::InvalidRequest(
-                "no attachments specified".to_string(),
-            ));
-        };
+        Self {
+            service,
+            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            attachments,
+        }
+    }
 
-        let ids: Vec<_> = ids.into_iter().map(|s| s.to_string()).collect();
-        let id = ids
+    fn url(&self) -> crate::Result<Url> {
+        let id = self
+            .ids
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
-        let url = service
+        let url = self
+            .service
             .config
             .base
             .join(&format!("rest/bug/{id}/attachment"))?;
 
-        // create temporary directory used for creating transient attachment files
-        let temp_dir = tempfile::tempdir()
-            .map_err(|e| Error::InvalidValue(format!("failed acquiring temporary dir: {e}")))?;
-        let temp_dir_path = Utf8Path::from_path(temp_dir.path())
-            .ok_or_else(|| Error::InvalidValue("non-unicode temporary dir path".to_string()))?;
-
-        let attachments = create_attachments
-            .into_iter()
-            .map(|x| x.build(&ids, temp_dir_path))
-            .try_collect()?;
-
-        Ok(Self {
-            service,
-            url,
-            attachments,
-        })
+        Ok(url)
     }
 }
 
@@ -435,15 +423,36 @@ impl RequestSend for Request<'_> {
     type Output = Vec<Vec<u64>>;
 
     async fn send(self) -> crate::Result<Self::Output> {
-        let futures = self
-            .attachments
-            .into_iter()
-            .map(|x| self.service.client.post(self.url.clone()).json(&x))
-            .map(|r| r.auth(self.service).map(|r| r.send()));
+        let url = self.url()?;
+
+        if self.attachments.is_empty() {
+            return Err(Error::InvalidRequest(
+                "no attachments specified".to_string(),
+            ));
+        };
+
+        // create temporary directory used for creating transient attachment files
+        let temp_dir = tempfile::tempdir()
+            .map_err(|e| Error::InvalidValue(format!("failed acquiring temporary dir: {e}")))?;
+        let temp_dir_path = Utf8Path::from_path(temp_dir.path())
+            .ok_or_else(|| Error::InvalidValue("non-unicode temporary dir path".to_string()))?;
+
+        let mut futures = vec![];
+        for attachment in self.attachments {
+            let attachment = attachment.build(&self.ids, temp_dir_path)?;
+            futures.push(
+                self.service
+                    .client
+                    .post(url.clone())
+                    .json(&attachment)
+                    .auth(self.service)?
+                    .send(),
+            )
+        }
 
         let mut attachment_ids = vec![];
         for future in futures {
-            let response = future?.await?;
+            let response = future.await?;
             let mut data = self.service.parse_response(response).await?;
             let data = data["ids"].take();
             let ids = serde_json::from_value(data)

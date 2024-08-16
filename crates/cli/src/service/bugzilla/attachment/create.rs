@@ -159,7 +159,7 @@ impl Command {
             .collect();
 
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
-        let attachment_ids = service.attachment_create(ids, attachments)?.send().await?;
+        let attachment_ids = service.attachment_create(ids, attachments).send().await?;
 
         let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
         for (file, ids) in self.args.files.iter().zip(attachment_ids.iter()) {
