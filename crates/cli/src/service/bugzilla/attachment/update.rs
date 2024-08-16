@@ -103,7 +103,7 @@ impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
         let _ = service
-            .attachment_update(ids)?
+            .attachment_update(ids)
             .params(self.params.into())
             .send()
             .await?;

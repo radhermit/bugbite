@@ -71,31 +71,36 @@ struct RequestParameters {
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
-    url: Url,
     ids: Vec<String>,
     params: Parameters,
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> crate::Result<Self>
+    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
-        let ids: Vec<_> = ids.into_iter().map(|s| s.to_string()).collect();
-        let id = ids
+        Self {
+            service,
+            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            params: Default::default(),
+        }
+    }
+
+    fn url(&self) -> crate::Result<Url> {
+        let id = self
+            .ids
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
-        Ok(Self {
-            service,
-            url: service
-                .config
-                .base
-                .join(&format!("rest/bug/attachment/{id}"))?,
-            ids,
-            params: Default::default(),
-        })
+        let url = self
+            .service
+            .config
+            .base
+            .join(&format!("rest/bug/attachment/{id}"))?;
+
+        Ok(url)
     }
 
     pub fn params(mut self, params: Parameters) -> Self {
@@ -108,11 +113,12 @@ impl RequestSend for Request<'_> {
     type Output = Vec<u64>;
 
     async fn send(self) -> crate::Result<Self::Output> {
+        let url = self.url()?;
         let params = self.params.encode(self.ids);
         let request = self
             .service
             .client
-            .put(self.url)
+            .put(url)
             .json(&params)
             .auth(self.service)?;
         let response = request.send().await?;
