@@ -12,35 +12,42 @@ use crate::Error;
 pub struct Request<'a> {
     service: &'a super::Service,
     ids: Vec<String>,
-    urls: Vec<Url>,
     fields: IndexSet<Field>,
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a super::Service, ids: I) -> crate::Result<Self>
+    pub(crate) fn new<I, S>(service: &'a super::Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
-        let ids = ids.into_iter().map(|s| s.to_string());
-        let mut request_ids = vec![];
-        let mut urls = vec![];
+        Self {
+            service,
+            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            fields: Default::default(),
+        }
+    }
 
-        for id in ids {
-            urls.push(service.config.web_base.join(&format!("issues/{id}.json"))?);
-            request_ids.push(id);
+    fn urls(&self) -> crate::Result<Vec<Url>> {
+        if self.ids.is_empty() {
+            return Err(Error::InvalidRequest("no IDs specified".to_string()));
         }
 
-        if request_ids.is_empty() {
-            return Err(Error::InvalidRequest("no IDs specified".to_string()));
-        };
+        let mut urls = vec![];
+        for id in &self.ids {
+            let mut url = self
+                .service
+                .config
+                .web_base
+                .join(&format!("issues/{id}.json"))?;
+            if !self.fields.is_empty() {
+                url.query_pairs_mut()
+                    .append_pair("include", &self.fields.iter().join(","));
+            }
+            urls.push(url);
+        }
 
-        Ok(Self {
-            service,
-            ids: request_ids,
-            urls,
-            fields: Default::default(),
-        })
+        Ok(urls)
     }
 
     /// Enable or disable fetching attachments.
@@ -73,15 +80,9 @@ impl RequestSend for Request<'_> {
 
     async fn send(self) -> crate::Result<Self::Output> {
         let futures: Vec<_> = self
-            .urls
+            .urls()?
             .into_iter()
-            .map(|mut u| {
-                if !self.fields.is_empty() {
-                    u.query_pairs_mut()
-                        .append_pair("include", &self.fields.iter().join(","));
-                }
-                self.service.client.get(u)
-            })
+            .map(|u| self.service.client.get(u))
             .map(|r| r.auth_optional(self.service).map(|r| r.send()))
             .try_collect()?;
 

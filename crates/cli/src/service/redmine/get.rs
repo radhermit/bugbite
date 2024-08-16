@@ -41,7 +41,7 @@ impl Command {
             launch_browser(urls)?;
         } else {
             let issues = service
-                .get(ids)?
+                .get(ids)
                 .comments(!self.options.no_comments)
                 .send()
                 .await?;

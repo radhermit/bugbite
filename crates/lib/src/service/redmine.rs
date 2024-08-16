@@ -83,7 +83,7 @@ impl Service {
         Ok(format!("{base}/issues?set_filter=1&{params}"))
     }
 
-    pub fn get<I, S>(&self, ids: I) -> crate::Result<get::Request>
+    pub fn get<I, S>(&self, ids: I) -> get::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
