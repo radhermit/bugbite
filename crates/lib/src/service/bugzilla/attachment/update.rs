@@ -68,6 +68,7 @@ struct RequestParameters {
     flags: Option<Vec<Flag>>,
 }
 
+#[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
     url: Url,

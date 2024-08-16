@@ -488,11 +488,12 @@ mod tests {
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
-        // missing IDs
+        // invalid request
         server.respond(200, path.join("get/single-bug.json")).await;
         let ids = Vec::<u32>::new();
-        let request = service.get(ids);
-        assert!(request.is_err());
+        let err = service.get(ids).unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
 
         server.reset().await;
 
@@ -500,15 +501,22 @@ mod tests {
         server
             .respond(404, path.join("errors/nonexistent-bug.json"))
             .await;
-        let result = service.get([1]).unwrap().send().await;
-        assert!(result.is_err());
+        let err = service.get([1]).unwrap().send().await.unwrap_err();
+        assert!(
+            matches!(err, Error::Bugzilla { code: 101, .. }),
+            "unmatched error: {err:?}"
+        );
 
         server.reset().await;
 
         // invalid response
         server.respond(200, path.join("get/invalid.json")).await;
-        let result = service.get([12345]).unwrap().send().await;
-        assert!(result.is_err());
+        let err = service.get([12345]).unwrap().send().await.unwrap_err();
+        assert!(
+            matches!(err, Error::InvalidValue(_)),
+            "unmatched error: {err:?}"
+        );
+        assert_err_re!(err, "invalid service response");
 
         server.reset().await;
 

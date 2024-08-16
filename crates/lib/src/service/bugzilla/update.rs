@@ -108,6 +108,7 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
     }
 }
 
+#[derive(Debug)]
 pub struct Request<'a> {
     service: &'a super::Service,
     url: url::Url,

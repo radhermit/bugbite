@@ -3,6 +3,7 @@ use tracing::debug;
 use crate::objects::github::Issue;
 use crate::traits::RequestSend;
 
+#[derive(Debug)]
 pub struct Request(Vec<reqwest::Request>);
 
 impl RequestSend for Request {

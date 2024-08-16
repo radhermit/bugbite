@@ -7,6 +7,7 @@ use crate::Error;
 
 use super::{attachment, comment, history};
 
+#[derive(Debug)]
 pub struct Request<'a> {
     service: &'a super::Service,
     url: Url,

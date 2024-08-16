@@ -8,6 +8,7 @@ use crate::objects::redmine::{Comment, Issue};
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
+#[derive(Debug)]
 pub struct Request<'a> {
     service: &'a super::Service,
     ids: Vec<String>,
