@@ -71,7 +71,7 @@ impl Service {
     }
 
     /// Return the website URL for an item ID.
-    pub fn item_url<I: std::fmt::Display>(&self, id: I) -> String {
+    pub fn item_url<I: fmt::Display>(&self, id: I) -> String {
         let base = self.config.web_base.as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
@@ -83,16 +83,12 @@ impl Service {
         Ok(format!("{base}/issues?set_filter=1&{params}"))
     }
 
-    pub fn get<S>(
-        &self,
-        ids: &[S],
-        attachments: bool,
-        comments: bool,
-    ) -> crate::Result<get::Request>
+    pub fn get<I, S>(&self, ids: I) -> crate::Result<get::Request>
     where
-        S: std::fmt::Display,
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
     {
-        get::Request::new(self, ids, attachments, comments)
+        get::Request::new(self, ids)
     }
 
     pub fn search(&self, params: search::Parameters) -> crate::Result<search::Request> {

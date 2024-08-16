@@ -54,7 +54,7 @@ impl<'a> Request<'a> {
         })
     }
 
-    /// Enable or disable fetching bug attachments.
+    /// Enable or disable fetching attachments.
     pub fn attachments(mut self, fetch: bool) -> Self {
         if fetch {
             self.attachments = Some(
@@ -67,7 +67,7 @@ impl<'a> Request<'a> {
         self
     }
 
-    /// Enable or disable fetching bug comments.
+    /// Enable or disable fetching comments.
     pub fn comments(mut self, fetch: bool) -> Self {
         if fetch {
             self.comments = Some(self.service.comment(&self.ids).unwrap());
@@ -75,7 +75,7 @@ impl<'a> Request<'a> {
         self
     }
 
-    /// Enable or disable fetching bug changes.
+    /// Enable or disable fetching changes.
     pub fn history(mut self, fetch: bool) -> Self {
         if fetch {
             self.history = Some(self.service.history(&self.ids).unwrap());

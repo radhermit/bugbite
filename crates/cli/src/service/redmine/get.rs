@@ -40,8 +40,7 @@ impl Command {
             let urls = ids.iter().map(|id| service.item_url(id));
             launch_browser(urls)?;
         } else {
-            let comments = !self.options.no_comments;
-            let request = service.get(ids, false, comments)?;
+            let request = service.get(ids)?.comments(!self.options.no_comments);
             let issues = request.send(service).await?;
             render_items(issues)?;
         }

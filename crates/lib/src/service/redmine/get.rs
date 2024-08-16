@@ -11,46 +11,43 @@ pub struct Request {
     ids: Vec<String>,
     urls: Vec<Url>,
     comments: bool,
+    fields: Vec<String>,
 }
 
 impl Request {
-    pub(crate) fn new<S>(
-        service: &super::Service,
-        ids: &[S],
-        _attachments: bool,
-        comments: bool,
-    ) -> crate::Result<Self>
+    pub(crate) fn new<I, S>(service: &super::Service, ids: I) -> crate::Result<Self>
     where
+        I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
-        if ids.is_empty() {
-            return Err(Error::InvalidRequest("no IDs specified".to_string()));
-        };
-
+        let ids = ids.into_iter().map(|s| s.to_string());
         let mut request_ids = vec![];
         let mut urls = vec![];
 
-        // conditionally request additional data fields
-        let mut fields = vec![];
-        if comments {
-            fields.push("journals");
+        for id in ids {
+            urls.push(service.config.web_base.join(&format!("issues/{id}.json"))?);
+            request_ids.push(id);
         }
 
-        for id in ids {
-            let mut url = service.config.web_base.join(&format!("issues/{id}.json"))?;
-            if !fields.is_empty() {
-                url.query_pairs_mut()
-                    .append_pair("include", &fields.iter().join(","));
-            }
-            request_ids.push(id.to_string());
-            urls.push(url);
-        }
+        if request_ids.is_empty() {
+            return Err(Error::InvalidRequest("no IDs specified".to_string()));
+        };
 
         Ok(Self {
             ids: request_ids,
             urls,
-            comments,
+            comments: false,
+            fields: vec![],
         })
+    }
+
+    /// Enable or disable fetching comments.
+    pub fn comments(mut self, fetch: bool) -> Self {
+        if fetch {
+            self.comments = true;
+            self.fields.push("journals".to_string());
+        }
+        self
     }
 }
 
@@ -62,7 +59,13 @@ impl RequestSend for Request {
         let futures: Vec<_> = self
             .urls
             .into_iter()
-            .map(|u| service.client.get(u))
+            .map(|mut u| {
+                if !self.fields.is_empty() {
+                    u.query_pairs_mut()
+                        .append_pair("include", &self.fields.iter().join(","));
+                }
+                service.client.get(u)
+            })
             .map(|r| r.auth_optional(service).map(|r| r.send()))
             .try_collect()?;
 
