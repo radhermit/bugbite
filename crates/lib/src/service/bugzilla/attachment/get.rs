@@ -5,7 +5,6 @@ use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-#[derive(Debug)]
 pub struct Request {
     ids: Vec<String>,
     url: Url,

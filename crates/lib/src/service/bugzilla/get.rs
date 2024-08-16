@@ -7,7 +7,6 @@ use crate::Error;
 
 use super::{attachment, comment, history};
 
-#[derive(Debug)]
 pub struct Request<'a> {
     url: Url,
     ids: Vec<String>,

@@ -327,7 +327,6 @@ impl Parameters {
     }
 }
 
-#[derive(Debug)]
 pub struct Request {
     params: Parameters,
 }

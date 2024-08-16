@@ -68,7 +68,6 @@ struct RequestParameters {
     flags: Option<Vec<Flag>>,
 }
 
-#[derive(Debug)]
 pub struct Request {
     url: Url,
     ids: Vec<String>,

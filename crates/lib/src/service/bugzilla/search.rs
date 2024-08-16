@@ -20,7 +20,6 @@ use crate::Error;
 
 use super::{BugField, FilterField};
 
-#[derive(Debug)]
 pub struct Request {
     params: Parameters,
 }

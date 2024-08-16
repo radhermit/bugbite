@@ -9,7 +9,6 @@ use crate::objects::bugzilla::{Bug, Flag};
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-#[derive(Debug)]
 pub struct Request {
     url: url::Url,
     params: Parameters,

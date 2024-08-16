@@ -108,7 +108,6 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
     }
 }
 
-#[derive(Debug)]
 pub struct Request {
     url: url::Url,
     ids: Vec<String>,
