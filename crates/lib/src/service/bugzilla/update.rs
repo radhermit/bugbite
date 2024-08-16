@@ -7,6 +7,7 @@ use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
+use url::Url;
 
 use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
@@ -111,7 +112,6 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a super::Service,
-    url: url::Url,
     ids: Vec<String>,
     params: Parameters,
 }
@@ -120,11 +120,12 @@ impl RequestSend for Request<'_> {
     type Output = Vec<BugChange>;
 
     async fn send(self) -> crate::Result<Self::Output> {
+        let url = self.url()?;
         let params = self.params.encode(self.service, self.ids).await?;
         let request = self
             .service
             .client
-            .put(self.url)
+            .put(url)
             .json(&params)
             .auth(self.service)?;
         let response = request.send().await?;
@@ -142,23 +143,25 @@ impl RequestSend for Request<'_> {
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> crate::Result<Self>
+    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        let ids: Vec<_> = ids.into_iter().map(|s| s.to_string()).collect();
-        let id = ids
+        Self {
+            service,
+            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            params: Default::default(),
+        }
+    }
+
+    fn url(&self) -> crate::Result<Url> {
+        let id = self
+            .ids
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
-        let url = service.config.base.join(&format!("rest/bug/{id}"))?;
-
-        Ok(Self {
-            service,
-            url,
-            ids,
-            params: Default::default(),
-        })
+        let url = self.service.config.base.join(&format!("rest/bug/{id}"))?;
+        Ok(url)
     }
 
     pub fn params(mut self, params: Parameters) -> Self {

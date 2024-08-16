@@ -398,7 +398,7 @@ impl Command {
         }
 
         if !self.options.dry_run {
-            let changes = service.update(ids)?.params(params).send().await?;
+            let changes = service.update(ids).params(params).send().await?;
             for change in changes {
                 info!("{change}");
             }

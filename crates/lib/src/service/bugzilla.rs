@@ -160,7 +160,7 @@ impl Service {
         search::Request::new(self)
     }
 
-    pub fn update<I, S>(&self, ids: I) -> crate::Result<update::Request>
+    pub fn update<I, S>(&self, ids: I) -> update::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
