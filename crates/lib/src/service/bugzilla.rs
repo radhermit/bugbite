@@ -104,7 +104,7 @@ impl Service {
         attachment::create::Request::new(self, ids, attachments)
     }
 
-    pub fn attachment_get<I, S>(&self, ids: I) -> crate::Result<attachment::get::Request>
+    pub fn attachment_get<I, S>(&self, ids: I) -> attachment::get::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -112,7 +112,7 @@ impl Service {
         attachment::get::Request::new(self, ids)
     }
 
-    pub fn attachment_get_item<I, S>(&self, ids: I) -> crate::Result<attachment::get_item::Request>
+    pub fn attachment_get_item<I, S>(&self, ids: I) -> attachment::get_item::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,

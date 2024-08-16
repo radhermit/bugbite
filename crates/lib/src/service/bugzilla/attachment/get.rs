@@ -9,47 +9,48 @@ use crate::Error;
 pub struct Request<'a> {
     service: &'a Service,
     ids: Vec<String>,
-    url: Url,
     data: bool,
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> crate::Result<Self>
+    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
-        let ids: Vec<_> = ids.into_iter().map(|s| s.to_string()).collect();
-        let id = ids
+        Self {
+            service,
+            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            data: true,
+        }
+    }
+
+    fn url(&self) -> crate::Result<Url> {
+        let id = self
+            .ids
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
-        let mut url = service
+        let mut url = self
+            .service
             .config
             .base
             .join(&format!("rest/bug/attachment/{id}"))?;
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
-        for id in &ids[1..] {
+        for id in &self.ids[1..] {
             url.query_pairs_mut().append_pair("attachment_ids", id);
         }
 
-        Ok(Self {
-            service,
-            ids,
-            url,
-            data: true,
-        })
+        if !self.data {
+            url.query_pairs_mut().append_pair("exclude_fields", "data");
+        }
+
+        Ok(url)
     }
 
     pub fn data(mut self, fetch: bool) -> Self {
-        if !fetch {
-            self.url
-                .query_pairs_mut()
-                .append_pair("exclude_fields", "data");
-        }
-
         self.data = fetch;
         self
     }
@@ -62,7 +63,7 @@ impl RequestSend for Request<'_> {
         let request = self
             .service
             .client
-            .get(self.url)
+            .get(self.url()?)
             .auth_optional(self.service)?;
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;

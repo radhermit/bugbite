@@ -59,12 +59,7 @@ impl<'a> Request<'a> {
     /// Enable or disable fetching attachments.
     pub fn attachments(mut self, fetch: bool) -> Self {
         if fetch {
-            self.attachments = Some(
-                self.service
-                    .attachment_get_item(&self.ids)
-                    .unwrap()
-                    .data(false),
-            );
+            self.attachments = Some(self.service.attachment_get_item(&self.ids).data(false));
         }
         self
     }

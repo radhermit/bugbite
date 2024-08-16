@@ -57,7 +57,7 @@ impl Command {
 
         let attachments = if self.options.item_ids {
             service
-                .attachment_get_item(ids)?
+                .attachment_get_item(ids)
                 .data(!self.options.list)
                 .send()
                 .await?
@@ -66,7 +66,7 @@ impl Command {
                 .collect()
         } else {
             service
-                .attachment_get(ids)?
+                .attachment_get(ids)
                 .data(!self.options.list)
                 .send()
                 .await?

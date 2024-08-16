@@ -9,46 +9,49 @@ use crate::Error;
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
-    url: Url,
+    ids: Vec<String>,
     data: bool,
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> crate::Result<Self>
+    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
-        let mut ids = ids.into_iter().map(|s| s.to_string());
-        let id = ids
-            .next()
+        Self {
+            service,
+            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            data: true,
+        }
+    }
+
+    fn url(&self) -> crate::Result<Url> {
+        let id = self
+            .ids
+            .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
-        let mut url = service
+        let mut url = self
+            .service
             .config
             .base
             .join(&format!("rest/bug/{id}/attachment"))?;
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
-        for id in ids {
-            url.query_pairs_mut().append_pair("ids", &id);
+        for id in &self.ids[1..] {
+            url.query_pairs_mut().append_pair("ids", id);
         }
 
-        Ok(Self {
-            service,
-            url,
-            data: true,
-        })
+        if !self.data {
+            url.query_pairs_mut().append_pair("exclude_fields", "data");
+        }
+
+        Ok(url)
     }
 
     pub fn data(mut self, fetch: bool) -> Self {
-        if !fetch {
-            self.url
-                .query_pairs_mut()
-                .append_pair("exclude_fields", "data");
-        }
-
         self.data = fetch;
         self
     }
@@ -61,7 +64,7 @@ impl RequestSend for Request<'_> {
         let request = self
             .service
             .client
-            .get(self.url)
+            .get(self.url()?)
             .auth_optional(self.service)?;
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
