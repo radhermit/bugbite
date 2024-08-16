@@ -72,7 +72,7 @@ impl<'a> Request<'a> {
     /// Enable or disable fetching comments.
     pub fn comments(mut self, fetch: bool) -> Self {
         if fetch {
-            self.comments = Some(self.service.comment(&self.ids).unwrap());
+            self.comments = Some(self.service.comment(&self.ids));
         }
         self
     }

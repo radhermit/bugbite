@@ -128,7 +128,7 @@ impl Service {
         attachment::update::Request::new(self, ids)
     }
 
-    pub fn comment<I, S>(&self, ids: I) -> crate::Result<comment::Request>
+    pub fn comment<I, S>(&self, ids: I) -> comment::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
