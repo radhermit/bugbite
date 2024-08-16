@@ -1,4 +1,5 @@
 use serde_json::Value;
+use url::Url;
 
 use crate::objects::bugzilla::Event;
 use crate::time::TimeDeltaOrStatic;
@@ -8,46 +9,50 @@ use crate::Error;
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a super::Service,
-    url: url::Url,
+    ids: Vec<String>,
     params: Parameters,
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a super::Service, ids: I) -> crate::Result<Self>
+    pub(crate) fn new<I, S>(service: &'a super::Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
-        let mut ids = ids.into_iter().map(|s| s.to_string());
-        let id = ids
-            .next()
+        Self {
+            service,
+            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            params: Default::default(),
+        }
+    }
+
+    fn url(&self) -> crate::Result<Url> {
+        let id = self
+            .ids
+            .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
-        let mut url = service
+        let mut url = self
+            .service
             .config
             .base
             .join(&format!("rest/bug/{id}/history"))?;
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
-        for id in ids {
-            url.query_pairs_mut().append_pair("ids", &id);
+        for id in &self.ids[1..] {
+            url.query_pairs_mut().append_pair("ids", id);
         }
 
-        Ok(Self {
-            service,
-            url,
-            params: Default::default(),
-        })
-    }
-
-    pub fn params(mut self, params: Parameters) -> Self {
-        if let Some(value) = params.created_after.as_ref() {
-            self.url
-                .query_pairs_mut()
+        if let Some(value) = self.params.created_after.as_ref() {
+            url.query_pairs_mut()
                 .append_pair("new_since", value.as_ref());
         }
 
+        Ok(url)
+    }
+
+    pub fn params(mut self, params: Parameters) -> Self {
         self.params = params;
         self
     }
@@ -60,7 +65,7 @@ impl RequestSend for Request<'_> {
         let request = self
             .service
             .client
-            .get(self.url)
+            .get(self.url()?)
             .auth_optional(self.service)?;
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;

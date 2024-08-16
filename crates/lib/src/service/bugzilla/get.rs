@@ -80,7 +80,7 @@ impl<'a> Request<'a> {
     /// Enable or disable fetching changes.
     pub fn history(mut self, fetch: bool) -> Self {
         if fetch {
-            self.history = Some(self.service.history(&self.ids).unwrap());
+            self.history = Some(self.service.history(&self.ids));
         }
         self
     }

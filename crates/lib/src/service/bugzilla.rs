@@ -148,7 +148,7 @@ impl Service {
         get::Request::new(self, ids)
     }
 
-    pub fn history<I, S>(&self, ids: I) -> crate::Result<history::Request>
+    pub fn history<I, S>(&self, ids: I) -> history::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,

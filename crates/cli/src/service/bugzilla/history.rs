@@ -48,7 +48,7 @@ impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids: Vec<_> = self.ids.iter().flatten().collect();
         let events = service
-            .history(&ids)?
+            .history(&ids)
             .params(self.params.into())
             .send()
             .await?;
