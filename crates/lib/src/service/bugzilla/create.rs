@@ -12,7 +12,6 @@ use crate::Error;
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a super::Service,
-    url: url::Url,
     params: Parameters,
 }
 
@@ -20,11 +19,12 @@ impl RequestSend for Request<'_> {
     type Output = u64;
 
     async fn send(self) -> crate::Result<Self::Output> {
+        let url = self.service.config.base.join("rest/bug")?;
         let params = self.params.encode(self.service)?;
         let request = self
             .service
             .client
-            .post(self.url)
+            .post(url)
             .json(&params)
             .auth(self.service)?;
         let response = request.send().await?;
@@ -36,12 +36,11 @@ impl RequestSend for Request<'_> {
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a super::Service) -> crate::Result<Self> {
-        Ok(Self {
+    pub(super) fn new(service: &'a super::Service) -> Self {
+        Self {
             service,
-            url: service.config.base.join("rest/bug")?,
             params: Default::default(),
-        })
+        }
     }
 
     pub fn params(mut self, params: Parameters) -> Self {

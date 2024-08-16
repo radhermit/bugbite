@@ -136,7 +136,7 @@ impl Service {
         comment::Request::new(self, ids)
     }
 
-    pub fn create(&self) -> crate::Result<create::Request> {
+    pub fn create(&self) -> create::Request {
         create::Request::new(self)
     }
 

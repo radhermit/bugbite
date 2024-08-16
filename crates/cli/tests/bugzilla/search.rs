@@ -9,7 +9,6 @@ use super::SERVICE;
 async fn id() {
     let id = SERVICE
         .create()
-        .unwrap()
         .summary("summary")
         .component("TestComponent")
         .product("TestProduct")

@@ -9,7 +9,6 @@ use super::SERVICE;
 async fn from_bug() {
     let id = SERVICE
         .create()
-        .unwrap()
         .summary("summary")
         .component("TestComponent")
         .product("TestProduct")
@@ -27,7 +26,6 @@ async fn from_bug() {
 async fn from_template() {
     let id = SERVICE
         .create()
-        .unwrap()
         .summary("summary")
         .component("TestComponent")
         .product("TestProduct")

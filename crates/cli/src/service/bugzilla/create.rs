@@ -232,7 +232,7 @@ impl Command {
 
         if !self.options.dry_run {
             let mut stdout = stdout().lock();
-            let id = service.create()?.params(params).send().await?;
+            let id = service.create().params(params).send().await?;
             if stdout.is_terminal() {
                 info!("Created bug {id}");
             } else {
