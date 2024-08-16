@@ -90,14 +90,13 @@ impl RequestSend for Request<'_> {
             .client
             .get(self.url()?)
             .auth_optional(self.service)?;
-        let (bugs, attachments, comments, history) = (
-            request.send(),
-            self.attachments.map(|r| r.send()),
-            self.comments.map(|r| r.send()),
-            self.history.map(|r| r.send()),
-        );
 
-        let response = bugs.await?;
+        // send data requests
+        let attachments = self.attachments.map(|r| r.send());
+        let comments = self.comments.map(|r| r.send());
+        let history = self.history.map(|r| r.send());
+
+        let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let Value::Array(data) = data["bugs"].take() else {
             return Err(Error::InvalidValue(
@@ -105,6 +104,7 @@ impl RequestSend for Request<'_> {
             ));
         };
 
+        // parse data requests
         let mut attachments = match attachments {
             Some(f) => f.await?.into_iter(),
             None => Vec::new().into_iter(),
