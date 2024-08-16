@@ -212,8 +212,8 @@ impl Command {
             // command-line parameters override template values
             params = params.merge(template);
         } else if let Some(id) = self.options.from_bug {
-            let request = service.get([id])?;
-            let bug = request
+            let bug = service
+                .get([id])
                 .send()
                 .await?
                 .into_iter()

@@ -49,7 +49,7 @@ impl Command {
             launch_browser(urls)?;
         } else {
             let bugs = service
-                .get(ids)?
+                .get(ids)
                 .attachments(!self.options.no_attachments)
                 .comments(!self.options.no_comments)
                 .history(!self.options.no_history)

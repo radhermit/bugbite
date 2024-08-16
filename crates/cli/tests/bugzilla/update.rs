@@ -37,7 +37,6 @@ async fn from_template() {
 
     let bug = SERVICE
         .get([id])
-        .unwrap()
         .send()
         .await
         .unwrap()
@@ -78,7 +77,6 @@ async fn multiple_bugs() {
 
     let (bug1, bug2) = SERVICE
         .get([id1, id2])
-        .unwrap()
         .send()
         .await
         .unwrap()

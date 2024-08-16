@@ -10,7 +10,6 @@ use super::{attachment, comment, history};
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a super::Service,
-    url: Url,
     ids: Vec<String>,
     attachments: Option<attachment::get_item::Request<'a>>,
     comments: Option<comment::Request<'a>>,
@@ -18,21 +17,31 @@ pub struct Request<'a> {
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> crate::Result<Self>
+    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
-        let ids: Vec<_> = ids.into_iter().map(|s| s.to_string()).collect();
-        let id = ids
+        Self {
+            service,
+            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            attachments: None,
+            comments: None,
+            history: None,
+        }
+    }
+
+    fn url(&self) -> crate::Result<Url> {
+        let id = self
+            .ids
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
-        let mut url = service.config.base.join(&format!("rest/bug/{id}"))?;
+        let mut url = self.service.config.base.join(&format!("rest/bug/{id}"))?;
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
-        for id in &ids[1..] {
+        for id in &self.ids[1..] {
             url.query_pairs_mut().append_pair("ids", id);
         }
 
@@ -44,14 +53,7 @@ impl<'a> Request<'a> {
         url.query_pairs_mut()
             .append_pair("exclude_fields", "update_token");
 
-        Ok(Self {
-            service,
-            url,
-            ids,
-            attachments: None,
-            comments: None,
-            history: None,
-        })
+        Ok(url)
     }
 
     /// Enable or disable fetching attachments.
@@ -91,7 +93,7 @@ impl RequestSend for Request<'_> {
         let request = self
             .service
             .client
-            .get(self.url)
+            .get(self.url()?)
             .auth_optional(self.service)?;
         let (bugs, attachments, comments, history) = (
             request.send(),

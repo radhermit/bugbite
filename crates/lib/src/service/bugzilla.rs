@@ -140,7 +140,7 @@ impl Service {
         create::Request::new(self)
     }
 
-    pub fn get<I, S>(&self, ids: I) -> crate::Result<get::Request>
+    pub fn get<I, S>(&self, ids: I) -> get::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -491,7 +491,7 @@ mod tests {
         // invalid request
         server.respond(200, path.join("get/single-bug.json")).await;
         let ids = Vec::<u32>::new();
-        let err = service.get(ids).unwrap_err();
+        let err = service.get(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
 
@@ -501,7 +501,7 @@ mod tests {
         server
             .respond(404, path.join("errors/nonexistent-bug.json"))
             .await;
-        let err = service.get([1]).unwrap().send().await.unwrap_err();
+        let err = service.get([1]).send().await.unwrap_err();
         assert!(
             matches!(err, Error::Bugzilla { code: 101, .. }),
             "unmatched error: {err:?}"
@@ -511,7 +511,7 @@ mod tests {
 
         // invalid response
         server.respond(200, path.join("get/invalid.json")).await;
-        let err = service.get([12345]).unwrap().send().await.unwrap_err();
+        let err = service.get([12345]).send().await.unwrap_err();
         assert!(
             matches!(err, Error::InvalidValue(_)),
             "unmatched error: {err:?}"
@@ -523,7 +523,7 @@ mod tests {
         // single bug
         server.respond(200, path.join("get/single-bug.json")).await;
         let ids = [12345];
-        let bugs = service.get(ids).unwrap().send().await.unwrap();
+        let bugs = service.get(ids).send().await.unwrap();
         assert_ordered_eq!(bugs.iter().map(|x| x.id), ids);
 
         server.reset().await;
@@ -533,7 +533,7 @@ mod tests {
             .respond(200, path.join("get/multiple-bugs.json"))
             .await;
         let ids = [12345, 23456, 34567];
-        let bugs = service.get(ids).unwrap().send().await.unwrap();
+        let bugs = service.get(ids).send().await.unwrap();
         assert_ordered_eq!(bugs.iter().map(|x| x.id), ids);
     }
 
