@@ -82,8 +82,7 @@ impl RequestSend for Request<'_> {
         let futures: Vec<_> = self
             .urls()?
             .into_iter()
-            .map(|u| self.service.client.get(u))
-            .map(|r| r.auth_optional(self.service).map(|r| r.send()))
+            .map(|u| self.service.client.get(u).auth_optional(self.service).map(|r| r.send()))
             .try_collect()?;
 
         let mut issues = vec![];
