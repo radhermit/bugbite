@@ -10,17 +10,6 @@ pub fn reset_stdin() {
     STDIN_HAS_BEEN_USED.store(false, std::sync::atomic::Ordering::SeqCst);
 }
 
-/// Build a [`Utf8PathBuf`] path from a base and components.
-#[macro_export]
-macro_rules! build_path {
-    ($base:expr, $($segment:expr),+) => {{
-        let mut base: ::camino::Utf8PathBuf = $base.into();
-        $(base.push($segment);)*
-        base
-    }}
-}
-pub use build_path;
-
 #[cfg(test)]
 pub(crate) static TESTDATA_PATH: once_cell::sync::Lazy<camino::Utf8PathBuf> =
     once_cell::sync::Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
@@ -78,3 +67,68 @@ impl TestServer {
         self.server.reset().await;
     }
 }
+
+/// Build a [`Utf8PathBuf`] path from a base and components.
+#[macro_export]
+macro_rules! build_path {
+    ($base:expr, $($segment:expr),+) => {{
+        let mut base: ::camino::Utf8PathBuf = $base.into();
+        $(base.push($segment);)*
+        base
+    }}
+}
+pub use build_path;
+
+/// Verify two, ordered iterables are equal.
+#[macro_export]
+macro_rules! assert_ordered_eq {
+    ($iter1:expr, $iter2:expr, $msg:expr) => {{
+        let a: Vec<_> = $iter1.into_iter().collect();
+        let b: Vec<_> = $iter2.into_iter().collect();
+        let msg = $msg;
+        assert_eq!(a, b, "{msg}");
+    }};
+
+    ($iter1:expr, $iter2:expr $(,)?) => {{
+        assert_ordered_eq!($iter1, $iter2, "");
+    }};
+}
+pub use assert_ordered_eq;
+
+/// Verify two, unordered iterables contain the same elements.
+#[macro_export]
+macro_rules! assert_unordered_eq {
+    ($iter1:expr, $iter2:expr, $msg:expr) => {{
+        let mut a: Vec<_> = $iter1.into_iter().collect();
+        let mut b: Vec<_> = $iter2.into_iter().collect();
+        a.sort();
+        b.sort();
+        let msg = $msg;
+        assert_eq!(a, b, "{msg}");
+    }};
+
+    ($iter1:expr, $iter2:expr $(,)?) => {{
+        assert_unordered_eq!($iter1, $iter2, "");
+    }};
+}
+pub use assert_unordered_eq;
+
+/// Assert an error matches a given regular expression for testing.
+#[macro_export]
+macro_rules! assert_err_re {
+    ($res:expr, $x:expr) => {
+        $crate::test::assert_err_re!($res, $x, "");
+    };
+    ($res:expr, $re:expr, $msg:expr) => {
+        let err = $res.unwrap_err();
+        let s = err.to_string();
+        let re = ::regex::Regex::new($re.as_ref()).unwrap();
+        let err_msg = format!("{s:?} does not match regex: {:?}", $re);
+        if $msg.is_empty() {
+            assert!(re.is_match(&s), "{}", err_msg);
+        } else {
+            assert!(re.is_match(&s), "{}", format!("{err_msg}: {}", $msg));
+        }
+    };
+}
+pub use assert_err_re;

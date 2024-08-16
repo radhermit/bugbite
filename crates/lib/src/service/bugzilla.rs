@@ -476,7 +476,7 @@ pub struct ServiceCache {
 
 #[cfg(test)]
 mod tests {
-    use crate::test::{TestServer, TESTDATA_PATH};
+    use crate::test::*;
     use crate::traits::RequestSend;
 
     use super::*;
@@ -512,12 +512,21 @@ mod tests {
 
         server.reset().await;
 
-        // valid request
+        // single bug
         server.respond(200, path.join("get/single-bug.json")).await;
-        let bugs = service.get([12345]).unwrap().send().await.unwrap();
-        assert_eq!(bugs.len(), 1);
-        let bug = &bugs[0];
-        assert_eq!(bug.id, 12345);
+        let ids = [12345];
+        let bugs = service.get(ids).unwrap().send().await.unwrap();
+        assert_ordered_eq!(bugs.iter().map(|x| x.id), ids);
+
+        server.reset().await;
+
+        // multiple bugs
+        server
+            .respond(200, path.join("get/multiple-bugs.json"))
+            .await;
+        let ids = [12345, 23456, 34567];
+        let bugs = service.get(ids).unwrap().send().await.unwrap();
+        assert_ordered_eq!(bugs.iter().map(|x| x.id), ids);
     }
 
     #[tokio::test]
