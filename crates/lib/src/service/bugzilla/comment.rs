@@ -5,13 +5,14 @@ use crate::time::TimeDeltaOrStatic;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-pub struct Request {
+pub struct Request<'a> {
+    service: &'a super::Service,
     url: url::Url,
     params: Parameters,
 }
 
-impl Request {
-    pub fn new<I, S>(service: &super::Service, ids: I, params: Parameters) -> crate::Result<Self>
+impl<'a> Request<'a> {
+    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> crate::Result<Self>
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -32,23 +33,35 @@ impl Request {
             url.query_pairs_mut().append_pair("ids", &id);
         }
 
+        Ok(Self {
+            service,
+            url,
+            params: Default::default(),
+        })
+    }
+
+    pub fn params(mut self, params: Parameters) -> Self {
         if let Some(value) = params.created_after.as_ref() {
-            url.query_pairs_mut()
+            self.url
+                .query_pairs_mut()
                 .append_pair("new_since", value.as_ref());
         }
-
-        Ok(Self { url, params })
+        self.params = params;
+        self
     }
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = Vec<Vec<Comment>>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client.get(self.url).auth_optional(service)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
+            .client
+            .get(self.url)
+            .auth_optional(self.service)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
         let serde_json::value::Value::Object(data) = data else {
             return Err(Error::InvalidValue(

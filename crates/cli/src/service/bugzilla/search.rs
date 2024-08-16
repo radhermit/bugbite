@@ -9,7 +9,7 @@ use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::bugzilla::Service;
 use bugbite::service::bugzilla::{
-    search::{ChangeField, Match, OrderField, Parameters, Request},
+    search::{ChangeField, Match, OrderField, Parameters},
     FilterField,
 };
 use bugbite::time::TimeDeltaOrStatic;
@@ -655,8 +655,7 @@ impl Command {
             let url = service.search_url(params)?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
-            let request = Request::new(params);
-            let items = request.send(service).await?;
+            let items = service.search().params(params).send().await?;
             let stdout = stdout().lock();
             render_search(stdout, items, &fields, self.options.json)?;
         }

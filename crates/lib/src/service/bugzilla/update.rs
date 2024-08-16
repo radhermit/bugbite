@@ -108,21 +108,26 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
     }
 }
 
-pub struct Request {
+pub struct Request<'a> {
+    service: &'a super::Service,
     url: url::Url,
     ids: Vec<String>,
     params: Parameters,
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = Vec<BugChange>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let params = self.params.encode(service, self.ids).await?;
-        let request = service.client.put(self.url).json(&params).auth(service)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let params = self.params.encode(self.service, self.ids).await?;
+        let request = self
+            .service
+            .client
+            .put(self.url)
+            .json(&params)
+            .auth(self.service)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
         let mut changes: Vec<BugChange> = serde_json::from_value(data)
             .map_err(|e| Error::InvalidValue(format!("failed deserializing changes: {e}")))?;
@@ -135,8 +140,8 @@ impl RequestSend for Request {
     }
 }
 
-impl Request {
-    pub fn new<I, S>(service: &super::Service, ids: I, params: Parameters) -> crate::Result<Self>
+impl<'a> Request<'a> {
+    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> crate::Result<Self>
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -145,12 +150,19 @@ impl Request {
         let id = ids
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
+        let url = service.config.base.join(&format!("rest/bug/{id}"))?;
 
         Ok(Self {
-            url: service.config.base.join(&format!("rest/bug/{id}"))?,
+            service,
+            url,
             ids,
-            params,
+            params: Default::default(),
         })
+    }
+
+    pub fn params(mut self, params: Parameters) -> Self {
+        self.params = params;
+        self
     }
 }
 
@@ -445,7 +457,7 @@ impl Parameters {
             };
             let comments = service
                 .comment([id])?
-                .send(service)
+                .send()
                 .await?
                 .into_iter()
                 .next()

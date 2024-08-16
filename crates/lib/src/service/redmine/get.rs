@@ -8,14 +8,15 @@ use crate::objects::redmine::{Comment, Issue};
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-pub struct Request {
+pub struct Request<'a> {
+    service: &'a super::Service,
     ids: Vec<String>,
     urls: Vec<Url>,
     fields: IndexSet<Field>,
 }
 
-impl Request {
-    pub(crate) fn new<I, S>(service: &super::Service, ids: I) -> crate::Result<Self>
+impl<'a> Request<'a> {
+    pub(crate) fn new<I, S>(service: &'a super::Service, ids: I) -> crate::Result<Self>
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -34,6 +35,7 @@ impl Request {
         };
 
         Ok(Self {
+            service,
             ids: request_ids,
             urls,
             fields: Default::default(),
@@ -65,11 +67,10 @@ enum Field {
     Journals,
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = Vec<Issue>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+    async fn send(self) -> crate::Result<Self::Output> {
         let futures: Vec<_> = self
             .urls
             .into_iter()
@@ -78,15 +79,16 @@ impl RequestSend for Request {
                     u.query_pairs_mut()
                         .append_pair("include", &self.fields.iter().join(","));
                 }
-                service.client.get(u)
+                self.service.client.get(u)
             })
-            .map(|r| r.auth_optional(service).map(|r| r.send()))
+            .map(|r| r.auth_optional(self.service).map(|r| r.send()))
             .try_collect()?;
 
         let mut issues = vec![];
         for (future, id) in futures.into_iter().zip(self.ids.into_iter()) {
             let response = future.await?;
-            let mut data = service
+            let mut data = self
+                .service
                 .parse_response(response)
                 .await
                 .map_err(|e| match e {

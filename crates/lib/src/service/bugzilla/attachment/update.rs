@@ -68,14 +68,15 @@ struct RequestParameters {
     flags: Option<Vec<Flag>>,
 }
 
-pub struct Request {
+pub struct Request<'a> {
+    service: &'a Service,
     url: Url,
     ids: Vec<String>,
     params: Parameters,
 }
 
-impl Request {
-    pub fn new<I, S>(service: &Service, ids: I, params: Parameters) -> crate::Result<Self>
+impl<'a> Request<'a> {
+    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> crate::Result<Self>
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -86,25 +87,35 @@ impl Request {
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
         Ok(Self {
+            service,
             url: service
                 .config
                 .base
                 .join(&format!("rest/bug/attachment/{id}"))?,
             ids,
-            params,
+            params: Default::default(),
         })
+    }
+
+    pub fn params(mut self, params: Parameters) -> Self {
+        self.params = params;
+        self
     }
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = Vec<u64>;
-    type Service = Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+    async fn send(self) -> crate::Result<Self::Output> {
         let params = self.params.encode(self.ids);
-        let request = service.client.put(self.url).json(&params).auth(service)?;
+        let request = self
+            .service
+            .client
+            .put(self.url)
+            .json(&params)
+            .auth(self.service)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let Value::Array(data) = data["attachments"].take() else {
             return Err(Error::InvalidValue(
                 "invalid service response to attachment update request".to_string(),

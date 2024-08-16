@@ -125,7 +125,7 @@ impl Service {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        attachment::update::Request::new(self, ids, Default::default())
+        attachment::update::Request::new(self, ids)
     }
 
     pub fn comment<I, S>(&self, ids: I) -> crate::Result<comment::Request>
@@ -133,11 +133,11 @@ impl Service {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        comment::Request::new(self, ids, Default::default())
+        comment::Request::new(self, ids)
     }
 
     pub fn create(&self) -> crate::Result<create::Request> {
-        create::Request::new(self, Default::default())
+        create::Request::new(self)
     }
 
     pub fn get<I, S>(&self, ids: I) -> crate::Result<get::Request>
@@ -153,11 +153,11 @@ impl Service {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        history::Request::new(self, ids, Default::default())
+        history::Request::new(self, ids)
     }
 
     pub fn search(&self) -> search::Request {
-        search::Request::new(Default::default())
+        search::Request::new(self)
     }
 
     pub fn update<I, S>(&self, ids: I) -> crate::Result<update::Request>
@@ -165,7 +165,7 @@ impl Service {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        update::Request::new(self, ids, Default::default())
+        update::Request::new(self, ids)
     }
 }
 
@@ -500,24 +500,21 @@ mod tests {
         server
             .respond(404, path.join("errors/nonexistent-bug.json"))
             .await;
-        let request = service.get([1]).unwrap();
-        let result = request.send(&service).await;
+        let result = service.get([1]).unwrap().send().await;
         assert!(result.is_err());
 
         server.reset().await;
 
         // invalid response
         server.respond(200, path.join("get/invalid.json")).await;
-        let request = service.get([12345]).unwrap();
-        let result = request.send(&service).await;
+        let result = service.get([12345]).unwrap().send().await;
         assert!(result.is_err());
 
         server.reset().await;
 
         // valid request
         server.respond(200, path.join("get/single-bug.json")).await;
-        let request = service.get([12345]).unwrap();
-        let bugs = request.send(&service).await.unwrap();
+        let bugs = service.get([12345]).unwrap().send().await.unwrap();
         assert_eq!(bugs.len(), 1);
         let bug = &bugs[0];
         assert_eq!(bug.id, 12345);
@@ -531,8 +528,7 @@ mod tests {
         let service = Service::new(config, Default::default()).unwrap();
 
         server.respond(200, path.join("search/ids.json")).await;
-        let request = service.search().summary(["test"]);
-        let bugs = request.send(&service).await.unwrap();
+        let bugs = service.search().summary(["test"]).send().await.unwrap();
         assert_eq!(bugs.len(), 5);
     }
 }

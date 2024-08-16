@@ -14,7 +14,7 @@ async fn from_bug() {
         .component("TestComponent")
         .product("TestProduct")
         .description("description")
-        .send(&SERVICE)
+        .send()
         .await
         .unwrap();
 
@@ -32,7 +32,7 @@ async fn from_template() {
         .component("TestComponent")
         .product("TestProduct")
         .description("description")
-        .send(&SERVICE)
+        .send()
         .await
         .unwrap();
 

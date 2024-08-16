@@ -9,32 +9,43 @@ use crate::objects::bugzilla::{Bug, Flag};
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-pub struct Request {
+pub struct Request<'a> {
+    service: &'a super::Service,
     url: url::Url,
     params: Parameters,
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = u64;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let params = self.params.encode(service)?;
-        let request = service.client.post(self.url).json(&params).auth(service)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let params = self.params.encode(self.service)?;
+        let request = self
+            .service
+            .client
+            .post(self.url)
+            .json(&params)
+            .auth(self.service)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let id = serde_json::from_value(data["id"].take())
             .map_err(|e| Error::InvalidValue(format!("failed deserializing id: {e}")))?;
         Ok(id)
     }
 }
 
-impl Request {
-    pub fn new(service: &super::Service, params: Parameters) -> crate::Result<Self> {
+impl<'a> Request<'a> {
+    pub(super) fn new(service: &'a super::Service) -> crate::Result<Self> {
         Ok(Self {
+            service,
             url: service.config.base.join("rest/bug")?,
-            params,
+            params: Default::default(),
         })
+    }
+
+    pub fn params(mut self, params: Parameters) -> Self {
+        self.params = params;
+        self
     }
 
     pub fn alias<I, S>(mut self, value: I) -> Self

@@ -68,8 +68,8 @@ impl Service {
         todo!("get requests unsupported")
     }
 
-    pub fn search(&self, _params: search::Parameters) -> crate::Result<search::Request> {
-        todo!("search requests unsupported")
+    pub fn search(&self) -> search::Request {
+        search::Request::new(self)
     }
 }
 

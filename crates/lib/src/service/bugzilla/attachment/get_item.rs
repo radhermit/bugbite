@@ -6,13 +6,14 @@ use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-pub struct Request {
+pub struct Request<'a> {
+    service: &'a Service,
     url: Url,
     data: bool,
 }
 
-impl Request {
-    pub(crate) fn new<I, S>(service: &Service, ids: I) -> crate::Result<Self>
+impl<'a> Request<'a> {
+    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> crate::Result<Self>
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -33,7 +34,11 @@ impl Request {
             url.query_pairs_mut().append_pair("ids", &id);
         }
 
-        Ok(Self { url, data: true })
+        Ok(Self {
+            service,
+            url,
+            data: true,
+        })
     }
 
     pub fn data(mut self, fetch: bool) -> Self {
@@ -48,14 +53,17 @@ impl Request {
     }
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = Vec<Vec<Attachment>>;
-    type Service = Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client.get(self.url).auth_optional(service)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
+            .client
+            .get(self.url)
+            .auth_optional(self.service)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
         let Value::Object(data) = data else {
             panic!("invalid bugzilla attachment response");

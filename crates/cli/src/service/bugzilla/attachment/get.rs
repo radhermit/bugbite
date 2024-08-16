@@ -56,11 +56,20 @@ impl Command {
         let mut stdout = stdout().lock();
 
         let attachments = if self.options.item_ids {
-            let request = service.attachment_get_item(ids)?.data(!self.options.list);
-            request.send(service).await?.into_iter().flatten().collect()
+            service
+                .attachment_get_item(ids)?
+                .data(!self.options.list)
+                .send()
+                .await?
+                .into_iter()
+                .flatten()
+                .collect()
         } else {
-            let request = service.attachment_get(ids)?.data(!self.options.list);
-            request.send(service).await?
+            service
+                .attachment_get(ids)?
+                .data(!self.options.list)
+                .send()
+                .await?
         };
 
         if self.options.list {

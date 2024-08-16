@@ -379,14 +379,15 @@ struct Attachment {
     flags: Option<Vec<Flag>>,
 }
 
-pub struct Request {
+pub struct Request<'a> {
+    service: &'a Service,
     url: Url,
     attachments: Vec<Attachment>,
 }
 
-impl Request {
+impl<'a> Request<'a> {
     pub(crate) fn new<I, S>(
-        service: &Service,
+        service: &'a Service,
         ids: I,
         create_attachments: Vec<CreateAttachment>,
     ) -> crate::Result<Self>
@@ -421,25 +422,28 @@ impl Request {
             .map(|x| x.build(&ids, temp_dir_path))
             .try_collect()?;
 
-        Ok(Self { url, attachments })
+        Ok(Self {
+            service,
+            url,
+            attachments,
+        })
     }
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = Vec<Vec<u64>>;
-    type Service = Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
+    async fn send(self) -> crate::Result<Self::Output> {
         let futures = self
             .attachments
             .into_iter()
-            .map(|x| service.client.post(self.url.clone()).json(&x))
-            .map(|r| r.auth(service).map(|r| r.send()));
+            .map(|x| self.service.client.post(self.url.clone()).json(&x))
+            .map(|r| r.auth(self.service).map(|r| r.send()));
 
         let mut attachment_ids = vec![];
         for future in futures {
             let response = future?.await?;
-            let mut data = service.parse_response(response).await?;
+            let mut data = self.service.parse_response(response).await?;
             let data = data["ids"].take();
             let ids = serde_json::from_value(data)
                 .map_err(|e| Error::InvalidValue(format!("failed deserializing ids: {e}")))?;

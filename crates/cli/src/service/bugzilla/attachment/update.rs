@@ -2,7 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
-use bugbite::service::bugzilla::attachment::update::{Parameters, Request};
+use bugbite::service::bugzilla::attachment::update::Parameters;
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
 use clap::Args;
@@ -102,8 +102,11 @@ pub(super) struct Command {
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
-        let request = Request::new(service, ids, self.params.into())?;
-        let _ = request.send(service).await?;
+        let _ = service
+            .attachment_update(ids)?
+            .params(self.params.into())
+            .send()
+            .await?;
 
         Ok(ExitCode::SUCCESS)
     }

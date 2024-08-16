@@ -91,8 +91,8 @@ impl Service {
         get::Request::new(self, ids)
     }
 
-    pub fn search(&self, params: search::Parameters) -> crate::Result<search::Request> {
-        Ok(search::Request::new(params))
+    pub fn search(&self) -> search::Request {
+        search::Request::new(self)
     }
 }
 

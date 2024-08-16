@@ -218,8 +218,7 @@ impl Command {
             let url = service.search_url(params)?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
-            let request = service.search(params)?;
-            let items = request.send(service).await?;
+            let items = service.search().params(params).send().await?;
             let stdout = stdout().lock();
             render_search(stdout, items, &fields, self.options.json)?;
         }

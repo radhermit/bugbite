@@ -2,7 +2,8 @@ use std::io::{stdout, IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::Csv;
-use bugbite::service::github::search::{Parameters, SearchOrder};
+use bugbite::query::Order;
+use bugbite::service::github::search::{OrderField, Parameters};
 use bugbite::service::github::Service;
 use bugbite::traits::RequestSend;
 use clap::Args;
@@ -26,7 +27,7 @@ struct Params {
         help_heading = "Search related",
         value_name = "TERM"
     )]
-    order: Option<SearchOrder>,
+    order: Option<Order<OrderField>>,
 
     /// strings to search for in the summary
     #[clap(value_name = "TERM", help_heading = "Arguments")]
@@ -49,8 +50,7 @@ impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let params: Parameters = self.params.into();
 
-        let request = service.search(params)?;
-        let issues = request.send(service).await?;
+        let issues = service.search().params(params).send().await?;
         let mut stdout = stdout().lock();
         let mut count = 0;
 

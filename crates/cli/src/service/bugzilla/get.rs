@@ -48,12 +48,13 @@ impl Command {
             let urls = ids.iter().map(|id| service.item_url(id));
             launch_browser(urls)?;
         } else {
-            let request = service
+            let bugs = service
                 .get(ids)?
                 .attachments(!self.options.no_attachments)
                 .comments(!self.options.no_comments)
-                .history(!self.options.no_history);
-            let bugs = request.send(service).await?;
+                .history(!self.options.no_history)
+                .send()
+                .await?;
             render_items(bugs)?;
         }
 

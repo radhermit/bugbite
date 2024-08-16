@@ -5,7 +5,7 @@ use std::process::ExitCode;
 use anyhow::Context;
 use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
-use bugbite::service::bugzilla::create::{Parameters, Request};
+use bugbite::service::bugzilla::create::Parameters;
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
@@ -214,7 +214,7 @@ impl Command {
         } else if let Some(id) = self.options.from_bug {
             let request = service.get([id])?;
             let bug = request
-                .send(service)
+                .send()
                 .await?
                 .into_iter()
                 .next()
@@ -232,8 +232,7 @@ impl Command {
 
         if !self.options.dry_run {
             let mut stdout = stdout().lock();
-            let request = Request::new(service, params)?;
-            let id = request.send(service).await?;
+            let id = service.create()?.params(params).send().await?;
             if stdout.is_terminal() {
                 info!("Created bug {id}");
             } else {

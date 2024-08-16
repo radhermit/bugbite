@@ -8,12 +8,12 @@ use crate::Error;
 use super::{attachment, comment, history};
 
 pub struct Request<'a> {
+    service: &'a super::Service,
     url: Url,
     ids: Vec<String>,
-    service: &'a super::Service,
-    attachments: Option<attachment::get_item::Request>,
-    comments: Option<comment::Request>,
-    history: Option<history::Request>,
+    attachments: Option<attachment::get_item::Request<'a>>,
+    comments: Option<comment::Request<'a>>,
+    history: Option<history::Request<'a>>,
 }
 
 impl<'a> Request<'a> {
@@ -44,9 +44,9 @@ impl<'a> Request<'a> {
             .append_pair("exclude_fields", "update_token");
 
         Ok(Self {
+            service,
             url,
             ids,
-            service,
             attachments: None,
             comments: None,
             history: None,
@@ -85,19 +85,22 @@ impl<'a> Request<'a> {
 
 impl RequestSend for Request<'_> {
     type Output = Vec<Bug>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client.get(self.url).auth_optional(service)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
+            .client
+            .get(self.url)
+            .auth_optional(self.service)?;
         let (bugs, attachments, comments, history) = (
             request.send(),
-            self.attachments.map(|r| r.send(service)),
-            self.comments.map(|r| r.send(service)),
-            self.history.map(|r| r.send(service)),
+            self.attachments.map(|r| r.send()),
+            self.comments.map(|r| r.send()),
+            self.history.map(|r| r.send()),
         );
 
         let response = bugs.await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let Value::Array(data) = data["bugs"].take() else {
             return Err(Error::InvalidValue(
                 "invalid service response to get request".to_string(),

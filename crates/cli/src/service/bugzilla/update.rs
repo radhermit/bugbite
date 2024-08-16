@@ -6,7 +6,7 @@ use std::{fmt, fs};
 use anyhow::Context;
 use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::objects::bugzilla::Flag;
-use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, Request, SetChange};
+use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange};
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
@@ -317,7 +317,7 @@ async fn get_reply(
 ) -> anyhow::Result<String> {
     let comments = service
         .comment([id])?
-        .send(service)
+        .send()
         .await?
         .into_iter()
         .next()
@@ -398,8 +398,7 @@ impl Command {
         }
 
         if !self.options.dry_run {
-            let request = Request::new(service, ids, params)?;
-            let changes = request.send(service).await?;
+            let changes = service.update(ids)?.params(params).send().await?;
             for change in changes {
                 info!("{change}");
             }

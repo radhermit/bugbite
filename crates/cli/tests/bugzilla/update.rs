@@ -15,7 +15,7 @@ async fn from_template() {
         .component("TestComponent")
         .product("TestProduct")
         .description("description")
-        .send(&SERVICE)
+        .send()
         .await
         .unwrap();
 
@@ -38,7 +38,7 @@ async fn from_template() {
     let bug = SERVICE
         .get([id])
         .unwrap()
-        .send(&SERVICE)
+        .send()
         .await
         .unwrap()
         .into_iter()
@@ -57,7 +57,7 @@ async fn multiple_bugs() {
         .component("TestComponent")
         .product("TestProduct")
         .description("description")
-        .send(&SERVICE)
+        .send()
         .await
         .unwrap();
 
@@ -68,7 +68,7 @@ async fn multiple_bugs() {
         .component("TestComponent")
         .product("TestProduct")
         .description("description")
-        .send(&SERVICE)
+        .send()
         .await
         .unwrap();
 
@@ -79,7 +79,7 @@ async fn multiple_bugs() {
     let (bug1, bug2) = SERVICE
         .get([id1, id2])
         .unwrap()
-        .send(&SERVICE)
+        .send()
         .await
         .unwrap()
         .into_iter()

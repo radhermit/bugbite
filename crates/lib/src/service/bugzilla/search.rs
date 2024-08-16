@@ -20,20 +20,24 @@ use crate::Error;
 
 use super::{BugField, FilterField};
 
-pub struct Request {
+pub struct Request<'a> {
+    service: &'a super::Service,
     params: Parameters,
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = Vec<Bug>;
-    type Service = super::Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let params = self.params.encode(service)?;
-        let url = service.config.base.join(&format!("rest/bug?{params}"))?;
-        let request = service.client.get(url).auth_optional(service)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let params = self.params.encode(self.service)?;
+        let url = self
+            .service
+            .config
+            .base
+            .join(&format!("rest/bug?{params}"))?;
+        let request = self.service.client.get(url).auth_optional(self.service)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
         let bugs = serde_json::from_value(data)
             .map_err(|e| Error::InvalidValue(format!("failed deserializing bugs: {e}")))?;
@@ -41,9 +45,17 @@ impl RequestSend for Request {
     }
 }
 
-impl Request {
-    pub fn new(params: Parameters) -> Self {
-        Self { params }
+impl<'a> Request<'a> {
+    pub(super) fn new(service: &'a super::Service) -> Self {
+        Self {
+            service,
+            params: Default::default(),
+        }
+    }
+
+    pub fn params(mut self, params: Parameters) -> Self {
+        self.params = params;
+        self
     }
 
     pub fn order<I>(mut self, values: I) -> Self

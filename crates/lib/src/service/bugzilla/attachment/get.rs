@@ -5,14 +5,15 @@ use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-pub struct Request {
+pub struct Request<'a> {
+    service: &'a Service,
     ids: Vec<String>,
     url: Url,
     data: bool,
 }
 
-impl Request {
-    pub(crate) fn new<I, S>(service: &Service, ids: I) -> crate::Result<Self>
+impl<'a> Request<'a> {
+    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> crate::Result<Self>
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -34,6 +35,7 @@ impl Request {
         }
 
         Ok(Self {
+            service,
             ids,
             url,
             data: true,
@@ -52,14 +54,17 @@ impl Request {
     }
 }
 
-impl RequestSend for Request {
+impl RequestSend for Request<'_> {
     type Output = Vec<Attachment>;
-    type Service = Service;
 
-    async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let request = service.client.get(self.url).auth_optional(service)?;
+    async fn send(self) -> crate::Result<Self::Output> {
+        let request = self
+            .service
+            .client
+            .get(self.url)
+            .auth_optional(self.service)?;
         let response = request.send().await?;
-        let mut data = service.parse_response(response).await?;
+        let mut data = self.service.parse_response(response).await?;
         let mut data = data["attachments"].take();
 
         let mut attachments = vec![];

@@ -59,9 +59,8 @@ impl<T: Api> Api for &T {
 
 pub trait RequestSend {
     type Output;
-    type Service;
 
-    fn send(self, service: &Self::Service) -> impl Future<Output = crate::Result<Self::Output>>;
+    fn send(self) -> impl Future<Output = crate::Result<Self::Output>>;
 }
 
 /// Inject service authentication data into a request.

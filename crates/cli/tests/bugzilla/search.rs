@@ -14,7 +14,7 @@ async fn id() {
         .component("TestComponent")
         .product("TestProduct")
         .description("description")
-        .send(&SERVICE)
+        .send()
         .await
         .unwrap();
 

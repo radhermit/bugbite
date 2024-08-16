@@ -1,57 +1,88 @@
-use std::fmt;
-use std::str::FromStr;
+use std::fs;
+use std::ops::{Deref, DerefMut};
 
+use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
-use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
+use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 use tracing::debug;
 
 use crate::objects::github::Issue;
-use crate::traits::RequestSend;
+use crate::query::{self, Order, OrderType};
+use crate::traits::{Api, RequestSend};
 use crate::Error;
+
+struct QueryBuilder<'a> {
+    _service: &'a super::Service,
+    query: query::QueryBuilder,
+}
+
+impl Deref for QueryBuilder<'_> {
+    type Target = query::QueryBuilder;
+
+    fn deref(&self) -> &Self::Target {
+        &self.query
+    }
+}
+
+impl DerefMut for QueryBuilder<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.query
+    }
+}
+
+impl<'a> QueryBuilder<'a> {
+    fn new(_service: &'a super::Service) -> Self {
+        Self {
+            _service,
+            query: Default::default(),
+        }
+    }
+}
 
 /// Issue search parameters.
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct Parameters {
-    pub order: Option<SearchOrder>,
+    pub order: Option<Order<OrderField>>,
 }
 
-/// Invertable search order sorting term.
-#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
-pub struct SearchOrder {
-    descending: bool,
-    term: SearchTerm,
-}
-
-impl FromStr for SearchOrder {
-    type Err = Error;
-
-    fn from_str(s: &str) -> crate::Result<Self> {
-        let term = s.strip_prefix('-').unwrap_or(s);
-        let descending = term != s;
-        let term = term
-            .parse()
-            .map_err(|_| Error::InvalidValue(format!("unknown search term: {term}")))?;
-        Ok(Self { descending, term })
+impl Parameters {
+    /// Load parameters in TOML format from a file.
+    pub fn from_path(path: &Utf8Path) -> crate::Result<Self> {
+        let data = fs::read_to_string(path)
+            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
+        toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
     }
-}
 
-impl fmt::Display for SearchOrder {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let name = &self.term;
-        if self.descending {
-            write!(f, "-{name}")
-        } else {
-            write!(f, "{name}")
+    /// Merge parameters using the provided value for fallbacks.
+    pub fn merge(self, other: Self) -> Self {
+        Self {
+            order: self.order.or(other.order),
         }
+    }
+
+    pub fn order(mut self, value: Order<OrderField>) -> Self {
+        self.order = Some(value);
+        self
+    }
+
+    pub(crate) fn encode(self, service: &super::Service) -> crate::Result<String> {
+        let mut query = QueryBuilder::new(service);
+
+        if let Some(value) = self.order {
+            query.insert("sort", value);
+        }
+
+        Ok(query.encode())
     }
 }
 
 /// Valid search order sorting terms.
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone)]
 #[strum(serialize_all = "kebab-case")]
-pub enum SearchTerm {
+pub enum OrderField {
     Comments,
     Created,
     Interactions,
@@ -59,14 +90,47 @@ pub enum SearchTerm {
     Updated,
 }
 
-pub struct Request(reqwest::Request);
+impl Api for OrderField {
+    fn api(&self) -> String {
+        self.to_string()
+    }
+}
 
-impl RequestSend for Request {
+impl Api for Order<OrderField> {
+    fn api(&self) -> String {
+        let name = self.field.api();
+        match self.order {
+            OrderType::Descending => format!("-{name}"),
+            OrderType::Ascending => name,
+        }
+    }
+}
+
+pub struct Request<'a> {
+    service: &'a super::Service,
+    params: Parameters,
+}
+
+impl<'a> Request<'a> {
+    pub(super) fn new(service: &'a super::Service) -> Self {
+        Self {
+            service,
+            params: Default::default(),
+        }
+    }
+
+    pub fn params(mut self, params: Parameters) -> Self {
+        self.params = params;
+        self
+    }
+}
+
+impl RequestSend for Request<'_> {
     type Output = Vec<Issue>;
-    type Service = super::Service;
 
-    async fn send(self, _service: &Self::Service) -> crate::Result<Self::Output> {
-        debug!("{:?}", self.0);
-        todo!()
+    async fn send(self) -> crate::Result<Self::Output> {
+        debug!("{:?}", self.params);
+        let _params = self.params.encode(self.service)?;
+        todo!("search requests unsupported")
     }
 }
