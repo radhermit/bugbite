@@ -431,16 +431,15 @@ impl RequestSend for Request {
     type Service = Service;
 
     async fn send(self, service: &Self::Service) -> crate::Result<Self::Output> {
-        let futures: Vec<_> = self
+        let futures = self
             .attachments
             .into_iter()
             .map(|x| service.client.post(self.url.clone()).json(&x))
-            .map(|r| r.auth(service).map(|r| r.send()))
-            .try_collect()?;
+            .map(|r| r.auth(service).map(|r| r.send()));
 
         let mut attachment_ids = vec![];
         for future in futures {
-            let response = future.await?;
+            let response = future?.await?;
             let mut data = service.parse_response(response).await?;
             let data = data["ids"].take();
             let ids = serde_json::from_value(data)
