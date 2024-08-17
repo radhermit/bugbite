@@ -560,6 +560,16 @@ mod tests {
             .await;
         let attachment = &service.attachment_get([123]).send().await.unwrap()[0];
         assert_eq!(String::from_utf8_lossy(attachment.as_ref()), "bugbite\n");
+
+        server.reset().await;
+
+        // multiple with plain text data
+        server
+            .respond(200, path.join("attachment/multiple-plain-text.json"))
+            .await;
+        let ids = [123, 124];
+        let attachments = &service.attachment_get(ids).send().await.unwrap();
+        assert_ordered_eq!(attachments.iter().map(|x| x.id), ids);
     }
 
     #[tokio::test]
