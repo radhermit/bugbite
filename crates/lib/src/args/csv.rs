@@ -54,6 +54,15 @@ impl<T: fmt::Display + FromStr> IntoIterator for Csv<T> {
     }
 }
 
+impl<'a, T: fmt::Display + FromStr> IntoIterator for &'a Csv<T> {
+    type Item = &'a T;
+    type IntoIter = std::slice::Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
+    }
+}
+
 impl<T: fmt::Display + FromStr> Deref for Csv<T> {
     type Target = [T];
 
