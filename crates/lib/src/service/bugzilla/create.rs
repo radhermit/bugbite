@@ -29,9 +29,8 @@ impl RequestSend for Request<'_> {
             .auth(self.service)?;
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
-        let id = serde_json::from_value(data["id"].take())
-            .map_err(|e| Error::InvalidValue(format!("failed deserializing id: {e}")))?;
-        Ok(id)
+        serde_json::from_value(data["id"].take())
+            .map_err(|e| Error::InvalidValue(format!("failed deserializing id: {e}")))
     }
 }
 
