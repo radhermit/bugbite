@@ -540,6 +540,16 @@ mod tests {
 
         server.reset().await;
 
+        // invalid response
+        server
+            .respond(200, path.join("attachment/invalid.json"))
+            .await;
+        let err = service.attachment_get([123]).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidValue(_)));
+        assert_err_re!(err, "failed deserializing attachment: 123");
+
+        server.reset().await;
+
         // single without data
         server
             .respond(200, path.join("attachment/single-without-data.json"))

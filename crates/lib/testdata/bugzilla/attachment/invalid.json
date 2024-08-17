@@ -1,0 +1,21 @@
+{
+  "attachments": {
+    "123": {
+      "bug_id": 321,
+      "content_type": "text/plain",
+      "creation_time": "2024-02-19T08:35:02Z",
+      "creator": "person",
+      "data": "YnVnYml0ZQo=",
+      "file_name": "test.txt",
+      "flags": [],
+      "id": 123,
+      "is_obsolete": false,
+      "is_patch": false,
+      "is_private": false,
+      "last_change_time": "2024-02-19T08:35:02Z",
+      "size": 8,
+      "summary": "test.txt"
+    }
+  },
+  "bugs": {}
+}
