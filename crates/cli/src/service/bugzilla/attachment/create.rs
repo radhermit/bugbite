@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use bugbite::args::MaybeStdinVec;
+use bugbite::args::CsvOrStdin;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::create::{Compression, CreateAttachment};
 use bugbite::service::bugzilla::Service;
@@ -104,17 +104,9 @@ struct CompressionOptions {
 #[derive(Debug, Args)]
 #[clap(next_help_heading = "Arguments")]
 struct Arguments {
-    // TODO: rework stdin support once clap supports custom containers
-    // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs or aliases
-    #[clap(
-        display_order = 0,
-        num_args = 1,
-        required = true,
-        value_delimiter = ',',
-        value_name = "ID[,...]"
-    )]
-    ids: Vec<MaybeStdinVec<String>>,
+    #[clap(display_order = 0, required = true, value_name = "ID[,...]")]
+    ids: CsvOrStdin<String>,
 
     /// files to attach
     #[clap(
@@ -139,7 +131,7 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
-        let attachments: Vec<_> = self
+        let attachments = self
             .args
             .files
             .iter()
@@ -156,12 +148,14 @@ impl Command {
                     .is_patch(self.options.patch)
                     .is_private(self.options.private)
             })
-            .collect();
+            .collect::<Vec<_>>();
 
-        let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
-        let attachment_ids = service.attachment_create(ids, attachments).send().await?;
+        let attachment_ids = service
+            .attachment_create(&self.args.ids, attachments)
+            .send()
+            .await?;
 
-        let item_ids = ids.iter().map(|x| x.to_string()).join(", ");
+        let item_ids = self.args.ids.iter().join(", ");
         for (file, ids) in self.args.files.iter().zip(attachment_ids.iter()) {
             let ids = ids.iter().map(|x| x.to_string()).join(", ");
             info!("{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})");
