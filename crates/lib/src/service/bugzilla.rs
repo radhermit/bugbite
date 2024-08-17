@@ -559,6 +559,19 @@ mod tests {
             .respond(200, path.join("attachment/single-plain-text.json"))
             .await;
         let attachment = &service.attachment_get([123]).send().await.unwrap()[0];
+        assert_eq!(attachment.id, 123);
+        assert_eq!(attachment.bug_id, 321);
+        assert_eq!(attachment.file_name, "test.txt");
+        assert_eq!(attachment.summary, "test.txt");
+        assert_eq!(attachment.size, 8);
+        assert_eq!(attachment.creator, "person");
+        assert_eq!(attachment.content_type, "text/plain");
+        assert!(!attachment.is_private);
+        assert!(!attachment.is_obsolete);
+        assert!(!attachment.is_patch);
+        assert_eq!(attachment.created.to_string(), "2024-02-19 08:35:02 UTC");
+        assert_eq!(attachment.updated.to_string(), "2024-02-19 08:35:02 UTC");
+        assert!(attachment.flags.is_empty());
         assert_eq!(String::from_utf8_lossy(attachment.as_ref()), "bugbite\n");
 
         server.reset().await;
