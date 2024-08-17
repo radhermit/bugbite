@@ -482,6 +482,31 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    async fn comment() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // invalid request
+        let ids = Vec::<u32>::new();
+        let err = service.comment(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+    }
+
+    #[tokio::test]
+    async fn create() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // invalid request
+        let err = service.create().send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "missing component");
+    }
+
+    #[tokio::test]
     async fn get() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
@@ -489,13 +514,10 @@ mod tests {
         let service = Service::new(config, Default::default()).unwrap();
 
         // invalid request
-        server.respond(200, path.join("get/single-bug.json")).await;
         let ids = Vec::<u32>::new();
         let err = service.get(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
-
-        server.reset().await;
 
         // nonexistent bug
         server
@@ -538,6 +560,19 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn history() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // invalid request
+        let ids = Vec::<u32>::new();
+        let err = service.history(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+    }
+
+    #[tokio::test]
     async fn search() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
@@ -547,5 +582,18 @@ mod tests {
         server.respond(200, path.join("search/ids.json")).await;
         let bugs = service.search().summary(["test"]).send().await.unwrap();
         assert_eq!(bugs.len(), 5);
+    }
+
+    #[tokio::test]
+    async fn update() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // invalid request
+        let ids = Vec::<u32>::new();
+        let err = service.update(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
     }
 }

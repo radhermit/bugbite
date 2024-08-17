@@ -347,16 +347,16 @@ impl Parameters {
             // error out on missing required fields
             component: self
                 .component
-                .ok_or_else(|| Error::InvalidValue("missing component".to_string()))?,
+                .ok_or_else(|| Error::InvalidRequest("missing component".to_string()))?,
             description: self
                 .description
-                .ok_or_else(|| Error::InvalidValue("missing description".to_string()))?,
+                .ok_or_else(|| Error::InvalidRequest("missing description".to_string()))?,
             product: self
                 .product
-                .ok_or_else(|| Error::InvalidValue("missing product".to_string()))?,
+                .ok_or_else(|| Error::InvalidRequest("missing product".to_string()))?,
             summary: self
                 .summary
-                .ok_or_else(|| Error::InvalidValue("missing summary".to_string()))?,
+                .ok_or_else(|| Error::InvalidRequest("missing summary".to_string()))?,
 
             // optional fields
             alias: self.alias,
