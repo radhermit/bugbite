@@ -63,7 +63,7 @@ async fn deleted_attachment() {
     cmd("bite bugzilla attachment get 21")
         .assert()
         .stdout("")
-        .stderr(predicate::str::diff("Error: can't retrieve deleted attachment: 21").trim())
+        .stderr(predicate::str::diff("Error: deleted attachment: 21").trim())
         .failure();
 }
 
