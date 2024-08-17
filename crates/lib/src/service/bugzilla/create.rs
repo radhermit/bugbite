@@ -2,6 +2,7 @@ use std::fs;
 
 use camino::Utf8Path;
 use indexmap::IndexMap;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
@@ -337,26 +338,18 @@ impl Parameters {
     /// Encode parameters into the form required for the request.
     fn encode(self, service: &super::Service) -> crate::Result<RequestParameters> {
         let params = RequestParameters {
-            // inject defaults for required fields
+            // required fields with defaults
             op_sys: self.os.unwrap_or_else(|| "All".to_string()),
             platform: self.platform.unwrap_or_else(|| "All".to_string()),
             priority: self.priority.unwrap_or_else(|| "Normal".to_string()),
             severity: self.severity.unwrap_or_else(|| "normal".to_string()),
             version: self.version.unwrap_or_else(|| "unspecified".to_string()),
 
-            // error out on missing required fields
-            component: self
-                .component
-                .ok_or_else(|| Error::InvalidRequest("missing component".to_string()))?,
-            description: self
-                .description
-                .ok_or_else(|| Error::InvalidRequest("missing description".to_string()))?,
-            product: self
-                .product
-                .ok_or_else(|| Error::InvalidRequest("missing product".to_string()))?,
-            summary: self
-                .summary
-                .ok_or_else(|| Error::InvalidRequest("missing summary".to_string()))?,
+            // required fields without defaults
+            component: self.component.unwrap_or_default(),
+            description: self.description.unwrap_or_default(),
+            product: self.product.unwrap_or_default(),
+            summary: self.summary.unwrap_or_default(),
 
             // optional fields
             alias: self.alias,
@@ -390,7 +383,31 @@ impl Parameters {
             }),
         };
 
-        // TODO: verify all required fields are non-empty
+        // verify required fields are non-empty
+        let mut missing = vec![];
+        for (value, name) in [
+            (&params.op_sys, "os"),
+            (&params.platform, "platform"),
+            (&params.priority, "priority"),
+            (&params.severity, "severity"),
+            (&params.version, "version"),
+            (&params.component, "component"),
+            (&params.description, "description"),
+            (&params.product, "product"),
+            (&params.summary, "summary"),
+        ] {
+            if value.is_empty() {
+                missing.push(name);
+            }
+        }
+
+        if !missing.is_empty() {
+            let fields = missing.iter().sorted().join(", ");
+            return Err(Error::InvalidRequest(format!(
+                "missing required fields: {fields}"
+            )));
+        }
+
         if params == RequestParameters::default() {
             Err(Error::EmptyParams)
         } else {

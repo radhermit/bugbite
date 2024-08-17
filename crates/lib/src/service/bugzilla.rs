@@ -500,10 +500,25 @@ mod tests {
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
-        // invalid request
+        // missing required fields without defaults
         let err = service.create().send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
-        assert_err_re!(err, "missing component");
+        assert_err_re!(
+            err,
+            "missing required fields: component, description, product, summary"
+        );
+
+        // empty required fields
+        let err = service
+            .create()
+            .os("")
+            .description("a")
+            .summary("b")
+            .send()
+            .await
+            .unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "missing required fields: component, os, product");
     }
 
     #[tokio::test]
