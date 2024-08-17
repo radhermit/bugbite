@@ -482,12 +482,77 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    async fn attachment_create() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service
+            .attachment_create(ids, vec![])
+            .send()
+            .await
+            .unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+
+        // no attachments
+        let err = service
+            .attachment_create([1], vec![])
+            .send()
+            .await
+            .unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no attachments specified");
+    }
+
+    #[tokio::test]
+    async fn attachment_get() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service.attachment_get(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+    }
+
+    #[tokio::test]
+    async fn attachment_get_item() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service.attachment_get_item(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+    }
+
+    #[tokio::test]
+    async fn attachment_update() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service.attachment_update(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+    }
+
+    #[tokio::test]
     async fn comment() {
         let server = TestServer::new().await;
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
-        // invalid request
+        // no IDs
         let ids = Vec::<u32>::new();
         let err = service.comment(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
@@ -528,7 +593,7 @@ mod tests {
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
-        // invalid request
+        // no IDs
         let ids = Vec::<u32>::new();
         let err = service.get(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
@@ -580,7 +645,7 @@ mod tests {
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
-        // invalid request
+        // no IDs
         let ids = Vec::<u32>::new();
         let err = service.history(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
@@ -605,7 +670,7 @@ mod tests {
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
-        // invalid request
+        // no IDs
         let ids = Vec::<u32>::new();
         let err = service.update(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
