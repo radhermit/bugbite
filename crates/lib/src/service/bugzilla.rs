@@ -509,6 +509,7 @@ mod tests {
 
     #[tokio::test]
     async fn attachment_get() {
+        let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
@@ -518,6 +519,24 @@ mod tests {
         let err = service.attachment_get(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
+
+        // nonexistent
+        server
+            .respond(200, path.join("attachment/nonexistent.json"))
+            .await;
+        let err = service.attachment_get([1]).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidValue(_)));
+        assert_err_re!(err, "nonexistent attachment: 1");
+
+        server.reset().await;
+
+        // deleted
+        server
+            .respond(200, path.join("attachment/deleted.json"))
+            .await;
+        let err = service.attachment_get([21]).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidValue(_)));
+        assert_err_re!(err, "deleted attachment: 21");
     }
 
     #[tokio::test]

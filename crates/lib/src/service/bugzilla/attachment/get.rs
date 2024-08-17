@@ -80,9 +80,7 @@ impl RequestSend for Request<'_> {
 
             // bugzilla doesn't return errors for deleted attachments
             if self.data && data["data"].is_null() {
-                return Err(Error::InvalidValue(format!(
-                    "can't retrieve deleted attachment: {id}"
-                )));
+                return Err(Error::InvalidValue(format!("deleted attachment: {id}")));
             }
 
             let attachment = serde_json::from_value(data).map_err(|_| {
