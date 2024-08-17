@@ -49,6 +49,12 @@ impl AsRef<[u8]> for Base64 {
     }
 }
 
+impl Base64 {
+    fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
 macro_rules! stringify {
     ($field:expr) => {
         if let Some(value) = $field.as_ref() {

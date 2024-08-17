@@ -1,21 +1,19 @@
 use std::cmp::Ordering;
 use std::collections::HashSet;
+use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::path::Path;
 use std::str::FromStr;
-use std::{fmt, fs};
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
 use indexmap::IndexSet;
 use itertools::{Either, Itertools};
 use once_cell::sync::Lazy;
-use serde::{de, Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::{
     serde_as, skip_serializing_none, BoolFromInt, DeserializeFromStr, SerializeDisplay,
 };
 use strum::{Display, EnumString};
-use tempfile::NamedTempFile;
 
 use crate::serde::{non_empty_str, null_empty_set, null_empty_vec};
 use crate::service::bugzilla::{BugField, FilterField, GroupField};
@@ -31,22 +29,6 @@ pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
         .map(|s| s.to_string())
         .collect()
 });
-
-/// Deserialize base64-encoded data into a temporary file.
-pub(crate) fn base64_to_tempfile<'de, D, E>(d: D) -> Result<Option<NamedTempFile>, E>
-where
-    D: Deserializer<'de>,
-    E: de::Error,
-{
-    let file = NamedTempFile::new()
-        .map_err(|e| E::custom(format!("failed creating temporary file: {e}")))?;
-    let data =
-        String::deserialize(d).map_err(|e| E::custom(format!("failed deserializing data: {e}")))?;
-    let data =
-        Base64::from_str(&data).map_err(|e| E::custom(format!("failed decoding data: {e}")))?;
-    fs::write(file.path(), data).map_err(|e| E::custom(format!("failed writing data: {e}")))?;
-    Ok(Some(file))
-}
 
 /// A file attachment on a bug.
 #[serde_as]
@@ -99,8 +81,8 @@ pub struct Attachment {
     pub flags: Vec<BugFlag>,
 
     /// Attachment data.
-    #[serde(default, rename = "data", deserialize_with = "base64_to_tempfile")]
-    file: Option<NamedTempFile>,
+    #[serde(default)]
+    data: Base64,
 }
 
 impl PartialEq for Attachment {
@@ -117,20 +99,20 @@ impl Hash for Attachment {
     }
 }
 
-impl Attachment {
-    pub fn path(&self) -> crate::Result<&Path> {
-        self.file.as_ref().map(|x| x.path()).ok_or_else(|| {
-            Error::InvalidValue(format!("attachment: {}: missing data", self.file_name))
-        })
+impl AsRef<[u8]> for Attachment {
+    fn as_ref(&self) -> &[u8] {
+        self.data.as_ref()
     }
+}
 
+// TODO: support auto-decompressing standard archive formats
+impl Attachment {
     pub fn human_size(&self) -> String {
         format_size(self.size, BINARY)
     }
 
-    pub fn read(&self) -> crate::Result<Vec<u8>> {
-        // TODO: auto-decompress standard archive formats
-        Ok(fs::read(self.path()?)?)
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
     }
 }
 

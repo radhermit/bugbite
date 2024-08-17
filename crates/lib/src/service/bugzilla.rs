@@ -537,6 +537,29 @@ mod tests {
         let err = service.attachment_get([21]).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidValue(_)));
         assert_err_re!(err, "deleted attachment: 21");
+
+        server.reset().await;
+
+        // single without data
+        server
+            .respond(200, path.join("attachment/single-without-data.json"))
+            .await;
+        let attachment = &service
+            .attachment_get([123])
+            .data(false)
+            .send()
+            .await
+            .unwrap()[0];
+        assert!(attachment.is_empty());
+
+        server.reset().await;
+
+        // single with plain text data
+        server
+            .respond(200, path.join("attachment/single-plain-text.json"))
+            .await;
+        let attachment = &service.attachment_get([123]).send().await.unwrap()[0];
+        assert_eq!(String::from_utf8_lossy(attachment.as_ref()), "bugbite\n");
     }
 
     #[tokio::test]

@@ -78,13 +78,12 @@ impl Command {
             }
         } else if let Some(name) = self.options.output.as_deref() {
             for attachment in attachments {
-                let data = attachment.read()?;
                 if name == "-" {
                     stdout
-                        .write_all(&data)
+                        .write_all(attachment.as_ref())
                         .context("failed writing to standard output")?;
                 } else {
-                    fs::write(name, &data).context("failed writing to file: {name}")?;
+                    fs::write(name, &attachment).context("failed writing to file: {name}")?;
                 }
             }
         } else {
@@ -106,7 +105,7 @@ impl Command {
                 }
 
                 writeln!(stdout, "Saving attachment: {path}")?;
-                fs::copy(attachment.path()?, &path).context("failed saving attachment")?;
+                fs::write(&path, &attachment).context("failed saving attachment")?;
             }
         }
 
