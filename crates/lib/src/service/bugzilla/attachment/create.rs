@@ -148,7 +148,7 @@ where
 }
 
 /// Attachment creation object.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct CreateAttachment {
     /// Path to the attachment.
     path: Utf8PathBuf,
@@ -187,27 +187,9 @@ pub struct CreateAttachment {
 impl CreateAttachment {
     /// Create a new attachment using a given path.
     pub fn new<P: AsRef<Utf8Path>>(path: P) -> Self {
-        let path = path.as_ref();
-
-        // use default compression for directory targets
-        let compress = if path.is_dir() {
-            Some(Default::default())
-        } else {
-            None
-        };
-
         Self {
-            path: path.to_path_buf(),
-            comment: None,
-            description: None,
-            flags: None,
-            mime_type: None,
-            name: None,
-            is_patch: None,
-            is_private: None,
-            compress,
-            auto_compress: None,
-            auto_truncate: None,
+            path: path.as_ref().to_path_buf(),
+            ..Default::default()
         }
     }
 
@@ -282,6 +264,7 @@ impl CreateAttachment {
 
     /// Build an attachment for request submission.
     fn build(self, ids: &[String], temp_dir_path: &Utf8Path) -> crate::Result<Attachment> {
+        let path_is_dir = self.path.is_dir();
         let mut path = self.path;
         let mut file_name = path
             .file_name()
@@ -290,7 +273,7 @@ impl CreateAttachment {
 
         // create directory tarball
         let is_patch = self.is_patch.unwrap_or_default();
-        if path.is_dir() {
+        if path_is_dir {
             if let Some(value) = self.mime_type.as_deref() {
                 return Err(Error::InvalidValue(format!(
                     "MIME type invalid for directory targets: {value}"
@@ -341,8 +324,11 @@ impl CreateAttachment {
             }
         }
 
-        // compress file if forced or triggered by size
-        if (self.compress.is_some() && self.auto_compress.is_none()) || auto_compress(data.len()) {
+        // compress attachment if dir target, forced, or triggered by size
+        if path_is_dir
+            || (self.compress.is_some() && self.auto_compress.is_none())
+            || auto_compress(data.len())
+        {
             let compress = self.compress.unwrap_or_default();
             file_name = compress.run(&path, temp_dir_path)?;
             path = temp_dir_path.join(&file_name);
