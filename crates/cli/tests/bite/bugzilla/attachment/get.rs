@@ -57,7 +57,7 @@ async fn deleted_attachment() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_DATA.join("attachment/deleted.json"))
+        .respond(200, TEST_DATA.join("attachment/get/deleted.json"))
         .await;
 
     cmd("bite bugzilla attachment get 21")
@@ -72,10 +72,14 @@ async fn list_single_without_data() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_DATA.join("attachment/single-without-data.json"))
+        .respond(
+            200,
+            TEST_DATA.join("attachment/get/single-without-data.json"),
+        )
         .await;
 
-    let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-without-data")).unwrap();
+    let expected =
+        fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-without-data")).unwrap();
 
     // default output
     for opt in ["-l", "--list"] {
@@ -104,9 +108,10 @@ async fn list_single_without_data() {
 async fn output_stdout_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(200, TEST_DATA.join("attachment/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachment/get/single-plain-text.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-plain-text")).unwrap();
+    let expected =
+        fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-plain-text")).unwrap();
 
     for opt in ["-o", "--output"] {
         cmd("bite bugzilla attachment get")
@@ -123,9 +128,10 @@ async fn output_stdout_with_plain_text() {
 async fn save_single_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(200, TEST_DATA.join("attachment/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachment/get/single-plain-text.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-plain-text")).unwrap();
+    let expected =
+        fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-plain-text")).unwrap();
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();
@@ -149,7 +155,7 @@ async fn save_single_with_plain_text() {
 async fn save_single_existing_error() {
     let server = start_server().await;
     server
-        .respond(200, TEST_DATA.join("attachment/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachment/get/single-plain-text.json"))
         .await;
 
     let dir = tempdir().unwrap();
@@ -184,7 +190,7 @@ async fn single_bug_with_no_attachments() {
     server
         .respond(
             200,
-            TEST_DATA.join("attachment/bug-with-no-attachments.json"),
+            TEST_DATA.join("attachment/get/bug-with-no-attachments.json"),
         )
         .await;
 
@@ -205,7 +211,7 @@ async fn multiple_bugs_with_no_attachments() {
     server
         .respond(
             200,
-            TEST_DATA.join("attachment/bugs-with-no-attachments.json"),
+            TEST_DATA.join("attachment/get/bugs-with-no-attachments.json"),
         )
         .await;
 
@@ -223,9 +229,13 @@ async fn multiple_bugs_with_no_attachments() {
 async fn save_multiple_with_plain_text() {
     let server = start_server().await;
     server
-        .respond(200, TEST_DATA.join("attachment/bugs-with-attachments.json"))
+        .respond(
+            200,
+            TEST_DATA.join("attachment/get/bugs-with-attachments.json"),
+        )
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("attachment/single-plain-text")).unwrap();
+    let expected =
+        fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-plain-text")).unwrap();
 
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_str().unwrap();

@@ -522,7 +522,7 @@ mod tests {
 
         // nonexistent
         server
-            .respond(200, path.join("attachment/nonexistent.json"))
+            .respond(200, path.join("attachment/get/nonexistent.json"))
             .await;
         let err = service.attachment_get([1]).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidValue(_)));
@@ -532,7 +532,7 @@ mod tests {
 
         // deleted
         server
-            .respond(200, path.join("attachment/deleted.json"))
+            .respond(200, path.join("attachment/get/deleted.json"))
             .await;
         let err = service.attachment_get([21]).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidValue(_)));
@@ -542,7 +542,7 @@ mod tests {
 
         // invalid response
         server
-            .respond(200, path.join("attachment/invalid.json"))
+            .respond(200, path.join("attachment/get/invalid.json"))
             .await;
         let err = service.attachment_get([123]).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidValue(_)));
@@ -552,7 +552,7 @@ mod tests {
 
         // single without data
         server
-            .respond(200, path.join("attachment/single-without-data.json"))
+            .respond(200, path.join("attachment/get/single-without-data.json"))
             .await;
         let attachment = &service
             .attachment_get([123])
@@ -566,7 +566,7 @@ mod tests {
 
         // single with plain text data
         server
-            .respond(200, path.join("attachment/single-plain-text.json"))
+            .respond(200, path.join("attachment/get/single-plain-text.json"))
             .await;
         let attachment = &service.attachment_get([123]).send().await.unwrap()[0];
         assert_eq!(attachment.id, 123);
@@ -588,7 +588,7 @@ mod tests {
 
         // multiple with plain text data
         server
-            .respond(200, path.join("attachment/multiple-plain-text.json"))
+            .respond(200, path.join("attachment/get/multiple-plain-text.json"))
             .await;
         let ids = [123, 124];
         let attachments = &service.attachment_get(ids).send().await.unwrap();
@@ -622,7 +622,10 @@ mod tests {
 
         // bug with no attachments
         server
-            .respond(200, path.join("attachment/bug-with-no-attachments.json"))
+            .respond(
+                200,
+                path.join("attachment/get/bug-with-no-attachments.json"),
+            )
             .await;
         let attachments = &service.attachment_get_item([12345]).send().await.unwrap()[0];
         assert!(attachments.is_empty());
@@ -631,7 +634,10 @@ mod tests {
 
         // bugs with no attachments
         server
-            .respond(200, path.join("attachment/bug-with-no-attachments.json"))
+            .respond(
+                200,
+                path.join("attachment/get/bug-with-no-attachments.json"),
+            )
             .await;
         let attachments = &service
             .attachment_get_item([12345, 23456, 34567])
