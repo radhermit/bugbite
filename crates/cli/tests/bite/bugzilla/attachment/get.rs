@@ -1,7 +1,7 @@
 use std::{env, fs};
 
 use predicates::prelude::*;
-use tempfile::tempdir;
+use tempfile::{tempdir, NamedTempFile};
 
 use crate::command::cmd;
 
@@ -105,7 +105,7 @@ async fn list_single_without_data() {
 }
 
 #[tokio::test]
-async fn output_stdout_with_plain_text() {
+async fn output_plain_text() {
     let server = start_server().await;
     server
         .respond(200, TEST_DATA.join("attachment/get/single-plain-text.json"))
@@ -114,6 +114,7 @@ async fn output_stdout_with_plain_text() {
         fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-plain-text")).unwrap();
 
     for opt in ["-o", "--output"] {
+        // stdout target
         cmd("bite bugzilla attachment get")
             .arg("123")
             .args([opt, "-"])
@@ -121,6 +122,19 @@ async fn output_stdout_with_plain_text() {
             .stdout(predicate::str::diff(expected.clone()))
             .stderr("")
             .success();
+
+        // file target
+        let file = NamedTempFile::new().unwrap();
+        let path = file.path().to_str().unwrap();
+        cmd("bite bugzilla attachment get")
+            .arg("123")
+            .args([opt, path])
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+        let content = fs::read_to_string(path).unwrap();
+        assert_eq!(content, expected);
     }
 }
 
