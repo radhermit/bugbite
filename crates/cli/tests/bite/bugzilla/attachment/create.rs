@@ -76,6 +76,16 @@ async fn single_bug() {
         .stderr("")
         .success();
 
+    // verify output when running verbosely
+    cmd("bite bugzilla attachment create 1 -v")
+        .arg(path)
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains(format!(
+            "{path}: attached to bug(s): 1 (attachment ID(s) 123)"
+        )))
+        .success();
+
     // IDs from standard input
     cmd("bite bugzilla attachment create -")
         .arg(path)
@@ -112,6 +122,16 @@ async fn multiple_bugs() {
         .assert()
         .stdout("")
         .stderr("")
+        .success();
+
+    // verify output when running verbosely
+    cmd("bite bugzilla attachment create 1,2 -v")
+        .arg(path)
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains(format!(
+            "{path}: attached to bug(s): 1, 2 (attachment ID(s) 123, 124)"
+        )))
         .success();
 
     // IDs from standard input
