@@ -305,6 +305,12 @@ impl CreateAttachment {
                 ));
             };
 
+            if path.read_dir()?.next().is_none() {
+                return Err(Error::InvalidValue(format!(
+                    "empty directory target: {path}"
+                )));
+            }
+
             file_name = tar(&path, temp_dir_path)?;
             path = temp_dir_path.join(&file_name);
         }
