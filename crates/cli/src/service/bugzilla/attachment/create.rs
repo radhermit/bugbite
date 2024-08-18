@@ -2,7 +2,7 @@ use std::process::ExitCode;
 
 use bugbite::args::CsvOrStdin;
 use bugbite::objects::bugzilla::Flag;
-use bugbite::service::bugzilla::attachment::create::{Compression, CreateAttachment};
+use bugbite::service::bugzilla::attachment::create::{Attachment, Compression};
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
@@ -134,7 +134,7 @@ impl Command {
         let attachment_ids = service
             .attachment_create(&self.args.ids)
             .attachments(self.args.files.iter().map(|file| {
-                CreateAttachment::new(file)
+                Attachment::new(file)
                     .comment(self.options.comment.as_deref())
                     .description(self.options.description.as_deref())
                     .flags(self.options.flags.clone())

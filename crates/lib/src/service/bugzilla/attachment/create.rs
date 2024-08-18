@@ -154,9 +154,9 @@ where
     }
 }
 
-/// Attachment creation object.
+/// Attachment object.
 #[derive(Debug, Default)]
-pub struct CreateAttachment {
+pub struct Attachment {
     /// Path to the attachment.
     path: Utf8PathBuf,
 
@@ -191,7 +191,7 @@ pub struct CreateAttachment {
     auto_truncate: Option<usize>,
 }
 
-impl CreateAttachment {
+impl Attachment {
     /// Create a new attachment using a given path.
     pub fn new<P: AsRef<Utf8Path>>(path: P) -> Self {
         Self {
@@ -270,7 +270,7 @@ impl CreateAttachment {
     }
 
     /// Build an attachment for request submission.
-    fn build(self, ids: &[String], temp_dir_path: &Utf8Path) -> crate::Result<Attachment> {
+    fn build(self, ids: &[String], temp_dir_path: &Utf8Path) -> crate::Result<RequestAttachment> {
         let path_is_dir = self.path.is_dir();
         let mut path = self.path;
         let mut file_name = path
@@ -347,7 +347,7 @@ impl CreateAttachment {
             mime_type = get_mime_type(path, &data);
         }
 
-        Ok(Attachment {
+        Ok(RequestAttachment {
             ids: ids.to_vec(),
             data: Base64(data),
             content_type: self.mime_type.unwrap_or(mime_type),
@@ -364,7 +364,7 @@ impl CreateAttachment {
 /// Attachment object used for request submission.
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
-struct Attachment {
+struct RequestAttachment {
     ids: Vec<String>,
     data: Base64,
     file_name: String,
@@ -380,7 +380,7 @@ struct Attachment {
 pub struct Request<'a> {
     service: &'a Service,
     ids: Vec<String>,
-    attachments: Vec<CreateAttachment>,
+    attachments: Vec<Attachment>,
 }
 
 impl<'a> Request<'a> {
@@ -413,7 +413,7 @@ impl<'a> Request<'a> {
 
     pub fn attachments<I>(mut self, values: I) -> Self
     where
-        I: IntoIterator<Item = CreateAttachment>,
+        I: IntoIterator<Item = Attachment>,
     {
         self.attachments.extend(values);
         self
