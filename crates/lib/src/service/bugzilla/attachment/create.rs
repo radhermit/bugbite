@@ -384,11 +384,7 @@ pub struct Request<'a> {
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(
-        service: &'a Service,
-        ids: I,
-        attachments: Vec<CreateAttachment>,
-    ) -> Self
+    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -396,7 +392,7 @@ impl<'a> Request<'a> {
         Self {
             service,
             ids: ids.into_iter().map(|s| s.to_string()).collect(),
-            attachments,
+            attachments: Default::default(),
         }
     }
 
@@ -413,6 +409,14 @@ impl<'a> Request<'a> {
             .join(&format!("rest/bug/{id}/attachment"))?;
 
         Ok(url)
+    }
+
+    pub fn attachments<I>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = CreateAttachment>,
+    {
+        self.attachments.extend(values);
+        self
     }
 }
 

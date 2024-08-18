@@ -131,11 +131,9 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
-        let attachments = self
-            .args
-            .files
-            .iter()
-            .map(|file| {
+        let attachment_ids = service
+            .attachment_create(&self.args.ids)
+            .attachments(self.args.files.iter().map(|file| {
                 CreateAttachment::new(file)
                     .comment(self.options.comment.as_deref())
                     .description(self.options.description.as_deref())
@@ -147,11 +145,7 @@ impl Command {
                     .auto_truncate(self.compression.auto_truncate)
                     .is_patch(self.options.patch)
                     .is_private(self.options.private)
-            })
-            .collect::<Vec<_>>();
-
-        let attachment_ids = service
-            .attachment_create(&self.args.ids, attachments)
+            }))
             .send()
             .await?;
 

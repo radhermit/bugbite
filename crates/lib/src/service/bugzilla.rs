@@ -92,16 +92,12 @@ impl Service {
         }
     }
 
-    pub fn attachment_create<I, S>(
-        &self,
-        ids: I,
-        attachments: Vec<attachment::create::CreateAttachment>,
-    ) -> attachment::create::Request
+    pub fn attachment_create<I, S>(&self, ids: I) -> attachment::create::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        attachment::create::Request::new(self, ids, attachments)
+        attachment::create::Request::new(self, ids)
     }
 
     pub fn attachment_get<I, S>(&self, ids: I) -> attachment::get::Request
@@ -489,20 +485,12 @@ mod tests {
 
         // no IDs
         let ids = Vec::<u32>::new();
-        let err = service
-            .attachment_create(ids, vec![])
-            .send()
-            .await
-            .unwrap_err();
+        let err = service.attachment_create(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
 
         // no attachments
-        let err = service
-            .attachment_create([1], vec![])
-            .send()
-            .await
-            .unwrap_err();
+        let err = service.attachment_create([1]).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no attachments specified");
     }
