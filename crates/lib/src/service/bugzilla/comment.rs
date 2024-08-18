@@ -2,19 +2,20 @@ use serde_json::Value;
 use url::Url;
 
 use crate::objects::bugzilla::Comment;
+use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
 pub struct Request<'a> {
-    service: &'a super::Service,
+    service: &'a Service,
     ids: Vec<String>,
     params: Parameters,
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> Self
+    pub(super) fn new<I, S>(service: &'a Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -146,5 +147,26 @@ impl Parameters {
         S: Into<String>,
     {
         self.creator = Some(value.into());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::service::bugzilla::Config;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn request() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service.comment(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
     }
 }

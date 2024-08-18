@@ -2,6 +2,7 @@ use serde_json::Value;
 use url::Url;
 
 use crate::objects::bugzilla::Bug;
+use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
@@ -9,7 +10,7 @@ use super::{attachment, comment, history};
 
 #[derive(Debug)]
 pub struct Request<'a> {
-    service: &'a super::Service,
+    service: &'a Service,
     ids: Vec<String>,
     attachments: Option<attachment::get_item::Request<'a>>,
     comments: Option<comment::Request<'a>>,
@@ -17,7 +18,7 @@ pub struct Request<'a> {
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> Self
+    pub(super) fn new<I, S>(service: &'a Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -129,5 +130,66 @@ impl RequestSend for Request<'_> {
         }
 
         Ok(bugs)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::service::bugzilla::Config;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn request() {
+        let path = TESTDATA_PATH.join("bugzilla");
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service.get(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+
+        // nonexistent bug
+        server
+            .respond(404, path.join("errors/nonexistent-bug.json"))
+            .await;
+        let err = service.get([1]).send().await.unwrap_err();
+        assert!(
+            matches!(err, Error::Bugzilla { code: 101, .. }),
+            "unmatched error: {err:?}"
+        );
+
+        server.reset().await;
+
+        // invalid response
+        server.respond(200, path.join("get/invalid.json")).await;
+        let err = service.get([12345]).send().await.unwrap_err();
+        assert!(
+            matches!(err, Error::InvalidValue(_)),
+            "unmatched error: {err:?}"
+        );
+        assert_err_re!(err, "invalid service response");
+
+        server.reset().await;
+
+        // single bug
+        server.respond(200, path.join("get/single-bug.json")).await;
+        let ids = [12345];
+        let bugs = service.get(ids).send().await.unwrap();
+        assert_ordered_eq!(bugs.iter().map(|x| x.id), ids);
+
+        server.reset().await;
+
+        // multiple bugs
+        server
+            .respond(200, path.join("get/multiple-bugs.json"))
+            .await;
+        let ids = [12345, 23456, 34567];
+        let bugs = service.get(ids).send().await.unwrap();
+        assert_ordered_eq!(bugs.iter().map(|x| x.id), ids);
     }
 }

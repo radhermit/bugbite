@@ -100,3 +100,63 @@ impl RequestSend for Request<'_> {
         Ok(attachments)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::service::bugzilla::Config;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn request() {
+        let path = TESTDATA_PATH.join("bugzilla");
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service.attachment_get_item(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+
+        // nonexistent bug
+        server
+            .respond(404, path.join("errors/nonexistent-bug.json"))
+            .await;
+        let err = service.attachment_get_item([1]).send().await.unwrap_err();
+        assert!(
+            matches!(err, Error::Bugzilla { code: 101, .. }),
+            "unmatched error: {err:?}"
+        );
+
+        server.reset().await;
+
+        // bug with no attachments
+        server
+            .respond(
+                200,
+                path.join("attachment/get/bug-with-no-attachments.json"),
+            )
+            .await;
+        let attachments = &service.attachment_get_item([12345]).send().await.unwrap()[0];
+        assert!(attachments.is_empty());
+
+        server.reset().await;
+
+        // bugs with no attachments
+        server
+            .respond(
+                200,
+                path.join("attachment/get/bug-with-no-attachments.json"),
+            )
+            .await;
+        let attachments = &service
+            .attachment_get_item([12345, 23456, 34567])
+            .send()
+            .await
+            .unwrap();
+        assert!(attachments.iter().all(|x| x.is_empty()));
+    }
+}

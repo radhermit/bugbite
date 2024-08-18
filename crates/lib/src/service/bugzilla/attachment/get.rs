@@ -93,3 +93,99 @@ impl RequestSend for Request<'_> {
         Ok(attachments)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::service::bugzilla::Config;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn request() {
+        let path = TESTDATA_PATH.join("bugzilla");
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service.attachment_get(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+
+        // nonexistent
+        server
+            .respond(200, path.join("attachment/get/nonexistent.json"))
+            .await;
+        let err = service.attachment_get([1]).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidValue(_)));
+        assert_err_re!(err, "nonexistent attachment: 1");
+
+        server.reset().await;
+
+        // deleted
+        server
+            .respond(200, path.join("attachment/get/deleted.json"))
+            .await;
+        let err = service.attachment_get([21]).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidValue(_)));
+        assert_err_re!(err, "deleted attachment: 21");
+
+        server.reset().await;
+
+        // invalid response
+        server
+            .respond(200, path.join("attachment/get/invalid.json"))
+            .await;
+        let err = service.attachment_get([123]).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidValue(_)));
+        assert_err_re!(err, "failed deserializing attachment: 123");
+
+        server.reset().await;
+
+        // single without data
+        server
+            .respond(200, path.join("attachment/get/single-without-data.json"))
+            .await;
+        let attachment = &service
+            .attachment_get([123])
+            .data(false)
+            .send()
+            .await
+            .unwrap()[0];
+        assert!(attachment.is_empty());
+
+        server.reset().await;
+
+        // single with plain text data
+        server
+            .respond(200, path.join("attachment/get/single-plain-text.json"))
+            .await;
+        let attachment = &service.attachment_get([123]).send().await.unwrap()[0];
+        assert_eq!(attachment.id, 123);
+        assert_eq!(attachment.bug_id, 321);
+        assert_eq!(attachment.file_name, "test.txt");
+        assert_eq!(attachment.summary, "test.txt");
+        assert_eq!(attachment.size, 8);
+        assert_eq!(attachment.creator, "person");
+        assert_eq!(attachment.content_type, "text/plain");
+        assert!(!attachment.is_private);
+        assert!(!attachment.is_obsolete);
+        assert!(!attachment.is_patch);
+        assert_eq!(attachment.created.to_string(), "2024-02-19 08:35:02 UTC");
+        assert_eq!(attachment.updated.to_string(), "2024-02-19 08:35:02 UTC");
+        assert!(attachment.flags.is_empty());
+        assert_eq!(String::from_utf8_lossy(attachment.as_ref()), "bugbite\n");
+
+        server.reset().await;
+
+        // multiple with plain text data
+        server
+            .respond(200, path.join("attachment/get/multiple-plain-text.json"))
+            .await;
+        let ids = [123, 124];
+        let attachments = &service.attachment_get(ids).send().await.unwrap();
+        assert_ordered_eq!(attachments.iter().map(|x| x.id), ids);
+    }
+}

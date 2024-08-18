@@ -11,6 +11,7 @@ use url::Url;
 
 use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
+use crate::service::bugzilla::Service;
 use crate::traits::{Contains, InjectAuth, RequestSend, WebService};
 use crate::Error;
 
@@ -111,7 +112,7 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
 
 #[derive(Debug)]
 pub struct Request<'a> {
-    service: &'a super::Service,
+    service: &'a Service,
     ids: Vec<String>,
     params: Parameters,
 }
@@ -143,7 +144,7 @@ impl RequestSend for Request<'_> {
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new<I, S>(service: &'a super::Service, ids: I) -> Self
+    pub(super) fn new<I, S>(service: &'a Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -362,11 +363,7 @@ impl Parameters {
     }
 
     /// Encode parameters into the form required for the request.
-    async fn encode(
-        self,
-        service: &super::Service,
-        ids: Vec<String>,
-    ) -> crate::Result<RequestParameters> {
+    async fn encode(self, service: &Service, ids: Vec<String>) -> crate::Result<RequestParameters> {
         let mut params = RequestParameters {
             ids: Default::default(),
             alias: self.alias.map(|x| x.into_iter().collect()),
@@ -553,4 +550,25 @@ struct RequestParameters {
 
     #[serde(flatten)]
     custom_fields: Option<IndexMap<String, String>>,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::service::bugzilla::Config;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn request() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service.update(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+    }
 }

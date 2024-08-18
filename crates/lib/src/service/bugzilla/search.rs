@@ -14,6 +14,7 @@ use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{self, Order, OrderType};
+use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestSend, WebService};
 use crate::Error;
@@ -22,7 +23,7 @@ use super::{BugField, FilterField};
 
 #[derive(Debug)]
 pub struct Request<'a> {
-    service: &'a super::Service,
+    service: &'a Service,
     params: Parameters,
 }
 
@@ -47,7 +48,7 @@ impl RequestSend for Request<'_> {
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a super::Service) -> Self {
+    pub(super) fn new(service: &'a Service) -> Self {
         Self {
             service,
             params: Default::default(),
@@ -158,7 +159,7 @@ pub struct Match {
 
 impl Match {
     /// Substitute user alias for matching value.
-    fn replace_user_alias(mut self, service: &super::Service) -> Self {
+    fn replace_user_alias(mut self, service: &Service) -> Self {
         if let Some(user) = service.config.user.as_deref() {
             if self.value == "@me" {
                 self.value = user.to_string();
@@ -361,7 +362,7 @@ impl Parameters {
         }
     }
 
-    pub(crate) fn encode(self, service: &super::Service) -> crate::Result<String> {
+    pub(crate) fn encode(self, service: &Service) -> crate::Result<String> {
         let mut query = QueryBuilder::new(service);
 
         if let Some(values) = self.status {
@@ -760,7 +761,7 @@ impl Parameters {
 /// information.
 #[derive(Debug)]
 struct QueryBuilder<'a> {
-    service: &'a super::Service,
+    service: &'a Service,
     query: query::QueryBuilder,
     advanced_count: u64,
 }
@@ -780,7 +781,7 @@ impl DerefMut for QueryBuilder<'_> {
 }
 
 impl<'a> QueryBuilder<'a> {
-    fn new(service: &'a super::Service) -> Self {
+    fn new(service: &'a Service) -> Self {
         Self {
             service,
             query: Default::default(),
@@ -1531,5 +1532,25 @@ impl TryFrom<String> for ChangeField {
         value
             .parse()
             .map_err(|_| Error::InvalidValue(format!("unknown change field: {value}")))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::service::bugzilla::Config;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn request() {
+        let path = TESTDATA_PATH.join("bugzilla");
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        server.respond(200, path.join("search/ids.json")).await;
+        let bugs = service.search().summary(["test"]).send().await.unwrap();
+        assert_eq!(bugs.len(), 5);
     }
 }

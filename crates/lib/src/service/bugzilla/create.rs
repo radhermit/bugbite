@@ -7,12 +7,13 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::objects::bugzilla::{Bug, Flag};
+use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
 pub struct Request<'a> {
-    service: &'a super::Service,
+    service: &'a Service,
     params: Parameters,
 }
 
@@ -36,7 +37,7 @@ impl RequestSend for Request<'_> {
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a super::Service) -> Self {
+    pub(super) fn new(service: &'a Service) -> Self {
         Self {
             service,
             params: Default::default(),
@@ -336,7 +337,7 @@ impl Parameters {
     }
 
     /// Encode parameters into the form required for the request.
-    fn encode(self, service: &super::Service) -> crate::Result<RequestParameters> {
+    fn encode(self, service: &Service) -> crate::Result<RequestParameters> {
         let params = RequestParameters {
             // required fields with defaults
             op_sys: self.os.unwrap_or_else(|| "All".to_string()),
@@ -464,4 +465,39 @@ struct RequestParameters {
 
     #[serde(flatten)]
     custom_fields: Option<IndexMap<String, String>>,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::service::bugzilla::Config;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn request() {
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // missing required fields without defaults
+        let err = service.create().send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(
+            err,
+            "missing required fields: component, description, product, summary"
+        );
+
+        // empty required fields
+        let err = service
+            .create()
+            .os("")
+            .description("a")
+            .summary("b")
+            .send()
+            .await
+            .unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "missing required fields: component, os, product");
+    }
 }
