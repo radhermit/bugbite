@@ -1,4 +1,4 @@
-use std::fs;
+use std::{env, fs};
 
 use predicates::prelude::*;
 use tempfile::{tempdir, NamedTempFile};
@@ -70,7 +70,7 @@ async fn multiple_bugs() {
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
-            "Error: invalid attachment source: 2",
+            "Error: failed reading attachment: 2",
         ))
         .failure()
         .code(1);
@@ -91,13 +91,11 @@ async fn dir_target() {
         .await;
 
     let dir = tempdir().unwrap();
-    let path = dir.path().join("src");
-    let path = path.to_str().unwrap();
-    fs::create_dir(path).unwrap();
+    env::set_current_dir(dir.path()).unwrap();
+    fs::create_dir("src").unwrap();
 
     // invalid MIME type
-    cmd("bite bugzilla attachment create 1")
-        .arg(path)
+    cmd("bite bugzilla attachment create 1 src")
         .args(["--mime", "text/plain"])
         .assert()
         .stdout("")
@@ -109,8 +107,7 @@ async fn dir_target() {
         .code(1);
 
     // invalid MIME type
-    cmd("bite bugzilla attachment create 1")
-        .arg(path)
+    cmd("bite bugzilla attachment create 1 src")
         .arg("--patch")
         .assert()
         .stdout("")
@@ -119,21 +116,19 @@ async fn dir_target() {
         .code(1);
 
     // empty directory target
-    cmd("bite bugzilla attachment create 1")
-        .arg(path)
+    cmd("bite bugzilla attachment create 1 src")
         .assert()
         .stdout("")
-        .stderr(predicate::str::contains("Error: empty directory target"))
+        .stderr(predicate::str::diff("Error: empty directory target: src").trim())
         .failure()
         .code(1);
 
     // create files
-    fs::write(dir.path().join("src/test1"), "test1").unwrap();
-    fs::write(dir.path().join("src/test2"), "test2").unwrap();
+    fs::write("src/test1", "test1").unwrap();
+    fs::write("src/test2", "test2").unwrap();
 
     // valid
-    cmd("bite bugzilla attachment create 1")
-        .arg(path)
+    cmd("bite bugzilla attachment create 1 src")
         .assert()
         .stdout("")
         .stderr("")
