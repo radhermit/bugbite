@@ -19,8 +19,10 @@ fn aliases() {
     }
 }
 
-#[test]
-fn required_args() {
+#[tokio::test]
+async fn required_args() {
+    let _server = start_server().await;
+
     // missing IDs
     cmd("bite bugzilla update -A test")
         .assert()
@@ -30,6 +32,14 @@ fn required_args() {
         ))
         .failure()
         .code(2);
+
+    // missing changes
+    cmd("bite bugzilla update 1")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff("Error: no parameters specified").trim())
+        .failure()
+        .code(1);
 }
 
 #[tokio::test]
