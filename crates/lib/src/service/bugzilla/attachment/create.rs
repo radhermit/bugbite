@@ -93,7 +93,6 @@ fn get_mime_type<P: AsRef<Utf8Path>>(path: P, data: &[u8]) -> String {
     }
 }
 
-// TODO: fix handling on macos
 /// Create a tarball from a given source directory into a given destination file path.
 fn tar<P1, P2>(src: P1, dest_dir: P2) -> crate::Result<String>
 where
@@ -113,17 +112,25 @@ where
         .ok_or_else(|| Error::InvalidValue(format!("invalid tarball source: {src}")))?;
     let dest_file_name = format!("{src_file_name}.tar");
     let dest = dest_dir.join(&dest_file_name);
-    let mut cmd = Command::new("tar");
-    cmd.args([
-        "-C",
-        src_dir.as_str(),
-        "-c",
-        src_file_name,
-        "-f",
-        dest.as_str(),
-    ]);
 
-    match cmd.status() {
+    // use GNU tar on macos
+    let cmd = if cfg!(target_os = "macos") {
+        "gtar"
+    } else {
+        "tar"
+    };
+
+    match Command::new(cmd)
+        .args([
+            "-C",
+            src_dir.as_str(),
+            "-c",
+            src_file_name,
+            "-f",
+            dest.as_str(),
+        ])
+        .status()
+    {
         Ok(status) => {
             if !status.success() {
                 Err(Error::InvalidValue(format!(
@@ -135,7 +142,7 @@ where
         }
         Err(e) => {
             let msg = if e.kind() == io::ErrorKind::NotFound {
-                "tar not available".to_string()
+                format!("{cmd} not available")
             } else {
                 e.to_string()
             };
