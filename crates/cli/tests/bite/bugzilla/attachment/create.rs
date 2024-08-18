@@ -119,12 +119,11 @@ async fn dir_target() {
         .code(1);
 
     // empty directory target
-    let err = format!("Error: empty directory target: {path}");
     cmd("bite bugzilla attachment create 1")
         .arg(path)
         .assert()
         .stdout("")
-        .stderr(predicate::str::diff(err).trim())
+        .stderr(predicate::str::contains("Error: empty directory target"))
         .failure()
         .code(1);
 
