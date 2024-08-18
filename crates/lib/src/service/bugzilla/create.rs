@@ -386,15 +386,15 @@ impl Parameters {
         // verify required fields are non-empty
         let mut missing = vec![];
         for (value, name) in [
+            (&params.component, "component"),
+            (&params.description, "description"),
             (&params.op_sys, "os"),
             (&params.platform, "platform"),
             (&params.priority, "priority"),
-            (&params.severity, "severity"),
-            (&params.version, "version"),
-            (&params.component, "component"),
-            (&params.description, "description"),
             (&params.product, "product"),
+            (&params.severity, "severity"),
             (&params.summary, "summary"),
+            (&params.version, "version"),
         ] {
             if value.is_empty() {
                 missing.push(name);
@@ -408,11 +408,7 @@ impl Parameters {
             )));
         }
 
-        if params == RequestParameters::default() {
-            Err(Error::EmptyParams)
-        } else {
-            Ok(params)
-        }
+        Ok(params)
     }
 }
 
