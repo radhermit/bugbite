@@ -432,7 +432,7 @@ impl From<Bug> for Parameters {
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
 /// information.
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
+#[derive(Serialize)]
 struct RequestParameters {
     // required fields
     component: String,

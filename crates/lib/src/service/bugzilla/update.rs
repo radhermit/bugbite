@@ -519,7 +519,7 @@ impl Parameters {
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
 /// information.
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
+#[derive(Serialize, Default, Eq, PartialEq)]
 struct RequestParameters {
     ids: Vec<String>,
     alias: Option<SetChanges<String>>,

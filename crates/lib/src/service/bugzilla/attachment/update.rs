@@ -55,7 +55,7 @@ impl Parameters {
 
 /// Internal attachment update request parameters.
 #[skip_serializing_none]
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
 struct RequestParameters {
     ids: Vec<String>,
     file_name: Option<String>,
