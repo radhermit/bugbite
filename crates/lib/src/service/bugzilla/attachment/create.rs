@@ -93,6 +93,7 @@ fn get_mime_type<P: AsRef<Utf8Path>>(path: P, data: &[u8]) -> String {
     }
 }
 
+// TODO: fix handling on macos
 /// Create a tarball from a given source directory into a given destination file path.
 fn tar<P1, P2>(src: P1, dest_dir: P2) -> crate::Result<String>
 where
