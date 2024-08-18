@@ -282,9 +282,6 @@ impl CreateAttachment {
     /// Build an attachment for request submission.
     fn build(self, ids: &[String], temp_dir_path: &Utf8Path) -> crate::Result<Attachment> {
         let mut path = self.path;
-        path = path
-            .canonicalize_utf8()
-            .map_err(|e| Error::InvalidValue(format!("invalid attachment source: {path}: {e}")))?;
         let mut file_name = path
             .file_name()
             .map(|s| s.to_string())
