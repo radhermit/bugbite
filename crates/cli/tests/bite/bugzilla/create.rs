@@ -21,6 +21,20 @@ fn aliases() {
 }
 
 #[tokio::test]
+async fn required_args() {
+    let _server = start_server().await;
+
+    // missing fields
+    let err = "Error: missing required fields: component, description, product, summary";
+    cmd("bite bugzilla create")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff(err).trim())
+        .failure()
+        .code(1);
+}
+
+#[tokio::test]
 async fn auth_required() {
     let _server = start_server().await;
 
