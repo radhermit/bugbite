@@ -3,7 +3,8 @@ use predicates::prelude::*;
 use crate::command::cmd;
 
 #[test]
-fn missing_ids() {
+fn required_args() {
+    // missing IDs
     cmd("bite bugzilla comment")
         .assert()
         .stdout("")

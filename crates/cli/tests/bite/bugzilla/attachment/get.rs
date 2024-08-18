@@ -23,7 +23,8 @@ fn aliases() {
 }
 
 #[test]
-fn missing_ids() {
+fn required_args() {
+    // missing IDs
     cmd("bite bugzilla attachment get")
         .assert()
         .stdout("")

@@ -22,6 +22,29 @@ fn aliases() {
     }
 }
 
+#[test]
+fn required_args() {
+    // missing IDs
+    cmd("bite bugzilla attachment create")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains(
+            "required arguments were not provided",
+        ))
+        .failure()
+        .code(2);
+
+    // missing files
+    cmd("bite bugzilla attachment create 1")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains(
+            "required arguments were not provided",
+        ))
+        .failure()
+        .code(2);
+}
+
 #[tokio::test]
 async fn auth_required() {
     let _server = start_server().await;

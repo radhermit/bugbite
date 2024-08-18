@@ -20,7 +20,8 @@ fn aliases() {
 }
 
 #[test]
-fn missing_ids() {
+fn required_args() {
+    // missing IDs
     cmd("bite bugzilla update -A test")
         .assert()
         .stdout("")
