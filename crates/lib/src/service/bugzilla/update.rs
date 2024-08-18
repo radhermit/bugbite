@@ -368,7 +368,7 @@ impl Parameters {
         ids: Vec<String>,
     ) -> crate::Result<RequestParameters> {
         let mut params = RequestParameters {
-            ids,
+            ids: Default::default(),
             alias: self.alias.map(|x| x.into_iter().collect()),
             blocks: self.blocks.map(|x| x.into_iter().collect()),
             component: self.component,
@@ -504,10 +504,11 @@ impl Parameters {
             params.see_also = Some(iter.collect());
         }
 
-        // TODO: verify all required fields are non-empty
+        // verify at least one field is updated
         if params == RequestParameters::default() {
             Err(Error::EmptyParams)
         } else {
+            params.ids = ids;
             Ok(params)
         }
     }
