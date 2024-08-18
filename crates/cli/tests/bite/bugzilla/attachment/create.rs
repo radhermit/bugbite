@@ -75,6 +75,15 @@ async fn single_bug() {
         .stdout("")
         .stderr("")
         .success();
+
+    // IDs from standard input
+    cmd("bite bugzilla attachment create -")
+        .arg(path)
+        .write_stdin("1\n")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
 }
 
 #[tokio::test]
@@ -100,6 +109,15 @@ async fn multiple_bugs() {
 
     cmd("bite bugzilla attachment create 1,2")
         .arg(path)
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // IDs from standard input
+    cmd("bite bugzilla attachment create -")
+        .arg(path)
+        .write_stdin("1\n2\n")
         .assert()
         .stdout("")
         .stderr("")
