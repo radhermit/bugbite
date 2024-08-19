@@ -13,6 +13,7 @@ use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{self, Order, OrderType};
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestSend, WebService};
+use crate::utils::or;
 use crate::Error;
 
 struct QueryBuilder<'a> {
@@ -180,22 +181,21 @@ impl Parameters {
     }
 
     /// Merge parameters using the provided value for fallbacks.
-    pub fn merge(self, other: Self) -> Self {
-        Self {
-            assignee: self.assignee.or(other.assignee),
-            attachments: self.attachments.or(other.attachments),
-            blocks: self.blocks.or(other.blocks),
-            blocked: self.blocked.or(other.blocked),
-            relates: self.relates.or(other.relates),
-            ids: self.ids.or(other.ids),
-            created: self.created.or(other.created),
-            updated: self.updated.or(other.updated),
-            closed: self.closed.or(other.closed),
-            limit: self.limit.or(other.limit),
-            order: self.order.or(other.order),
-            status: self.status.or(other.status),
-            summary: self.summary.or(other.summary),
-        }
+    pub fn merge<T: Into<Self>>(&mut self, other: T) {
+        let other = other.into();
+        or!(self.assignee, other.assignee);
+        or!(self.attachments, other.attachments);
+        or!(self.blocks, other.blocks);
+        or!(self.blocked, other.blocked);
+        or!(self.relates, other.relates);
+        or!(self.ids, other.ids);
+        or!(self.created, other.created);
+        or!(self.updated, other.updated);
+        or!(self.closed, other.closed);
+        or!(self.limit, other.limit);
+        or!(self.order, other.order);
+        or!(self.status, other.status);
+        or!(self.summary, other.summary);
     }
 
     pub fn order<I>(mut self, values: I) -> Self
