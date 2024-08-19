@@ -55,6 +55,26 @@ async fn auth_required() {
 }
 
 #[tokio::test]
+async fn no_changes() {
+    let server = start_server_with_auth().await;
+
+    server
+        .respond(200, TEST_DATA.join("update/no-changes.json"))
+        .await;
+
+    cmd("bite bugzilla update 123 -v")
+        .args(["--summary", "new summary"])
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff(indoc::indoc! {"
+            === Bug #123 ===
+            --- Updated fields ---
+            None
+        "}))
+        .success();
+}
+
+#[tokio::test]
 async fn template() {
     let server = start_server_with_auth().await;
 
