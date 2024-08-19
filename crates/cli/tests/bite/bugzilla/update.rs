@@ -113,7 +113,9 @@ async fn template() {
             .args(["--to", path])
             .write_stdin(input)
             .assert()
-            .stdout(predicate::str::contains(format!("template exists: {path}, overwrite?")))
+            .stdout(predicate::str::contains(format!(
+                "template exists: {path}, overwrite?"
+            )))
             .stderr("")
             .success();
     }
@@ -161,5 +163,24 @@ async fn summary() {
                 summary: old summary -> new summary
             "}))
             .success();
+    }
+}
+
+#[tokio::test]
+async fn reply() {
+    let server = start_server_with_auth().await;
+
+    server
+        .respond(200, TEST_DATA.join("update/no-changes.json"))
+        .await;
+
+    for opt in ["-R", "--reply"] {
+        cmd("bite bugzilla update 123 124")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::diff("Error: reply invalid, targeting multiple bugs").trim())
+            .failure()
+            .code(1);
     }
 }
