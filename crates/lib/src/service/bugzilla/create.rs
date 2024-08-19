@@ -306,7 +306,8 @@ impl Parameters {
     }
 
     /// Merge parameters using the provided value for fallbacks.
-    pub fn merge(self, other: Self) -> Self {
+    pub fn merge<T: Into<Self>>(self, other: T) -> Self {
+        let other = other.into();
         Self {
             alias: self.alias.or(other.alias),
             assignee: self.assignee.or(other.assignee),

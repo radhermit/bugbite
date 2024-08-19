@@ -219,7 +219,7 @@ impl Command {
                 .into_iter()
                 .next()
                 .expect("failed getting bug");
-            params = params.merge(bug.into());
+            params = params.merge(bug);
         }
 
         // write attributes to template
