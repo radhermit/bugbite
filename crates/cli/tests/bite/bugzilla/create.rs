@@ -1,5 +1,6 @@
 use predicates::prelude::*;
 use tempfile::tempdir;
+use wiremock::matchers;
 
 use crate::command::cmd;
 
@@ -69,7 +70,47 @@ async fn creation() {
 }
 
 #[tokio::test]
-async fn templates() {
+async fn from_bug() {
+    let server = start_server_with_auth().await;
+
+    server
+        .respond_match(
+            matchers::path("/rest/bug/12345"),
+            200,
+            TEST_DATA.join("get/single-bug.json"),
+        )
+        .await;
+    server
+        .respond_match(
+            matchers::path("/rest/bug"),
+            200,
+            TEST_DATA.join("create/creation.json"),
+        )
+        .await;
+
+    // description and summary must be specified
+    let err = "Error: missing required fields: description, summary";
+    cmd("bite bugzilla create")
+        .args(["--from-bug", "12345"])
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff(err).trim())
+        .failure()
+        .code(1);
+
+    // valid
+    cmd("bite bugzilla create")
+        .args(["--from-bug", "12345"])
+        .args(["--description", "description"])
+        .args(["--summary", "summary"])
+        .assert()
+        .stdout("123\n")
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
+async fn from_template() {
     let server = start_server_with_auth().await;
 
     let dir = tempdir().unwrap();
