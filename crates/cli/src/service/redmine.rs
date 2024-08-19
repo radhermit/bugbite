@@ -6,7 +6,7 @@ use bugbite::service::{
     ClientBuilder, ServiceKind,
 };
 use itertools::Itertools;
-use tracing::info;
+use tracing::debug;
 
 use super::output::*;
 use super::Render;
@@ -64,7 +64,7 @@ impl Command {
             .timeout(self.service.timeout);
 
         let service = Service::new(config, builder)?;
-        info!("Service: {service}");
+        debug!("Service: {service}");
         self.cmd.run(&service).await
     }
 }
