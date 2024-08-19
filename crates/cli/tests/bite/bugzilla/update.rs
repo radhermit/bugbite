@@ -62,6 +62,7 @@ async fn no_changes() {
         .respond(200, TEST_DATA.join("update/no-changes.json"))
         .await;
 
+    // no field changes if new value is the same as the original value
     cmd("bite bugzilla update 123 -v")
         .args(["--summary", "new summary"])
         .assert()
@@ -70,6 +71,20 @@ async fn no_changes() {
             === Bug #123 ===
             --- Updated fields ---
             None
+        "}))
+        .success();
+
+    // no filed changes for comment only updates
+    cmd("bite bugzilla update 123 -v")
+        .args(["--comment", "comment"])
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff(indoc::indoc! {"
+            === Bug #123 ===
+            --- Updated fields ---
+            None
+            --- Added comment ---
+            comment
         "}))
         .success();
 }
