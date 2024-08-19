@@ -1,0 +1,15 @@
+{
+  "bugs": [
+    {
+      "alias": [],
+      "changes": {
+        "summary": {
+          "added": "new summary",
+          "removed": "old summary"
+        }
+      },
+      "id": 123,
+      "last_change_time": "2024-08-19T10:49:01Z"
+    }
+  ]
+}

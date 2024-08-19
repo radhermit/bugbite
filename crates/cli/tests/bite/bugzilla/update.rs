@@ -52,3 +52,33 @@ async fn auth_required() {
         .stderr(predicate::str::diff("Error: authentication required").trim())
         .failure();
 }
+
+#[tokio::test]
+async fn summary() {
+    let server = start_server_with_auth().await;
+
+    server
+        .respond(200, TEST_DATA.join("update/summary.json"))
+        .await;
+
+    for opt in ["-S", "--summary"] {
+        cmd("bite bugzilla update 123")
+            .args([opt, "new summary"])
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+
+        // verify output when running verbosely
+        cmd("bite bugzilla update 123 -v")
+            .args([opt, "new summary"])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::diff(indoc::indoc! {"
+                === Bug #123 ===
+                --- Updated fields ---
+                summary: old summary -> new summary
+            "}))
+            .success();
+    }
+}
