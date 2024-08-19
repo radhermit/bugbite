@@ -12,6 +12,17 @@ pub fn current_dir() -> crate::Result<Utf8PathBuf> {
         .map_err(|e| Error::InvalidValue(format!("invalid current working directory: {e}")))
 }
 
+/// Merge two Option wrapped values together, the second value is used if the first is None.
+#[macro_export]
+macro_rules! or {
+    ($orig:expr, $new:expr) => {
+        if $orig.is_none() {
+            $orig = $new;
+        }
+    };
+}
+pub(crate) use or;
+
 /// Try to get the MIME type of a file path using the `file` utility.
 ///
 /// Note that `file` can misidentify plain text file types as various text/* subtypes depending

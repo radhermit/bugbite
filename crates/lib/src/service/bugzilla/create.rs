@@ -9,6 +9,7 @@ use serde_with::skip_serializing_none;
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, RequestSend, WebService};
+use crate::utils::or;
 use crate::Error;
 
 #[derive(Debug)]
@@ -306,35 +307,33 @@ impl Parameters {
     }
 
     /// Merge parameters using the provided value for fallbacks.
-    pub fn merge<T: Into<Self>>(self, other: T) -> Self {
+    pub fn merge<T: Into<Self>>(&mut self, other: T) {
         let other = other.into();
-        Self {
-            alias: self.alias.or(other.alias),
-            assignee: self.assignee.or(other.assignee),
-            blocks: self.blocks.or(other.blocks),
-            cc: self.cc.or(other.cc),
-            component: self.component.or(other.component),
-            custom_fields: self.custom_fields.or(other.custom_fields),
-            depends: self.depends.or(other.depends),
-            description: self.description.or(other.description),
-            flags: self.flags.or(other.flags),
-            groups: self.groups.or(other.groups),
-            keywords: self.keywords.or(other.keywords),
-            os: self.os.or(other.os),
-            platform: self.platform.or(other.platform),
-            priority: self.priority.or(other.priority),
-            product: self.product.or(other.product),
-            qa: self.qa.or(other.qa),
-            resolution: self.resolution.or(other.resolution),
-            see_also: self.see_also.or(other.see_also),
-            status: self.status.or(other.status),
-            severity: self.severity.or(other.severity),
-            target: self.target.or(other.target),
-            summary: self.summary.or(other.summary),
-            url: self.url.or(other.url),
-            version: self.version.or(other.version),
-            whiteboard: self.whiteboard.or(other.whiteboard),
-        }
+        or!(self.alias, other.alias);
+        or!(self.assignee, other.assignee);
+        or!(self.blocks, other.blocks);
+        or!(self.cc, other.cc);
+        or!(self.component, other.component);
+        or!(self.custom_fields, other.custom_fields);
+        or!(self.depends, other.depends);
+        or!(self.description, other.description);
+        or!(self.flags, other.flags);
+        or!(self.groups, other.groups);
+        or!(self.keywords, other.keywords);
+        or!(self.os, other.os);
+        or!(self.platform, other.platform);
+        or!(self.priority, other.priority);
+        or!(self.product, other.product);
+        or!(self.qa, other.qa);
+        or!(self.resolution, other.resolution);
+        or!(self.see_also, other.see_also);
+        or!(self.status, other.status);
+        or!(self.severity, other.severity);
+        or!(self.target, other.target);
+        or!(self.summary, other.summary);
+        or!(self.url, other.url);
+        or!(self.version, other.version);
+        or!(self.whiteboard, other.whiteboard);
     }
 
     /// Encode parameters into the form required for the request.

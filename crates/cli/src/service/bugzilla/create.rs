@@ -210,7 +210,7 @@ impl Command {
         if let Some(path) = self.options.from.as_ref() {
             let template = Parameters::from_path(path)?;
             // command-line parameters override template values
-            params = params.merge(template);
+            params.merge(template);
         } else if let Some(id) = self.options.from_bug {
             let bug = service
                 .get([id])
@@ -219,7 +219,7 @@ impl Command {
                 .into_iter()
                 .next()
                 .expect("failed getting bug");
-            params = params.merge(bug);
+            params.merge(bug);
         }
 
         // write attributes to template
