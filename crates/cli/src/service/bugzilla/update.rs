@@ -372,7 +372,7 @@ impl Command {
         if let Some(path) = self.options.from.as_ref() {
             let template = Parameters::from_path(path)?;
             // command-line parameters override template values
-            params = params.merge(template);
+            params.merge(template);
         };
 
         // write attributes to template
