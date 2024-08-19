@@ -47,7 +47,10 @@
       "target_milestone": "---",
       "is_confirmed": true,
       "last_change_time": "2024-01-18T18:37:44Z",
-      "see_also": [],
+      "see_also": [
+        "https://github.com/radhermit/bugbite/issues/1",
+        "https://github.com/radhermit/bugbite/issues/2"
+      ],
       "groups": [],
       "cc_detail": [
         {

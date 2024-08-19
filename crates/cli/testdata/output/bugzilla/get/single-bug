@@ -15,3 +15,6 @@ Severity     : normal
 ID           : 12345
 Alias        : alias
 CC           : person1, person2
+See also     :
+  https://github.com/radhermit/bugbite/issues/1
+  https://github.com/radhermit/bugbite/issues/2
