@@ -74,7 +74,7 @@ async fn no_changes() {
         "}))
         .success();
 
-    // no filed changes for comment only updates
+    // no field changes for comment only updates
     cmd("bite bugzilla update 123 -v")
         .args(["--comment", "comment"])
         .assert()
@@ -105,6 +105,18 @@ async fn template() {
         .stdout("")
         .stderr("")
         .success();
+
+    // overriding existing template
+    for input in ["y\n", "Y\n", "n\n", "N\n", "\n"] {
+        cmd("bite bugzilla update --dry-run")
+            .args(["--summary", "new summary"])
+            .args(["--to", path])
+            .write_stdin(input)
+            .assert()
+            .stdout(predicate::str::contains(format!("template exists: {path}, overwrite?")))
+            .stderr("")
+            .success();
+    }
 
     server
         .respond(200, TEST_DATA.join("update/summary.json"))
