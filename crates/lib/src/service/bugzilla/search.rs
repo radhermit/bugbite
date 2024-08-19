@@ -17,6 +17,7 @@ use crate::query::{self, Order, OrderType};
 use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestSend, WebService};
+use crate::utils::or;
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -298,68 +299,67 @@ impl Parameters {
     }
 
     /// Merge parameters using the provided value for fallbacks.
-    pub fn merge(self, other: Self) -> Self {
-        Self {
-            alias: self.alias.or(other.alias),
-            attachments: self.attachments.or(other.attachments),
-            flags: self.flags.or(other.flags),
-            groups: self.groups.or(other.groups),
-            keywords: self.keywords.or(other.keywords),
-            see_also: self.see_also.or(other.see_also),
-            tags: self.tags.or(other.tags),
-            whiteboard: self.whiteboard.or(other.whiteboard),
-            url: self.url.or(other.url),
+    pub fn merge<T: Into<Self>>(&mut self, other: T) {
+        let other = other.into();
+        or!(self.alias, other.alias);
+        or!(self.attachments, other.attachments);
+        or!(self.flags, other.flags);
+        or!(self.groups, other.groups);
+        or!(self.keywords, other.keywords);
+        or!(self.see_also, other.see_also);
+        or!(self.tags, other.tags);
+        or!(self.whiteboard, other.whiteboard);
+        or!(self.url, other.url);
 
-            attachment_description: self.attachment_description.or(other.attachment_description),
-            attachment_filename: self.attachment_filename.or(other.attachment_filename),
-            attachment_mime: self.attachment_mime.or(other.attachment_mime),
-            attachment_is_obsolete: self.attachment_is_obsolete.or(other.attachment_is_obsolete),
-            attachment_is_patch: self.attachment_is_patch.or(other.attachment_is_patch),
-            attachment_is_private: self.attachment_is_private.or(other.attachment_is_private),
+        or!(self.attachment_description, other.attachment_description);
+        or!(self.attachment_filename, other.attachment_filename);
+        or!(self.attachment_mime, other.attachment_mime);
+        or!(self.attachment_is_obsolete, other.attachment_is_obsolete);
+        or!(self.attachment_is_patch, other.attachment_is_patch);
+        or!(self.attachment_is_private, other.attachment_is_private);
 
-            changed: self.changed.or(other.changed),
-            changed_by: self.changed_by.or(other.changed_by),
-            changed_from: self.changed_from.or(other.changed_from),
-            changed_to: self.changed_to.or(other.changed_to),
+        or!(self.changed, other.changed);
+        or!(self.changed_by, other.changed_by);
+        or!(self.changed_from, other.changed_from);
+        or!(self.changed_to, other.changed_to);
 
-            assignee: self.assignee.or(other.assignee),
-            attacher: self.attacher.or(other.attacher),
-            cc: self.cc.or(other.cc),
-            commenter: self.commenter.or(other.commenter),
-            flagger: self.flagger.or(other.flagger),
-            qa: self.qa.or(other.qa),
-            reporter: self.reporter.or(other.reporter),
+        or!(self.assignee, other.assignee);
+        or!(self.attacher, other.attacher);
+        or!(self.cc, other.cc);
+        or!(self.commenter, other.commenter);
+        or!(self.flagger, other.flagger);
+        or!(self.qa, other.qa);
+        or!(self.reporter, other.reporter);
 
-            fields: self.fields.or(other.fields),
-            limit: self.limit.or(other.limit),
-            order: self.order.or(other.order),
+        or!(self.fields, other.fields);
+        or!(self.limit, other.limit);
+        or!(self.order, other.order);
 
-            created: self.created.or(other.created),
-            updated: self.updated.or(other.updated),
+        or!(self.created, other.created);
+        or!(self.updated, other.updated);
 
-            comment: self.comment.or(other.comment),
-            comment_is_private: self.comment_is_private.or(other.comment_is_private),
-            comment_tag: self.comment_tag.or(other.comment_tag),
+        or!(self.comment, other.comment);
+        or!(self.comment_is_private, other.comment_is_private);
+        or!(self.comment_tag, other.comment_tag);
 
-            blocks: self.blocks.or(other.blocks),
-            depends: self.depends.or(other.depends),
-            ids: self.ids.or(other.ids),
-            priority: self.priority.or(other.priority),
-            severity: self.severity.or(other.severity),
-            version: self.version.or(other.version),
-            component: self.component.or(other.component),
-            product: self.product.or(other.product),
-            platform: self.platform.or(other.platform),
-            os: self.os.or(other.os),
-            resolution: self.resolution.or(other.resolution),
-            status: self.status.or(other.status),
-            target: self.target.or(other.target),
-            comments: self.comments.or(other.comments),
-            votes: self.votes.or(other.votes),
-            summary: self.summary.or(other.summary),
-            quicksearch: self.quicksearch.or(other.quicksearch),
-            custom_fields: self.custom_fields.or(other.custom_fields),
-        }
+        or!(self.blocks, other.blocks);
+        or!(self.depends, other.depends);
+        or!(self.ids, other.ids);
+        or!(self.priority, other.priority);
+        or!(self.severity, other.severity);
+        or!(self.version, other.version);
+        or!(self.component, other.component);
+        or!(self.product, other.product);
+        or!(self.platform, other.platform);
+        or!(self.os, other.os);
+        or!(self.resolution, other.resolution);
+        or!(self.status, other.status);
+        or!(self.target, other.target);
+        or!(self.comments, other.comments);
+        or!(self.votes, other.votes);
+        or!(self.summary, other.summary);
+        or!(self.quicksearch, other.quicksearch);
+        or!(self.custom_fields, other.custom_fields);
     }
 
     pub(crate) fn encode(self, service: &Service) -> crate::Result<String> {
