@@ -110,7 +110,7 @@ async fn from_bug() {
 }
 
 #[tokio::test]
-async fn from_template() {
+async fn template() {
     let server = start_server_with_auth().await;
 
     let dir = tempdir().unwrap();

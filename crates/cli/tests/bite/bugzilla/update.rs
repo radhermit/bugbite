@@ -1,4 +1,5 @@
 use predicates::prelude::*;
+use tempfile::tempdir;
 
 use crate::command::cmd;
 
@@ -51,6 +52,39 @@ async fn auth_required() {
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())
         .failure();
+}
+
+#[tokio::test]
+async fn template() {
+    let server = start_server_with_auth().await;
+
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("template");
+    let path = path.to_str().unwrap();
+
+    // create template
+    cmd("bite bugzilla update --dry-run")
+        .args(["--summary", "new summary"])
+        .args(["--to", path])
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    server
+        .respond(200, TEST_DATA.join("update/summary.json"))
+        .await;
+
+    cmd("bite bugzilla update 123 -v")
+        .args(["--from", path])
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff(indoc::indoc! {"
+            === Bug #123 ===
+            --- Updated fields ---
+            summary: old summary -> new summary
+        "}))
+        .success();
 }
 
 #[tokio::test]
