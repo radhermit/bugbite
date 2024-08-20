@@ -1,0 +1,50 @@
+{
+  "attachments": {
+    "123": {
+      "bug_id": 321,
+      "content_type": "text/plain",
+      "creation_time": "2024-02-19T08:35:02Z",
+      "creator": "person",
+      "file_name": "test1",
+      "flags": [],
+      "id": 123,
+      "is_obsolete": 0,
+      "is_patch": 0,
+      "is_private": 0,
+      "last_change_time": "2024-02-19T08:35:02Z",
+      "size": 8,
+      "summary": "test file 1"
+    },
+    "124": {
+      "bug_id": 321,
+      "content_type": "text/plain",
+      "creation_time": "2024-02-19T08:35:02Z",
+      "creator": "person",
+      "file_name": "test2.txt",
+      "flags": [],
+      "id": 124,
+      "is_obsolete": 0,
+      "is_patch": 0,
+      "is_private": 0,
+      "last_change_time": "2024-02-19T08:35:02Z",
+      "size": 8,
+      "summary": "test file 2"
+    },
+    "125": {
+      "bug_id": 321,
+      "content_type": "text/plain",
+      "creation_time": "2024-02-19T08:35:02Z",
+      "creator": "person",
+      "file_name": "test.patch",
+      "flags": [],
+      "id": 125,
+      "is_obsolete": 1,
+      "is_patch": 1,
+      "is_private": 1,
+      "last_change_time": "2024-02-19T08:35:02Z",
+      "size": 0,
+      "summary": "patch file"
+    }
+  },
+  "bugs": {}
+}

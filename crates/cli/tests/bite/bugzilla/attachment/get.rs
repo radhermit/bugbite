@@ -69,35 +69,65 @@ async fn deleted_attachment() {
 }
 
 #[tokio::test]
-async fn list_single_without_data() {
+async fn list() {
     let server = start_server().await;
-
     server
         .respond(
             200,
             TEST_DATA.join("attachment/get/single-without-data.json"),
         )
         .await;
-
     let expected =
         fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-without-data")).unwrap();
 
-    // default output
+    // default output for single attachment
     for opt in ["-l", "--list"] {
         cmd("bite bugzilla attachment get")
-            .arg("123")
             .arg(opt)
+            .arg("123")
             .assert()
             .stdout(predicate::str::diff(expected.clone()))
             .stderr("")
             .success();
     }
 
-    // verbose output
+    // verbose output for single attachment
     for opt in ["-l", "--list"] {
         cmd("bite bugzilla attachment get -v")
-            .arg("123")
             .arg(opt)
+            .arg("123")
+            .assert()
+            .stdout(predicate::str::diff(expected.clone()))
+            .stderr(predicate::str::is_empty().not())
+            .success();
+    }
+
+    server.reset().await;
+    server
+        .respond(
+            200,
+            TEST_DATA.join("attachment/get/multiple-without-data.json"),
+        )
+        .await;
+    let expected =
+        fs::read_to_string(TEST_OUTPUT.join("attachment/get/multiple-without-data")).unwrap();
+
+    // default output for multiple attachments
+    for opt in ["-l", "--list"] {
+        cmd("bite bugzilla attachment get")
+            .arg(opt)
+            .args(["123", "124", "125"])
+            .assert()
+            .stdout(predicate::str::diff(expected.clone()))
+            .stderr("")
+            .success();
+    }
+
+    // verbose output for multiple attachments
+    for opt in ["-l", "--list"] {
+        cmd("bite bugzilla attachment get -v")
+            .arg(opt)
+            .args(["123", "124", "125"])
             .assert()
             .stdout(predicate::str::diff(expected.clone()))
             .stderr(predicate::str::is_empty().not())
