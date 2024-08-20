@@ -1,5 +1,3 @@
-use std::fs;
-
 use predicates::prelude::*;
 use tempfile::tempdir;
 
@@ -51,7 +49,6 @@ async fn fields() {
     let server = start_server().await;
 
     server.respond(200, TEST_DATA.join("search/ids.json")).await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("search/ids")).unwrap();
 
     for opt in ["-f", "--fields"] {
         // invalid field
@@ -59,7 +56,7 @@ async fn fields() {
             .args([opt, "field"])
             .assert()
             .stdout("")
-            .stderr(predicate::str::contains("invalid filter field").trim())
+            .stderr(predicate::str::contains("invalid filter field"))
             .failure()
             .code(2);
 
@@ -67,7 +64,13 @@ async fn fields() {
         cmd("bite bugzilla search test")
             .args([opt, "id"])
             .assert()
-            .stdout(predicate::str::diff(expected.clone()))
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                924847
+                924852
+                924854
+                924855
+                924856
+            "}))
             .stderr("")
             .success();
     }
