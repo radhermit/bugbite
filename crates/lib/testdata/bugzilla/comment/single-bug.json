@@ -1,0 +1,33 @@
+{
+  "bugs": {
+    "1": {
+      "comments": [
+        {
+          "attachment_id": null,
+          "bug_id": 1,
+          "count": 0,
+          "creation_time": "2024-03-13T14:02:53Z",
+          "creator": "bugbite@bugbite.test",
+          "id": 1,
+          "is_private": false,
+          "tags": [],
+          "text": "test",
+          "time": "2024-03-13T14:02:53Z"
+        },
+        {
+          "attachment_id": null,
+          "bug_id": 1,
+          "count": 1,
+          "creation_time": "2024-03-13T14:45:00Z",
+          "creator": "bugbite@bugbite.test",
+          "id": 3,
+          "is_private": false,
+          "tags": [],
+          "text": "comment",
+          "time": "2024-03-13T14:45:00Z"
+        }
+      ]
+    }
+  },
+  "comments": {}
+}
