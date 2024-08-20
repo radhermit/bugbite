@@ -1,6 +1,7 @@
 use std::fs;
 
 use predicates::prelude::*;
+use tempfile::tempdir;
 
 use crate::command::cmd;
 
@@ -78,4 +79,45 @@ async fn no_matches() {
             .stderr("")
             .success();
     }
+}
+
+#[tokio::test]
+async fn template() {
+    let server = start_server().await;
+
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("template");
+    let path = path.to_str().unwrap();
+
+    // create template
+    cmd("bite bugzilla search --dry-run test")
+        .args(["--to", path])
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // overriding existing template
+    for input in ["y\n", "Y\n", "n\n", "N\n", "\n"] {
+        cmd("bite bugzilla search -n test")
+            .args(["--to", path])
+            .write_stdin(input)
+            .assert()
+            .stdout(predicate::str::contains(format!(
+                "template exists: {path}, overwrite?"
+            )))
+            .stderr("")
+            .success();
+    }
+
+    server
+        .respond(200, TEST_DATA.join("search/nonexistent.json"))
+        .await;
+
+    cmd("bite bugzilla search")
+        .args(["--from", path])
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
 }
