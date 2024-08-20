@@ -2,8 +2,8 @@
 Summary      : new summary
 Assignee     : assignee
 Creator      : person
-Created      : 2010-04-21 21:28:20 UTC
-Updated      : 2024-01-18 18:37:44 UTC
+Created      : 2024-03-13 14:02:53 UTC
+Updated      : 2024-03-15 22:31:48 UTC
 Status       : CONFIRMED
 Whiteboard   : whiteboard
 Component    : component
@@ -18,18 +18,33 @@ CC           : person1, person2
 See also     :
   https://github.com/radhermit/bugbite/issues/1
   https://github.com/radhermit/bugbite/issues/2
-Comments     : 4
+Comments     : 7
 Changes      : 3
 
 Description by user1@bugbite.test, 2024-03-13 14:02:53 UTC
 ------------------------------------------------------------------------------------------
 test
 
+Comment #1 by user1@bugbite.test, 2024-03-13 14:04:31 UTC
+------------------------------------------------------------------------------------------
+Created attachment 123
+test.patch
+
+Comment #2 (private) by user1@bugbite.test, 2024-03-13 14:05:02 UTC
+------------------------------------------------------------------------------------------
+Created attachment 234
+test data
+
+Comment #3 by user2@bugbite.test, 2024-03-13 14:11:47 UTC
+------------------------------------------------------------------------------------------
+Created attachment 345
+build log
+
 Changes made by user1@bugbite.test, 2024-03-13 14:22:39 UTC
 ------------------------------------------------------------------------------------------
 summary: old summary -> new summary
 
-Comment #1 by user2@bugbite.test, 2024-03-13 14:45:00 UTC
+Comment #4 by user2@bugbite.test, 2024-03-13 14:45:00 UTC
 ------------------------------------------------------------------------------------------
 comment
 
@@ -37,11 +52,11 @@ Changes made by user2@bugbite.test, 2024-03-13 14:45:08 UTC
 ------------------------------------------------------------------------------------------
 blocks: +100
 
-Comment #2 (private) by user2@bugbite.test, 2024-03-13 14:46:29 UTC
+Comment #5 (private) by user2@bugbite.test, 2024-03-13 14:46:29 UTC
 ------------------------------------------------------------------------------------------
 private
 
-Comment #3 (spam, test) by user1@bugbite.test, 2024-03-13 14:46:57 UTC
+Comment #6 (spam, test) by user1@bugbite.test, 2024-03-13 14:46:57 UTC
 ------------------------------------------------------------------------------------------
 tags
 

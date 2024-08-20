@@ -30,7 +30,7 @@
       "version": "unspecified",
       "op_sys": "Linux",
       "status": "CONFIRMED",
-      "creation_time": "2010-04-21T21:28:20Z",
+      "creation_time": "2024-03-13T14:02:53Z",
       "blocks": [],
       "creator": "person",
       "keywords": [],
@@ -46,7 +46,7 @@
       "flags": [],
       "target_milestone": "---",
       "is_confirmed": true,
-      "last_change_time": "2024-01-18T18:37:44Z",
+      "last_change_time": "2024-03-15T22:31:48Z",
       "see_also": [
         "https://github.com/radhermit/bugbite/issues/1",
         "https://github.com/radhermit/bugbite/issues/2"

@@ -220,10 +220,10 @@ async fn reply() {
 
         // invalid comment ID
         cmd("bite bugzilla update 1")
-            .args([opt, "4"])
+            .args([opt, "7"])
             .assert()
             .stdout("")
-            .stderr(predicate::str::diff("Error: reply invalid, nonexistent comment #4").trim())
+            .stderr(predicate::str::diff("Error: reply invalid, nonexistent comment #7").trim())
             .failure()
             .code(1);
 
@@ -255,7 +255,7 @@ async fn reply() {
                 --- Updated fields ---
                 None
                 --- Added comment ---
-                (In reply to user1 from comment #3)
+                (In reply to user1 from comment #6)
                 > tags
 
                 reply
@@ -274,14 +274,14 @@ async fn reply() {
                 --- Updated fields ---
                 None
                 --- Added comment ---
-                (In reply to user1 from comment #3)
+                (In reply to user1 from comment #6)
                 > tags
             "}))
             .success();
 
         // specific comment ID
         cmd("bite bugzilla update 1 -v")
-            .args([opt, "1"])
+            .args([opt, "4"])
             .assert()
             .stdout("")
             .stderr(predicate::str::diff(indoc::indoc! {"
@@ -289,7 +289,7 @@ async fn reply() {
                 --- Updated fields ---
                 None
                 --- Added comment ---
-                (In reply to user2 from comment #1)
+                (In reply to user2 from comment #4)
                 > comment
 
                 reply
