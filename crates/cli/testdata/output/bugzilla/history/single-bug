@@ -1,12 +1,12 @@
 Bug: 1 ===================================================================================
-Changes made by bugbite@bugbite.test, 2024-03-13 14:22:39 UTC
+Changes made by user1@bugbite.test, 2024-03-13 14:22:39 UTC
 ------------------------------------------------------------------------------------------
 summary: old summary -> new summary
 
-Changes made by bugbite@bugbite.test, 2024-03-13 14:45:08 UTC
+Changes made by user2@bugbite.test, 2024-03-13 14:45:08 UTC
 ------------------------------------------------------------------------------------------
 blocks: +100
 
-Changes made by bugbite@bugbite.test, 2024-03-15 03:11:09 UTC
+Changes made by user1@bugbite.test, 2024-03-15 03:11:09 UTC
 ------------------------------------------------------------------------------------------
 blocks: -100

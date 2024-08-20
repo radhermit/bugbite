@@ -12,7 +12,7 @@
             }
           ],
           "when": "2024-03-13T14:22:39Z",
-          "who": "bugbite@bugbite.test"
+          "who": "user1@bugbite.test"
         },
         {
           "changes": [
@@ -23,7 +23,7 @@
             }
           ],
           "when": "2024-03-13T14:45:08Z",
-          "who": "bugbite@bugbite.test"
+          "who": "user2@bugbite.test"
         },
         {
           "changes": [
@@ -34,7 +34,7 @@
             }
           ],
           "when": "2024-03-15T03:11:09Z",
-          "who": "bugbite@bugbite.test"
+          "who": "user1@bugbite.test"
         }
       ],
       "id": 1

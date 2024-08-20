@@ -255,7 +255,7 @@ async fn reply() {
                 --- Updated fields ---
                 None
                 --- Added comment ---
-                (In reply to bugbite from comment #3)
+                (In reply to user1 from comment #3)
                 > tags
 
                 reply
@@ -274,7 +274,7 @@ async fn reply() {
                 --- Updated fields ---
                 None
                 --- Added comment ---
-                (In reply to bugbite from comment #3)
+                (In reply to user1 from comment #3)
                 > tags
             "}))
             .success();
@@ -289,7 +289,7 @@ async fn reply() {
                 --- Updated fields ---
                 None
                 --- Added comment ---
-                (In reply to bugbite from comment #1)
+                (In reply to user2 from comment #1)
                 > comment
 
                 reply

@@ -112,3 +112,30 @@ async fn multiple_bugs() {
         .stderr("")
         .success();
 }
+
+#[tokio::test]
+async fn creator() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("comment/single-bug.json"))
+        .await;
+
+    for opt in ["-R", "--creator"] {
+        cmd("bite bugzilla comment 1")
+            .args([opt, "user1"])
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                Bug: 1 ===================================================================================
+                Description by user1@bugbite.test, 2024-03-13 14:02:53 UTC
+                ------------------------------------------------------------------------------------------
+                test
+
+                Comment #3 (spam, test) by user1@bugbite.test, 2024-03-13 14:46:57 UTC
+                ------------------------------------------------------------------------------------------
+                tags
+            "}))
+            .stderr("")
+            .success();
+    }
+}

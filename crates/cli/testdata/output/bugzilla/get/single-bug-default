@@ -27,30 +27,30 @@ Attachments  : 3
 234: test.txt
 345: test.txt
 
-Description by bugbite@bugbite.test, 2024-03-13 14:02:53 UTC
+Description by user1@bugbite.test, 2024-03-13 14:02:53 UTC
 ------------------------------------------------------------------------------------------
 test
 
-Changes made by bugbite@bugbite.test, 2024-03-13 14:22:39 UTC
+Changes made by user1@bugbite.test, 2024-03-13 14:22:39 UTC
 ------------------------------------------------------------------------------------------
 summary: old summary -> new summary
 
-Comment #1 by bugbite@bugbite.test, 2024-03-13 14:45:00 UTC
+Comment #1 by user2@bugbite.test, 2024-03-13 14:45:00 UTC
 ------------------------------------------------------------------------------------------
 comment
 
-Changes made by bugbite@bugbite.test, 2024-03-13 14:45:08 UTC
+Changes made by user2@bugbite.test, 2024-03-13 14:45:08 UTC
 ------------------------------------------------------------------------------------------
 blocks: +100
 
-Comment #2 (private) by bugbite@bugbite.test, 2024-03-13 14:46:29 UTC
+Comment #2 (private) by user2@bugbite.test, 2024-03-13 14:46:29 UTC
 ------------------------------------------------------------------------------------------
 private
 
-Comment #3 (spam, test) by bugbite@bugbite.test, 2024-03-13 14:46:57 UTC
+Comment #3 (spam, test) by user1@bugbite.test, 2024-03-13 14:46:57 UTC
 ------------------------------------------------------------------------------------------
 tags
 
-Changes made by bugbite@bugbite.test, 2024-03-15 03:11:09 UTC
+Changes made by user1@bugbite.test, 2024-03-15 03:11:09 UTC
 ------------------------------------------------------------------------------------------
 blocks: -100
