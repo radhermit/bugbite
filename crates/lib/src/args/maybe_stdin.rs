@@ -21,9 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use std::io::{self, BufRead, IsTerminal, Read};
+use std::io::{self, read_to_string, BufRead};
 use std::str::FromStr;
 use std::sync::atomic::AtomicBool;
+
+use crate::utils::is_terminal;
 
 pub(crate) static STDIN_HAS_BEEN_USED: AtomicBool = AtomicBool::new(false);
 
@@ -92,11 +94,10 @@ where
         match &source {
             Source::Stdin => {
                 let mut stdin = io::stdin().lock();
-                if stdin.is_terminal() {
+                if is_terminal!(&stdin) {
                     return Err(StdinError::StdinIsTerminal);
                 }
-                let mut input = String::new();
-                stdin.read_to_string(&mut input)?;
+                let input = read_to_string(&mut stdin)?;
                 Ok(T::from_str(input.trim_end())
                     .map_err(|e| StdinError::FromStr(format!("{e}")))
                     .map(|val| Self { source, inner: val })?)
@@ -167,7 +168,7 @@ where
         match &source {
             Source::Stdin => {
                 let stdin = io::stdin().lock();
-                if stdin.is_terminal() {
+                if is_terminal!(&stdin) {
                     return Err(StdinError::StdinIsTerminal);
                 }
                 let mut inner = vec![];
