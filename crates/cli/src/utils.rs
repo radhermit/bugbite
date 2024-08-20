@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::env;
 use std::ffi::OsStr;
-use std::io::{stdin, stdout, Write};
+use std::io::{stdin, stdout, BufRead, Write};
 use std::path::Path;
 use std::process::{Command, ExitStatus};
 
@@ -16,8 +16,8 @@ pub(crate) fn confirm<S>(prompt: S, default: bool) -> Result<bool>
 where
     S: std::fmt::Display,
 {
-    let mut answer = String::new();
     let mut stdout = stdout().lock();
+    let mut stdin = stdin().lock();
     loop {
         if default {
             write!(stdout, "{prompt} (Y/n): ")?;
@@ -26,7 +26,8 @@ where
         }
 
         stdout.flush()?;
-        stdin().read_line(&mut answer)?;
+        let mut answer = String::new();
+        stdin.read_line(&mut answer)?;
         let value = answer.trim();
 
         if value.is_empty() {
