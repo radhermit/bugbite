@@ -9,12 +9,12 @@
         "id": 12429,
         "real_name": "A Person"
       },
-      "id": 12345,
+      "id": 1,
       "resolution": "",
       "alias": [
         "alias"
       ],
-      "summary": "summary",
+      "summary": "new summary",
       "product": "product",
       "url": "",
       "severity": "normal",

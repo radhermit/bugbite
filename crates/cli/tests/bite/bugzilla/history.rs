@@ -58,7 +58,7 @@ async fn single_bug() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("history/single-bug")).unwrap();
 
-    cmd("bite bugzilla history 123")
+    cmd("bite bugzilla history 1")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
@@ -66,7 +66,7 @@ async fn single_bug() {
 
     // pull id from stdin
     cmd("bite bugzilla history -")
-        .write_stdin("123\n")
+        .write_stdin("1\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")

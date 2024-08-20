@@ -1,0 +1,50 @@
+==========================================================================================
+Summary      : new summary
+Assignee     : assignee
+Creator      : person
+Created      : 2010-04-21 21:28:20 UTC
+Updated      : 2024-01-18 18:37:44 UTC
+Status       : CONFIRMED
+Whiteboard   : whiteboard
+Component    : component
+Product      : product
+Platform     : All
+OS           : Linux
+Priority     : High
+Severity     : normal
+ID           : 1
+Alias        : alias
+CC           : person1, person2
+See also     :
+  https://github.com/radhermit/bugbite/issues/1
+  https://github.com/radhermit/bugbite/issues/2
+Comments     : 4
+Changes      : 3
+
+Description by bugbite@bugbite.test, 2024-03-13 14:02:53 UTC
+------------------------------------------------------------------------------------------
+test
+
+Changes made by bugbite@bugbite.test, 2024-03-13 14:22:39 UTC
+------------------------------------------------------------------------------------------
+summary: old summary -> new summary
+
+Comment #1 by bugbite@bugbite.test, 2024-03-13 14:45:00 UTC
+------------------------------------------------------------------------------------------
+comment
+
+Changes made by bugbite@bugbite.test, 2024-03-13 14:45:08 UTC
+------------------------------------------------------------------------------------------
+blocks: +100
+
+Comment #2 (private) by bugbite@bugbite.test, 2024-03-13 14:46:29 UTC
+------------------------------------------------------------------------------------------
+private
+
+Comment #3 (spam, test) by bugbite@bugbite.test, 2024-03-13 14:46:57 UTC
+------------------------------------------------------------------------------------------
+tags
+
+Changes made by bugbite@bugbite.test, 2024-03-15 03:11:09 UTC
+------------------------------------------------------------------------------------------
+blocks: -100

@@ -167,7 +167,7 @@ mod tests {
 
         // invalid response
         server.respond(200, path.join("get/invalid.json")).await;
-        let err = service.get([12345]).send().await.unwrap_err();
+        let err = service.get([1]).send().await.unwrap_err();
         assert!(
             matches!(err, Error::InvalidValue(_)),
             "unmatched error: {err:?}"
@@ -178,7 +178,7 @@ mod tests {
 
         // single bug
         server.respond(200, path.join("get/single-bug.json")).await;
-        let ids = [12345];
+        let ids = [1];
         let bugs = service.get(ids).send().await.unwrap();
         assert_ordered_eq!(bugs.iter().map(|x| x.id), ids);
 

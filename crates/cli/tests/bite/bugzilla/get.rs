@@ -1,6 +1,7 @@
 use std::fs;
 
 use predicates::prelude::*;
+use wiremock::matchers;
 
 use crate::command::cmd;
 
@@ -52,13 +53,39 @@ async fn nonexistent_bug() {
 #[tokio::test]
 async fn single_bug() {
     let server = start_server().await;
-
     server
-        .respond(200, TEST_DATA.join("get/single-bug.json"))
+        .respond_match(
+            matchers::path("/rest/bug/1"),
+            200,
+            TEST_DATA.join("get/single-bug.json"),
+        )
         .await;
+    server
+        .respond_match(
+            matchers::path("/rest/bug/1/attachment"),
+            200,
+            TEST_DATA.join("attachment/get/bug-with-attachments.json"),
+        )
+        .await;
+    server
+        .respond_match(
+            matchers::path("/rest/bug/1/comment"),
+            200,
+            TEST_DATA.join("comment/single-bug.json"),
+        )
+        .await;
+    server
+        .respond_match(
+            matchers::path("/rest/bug/1/history"),
+            200,
+            TEST_DATA.join("history/single-bug.json"),
+        )
+        .await;
+
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug")).unwrap();
 
-    cmd("bite bugzilla get -ACH 12345")
+    // bug fields only, no extra data
+    cmd("bite bugzilla get -ACH 1")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
@@ -66,9 +93,36 @@ async fn single_bug() {
 
     // pull id from stdin
     cmd("bite bugzilla get -ACH -")
-        .write_stdin("12345\n")
+        .write_stdin("1\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
+
+    let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug-default")).unwrap();
+
+    // default output with all extra data
+    cmd("bite bugzilla get 1")
+        .assert()
+        .stdout(predicate::str::diff(expected))
+        .stderr("")
+        .success();
+
+    let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug-attachments")).unwrap();
+
+    // bug fields with attachments
+    cmd("bite bugzilla get -CH 1")
+        .assert()
+        .stdout(predicate::str::diff(expected))
+        .stderr("")
+        .success();
+
+    let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug-no-attachments")).unwrap();
+
+    // bug fields without attachments
+    cmd("bite bugzilla get -A 1")
+        .assert()
+        .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 }
