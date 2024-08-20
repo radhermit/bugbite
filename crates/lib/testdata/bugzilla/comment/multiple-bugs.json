@@ -20,7 +20,7 @@
           "count": 1,
           "creation_time": "2024-03-13T14:45:00Z",
           "creator": "bugbite@bugbite.test",
-          "id": 3,
+          "id": 2,
           "is_private": false,
           "tags": [],
           "text": "comment",
@@ -32,11 +32,11 @@
       "comments": [
         {
           "attachment_id": null,
-          "bug_id": 1,
+          "bug_id": 2,
           "count": 0,
           "creation_time": "2024-03-14T04:16:28Z",
           "creator": "bugbite@bugbite.test",
-          "id": 1,
+          "id": 3,
           "is_private": false,
           "tags": [],
           "text": "another comment",

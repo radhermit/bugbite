@@ -158,6 +158,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
+        let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
@@ -167,5 +168,46 @@ mod tests {
         let err = service.comment(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
+
+        server.reset().await;
+        server
+            .respond(200, path.join("comment/multiple-bugs.json"))
+            .await;
+
+        let comments = service.comment([1, 2]).send().await.unwrap();
+        assert_eq!(comments.len(), 2);
+        assert_eq!(comments[0].len(), 2);
+        assert_eq!(comments[1].len(), 1);
+
+        server.reset().await;
+        server
+            .respond(200, path.join("comment/single-bug.json"))
+            .await;
+
+        // all comments
+        let comments = service.comment([1]).send().await.unwrap();
+        assert_ordered_eq!(comments[0].iter().map(|x| x.id), [1, 2, 3, 4, 5, 6, 7]);
+
+        // comments with attachments
+        let comments = service.comment([1]).attachment(true).send().await.unwrap();
+        assert_ordered_eq!(comments[0].iter().map(|x| x.id), [2, 3, 4]);
+
+        // comments without attachments
+        let comments = service.comment([1]).attachment(false).send().await.unwrap();
+        assert_ordered_eq!(comments[0].iter().map(|x| x.id), [1, 5, 6, 7]);
+
+        // comments by a specific user
+        let comments = service.comment([1]).creator("user1").send().await.unwrap();
+        assert_ordered_eq!(comments[0].iter().map(|x| x.id), [1, 2, 3, 7]);
+
+        // comments with attachments by a specific user
+        let comments = service
+            .comment([1])
+            .attachment(true)
+            .creator("user2")
+            .send()
+            .await
+            .unwrap();
+        assert_ordered_eq!(comments[0].iter().map(|x| x.id), [4]);
     }
 }
