@@ -1,5 +1,6 @@
 use predicates::prelude::*;
 use tempfile::tempdir;
+use wiremock::matchers;
 
 use crate::command::cmd;
 
@@ -68,7 +69,7 @@ async fn no_changes() {
         .assert()
         .stdout("")
         .stderr(predicate::str::diff(indoc::indoc! {"
-            === Bug #123 ===
+            === Bug #1 ===
             --- Updated fields ---
             None
         "}))
@@ -80,7 +81,7 @@ async fn no_changes() {
         .assert()
         .stdout("")
         .stderr(predicate::str::diff(indoc::indoc! {"
-            === Bug #123 ===
+            === Bug #1 ===
             --- Updated fields ---
             None
             --- Added comment ---
@@ -170,17 +171,101 @@ async fn summary() {
 async fn reply() {
     let server = start_server_with_auth().await;
 
-    server
-        .respond(200, TEST_DATA.join("update/no-changes.json"))
-        .await;
+    // override interactive editor default
+    env::set_var("EDITOR", "sed -i -e '$a\\\n\\\nreply'");
 
     for opt in ["-R", "--reply"] {
-        cmd("bite bugzilla update 123 124")
+        // invalid
+        cmd("bite bugzilla update 1 2")
             .arg(opt)
             .assert()
             .stdout("")
             .stderr(predicate::str::diff("Error: reply invalid, targeting multiple bugs").trim())
             .failure()
             .code(1);
+
+        // no comments
+        server.reset().await;
+        server
+            .respond_match(
+                matchers::path("/rest/bug/1/comment"),
+                200,
+                TEST_DATA.join("comment/nonexistent.json"),
+            )
+            .await;
+        cmd("bite bugzilla update 1")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::diff("Error: reply invalid, bug 1 has no comments").trim())
+            .failure()
+            .code(1);
+
+        server.reset().await;
+        server
+            .respond_match(
+                matchers::path("/rest/bug/1/comment"),
+                200,
+                TEST_DATA.join("comment/single-bug.json"),
+            )
+            .await;
+        server
+            .respond_match(
+                matchers::path("/rest/bug/1"),
+                200,
+                TEST_DATA.join("update/no-changes.json"),
+            )
+            .await;
+
+        // invalid comment ID
+        cmd("bite bugzilla update 1")
+            .args([opt, "4"])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::diff("Error: reply invalid, nonexistent comment #4").trim())
+            .failure()
+            .code(1);
+
+        // no output by default
+        cmd("bite bugzilla update 1")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+
+        // last comment default
+        cmd("bite bugzilla update 1 -v")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::diff(indoc::indoc! {"
+                === Bug #1 ===
+                --- Updated fields ---
+                None
+                --- Added comment ---
+                (In reply to bugbite from comment #3)
+                > tags
+
+                reply
+            "}))
+            .success();
+
+        // specific comment ID
+        cmd("bite bugzilla update 1 -v")
+            .args([opt, "1"])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::diff(indoc::indoc! {"
+                === Bug #1 ===
+                --- Updated fields ---
+                None
+                --- Added comment ---
+                (In reply to bugbite from comment #1)
+                > comment
+
+                reply
+            "}))
+            .success();
     }
 }
