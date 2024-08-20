@@ -35,6 +35,21 @@ async fn nonexistent_bug() {
 }
 
 #[tokio::test]
+async fn nonexistent() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("comment/nonexistent.json"))
+        .await;
+
+    cmd("bite bugzilla comment 1")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
 async fn single_bug() {
     let server = start_server().await;
 
@@ -94,21 +109,6 @@ async fn description() {
     cmd("bite bugzilla comment 1")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
-        .stderr("")
-        .success();
-}
-
-#[tokio::test]
-async fn nonexistent() {
-    let server = start_server().await;
-
-    server
-        .respond(200, TEST_DATA.join("comment/nonexistent.json"))
-        .await;
-
-    cmd("bite bugzilla comment 1")
-        .assert()
-        .stdout("")
         .stderr("")
         .success();
 }
