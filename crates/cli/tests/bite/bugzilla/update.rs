@@ -172,7 +172,11 @@ async fn reply() {
     let server = start_server_with_auth().await;
 
     // override interactive editor default
-    env::set_var("EDITOR", "sed -i -e '$a\\\n\\\nreply'");
+    if cfg!(target_os = "macos") {
+        env::set_var("EDITOR", "gsed -i -e '$a\\\n\\\nreply'");
+    } else {
+        env::set_var("EDITOR", "sed -i -e '$a\\\n\\\nreply'");
+    };
 
     for opt in ["-R", "--reply"] {
         // invalid
