@@ -20,11 +20,35 @@
           "count": 1,
           "creation_time": "2024-03-13T14:45:00Z",
           "creator": "bugbite@bugbite.test",
-          "id": 3,
+          "id": 2,
           "is_private": false,
           "tags": [],
           "text": "comment",
           "time": "2024-03-13T14:45:00Z"
+        },
+        {
+          "attachment_id": null,
+          "bug_id": 1,
+          "count": 2,
+          "creation_time": "2024-03-13T14:46:29Z",
+          "creator": "bugbite@bugbite.test",
+          "id": 3,
+          "is_private": true,
+          "tags": [],
+          "text": "private",
+          "time": "2024-03-13T14:46:29Z"
+        },
+        {
+          "attachment_id": null,
+          "bug_id": 1,
+          "count": 3,
+          "creation_time": "2024-03-13T14:46:57Z",
+          "creator": "bugbite@bugbite.test",
+          "id": 4,
+          "is_private": false,
+          "tags": ["spam","test"],
+          "text": "tags",
+          "time": "2024-03-13T14:46:57Z"
         }
       ]
     }
