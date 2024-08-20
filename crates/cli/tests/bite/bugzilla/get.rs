@@ -35,6 +35,21 @@ fn required_args() {
 }
 
 #[tokio::test]
+async fn nonexistent_bug() {
+    let server = start_server().await;
+
+    server
+        .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
+        .await;
+
+    cmd("bite bugzilla get 1")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff("Error: bugzilla: Bug #1 does not exist.").trim())
+        .failure();
+}
+
+#[tokio::test]
 async fn single_bug() {
     let server = start_server().await;
 
@@ -43,8 +58,7 @@ async fn single_bug() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug")).unwrap();
 
-    cmd("bite bugzilla get -ACH")
-        .arg("12345")
+    cmd("bite bugzilla get -ACH 12345")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
@@ -60,22 +74,6 @@ async fn single_bug() {
 }
 
 #[tokio::test]
-async fn nonexistent_bug() {
-    let server = start_server().await;
-
-    server
-        .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
-        .await;
-
-    cmd("bite bugzilla get")
-        .arg("1")
-        .assert()
-        .stdout("")
-        .stderr("Error: bugzilla: Bug #1 does not exist.\n")
-        .failure();
-}
-
-#[tokio::test]
 async fn multiple_bugs() {
     let server = start_server().await;
 
@@ -84,8 +82,7 @@ async fn multiple_bugs() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/multiple-bugs")).unwrap();
 
-    cmd("bite bugzilla get -ACH")
-        .args(["12345", "23456", "34567"])
+    cmd("bite bugzilla get -ACH 12345 23456 34567")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
