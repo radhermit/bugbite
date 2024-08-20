@@ -40,3 +40,15 @@ pub(crate) fn get_mime_type<P: AsRef<Utf8Path>>(path: P) -> crate::Result<String
         )),
     }
 }
+
+/// Return true if a given file descriptor is a terminal/tty, otherwise false.
+///
+/// Allows overriding the return value for testing purposes.
+#[macro_export]
+macro_rules! is_terminal {
+    ($fd:expr) => {
+        std::io::IsTerminal::is_terminal($fd)
+            || (cfg!(feature = "test") && std::env::var("BUGBITE_IS_TERMINAL").is_ok())
+    };
+}
+pub use is_terminal;

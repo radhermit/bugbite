@@ -1,4 +1,5 @@
 use std::fs;
+use std::sync::atomic::Ordering;
 
 use camino::Utf8Path;
 use wiremock::{matchers, Match, Mock, MockServer, ResponseTemplate};
@@ -7,7 +8,7 @@ use crate::args::maybe_stdin::STDIN_HAS_BEEN_USED;
 
 /// Reset standard input argument usage flag.
 pub fn reset_stdin() {
-    STDIN_HAS_BEEN_USED.store(false, std::sync::atomic::Ordering::SeqCst);
+    STDIN_HAS_BEEN_USED.store(false, Ordering::SeqCst);
 }
 
 #[cfg(test)]

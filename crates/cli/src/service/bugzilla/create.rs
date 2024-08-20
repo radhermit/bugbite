@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{stdout, IsTerminal, Write};
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use anyhow::Context;
@@ -8,6 +8,7 @@ use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::create::Parameters;
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
+use bugbite::utils::is_terminal;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
@@ -233,7 +234,7 @@ impl Command {
         if !self.options.dry_run {
             let mut stdout = stdout().lock();
             let id = service.create().params(params).send().await?;
-            if stdout.is_terminal() {
+            if is_terminal!(&stdout) {
                 info!("Created bug {id}");
             } else {
                 writeln!(stdout, "{id}")?;
