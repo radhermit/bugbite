@@ -61,3 +61,21 @@ async fn ids_only() {
             .success();
     }
 }
+
+#[tokio::test]
+async fn no_matches() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("search/nonexistent.json"))
+        .await;
+
+    for opt in ["", "-v", "--verbose"] {
+        cmd("bite bugzilla search nonexistent")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+    }
+}
