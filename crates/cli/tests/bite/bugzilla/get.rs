@@ -130,7 +130,6 @@ async fn single_bug() {
 #[tokio::test]
 async fn multiple_bugs() {
     let server = start_server().await;
-
     server
         .respond(200, TEST_DATA.join("get/multiple-bugs.json"))
         .await;
@@ -149,4 +148,22 @@ async fn multiple_bugs() {
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
         .success();
+}
+
+#[tokio::test]
+async fn browser() {
+    let server = start_server().await;
+    server
+        .respond(200, TEST_DATA.join("get/multiple-bugs.json"))
+        .await;
+
+    for opt in ["-b", "--browser"] {
+        cmd("bite bugzilla get 1")
+            .arg(opt)
+            .env("BROWSER", "true")
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+    }
 }
