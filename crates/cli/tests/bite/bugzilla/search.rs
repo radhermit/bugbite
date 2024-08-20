@@ -121,3 +121,18 @@ async fn template() {
         .stderr("")
         .success();
 }
+
+#[tokio::test]
+async fn browser() {
+    let _server = start_server().await;
+
+    for opt in ["-b", "--browser"] {
+        cmd("bite bugzilla search test")
+            .arg(opt)
+            .env("BROWSER", "true")
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+    }
+}

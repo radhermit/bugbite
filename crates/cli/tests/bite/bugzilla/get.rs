@@ -154,7 +154,7 @@ async fn multiple_bugs() {
 async fn browser() {
     let server = start_server().await;
     server
-        .respond(200, TEST_DATA.join("get/multiple-bugs.json"))
+        .respond(200, TEST_DATA.join("get/single-bug.json"))
         .await;
 
     for opt in ["-b", "--browser"] {
