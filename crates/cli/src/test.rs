@@ -20,13 +20,10 @@ pub(crate) fn subcmd_parse_doc(doc: &str) {
     for line in doc.lines().filter(|x| x.starts_with(' ')) {
         for cmd in line.trim().split(" | ").filter(|x| x.starts_with("bite ")) {
             let args = shlex::split(cmd).unwrap();
-            let result = Command::try_parse_from(args);
+            if let Err(e) = Command::try_parse_from(args) {
+                panic!("failed parsing: {cmd}\n{e}");
+            }
             reset_stdin();
-            assert!(
-                result.is_ok(),
-                "failed parsing: {cmd}\n{}",
-                result.unwrap_err()
-            );
         }
     }
 }
