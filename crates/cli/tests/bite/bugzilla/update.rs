@@ -270,3 +270,52 @@ async fn reply() {
             .success();
     }
 }
+
+#[tokio::test]
+async fn comment() {
+    let server = start_server_with_auth().await;
+    server
+        .respond(200, TEST_DATA.join("update/no-changes.json"))
+        .await;
+
+    // override interactive editor default
+    env::set_var("EDITOR", "tee");
+
+    for opt in ["-c", "--comment"] {
+        // no output by default
+        cmd("bite bugzilla update 1")
+            .args([opt, "comment"])
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+
+        // verbose output
+        cmd("bite bugzilla update 1 -v")
+            .args([opt, "static"])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::diff(indoc::indoc! {"
+                === Bug #1 ===
+                --- Updated fields ---
+                None
+                --- Added comment ---
+                static
+            "}))
+            .success();
+
+        // option used without argument spawns editor
+        cmd("bite bugzilla update 1 -v")
+            .arg(opt)
+            .write_stdin("interactive\n")
+            .assert()
+            .stderr(predicate::str::diff(indoc::indoc! {"
+                === Bug #1 ===
+                --- Updated fields ---
+                None
+                --- Added comment ---
+                interactive
+            "}))
+            .success();
+    }
+}
