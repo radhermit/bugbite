@@ -96,3 +96,30 @@ async fn multiple_bugs() {
         .stderr("")
         .success();
 }
+
+#[tokio::test]
+async fn creator() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("history/single-bug.json"))
+        .await;
+
+    for opt in ["-R", "--creator"] {
+        cmd("bite bugzilla history 1")
+            .args([opt, "user1"])
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                Bug: 1 ===================================================================================
+                Changes made by user1@bugbite.test, 2024-03-13 14:22:39 UTC
+                ------------------------------------------------------------------------------------------
+                summary: old summary -> new summary
+
+                Changes made by user1@bugbite.test, 2024-03-15 03:11:09 UTC
+                ------------------------------------------------------------------------------------------
+                blocks: -100
+            "}))
+            .stderr("")
+            .success();
+    }
+}
