@@ -57,6 +57,24 @@ impl<'a> Request<'a> {
         self.params = params;
         self
     }
+
+    pub fn attachment(mut self, value: bool) -> Self {
+        self.params.attachment = Some(value);
+        self
+    }
+
+    pub fn created_after(mut self, interval: TimeDeltaOrStatic) -> Self {
+        self.params.created_after = Some(interval);
+        self
+    }
+
+    pub fn creator<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.creator = Some(value.into());
+        self
+    }
 }
 
 impl RequestSend for Request<'_> {
@@ -114,10 +132,6 @@ pub struct Parameters {
 }
 
 impl Parameters {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     fn filter(&self, comment: &Comment) -> bool {
         if let Some(value) = self.attachment {
             if comment.attachment_id.is_some() != value {
@@ -132,21 +146,6 @@ impl Parameters {
         }
 
         true
-    }
-
-    pub fn attachment(&mut self, value: bool) {
-        self.attachment = Some(value);
-    }
-
-    pub fn created_after(&mut self, interval: TimeDeltaOrStatic) {
-        self.created_after = Some(interval);
-    }
-
-    pub fn creator<S>(&mut self, value: S)
-    where
-        S: Into<String>,
-    {
-        self.creator = Some(value.into());
     }
 }
 

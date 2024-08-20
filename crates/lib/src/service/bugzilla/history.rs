@@ -57,6 +57,19 @@ impl<'a> Request<'a> {
         self.params = params;
         self
     }
+
+    pub fn created_after(mut self, interval: TimeDeltaOrStatic) -> Self {
+        self.params.created_after = Some(interval);
+        self
+    }
+
+    pub fn creator<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.creator = Some(value.into());
+        self
+    }
 }
 
 impl RequestSend for Request<'_> {
@@ -110,10 +123,6 @@ pub struct Parameters {
 }
 
 impl Parameters {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     fn filter(&self, event: &Event) -> bool {
         if let Some(value) = self.creator.as_ref() {
             if !event.who.contains(value) {
@@ -122,17 +131,6 @@ impl Parameters {
         }
 
         true
-    }
-
-    pub fn created_after(&mut self, interval: TimeDeltaOrStatic) {
-        self.created_after = Some(interval);
-    }
-
-    pub fn creator<S>(&mut self, value: S)
-    where
-        S: Into<String>,
-    {
-        self.creator = Some(value.into());
     }
 }
 
