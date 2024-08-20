@@ -81,3 +81,34 @@ async fn multiple_bugs() {
         .stderr("")
         .success();
 }
+
+#[tokio::test]
+async fn description() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("comment/description.json"))
+        .await;
+    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/description")).unwrap();
+
+    cmd("bite bugzilla comment 1")
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
+async fn nonexistent() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("comment/nonexistent.json"))
+        .await;
+
+    cmd("bite bugzilla comment 1")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}

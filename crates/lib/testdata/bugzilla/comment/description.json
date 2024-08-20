@@ -1,0 +1,21 @@
+{
+  "bugs": {
+    "1": {
+      "comments": [
+        {
+          "attachment_id": null,
+          "bug_id": 1,
+          "count": 0,
+          "creation_time": "2024-03-13T14:02:53Z",
+          "creator": "bugbite@bugbite.test",
+          "id": 1,
+          "is_private": false,
+          "tags": [],
+          "text": "description",
+          "time": "2024-03-13T14:02:53Z"
+        }
+      ]
+    }
+  },
+  "comments": {}
+}
