@@ -142,6 +142,23 @@ async fn template() {
         .stderr("")
         .success();
 
+    // overriding existing template
+    for input in ["y\n", "Y\n", "n\n", "N\n", "\n"] {
+        cmd("bite bugzilla create -n")
+            .args(["--component", "TestComponent"])
+            .args(["--product", "TestProduct"])
+            .args(["--summary", "test"])
+            .args(["--description", "test"])
+            .args(["--to", path])
+            .write_stdin(input)
+            .assert()
+            .stdout(predicate::str::contains(format!(
+                "template exists: {path}, overwrite?"
+            )))
+            .stderr("")
+            .success();
+    }
+
     server
         .respond(200, TEST_DATA.join("create/creation.json"))
         .await;

@@ -108,7 +108,7 @@ async fn template() {
 
     // overriding existing template
     for input in ["y\n", "Y\n", "n\n", "N\n", "\n"] {
-        cmd("bite bugzilla update --dry-run")
+        cmd("bite bugzilla update -n")
             .args(["--summary", "new summary"])
             .args(["--to", path])
             .write_stdin(input)
