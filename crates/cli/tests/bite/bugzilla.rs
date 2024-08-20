@@ -1,9 +1,11 @@
 use std::env;
+use std::time::Duration;
 
 use bugbite::test::TestServer;
 use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
 use predicates::str::contains;
+use wiremock::{matchers, ResponseTemplate};
 
 use crate::command::cmd;
 
@@ -55,4 +57,19 @@ fn unknown_connection() {
             .stderr(contains("unknown connection: unknown"))
             .failure();
     }
+}
+
+// timeout support works at a global session level, but only a specific request is tested here
+#[tokio::test]
+async fn timeout() {
+    let server = start_server().await;
+    let delay = Duration::from_secs(1);
+    let template = ResponseTemplate::new(200).set_delay(delay);
+    server.respond_custom(matchers::any(), template).await;
+
+    cmd("bite bugzilla -t 0.25 get 1")
+        .assert()
+        .stdout("")
+        .stderr("Error: request timed out\n")
+        .failure();
 }
