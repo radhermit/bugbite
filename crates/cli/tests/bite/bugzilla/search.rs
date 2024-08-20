@@ -98,7 +98,7 @@ async fn template() {
         .success();
 
     // overriding existing template
-    for input in ["y\n", "Y\n", "n\n", "N\n", "\n"] {
+    for input in ["y\n", "Y\n", "n\n", "N\n", "\n", "yes\ny\n", "no\nn\n"] {
         cmd("bite bugzilla search -n test")
             .args(["--to", path])
             .write_stdin(input)
