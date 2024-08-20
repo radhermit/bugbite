@@ -168,15 +168,12 @@ async fn summary() {
 }
 
 #[tokio::test]
+#[cfg_attr(target_os = "macos", ignore)] // requires GNU sed which isn't installed by default
 async fn reply() {
     let server = start_server_with_auth().await;
 
     // override interactive editor default
-    if cfg!(target_os = "macos") {
-        env::set_var("EDITOR", "gsed -i -e '$a\\\n\\\nreply'");
-    } else {
-        env::set_var("EDITOR", "sed -i -e '$a\\\n\\\nreply'");
-    };
+    env::set_var("EDITOR", "sed -i -e '$a\\\n\\\nreply'");
 
     for opt in ["-R", "--reply"] {
         // invalid
