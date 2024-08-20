@@ -20,6 +20,8 @@ name = "bugbite"
 default = []
 # external test support
 test = ["dep:wiremock"]
+# bugzilla integration tests that require a local instance
+test-bugzilla = []
 
 [dependencies]
 base64 = "0.22.1"

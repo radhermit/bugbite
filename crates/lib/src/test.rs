@@ -6,6 +6,9 @@ use wiremock::{matchers, Match, Mock, MockServer, ResponseTemplate};
 
 use crate::args::maybe_stdin::STDIN_HAS_BEEN_USED;
 
+#[cfg(feature = "test-bugzilla")]
+pub mod bugzilla;
+
 /// Reset standard input argument usage flag.
 pub fn reset_stdin() {
     STDIN_HAS_BEEN_USED.store(false, Ordering::SeqCst);

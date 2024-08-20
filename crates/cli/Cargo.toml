@@ -37,7 +37,7 @@ generate = ["dep:clap_complete"]
 # test support
 test = ["bugbite/test"]
 # bugzilla integration tests that require a local instance
-test-bugzilla = ["bugbite/test"]
+test-bugzilla = ["bugbite/test", "bugbite/test-bugzilla"]
 
 [dependencies]
 anyhow = "1.0.86"
