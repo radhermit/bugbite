@@ -57,3 +57,27 @@ async fn single_bug() {
         .stderr("")
         .success();
 }
+
+#[tokio::test]
+async fn multiple_bugs() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("comment/multiple-bugs.json"))
+        .await;
+    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/multiple-bugs")).unwrap();
+
+    cmd("bite bugzilla comment 1 2")
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
+
+    // pull ids from stdin
+    cmd("bite bugzilla comment -")
+        .write_stdin("1\n2\n")
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
+}
