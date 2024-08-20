@@ -262,6 +262,23 @@ async fn reply() {
             "}))
             .success();
 
+        // no changes made
+        cmd("bite bugzilla update 1 -v")
+            .arg(opt)
+            .env("EDITOR", "sed -i -e '100d'")
+            .write_stdin("Y\n")
+            .assert()
+            .stdout(predicate::str::diff("No changes made, submit anyway? (y/N):").trim())
+            .stderr(predicate::str::diff(indoc::indoc! {"
+                === Bug #1 ===
+                --- Updated fields ---
+                None
+                --- Added comment ---
+                (In reply to bugbite from comment #3)
+                > tags
+            "}))
+            .success();
+
         // specific comment ID
         cmd("bite bugzilla update 1 -v")
             .args([opt, "1"])
