@@ -1,0 +1,60 @@
+{
+  "bugs": [
+    {
+      "alias": [],
+      "history": [
+        {
+          "changes": [
+            {
+              "added": "new summary",
+              "field_name": "summary",
+              "removed": "old summary"
+            }
+          ],
+          "when": "2024-08-20T03:08:52Z",
+          "who": "bugbite@bugbite.test"
+        },
+        {
+          "changes": [
+            {
+              "added": "100",
+              "field_name": "blocks",
+              "removed": ""
+            }
+          ],
+          "when": "2024-08-20T03:09:30Z",
+          "who": "bugbite@bugbite.test"
+        },
+        {
+          "changes": [
+            {
+              "added": "",
+              "field_name": "blocks",
+              "removed": "100"
+            }
+          ],
+          "when": "2024-08-20T03:11:09Z",
+          "who": "bugbite@bugbite.test"
+        }
+      ],
+      "id": 123
+    },
+    {
+      "alias": [],
+      "history": [
+        {
+          "changes": [
+            {
+              "added": "123",
+              "field_name": "depends_on",
+              "removed": ""
+            }
+          ],
+          "when": "2024-09-22T05:12:33Z",
+          "who": "bugbite@bugbite.test"
+        }
+      ],
+      "id": 234
+    }
+  ]
+}

@@ -50,6 +50,22 @@ async fn nonexistent() {
 }
 
 #[tokio::test]
+async fn description() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("comment/description.json"))
+        .await;
+    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/description")).unwrap();
+
+    cmd("bite bugzilla comment 1")
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
 async fn single_bug() {
     let server = start_server().await;
 
@@ -91,22 +107,6 @@ async fn multiple_bugs() {
     // pull ids from stdin
     cmd("bite bugzilla comment -")
         .write_stdin("1\n2\n")
-        .assert()
-        .stdout(predicate::str::diff(expected.clone()))
-        .stderr("")
-        .success();
-}
-
-#[tokio::test]
-async fn description() {
-    let server = start_server().await;
-
-    server
-        .respond(200, TEST_DATA.join("comment/description.json"))
-        .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/description")).unwrap();
-
-    cmd("bite bugzilla comment 1")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")

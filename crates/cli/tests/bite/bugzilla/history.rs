@@ -72,3 +72,27 @@ async fn single_bug() {
         .stderr("")
         .success();
 }
+
+#[tokio::test]
+async fn multiple_bugs() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("history/multiple-bugs.json"))
+        .await;
+    let expected = fs::read_to_string(TEST_OUTPUT.join("history/multiple-bugs")).unwrap();
+
+    cmd("bite bugzilla history 123 234")
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
+
+    // pull ids from stdin
+    cmd("bite bugzilla history -")
+        .write_stdin("123\n234\n")
+        .assert()
+        .stdout(predicate::str::diff(expected.clone()))
+        .stderr("")
+        .success();
+}
