@@ -159,6 +159,7 @@ async fn attachment() {
         .await;
 
     for opt in ["-a", "--attachment"] {
+        // comments with attachments
         cmd("bite bugzilla comment 1")
             .arg(opt)
             .assert()
@@ -182,6 +183,32 @@ async fn attachment() {
             .stderr("")
             .success();
 
+        // comments without attachments
+        cmd("bite bugzilla comment 1")
+            .args([opt, "false"])
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                Bug: 1 ===================================================================================
+                Description by user1@bugbite.test, 2024-03-13 14:02:53 UTC
+                ------------------------------------------------------------------------------------------
+                test
+
+                Comment #4 by user2@bugbite.test, 2024-03-13 14:45:00 UTC
+                ------------------------------------------------------------------------------------------
+                comment
+
+                Comment #5 (private) by user2@bugbite.test, 2024-03-13 14:46:29 UTC
+                ------------------------------------------------------------------------------------------
+                private
+
+                Comment #6 (spam, test) by user1@bugbite.test, 2024-03-13 14:46:57 UTC
+                ------------------------------------------------------------------------------------------
+                tags
+            "}))
+            .stderr("")
+            .success();
+
+        // comments with attachments by a specific user
         cmd("bite bugzilla comment 1 --creator user2")
             .arg(opt)
             .assert()
