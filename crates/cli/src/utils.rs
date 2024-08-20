@@ -43,12 +43,25 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
+    let browser = env::var("BROWSER").unwrap_or_default();
+    let args = shlex::split(&browser).unwrap_or_default();
+
     for url in urls {
-        Command::new("xdg-open")
-            .arg(url)
-            .spawn()
-            .context("failed launching browser via xdg-open")?;
+        if !args.is_empty() {
+            let cmd = &args[0];
+            Command::new(cmd)
+                .args(&args[1..])
+                .arg(url)
+                .spawn()
+                .with_context(|| format!("failed launching browser via {cmd}"))?;
+        } else {
+            Command::new("xdg-open")
+                .arg(url)
+                .spawn()
+                .context("failed launching browser via xdg-open")?;
+        }
     }
+
     Ok(())
 }
 
