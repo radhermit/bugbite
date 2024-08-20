@@ -357,8 +357,9 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
             anyhow::bail!("failed editing comment");
         }
         let comment = fs::read_to_string(&temp_file).context("failed reading comment file")?;
+        let comment = comment.trim().to_string();
         if comment != data || confirm("No changes made, submit anyway?", false)? {
-            return Ok(comment.trim().to_string());
+            return Ok(comment);
         }
     }
 }
