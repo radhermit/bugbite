@@ -1,11 +1,12 @@
 use std::borrow::Cow;
 use std::env;
 use std::ffi::OsStr;
-use std::io::{stdin, stdout, IsTerminal, Write};
+use std::io::{stdin, stdout, Write};
 use std::path::Path;
 use std::process::{Command, ExitStatus};
 
 use anyhow::{Context, Result};
+use bugbite::utils::is_terminal;
 use crossterm::terminal;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
@@ -75,7 +76,7 @@ pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {
 
 /// Truncate a string to the requested width of graphemes.
 pub(crate) fn truncate(data: &str, width: usize) -> Cow<'_, str> {
-    if data.len() > width && stdout().is_terminal() {
+    if data.len() > width && is_terminal!(&stdout()) {
         let mut iter = UnicodeSegmentation::graphemes(data, true).take(*COLUMNS);
         Cow::Owned(iter.join(""))
     } else {

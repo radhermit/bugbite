@@ -1,7 +1,8 @@
 use std::cmp::Ordering;
-use std::io::{stdout, IsTerminal, Write};
+use std::io::{stdout, Write};
 
 use bugbite::traits::RenderSearch;
+use bugbite::utils::is_terminal;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use serde::Serialize;
@@ -80,7 +81,7 @@ where
     let mut stdout = stdout().lock();
 
     // text wrap width
-    let width = if stdout.is_terminal() && *COLUMNS <= 90 && *COLUMNS >= 50 {
+    let width = if is_terminal!(&stdout) && *COLUMNS <= 90 && *COLUMNS >= 50 {
         *COLUMNS
     } else {
         90

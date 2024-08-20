@@ -1,4 +1,4 @@
-use std::io::{stdout, IsTerminal, Write};
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::Csv;
@@ -6,6 +6,7 @@ use bugbite::query::Order;
 use bugbite::service::github::search::{OrderField, Parameters};
 use bugbite::service::github::Service;
 use bugbite::traits::RequestSend;
+use bugbite::utils::is_terminal;
 use clap::Args;
 use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
@@ -66,7 +67,7 @@ impl Command {
             }
         }
 
-        if count > 0 && stdout.is_terminal() {
+        if count > 0 && is_terminal!(&stdout) {
             writeln!(stdout, " * {count} found")?;
         }
 
