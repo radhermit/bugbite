@@ -58,14 +58,27 @@ async fn creation() {
         .respond(200, TEST_DATA.join("create/creation.json"))
         .await;
 
+    // non-terminal output
     cmd("bite bugzilla create")
         .args(["--component", "TestComponent"])
         .args(["--product", "TestProduct"])
         .args(["--summary", "test"])
         .args(["--description", "test"])
         .assert()
-        .stdout("123\n")
+        .stdout(predicate::str::diff("123").trim())
         .stderr("")
+        .success();
+
+    // verbose terminal output
+    cmd("bite bugzilla create -v")
+        .args(["--component", "TestComponent"])
+        .args(["--product", "TestProduct"])
+        .args(["--summary", "test"])
+        .args(["--description", "test"])
+        .env("BUGBITE_IS_TERMINAL", "1")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff("Created bug 123").trim())
         .success();
 }
 
