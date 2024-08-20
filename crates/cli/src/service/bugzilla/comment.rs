@@ -11,7 +11,7 @@ use clap::Args;
 use crate::service::Render;
 use crate::utils::COLUMNS;
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Comment options")]
 struct Params {
     /// comment includes attachment
@@ -44,7 +44,7 @@ impl From<Params> for Parameters {
     }
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 pub(super) struct Command {
     #[clap(flatten)]
     params: Params,

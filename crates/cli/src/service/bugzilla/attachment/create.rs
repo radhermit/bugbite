@@ -12,7 +12,7 @@ use itertools::Itertools;
 use strum::VariantNames;
 use tracing::info;
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Attachment options")]
 struct Options {
     /// attachment comment
@@ -64,7 +64,7 @@ struct Options {
     private: Option<bool>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Compression options")]
 struct CompressionOptions {
     /// compress attachment
@@ -101,7 +101,7 @@ struct CompressionOptions {
     auto_truncate: Option<usize>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Arguments")]
 struct Arguments {
     /// bug IDs or aliases
@@ -117,7 +117,7 @@ struct Arguments {
     files: Vec<Utf8PathBuf>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,

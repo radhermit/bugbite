@@ -7,7 +7,7 @@ use clap::Args;
 use indexmap::IndexMap;
 use itertools::Itertools;
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 pub(super) struct Subcommand {}
 
 impl Subcommand {

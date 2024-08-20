@@ -4,7 +4,7 @@ use bugbite::services::SERVICES;
 use camino::Utf8Path;
 use indexmap::IndexMap;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub(crate) struct Config {
     pub(crate) connections: IndexMap<String, service::Config>,
 }

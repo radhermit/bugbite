@@ -14,7 +14,7 @@ use super::Render;
 mod get;
 mod search;
 
-#[derive(Debug, clap::Args)]
+#[derive(clap::Args)]
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
     /// API key
@@ -30,7 +30,7 @@ struct Authentication {
     password: Option<String>,
 }
 
-#[derive(Debug, clap::Args)]
+#[derive(clap::Args)]
 pub(crate) struct Command {
     #[clap(flatten)]
     service: super::ServiceOptions,
@@ -69,7 +69,7 @@ impl Command {
     }
 }
 
-#[derive(Debug, clap::Subcommand)]
+#[derive(clap::Subcommand)]
 enum Subcommand {
     /// Get issues
     #[command(alias = "g")]

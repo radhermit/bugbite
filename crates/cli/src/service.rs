@@ -11,7 +11,7 @@ pub(crate) trait Render {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()>;
 }
 
-#[derive(Debug, clap::Args)]
+#[derive(clap::Args)]
 #[clap(next_help_heading = "Service options")]
 struct ServiceOptions {
     /// service connection

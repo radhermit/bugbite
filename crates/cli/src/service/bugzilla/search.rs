@@ -31,7 +31,7 @@ fn change_field(s: &str) -> anyhow::Result<ChangeField> {
     })
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct Changed {
     fields: Vec<ChangeField>,
     interval: RangeOrValue<TimeDeltaOrStatic>,
@@ -52,7 +52,7 @@ impl FromStr for Changed {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct ChangedBy {
     fields: Vec<ChangeField>,
     users: Vec<String>,
@@ -73,7 +73,7 @@ impl FromStr for ChangedBy {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct ChangedValue {
     field: ChangeField,
     value: String,
@@ -94,7 +94,7 @@ impl FromStr for ChangedValue {
     }
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Attribute options")]
 struct AttributeOptions {
     /// restrict by alias
@@ -260,7 +260,7 @@ struct AttributeOptions {
     whiteboard: Option<Vec<ExistsOrValues<Match>>>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Attachment options")]
 struct AttachmentOptions {
     /// restrict by description
@@ -306,7 +306,7 @@ struct AttachmentOptions {
     attachment_is_private: Option<bool>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Range options")]
 struct RangeOptions {
     /// restrict by comments
@@ -318,7 +318,7 @@ struct RangeOptions {
     votes: Option<RangeOrValue<u64>>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Change options")]
 struct ChangeOptions {
     /// fields changed within time interval
@@ -338,7 +338,7 @@ struct ChangeOptions {
     changed_to: Option<Vec<ChangedValue>>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Query options")]
 struct QueryOptions {
     /// fields to output
@@ -358,7 +358,7 @@ struct QueryOptions {
     quicksearch: Option<String>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Time options")]
 struct TimeOptions {
     /// restrict by creation time
@@ -370,7 +370,7 @@ struct TimeOptions {
     updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "User options")]
 struct UserOptions {
     /// user is the assignee
@@ -412,7 +412,7 @@ struct UserOptions {
     reporter: Option<Vec<Csv<Match>>>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Comment options")]
 struct CommentOptions {
     /// strings to search for in comments
@@ -438,7 +438,7 @@ struct CommentOptions {
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
 /// information.
-#[derive(Debug, Args)]
+#[derive(Args)]
 struct Params {
     #[clap(flatten)]
     query: QueryOptions,
@@ -590,7 +590,7 @@ impl From<Params> for Parameters {
     }
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Search options")]
 pub(super) struct Options {
     /// open in browser
@@ -622,7 +622,7 @@ pub(super) struct Options {
     to: Option<Utf8PathBuf>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,

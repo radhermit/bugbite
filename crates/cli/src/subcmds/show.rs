@@ -5,7 +5,7 @@ use clap::Args;
 mod connections;
 mod services;
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 pub(crate) struct Command {
     #[command(subcommand)]
     command: Subcommand,
@@ -17,7 +17,7 @@ impl Command {
     }
 }
 
-#[derive(Debug, clap::Subcommand)]
+#[derive(clap::Subcommand)]
 enum Subcommand {
     /// Show available connections
     Connections(connections::Subcommand),

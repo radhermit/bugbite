@@ -35,7 +35,7 @@ fn enable_logging(verbosity: LevelFilter) {
         .init();
 }
 
-#[derive(Debug, Parser)]
+#[derive(Parser)]
 #[command(
     name = "bite",
     version,

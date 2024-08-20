@@ -22,7 +22,7 @@ mod history;
 mod search;
 mod update;
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
     /// API key
@@ -38,7 +38,7 @@ struct Authentication {
     password: Option<String>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 pub(crate) struct Command {
     #[clap(flatten)]
     service: super::ServiceOptions,
@@ -77,7 +77,7 @@ impl Command {
     }
 }
 
-#[derive(Debug, clap::Subcommand)]
+#[derive(clap::Subcommand)]
 enum Subcommand {
     /// Attachment commands
     #[command(alias = "a")]

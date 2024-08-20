@@ -14,7 +14,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::utils::COLUMNS;
 
 /// Available search parameters.
-#[derive(Debug, Args)]
+#[derive(Args)]
 struct Params {
     // TODO: use enum to define supported fields
     /// fields to output
@@ -41,7 +41,7 @@ impl From<Params> for Parameters {
     }
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 pub(super) struct Command {
     #[clap(flatten)]
     params: Params,

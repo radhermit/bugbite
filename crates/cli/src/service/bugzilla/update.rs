@@ -17,7 +17,7 @@ use tracing::info;
 
 use crate::utils::{confirm, launch_editor};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
     raw: String,
     range_or_set: Option<RangeOrSet<T>>,
@@ -51,7 +51,7 @@ impl<T: FromStr + PartialOrd + Eq + Hash> fmt::Display for CommentPrivacy<T> {
     }
 }
 
-#[derive(Args, Debug)]
+#[derive(Args)]
 #[clap(next_help_heading = "Attribute options")]
 struct Params {
     /// add/remove/set aliases
@@ -259,7 +259,7 @@ impl From<Params> for Parameters {
     }
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 #[clap(next_help_heading = "Update options")]
 pub(super) struct Options {
     /// skip service interaction
@@ -294,7 +294,7 @@ pub(super) struct Options {
     to: Option<Utf8PathBuf>,
 }
 
-#[derive(Debug, Args)]
+#[derive(Args)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,

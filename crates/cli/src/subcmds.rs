@@ -7,7 +7,7 @@ use crate::service::*;
 
 mod show;
 
-#[derive(Debug, VariantNames, clap::Subcommand)]
+#[derive(VariantNames, clap::Subcommand)]
 #[strum(serialize_all = "kebab-case")]
 pub(crate) enum Subcommand {
     // service subcommands
