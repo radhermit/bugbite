@@ -149,3 +149,50 @@ async fn creator() {
             .success();
     }
 }
+
+#[tokio::test]
+async fn attachment() {
+    let server = start_server().await;
+
+    server
+        .respond(200, TEST_DATA.join("comment/single-bug.json"))
+        .await;
+
+    for opt in ["-a", "--attachment"] {
+        cmd("bite bugzilla comment 1")
+            .arg(opt)
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                Bug: 1 ===================================================================================
+                Comment #1 by user1@bugbite.test, 2024-03-13 14:04:31 UTC
+                ------------------------------------------------------------------------------------------
+                Created attachment 123
+                test.patch
+
+                Comment #2 (private) by user1@bugbite.test, 2024-03-13 14:05:02 UTC
+                ------------------------------------------------------------------------------------------
+                Created attachment 234
+                test data
+
+                Comment #3 by user2@bugbite.test, 2024-03-13 14:11:47 UTC
+                ------------------------------------------------------------------------------------------
+                Created attachment 345
+                build log
+            "}))
+            .stderr("")
+            .success();
+
+        cmd("bite bugzilla comment 1 --creator user2")
+            .arg(opt)
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                Bug: 1 ===================================================================================
+                Comment #3 by user2@bugbite.test, 2024-03-13 14:11:47 UTC
+                ------------------------------------------------------------------------------------------
+                Created attachment 345
+                build log
+            "}))
+            .stderr("")
+            .success();
+    }
+}
