@@ -286,10 +286,6 @@ pub struct Parameters {
 }
 
 impl Parameters {
-    pub fn new() -> Self {
-        Parameters::default()
-    }
-
     /// Load parameters in TOML format from a file.
     pub fn from_path(path: &Utf8Path) -> crate::Result<Self> {
         let data = fs::read_to_string(path)
