@@ -18,13 +18,9 @@ where
 {
     let mut stdout = stdout().lock();
     let mut stdin = stdin().lock();
+    let vals = if default { "Y/n" } else { "y/N" };
     loop {
-        if default {
-            write!(stdout, "{prompt} (Y/n): ")?;
-        } else {
-            write!(stdout, "{prompt} (y/N): ")?;
-        }
-
+        write!(stdout, "{prompt} ({vals}): ")?;
         stdout.flush()?;
         let mut answer = String::new();
         stdin.read_line(&mut answer)?;
