@@ -47,15 +47,25 @@ fn multiple_stdin() {
 }
 
 #[tokio::test]
-async fn ids_only() {
+async fn fields() {
     let server = start_server().await;
 
     server.respond(200, TEST_DATA.join("search/ids.json")).await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("search/ids")).unwrap();
 
     for opt in ["-f", "--fields"] {
-        cmd("bite bugzilla search")
-            .args([opt, "id", "test"])
+        // invalid field
+        cmd("bite bugzilla search test")
+            .args([opt, "field"])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::contains("invalid filter field").trim())
+            .failure()
+            .code(2);
+
+        // IDS only
+        cmd("bite bugzilla search test")
+            .args([opt, "id"])
             .assert()
             .stdout(predicate::str::diff(expected.clone()))
             .stderr("")
