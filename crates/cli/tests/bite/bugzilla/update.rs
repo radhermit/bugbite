@@ -227,6 +227,16 @@ async fn reply() {
             .failure()
             .code(1);
 
+        // editor returned failure
+        cmd("bite bugzilla update 1")
+            .arg(opt)
+            .env("EDITOR", "sed -i -e '0d'")
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::contains("Error: failed editing comment"))
+            .failure()
+            .code(1);
+
         // no output by default
         cmd("bite bugzilla update 1")
             .arg(opt)
