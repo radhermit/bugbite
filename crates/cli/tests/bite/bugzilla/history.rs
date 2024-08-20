@@ -82,7 +82,7 @@ async fn multiple_bugs() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("history/multiple-bugs")).unwrap();
 
-    cmd("bite bugzilla history 123 234")
+    cmd("bite bugzilla history 1 2")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
@@ -90,7 +90,7 @@ async fn multiple_bugs() {
 
     // pull ids from stdin
     cmd("bite bugzilla history -")
-        .write_stdin("123\n234\n")
+        .write_stdin("1\n2\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")

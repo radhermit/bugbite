@@ -143,6 +143,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
+        let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
@@ -152,5 +153,28 @@ mod tests {
         let err = service.history(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
+
+        server.reset().await;
+        server
+            .respond(200, path.join("history/multiple-bugs.json"))
+            .await;
+
+        let changes = service.history([1, 2]).send().await.unwrap();
+        assert_eq!(changes.len(), 2);
+        assert_eq!(changes[0].len(), 3);
+        assert_eq!(changes[1].len(), 1);
+
+        server.reset().await;
+        server
+            .respond(200, path.join("history/single-bug.json"))
+            .await;
+
+        // all changes
+        let changes = service.history([1]).send().await.unwrap();
+        assert_eq!(changes[0].len(), 3);
+
+        // changes by a specific user
+        let changes = service.history([1]).creator("user1").send().await.unwrap();
+        assert_eq!(changes[0].len(), 2);
     }
 }

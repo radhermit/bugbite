@@ -37,7 +37,7 @@
           "who": "bugbite@bugbite.test"
         }
       ],
-      "id": 123
+      "id": 1
     },
     {
       "alias": [],
@@ -45,7 +45,7 @@
         {
           "changes": [
             {
-              "added": "123",
+              "added": "1",
               "field_name": "depends_on",
               "removed": ""
             }
@@ -54,7 +54,7 @@
           "who": "bugbite@bugbite.test"
         }
       ],
-      "id": 234
+      "id": 2
     }
   ]
 }
