@@ -106,6 +106,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::test::assert_ordered_eq;
+
     use super::*;
 
     #[test]
@@ -153,5 +155,12 @@ mod tests {
         // mutable deref
         csv[1] = "c".to_string();
         assert_eq!(&csv, &["a", "c"]);
+    }
+
+    #[test]
+    fn into_iter() {
+        let csv: Csv<u64> = "1,2,3".parse().unwrap();
+        assert_ordered_eq!((&csv).into_iter(), &[1, 2, 3]);
+        assert_ordered_eq!(csv.into_iter(), [1, 2, 3]);
     }
 }
