@@ -117,7 +117,7 @@ async fn from_bug() {
         .args(["--description", "description"])
         .args(["--summary", "summary"])
         .assert()
-        .stdout("123\n")
+        .stdout(predicate::str::diff("123").trim())
         .stderr("")
         .success();
 }
@@ -167,7 +167,7 @@ async fn template() {
     cmd("bite bugzilla create")
         .args(["--from", path])
         .assert()
-        .stdout("123\n")
+        .stdout(predicate::str::diff("123").trim())
         .stderr("")
         .success();
 }

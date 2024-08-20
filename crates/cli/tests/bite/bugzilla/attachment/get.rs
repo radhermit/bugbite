@@ -48,7 +48,7 @@ async fn nonexistent_bug() {
             .arg(opt)
             .assert()
             .stdout("")
-            .stderr("Error: bugzilla: Bug #1 does not exist.\n")
+            .stderr(predicate::str::diff("Error: bugzilla: Bug #1 does not exist.").trim())
             .failure();
     }
 }
@@ -179,7 +179,7 @@ async fn save_single_with_plain_text() {
 
     cmd("bite bugzilla attachment get 123")
         .assert()
-        .stdout(predicate::str::diff("Saving attachment: ./test.txt\n"))
+        .stdout(predicate::str::diff("Saving attachment: ./test.txt").trim())
         .stderr("")
         .success();
 
@@ -202,9 +202,7 @@ async fn save_single_existing_error() {
     cmd("bite bugzilla attachment get 123")
         .args(["-d", dir_path])
         .assert()
-        .stdout(predicate::str::diff(format!(
-            "Saving attachment: {dir_path}/test.txt\n"
-        )))
+        .stdout(predicate::str::diff(format!("Saving attachment: {dir_path}/test.txt")).trim())
         .stderr("")
         .success();
 
@@ -213,9 +211,9 @@ async fn save_single_existing_error() {
         .args(["-d", dir_path])
         .assert()
         .stdout("")
-        .stderr(predicate::str::diff(format!(
-            "Error: file already exists: {dir_path}/test.txt\n"
-        )))
+        .stderr(
+            predicate::str::diff(format!("Error: file already exists: {dir_path}/test.txt")).trim(),
+        )
         .failure();
 }
 
