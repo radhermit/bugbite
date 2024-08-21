@@ -89,18 +89,11 @@ pub(crate) trait WebService<'a>: fmt::Display {
     type Response;
 
     /// Inject authentication into a request before it's sent.
-    fn inject_auth(
-        &self,
-        _request: RequestBuilder,
-        _required: bool,
-    ) -> crate::Result<RequestBuilder> {
-        unimplemented!("authentication unsupported")
-    }
+    fn inject_auth(&self, request: RequestBuilder, required: bool)
+        -> crate::Result<RequestBuilder>;
 
     /// Parse a raw response into a service response.
-    async fn parse_response(&self, _response: reqwest::Response) -> crate::Result<Self::Response> {
-        unimplemented!("request parsing unsupported")
-    }
+    async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response>;
 }
 
 pub trait WebClient<'a> {

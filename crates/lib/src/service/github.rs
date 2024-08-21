@@ -1,5 +1,6 @@
 use std::fmt;
 
+use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -82,6 +83,18 @@ impl fmt::Display for Service {
 impl<'a> WebService<'a> for Service {
     const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
+
+    fn inject_auth(
+        &self,
+        _request: RequestBuilder,
+        _required: bool,
+    ) -> crate::Result<RequestBuilder> {
+        unimplemented!("authentication unsupported")
+    }
+
+    async fn parse_response(&self, _response: reqwest::Response) -> crate::Result<Self::Response> {
+        unimplemented!("request parsing unsupported")
+    }
 }
 
 impl<'a> WebClient<'a> for Service {
