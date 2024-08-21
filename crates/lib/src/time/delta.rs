@@ -11,7 +11,7 @@ use crate::traits::Api;
 use crate::Error;
 
 static RELATIVE_TIME_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"^(?<value>\d+)(?<unit>\S+)$").unwrap());
+    Lazy::new(|| Regex::new(r"^(?<value>\d+)(?<unit>[[:alpha:]]+)$").unwrap());
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone, PartialEq, Eq)]
 pub struct TimeDelta {
@@ -86,5 +86,51 @@ impl Api for TimeDelta {
     fn api(&self) -> String {
         let datetime = Utc::now() - self.delta();
         datetime.format("%Y-%m-%dT%H:%M:%SZ").to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::test::assert_err_re;
+
+    use super::*;
+
+    #[test]
+    fn parse() {
+        // invalid
+        for s in ["", "1", "2h2"] {
+            let err = TimeDelta::from_str(s).unwrap_err();
+            assert_err_re!(err, format!("invalid time interval: {s}"));
+        }
+
+        // invalid unit
+        for unit in ["z", "seconds", "ms"] {
+            let s = format!("1{unit}");
+            let err = TimeDelta::from_str(&s).unwrap_err();
+            assert_err_re!(err, format!("invalid time unit: {unit}"));
+        }
+
+        // i32 overflow
+        for unit in ["y", "m"] {
+            let value = "2147483648";
+            let s = format!("{value}{unit}");
+            let err = TimeDelta::from_str(&s).unwrap_err();
+            assert_err_re!(err, format!("invalid time interval value: {value}"));
+        }
+
+        // i64 overflow
+        for unit in ["w", "d", "h", "min", "s"] {
+            let value = "9223372036854775808";
+            let s = format!("{value}{unit}");
+            let err = TimeDelta::from_str(&s).unwrap_err();
+            assert_err_re!(err, format!("invalid time interval value: {value}"));
+        }
+
+        // valid
+        for s in ["1y", "2m", "3w", "4d", "5h", "10min", "100s"] {
+            let delta: TimeDelta = s.try_into().unwrap();
+            assert_eq!(delta.to_string(), s);
+            assert_eq!(delta.as_ref(), s);
+        }
     }
 }
