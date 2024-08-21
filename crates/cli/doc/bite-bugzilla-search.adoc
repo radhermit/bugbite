@@ -591,8 +591,29 @@ the overall comment count shown by the `get` or `comment` subcommands.
 
 // TODO: list possible change fields
 
-*--changed* <field[,...]=time>::
+*--changed* <field[,...][=time]>::
     Restrict by fields changed within a time interval.
++
+By default, this will match any change to the specified fields if no time interval is
+given.
++
+.Summary has been changed:
+ bite bugzilla -c gentoo search --changed summary
++
+.Summary changed in the last week:
+ bite bugzilla -c gentoo search --changed summary=1w
++
+.Summary changed in 2020 or later:
+ bite bugzilla -c gentoo search --changed summary=2020
+ bite bugzilla -c gentoo search --changed summary='>2020'
+ bite bugzilla -c gentoo search --changed summary='2020..'
++
+.Summary changed before 2020:
+ bite bugzilla -c gentoo search --changed summary='<2020'
+ bite bugzilla -c gentoo search --changed summary='..2020'
++
+.Summary changed between 2020 and 2022:
+ bite bugzilla -c gentoo search --changed summary='2020..2022'
 
 *--changed-by* <field[,...]=user[,...]>::
     Restrict by fields changed by a given user.

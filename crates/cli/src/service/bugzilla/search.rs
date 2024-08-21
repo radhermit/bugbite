@@ -41,10 +41,7 @@ impl FromStr for Changed {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let Some((raw_fields, time)) = s.split_once('=') else {
-            anyhow::bail!("missing time interval");
-        };
-
+        let (raw_fields, time) = s.split_once('=').unwrap_or((s, "<now"));
         Ok(Self {
             fields: raw_fields.split(',').map(change_field).try_collect()?,
             interval: time.parse()?,
@@ -322,7 +319,7 @@ struct RangeOptions {
 #[clap(next_help_heading = "Change options")]
 struct ChangeOptions {
     /// fields changed within time interval
-    #[arg(long, value_name = "FIELD[,...]=TIME")]
+    #[arg(long, value_name = "FIELD[,...][=TIME]")]
     changed: Option<Vec<Changed>>,
 
     /// fields changed by users
