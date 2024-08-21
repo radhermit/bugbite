@@ -37,8 +37,12 @@ async fn required_args() {
 
 #[tokio::test]
 async fn auth_required() {
-    let _server = start_server().await;
+    let server = start_server().await;
+    server
+        .respond(200, TEST_DATA.join("create/creation.json"))
+        .await;
 
+    // no auth
     cmd("bite bugzilla create")
         .args(["--component", "TestComponent"])
         .args(["--product", "TestProduct"])
@@ -47,7 +51,34 @@ async fn auth_required() {
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())
-        .failure();
+        .failure()
+        .code(1);
+
+    // user and password
+    for (opt1, opt2) in [("-u", "-p"), ("--user", "--password")] {
+        cmd("bite bugzilla")
+            .args([opt1, "user", opt2, "pass"])
+            .arg("create")
+            .args(["--component", "TestComponent"])
+            .args(["--product", "TestProduct"])
+            .args(["--summary", "test"])
+            .args(["--description", "test"])
+            .assert()
+            .success();
+    }
+
+    // API key
+    for opt in ["-k", "--key"] {
+        cmd("bite bugzilla")
+            .args([opt, "keydata"])
+            .arg("create")
+            .args(["--component", "TestComponent"])
+            .args(["--product", "TestProduct"])
+            .args(["--summary", "test"])
+            .args(["--description", "test"])
+            .assert()
+            .success();
+    }
 }
 
 #[tokio::test]
