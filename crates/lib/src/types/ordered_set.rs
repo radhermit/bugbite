@@ -7,9 +7,7 @@
 
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
-use std::ops::{
-    BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Deref, DerefMut, Sub, SubAssign,
-};
+use std::ops::{Deref, DerefMut};
 
 use indexmap::IndexSet;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
