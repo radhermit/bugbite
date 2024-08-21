@@ -204,21 +204,25 @@ make_set_traits!(OrderedSet<T>);
 
 #[cfg(test)]
 mod tests {
+    use serde_test::{assert_tokens, Token};
+
+    use crate::test::assert_ordered_eq;
+
     use super::*;
 
     #[test]
-    fn ordered_set() {
+    fn hash() {
         // different elements
         let s1 = OrderedSet::from(["a"]);
         let s2 = OrderedSet::from(["b"]);
         assert_ne!(&s1, &s2);
-        assert_ne!(OrderedSet::from([s1, s2]).len(), 1);
+        assert_eq!(OrderedSet::from([s1, s2]).len(), 2);
 
         // different ordering
         let s1 = OrderedSet::from(["a", "b"]);
         let s2 = OrderedSet::from(["b", "a"]);
         assert_ne!(&s1, &s2);
-        assert_ne!(OrderedSet::from([s1, s2]).len(), 1);
+        assert_eq!(OrderedSet::from([s1, s2]).len(), 2);
 
         // similar ordering
         let s1 = OrderedSet::from(["a", "b"]);
@@ -231,5 +235,35 @@ mod tests {
         let s2 = OrderedSet::from(["a", "b", "b"]);
         assert_eq!(&s1, &s2);
         assert_eq!(OrderedSet::from([s1, s2]).len(), 1);
+    }
+
+    #[test]
+    fn deref() {
+        let mut set = OrderedSet::new();
+        set.insert("a");
+        assert!(set.contains("a"));
+    }
+
+    #[test]
+    fn into_iter() {
+        let items = ["a", "b", "c"];
+        let set = OrderedSet::from(items);
+        assert_ordered_eq!((&set).into_iter().copied(), items);
+        assert_ordered_eq!(set.into_iter(), items);
+    }
+
+    #[test]
+    fn serde() {
+        let set = OrderedSet::from(['a', 'b', 'c']);
+        assert_tokens(
+            &set,
+            &[
+                Token::Seq { len: Some(3) },
+                Token::Char('a'),
+                Token::Char('b'),
+                Token::Char('c'),
+                Token::SeqEnd,
+            ],
+        );
     }
 }
