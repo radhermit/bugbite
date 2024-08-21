@@ -11,7 +11,7 @@ use crate::traits::Api;
 use crate::Error;
 
 static RELATIVE_TIME_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"^(?<value>\d+)(?<unit>[ymwdhs]|min)$").unwrap());
+    Lazy::new(|| Regex::new(r"^(?<value>\d+)(?<unit>\S+)$").unwrap());
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone, PartialEq, Eq)]
 pub struct TimeDelta {
@@ -47,7 +47,7 @@ impl FromStr for TimeDelta {
                 "h" => delta = delta + RelativeDuration::hours(convert!(value)?),
                 "min" => delta = delta + RelativeDuration::minutes(convert!(value)?),
                 "s" => delta = delta + RelativeDuration::seconds(convert!(value)?),
-                _ => panic!("invalid time interval unit: {unit}"),
+                _ => return Err(Error::InvalidValue(format!("invalid time unit: {unit}"))),
             }
         }
 
