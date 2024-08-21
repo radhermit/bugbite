@@ -25,7 +25,9 @@ impl FromStr for TimeStatic {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
-        let value = if let Some(captures) = STATIC_DATE_RE.captures(s) {
+        let value = if s == "now" {
+            Utc::now()
+        } else if let Some(captures) = STATIC_DATE_RE.captures(s) {
             let year = captures.name("year").map(|m| m.as_str()).unwrap();
             let year = year
                 .parse()
