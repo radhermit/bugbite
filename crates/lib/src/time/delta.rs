@@ -29,6 +29,16 @@ impl FromStr for TimeDelta {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
+        let convert_i32 = |s: &str| -> crate::Result<i32> {
+            s.parse()
+                .map_err(|_| Error::InvalidValue(format!("invalid time interval value: {s}")))
+        };
+
+        let convert_i64 = |s: &str| -> crate::Result<i64> {
+            s.parse()
+                .map_err(|_| Error::InvalidValue(format!("invalid time interval value: {s}")))
+        };
+
         let captures: Vec<_> = RELATIVE_TIME_RE.captures_iter(s).collect();
         if captures.is_empty() {
             return Err(Error::InvalidValue(format!("invalid time interval: {s}")));
@@ -38,20 +48,14 @@ impl FromStr for TimeDelta {
         for cap in captures {
             let unit = cap.name("unit").map_or("", |m| m.as_str());
             let value = cap.name("value").map_or("", |m| m.as_str());
-            let value_i32: i32 = value.parse().map_err(|_| {
-                Error::InvalidValue(format!("invalid time interval value: {value}"))
-            })?;
-            let value_i64: i64 = value.parse().map_err(|_| {
-                Error::InvalidValue(format!("invalid time interval value: {value}"))
-            })?;
             match unit {
-                "y" => delta = delta + RelativeDuration::years(value_i32),
-                "m" => delta = delta + RelativeDuration::months(value_i32),
-                "w" => delta = delta + RelativeDuration::weeks(value_i64),
-                "d" => delta = delta + RelativeDuration::days(value_i64),
-                "h" => delta = delta + RelativeDuration::hours(value_i64),
-                "min" => delta = delta + RelativeDuration::minutes(value_i64),
-                "s" => delta = delta + RelativeDuration::seconds(value_i64),
+                "y" => delta = delta + RelativeDuration::years(convert_i32(value)?),
+                "m" => delta = delta + RelativeDuration::months(convert_i32(value)?),
+                "w" => delta = delta + RelativeDuration::weeks(convert_i64(value)?),
+                "d" => delta = delta + RelativeDuration::days(convert_i64(value)?),
+                "h" => delta = delta + RelativeDuration::hours(convert_i64(value)?),
+                "min" => delta = delta + RelativeDuration::minutes(convert_i64(value)?),
+                "s" => delta = delta + RelativeDuration::seconds(convert_i64(value)?),
                 _ => panic!("invalid time interval unit: {unit}"),
             }
         }
