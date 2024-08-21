@@ -1,5 +1,3 @@
-use std::fs;
-
 use predicates::prelude::*;
 
 use crate::command::cmd;
@@ -56,11 +54,25 @@ async fn single_bug() {
     server
         .respond(200, TEST_DATA.join("history/single-bug.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("history/single-bug")).unwrap();
+
+    let expected = indoc::indoc! {"
+        Bug: 1 ===================================================================================
+        Changes made by user1@bugbite.test, 2024-03-13 14:22:39 UTC
+        ------------------------------------------------------------------------------------------
+        summary: old summary -> new summary
+
+        Changes made by user2@bugbite.test, 2024-03-13 14:45:08 UTC
+        ------------------------------------------------------------------------------------------
+        blocks: +100
+
+        Changes made by user1@bugbite.test, 2024-03-15 03:11:09 UTC
+        ------------------------------------------------------------------------------------------
+        blocks: -100
+    "};
 
     cmd("bite bugzilla history 1")
         .assert()
-        .stdout(predicate::str::diff(expected.clone()))
+        .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 
@@ -68,7 +80,7 @@ async fn single_bug() {
     cmd("bite bugzilla history -")
         .write_stdin("1\n")
         .assert()
-        .stdout(predicate::str::diff(expected.clone()))
+        .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 }
@@ -80,11 +92,30 @@ async fn multiple_bugs() {
     server
         .respond(200, TEST_DATA.join("history/multiple-bugs.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("history/multiple-bugs")).unwrap();
+
+    let expected = indoc::indoc! {"
+        Bug: 1 ===================================================================================
+        Changes made by bugbite@bugbite.test, 2024-08-20 03:08:52 UTC
+        ------------------------------------------------------------------------------------------
+        summary: old summary -> new summary
+
+        Changes made by bugbite@bugbite.test, 2024-08-20 03:09:30 UTC
+        ------------------------------------------------------------------------------------------
+        blocks: +100
+
+        Changes made by bugbite@bugbite.test, 2024-08-20 03:11:09 UTC
+        ------------------------------------------------------------------------------------------
+        blocks: -100
+
+        Bug: 2 ===================================================================================
+        Changes made by bugbite@bugbite.test, 2024-09-22 05:12:33 UTC
+        ------------------------------------------------------------------------------------------
+        depends_on: +1
+    "};
 
     cmd("bite bugzilla history 1 2")
         .assert()
-        .stdout(predicate::str::diff(expected.clone()))
+        .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 
@@ -92,7 +123,7 @@ async fn multiple_bugs() {
     cmd("bite bugzilla history -")
         .write_stdin("1\n2\n")
         .assert()
-        .stdout(predicate::str::diff(expected.clone()))
+        .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 }
