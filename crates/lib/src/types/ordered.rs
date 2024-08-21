@@ -237,6 +237,29 @@ mod tests {
     use super::*;
 
     #[test]
+    fn eq_and_ord() {
+        let s1 = OrderedSet::<&str>::new();
+        let s2 = OrderedSet::<&str>::new();
+        assert!(s1 >= s2);
+        assert!(s1 <= s2);
+        assert!(s1 == s2);
+
+        let s1 = OrderedSet::from(["a"]);
+        let s2 = OrderedSet::from(["a"]);
+        assert!(s1 >= s2);
+        assert!(s1 <= s2);
+        assert!(s1 == s2);
+
+        let s1 = OrderedSet::from(["a"]);
+        let s2 = OrderedSet::from(["b"]);
+        assert!(s1 < s2);
+
+        let s1 = OrderedSet::from(["a", "b", "d"]);
+        let s2 = OrderedSet::from(["a", "b", "c"]);
+        assert!(s1 > s2);
+    }
+
+    #[test]
     fn hash() {
         // different elements
         let s1 = OrderedSet::from(["a"]);
