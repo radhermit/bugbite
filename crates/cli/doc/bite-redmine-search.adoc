@@ -23,7 +23,7 @@ include::include/global-options.adoc[]
 *-b, --browser*::
     Open in a browser.
 +
-This functionality uses `xdg-open` to open URLs.
+This uses `$BROWSER` to open URLs, falling back to `xdg-open` if undefined.
 
 *-n, --dry-run*::
     Skip service interaction.
