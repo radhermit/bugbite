@@ -37,15 +37,8 @@ impl FromStr for TimeDelta {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
-        let captures: Vec<_> = RELATIVE_TIME_RE.captures_iter(s).collect();
-        if captures.is_empty() {
-            return Err(Error::InvalidValue(format!("invalid time interval: {s}")));
-        }
-
         let mut delta = RelativeDuration::zero();
-        for cap in captures {
-            let unit = cap.name("unit").map_or("", |m| m.as_str());
-            let value = cap.name("value").map_or("", |m| m.as_str());
+        for (_, [value, unit]) in RELATIVE_TIME_RE.captures_iter(s).map(|c| c.extract()) {
             match unit {
                 "y" => delta = delta + RelativeDuration::years(convert!(value)?),
                 "m" => delta = delta + RelativeDuration::months(convert!(value)?),
@@ -58,10 +51,14 @@ impl FromStr for TimeDelta {
             }
         }
 
-        Ok(Self {
-            raw: s.to_string(),
-            delta,
-        })
+        if delta == RelativeDuration::zero() {
+            Err(Error::InvalidValue(format!("invalid time interval: {s}")))
+        } else {
+            Ok(Self {
+                raw: s.to_string(),
+                delta,
+            })
+        }
     }
 }
 
