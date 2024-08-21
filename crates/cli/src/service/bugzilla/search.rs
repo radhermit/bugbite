@@ -326,11 +326,11 @@ struct ChangeOptions {
     #[arg(long, value_name = "FIELD[,...]=USER[,...]")]
     changed_by: Option<Vec<ChangedBy>>,
 
-    /// fields changed from a value
+    /// fields changed from value
     #[arg(long, value_name = "FIELD=VALUE")]
     changed_from: Option<Vec<ChangedValue>>,
 
-    /// fields changed to a value
+    /// fields changed to value
     #[arg(long, value_name = "FIELD=VALUE")]
     changed_to: Option<Vec<ChangedValue>>,
 }
@@ -342,7 +342,7 @@ struct QueryOptions {
     #[arg(short, long, value_name = "FIELD[,...]", default_value = "id,summary")]
     fields: Csv<FilterField>,
 
-    /// limit the number of results
+    /// limit result count
     #[arg(short, long)]
     limit: Option<u64>,
 
@@ -370,7 +370,7 @@ struct TimeOptions {
 #[derive(Args)]
 #[clap(next_help_heading = "User options")]
 struct UserOptions {
-    /// user is the assignee
+    /// user is assignee
     #[arg(short, long, value_name = "USER[,...]")]
     assignee: Option<Vec<Csv<Match>>>,
 
@@ -378,7 +378,7 @@ struct UserOptions {
     #[arg(long, value_name = "USER[,...]")]
     attacher: Option<Vec<Csv<Match>>>,
 
-    /// user in the CC list
+    /// user in CC list
     #[arg(
         long,
         value_name = "USER[,...]",
@@ -391,11 +391,11 @@ struct UserOptions {
     #[arg(long, value_name = "USER[,...]")]
     commenter: Option<Vec<Csv<Match>>>,
 
-    /// user who set a flag
+    /// user who set flag
     #[arg(long, value_name = "USER[,...]")]
     flagger: Option<Vec<Csv<Match>>>,
 
-    /// user is the QA contact
+    /// user is QA contact
     #[arg(
         long,
         value_name = "USER[,...]",
@@ -461,7 +461,7 @@ struct Params {
     #[clap(flatten)]
     comment: CommentOptions,
 
-    /// strings to search for in the summary
+    /// summary strings to search for
     #[clap(value_name = "TERM", help_heading = "Arguments")]
     summary: Option<Vec<MaybeStdinVec<Match>>>,
 }
