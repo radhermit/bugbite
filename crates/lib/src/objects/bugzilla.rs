@@ -1,12 +1,10 @@
 use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::fmt;
-use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
-use indexmap::IndexSet;
 use itertools::{Either, Itertools};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -18,6 +16,7 @@ use strum::{Display, EnumString};
 use crate::serde::{non_empty_str, null_empty_set, null_empty_vec};
 use crate::service::bugzilla::{BugField, FilterField, GroupField};
 use crate::traits::RenderSearch;
+use crate::types::OrderedSet;
 use crate::Error;
 
 use super::{stringify, Base64, Item};
@@ -32,7 +31,7 @@ pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
 
 /// A file attachment on a bug.
 #[serde_as]
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq, Eq, Hash)]
 pub struct Attachment {
     /// Unique attachment identifier.
     pub id: u64,
@@ -85,20 +84,6 @@ pub struct Attachment {
     data: Base64,
 }
 
-impl PartialEq for Attachment {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
-    }
-}
-
-impl Eq for Attachment {}
-
-impl Hash for Attachment {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-    }
-}
-
 impl AsRef<[u8]> for Attachment {
     fn as_ref(&self) -> &[u8] {
         self.data.as_ref()
@@ -116,7 +101,7 @@ impl Attachment {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum BugUpdate<'a> {
     Comment(&'a Comment),
     Event(&'a Event),
@@ -143,7 +128,7 @@ impl PartialOrd for BugUpdate<'_> {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
 pub struct Comment {
     /// Globally unique ID for the comment.
     pub id: u64,
@@ -165,7 +150,7 @@ pub struct Comment {
     pub created: DateTime<Utc>,
     pub is_private: bool,
     #[serde(default)]
-    pub tags: IndexSet<String>,
+    pub tags: OrderedSet<String>,
 }
 
 impl Comment {
@@ -188,14 +173,14 @@ impl Comment {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
 pub struct Event {
     pub who: String,
     pub when: DateTime<Utc>,
     pub changes: Vec<Change>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
 pub struct Change {
     pub field_name: String,
     #[serde(deserialize_with = "non_empty_str")]
@@ -206,7 +191,16 @@ pub struct Change {
 }
 
 #[derive(
-    Display, EnumString, DeserializeFromStr, SerializeDisplay, Debug, Eq, PartialEq, Clone, Copy,
+    Display,
+    EnumString,
+    DeserializeFromStr,
+    SerializeDisplay,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    Clone,
+    Copy,
 )]
 pub enum FlagStatus {
     #[strum(serialize = "+")]
@@ -219,7 +213,7 @@ pub enum FlagStatus {
     Remove,
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Flag {
     pub name: String,
     pub status: FlagStatus,
@@ -252,7 +246,7 @@ impl fmt::Display for Flag {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
 pub struct BugFlag {
     #[serde(flatten)]
     pub flag: Flag,
@@ -273,10 +267,10 @@ impl fmt::Display for BugFlag {
 // webservice API returns alias arrays while Mozilla upstream uses string values which
 // is what Bugzilla is moving to in the future (see
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1534305).
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
 #[serde(untagged)]
 enum Alias {
-    List(IndexSet<String>),
+    List(OrderedSet<String>),
     String(String),
 }
 
@@ -286,7 +280,9 @@ pub(crate) fn unset_value_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<
 }
 
 /// Deserialize an alias as an ordered set of strings.
-pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(d: D) -> Result<IndexSet<String>, D::Error> {
+pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(
+    d: D,
+) -> Result<OrderedSet<String>, D::Error> {
     Option::<Alias>::deserialize(d).map(|o| match o {
         Some(Alias::List(values)) => values,
         Some(Alias::String(value)) => [value].into_iter().collect(),
@@ -295,13 +291,13 @@ pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(d: D) -> Result<IndexSet<S
 }
 
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default)]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Hash)]
 #[serde(default)]
 pub struct Bug {
     pub id: u64,
     #[serde(deserialize_with = "alias_to_set")]
-    #[serde(skip_serializing_if = "IndexSet::is_empty")]
-    pub alias: IndexSet<String>,
+    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
+    pub alias: OrderedSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub assigned_to: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
@@ -338,31 +334,31 @@ pub struct Bug {
     #[serde(deserialize_with = "unset_value_str")]
     pub severity: Option<String>,
     #[serde(deserialize_with = "null_empty_set")]
-    #[serde(skip_serializing_if = "IndexSet::is_empty")]
-    pub groups: IndexSet<String>,
+    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
+    pub groups: OrderedSet<String>,
     #[serde(deserialize_with = "null_empty_set")]
-    #[serde(skip_serializing_if = "IndexSet::is_empty")]
-    pub keywords: IndexSet<String>,
+    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
+    pub keywords: OrderedSet<String>,
     #[serde(deserialize_with = "null_empty_set")]
-    #[serde(skip_serializing_if = "IndexSet::is_empty")]
-    pub cc: IndexSet<String>,
+    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
+    pub cc: OrderedSet<String>,
     #[serde(deserialize_with = "null_empty_set")]
-    #[serde(skip_serializing_if = "IndexSet::is_empty")]
-    pub blocks: IndexSet<u64>,
+    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
+    pub blocks: OrderedSet<u64>,
     #[serde(deserialize_with = "null_empty_set")]
-    #[serde(skip_serializing_if = "IndexSet::is_empty")]
-    pub depends_on: IndexSet<u64>,
+    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
+    pub depends_on: OrderedSet<u64>,
     #[serde(rename = "dupe_of")]
     pub duplicate_of: Option<u64>,
     #[serde(deserialize_with = "null_empty_vec")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub flags: Vec<BugFlag>,
     #[serde(deserialize_with = "null_empty_set")]
-    #[serde(skip_serializing_if = "IndexSet::is_empty")]
-    pub tags: IndexSet<String>,
+    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
+    pub tags: OrderedSet<String>,
     #[serde(deserialize_with = "null_empty_set")]
-    #[serde(skip_serializing_if = "IndexSet::is_empty")]
-    pub see_also: IndexSet<String>,
+    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
+    pub see_also: OrderedSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub url: Option<String>,
     #[serde(skip)]
@@ -371,20 +367,6 @@ pub struct Bug {
     pub attachments: Vec<Attachment>,
     #[serde(skip)]
     pub history: Vec<Event>,
-}
-
-impl PartialEq for Bug {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
-    }
-}
-
-impl Eq for Bug {}
-
-impl Hash for Bug {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-    }
 }
 
 impl From<Bug> for Item {

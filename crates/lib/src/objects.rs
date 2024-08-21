@@ -23,7 +23,7 @@ pub enum Item {
 }
 
 /// Raw binary data encoded as Base64.
-#[derive(DeserializeFromStr, SerializeDisplay, Default, Debug, Eq, PartialEq)]
+#[derive(DeserializeFromStr, SerializeDisplay, Default, Debug, PartialEq, Eq, Hash)]
 pub(crate) struct Base64(pub(crate) Vec<u8>);
 
 impl FromStr for Base64 {

@@ -1,5 +1,3 @@
-use std::hash::{Hash, Hasher};
-
 use chrono::prelude::*;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -14,7 +12,7 @@ use crate::traits::RenderSearch;
 use super::{stringify, Item};
 
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default)]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Hash)]
 #[serde(default)]
 pub struct Issue {
     pub id: u64,
@@ -35,21 +33,7 @@ pub struct Issue {
     pub comments: Vec<Comment>,
 }
 
-impl PartialEq for Issue {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
-    }
-}
-
-impl Eq for Issue {}
-
-impl Hash for Issue {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-    }
-}
-
-#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Hash)]
 pub struct FieldValue {
     id: u64,
     name: String,
@@ -73,7 +57,7 @@ impl From<Issue> for Item {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Person {
     id: u64,
     name: String,
@@ -85,7 +69,7 @@ impl fmt::Display for Person {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
 pub struct Comment {
     /// The number of the comment local to the issue.
     ///
