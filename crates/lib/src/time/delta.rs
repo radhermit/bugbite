@@ -91,6 +91,8 @@ impl Api for TimeDelta {
 
 #[cfg(test)]
 mod tests {
+    use chrono::DateTime;
+
     use crate::test::assert_err_re;
 
     use super::*;
@@ -131,6 +133,10 @@ mod tests {
             let delta: TimeDelta = s.try_into().unwrap();
             assert_eq!(delta.to_string(), s);
             assert_eq!(delta.as_ref(), s);
+
+            // verify Api trait produces valid RFC3339 values
+            let api = delta.api();
+            assert!(DateTime::parse_from_rfc3339(&api).is_ok());
         }
     }
 }
