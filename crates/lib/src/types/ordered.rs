@@ -28,6 +28,12 @@ impl<T: Ordered> Default for OrderedSet<T> {
     }
 }
 
+impl<T: Ordered> From<IndexSet<T>> for OrderedSet<T> {
+    fn from(value: IndexSet<T>) -> Self {
+        Self(value)
+    }
+}
+
 impl<T: Ordered> OrderedSet<T> {
     /// Construct a new, empty OrderedSet<T>.
     pub fn new() -> Self {
@@ -138,62 +144,82 @@ where
 
 macro_rules! make_set_traits {
     ($($x:ty),+) => {$(
-        impl<T: Ordered> BitAnd<&Self> for $x {
-            type Output = Self;
+        impl<T: Ordered> BitAnd<&$x> for &$x {
+            type Output = $x;
 
-            fn bitand(mut self, other: &Self) -> Self::Output {
-                self &= other;
-                self
+            fn bitand(self, other: &$x) -> Self::Output {
+                (&self.0 & &other.0).into()
             }
         }
 
-        impl<T: Ordered> BitAndAssign<&Self> for $x {
-            fn bitand_assign(&mut self, other: &Self) {
+        impl<T: Ordered> BitAndAssign<&$x> for $x {
+            fn bitand_assign(&mut self, other: &$x) {
                 self.0 = &self.0 & &other.0;
             }
         }
 
-        impl<T: Ordered> BitOr<&Self> for $x {
-            type Output = Self;
-
-            fn bitor(mut self, other: &Self) -> Self::Output {
-                self |= other;
-                self
+        impl<T: Ordered> BitAndAssign<$x> for $x {
+            fn bitand_assign(&mut self, other: $x) {
+                self.0 = &self.0 & &other.0;
             }
         }
 
-        impl<T: Ordered> BitOrAssign<&Self> for $x {
-            fn bitor_assign(&mut self, other: &Self) {
+        impl<T: Ordered> BitOr<&$x> for &$x {
+            type Output = $x;
+
+            fn bitor(self, other: &$x) -> Self::Output {
+                (&self.0 | &other.0).into()
+            }
+        }
+
+        impl<T: Ordered> BitOrAssign<&$x> for $x {
+            fn bitor_assign(&mut self, other: &$x) {
                 self.0 = &self.0 | &other.0;
             }
         }
 
-        impl<T: Ordered> BitXor<&Self> for $x {
-            type Output = Self;
-
-            fn bitxor(mut self, other: &Self) -> Self::Output {
-                self ^= other;
-                self
+        impl<T: Ordered> BitOrAssign<$x> for $x {
+            fn bitor_assign(&mut self, other: $x) {
+                self.0 = &self.0 | &other.0;
             }
         }
 
-        impl<T: Ordered> BitXorAssign<&Self> for $x {
-            fn bitxor_assign(&mut self, other: &Self) {
+        impl<T: Ordered> BitXor<&$x> for &$x {
+            type Output = $x;
+
+            fn bitxor(self, other: &$x) -> Self::Output {
+                (&self.0 ^ &other.0).into()
+            }
+        }
+
+        impl<T: Ordered> BitXorAssign<&$x> for $x {
+            fn bitxor_assign(&mut self, other: &$x) {
                 self.0 = &self.0 ^ &other.0;
             }
         }
 
-        impl<T: Ordered> Sub<&Self> for $x {
-            type Output = Self;
-
-            fn sub(mut self, other: &Self) -> Self::Output {
-                self -= other;
-                self
+        impl<T: Ordered> BitXorAssign<$x> for $x {
+            fn bitxor_assign(&mut self, other: $x) {
+                self.0 = &self.0 ^ &other.0;
             }
         }
 
-        impl<T: Ordered> SubAssign<&Self> for $x {
-            fn sub_assign(&mut self, other: &Self) {
+        impl<T: Ordered> Sub<&$x> for &$x {
+            type Output = $x;
+
+            fn sub(self, other: &$x) -> Self::Output {
+                (&self.0 - &other.0).into()
+            }
+        }
+
+        impl<T: Ordered> SubAssign<&$x> for $x {
+            fn sub_assign(&mut self, other: &$x) {
+                self.0 = &self.0 - &other.0;
+            }
+        }
+
+        impl<T: Ordered> SubAssign<$x> for $x {
+            fn sub_assign(&mut self, other: $x) {
                 self.0 = &self.0 - &other.0;
             }
         }
@@ -265,5 +291,85 @@ mod tests {
                 Token::SeqEnd,
             ],
         );
+    }
+
+    #[test]
+    fn and() {
+        let s1 = OrderedSet::from(["a"]);
+        let s2 = OrderedSet::from(["b"]);
+        let s3 = &s1 & &s2;
+        assert!(s3.is_empty());
+
+        let s1 = OrderedSet::from(["a", "c"]);
+        let s2 = OrderedSet::from(["b", "c"]);
+        let s3 = &s1 & &s2;
+        assert_ordered_eq!(&s3, &["c"]);
+
+        let mut s1 = OrderedSet::from(["a", "c"]);
+        let s2 = OrderedSet::from(["b", "c"]);
+        s1 &= &s2;
+        assert_ordered_eq!(&s1, &["c"]);
+        s1 &= s2;
+        assert_ordered_eq!(&s1, &["c"]);
+    }
+
+    #[test]
+    fn or() {
+        let s1 = OrderedSet::from(["a"]);
+        let s2 = OrderedSet::from(["b"]);
+        let s3 = &s1 | &s2;
+        assert_ordered_eq!(&s3, &["a", "b"]);
+
+        let s1 = OrderedSet::from(["a", "c"]);
+        let s2 = OrderedSet::from(["b", "c"]);
+        let s3 = &s1 | &s2;
+        assert_ordered_eq!(&s3, &["a", "c", "b"]);
+
+        let mut s1 = OrderedSet::from(["a", "c"]);
+        let s2 = OrderedSet::from(["b", "c"]);
+        s1 |= &s2;
+        assert_ordered_eq!(&s1, &["a", "c", "b"]);
+        s1 |= s2;
+        assert_ordered_eq!(&s1, &["a", "c", "b"]);
+    }
+
+    #[test]
+    fn xor() {
+        let s1 = OrderedSet::from(["a"]);
+        let s2 = OrderedSet::from(["b"]);
+        let s3 = &s1 ^ &s2;
+        assert_ordered_eq!(&s3, &["a", "b"]);
+
+        let s1 = OrderedSet::from(["a", "c"]);
+        let s2 = OrderedSet::from(["b", "c"]);
+        let s3 = &s1 ^ &s2;
+        assert_ordered_eq!(&s3, &["a", "b"]);
+
+        let mut s1 = OrderedSet::from(["a", "c"]);
+        let s2 = OrderedSet::from(["b", "c"]);
+        s1 ^= &s2;
+        assert_ordered_eq!(&s1, &["a", "b"]);
+        s1 ^= s2;
+        assert_ordered_eq!(&s1, &["a", "c"]);
+    }
+
+    #[test]
+    fn sub() {
+        let s1 = OrderedSet::from(["a"]);
+        let s2 = OrderedSet::from(["b"]);
+        let s3 = &s1 - &s2;
+        assert_ordered_eq!(&s3, &["a"]);
+
+        let s1 = OrderedSet::from(["a", "c"]);
+        let s2 = OrderedSet::from(["b", "c"]);
+        let s3 = &s1 - &s2;
+        assert_ordered_eq!(&s3, &["a"]);
+
+        let mut s1 = OrderedSet::from(["a", "c"]);
+        let s2 = OrderedSet::from(["b", "c"]);
+        s1 -= &s2;
+        assert_ordered_eq!(&s1, &["a"]);
+        s1 -= s2;
+        assert_ordered_eq!(&s1, &["a"]);
     }
 }
