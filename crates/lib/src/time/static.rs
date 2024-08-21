@@ -37,15 +37,13 @@ impl FromStr for TimeStatic {
             let day = day
                 .parse()
                 .map_err(|e| Error::InvalidValue(format!("invalid day: {day}: {e}")))?;
-            let date = NaiveDate::from_ymd_opt(year, month, day)
-                .ok_or_else(|| Error::InvalidValue(format!("invalid static date: {s}")))?;
-            let time = NaiveTime::from_hms_opt(0, 0, 0).unwrap();
-            let dt = date.and_time(time);
-            dt.and_utc()
+            NaiveDate::from_ymd_opt(year, month, day)
+                .ok_or_else(|| Error::InvalidValue(format!("invalid date: {s}")))?
+                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap())
+                .and_utc()
         } else {
-            DateTime::from_str(s).map_err(|e| {
-                Error::InvalidValue(format!("invalid static datetime format: {s}: {e}"))
-            })?
+            DateTime::from_str(s)
+                .map_err(|e| Error::InvalidValue(format!("invalid datetime format: {s}: {e}")))?
         };
 
         Ok(Self {
