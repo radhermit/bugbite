@@ -14,10 +14,10 @@ use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{self, Order};
-use crate::service::bugzilla::{cf, Service};
+use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestSend, WebService};
-use crate::utils::or;
+use crate::utils::{or, prefix};
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -1031,7 +1031,7 @@ impl QueryBuilder<'_> {
     {
         for (name, value) in values {
             let value = value.into();
-            self.advanced_field(cf!(name), value.op, value);
+            self.advanced_field(prefix!("cf_", name), value.op, value);
         }
     }
 

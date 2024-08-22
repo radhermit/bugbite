@@ -11,9 +11,9 @@ use url::Url;
 
 use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
-use crate::service::bugzilla::{cf, Service};
+use crate::service::bugzilla::Service;
 use crate::traits::{Contains, InjectAuth, RequestSend, WebService};
-use crate::utils::or;
+use crate::utils::{or, prefix};
 use crate::Error;
 
 /// Changes made to a field.
@@ -391,7 +391,7 @@ impl Parameters {
             custom_fields: self.custom_fields.map(|values| {
                 values
                     .into_iter()
-                    .map(|(name, value)| (cf!(name), value))
+                    .map(|(name, value)| (prefix!("cf_", name), value))
                     .collect()
             }),
 
