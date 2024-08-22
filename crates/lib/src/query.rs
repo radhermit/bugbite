@@ -37,7 +37,7 @@ impl QueryBuilder {
     }
 }
 
-/// Invertable search order sorting term.
+/// Invertible search order sorting term.
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Order<T> {
     Ascending(T),
