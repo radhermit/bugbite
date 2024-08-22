@@ -70,3 +70,31 @@ impl Api for TimeStatic {
         self.value.format("%Y-%m-%dT%H:%M:%SZ").to_string()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse() {
+        // invalid
+        for s in ["", "0", "-1", "01:02:03"] {
+            assert!(TimeStatic::from_str(s).is_err());
+        }
+
+        // valid
+        for (s, api) in [
+            ("2020", "2020-01-01T00:00:00Z"),
+            ("2020-08", "2020-08-01T00:00:00Z"),
+            ("2020-08-09", "2020-08-09T00:00:00Z"),
+            ("1996-12-19T16:39:57-08:00", "1996-12-20T00:39:57Z"),
+            ("1996-12-19 16:39:57-08:00", "1996-12-20T00:39:57Z"),
+            ("2012-12-12T12:12:12Z", "2012-12-12T12:12:12Z"),
+        ] {
+            let time = TimeStatic::from_str(s).unwrap();
+            assert_eq!(time.to_string(), s);
+            assert_eq!(time.as_ref(), s);
+            assert_eq!(time.api(), api);
+        }
+    }
+}
