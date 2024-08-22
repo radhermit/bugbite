@@ -90,11 +90,14 @@ service default.
 Ordering is especially useful in combination with -l/--limit to get the first
 or last results of an ordered match.
 +
-.Top ten by votes:
+.Most popular by votes:
  bite bugzilla -c gentoo search --limit 10 --order=-votes
 +
 .Highest comment count:
- bite bugzilla -c gentoo search --limit 1 --order=-comments
+ bite bugzilla -c gentoo search --limit 10 --order=-comments
++
+.Least recently updated:
+ bite bugzilla -c gentoo search --limit 10 --order=updated
 +
 // TODO: link to rust docs for field descriptions
 Possible values: alias, assignee, blocks, comments, component, created,
