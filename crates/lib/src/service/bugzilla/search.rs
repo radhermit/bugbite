@@ -1319,6 +1319,12 @@ impl QueryBuilder<'_> {
     fn and<F: FnOnce(&mut Self)>(&mut self, func: F) {
         self.op_func("AND", func)
     }
+
+    fn not<F: FnOnce(&mut Self)>(&mut self, func: F) {
+        func(self);
+        let num = self.advanced_count;
+        self.insert(format!("n{num}"), "1");
+    }
 }
 
 /// Bug fields composed of value arrays.
