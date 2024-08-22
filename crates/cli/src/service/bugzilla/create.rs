@@ -7,7 +7,7 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::create::Parameters;
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::RequestSend;
+use bugbite::traits::{RequestMerge, RequestSend};
 use bugbite::utils::is_terminal;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
@@ -183,7 +183,7 @@ pub(super) struct Options {
 
     /// read attributes from an existing bug
     #[arg(long, value_name = "ID", conflicts_with = "from")]
-    from_bug: Option<u64>,
+    from_bug: Option<String>,
 
     /// write attributes to template
     #[arg(
@@ -205,13 +205,12 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
-        let mut params: Parameters = self.params.into();
+        let mut request = service.create();
+        request.merge(self.params)?;
 
-        // read attributes from template
-        if let Some(path) = self.options.from.as_ref() {
-            let template = Parameters::from_path(path)?;
-            // command-line parameters override template values
-            params.merge(template);
+        // merge attributes from template or bug
+        if let Some(path) = self.options.from.as_deref() {
+            request.merge(path)?;
         } else if let Some(id) = self.options.from_bug {
             let bug = service
                 .get([id])
@@ -220,20 +219,20 @@ impl Command {
                 .into_iter()
                 .next()
                 .expect("failed getting bug");
-            params.merge(bug);
+            request.merge(bug)?;
         }
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                let data = toml::to_string(&params)?;
+                let data = toml::to_string(&request)?;
                 fs::write(path, data).context("failed writing template")?;
             }
         }
 
         if !self.options.dry_run {
             let mut stdout = stdout().lock();
-            let id = service.create().params(params).send().await?;
+            let id = request.send().await?;
             if is_terminal!(&stdout) {
                 info!("Created bug {id}");
             } else {

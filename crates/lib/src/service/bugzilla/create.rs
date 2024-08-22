@@ -8,14 +8,32 @@ use serde_with::skip_serializing_none;
 
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Service;
-use crate::traits::{InjectAuth, RequestSend, WebService};
+use crate::traits::{InjectAuth, RequestMerge, RequestSend, WebService};
 use crate::utils::{or, prefix};
 use crate::Error;
 
-#[derive(Debug)]
+#[skip_serializing_none]
+#[derive(Serialize, Debug)]
 pub struct Request<'a> {
+    #[serde(skip)]
     service: &'a Service,
+    #[serde(flatten)]
     params: Parameters,
+}
+
+impl RequestMerge<&Utf8Path> for Request<'_> {
+    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        let params = Parameters::from_path(path)?;
+        self.params.merge(params);
+        Ok(())
+    }
+}
+
+impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
+    fn merge(&mut self, value: T) -> crate::Result<()> {
+        self.params.merge(value);
+        Ok(())
+    }
 }
 
 impl RequestSend for Request<'_> {
@@ -43,11 +61,6 @@ impl<'a> Request<'a> {
             service,
             params: Default::default(),
         }
-    }
-
-    pub fn params(mut self, params: Parameters) -> Self {
-        self.params = params;
-        self
     }
 
     pub fn alias<I, S>(mut self, value: I) -> Self
@@ -299,7 +312,7 @@ pub struct Parameters {
 
 impl Parameters {
     /// Load parameters in TOML format from a file.
-    pub fn from_path(path: &Utf8Path) -> crate::Result<Self> {
+    fn from_path(path: &Utf8Path) -> crate::Result<Self> {
         let data = fs::read_to_string(path)
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         toml::from_str(&data)
@@ -307,7 +320,7 @@ impl Parameters {
     }
 
     /// Merge parameters using the provided value for fallbacks.
-    pub fn merge<T: Into<Self>>(&mut self, other: T) {
+    fn merge<T: Into<Self>>(&mut self, other: T) {
         let other = other.into();
         or!(self.alias, other.alias);
         or!(self.assignee, other.assignee);

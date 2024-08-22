@@ -57,6 +57,10 @@ impl<T: Api> Api for &T {
     }
 }
 
+pub trait RequestMerge<T> {
+    fn merge(&mut self, value: T) -> crate::Result<()>;
+}
+
 pub trait RequestSend {
     type Output;
 
