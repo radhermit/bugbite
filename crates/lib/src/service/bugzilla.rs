@@ -165,6 +165,19 @@ impl Service {
     }
 }
 
+/// Prefix a custom field name with `cf_` if missing.
+macro_rules! cf {
+    ($value:expr) => {{
+        let value = $value.to_string();
+        if !value.starts_with("cf_") {
+            format!("cf_{value}")
+        } else {
+            value
+        }
+    }};
+}
+use cf;
+
 /// Return a bugzilla error if one is returned in the response data.
 macro_rules! return_if_error {
     ($data:expr) => {{

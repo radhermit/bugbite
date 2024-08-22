@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::objects::bugzilla::{Bug, Flag};
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::{cf, Service};
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::utils::or;
 use crate::Error;
@@ -373,13 +373,7 @@ impl Parameters {
             custom_fields: self.custom_fields.map(|values| {
                 values
                     .into_iter()
-                    .map(|(k, v)| {
-                        if !k.starts_with("cf_") {
-                            (format!("cf_{k}"), v)
-                        } else {
-                            (k, v)
-                        }
-                    })
+                    .map(|(name, value)| (cf!(name), value))
                     .collect()
             }),
         };

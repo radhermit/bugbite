@@ -14,7 +14,7 @@ use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{self, Order};
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::{cf, Service};
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestSend, WebService};
 use crate::utils::or;
@@ -1026,16 +1026,12 @@ impl QueryBuilder<'_> {
     fn custom_fields<I, K, V>(&mut self, values: I)
     where
         I: IntoIterator<Item = (K, V)>,
-        K: AsRef<str>,
+        K: fmt::Display,
         V: Into<Match>,
     {
         for (name, value) in values {
-            let name = match name.as_ref() {
-                k if k.starts_with("cf_") => k.into(),
-                k => format!("cf_{k}"),
-            };
             let value = value.into();
-            self.advanced_field(name, value.op, value);
+            self.advanced_field(cf!(name), value.op, value);
         }
     }
 
