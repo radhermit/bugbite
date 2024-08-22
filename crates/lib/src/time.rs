@@ -23,8 +23,10 @@ impl FromStr for TimeDeltaOrStatic {
     fn from_str(s: &str) -> crate::Result<Self> {
         if let Ok(value) = s.parse() {
             Ok(Self::Delta(value))
+        } else if let Ok(value) = s.parse() {
+            Ok(Self::Static(value))
         } else {
-            Ok(Self::Static(s.parse()?))
+            Err(Error::InvalidValue(format!("invalid time: {s}")))
         }
     }
 }
