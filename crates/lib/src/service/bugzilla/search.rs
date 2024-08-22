@@ -402,7 +402,13 @@ impl Parameters {
             query.or(|query| {
                 for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Alias, value),
+                        // HACK: Work around a server bug where regular "isempty" queries don't
+                        // work with the alias field so use inverted existence queries instead for
+                        // nonexistence.
+                        ExistsOrValues::Exists(true) => query.exists(ExistsField::Alias, true),
+                        ExistsOrValues::Exists(false) => {
+                            query.not(|query| query.exists(ExistsField::Alias, true))
+                        }
                         ExistsOrValues::Values(values) => {
                             query.and(|query| values.into_iter().for_each(|x| query.alias(x)))
                         }
