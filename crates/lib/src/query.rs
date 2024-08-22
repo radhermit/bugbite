@@ -37,33 +37,11 @@ impl QueryBuilder {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub(crate) enum OrderType {
-    Ascending,
-    Descending,
-}
-
 /// Invertable search order sorting term.
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone, Copy)]
-pub struct Order<T> {
-    pub(crate) order: OrderType,
-    pub(crate) field: T,
-}
-
-impl<T> Order<T> {
-    pub fn ascending(field: T) -> Self {
-        Self {
-            order: OrderType::Ascending,
-            field,
-        }
-    }
-
-    pub fn descending(field: T) -> Self {
-        Self {
-            order: OrderType::Descending,
-            field,
-        }
-    }
+pub enum Order<T> {
+    Ascending(T),
+    Descending(T),
 }
 
 impl<T: FromStr + VariantNames> TryFrom<&str> for Order<T> {
@@ -78,23 +56,29 @@ impl<T: FromStr + VariantNames> FromStr for Order<T> {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
-        let (order, field) = if let Some(value) = s.strip_prefix('-') {
-            (OrderType::Descending, value)
-        } else {
-            (OrderType::Ascending, s.strip_prefix('+').unwrap_or(s))
+        let field = |s: &str| -> crate::Result<T> {
+            s.parse()
+                .map_err(|_| Error::InvalidValue(format!("unknown field: {s}")))
         };
-        let field = field
-            .parse()
-            .map_err(|_| Error::InvalidValue(format!("unknown search field: {field}")))?;
-        Ok(Self { order, field })
+
+        let value = if let Some(value) = s.strip_prefix('-') {
+            let field = field(value)?;
+            Self::Descending(field)
+        } else {
+            let value = s.strip_prefix('+').unwrap_or(s);
+            let field = field(value)?;
+            Self::Ascending(field)
+        };
+
+        Ok(value)
     }
 }
 
 impl<T: fmt::Display> fmt::Display for Order<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.order {
-            OrderType::Descending => write!(f, "-{}", self.field),
-            OrderType::Ascending => write!(f, "{}", self.field),
+        match self {
+            Self::Ascending(value) => write!(f, "{value}"),
+            Self::Descending(value) => write!(f, "-{value}"),
         }
     }
 }

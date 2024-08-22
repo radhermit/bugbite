@@ -13,7 +13,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
-use crate::query::{self, Order, OrderType};
+use crate::query::{self, Order};
 use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestSend, WebService};
@@ -384,7 +384,7 @@ impl Parameters {
             query.order(values)?;
         } else {
             // sort by ascending ID by default
-            query.order([Order::ascending(OrderField::Id)])?;
+            query.order([Order::Ascending(OrderField::Id)])?;
         }
 
         if let Some(values) = self.fields {
@@ -1439,10 +1439,9 @@ impl Api for OrderField {
 
 impl Api for Order<OrderField> {
     fn api(&self) -> String {
-        let name = self.field.api();
-        match self.order {
-            OrderType::Descending => format!("{name} DESC"),
-            OrderType::Ascending => format!("{name} ASC"),
+        match self {
+            Order::Ascending(field) => format!("{} ASC", field.api()),
+            Order::Descending(field) => format!("{} DESC", field.api()),
         }
     }
 }

@@ -8,7 +8,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use tracing::debug;
 
 use crate::objects::github::Issue;
-use crate::query::{self, Order, OrderType};
+use crate::query::{self, Order};
 use crate::traits::{Api, RequestSend};
 use crate::Error;
 
@@ -98,10 +98,9 @@ impl Api for OrderField {
 
 impl Api for Order<OrderField> {
     fn api(&self) -> String {
-        let name = self.field.api();
-        match self.order {
-            OrderType::Descending => format!("-{name}"),
-            OrderType::Ascending => name,
+        match self {
+            Order::Ascending(field) => field.api(),
+            Order::Descending(field) => format!("-{}", field.api()),
         }
     }
 }

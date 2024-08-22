@@ -10,7 +10,7 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use crate::args::ExistsOrValues;
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
-use crate::query::{self, Order, OrderType};
+use crate::query::{self, Order};
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestSend, WebService};
 use crate::utils::or;
@@ -290,7 +290,7 @@ impl Parameters {
             query.insert("sort", value);
         } else {
             // sort by ascending ID by default
-            let order = Order::ascending(OrderField::Id);
+            let order = Order::Ascending(OrderField::Id);
             query.insert("sort", order.api());
         }
 
@@ -433,10 +433,9 @@ impl Api for OrderField {
 
 impl Api for Order<OrderField> {
     fn api(&self) -> String {
-        let name = self.field.api();
-        match self.order {
-            OrderType::Descending => format!("{name}:desc"),
-            OrderType::Ascending => format!("{name}:asc"),
+        match self {
+            Order::Ascending(field) => format!("{}:asc", field.api()),
+            Order::Descending(field) => format!("{}:desc", field.api()),
         }
     }
 }
