@@ -8,7 +8,7 @@ use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange};
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::RequestSend;
+use bugbite::traits::{RequestMerge, RequestSend};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
@@ -366,20 +366,19 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
-        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-        let mut params: Parameters = self.params.into();
+        let mut request = service.update();
+        request.merge(self.params)?;
+        let ids = self.ids.into_iter().flatten().collect::<Vec<_>>();
 
         // read attributes from template
-        if let Some(path) = self.options.from.as_ref() {
-            let template = Parameters::from_path(path)?;
-            // command-line parameters override template values
-            params.merge(template);
-        };
+        if let Some(path) = self.options.from.as_deref() {
+            request.merge(path)?;
+        }
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                let data = toml::to_string(&params)?;
+                let data = toml::to_string(&request)?;
                 fs::write(path, data).context("failed writing template")?;
             }
         }
@@ -389,17 +388,17 @@ impl Command {
             if ids.len() > 1 {
                 anyhow::bail!("reply invalid, targeting multiple bugs");
             }
-            let comment = get_reply(service, ids[0], &mut values).await?;
-            params.comment = Some(comment);
-        } else if let Some(value) = params.comment.as_ref() {
+            let comment = get_reply(service, &ids[0], &mut values).await?;
+            request.params.comment = Some(comment);
+        } else if let Some(value) = request.params.comment.as_ref() {
             if value.trim().is_empty() {
                 let comment = edit_comment(value.trim())?;
-                params.comment = Some(comment);
+                request.params.comment = Some(comment);
             }
         }
 
         if !self.options.dry_run {
-            let changes = service.update(ids).params(params).send().await?;
+            let changes = request.ids(ids).send().await?;
             for change in changes {
                 info!("{change}");
             }

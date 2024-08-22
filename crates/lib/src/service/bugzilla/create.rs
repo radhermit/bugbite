@@ -12,13 +12,12 @@ use crate::traits::{InjectAuth, RequestMerge, RequestSend, WebService};
 use crate::utils::{or, prefix};
 use crate::Error;
 
-#[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
     #[serde(flatten)]
-    params: Parameters,
+    pub params: Parameters,
 }
 
 impl RequestMerge<&Utf8Path> for Request<'_> {

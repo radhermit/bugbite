@@ -156,12 +156,8 @@ impl Service {
         search::Request::new(self)
     }
 
-    pub fn update<I, S>(&self, ids: I) -> update::Request
-    where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
-    {
-        update::Request::new(self, ids)
+    pub fn update(&self) -> update::Request {
+        update::Request::new(self)
     }
 }
 

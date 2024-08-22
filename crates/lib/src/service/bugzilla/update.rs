@@ -12,7 +12,7 @@ use url::Url;
 use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Service;
-use crate::traits::{Contains, InjectAuth, RequestSend, WebService};
+use crate::traits::{Contains, InjectAuth, RequestMerge, RequestSend, WebService};
 use crate::utils::{or, prefix};
 use crate::Error;
 
@@ -111,11 +111,29 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct Request<'a> {
+    #[serde(skip)]
     service: &'a Service,
-    ids: Vec<String>,
-    params: Parameters,
+    #[serde(skip)]
+    pub ids: Vec<String>,
+    #[serde(flatten)]
+    pub params: Parameters,
+}
+
+impl RequestMerge<&Utf8Path> for Request<'_> {
+    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        let params = Parameters::from_path(path)?;
+        self.params.merge(params);
+        Ok(())
+    }
+}
+
+impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
+    fn merge(&mut self, value: T) -> crate::Result<()> {
+        self.params.merge(value);
+        Ok(())
+    }
 }
 
 impl RequestSend for Request<'_> {
@@ -145,16 +163,21 @@ impl RequestSend for Request<'_> {
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new<I, S>(service: &'a Service, ids: I) -> Self
-    where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
-    {
+    pub(super) fn new(service: &'a Service) -> Self {
         Self {
             service,
-            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            ids: Default::default(),
             params: Default::default(),
         }
+    }
+
+    pub fn ids<I, S>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.ids = values.into_iter().map(Into::into).collect();
+        self
     }
 
     fn url(&self) -> crate::Result<Url> {
@@ -164,11 +187,6 @@ impl<'a> Request<'a> {
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
         let url = self.service.config.base.join(&format!("rest/bug/{id}"))?;
         Ok(url)
-    }
-
-    pub fn params(mut self, params: Parameters) -> Self {
-        self.params = params;
-        self
     }
 }
 
@@ -321,7 +339,7 @@ pub struct Parameters {
 
 impl Parameters {
     /// Load parameters in TOML format from a file.
-    pub fn from_path(path: &Utf8Path) -> crate::Result<Self> {
+    fn from_path(path: &Utf8Path) -> crate::Result<Self> {
         let data = fs::read_to_string(path)
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         toml::from_str(&data)
@@ -329,7 +347,7 @@ impl Parameters {
     }
 
     /// Merge parameters using the provided value for fallbacks.
-    pub fn merge<T: Into<Self>>(&mut self, other: T) {
+    fn merge<T: Into<Self>>(&mut self, other: T) {
         let other = other.into();
         or!(self.alias, other.alias);
         or!(self.assignee, other.assignee);
@@ -442,7 +460,7 @@ impl Parameters {
         }
 
         if let Some((value, is_private)) = self.comment_privacy {
-            let id = match &params.ids[..] {
+            let id = match &ids[..] {
                 [x] => x,
                 _ => {
                     return Err(Error::InvalidValue(
@@ -495,7 +513,7 @@ impl Parameters {
             params.see_also = Some(iter.collect());
         }
 
-        // verify at least one field is updated
+        // verify at least one non-IDs field is updated
         if params == RequestParameters::default() {
             Err(Error::EmptyParams)
         } else {
@@ -560,8 +578,7 @@ mod tests {
         let service = Service::new(config, Default::default()).unwrap();
 
         // no IDs
-        let ids = Vec::<u32>::new();
-        let err = service.update(ids).send().await.unwrap_err();
+        let err = service.update().send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
     }
