@@ -202,6 +202,12 @@ suffix, the privacy of all matching comments is toggled.
 
 *--cf <name> <value>*::
     Update custom fields.
++
+Custom field names must match the raw values used by bugzilla itself in the form of
+`cf_custom_field_name` with the `cf_` prefix being optional for bite usage.
++
+.Update custom field:
+ bite bugzilla -c gentoo update 10 --cf stabilisation_atoms "sys-libs/pkgcraft arm64"
 
 *-d, --depends* <id[,...]>::
     Add, remove, or set dependencies.
