@@ -115,8 +115,6 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
-    #[serde(skip)]
-    pub ids: Vec<String>,
     #[serde(flatten)]
     pub params: Parameters,
 }
@@ -141,7 +139,7 @@ impl RequestSend for Request<'_> {
 
     async fn send(self) -> crate::Result<Self::Output> {
         let url = self.url()?;
-        let params = self.params.encode(self.service, self.ids).await?;
+        let params = self.params.encode(self.service).await?;
         let request = self
             .service
             .client
@@ -166,7 +164,6 @@ impl<'a> Request<'a> {
     pub(super) fn new(service: &'a Service) -> Self {
         Self {
             service,
-            ids: Default::default(),
             params: Default::default(),
         }
     }
@@ -176,12 +173,13 @@ impl<'a> Request<'a> {
         I: IntoIterator<Item = S>,
         S: Into<String>,
     {
-        self.ids = values.into_iter().map(Into::into).collect();
+        self.params.ids = values.into_iter().map(Into::into).collect();
         self
     }
 
     fn url(&self) -> crate::Result<Url> {
         let id = self
+            .params
             .ids
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
@@ -304,6 +302,8 @@ impl fmt::Display for Comment {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct Parameters {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub ids: Vec<String>,
     pub alias: Option<Vec<SetChange<String>>>,
     pub assignee: Option<String>,
     pub blocks: Option<Vec<SetChange<u64>>>,
@@ -381,7 +381,7 @@ impl Parameters {
     }
 
     /// Encode parameters into the form required for the request.
-    async fn encode(self, service: &Service, ids: Vec<String>) -> crate::Result<RequestParameters> {
+    async fn encode(self, service: &Service) -> crate::Result<RequestParameters> {
         let mut params = RequestParameters {
             ids: Default::default(),
             alias: self.alias.map(|x| x.into_iter().collect()),
@@ -460,7 +460,7 @@ impl Parameters {
         }
 
         if let Some((value, is_private)) = self.comment_privacy {
-            let id = match &ids[..] {
+            let id = match &self.ids[..] {
                 [x] => x,
                 _ => {
                     return Err(Error::InvalidValue(
@@ -517,7 +517,7 @@ impl Parameters {
         if params == RequestParameters::default() {
             Err(Error::EmptyParams)
         } else {
-            params.ids = ids;
+            params.ids = self.ids;
             Ok(params)
         }
     }

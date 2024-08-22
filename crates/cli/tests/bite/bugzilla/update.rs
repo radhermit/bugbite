@@ -181,7 +181,7 @@ async fn reply() {
             .arg(opt)
             .assert()
             .stdout("")
-            .stderr(predicate::str::diff("Error: reply invalid, targeting multiple bugs").trim())
+            .stderr(predicate::str::diff("Error: reply must target a single bug").trim())
             .failure()
             .code(1);
 

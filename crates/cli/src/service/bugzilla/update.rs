@@ -221,6 +221,7 @@ struct Params {
 impl From<Params> for Parameters {
     fn from(value: Params) -> Self {
         Self {
+            ids: Default::default(),
             alias: value.alias,
             assignee: value.assignee,
             blocks: value.blocks,
@@ -368,12 +369,14 @@ impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let mut request = service.update();
         request.merge(self.params)?;
-        let ids = self.ids.into_iter().flatten().collect::<Vec<_>>();
 
         // read attributes from template
         if let Some(path) = self.options.from.as_deref() {
             request.merge(path)?;
         }
+
+        // override template IDs with command line args if they exist
+        request.params.ids = self.ids.into_iter().flatten().collect();
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
@@ -385,10 +388,10 @@ impl Command {
 
         // interactively create reply or comment
         if let Some(mut values) = self.options.reply {
-            if ids.len() > 1 {
-                anyhow::bail!("reply invalid, targeting multiple bugs");
+            if request.params.ids.len() != 1 {
+                anyhow::bail!("reply must target a single bug");
             }
-            let comment = get_reply(service, &ids[0], &mut values).await?;
+            let comment = get_reply(service, &request.params.ids[0], &mut values).await?;
             request.params.comment = Some(comment);
         } else if let Some(value) = request.params.comment.as_ref() {
             if value.trim().is_empty() {
@@ -398,7 +401,7 @@ impl Command {
         }
 
         if !self.options.dry_run {
-            let changes = request.ids(ids).send().await?;
+            let changes = request.send().await?;
             for change in changes {
                 info!("{change}");
             }
