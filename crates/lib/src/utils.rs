@@ -13,7 +13,6 @@ pub fn current_dir() -> crate::Result<Utf8PathBuf> {
 }
 
 /// Merge two Option wrapped values together, the second value is used if the first is None.
-#[macro_export]
 macro_rules! or {
     ($orig:expr, $new:expr) => {
         if $orig.is_none() {
