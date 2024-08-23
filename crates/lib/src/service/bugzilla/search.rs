@@ -1582,8 +1582,18 @@ mod tests {
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
-        // empty params
+        // empty parameters
         let err = service.search().send().await.unwrap_err();
+        assert!(matches!(err, Error::EmptyParams));
+        // non-item parameters
+        let err = service
+            .search()
+            .fields([BugField::Id])
+            .limit(100)
+            .order([Order::Ascending(OrderField::Id)])
+            .send()
+            .await
+            .unwrap_err();
         assert!(matches!(err, Error::EmptyParams));
 
         server.respond(200, path.join("search/ids.json")).await;
