@@ -11,13 +11,14 @@ use crate::args::ExistsOrValues;
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{self, Order};
+use crate::service::redmine::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, WebService};
 use crate::utils::or;
 use crate::Error;
 
 struct QueryBuilder<'a> {
-    _service: &'a super::Service,
+    _service: &'a Service,
     query: query::QueryBuilder,
 }
 
@@ -36,7 +37,7 @@ impl DerefMut for QueryBuilder<'_> {
 }
 
 impl<'a> QueryBuilder<'a> {
-    fn new(_service: &'a super::Service) -> Self {
+    fn new(_service: &'a Service) -> Self {
         Self {
             _service,
             query: Default::default(),
@@ -165,8 +166,10 @@ pub struct Parameters {
     pub updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
     pub closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
+    // non-item parameters
     pub limit: Option<u64>,
     pub order: Option<Vec<Order<OrderField>>>,
+
     pub status: Option<String>,
     pub summary: Option<Vec<String>>,
 }
@@ -217,7 +220,16 @@ impl Parameters {
         Ok(self)
     }
 
-    pub(crate) fn encode(self, service: &super::Service) -> crate::Result<String> {
+    pub(crate) fn encode(mut self, service: &Service) -> crate::Result<String> {
+        // pull non-item parameters
+        let limit = self.limit.take();
+        let order = self.order.take();
+
+        // verify parameters exist
+        if self == Self::default() {
+            return Err(Error::EmptyParams);
+        }
+
         let mut query = QueryBuilder::new(service);
 
         if let Some(values) = self.blocks {
@@ -285,7 +297,7 @@ impl Parameters {
             query.insert("status", "open");
         }
 
-        if let Some(values) = self.order {
+        if let Some(values) = order {
             let value = values.iter().map(|x| x.api()).join(",");
             query.insert("sort", value);
         } else {
@@ -294,7 +306,7 @@ impl Parameters {
             query.insert("sort", order.api());
         }
 
-        if let Some(value) = self.limit {
+        if let Some(value) = limit {
             query.insert("limit", value);
         } else {
             // default to the common maximum limit, without this the default limit is used
@@ -327,13 +339,13 @@ where
 #[derive(Serialize, Debug)]
 pub struct Request<'a> {
     #[serde(skip)]
-    service: &'a super::Service,
+    service: &'a Service,
     #[serde(flatten)]
     pub params: Parameters,
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a super::Service) -> Self {
+    pub(super) fn new(service: &'a Service) -> Self {
         Self {
             service,
             params: Default::default(),
