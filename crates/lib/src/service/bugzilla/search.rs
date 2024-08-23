@@ -265,6 +265,7 @@ pub struct Parameters {
     pub qa: Option<Vec<ExistsOrValues<Match>>>,
     pub reporter: Option<Vec<Vec<Match>>>,
 
+    // non-item parameters
     #[serde(skip_serializing)]
     pub fields: Option<Vec<FilterField>>,
     pub limit: Option<u64>,
@@ -370,7 +371,12 @@ impl Parameters {
         or!(self.custom_fields, other.custom_fields);
     }
 
-    pub(crate) fn encode(self, service: &Service) -> crate::Result<String> {
+    pub(crate) fn encode(mut self, service: &Service) -> crate::Result<String> {
+        // pull non-item parameters
+        let fields = self.fields.take();
+        let limit = self.limit.take();
+        let order = self.order.take();
+
         // verify parameters exist
         if self == Self::default() {
             return Err(Error::EmptyParams);
@@ -397,21 +403,21 @@ impl Parameters {
             query.status("@open");
         }
 
-        if let Some(values) = self.order {
+        if let Some(values) = order {
             query.order(values)?;
         } else {
             // sort by ascending ID by default
             query.order([Order::Ascending(OrderField::Id)])?;
         }
 
-        if let Some(values) = self.fields {
+        if let Some(values) = fields {
             query.fields(values);
         } else {
             // limit requested fields by default to decrease bandwidth and speed up response
             query.fields([BugField::Id, BugField::Summary]);
         }
 
-        if let Some(value) = self.limit {
+        if let Some(value) = limit {
             query.insert("limit", value);
         }
 
