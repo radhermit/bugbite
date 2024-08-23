@@ -220,7 +220,7 @@ impl Parameters {
         Ok(self)
     }
 
-    pub(crate) fn encode(mut self, service: &Service) -> crate::Result<String> {
+    fn encode(mut self, service: &Service) -> crate::Result<String> {
         // pull non-item parameters
         let limit = self.limit.take();
         let order = self.order.take();
@@ -350,6 +350,13 @@ impl<'a> Request<'a> {
             service,
             params: Default::default(),
         }
+    }
+
+    /// Return the website URL for a query.
+    pub fn search_url(self) -> crate::Result<String> {
+        let base = self.service.config.base().as_str().trim_end_matches('/');
+        let params = self.params.encode(self.service)?;
+        Ok(format!("{base}/issues?set_filter=1&{params}"))
     }
 }
 

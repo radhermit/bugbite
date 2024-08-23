@@ -73,6 +73,13 @@ impl<'a> Request<'a> {
         }
     }
 
+    /// Return the website URL for a query.
+    pub fn search_url(self) -> crate::Result<String> {
+        let base = self.service.config.base().as_str().trim_end_matches('/');
+        let params = self.params.encode(self.service)?;
+        Ok(format!("{base}/buglist.cgi?{params}"))
+    }
+
     pub fn order<I>(mut self, values: I) -> Self
     where
         I: IntoIterator<Item = Order<OrderField>>,
@@ -371,7 +378,7 @@ impl Parameters {
         or!(self.custom_fields, other.custom_fields);
     }
 
-    pub(crate) fn encode(mut self, service: &Service) -> crate::Result<String> {
+    fn encode(mut self, service: &Service) -> crate::Result<String> {
         // pull non-item parameters
         let fields = self.fields.take();
         let limit = self.limit.take();

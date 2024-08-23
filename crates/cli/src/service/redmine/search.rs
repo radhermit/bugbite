@@ -216,7 +216,7 @@ impl Command {
         }
 
         if self.options.browser {
-            let url = service.search_url(request.params)?;
+            let url = request.search_url()?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
             let items = request.send().await?;
