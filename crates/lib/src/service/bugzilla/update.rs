@@ -115,6 +115,8 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
+    #[serde(skip)]
+    pub ids: Vec<String>,
     #[serde(flatten)]
     pub params: Parameters,
 }
@@ -139,7 +141,7 @@ impl RequestSend for Request<'_> {
 
     async fn send(self) -> crate::Result<Self::Output> {
         let url = self.url()?;
-        let params = self.params.encode(self.service).await?;
+        let params = self.params.encode(self.service, self.ids).await?;
         let request = self
             .service
             .client
@@ -161,25 +163,20 @@ impl RequestSend for Request<'_> {
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a Service) -> Self {
+    pub(super) fn new<I, S>(service: &'a Service, ids: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
         Self {
             service,
+            ids: ids.into_iter().map(|s| s.to_string()).collect(),
             params: Default::default(),
         }
     }
 
-    pub fn ids<I, S>(mut self, values: I) -> Self
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
-    {
-        self.params.ids = values.into_iter().map(Into::into).collect();
-        self
-    }
-
     fn url(&self) -> crate::Result<Url> {
         let id = self
-            .params
             .ids
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
@@ -302,8 +299,6 @@ impl fmt::Display for Comment {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct Parameters {
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub ids: Vec<String>,
     pub alias: Option<Vec<SetChange<String>>>,
     pub assignee: Option<String>,
     pub blocks: Option<Vec<SetChange<u64>>>,
@@ -381,7 +376,7 @@ impl Parameters {
     }
 
     /// Encode parameters into the form required for the request.
-    async fn encode(self, service: &Service) -> crate::Result<RequestParameters> {
+    async fn encode(self, service: &Service, ids: Vec<String>) -> crate::Result<RequestParameters> {
         let mut params = RequestParameters {
             ids: Default::default(),
             alias: self.alias.map(|x| x.into_iter().collect()),
@@ -460,7 +455,7 @@ impl Parameters {
         }
 
         if let Some((value, is_private)) = self.comment_privacy {
-            let id = match &self.ids[..] {
+            let id = match &ids[..] {
                 [x] => x,
                 _ => {
                     return Err(Error::InvalidValue(
@@ -517,7 +512,7 @@ impl Parameters {
         if params == RequestParameters::default() {
             Err(Error::EmptyParams)
         } else {
-            params.ids = self.ids;
+            params.ids = ids;
             Ok(params)
         }
     }
@@ -578,7 +573,8 @@ mod tests {
         let service = Service::new(config, Default::default()).unwrap();
 
         // no IDs
-        let err = service.update().send().await.unwrap_err();
+        let ids = Vec::<u32>::new();
+        let err = service.update(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
     }

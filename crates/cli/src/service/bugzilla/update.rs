@@ -221,7 +221,6 @@ struct Params {
 impl From<Params> for Parameters {
     fn from(value: Params) -> Self {
         Self {
-            ids: Default::default(),
             alias: value.alias,
             assignee: value.assignee,
             blocks: value.blocks,
@@ -367,7 +366,8 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
-        let mut request = service.update();
+        let ids = self.ids.into_iter().flatten().collect::<Vec<_>>();
+        let mut request = service.update(ids);
 
         // read attributes from template
         if let Some(path) = self.options.from.as_deref() {
@@ -376,7 +376,6 @@ impl Command {
 
         // command line parameters override template
         request.merge(self.params)?;
-        request.params.ids = self.ids.into_iter().flatten().collect();
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
@@ -388,10 +387,10 @@ impl Command {
 
         // interactively create reply or comment
         if let Some(mut values) = self.options.reply {
-            if request.params.ids.len() != 1 {
+            if request.ids.len() != 1 {
                 anyhow::bail!("reply must target a single bug");
             }
-            let comment = get_reply(service, &request.params.ids[0], &mut values).await?;
+            let comment = get_reply(service, &request.ids[0], &mut values).await?;
             request.params.comment = Some(comment);
         } else if let Some(value) = request.params.comment.as_ref() {
             if value.trim().is_empty() {
