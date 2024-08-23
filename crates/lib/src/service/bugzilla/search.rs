@@ -371,6 +371,11 @@ impl Parameters {
     }
 
     pub(crate) fn encode(self, service: &Service) -> crate::Result<String> {
+        // verify parameters exist
+        if self == Self::default() {
+            return Err(Error::EmptyParams);
+        }
+
         let mut query = QueryBuilder::new(service);
 
         if let Some(values) = self.status {
@@ -1563,6 +1568,10 @@ mod tests {
         let server = TestServer::new().await;
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
+
+        // empty params
+        let err = service.search().send().await.unwrap_err();
+        assert!(matches!(err, Error::EmptyParams));
 
         server.respond(200, path.join("search/ids.json")).await;
         let bugs = service.search().summary(["test"]).send().await.unwrap();
