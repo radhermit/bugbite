@@ -29,7 +29,7 @@ struct Params {
 
     /// set blockers
     #[arg(short, long, value_name = "ID[,...]", value_delimiter = ',')]
-    blocks: Option<Vec<MaybeStdinVec<u64>>>,
+    blocks: Option<Vec<MaybeStdinVec<String>>>,
 
     /// set CC users
     #[arg(long, value_name = "USER[,...]", value_delimiter = ',')]
@@ -49,7 +49,7 @@ struct Params {
 
     /// set dependencies
     #[arg(short, long, value_name = "ID[,...]", value_delimiter = ',')]
-    depends: Option<Vec<MaybeStdinVec<u64>>>,
+    depends: Option<Vec<MaybeStdinVec<String>>>,
 
     /// set description
     #[arg(short = 'D', long)]

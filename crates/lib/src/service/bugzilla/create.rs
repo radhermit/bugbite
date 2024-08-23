@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fmt, fs};
 
 use camino::Utf8Path;
 use indexmap::IndexMap;
@@ -79,11 +79,12 @@ impl<'a> Request<'a> {
         self
     }
 
-    pub fn blocks<I>(mut self, value: I) -> Self
+    pub fn blocks<I, S>(mut self, value: I) -> Self
     where
-        I: IntoIterator<Item = u64>,
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
     {
-        self.params.blocks = Some(value.into_iter().collect());
+        self.params.blocks = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
     }
 
@@ -104,11 +105,12 @@ impl<'a> Request<'a> {
         self
     }
 
-    pub fn depends<I>(mut self, value: I) -> Self
+    pub fn depends<I, S>(mut self, value: I) -> Self
     where
-        I: IntoIterator<Item = u64>,
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
     {
-        self.params.depends = Some(value.into_iter().collect());
+        self.params.depends = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
     }
 
@@ -282,10 +284,10 @@ impl<'a> Request<'a> {
 pub struct Parameters {
     pub alias: Option<Vec<String>>,
     pub assignee: Option<String>,
-    pub blocks: Option<Vec<u64>>,
+    pub blocks: Option<Vec<String>>,
     pub cc: Option<Vec<String>>,
     pub component: Option<String>,
-    pub depends: Option<Vec<u64>>,
+    pub depends: Option<Vec<String>>,
     pub description: Option<String>,
     pub flags: Option<Vec<Flag>>,
     pub groups: Option<Vec<String>>,
@@ -455,9 +457,9 @@ struct RequestParameters {
     // optional fields
     alias: Option<Vec<String>>,
     assigned_to: Option<String>,
-    blocks: Option<Vec<u64>>,
+    blocks: Option<Vec<String>>,
     cc: Option<Vec<String>>,
-    depends_on: Option<Vec<u64>>,
+    depends_on: Option<Vec<String>>,
     flags: Option<Vec<Flag>>,
     groups: Option<Vec<String>>,
     keywords: Option<Vec<String>>,
