@@ -122,12 +122,11 @@ impl<'a> Request<'a> {
         self
     }
 
-    pub fn flags<I, T>(mut self, value: I) -> Self
+    pub fn flags<I>(mut self, value: I) -> Self
     where
-        I: IntoIterator<Item = T>,
-        T: Into<Flag>,
+        I: IntoIterator<Item = Flag>,
     {
-        self.params.flags = Some(value.into_iter().map(Into::into).collect());
+        self.params.flags = Some(value.into_iter().collect());
         self
     }
 
@@ -477,6 +476,8 @@ struct RequestParameters {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use crate::service::bugzilla::Config;
     use crate::test::*;
 
@@ -537,5 +538,54 @@ mod tests {
         // blocks
         request().blocks([1]).send().await.unwrap();
         request().blocks(["alias1", "alias2"]).send().await.unwrap();
+
+        // cc
+        request().cc(["user@email.com"]).send().await.unwrap();
+        request()
+            .cc(["user1@email.com", "user2@email.com"])
+            .send()
+            .await
+            .unwrap();
+
+        // component
+        request().component("component").send().await.unwrap();
+
+        // depends
+        request().depends([1]).send().await.unwrap();
+        request()
+            .depends(["alias1", "alias2"])
+            .send()
+            .await
+            .unwrap();
+
+        // description
+        request().description("description").send().await.unwrap();
+
+        // flags
+        let flag1 = Flag::from_str("flag1+").unwrap();
+        let flag2 = Flag::from_str("flag2-").unwrap();
+        let flag3 = Flag::from_str("flag3?").unwrap();
+        request().flags([flag1, flag2, flag3]).send().await.unwrap();
+
+        // groups
+        request().groups(["group1", "group2"]).send().await.unwrap();
+
+        // keywords
+        request().keywords(["kw1", "kw2"]).send().await.unwrap();
+
+        // os
+        request().os("os").send().await.unwrap();
+
+        // platform
+        request().platform("platform").send().await.unwrap();
+
+        // priority
+        request().priority("normal").send().await.unwrap();
+
+        // product
+        request().product("product").send().await.unwrap();
+
+        // qa
+        request().qa("user@email.com").send().await.unwrap();
     }
 }
