@@ -9,8 +9,8 @@ use crate::Error;
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
-    ids: Vec<String>,
-    data: bool,
+    pub ids: Vec<String>,
+    pub data: bool,
 }
 
 impl<'a> Request<'a> {

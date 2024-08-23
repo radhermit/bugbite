@@ -11,7 +11,7 @@ use crate::Error;
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a super::Service,
-    ids: Vec<String>,
+    pub ids: Vec<String>,
     fields: IndexSet<Field>,
 }
 

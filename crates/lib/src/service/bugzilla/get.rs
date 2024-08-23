@@ -11,7 +11,7 @@ use super::{attachment, comment, history};
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
-    ids: Vec<String>,
+    pub ids: Vec<String>,
     attachments: Option<attachment::get_item::Request<'a>>,
     comments: Option<comment::Request<'a>>,
     history: Option<history::Request<'a>>,

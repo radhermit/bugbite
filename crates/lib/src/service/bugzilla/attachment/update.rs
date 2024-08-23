@@ -71,8 +71,8 @@ struct RequestParameters {
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
-    ids: Vec<String>,
-    params: Parameters,
+    pub ids: Vec<String>,
+    pub params: Parameters,
 }
 
 impl<'a> Request<'a> {

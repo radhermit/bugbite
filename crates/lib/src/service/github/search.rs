@@ -108,7 +108,7 @@ impl Api for Order<OrderField> {
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a super::Service,
-    params: Parameters,
+    pub params: Parameters,
 }
 
 impl<'a> Request<'a> {

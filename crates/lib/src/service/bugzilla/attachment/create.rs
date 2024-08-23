@@ -379,8 +379,8 @@ struct RequestAttachment {
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
-    ids: Vec<String>,
-    attachments: Vec<Attachment>,
+    pub ids: Vec<String>,
+    pub attachments: Vec<Attachment>,
 }
 
 impl<'a> Request<'a> {
