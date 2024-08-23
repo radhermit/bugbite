@@ -65,17 +65,17 @@ impl<'a> Request<'a> {
     pub fn alias<I, S>(mut self, value: I) -> Self
     where
         I: IntoIterator<Item = S>,
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.alias = Some(value.into_iter().map(Into::into).collect());
+        self.params.alias = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
     }
 
     pub fn assignee<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.assignee = Some(value.into());
+        self.params.assignee = Some(value.to_string());
         self
     }
 
@@ -91,17 +91,17 @@ impl<'a> Request<'a> {
     pub fn cc<I, S>(mut self, value: I) -> Self
     where
         I: IntoIterator<Item = S>,
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.cc = Some(value.into_iter().map(Into::into).collect());
+        self.params.cc = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
     }
 
     pub fn component<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.component = Some(value.into());
+        self.params.component = Some(value.to_string());
         self
     }
 
@@ -116,9 +116,9 @@ impl<'a> Request<'a> {
 
     pub fn description<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.description = Some(value.into());
+        self.params.description = Some(value.to_string());
         self
     }
 
@@ -134,144 +134,144 @@ impl<'a> Request<'a> {
     pub fn groups<I, S>(mut self, value: I) -> Self
     where
         I: IntoIterator<Item = S>,
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.groups = Some(value.into_iter().map(Into::into).collect());
+        self.params.groups = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
     }
 
     pub fn keywords<I, S>(mut self, value: I) -> Self
     where
         I: IntoIterator<Item = S>,
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.keywords = Some(value.into_iter().map(Into::into).collect());
+        self.params.keywords = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
     }
 
     pub fn os<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.os = Some(value.into());
+        self.params.os = Some(value.to_string());
         self
     }
 
     pub fn platform<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.platform = Some(value.into());
+        self.params.platform = Some(value.to_string());
         self
     }
 
     pub fn priority<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.priority = Some(value.into());
+        self.params.priority = Some(value.to_string());
         self
     }
 
     pub fn product<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.product = Some(value.into());
+        self.params.product = Some(value.to_string());
         self
     }
 
     pub fn qa<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.qa = Some(value.into());
+        self.params.qa = Some(value.to_string());
         self
     }
 
     pub fn resolution<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.resolution = Some(value.into());
+        self.params.resolution = Some(value.to_string());
         self
     }
 
     pub fn see_also<I, S>(mut self, value: I) -> Self
     where
         I: IntoIterator<Item = S>,
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.see_also = Some(value.into_iter().map(Into::into).collect());
+        self.params.see_also = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
     }
 
     pub fn severity<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.severity = Some(value.into());
+        self.params.severity = Some(value.to_string());
         self
     }
 
     pub fn status<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.status = Some(value.into());
+        self.params.status = Some(value.to_string());
         self
     }
 
     pub fn summary<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.summary = Some(value.into());
+        self.params.summary = Some(value.to_string());
         self
     }
 
     pub fn target<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.target = Some(value.into());
+        self.params.target = Some(value.to_string());
         self
     }
 
     pub fn url<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.url = Some(value.into());
+        self.params.url = Some(value.to_string());
         self
     }
 
     pub fn version<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.version = Some(value.into());
+        self.params.version = Some(value.to_string());
         self
     }
 
     pub fn whiteboard<S>(mut self, value: S) -> Self
     where
-        S: Into<String>,
+        S: fmt::Display,
     {
-        self.params.whiteboard = Some(value.into());
+        self.params.whiteboard = Some(value.to_string());
         self
     }
 
     pub fn custom_fields<I, S1, S2>(mut self, value: I) -> Self
     where
         I: IntoIterator<Item = (S1, S2)>,
-        S1: Into<String>,
-        S2: Into<String>,
+        S1: fmt::Display,
+        S2: fmt::Display,
     {
         self.params.custom_fields = Some(
             value
                 .into_iter()
-                .map(|(k, v)| (k.into(), v.into()))
+                .map(|(k, v)| (k.to_string(), v.to_string()))
                 .collect(),
         );
         self
