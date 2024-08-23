@@ -65,7 +65,7 @@ impl fmt::Display for BugChange {
     }
 }
 
-#[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone)]
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub enum RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {
     Range(Range<T>),
     Set(IndexSet<T>),
@@ -297,7 +297,7 @@ impl fmt::Display for Comment {
 
 /// Bug update parameters.
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Clone)]
 pub struct Parameters {
     pub alias: Option<Vec<SetChange<String>>>,
     pub assignee: Option<String>,
@@ -377,8 +377,13 @@ impl Parameters {
 
     /// Encode parameters into the form required for the request.
     async fn encode(self, service: &Service, ids: Vec<String>) -> crate::Result<RequestParameters> {
+        // verify parameters exist
+        if self == Self::default() {
+            return Err(Error::EmptyParams);
+        }
+
         let mut params = RequestParameters {
-            ids: Default::default(),
+            ids,
             alias: self.alias.map(|x| x.into_iter().collect()),
             blocks: self.blocks.map(|x| x.into_iter().collect()),
             component: self.component,
@@ -455,7 +460,7 @@ impl Parameters {
         }
 
         if let Some((value, is_private)) = self.comment_privacy {
-            let id = match &ids[..] {
+            let id = match &params.ids[..] {
                 [x] => x,
                 _ => {
                     return Err(Error::InvalidValue(
@@ -508,13 +513,7 @@ impl Parameters {
             params.see_also = Some(iter.collect());
         }
 
-        // verify at least one non-IDs field is updated
-        if params == RequestParameters::default() {
-            Err(Error::EmptyParams)
-        } else {
-            params.ids = ids;
-            Ok(params)
-        }
+        Ok(params)
     }
 }
 
@@ -577,5 +576,9 @@ mod tests {
         let err = service.update(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
+
+        // empty params
+        let err = service.update([1]).send().await.unwrap_err();
+        assert!(matches!(err, Error::EmptyParams));
     }
 }
