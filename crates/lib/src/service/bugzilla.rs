@@ -22,6 +22,7 @@ pub mod history;
 pub mod search;
 pub mod update;
 
+// TODO: improve API for setting user info on config creation
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,

@@ -484,8 +484,12 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
+        let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let config = Config::new(server.uri()).unwrap();
+        // TODO: improve API for setting user info on config creation
+        let mut config = Config::new(server.uri()).unwrap();
+        config.user = Some("user".to_string());
+        config.password = Some("pass".to_string());
         let service = Service::new(config, Default::default()).unwrap();
 
         // missing required fields without defaults
@@ -507,5 +511,31 @@ mod tests {
             .unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "missing required fields: component, os, product");
+
+        // create new request with default fields set
+        let request = || {
+            service
+                .create()
+                .component("TestComponent")
+                .product("TestProduct")
+                .description("description")
+                .summary("summary")
+        };
+
+        server.respond(200, path.join("create/creation.json")).await;
+
+        // valid
+        let id = request().send().await.unwrap();
+        assert_eq!(id, 123);
+
+        // alias
+        request().alias(["alias1", "alias2"]).send().await.unwrap();
+
+        // assignee
+        request().assignee("user").send().await.unwrap();
+
+        // blocks
+        request().blocks([1]).send().await.unwrap();
+        request().blocks(["alias1", "alias2"]).send().await.unwrap();
     }
 }
