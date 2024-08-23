@@ -653,7 +653,7 @@ impl Command {
             let url = service.search_url(request.params)?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
-            let items = service.search().send().await?;
+            let items = request.send().await?;
             let stdout = stdout().lock();
             render_search(stdout, items, &fields, self.options.json)?;
         }
