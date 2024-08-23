@@ -368,14 +368,14 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let mut request = service.update();
-        request.merge(self.params)?;
 
         // read attributes from template
         if let Some(path) = self.options.from.as_deref() {
             request.merge(path)?;
         }
 
-        // override template IDs with command line args if they exist
+        // command line parameters override template
+        request.merge(self.params)?;
         request.params.ids = self.ids.into_iter().flatten().collect();
 
         // write attributes to template

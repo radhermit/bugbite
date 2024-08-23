@@ -206,7 +206,6 @@ pub(super) struct Command {
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let mut request = service.create();
-        request.merge(self.params)?;
 
         // merge attributes from template or bug
         if let Some(path) = self.options.from.as_deref() {
@@ -221,6 +220,9 @@ impl Command {
                 .expect("failed getting bug");
             request.merge(bug)?;
         }
+
+        // command line parameters override template
+        request.merge(self.params)?;
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {

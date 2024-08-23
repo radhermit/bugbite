@@ -12,10 +12,10 @@ pub fn current_dir() -> crate::Result<Utf8PathBuf> {
         .map_err(|e| Error::InvalidValue(format!("invalid current working directory: {e}")))
 }
 
-/// Merge two Option wrapped values together, the second value is used if the first is None.
+/// Merge two Option wrapped values together, the second value overrides the first if it exists.
 macro_rules! or {
     ($orig:expr, $new:expr) => {
-        if $orig.is_none() {
+        if $new.is_some() {
             $orig = $new;
         }
     };

@@ -10,7 +10,7 @@ use bugbite::service::redmine::search::{OrderField, Parameters};
 use bugbite::service::redmine::IssueField;
 use bugbite::service::redmine::Service;
 use bugbite::time::TimeDeltaOrStatic;
-use bugbite::traits::RequestSend;
+use bugbite::traits::{RequestMerge, RequestSend};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 
@@ -196,29 +196,30 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
-        let fields = self.params.query.fields.clone();
-        let mut params: Parameters = self.params.into();
+        let mut request = service.search();
 
         // read attributes from template
-        if let Some(path) = self.options.from.as_ref() {
-            let template = Parameters::from_path(path)?;
-            // command-line parameters override template values
-            params.merge(template);
+        if let Some(path) = self.options.from.as_deref() {
+            request.merge(path)?;
         }
+
+        // command line parameters override template
+        let fields = self.params.query.fields.clone();
+        request.merge(self.params)?;
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                let data = toml::to_string(&params)?;
+                let data = toml::to_string(&request)?;
                 fs::write(path, data).context("failed writing template")?;
             }
         }
 
         if self.options.browser {
-            let url = service.search_url(params)?;
+            let url = service.search_url(request.params)?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
-            let items = service.search().params(params).send().await?;
+            let items = service.search().send().await?;
             let stdout = stdout().lock();
             render_search(stdout, items, &fields, self.options.json)?;
         }
