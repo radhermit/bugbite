@@ -17,7 +17,7 @@ pub mod search;
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
-    pub(crate) web_base: Url,
+    pub(crate) web_base: Option<Url>,
     pub user: Option<String>,
     pub password: Option<String>,
     pub key: Option<String>,
@@ -26,14 +26,16 @@ pub struct Config {
 
 impl Config {
     pub fn new(base: &str) -> crate::Result<Self> {
-        let Some((web_base, _project)) = base.split_once("/projects/") else {
-            return Err(Error::InvalidValue(format!("invalid project base: {base}")));
+        let web_base = if let Some((base, _project)) = base.split_once("/projects/") {
+            let url = Url::parse(base)
+                .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
+            Some(url)
+        } else {
+            None
         };
 
         let base = base.trim_end_matches('/');
         let base = Url::parse(&format!("{base}/"))
-            .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
-        let web_base = Url::parse(web_base)
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
 
         Ok(Self {
@@ -46,10 +48,17 @@ impl Config {
         })
     }
 
+    /// Return the base URL for the service.
     pub fn base(&self) -> &Url {
         &self.base
     }
 
+    /// Return the base URL for the service, removing any project subpath if it exists.
+    pub fn web_base(&self) -> &Url {
+        self.web_base.as_ref().unwrap_or(&self.base)
+    }
+
+    /// Return the service variant.
     pub fn kind(&self) -> ServiceKind {
         ServiceKind::Redmine
     }
@@ -72,7 +81,7 @@ impl Service {
 
     /// Return the website URL for an item ID.
     pub fn item_url<I: fmt::Display>(&self, id: I) -> String {
-        let base = self.config.web_base.as_str().trim_end_matches('/');
+        let base = self.config.web_base().as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
 

@@ -374,7 +374,7 @@ impl RequestSend for Request<'_> {
         let url = self
             .service
             .config
-            .base
+            .base()
             .join(&format!("issues.json?{params}"))?;
         let request = self.service.client.get(url).auth_optional(self.service);
         let response = request.send().await?;

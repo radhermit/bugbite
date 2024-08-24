@@ -38,7 +38,7 @@ impl<'a> Request<'a> {
             let mut url = self
                 .service
                 .config
-                .web_base
+                .web_base()
                 .join(&format!("issues/{id}.json"))?;
             if !self.fields.is_empty() {
                 url.query_pairs_mut()
