@@ -22,7 +22,7 @@ use crate::Error;
 use super::{stringify, Base64, Item};
 
 /// Common default values used for unset fields.
-pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
+static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
     ["unspecified", "Unspecified", "---", "--", "-"]
         .iter()
         .map(|s| s.to_string())
