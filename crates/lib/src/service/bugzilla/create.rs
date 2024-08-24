@@ -587,5 +587,45 @@ mod tests {
 
         // qa
         request().qa("user@email.com").send().await.unwrap();
+
+        // resolution
+        request().resolution("fixed").send().await.unwrap();
+
+        // see also
+        request().see_also([36]).send().await.unwrap();
+        request().see_also(["36"]).send().await.unwrap();
+        request()
+            .see_also(["https://link/to/external/bug"])
+            .send()
+            .await
+            .unwrap();
+
+        // severity
+        request().severity("normal").send().await.unwrap();
+
+        // status
+        request().status("closed").send().await.unwrap();
+
+        // summary
+        request().summary("summary").send().await.unwrap();
+
+        // target
+        request().target("milestone").send().await.unwrap();
+
+        // url
+        request().url("https://link/to/site").send().await.unwrap();
+
+        // version
+        request().version("1.2.3").send().await.unwrap();
+
+        // whiteboard
+        request().whiteboard("note").send().await.unwrap();
+
+        // custom fields
+        request()
+            .custom_fields([("name", "value")])
+            .send()
+            .await
+            .unwrap();
     }
 }
