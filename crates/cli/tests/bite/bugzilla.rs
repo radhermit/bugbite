@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
-use predicates::str::contains;
+use predicates::prelude::*;
 use wiremock::{matchers, ResponseTemplate};
 
 use crate::command::cmd;
@@ -22,6 +22,18 @@ static TEST_DATA: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("b
 static TEST_OUTPUT: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("output/bugzilla"));
 
 #[test]
+fn help() {
+    for opt in ["-h", "--help"] {
+        cmd("bite bugzilla")
+            .arg(opt)
+            .assert()
+            .stdout(predicate::str::is_empty().not())
+            .stderr("")
+            .success();
+    }
+}
+
+#[test]
 fn incompatible_connection() {
     for opt in ["-c", "--connection"] {
         cmd("bite bugzilla")
@@ -29,7 +41,7 @@ fn incompatible_connection() {
             .args(["search", "test"])
             .assert()
             .stdout("")
-            .stderr(contains("incompatible connection: ruby"))
+            .stderr(predicate::str::contains("incompatible connection: ruby"))
             .failure();
     }
 }
@@ -42,7 +54,7 @@ fn unknown_connection() {
             .args(["search", "test"])
             .assert()
             .stdout("")
-            .stderr(contains("unknown connection: unknown"))
+            .stderr(predicate::str::contains("unknown connection: unknown"))
             .failure();
     }
 }

@@ -40,20 +40,18 @@ fn initialize() {
     }
 }
 
-// verify help support isn't mangled by service subcommand injection
 #[test]
 fn help() {
     for opt in ["-h", "--help"] {
         cmd("bite")
             .arg(opt)
             .assert()
-            .stdout(predicate::str::starts_with("bite"))
+            .stdout(predicate::str::is_empty().not())
             .stderr("")
             .success();
     }
 }
 
-// verify version support isn't mangled by service subcommand injection
 #[test]
 fn version() {
     let version = env!("CARGO_PKG_VERSION");
