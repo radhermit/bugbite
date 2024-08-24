@@ -3,7 +3,7 @@ use std::env;
 use std::ffi::OsStr;
 use std::io::{stdin, stdout, BufRead, Write};
 use std::path::Path;
-use std::process::{Command, ExitStatus};
+use std::process::{Command, ExitStatus, Stdio};
 
 use anyhow::{Context, Result};
 use bugbite::utils::is_terminal;
@@ -52,11 +52,15 @@ where
             Command::new(cmd)
                 .args(&args[1..])
                 .arg(url)
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
                 .spawn()
                 .with_context(|| format!("failed launching browser via {cmd}"))?;
         } else {
             Command::new("xdg-open")
                 .arg(url)
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
                 .spawn()
                 .context("failed launching browser via xdg-open")?;
         }
