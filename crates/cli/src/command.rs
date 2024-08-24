@@ -82,3 +82,44 @@ impl Command {
         cmd.subcmd.run(&config).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{env, fs};
+
+    use bugbite::test::{build_path, reset_stdin};
+
+    use super::*;
+
+    #[tokio::test]
+    async fn doc() {
+        // wipe bugbite-related environment variables
+        for (key, _value) in env::vars() {
+            if key.starts_with("BUGBITE_") {
+                env::remove_var(key);
+            }
+        }
+
+        let doc_dir = build_path!(env!("CARGO_MANIFEST_DIR"), "doc");
+        for entry in doc_dir.read_dir_utf8().unwrap() {
+            let entry = entry.unwrap();
+            let path = entry.path();
+            if path.extension().map(|x| x == "adoc").unwrap_or_default() {
+                let name = entry.file_name();
+                let doc = fs::read_to_string(path).unwrap();
+                for (lineno, line) in doc.lines().enumerate().filter(|(_, x)| x.starts_with(' ')) {
+                    for cmd in line.trim().split(" | ").filter(|x| x.starts_with("bite ")) {
+                        let args = shlex::split(cmd).unwrap();
+                        if let Err(e) = Command::try_parse_from(args) {
+                            panic!(
+                                "failed parsing: {cmd}\nfile: {name}, line {}\n{e}",
+                                lineno + 1
+                            );
+                        }
+                        reset_stdin();
+                    }
+                }
+            }
+        }
+    }
+}

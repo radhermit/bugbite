@@ -10,7 +10,6 @@ mod command;
 mod config;
 mod service;
 mod subcmds;
-mod test;
 mod utils;
 
 fn main() -> anyhow::Result<()> {
