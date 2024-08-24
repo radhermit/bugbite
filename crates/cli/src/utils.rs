@@ -78,11 +78,15 @@ pub(crate) fn launch_editor<P: AsRef<Path>>(path: P) -> Result<ExitStatus> {
         Command::new(cmd)
             .args(&args[1..])
             .arg(path)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
             .status()
             .with_context(|| format!("failed launching editor via {cmd}"))
     } else {
         Command::new("xdg-open")
             .arg(path)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
             .status()
             .context("failed launching editor via xdg-open")
     }

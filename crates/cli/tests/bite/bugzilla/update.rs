@@ -336,6 +336,7 @@ async fn comment() {
             .arg(opt)
             .write_stdin("interactive\n")
             .assert()
+            .stdout("")
             .stderr(predicate::str::diff(indoc::indoc! {"
                 === Bug #1 ===
                 --- Updated fields ---
