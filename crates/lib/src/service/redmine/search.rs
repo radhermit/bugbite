@@ -220,16 +220,7 @@ impl Parameters {
         Ok(self)
     }
 
-    fn encode(mut self, service: &Service) -> crate::Result<String> {
-        // pull non-item parameters
-        let limit = self.limit.take();
-        let order = self.order.take();
-
-        // verify parameters exist
-        if self == Self::default() {
-            return Err(Error::EmptyParams);
-        }
-
+    fn encode(self, service: &Service) -> crate::Result<String> {
         let mut query = QueryBuilder::new(service);
 
         if let Some(values) = self.blocks {
@@ -297,7 +288,7 @@ impl Parameters {
             query.insert("status", "open");
         }
 
-        if let Some(values) = order {
+        if let Some(values) = self.order {
             let value = values.iter().map(|x| x.api()).join(",");
             query.insert("sort", value);
         } else {
@@ -306,7 +297,7 @@ impl Parameters {
             query.insert("sort", order.api());
         }
 
-        if let Some(value) = limit {
+        if let Some(value) = self.limit {
             query.insert("limit", value);
         } else {
             // default to the common maximum limit, without this the default limit is used

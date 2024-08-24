@@ -378,17 +378,7 @@ impl Parameters {
         or!(self.custom_fields, other.custom_fields);
     }
 
-    fn encode(mut self, service: &Service) -> crate::Result<String> {
-        // pull non-item parameters
-        let fields = self.fields.take();
-        let limit = self.limit.take();
-        let order = self.order.take();
-
-        // verify parameters exist
-        if self == Self::default() {
-            return Err(Error::EmptyParams);
-        }
-
+    fn encode(self, service: &Service) -> crate::Result<String> {
         let mut query = QueryBuilder::new(service);
 
         if let Some(values) = self.status {
@@ -410,21 +400,21 @@ impl Parameters {
             query.status("@open");
         }
 
-        if let Some(values) = order {
+        if let Some(values) = self.order {
             query.order(values)?;
         } else {
             // sort by ascending ID by default
             query.order([Order::Ascending(OrderField::Id)])?;
         }
 
-        if let Some(values) = fields {
+        if let Some(values) = self.fields {
             query.fields(values);
         } else {
             // limit requested fields by default to decrease bandwidth and speed up response
             query.fields([BugField::Id, BugField::Summary]);
         }
 
-        if let Some(value) = limit {
+        if let Some(value) = self.limit {
             query.insert("limit", value);
         }
 
@@ -1581,20 +1571,6 @@ mod tests {
         let server = TestServer::new().await;
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
-
-        // empty parameters
-        let err = service.search().send().await.unwrap_err();
-        assert!(matches!(err, Error::EmptyParams));
-        // non-item parameters
-        let err = service
-            .search()
-            .fields([BugField::Id])
-            .limit(100)
-            .order([Order::Ascending(OrderField::Id)])
-            .send()
-            .await
-            .unwrap_err();
-        assert!(matches!(err, Error::EmptyParams));
 
         server.respond(200, path.join("search/ids.json")).await;
         let bugs = service.search().summary(["test"]).send().await.unwrap();
