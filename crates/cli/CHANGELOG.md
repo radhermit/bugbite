@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.0.11
+
+### Changed
+
+- Rework service command layout to make usage patterns more consistent. This includes
+  dropping support for linked connection commands, replacing the -s/--service option with
+  a required subcommand, and merging the -b/--base option into -c/--connection. See the
+  related command documentation for further usage examples.
+- Try launching $BROWSER before using xdg-open for web browser support.
+
+#### Bugzilla
+
+- attachment create: Rename `attach` command to `attachment create`.
+- attachment create: Drop --dir option to use automatic directory target handling instead.
+- attachment create: Rename -s/--summary to -d/--description.
+- attachment create: Add -f/--flag option to set attachment flags.
+- attachment create: Add -n/--name option to explicitly set file name.
+- attachment get: Rename `attachment` command to `attachment get`.
+- attachment get: Rename -V/--view option to -o/--output.
+- attachment update: Add initial attachment metadata update command support.
+- search: Separate match operators from values with a single space.
+- search: Support various attachment-related queries such as `--attachment-mime`.
+- search: Support comment tag and privacy queries.
+- search: Alter match operators to all be two characters long.
+- update: Rename `modify` subcommand to `update` for consistency with upstream docs.
+
 ## 0.0.10
 
 ### Changed

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.11
+
+### Changed
+
+- Rework service support to expose Request objects allowing combinator-style
+  parameter mutation.
+
+#### Bugzilla
+
+- search: Separate match operators from values with a single space.
+- search: Support various attachment-related queries.
+- search: Support comment tag and privacy queries.
+- search: Alter match operators to all be two characters long.
+
 ## 0.0.10
 
 ### Changed
