@@ -1,6 +1,6 @@
 use std::env;
 
-use bugbite::test::build_path;
+use bugbite::test::{build_path, TestServer};
 use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
 use predicates::prelude::*;
@@ -14,6 +14,20 @@ mod show;
 
 pub(crate) static TEST_DATA_PATH: Lazy<Utf8PathBuf> =
     Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
+
+async fn start_server() -> TestServer {
+    let server = TestServer::new().await;
+    env::set_var("BUGBITE_CONNECTION", server.uri());
+    server
+}
+
+async fn start_server_with_auth() -> TestServer {
+    let server = start_server().await;
+    env::set_var("BUGBITE_USER", "bugbite@bugbite.test");
+    env::set_var("BUGBITE_PASS", "bugbite");
+    env::set_var("BUGBITE_KEY", "bugbite");
+    server
+}
 
 /// Initialization for all test executables.
 #[ctor::ctor]

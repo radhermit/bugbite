@@ -1,13 +1,14 @@
 use std::env;
 use std::time::Duration;
 
-use bugbite::test::TestServer;
 use camino::Utf8PathBuf;
 use once_cell::sync::Lazy;
 use predicates::str::contains;
 use wiremock::{matchers, ResponseTemplate};
 
 use crate::command::cmd;
+
+use super::*;
 
 mod attachment;
 mod comment;
@@ -19,19 +20,6 @@ mod update;
 
 static TEST_DATA: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("bugbite/bugzilla"));
 static TEST_OUTPUT: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("output/bugzilla"));
-
-async fn start_server() -> TestServer {
-    let server = TestServer::new().await;
-    env::set_var("BUGBITE_CONNECTION", server.uri());
-    server
-}
-
-async fn start_server_with_auth() -> TestServer {
-    let server = start_server().await;
-    env::set_var("BUGBITE_USER", "bugbite@bugbite.test");
-    env::set_var("BUGBITE_PASS", "bugbite");
-    server
-}
 
 #[test]
 fn incompatible_connection() {
