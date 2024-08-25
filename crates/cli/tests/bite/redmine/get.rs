@@ -83,7 +83,7 @@ async fn single() {
         .stderr("")
         .success();
 
-    // bug fields without attachments
+    // default output with all extra data
     cmd("bite redmine get 1")
         .assert()
         .stdout(predicate::str::diff(expected))
