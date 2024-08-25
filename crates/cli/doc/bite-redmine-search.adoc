@@ -49,8 +49,8 @@ Combining with --dry-run allows creating templates without service interaction.
     Restrict the data fields returned by the query.
 +
 By default, only the id and subject fields are returned. This can be altered by
-specifying a custom list of comma-separated field while will change the output
-format to a space-separated list of the field values.
+specifying a custom list of comma-separated values that changes the output format to
+a space-separated list of the field values.
 +
 .Possible values:
 - *assignee*: user the issue is assigned to
