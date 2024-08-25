@@ -5,18 +5,19 @@ use strum::Display;
 use url::Url;
 
 use crate::objects::redmine::{Comment, Issue};
+use crate::service::redmine::Service;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
 pub struct Request<'a> {
-    service: &'a super::Service,
+    service: &'a Service,
     pub ids: Vec<String>,
     fields: IndexSet<Field>,
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a super::Service, ids: I) -> Self
+    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
@@ -140,5 +141,44 @@ impl RequestSend for Request<'_> {
         }
 
         Ok(issues)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use wiremock::{matchers, ResponseTemplate};
+
+    use crate::service::redmine::Config;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn request() {
+        let path = TESTDATA_PATH.join("redmine");
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        // no IDs
+        let ids = Vec::<u32>::new();
+        let err = service.get(ids).send().await.unwrap_err();
+        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_err_re!(err, "no IDs specified");
+
+        // nonexistent
+        let template = ResponseTemplate::new(404);
+        server.respond_custom(matchers::any(), template).await;
+        let err = service.get([1]).send().await.unwrap_err();
+        assert!(matches!(err, Error::Redmine(_)));
+        assert_err_re!(err, "nonexistent issue: 1");
+
+        server.reset().await;
+
+        // single
+        server.respond(200, path.join("get/single.json")).await;
+        let ids = [1];
+        let bugs = service.get(ids).send().await.unwrap();
+        assert_ordered_eq!(bugs.iter().map(|x| x.id), ids);
     }
 }
