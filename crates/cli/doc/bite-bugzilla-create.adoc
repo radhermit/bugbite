@@ -69,12 +69,18 @@ the service to return an error.
 +
 Multiple arguments can be specified in a comma-separated list or via multiple
 options.
++
+.Create bug with multiple aliases:
+ bite bugzilla create --alias alias1,alias2
 
 *-a, --assignee* <user>::
     Assign a bug to a user.
 +
 The value must be an email address for a service user. The alias `@me` can be
 used for the service's configured user if one exists.
++
+.Create bug assigned to yourself:
+ bite bugzilla create --assignee @me
 
 *-b, --blocks* <id[,...]>::
     Set blockers.
@@ -85,6 +91,9 @@ Multiple arguments can be specified in a comma-separated list or via multiple
 options.
 +
 Values are taken from standard input when `-`.
++
+.Create bug with blockers using specified keywords:
+ bite bugzilla search -k kw1,kw2 -f id | bite bugzilla create --blocks -
 
 *--cc* <user[,...]>::
     Set users in the CC list.
@@ -93,6 +102,9 @@ Values must be email addresses for service users.
 +
 Multiple arguments can be specified in a comma-separated list or via multiple
 options.
++
+.Create bug CCing specified users:
+ bite bugzilla create --cc user1@email.com --cc user2@email.com
 
 *-C, --component* <value>::
     Set the component.
