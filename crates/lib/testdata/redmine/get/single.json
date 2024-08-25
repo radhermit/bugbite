@@ -1,0 +1,62 @@
+{
+  "issue": {
+    "author": {
+      "id": 100,
+      "name": "user1 (User Name)"
+    },
+    "closed_on": null,
+    "created_on": "2024-02-15T15:56:49Z",
+    "custom_fields": [
+      {
+        "id": 4,
+        "name": "Custom field 4",
+        "value": "value"
+      },
+      {
+        "id": 5,
+        "name": "Custom field 5",
+        "value": "value"
+      }
+    ],
+    "description": "description",
+    "done_ratio": 0,
+    "due_date": null,
+    "estimated_hours": null,
+    "id": 1,
+    "is_private": false,
+    "journals": [
+      {
+        "created_on": "2024-02-15T16:00:26Z",
+        "details": [],
+        "id": 12345,
+        "notes": "comment",
+        "private_notes": false,
+        "user": {
+          "id": 100,
+          "name": "user1 (User Name)"
+        }
+      }
+    ],
+    "priority": {
+      "id": 4,
+      "name": "Normal"
+    },
+    "project": {
+      "id": 1,
+      "name": "project"
+    },
+    "start_date": null,
+    "status": {
+      "id": 1,
+      "is_closed": false,
+      "name": "Open"
+    },
+    "subject": "subject",
+    "total_estimated_hours": null,
+    "tracker": {
+      "id": 1,
+      "name": "Bug"
+    },
+    "updated_on": "2024-02-15T16:00:26Z"
+  }
+}

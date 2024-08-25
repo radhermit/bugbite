@@ -48,3 +48,19 @@ async fn timeout() {
         .stderr("Error: request timed out\n")
         .failure();
 }
+
+#[tokio::test]
+async fn browser() {
+    let server = start_server().await;
+    server.respond(200, TEST_DATA.join("get/single.json")).await;
+
+    for opt in ["-b", "--browser"] {
+        cmd("bite redmine get 1")
+            .arg(opt)
+            .env("BROWSER", "true")
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+    }
+}
