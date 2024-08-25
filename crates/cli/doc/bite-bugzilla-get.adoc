@@ -22,7 +22,7 @@ Note that this command isn't meant for returning individual field values,
 instead use the `search` command similar to the following:
 
 .Output bug 10's summary:
- bite bugzilla -c gentoo search --id 10 -f summary -s @all
+ bite bugzilla search --id 10 -f summary -s @all
 
 include::include/global-options.adoc[]
 
@@ -52,13 +52,13 @@ Taken from standard input when `-`.
 == Examples
 
 .Get bug 123:
- bite bugzilla -c gentoo get 123
+ bite bugzilla get 123
 
 .Get bug with alias `test` and only output field values:
- bite bugzilla -c gentoo get test -ACH
+ bite bugzilla get test -ACH
 
 .Get all bugs created in the last day:
- bite bugzilla -c gentoo search -c 1d -f id | bite bugzilla -c gentoo get -
+ bite bugzilla search -c 1d -f id | bite bugzilla get -
 
 == See Also
 

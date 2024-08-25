@@ -87,7 +87,7 @@ impl Command {
 mod tests {
     use std::{env, fs};
 
-    use bugbite::test::{build_path, reset_stdin};
+    use bugbite::test::{build_path, reset_stdin, TestServer};
 
     use super::*;
 
@@ -99,6 +99,13 @@ mod tests {
                 env::remove_var(key);
             }
         }
+
+        // start mocked server
+        let server = TestServer::new().await;
+        env::set_var("BUGBITE_CONNECTION", server.uri());
+        env::set_var("BUGBITE_USER", "bugbite@bugbite.test");
+        env::set_var("BUGBITE_PASS", "bugbite");
+        env::set_var("BUGBITE_KEY", "bugbite");
 
         let doc_dir = build_path!(env!("CARGO_MANIFEST_DIR"), "doc");
         for entry in doc_dir.read_dir_utf8().unwrap() {

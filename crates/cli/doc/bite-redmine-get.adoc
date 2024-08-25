@@ -38,13 +38,13 @@ Taken from standard input when `-`.
 == Examples
 
 .Get issue 123:
- bite redmine -c ruby get 123
+ bite redmine get 123
 
 .Get issue 123 and only output field values:
- bite redmine -c ruby get 123 -C
+ bite redmine get 123 -C
 
 .Get all issues created in the last day:
- bite redmine -c ruby search -c 1d -f id | bite redmine -c ruby get -
+ bite redmine search -c 1d -f id | bite redmine get -
 
 == See Also
 
