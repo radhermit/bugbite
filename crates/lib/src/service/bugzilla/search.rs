@@ -1562,7 +1562,7 @@ impl TryFrom<String> for ChangeField {
 mod tests {
     use strum::IntoEnumIterator;
 
-    use crate::service::bugzilla::Config;
+    use crate::service::bugzilla::{Config, GroupField};
     use crate::test::*;
 
     use super::*;
@@ -1589,6 +1589,18 @@ mod tests {
         }
 
         // fields
+        service
+            .search()
+            .fields([BugField::Id])
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .fields([GroupField::All])
+            .send()
+            .await
+            .unwrap();
         for field in FilterField::iter() {
             service.search().fields([field]).send().await.unwrap();
         }
