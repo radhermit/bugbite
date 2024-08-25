@@ -136,104 +136,6 @@ impl<'a> Request<'a> {
     }
 }
 
-/// Advanced field matching operators.
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-enum MatchOp {
-    /// Contains case-sensitive substring.
-    CaseSubstring,
-    /// Contains substring.
-    Substring,
-    /// Doesn't contain substring.
-    NotSubstring,
-    /// Equal to value.
-    Equals,
-    /// Not equal to value.
-    NotEquals,
-    /// Matches regular expression.
-    Regexp,
-    /// Doesn't match regular expression.
-    NotRegexp,
-}
-
-impl Api for MatchOp {
-    fn api(&self) -> String {
-        let value = match self {
-            Self::CaseSubstring => "casesubstring",
-            Self::Substring => "substring",
-            Self::NotSubstring => "notsubstring",
-            Self::Equals => "equals",
-            Self::NotEquals => "notequals",
-            Self::Regexp => "regexp",
-            Self::NotRegexp => "notregexp",
-        };
-        value.to_string()
-    }
-}
-
-/// Advanced field match.
-#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
-pub struct Match {
-    op: MatchOp,
-    value: String,
-}
-
-impl Match {
-    /// Substitute user alias for matching value.
-    fn replace_user_alias(mut self, service: &Service) -> Self {
-        self.value = service.replace_user_alias(&self.value);
-        self
-    }
-}
-
-impl Api for Match {
-    fn api(&self) -> String {
-        self.value.to_string()
-    }
-}
-
-impl fmt::Display for Match {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.value.fmt(f)
-    }
-}
-
-impl FromStr for Match {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(s.into())
-    }
-}
-
-impl From<&str> for Match {
-    fn from(s: &str) -> Self {
-        let (op, value) = match s.split_once(' ') {
-            Some(("=~", value)) => (MatchOp::CaseSubstring, value.into()),
-            Some(("~~", value)) => (MatchOp::Substring, value.into()),
-            Some(("!~", value)) => (MatchOp::NotSubstring, value.into()),
-            Some(("==", value)) => (MatchOp::Equals, value.into()),
-            Some(("!=", value)) => (MatchOp::NotEquals, value.into()),
-            Some(("=*", value)) => (MatchOp::Regexp, value.into()),
-            Some(("!*", value)) => (MatchOp::NotRegexp, value.into()),
-            _ => (MatchOp::Substring, s.into()),
-        };
-
-        Self { op, value }
-    }
-}
-
-impl From<String> for Match {
-    fn from(s: String) -> Self {
-        s.as_str().into()
-    }
-}
-
-impl From<&String> for Match {
-    fn from(s: &String) -> Self {
-        s.as_str().into()
-    }
-}
-
 /// Bug search parameters.
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Clone)]
@@ -804,6 +706,104 @@ impl<'a> QueryBuilder<'a> {
             query: Default::default(),
             advanced_count: Default::default(),
         }
+    }
+}
+
+/// Advanced field matching operators.
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+enum MatchOp {
+    /// Contains case-sensitive substring.
+    CaseSubstring,
+    /// Contains substring.
+    Substring,
+    /// Doesn't contain substring.
+    NotSubstring,
+    /// Equal to value.
+    Equals,
+    /// Not equal to value.
+    NotEquals,
+    /// Matches regular expression.
+    Regexp,
+    /// Doesn't match regular expression.
+    NotRegexp,
+}
+
+impl Api for MatchOp {
+    fn api(&self) -> String {
+        let value = match self {
+            Self::CaseSubstring => "casesubstring",
+            Self::Substring => "substring",
+            Self::NotSubstring => "notsubstring",
+            Self::Equals => "equals",
+            Self::NotEquals => "notequals",
+            Self::Regexp => "regexp",
+            Self::NotRegexp => "notregexp",
+        };
+        value.to_string()
+    }
+}
+
+/// Advanced field match.
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
+pub struct Match {
+    op: MatchOp,
+    value: String,
+}
+
+impl Match {
+    /// Substitute user alias for matching value.
+    fn replace_user_alias(mut self, service: &Service) -> Self {
+        self.value = service.replace_user_alias(&self.value);
+        self
+    }
+}
+
+impl Api for Match {
+    fn api(&self) -> String {
+        self.value.to_string()
+    }
+}
+
+impl fmt::Display for Match {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.value.fmt(f)
+    }
+}
+
+impl FromStr for Match {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(s.into())
+    }
+}
+
+impl From<&str> for Match {
+    fn from(s: &str) -> Self {
+        let (op, value) = match s.split_once(' ') {
+            Some(("=~", value)) => (MatchOp::CaseSubstring, value.into()),
+            Some(("~~", value)) => (MatchOp::Substring, value.into()),
+            Some(("!~", value)) => (MatchOp::NotSubstring, value.into()),
+            Some(("==", value)) => (MatchOp::Equals, value.into()),
+            Some(("!=", value)) => (MatchOp::NotEquals, value.into()),
+            Some(("=*", value)) => (MatchOp::Regexp, value.into()),
+            Some(("!*", value)) => (MatchOp::NotRegexp, value.into()),
+            _ => (MatchOp::Substring, s.into()),
+        };
+
+        Self { op, value }
+    }
+}
+
+impl From<String> for Match {
+    fn from(s: String) -> Self {
+        s.as_str().into()
+    }
+}
+
+impl From<&String> for Match {
+    fn from(s: &String) -> Self {
+        s.as_str().into()
     }
 }
 

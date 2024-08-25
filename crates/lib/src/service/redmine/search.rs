@@ -17,137 +17,62 @@ use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, WebService};
 use crate::utils::or;
 use crate::Error;
 
-struct QueryBuilder<'a> {
-    _service: &'a Service,
-    query: query::QueryBuilder,
+#[derive(Serialize, Debug)]
+pub struct Request<'a> {
+    #[serde(skip)]
+    service: &'a Service,
+    #[serde(flatten)]
+    pub params: Parameters,
 }
 
-impl Deref for QueryBuilder<'_> {
-    type Target = query::QueryBuilder;
-
-    fn deref(&self) -> &Self::Target {
-        &self.query
-    }
-}
-
-impl DerefMut for QueryBuilder<'_> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.query
-    }
-}
-
-impl<'a> QueryBuilder<'a> {
-    fn new(_service: &'a Service) -> Self {
+impl<'a> Request<'a> {
+    pub(super) fn new(service: &'a Service) -> Self {
         Self {
-            _service,
-            query: Default::default(),
+            service,
+            params: Default::default(),
         }
     }
 
-    /// Match conditionally existent array field values.
-    fn exists(&mut self, field: ExistsField, status: bool) {
-        let status = if status { "*" } else { "!*" };
-        self.insert(field.api(), status);
+    /// Return the website URL for a query.
+    pub fn search_url(self) -> crate::Result<String> {
+        let base = self.service.config.base().as_str().trim_end_matches('/');
+        let params = self.params.encode(self.service)?;
+        Ok(format!("{base}/issues?set_filter=1&{params}"))
     }
+}
 
-    fn id<I>(&mut self, values: I) -> crate::Result<()>
-    where
-        I: IntoIterator<Item = RangeOrValue<u64>>,
-    {
-        let (ids, ranges): (Vec<_>, Vec<_>) = values
-            .into_iter()
-            .partition(|x| matches!(x, RangeOrValue::Value(_)));
-
-        if !ids.is_empty() && !ranges.is_empty() {
-            return Err(Error::InvalidValue(
-                "IDs and ID ranges specified".to_string(),
-            ));
-        }
-
-        if !ids.is_empty() {
-            self.insert("issue_id", ids.iter().join(","));
-        }
-
-        match &ranges[..] {
-            [] => (),
-            [value] => match value {
-                RangeOrValue::RangeOp(value) => self.range_op("issue_id", value),
-                RangeOrValue::Range(value) => self.range("issue_id", value),
-                RangeOrValue::Value(_) => (),
-            },
-            _ => {
-                return Err(Error::InvalidValue(
-                    "multiple ID ranges specified".to_string(),
-                ))
-            }
-        }
-
+impl RequestMerge<&Utf8Path> for Request<'_> {
+    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        let params = Parameters::from_path(path)?;
+        self.params.merge(params);
         Ok(())
     }
+}
 
-    fn time(&mut self, field: &str, value: RangeOrValue<TimeDeltaOrStatic>) {
-        match value {
-            RangeOrValue::Value(value) => {
-                let value = value.api();
-                self.insert(field, format!(">={value}"));
-            }
-            RangeOrValue::RangeOp(value) => self.range_op(field, &value),
-            RangeOrValue::Range(value) => self.range(field, &value),
-        }
+impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
+    fn merge(&mut self, value: T) -> crate::Result<()> {
+        self.params.merge(value);
+        Ok(())
     }
+}
 
-    // Redmine doesn't support native < or > operators so use <= and >= for them.
-    fn range_op<T>(&mut self, field: &str, value: &RangeOp<T>)
-    where
-        T: Api + Eq,
-    {
-        match value {
-            RangeOp::Less(value) | RangeOp::LessOrEqual(value) => {
-                let value = value.api();
-                self.insert(field, format!("<={value}"));
-            }
-            RangeOp::Equal(value) => {
-                let value = value.api();
-                self.insert(field, format!("={value}"));
-            }
-            RangeOp::NotEqual(value) => {
-                let value = value.api();
-                self.insert(field, format!("!{value}"));
-            }
-            RangeOp::GreaterOrEqual(value) | RangeOp::Greater(value) => {
-                let value = value.api();
-                self.insert(field, format!(">={value}"));
-            }
-        }
-    }
+impl RequestSend for Request<'_> {
+    type Output = Vec<Issue>;
 
-    fn range<T>(&mut self, field: &str, value: &Range<T>)
-    where
-        T: Api + Eq,
-    {
-        match value {
-            Range::Range(r) => {
-                let (start, end) = (r.start.api(), r.end.api());
-                self.insert(field, format!("><{start}|{end}"));
-            }
-            Range::Inclusive(r) => {
-                let (start, end) = (r.start().api(), r.end().api());
-                self.insert(field, format!("><{start}|{end}"));
-            }
-            Range::To(r) => {
-                let end = r.end.api();
-                self.insert(field, format!("<={end}"));
-            }
-            Range::ToInclusive(r) => {
-                let end = r.end.api();
-                self.insert(field, format!("<={end}"));
-            }
-            Range::From(r) => {
-                let start = r.start.api();
-                self.insert(field, format!(">={start}"));
-            }
-            Range::Full(_) => (),
-        }
+    async fn send(self) -> crate::Result<Self::Output> {
+        let params = self.params.encode(self.service)?;
+        let url = self
+            .service
+            .config
+            .base()
+            .join(&format!("issues.json?{params}"))?;
+        let request = self.service.client.get(url).auth_optional(self.service);
+        let response = request.send().await?;
+        let mut data = self.service.parse_response(response).await?;
+        let data = data["issues"].take();
+        let issues = serde_json::from_value(data)
+            .map_err(|e| Error::InvalidValue(format!("failed deserializing issues: {e}")))?;
+        Ok(issues)
     }
 }
 
@@ -307,6 +232,140 @@ impl Parameters {
     }
 }
 
+struct QueryBuilder<'a> {
+    _service: &'a Service,
+    query: query::QueryBuilder,
+}
+
+impl Deref for QueryBuilder<'_> {
+    type Target = query::QueryBuilder;
+
+    fn deref(&self) -> &Self::Target {
+        &self.query
+    }
+}
+
+impl DerefMut for QueryBuilder<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.query
+    }
+}
+
+impl<'a> QueryBuilder<'a> {
+    fn new(_service: &'a Service) -> Self {
+        Self {
+            _service,
+            query: Default::default(),
+        }
+    }
+
+    /// Match conditionally existent array field values.
+    fn exists(&mut self, field: ExistsField, status: bool) {
+        let status = if status { "*" } else { "!*" };
+        self.insert(field.api(), status);
+    }
+
+    fn id<I>(&mut self, values: I) -> crate::Result<()>
+    where
+        I: IntoIterator<Item = RangeOrValue<u64>>,
+    {
+        let (ids, ranges): (Vec<_>, Vec<_>) = values
+            .into_iter()
+            .partition(|x| matches!(x, RangeOrValue::Value(_)));
+
+        if !ids.is_empty() && !ranges.is_empty() {
+            return Err(Error::InvalidValue(
+                "IDs and ID ranges specified".to_string(),
+            ));
+        }
+
+        if !ids.is_empty() {
+            self.insert("issue_id", ids.iter().join(","));
+        }
+
+        match &ranges[..] {
+            [] => (),
+            [value] => match value {
+                RangeOrValue::RangeOp(value) => self.range_op("issue_id", value),
+                RangeOrValue::Range(value) => self.range("issue_id", value),
+                RangeOrValue::Value(_) => (),
+            },
+            _ => {
+                return Err(Error::InvalidValue(
+                    "multiple ID ranges specified".to_string(),
+                ))
+            }
+        }
+
+        Ok(())
+    }
+
+    fn time(&mut self, field: &str, value: RangeOrValue<TimeDeltaOrStatic>) {
+        match value {
+            RangeOrValue::Value(value) => {
+                let value = value.api();
+                self.insert(field, format!(">={value}"));
+            }
+            RangeOrValue::RangeOp(value) => self.range_op(field, &value),
+            RangeOrValue::Range(value) => self.range(field, &value),
+        }
+    }
+
+    // Redmine doesn't support native < or > operators so use <= and >= for them.
+    fn range_op<T>(&mut self, field: &str, value: &RangeOp<T>)
+    where
+        T: Api + Eq,
+    {
+        match value {
+            RangeOp::Less(value) | RangeOp::LessOrEqual(value) => {
+                let value = value.api();
+                self.insert(field, format!("<={value}"));
+            }
+            RangeOp::Equal(value) => {
+                let value = value.api();
+                self.insert(field, format!("={value}"));
+            }
+            RangeOp::NotEqual(value) => {
+                let value = value.api();
+                self.insert(field, format!("!{value}"));
+            }
+            RangeOp::GreaterOrEqual(value) | RangeOp::Greater(value) => {
+                let value = value.api();
+                self.insert(field, format!(">={value}"));
+            }
+        }
+    }
+
+    fn range<T>(&mut self, field: &str, value: &Range<T>)
+    where
+        T: Api + Eq,
+    {
+        match value {
+            Range::Range(r) => {
+                let (start, end) = (r.start.api(), r.end.api());
+                self.insert(field, format!("><{start}|{end}"));
+            }
+            Range::Inclusive(r) => {
+                let (start, end) = (r.start().api(), r.end().api());
+                self.insert(field, format!("><{start}|{end}"));
+            }
+            Range::To(r) => {
+                let end = r.end.api();
+                self.insert(field, format!("<={end}"));
+            }
+            Range::ToInclusive(r) => {
+                let end = r.end.api();
+                self.insert(field, format!("<={end}"));
+            }
+            Range::From(r) => {
+                let start = r.start.api();
+                self.insert(field, format!(">={start}"));
+            }
+            Range::Full(_) => (),
+        }
+    }
+}
+
 /// Quote terms containing whitespace, combining them into a query value.
 fn quoted_strings<I, S>(values: I) -> String
 where
@@ -324,65 +383,6 @@ where
             }
         })
         .join(" ")
-}
-
-#[derive(Serialize, Debug)]
-pub struct Request<'a> {
-    #[serde(skip)]
-    service: &'a Service,
-    #[serde(flatten)]
-    pub params: Parameters,
-}
-
-impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a Service) -> Self {
-        Self {
-            service,
-            params: Default::default(),
-        }
-    }
-
-    /// Return the website URL for a query.
-    pub fn search_url(self) -> crate::Result<String> {
-        let base = self.service.config.base().as_str().trim_end_matches('/');
-        let params = self.params.encode(self.service)?;
-        Ok(format!("{base}/issues?set_filter=1&{params}"))
-    }
-}
-
-impl RequestMerge<&Utf8Path> for Request<'_> {
-    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        let params = Parameters::from_path(path)?;
-        self.params.merge(params);
-        Ok(())
-    }
-}
-
-impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
-    fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.params.merge(value);
-        Ok(())
-    }
-}
-
-impl RequestSend for Request<'_> {
-    type Output = Vec<Issue>;
-
-    async fn send(self) -> crate::Result<Self::Output> {
-        let params = self.params.encode(self.service)?;
-        let url = self
-            .service
-            .config
-            .base()
-            .join(&format!("issues.json?{params}"))?;
-        let request = self.service.client.get(url).auth_optional(self.service);
-        let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let data = data["issues"].take();
-        let issues = serde_json::from_value(data)
-            .map_err(|e| Error::InvalidValue(format!("failed deserializing issues: {e}")))?;
-        Ok(issues)
-    }
 }
 
 #[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
