@@ -367,14 +367,14 @@ impl Parameters {
 
             // optional fields
             alias: self.alias,
-            assigned_to: self.assignee.map(|x| service.replace_user_alias(&x).into()),
+            assigned_to: self.assignee.map(|x| service.replace_user_alias(x)),
             blocks: self.blocks,
             cc: self.cc,
             depends_on: self.depends,
             flags: self.flags,
             groups: self.groups,
             keywords: self.keywords,
-            qa_contact: self.qa.map(|x| service.replace_user_alias(&x).into()),
+            qa_contact: self.qa.map(|x| service.replace_user_alias(x)),
             resolution: self.resolution,
             see_also: self.see_also,
             status: self.status,

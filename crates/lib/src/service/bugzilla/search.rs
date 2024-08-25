@@ -180,11 +180,7 @@ pub struct Match {
 impl Match {
     /// Substitute user alias for matching value.
     fn replace_user_alias(mut self, service: &Service) -> Self {
-        if let Some(user) = service.config.user.as_deref() {
-            if self.value == "@me" {
-                self.value = user.to_string();
-            }
-        }
+        self.value = service.replace_user_alias(&self.value);
         self
     }
 }

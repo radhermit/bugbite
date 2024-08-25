@@ -421,24 +421,15 @@ impl Parameters {
                 params.reset_assigned_to = Some(true);
             } else {
                 let user = service.replace_user_alias(value);
-                params.assigned_to = Some(user.into());
+                params.assigned_to = Some(user);
             }
         }
 
         if let Some(values) = self.cc {
             let iter = values.into_iter().map(|c| match c {
-                SetChange::Add(value) => {
-                    let user = service.replace_user_alias(&value);
-                    SetChange::Add(user.into())
-                }
-                SetChange::Remove(value) => {
-                    let user = service.replace_user_alias(&value);
-                    SetChange::Remove(user.into())
-                }
-                SetChange::Set(value) => {
-                    let user = service.replace_user_alias(&value);
-                    SetChange::Set(user.into())
-                }
+                SetChange::Add(value) => SetChange::Add(service.replace_user_alias(value)),
+                SetChange::Remove(value) => SetChange::Remove(service.replace_user_alias(value)),
+                SetChange::Set(value) => SetChange::Set(service.replace_user_alias(value)),
             });
 
             params.cc = Some(iter.collect());
@@ -491,7 +482,7 @@ impl Parameters {
                 params.reset_qa_contact = Some(true);
             } else {
                 let user = service.replace_user_alias(value);
-                params.qa_contact = Some(user.into());
+                params.qa_contact = Some(user);
             }
         }
 
