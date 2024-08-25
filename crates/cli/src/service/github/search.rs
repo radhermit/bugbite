@@ -5,7 +5,7 @@ use bugbite::args::Csv;
 use bugbite::query::Order;
 use bugbite::service::github::search::{OrderField, Parameters};
 use bugbite::service::github::Service;
-use bugbite::traits::RequestSend;
+use bugbite::traits::{RequestMerge, RequestSend};
 use bugbite::utils::is_terminal;
 use clap::Args;
 use itertools::Itertools;
@@ -49,9 +49,9 @@ pub(super) struct Command {
 
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
-        let params: Parameters = self.params.into();
-
-        let issues = service.search().params(params).send().await?;
+        let mut request = service.search();
+        request.merge(self.params)?;
+        let issues = request.send().await?;
         let mut stdout = stdout().lock();
         let mut count = 0;
 

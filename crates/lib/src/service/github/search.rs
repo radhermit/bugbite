@@ -9,7 +9,8 @@ use tracing::debug;
 
 use crate::objects::github::Issue;
 use crate::query::{self, Order};
-use crate::traits::{Api, RequestSend};
+use crate::traits::{Api, RequestMerge, RequestSend};
+use crate::utils::or;
 use crate::Error;
 
 struct QueryBuilder<'a> {
@@ -56,11 +57,10 @@ impl Parameters {
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
     }
 
-    /// Merge parameters using the provided value for fallbacks.
-    pub fn merge(self, other: Self) -> Self {
-        Self {
-            order: self.order.or(other.order),
-        }
+    /// Override parameters using the provided value if it exists.
+    fn merge<T: Into<Self>>(&mut self, other: T) {
+        let other = other.into();
+        or!(self.order, other.order);
     }
 
     pub fn order(mut self, value: Order<OrderField>) -> Self {
@@ -118,10 +118,20 @@ impl<'a> Request<'a> {
             params: Default::default(),
         }
     }
+}
 
-    pub fn params(mut self, params: Parameters) -> Self {
-        self.params = params;
-        self
+impl RequestMerge<&Utf8Path> for Request<'_> {
+    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        let params = Parameters::from_path(path)?;
+        self.params.merge(params);
+        Ok(())
+    }
+}
+
+impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
+    fn merge(&mut self, value: T) -> crate::Result<()> {
+        self.params.merge(value);
+        Ok(())
     }
 }
 
