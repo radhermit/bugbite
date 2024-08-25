@@ -34,6 +34,10 @@ async fn start_server_with_auth() -> TestServer {
 /// Initialization for all test executables.
 #[ctor::ctor]
 fn initialize() {
+    // avoid spawning a real browser or editor by default
+    env::set_var("EDITOR", "true");
+    env::set_var("BROWSER", "true");
+
     // wipe bugbite-related environment variables
     for (key, _value) in env::vars() {
         if key.starts_with("BUGBITE_") {
