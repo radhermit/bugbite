@@ -104,10 +104,10 @@ With no argument, all matches with assignees are returned. If the value is
 `true` or `false`, all matches with or without assignees are returned,
 respectively.
 +
-.Search for assigned ruby issues:
+.Search for assigned issues:
  bite redmine search --assignee
 +
-.Search for unassigned ruby issues:
+.Search for unassigned issues:
  bite redmine search --assignee false
 
 *--attachments [<value>[,...]]*::
@@ -123,16 +123,16 @@ attachment's file name.
 Multiple values can be specified in a comma-separated list and will
 match if all of the specified values match.
 +
-.Search for ruby issues with attachments:
+.Search for issues with attachments:
  bite redmine search --attachments
 +
-.Search for ruby issues without attachments:
+.Search for issues without attachments:
  bite redmine search --attachments false
 +
-.Search for ruby issues with file names containing `test`:
+.Search for issues with file names containing `test`:
  bite redmine search --attachments test
 +
-.Search for ruby issues with file names containing `test` and `log`:
+.Search for issues with file names containing `test` and `log`:
  bite redmine search --attachments test,log
 
 *-B, --blocks [<ID>[,...]]*::
@@ -141,20 +141,20 @@ match if all of the specified values match.
 With no argument, all blocking matches are returned. If the value is `true` or
 `false`, all blocking and non-blocking matches are returned, respectively.
 +
-.Search for ruby issue blockers:
+.Search for issue blockers:
  bite redmine search --blocks
 +
-.Search for non-blocking ruby issues:
+.Search for non-blocking issues:
  bite redmine search --blocks false
 +
 Regular values search for matching blockers and multiple values can be
 specified in a comma-separated list, matching if any of the specified blockers
 match.
 +
-.Search for ruby issues blocking issue #10:
+.Search for issues blocking issue #10:
  bite redmine search --blocks 10
 +
-.Search for ruby issues blocking issues #10 or #11:
+.Search for issues blocking issues #10 or #11:
  bite redmine search --blocks 10,11
 +
 Values are taken from standard input when `-`.
@@ -166,20 +166,20 @@ With no argument, all matches with dependencies are returned. If the value is
 `true` or `false`, all matches with or without dependencies are returned,
 respectively.
 +
-.Search for ruby issues with dependencies:
+.Search for issues with dependencies:
  bite redmine search --blocked
 +
-.Search for ruby issues without dependencies:
+.Search for issues without dependencies:
  bite redmine search --blocked false
 +
 Regular values search for matching dependencies and multiple values can be
 specified in a comma-separated list, matching if any of the specified
 dependencies match.
 +
-.Search for ruby issues blocked on issue #10:
+.Search for issues blocked on issue #10:
  bite redmine search --blocked 10
 +
-.Search for ruby issues blocked on issues #10 or #11:
+.Search for issues blocked on issues #10 or #11:
  bite redmine search --blocked 10,11
 +
 Values are taken from standard input when `-`.
@@ -191,20 +191,20 @@ With no argument, all matches with relations are returned. If the value is
 `true` or `false`, all matches with or without relations are returned,
 respectively.
 +
-.Search for ruby issues with relations:
+.Search for issues with relations:
  bite redmine search --relates
 +
-.Search for ruby issues without relations:
+.Search for issues without relations:
  bite redmine search --relates false
 +
 Regular values search for matching relations and multiple values can be
 specified in a comma-separated list, matching if any of the specified
 relations match.
 +
-.Search for ruby issues related to issue #10:
+.Search for issues related to issue #10:
  bite redmine search --relates 10
 +
-.Search for ruby issues related to issues #10 or #11:
+.Search for issues related to issues #10 or #11:
  bite redmine search --relates 10,11
 +
 Values are taken from standard input when `-`.
@@ -243,7 +243,7 @@ Query issue status from the following options: open, closed, and all.
 +
 Taken from standard input when `-`.
 +
-.Search for ruby issues with `test` in the subject:
+.Search for issues with `test` in the subject:
  bite redmine search test
 
 == See Also
