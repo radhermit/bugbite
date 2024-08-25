@@ -5,7 +5,7 @@ use std::str::FromStr;
 use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
-use strum::{Display, EnumIter, EnumString, VariantNames};
+use strum::{Display, EnumIter, EnumString, IntoEnumIterator, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
@@ -425,6 +425,15 @@ impl Api for BugField {
 pub enum FilterField {
     Bug(BugField),
     Group(GroupField),
+}
+
+impl FilterField {
+    /// Return an iterator over all FilterField variants.
+    pub fn iter() -> impl Iterator<Item = FilterField> {
+        BugField::iter()
+            .map(FilterField::Bug)
+            .chain(GroupField::iter().map(FilterField::Group))
+    }
 }
 
 impl fmt::Display for FilterField {
