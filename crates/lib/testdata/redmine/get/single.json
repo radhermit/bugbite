@@ -2,7 +2,7 @@
   "issue": {
     "author": {
       "id": 100,
-      "name": "user1 (User Name)"
+      "name": "john (John Smith)"
     },
     "closed_on": null,
     "created_on": "2024-02-15T15:56:49Z",
@@ -32,8 +32,8 @@
         "notes": "comment",
         "private_notes": false,
         "user": {
-          "id": 100,
-          "name": "user1 (User Name)"
+          "id": 101,
+          "name": "susan (Susan Miller)"
         }
       }
     ],

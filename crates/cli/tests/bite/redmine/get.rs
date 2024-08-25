@@ -50,6 +50,48 @@ async fn timeout() {
 }
 
 #[tokio::test]
+async fn single() {
+    let server = start_server().await;
+    server.respond(200, TEST_DATA.join("get/single.json")).await;
+
+    let expected = indoc::indoc! {"
+        ==========================================================================================
+        Subject      : subject
+        Reporter     : john (John Smith)
+        Status       : Open
+        Tracker      : Bug
+        Priority     : Normal
+        Created      : 2024-02-15 15:56:49 UTC
+        Updated      : 2024-02-15 16:00:26 UTC
+        ID           : 1
+        Comments     : 2
+
+        Description by john (John Smith), 2024-02-15 15:56:49 UTC
+        ------------------------------------------------------------------------------------------
+        description
+
+        Comment #1 by susan (Susan Miller), 2024-02-15 16:00:26 UTC
+        ------------------------------------------------------------------------------------------
+        comment
+    "};
+
+    // pull ID from stdin
+    cmd("bite redmine get -")
+        .write_stdin("1\n")
+        .assert()
+        .stdout(predicate::str::diff(expected))
+        .stderr("")
+        .success();
+
+    // bug fields without attachments
+    cmd("bite redmine get 1")
+        .assert()
+        .stdout(predicate::str::diff(expected))
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
 async fn browser() {
     let server = start_server().await;
     server.respond(200, TEST_DATA.join("get/single.json")).await;

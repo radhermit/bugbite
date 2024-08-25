@@ -91,7 +91,7 @@ async fn single_bug() {
         .stderr("")
         .success();
 
-    // pull id from stdin
+    // pull ID from stdin
     cmd("bite bugzilla get -ACH -")
         .write_stdin("1\n")
         .assert()
@@ -141,7 +141,7 @@ async fn multiple_bugs() {
         .stderr("")
         .success();
 
-    // pull ids from stdin
+    // pull IDs from stdin
     cmd("bite bugzilla get -ACH -")
         .write_stdin("12345\n23456\n34567\n")
         .assert()
