@@ -166,7 +166,6 @@ pub struct Parameters {
     pub updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
     pub closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
-    // non-item parameters
     pub limit: Option<u64>,
     pub order: Option<Vec<Order<OrderField>>>,
 

@@ -268,7 +268,6 @@ pub struct Parameters {
     pub qa: Option<Vec<ExistsOrValues<Match>>>,
     pub reporter: Option<Vec<Vec<Match>>>,
 
-    // non-item parameters
     #[serde(skip_serializing)]
     pub fields: Option<Vec<FilterField>>,
     pub limit: Option<u64>,
