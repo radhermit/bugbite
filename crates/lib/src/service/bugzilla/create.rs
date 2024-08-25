@@ -319,7 +319,7 @@ impl Parameters {
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
     }
 
-    /// Merge parameters using the provided value for fallbacks.
+    /// Override parameters using the provided value if it exists.
     fn merge<T: Into<Self>>(&mut self, other: T) {
         let other = other.into();
         or!(self.alias, other.alias);
