@@ -24,12 +24,18 @@ include::include/global-options.adoc[]
     Open in a browser.
 +
 This uses `$BROWSER` to open URLs, falling back to `xdg-open` if undefined.
++
+.Open all closed issues updated in the last hour in a browser:
+ bite redmine search -s closed --updated 1h -b
 
 *-n, --dry-run*::
     Skip service interaction.
 
 *--json*::
     Output in JSON format.
++
+.Return all open issues created in the past day rendered in JSON:
+ bite redmine search --created 1d --json
 
 *--from <path>*::
     Read search attributes from a template.
@@ -51,6 +57,9 @@ Combining with --dry-run allows creating templates without service interaction.
 By default, only the id and subject fields are returned. This can be altered by
 specifying a custom list of comma-separated values that changes the output format to
 a space-separated list of the field values.
++
+.Output the ID and author for open issues created in the last week:
+ bite redmine search -c 1w --fields id,author
 +
 .Possible values:
 - *assignee*: user the issue is assigned to
