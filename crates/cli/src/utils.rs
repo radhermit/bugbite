@@ -2,7 +2,6 @@ use std::borrow::Cow;
 use std::env;
 use std::ffi::OsStr;
 use std::io::{stdin, stdout, BufRead, Write};
-use std::path::Path;
 use std::process::{Command, ExitStatus, Stdio};
 
 use anyhow::{Context, Result};
@@ -69,8 +68,7 @@ where
     Ok(())
 }
 
-pub(crate) fn launch_editor<P: AsRef<Path>>(path: P) -> Result<ExitStatus> {
-    let path = path.as_ref();
+pub(crate) fn launch_editor<S: AsRef<OsStr>>(path: S) -> Result<ExitStatus> {
     let editor = env::var("EDITOR").unwrap_or_default();
     let args = shlex::split(&editor).unwrap_or_default();
     if !args.is_empty() {

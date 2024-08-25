@@ -352,7 +352,7 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
     }
 
     loop {
-        let status = launch_editor(&temp_file)?;
+        let status = launch_editor(temp_file.path())?;
         if !status.success() {
             anyhow::bail!("failed editing comment");
         }
