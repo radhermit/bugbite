@@ -278,45 +278,6 @@ impl Api for GroupField {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
-enum IdOrAlias {
-    Id(u64),
-    Alias(String),
-}
-
-impl fmt::Display for IdOrAlias {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Id(value) => value.fmt(f),
-            Self::Alias(value) => value.fmt(f),
-        }
-    }
-}
-
-impl FromStr for IdOrAlias {
-    type Err = Error;
-
-    fn from_str(s: &str) -> crate::Result<Self> {
-        Ok(s.into())
-    }
-}
-
-impl From<&str> for IdOrAlias {
-    fn from(s: &str) -> Self {
-        if let Ok(value) = s.parse::<u64>() {
-            Self::Id(value)
-        } else {
-            Self::Alias(s.to_string())
-        }
-    }
-}
-
-impl From<u64> for IdOrAlias {
-    fn from(value: u64) -> Self {
-        Self::Id(value)
-    }
-}
-
 #[derive(
     Display,
     EnumIter,
