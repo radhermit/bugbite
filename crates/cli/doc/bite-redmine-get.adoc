@@ -43,7 +43,7 @@ Taken from standard input when `-`.
 .Get issue 123 and only output field values:
  bite redmine get 123 -C
 
-.Get all issues created in the last day:
+.Get all open issues created in the last day:
  bite redmine search -c 1d -f id | bite redmine get -
 
 == See Also

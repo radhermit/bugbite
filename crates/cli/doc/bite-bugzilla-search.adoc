@@ -58,7 +58,7 @@ format to a space-separated list of the field values.
 Group fields relate to groups of bug fields and are most useful when using JSON
 formatted output:
 +
-.Return all bugs created in the past day rendered in JSON:
+.Return all open bugs created in the past day rendered in JSON:
  bite bugzilla search --created 1d -f all --json
 +
 // TODO: link to rust docs for field descriptions
