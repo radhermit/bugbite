@@ -10,3 +10,12 @@ fn services() {
         .stderr("")
         .success();
 }
+
+#[test]
+fn connections() {
+    cmd("bite show connections")
+        .assert()
+        .stdout(predicate::str::contains("gentoo"))
+        .stderr("")
+        .success();
+}
