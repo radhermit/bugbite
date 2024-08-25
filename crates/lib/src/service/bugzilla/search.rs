@@ -1560,6 +1560,8 @@ impl TryFrom<String> for ChangeField {
 
 #[cfg(test)]
 mod tests {
+    use strum::IntoEnumIterator;
+
     use crate::service::bugzilla::Config;
     use crate::test::*;
 
@@ -1575,5 +1577,20 @@ mod tests {
         server.respond(200, path.join("search/ids.json")).await;
         let bugs = service.search().summary(["test"]).send().await.unwrap();
         assert_eq!(bugs.len(), 5);
+
+        // order
+        for field in OrderField::iter() {
+            service
+                .search()
+                .order([Order::Ascending(field)])
+                .send()
+                .await
+                .unwrap();
+        }
+
+        // fields
+        for field in FilterField::iter() {
+            service.search().fields([field]).send().await.unwrap();
+        }
     }
 }
