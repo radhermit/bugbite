@@ -48,10 +48,11 @@ where
         .unwrap_or_default()
         .into_iter()
         .collect::<VecDeque<_>>();
-    let cmd = args.pop_front().unwrap_or_else(|| "xdg-open".to_string());
+    let cmd = args.pop_front();
+    let cmd = cmd.as_deref().unwrap_or("xdg-open");
 
     for url in urls {
-        Command::new(&cmd)
+        Command::new(cmd)
             .args(&args)
             .arg(url)
             .stdout(Stdio::null())
@@ -69,9 +70,10 @@ pub(crate) fn launch_editor<S: AsRef<OsStr>>(path: S) -> Result<ExitStatus> {
         .unwrap_or_default()
         .into_iter()
         .collect::<VecDeque<_>>();
-    let cmd = args.pop_front().unwrap_or_else(|| "xdg-open".to_string());
+    let cmd = args.pop_front();
+    let cmd = cmd.as_deref().unwrap_or("xdg-open");
 
-    Command::new(&cmd)
+    Command::new(cmd)
         .args(&args)
         .arg(path)
         .stdout(Stdio::null())
