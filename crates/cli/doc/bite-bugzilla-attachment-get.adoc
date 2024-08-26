@@ -22,6 +22,12 @@ include::include/global-options.adoc[]
 
 *-l, --list*::
     List attachment metadata.
++
+.Show all metadata for an attachment:
+ bite bugzilla attachment get -lv 123
++
+.List all attachments for bug 10:
+ bite bugzilla attachment get -il 10
 
 *-o, --output* [<file>]::
     Output attachment to a specified file.
@@ -29,6 +35,9 @@ include::include/global-options.adoc[]
 Note that multiple attachments will be output to the same location.
 +
 Use `-` for standard output.
++
+.Output attachment data to standard output:
+ bite bugzilla attachment get 123 -o -
 
 *-i, --item-ids*::
     Treat ID arguments as bug IDs or aliases, not attachment IDs.
@@ -39,12 +48,18 @@ pulls all attachments from the related bugs.
 Note that when saving multiple attachments from multiple bugs, subdirectories
 named after the bug IDs are automatically used in order to avoid file name
 overlap.
++
+.Get all attachments from bug 123:
+ bite bugzilla attachment get -i 123
 
 *-d, --dir* <path>::
     Save attachments to a specified directory.
 +
 By default, attachments are saved to the current working directory and this
 allows altering that target directory.
++
+.Save all attachments from bug 123 to the specified directory:
+ bite bugzilla attachment get -i 123 --dir path/to/dir
 
 == Arguments
 
