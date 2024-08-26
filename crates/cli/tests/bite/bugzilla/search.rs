@@ -151,13 +151,51 @@ async fn browser() {
 }
 
 #[tokio::test]
+async fn custom_fields() {
+    let server = start_server().await;
+    server
+        .respond(200, TEST_DATA.join("search/nonexistent.json"))
+        .await;
+
+    // missing args
+    cmd("bite bugzilla search --cf")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("value is required"))
+        .failure()
+        .code(2);
+
+    // missing value
+    cmd("bite bugzilla search --cf field")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("2 values required"))
+        .failure()
+        .code(2);
+
+    // single
+    cmd("bite bugzilla search --cf field value")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // multiple
+    cmd("bite bugzilla search --cf field2 value --cf field2 '!= value'")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
 async fn changed() {
     let server = start_server().await;
     server
         .respond(200, TEST_DATA.join("search/nonexistent.json"))
         .await;
 
-    // nonexistent
+    // missing field
     cmd("bite bugzilla search --changed")
         .assert()
         .stdout("")
@@ -217,7 +255,7 @@ async fn changed_by() {
         .respond(200, TEST_DATA.join("search/nonexistent.json"))
         .await;
 
-    // nonexistent
+    // missing args
     cmd("bite bugzilla search --changed-by")
         .assert()
         .stdout("")
@@ -263,7 +301,7 @@ async fn changed_from() {
         .respond(200, TEST_DATA.join("search/nonexistent.json"))
         .await;
 
-    // nonexistent
+    // missing args
     cmd("bite bugzilla search --changed-from")
         .assert()
         .stdout("")
@@ -302,7 +340,7 @@ async fn changed_to() {
         .respond(200, TEST_DATA.join("search/nonexistent.json"))
         .await;
 
-    // nonexistent
+    // missing args
     cmd("bite bugzilla search --changed-to")
         .assert()
         .stdout("")
