@@ -787,9 +787,7 @@ impl FromStr for Match {
 
 impl From<&str> for Match {
     fn from(s: &str) -> Self {
-        let values = s
-            .split_once(' ')
-            .map(|(op, value)| (MatchOp::from_str(op), value));
+        let values = s.split_once(' ').map(|(op, value)| (op.parse(), value));
 
         let (op, value) = if let Some((Ok(op), value)) = values {
             (op, value.into())
