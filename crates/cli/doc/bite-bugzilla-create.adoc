@@ -115,6 +115,9 @@ options.
 The values must be valid custom field names followed by their value.
 +
 Multiple arguments can be specified via multiple options.
++
+.Create bug with custom field:
+ bite bugzilla create --cf package_list cat/pkg
 
 *-d, --depends* <id[,...]>::
     Set dependencies.
@@ -125,6 +128,10 @@ Multiple arguments can be specified in a comma-separated list or via multiple
 options.
 +
 Values are taken from standard input when `-`.
++
+.Create bug that depends on bugs 11 and 12:
+ bite bugzilla create --depends 11,12
+ bite bugzilla create -d 11 -d 12
 
 *-D, --description* <value>::
     Set the description.
@@ -137,6 +144,10 @@ Supported statuses include `+`, `-`, and `?`.
 +
 Multiple arguments can be specified in a comma-separated list or via multiple
 options.
++
+.Create bug with flags:
+ bite bugzilla create --flags flag1+,flag2-
+ bite bugzilla create -F flag1+ -F flag2-
 
 *-g, --groups* <value[,...]>::
     Set groups.
