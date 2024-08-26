@@ -6,6 +6,16 @@ use crate::command::cmd;
 
 use super::*;
 
+macro_rules! default_cmd {
+    () => {
+        $crate::command::cmd("bite bugzilla create")
+            .args(["--component", "TestComponent"])
+            .args(["--product", "TestProduct"])
+            .args(["--summary", "summary"])
+            .args(["--description", "description"])
+    };
+}
+
 #[test]
 fn aliases() {
     for subcmd in ["c", "create"] {
@@ -43,11 +53,7 @@ async fn auth_required() {
         .await;
 
     // no auth
-    cmd("bite bugzilla create")
-        .args(["--component", "TestComponent"])
-        .args(["--product", "TestProduct"])
-        .args(["--summary", "test"])
-        .args(["--description", "test"])
+    default_cmd!()
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())
@@ -61,8 +67,8 @@ async fn auth_required() {
             .arg("create")
             .args(["--component", "TestComponent"])
             .args(["--product", "TestProduct"])
-            .args(["--summary", "test"])
-            .args(["--description", "test"])
+            .args(["--summary", "summary"])
+            .args(["--description", "description"])
             .assert()
             .success();
     }
@@ -74,8 +80,8 @@ async fn auth_required() {
             .arg("create")
             .args(["--component", "TestComponent"])
             .args(["--product", "TestProduct"])
-            .args(["--summary", "test"])
-            .args(["--description", "test"])
+            .args(["--summary", "summary"])
+            .args(["--description", "description"])
             .assert()
             .success();
     }
@@ -89,23 +95,16 @@ async fn creation() {
         .respond(200, TEST_DATA.join("create/creation.json"))
         .await;
 
-    // non-terminal output
-    cmd("bite bugzilla create")
-        .args(["--component", "TestComponent"])
-        .args(["--product", "TestProduct"])
-        .args(["--summary", "test"])
-        .args(["--description", "test"])
+    // default output
+    default_cmd!()
         .assert()
         .stdout(predicate::str::diff("123").trim())
         .stderr("")
         .success();
 
     // verbose terminal output
-    cmd("bite bugzilla create -v")
-        .args(["--component", "TestComponent"])
-        .args(["--product", "TestProduct"])
-        .args(["--summary", "test"])
-        .args(["--description", "test"])
+    default_cmd!()
+        .arg("-v")
         .env("BUGBITE_IS_TERMINAL", "1")
         .assert()
         .stdout("")
@@ -162,11 +161,8 @@ async fn template() {
     let path = path.to_str().unwrap();
 
     // create template
-    cmd("bite bugzilla create --dry-run")
-        .args(["--component", "TestComponent"])
-        .args(["--product", "TestProduct"])
-        .args(["--summary", "test"])
-        .args(["--description", "test"])
+    default_cmd!()
+        .arg("--dry-run")
         .args(["--to", path])
         .assert()
         .stdout("")
@@ -175,11 +171,8 @@ async fn template() {
 
     // overriding existing template
     for input in ["y\n", "Y\n", "n\n", "N\n", "\n", "yes\ny\n", "no\nn\n"] {
-        cmd("bite bugzilla create -n")
-            .args(["--component", "TestComponent"])
-            .args(["--product", "TestProduct"])
-            .args(["--summary", "test"])
-            .args(["--description", "test"])
+        default_cmd!()
+            .arg("-n")
             .args(["--to", path])
             .write_stdin(input)
             .assert()
