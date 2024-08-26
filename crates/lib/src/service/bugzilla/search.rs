@@ -710,21 +710,28 @@ impl<'a> QueryBuilder<'a> {
 }
 
 /// Advanced field matching operators.
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, Debug, PartialEq, Eq, Clone, Copy)]
 enum MatchOp {
     /// Contains case-sensitive substring.
+    #[strum(serialize = "=~")]
     CaseSubstring,
     /// Contains substring.
+    #[strum(serialize = "~~")]
     Substring,
     /// Doesn't contain substring.
+    #[strum(serialize = "!~")]
     NotSubstring,
     /// Equal to value.
+    #[strum(serialize = "==")]
     Equals,
     /// Not equal to value.
+    #[strum(serialize = "!=")]
     NotEquals,
     /// Matches regular expression.
+    #[strum(serialize = "=*")]
     Regexp,
     /// Doesn't match regular expression.
+    #[strum(serialize = "!*")]
     NotRegexp,
 }
 
@@ -780,15 +787,14 @@ impl FromStr for Match {
 
 impl From<&str> for Match {
     fn from(s: &str) -> Self {
-        let (op, value) = match s.split_once(' ') {
-            Some(("=~", value)) => (MatchOp::CaseSubstring, value.into()),
-            Some(("~~", value)) => (MatchOp::Substring, value.into()),
-            Some(("!~", value)) => (MatchOp::NotSubstring, value.into()),
-            Some(("==", value)) => (MatchOp::Equals, value.into()),
-            Some(("!=", value)) => (MatchOp::NotEquals, value.into()),
-            Some(("=*", value)) => (MatchOp::Regexp, value.into()),
-            Some(("!*", value)) => (MatchOp::NotRegexp, value.into()),
-            _ => (MatchOp::Substring, s.into()),
+        let values = s
+            .split_once(' ')
+            .map(|(op, value)| (MatchOp::from_str(op), value));
+
+        let (op, value) = if let Some((Ok(op), value)) = values {
+            (op, value.into())
+        } else {
+            (MatchOp::Substring, s.into())
         };
 
         Self { op, value }
