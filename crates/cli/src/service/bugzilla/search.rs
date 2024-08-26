@@ -60,7 +60,7 @@ impl FromStr for ChangedBy {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let Some((raw_fields, users)) = s.split_once('=') else {
-            anyhow::bail!("missing users");
+            anyhow::bail!("missing value");
         };
 
         Ok(Self {

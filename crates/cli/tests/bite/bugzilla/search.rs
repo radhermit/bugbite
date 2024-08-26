@@ -149,3 +149,187 @@ async fn browser() {
             .success();
     }
 }
+
+#[tokio::test]
+async fn changed() {
+    let server = start_server().await;
+    server
+        .respond(200, TEST_DATA.join("search/nonexistent.json"))
+        .await;
+
+    // nonexistent
+    cmd("bite bugzilla search --changed")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("value is required"))
+        .failure()
+        .code(2);
+
+    // invalid field
+    cmd("bite bugzilla search --changed invalid")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("invalid change field"))
+        .failure()
+        .code(2);
+
+    // single
+    cmd("bite bugzilla search --changed alias")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // multiple
+    cmd("bite bugzilla search --changed blocks,depends")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // invalid time
+    cmd("bite bugzilla search --changed blocks=2")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("invalid range or value: 2"))
+        .failure()
+        .code(2);
+
+    // time range
+    cmd("bite bugzilla search --changed blocks=1d")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // time static
+    cmd("bite bugzilla search --changed blocks,depends=2020-02-02")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
+async fn changed_by() {
+    let server = start_server().await;
+    server
+        .respond(200, TEST_DATA.join("search/nonexistent.json"))
+        .await;
+
+    // nonexistent
+    cmd("bite bugzilla search --changed-by")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("value is required"))
+        .failure()
+        .code(2);
+
+    // missing value
+    cmd("bite bugzilla search --changed-by alias")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("missing value"))
+        .failure()
+        .code(2);
+
+    // invalid field
+    cmd("bite bugzilla search --changed-by invalid=user")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("invalid change field"))
+        .failure()
+        .code(2);
+
+    // single
+    cmd("bite bugzilla search --changed-by alias=user")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // multiple
+    cmd("bite bugzilla search --changed-by blocks,depends=user1,user2")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
+async fn changed_from() {
+    let server = start_server().await;
+    server
+        .respond(200, TEST_DATA.join("search/nonexistent.json"))
+        .await;
+
+    // nonexistent
+    cmd("bite bugzilla search --changed-from")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("value is required"))
+        .failure()
+        .code(2);
+
+    // missing value
+    cmd("bite bugzilla search --changed-from alias")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("missing value"))
+        .failure()
+        .code(2);
+
+    // invalid field
+    cmd("bite bugzilla search --changed-from invalid=user")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("invalid change field"))
+        .failure()
+        .code(2);
+
+    // single
+    cmd("bite bugzilla search --changed-from alias=user")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
+async fn changed_to() {
+    let server = start_server().await;
+    server
+        .respond(200, TEST_DATA.join("search/nonexistent.json"))
+        .await;
+
+    // nonexistent
+    cmd("bite bugzilla search --changed-to")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("value is required"))
+        .failure()
+        .code(2);
+
+    // missing value
+    cmd("bite bugzilla search --changed-to alias")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("missing value"))
+        .failure()
+        .code(2);
+
+    // invalid field
+    cmd("bite bugzilla search --changed-to invalid=user")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("invalid change field"))
+        .failure()
+        .code(2);
+
+    // single
+    cmd("bite bugzilla search --changed-to alias=user")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}
