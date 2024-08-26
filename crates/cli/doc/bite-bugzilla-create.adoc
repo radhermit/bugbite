@@ -117,7 +117,7 @@ The values must be valid custom field names followed by their value.
 Multiple arguments can be specified via multiple options.
 +
 .Create bug with custom field:
- bite bugzilla create --cf package_list cat/pkg
+ bite bugzilla create --cf stabilisation_atoms '=cat/pkg-1'
 
 *-d, --depends* <id[,...]>::
     Set dependencies.
