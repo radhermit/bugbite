@@ -89,6 +89,26 @@ async fn single() {
         .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
+
+    // without comments
+    for opt in ["-C", "--no-comments"] {
+        cmd("bite redmine get 1")
+            .arg(opt)
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                ==========================================================================================
+                Subject      : subject
+                Reporter     : john (John Smith)
+                Status       : Open
+                Tracker      : Bug
+                Priority     : Normal
+                Created      : 2024-02-15 15:56:49 UTC
+                Updated      : 2024-02-15 16:00:26 UTC
+                ID           : 1
+            "}))
+            .stderr("")
+            .success();
+    }
 }
 
 #[tokio::test]
