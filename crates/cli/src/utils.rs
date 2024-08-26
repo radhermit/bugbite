@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::collections::VecDeque;
 use std::env;
 use std::ffi::OsStr;
 use std::io::{stdin, stdout, BufRead, Write};
@@ -43,26 +44,20 @@ where
     S: AsRef<OsStr>,
 {
     let browser = env::var("BROWSER").unwrap_or_default();
-    let args = shlex::split(&browser).unwrap_or_default();
+    let mut args = shlex::split(&browser)
+        .unwrap_or_default()
+        .into_iter()
+        .collect::<VecDeque<_>>();
+    let cmd = args.pop_front().unwrap_or_else(|| "xdg-open".to_string());
 
     for url in urls {
-        if !args.is_empty() {
-            let cmd = &args[0];
-            Command::new(cmd)
-                .args(&args[1..])
-                .arg(url)
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn()
-                .with_context(|| format!("failed launching browser via {cmd}"))?;
-        } else {
-            Command::new("xdg-open")
-                .arg(url)
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn()
-                .context("failed launching browser via xdg-open")?;
-        }
+        Command::new(&cmd)
+            .args(&args)
+            .arg(url)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .with_context(|| format!("failed launching browser via {cmd}"))?;
     }
 
     Ok(())
@@ -70,24 +65,19 @@ where
 
 pub(crate) fn launch_editor<S: AsRef<OsStr>>(path: S) -> Result<ExitStatus> {
     let editor = env::var("EDITOR").unwrap_or_default();
-    let args = shlex::split(&editor).unwrap_or_default();
-    if !args.is_empty() {
-        let cmd = &args[0];
-        Command::new(cmd)
-            .args(&args[1..])
-            .arg(path)
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .with_context(|| format!("failed launching editor via {cmd}"))
-    } else {
-        Command::new("xdg-open")
-            .arg(path)
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .context("failed launching editor via xdg-open")
-    }
+    let mut args = shlex::split(&editor)
+        .unwrap_or_default()
+        .into_iter()
+        .collect::<VecDeque<_>>();
+    let cmd = args.pop_front().unwrap_or_else(|| "xdg-open".to_string());
+
+    Command::new(&cmd)
+        .args(&args)
+        .arg(path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .with_context(|| format!("failed launching editor via {cmd}"))
 }
 
 pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {
