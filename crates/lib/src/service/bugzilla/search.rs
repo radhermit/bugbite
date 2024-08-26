@@ -773,7 +773,7 @@ impl Api for Match {
 
 impl fmt::Display for Match {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.value.fmt(f)
+        write!(f, "{} {}", self.op, self.value)
     }
 }
 
