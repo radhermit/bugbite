@@ -94,7 +94,7 @@ struct AttributeOptions {
     #[arg(
         short,
         long,
-        value_parser = ["open", "closed", "all"],
+        value_parser = ["@open", "@closed", "@any"],
         hide_possible_values = true,
     )]
     status: Option<String>,

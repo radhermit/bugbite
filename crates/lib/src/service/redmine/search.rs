@@ -47,6 +47,14 @@ impl<'a> Request<'a> {
         self.params.order = Some(values.into_iter().collect());
         self
     }
+
+    pub fn status<S>(mut self, value: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.params.status = Some(value.into());
+        self
+    }
 }
 
 impl RequestMerge<&Utf8Path> for Request<'_> {
@@ -133,17 +141,6 @@ impl Parameters {
         or!(self.summary, other.summary);
     }
 
-    pub fn status<S: AsRef<str>>(mut self, value: S) -> crate::Result<Self> {
-        // TODO: move valid status search values to an enum
-        match value.as_ref() {
-            "open" => self.status = Some("open".to_string()),
-            "closed" => self.status = Some("closed".to_string()),
-            "all" => self.status = Some("*".to_string()),
-            x => return Err(Error::InvalidValue(format!("invalid status: {x}"))),
-        }
-        Ok(self)
-    }
-
     fn encode(self, service: &Service) -> crate::Result<String> {
         let mut query = QueryBuilder::new(service);
 
@@ -205,12 +202,8 @@ impl Parameters {
             query.insert("subject", format!("~{value}"));
         }
 
-        if let Some(value) = self.status {
-            query.insert("status", value);
-        } else {
-            // limit to open issues by default
-            query.insert("status", "open");
-        }
+        // limit to open issues by default
+        query.status(self.status.as_deref().unwrap_or("@open"))?;
 
         if let Some(values) = self.order {
             let value = values.iter().map(|x| x.api()).join(",");
@@ -295,6 +288,18 @@ impl<'a> QueryBuilder<'a> {
                     "multiple ID ranges specified".to_string(),
                 ))
             }
+        }
+
+        Ok(())
+    }
+
+    fn status(&mut self, value: &str) -> crate::Result<()> {
+        match value {
+            "@open" => self.append("status_id", "open"),
+            "@closed" => self.append("status_id", "closed"),
+            "@any" => self.append("status_id", "*"),
+            // TODO: use service cache to support custom values mapped to IDs
+            _ => return Err(Error::InvalidValue(format!("invalid status: {value}"))),
         }
 
         Ok(())

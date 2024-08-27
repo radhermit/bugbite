@@ -25,8 +25,8 @@ include::include/global-options.adoc[]
 +
 This uses `$BROWSER` to open URLs, falling back to `xdg-open` if undefined.
 +
-.Open all closed issues updated in the last hour in a browser:
- bite redmine search -s closed --updated 1h -b
+.Open search for all issues updated in the last week in a browser:
+ bite redmine search -s @any --updated 1w -b
 
 *-n, --dry-run*::
     Skip service interaction.
@@ -93,7 +93,7 @@ results by each field in order.
 If an invalid sorting request is made, the default ordering will be used.
 +
 .Issues closed in the last day ordered by modification time:
- bite redmine search -s closed -u 1d -o updated
+ bite redmine search -s @closed -u 1d -o updated
 +
 .Highest priority issues:
  bite redmine search -l 10 --order=-priority
@@ -236,7 +236,7 @@ Values are taken from standard input when `-`.
 *-s, --status*::
     Restrict by status.
 +
-Query issue status from the following options: open, closed, and all.
+Query issue status from the following options: @open, @closed, and @any.
 
 == Time options
 
