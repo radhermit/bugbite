@@ -50,7 +50,7 @@ impl RequestSend for Request<'_> {
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         serde_json::from_value(data["id"].take())
-            .map_err(|e| Error::InvalidValue(format!("failed deserializing id: {e}")))
+            .map_err(|e| Error::InvalidResponse(format!("failed deserializing id: {e}")))
     }
 }
 

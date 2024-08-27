@@ -100,7 +100,7 @@ impl RequestSend for Request<'_> {
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let Value::Array(data) = data["bugs"].take() else {
-            return Err(Error::InvalidValue(
+            return Err(Error::InvalidResponse(
                 "invalid service response to get request".to_string(),
             ));
         };
@@ -122,7 +122,7 @@ impl RequestSend for Request<'_> {
         let mut bugs = vec![];
         for value in data {
             let mut bug: Bug = serde_json::from_value(value)
-                .map_err(|e| Error::InvalidValue(format!("failed deserializing bug: {e}")))?;
+                .map_err(|e| Error::InvalidResponse(format!("failed deserializing bug: {e}")))?;
             bug.attachments = attachments.next().unwrap_or_default();
             bug.comments = comments.next().unwrap_or_default();
             bug.history = history.next().unwrap_or_default();
@@ -169,7 +169,7 @@ mod tests {
         server.respond(200, path.join("get/invalid.json")).await;
         let err = service.get([1]).send().await.unwrap_err();
         assert!(
-            matches!(err, Error::InvalidValue(_)),
+            matches!(err, Error::InvalidResponse(_)),
             "unmatched error: {err:?}"
         );
         assert_err_re!(err, "invalid service response");

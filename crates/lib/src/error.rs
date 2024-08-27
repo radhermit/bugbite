@@ -13,6 +13,8 @@ pub enum Error {
     #[error("{0}")]
     InvalidRequest(String),
     #[error("{0}")]
+    InvalidResponse(String),
+    #[error("{0}")]
     InvalidValue(String),
     #[error("{0}")]
     IO(String),

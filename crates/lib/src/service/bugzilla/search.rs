@@ -60,7 +60,7 @@ impl RequestSend for Request<'_> {
         let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
         let bugs = serde_json::from_value(data)
-            .map_err(|e| Error::InvalidValue(format!("failed deserializing bugs: {e}")))?;
+            .map_err(|e| Error::InvalidResponse(format!("failed deserializing bugs: {e}")))?;
         Ok(bugs)
     }
 }

@@ -108,7 +108,7 @@ impl RequestSend for Request<'_> {
             let mut data = data["issue"].take();
             let journals = data["journals"].take();
             let mut issue: Issue = serde_json::from_value(data)
-                .map_err(|e| Error::InvalidValue(format!("failed deserializing issue: {e}")))?;
+                .map_err(|e| Error::InvalidResponse(format!("failed deserializing issue: {e}")))?;
 
             if self.fields.contains(&Field::Journals) {
                 let mut count = 0;
@@ -126,7 +126,7 @@ impl RequestSend for Request<'_> {
                 if let serde_json::Value::Array(values) = journals {
                     for data in values {
                         let mut comment: Comment = serde_json::from_value(data).map_err(|e| {
-                            Error::InvalidValue(format!("failed deserializing comment: {e}"))
+                            Error::InvalidResponse(format!("failed deserializing comment: {e}"))
                         })?;
                         if !comment.text.is_empty() {
                             count += 1;

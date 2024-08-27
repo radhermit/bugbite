@@ -90,7 +90,7 @@ impl RequestSend for Request<'_> {
         let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
         let serde_json::value::Value::Object(data) = data else {
-            return Err(Error::InvalidValue(
+            return Err(Error::InvalidResponse(
                 "invalid service response to comment request".to_string(),
             ));
         };
@@ -101,7 +101,7 @@ impl RequestSend for Request<'_> {
 
         for (_id, mut data) in data {
             let Value::Array(data) = data["comments"].take() else {
-                return Err(Error::InvalidValue(
+                return Err(Error::InvalidResponse(
                     "invalid service response to comment request".to_string(),
                 ));
             };
@@ -110,7 +110,7 @@ impl RequestSend for Request<'_> {
             let mut bug_comments = vec![];
             for value in data {
                 let comment: Comment = serde_json::from_value(value).map_err(|e| {
-                    Error::InvalidValue(format!("failed deserializing comment: {e}"))
+                    Error::InvalidResponse(format!("failed deserializing comment: {e}"))
                 })?;
                 if self.params.filter(&comment) {
                     bug_comments.push(comment);

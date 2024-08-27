@@ -459,7 +459,7 @@ impl RequestSend for Request<'_> {
             let mut data = self.service.parse_response(response).await?;
             let data = data["ids"].take();
             let ids = serde_json::from_value(data)
-                .map_err(|e| Error::InvalidValue(format!("failed deserializing ids: {e}")))?;
+                .map_err(|e| Error::InvalidResponse(format!("failed deserializing ids: {e}")))?;
             attachment_ids.push(ids);
         }
 

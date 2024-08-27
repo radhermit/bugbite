@@ -84,7 +84,7 @@ impl RequestSend for Request<'_> {
             }
 
             let attachment = serde_json::from_value(data).map_err(|_| {
-                Error::InvalidValue(format!("failed deserializing attachment: {id}"))
+                Error::InvalidResponse(format!("failed deserializing attachment: {id}"))
             })?;
 
             attachments.push(attachment);
@@ -139,7 +139,7 @@ mod tests {
             .respond(200, path.join("attachment/get/invalid.json"))
             .await;
         let err = service.attachment_get([123]).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidValue(_)));
+        assert!(matches!(err, Error::InvalidResponse(_)));
         assert_err_re!(err, "failed deserializing attachment: 123");
 
         server.reset().await;

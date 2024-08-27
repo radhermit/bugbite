@@ -124,15 +124,16 @@ impl RequestSend for Request<'_> {
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let Value::Array(data) = data["attachments"].take() else {
-            return Err(Error::InvalidValue(
+            return Err(Error::InvalidResponse(
                 "invalid service response to attachment update request".to_string(),
             ));
         };
 
         let mut ids = vec![];
         for mut change in data {
-            let id = serde_json::from_value(change["id"].take())
-                .map_err(|e| Error::InvalidValue(format!("failed deserializing changes: {e}")))?;
+            let id = serde_json::from_value(change["id"].take()).map_err(|e| {
+                Error::InvalidResponse(format!("failed deserializing changes: {e}"))
+            })?;
             ids.push(id);
         }
 

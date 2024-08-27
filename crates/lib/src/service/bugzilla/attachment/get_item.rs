@@ -78,7 +78,7 @@ impl RequestSend for Request<'_> {
         let mut attachments = vec![];
         for (id, values) in data {
             let Value::Array(data) = values else {
-                return Err(Error::InvalidValue(
+                return Err(Error::InvalidResponse(
                     "invalid service response to attachment get request".to_string(),
                 ));
             };
@@ -88,7 +88,7 @@ impl RequestSend for Request<'_> {
                 // skip deserializing deleted attachments when retrieving data
                 if !self.data || !attachment["data"].is_null() {
                     let attachment = serde_json::from_value(attachment).map_err(|_| {
-                        Error::InvalidValue(format!("invalid attachment for bug {id}"))
+                        Error::InvalidResponse(format!("invalid attachment for bug {id}"))
                     })?;
                     bug_attachments.push(attachment);
                 }

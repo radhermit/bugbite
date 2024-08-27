@@ -84,7 +84,7 @@ impl RequestSend for Request<'_> {
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let Value::Array(bugs) = data["bugs"].take() else {
-            return Err(Error::InvalidValue(
+            return Err(Error::InvalidResponse(
                 "invalid service response to history request".to_string(),
             ));
         };
@@ -93,7 +93,7 @@ impl RequestSend for Request<'_> {
 
         for mut bug in bugs {
             let Value::Array(data) = bug["history"].take() else {
-                return Err(Error::InvalidValue(
+                return Err(Error::InvalidResponse(
                     "invalid service response to history request".to_string(),
                 ));
             };
@@ -101,8 +101,9 @@ impl RequestSend for Request<'_> {
             // deserialize and filter events
             let mut bug_history = vec![];
             for value in data {
-                let event: Event = serde_json::from_value(value)
-                    .map_err(|e| Error::InvalidValue(format!("failed deserializing event: {e}")))?;
+                let event: Event = serde_json::from_value(value).map_err(|e| {
+                    Error::InvalidResponse(format!("failed deserializing event: {e}"))
+                })?;
                 if self.params.filter(&event) {
                     bug_history.push(event);
                 }

@@ -87,7 +87,7 @@ impl RequestSend for Request<'_> {
         let mut data = self.service.parse_response(response).await?;
         let data = data["issues"].take();
         let issues = serde_json::from_value(data)
-            .map_err(|e| Error::InvalidValue(format!("failed deserializing issues: {e}")))?;
+            .map_err(|e| Error::InvalidResponse(format!("failed deserializing issues: {e}")))?;
         Ok(issues)
     }
 }
