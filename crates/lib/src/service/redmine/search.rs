@@ -39,6 +39,14 @@ impl<'a> Request<'a> {
         let params = self.params.encode(self.service)?;
         Ok(format!("{base}/issues?set_filter=1&{params}"))
     }
+
+    pub fn order<I>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = Order<OrderField>>,
+    {
+        self.params.order = Some(values.into_iter().collect());
+        self
+    }
 }
 
 impl RequestMerge<&Utf8Path> for Request<'_> {
@@ -123,14 +131,6 @@ impl Parameters {
         or!(self.order, other.order);
         or!(self.status, other.status);
         or!(self.summary, other.summary);
-    }
-
-    pub fn order<I>(mut self, values: I) -> Self
-    where
-        I: IntoIterator<Item = Order<OrderField>>,
-    {
-        self.order = Some(values.into_iter().collect());
-        self
     }
 
     pub fn status<S: AsRef<str>>(mut self, value: S) -> crate::Result<Self> {
@@ -457,6 +457,38 @@ impl Api for Order<OrderField> {
         match self {
             Order::Ascending(field) => format!("{}:asc", field.api()),
             Order::Descending(field) => format!("{}:desc", field.api()),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use strum::IntoEnumIterator;
+
+    use crate::service::redmine::Config;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn request() {
+        let path = TESTDATA_PATH.join("redmine");
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+
+        server
+            .respond(200, path.join("search/nonexistent.json"))
+            .await;
+
+        // order
+        for field in OrderField::iter() {
+            service
+                .search()
+                .order([Order::Ascending(field)])
+                .send()
+                .await
+                .unwrap();
         }
     }
 }
