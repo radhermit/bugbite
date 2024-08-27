@@ -448,8 +448,10 @@ Multiple values can be specified in a comma-separated list for logical OR.
 .Confirmed or verified bugs:
  bite bugzilla search --status confirmed,verified
 +
+// TODO: update when implementation reverts to using regular values
 The aliases `@open`, `@closed`, and `@all` can be used to search for open,
-closed, and all bugs, respectively.
+closed, and all bugs, respectively. Note that alias usage will only use the
+last value when multiple are specified.
 +
 .Closed bugs with bugbite in the summary:
  bite bugzilla search --status @closed bugbite
@@ -643,9 +645,21 @@ given.
 
 *-c, --created* <time>::
     Restrict by creation time.
++
+.Created in the last day:
+ bite bugzilla search -c 1d
 
 *-u, --updated* <time>::
     Restrict by update time.
++
+.Updated in the last week:
+ bite bugzilla search -u 1w
+
+*--closed* <time>::
+    Restrict by closed time.
++
+.Closed in the last month:
+ bite bugzilla search --closed 1m
 
 == User Options
 

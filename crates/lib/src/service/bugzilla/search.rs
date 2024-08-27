@@ -125,6 +125,11 @@ impl<'a> Request<'a> {
         self
     }
 
+    pub fn closed(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+        self.params.closed = Some(value);
+        self
+    }
+
     pub fn limit(mut self, value: u64) -> Self {
         self.params.limit = Some(value);
         self
@@ -177,6 +182,7 @@ pub struct Parameters {
 
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
     pub updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
+    pub closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     pub comment: Option<Vec<Match>>,
     pub comment_is_private: Option<bool>,
@@ -250,6 +256,7 @@ impl Parameters {
 
         or!(self.created, other.created);
         or!(self.updated, other.updated);
+        or!(self.closed, other.closed);
 
         or!(self.comment, other.comment);
         or!(self.comment_is_private, other.comment_is_private);
@@ -620,6 +627,11 @@ impl Parameters {
 
         if let Some(value) = self.updated {
             query.updated(value);
+        }
+
+        if let Some(value) = self.closed {
+            query.changed([(ChangeField::Status, &value)]);
+            query.status("@closed");
         }
 
         if let Some(value) = self.quicksearch {
@@ -1072,7 +1084,7 @@ impl QueryBuilder<'_> {
 
     fn status<S: AsRef<str>>(&mut self, value: S) {
         // TODO: Consider reverting to converting aliases into regular values so
-        // advanced fields can be used in all cases.
+        // advanced fields can be used in all cases and multiple values can be appended.
         match value.as_ref() {
             "@open" => self.insert("bug_status", "__open__"),
             "@closed" => self.insert("bug_status", "__closed__"),

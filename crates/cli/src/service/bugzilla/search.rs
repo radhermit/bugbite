@@ -365,6 +365,10 @@ struct TimeOptions {
     /// restrict by update time
     #[arg(short, long, value_name = "TIME")]
     updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
+
+    /// restrict by closed time
+    #[arg(long, value_name = "TIME")]
+    closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 }
 
 #[derive(Args)]
@@ -541,6 +545,7 @@ impl From<Params> for Parameters {
 
             created: value.time.created,
             updated: value.time.updated,
+            closed: value.time.closed,
 
             assignee: value
                 .user
