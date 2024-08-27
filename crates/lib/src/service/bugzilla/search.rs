@@ -1171,8 +1171,7 @@ impl QueryBuilder<'_> {
 
     /// Match bugs with boolean field values.
     fn boolean<F: Api>(&mut self, field: F, status: bool) {
-        let status = if status { 1 } else { 0 };
-        self.advanced_field(field, "equals", status);
+        self.advanced_field(field, "equals", status as u64);
     }
 
     fn blocks(&mut self, value: i64) {
