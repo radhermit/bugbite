@@ -1074,9 +1074,9 @@ impl QueryBuilder<'_> {
         // TODO: Consider reverting to converting aliases into regular values so
         // advanced fields can be used in all cases.
         match value.as_ref() {
-            "@open" => self.append("bug_status", "__open__"),
-            "@closed" => self.append("bug_status", "__closed__"),
-            "@all" => self.append("bug_status", "__all__"),
+            "@open" => self.insert("bug_status", "__open__"),
+            "@closed" => self.insert("bug_status", "__closed__"),
+            "@all" => self.insert("bug_status", "__all__"),
             value => {
                 if let Some(value) = value.strip_prefix('!') {
                     self.advanced_field("bug_status", "notequals", value)
