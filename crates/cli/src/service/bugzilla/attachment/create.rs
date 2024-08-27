@@ -5,6 +5,7 @@ use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::create::{Attachment, Compression};
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
+use byte_unit::Byte;
 use camino::Utf8PathBuf;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};
@@ -85,10 +86,10 @@ struct CompressionOptions {
         long,
         value_name = "SIZE",
         num_args = 0..=1,
-        default_missing_value = "1.0",
+        default_missing_value = "1000KiB",
         conflicts_with_all = ["mime", "patch"],
     )]
-    auto_compress: Option<f64>,
+    auto_compress: Option<Byte>,
 
     /// auto-truncate text attachment
     #[arg(

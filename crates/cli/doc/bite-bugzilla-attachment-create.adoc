@@ -80,14 +80,15 @@ default: xz. Using compression requires the related utility installed.
 *--auto-compress* [<size>]::
     Auto-compress attachments larger than a given size.
 +
-The value must be the file size limit in MB above which attachments will be
-compressed, defaulting to 1MB when not given.
+The value is the file size limit above which attachments will be compressed,
+defaulting to 1000KiB when not given. Standard unit symbols should be used with
+the size, otherwise bytes are assumed.
 +
 .Auto-compress using the defaults:
  bite bugzilla attachment create 10 file --auto-compress
 +
 .Auto-compress using zstd with 5MB size limit:
- bite bugzilla attachment create 10 file --auto-compress 5 --compress zstd
+ bite bugzilla attachment create 10 file --auto-compress 5MB --compress zstd
 
 *--auto-truncate* [<lines>]::
     Auto-truncate text attachments to a given number of lines.

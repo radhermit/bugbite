@@ -2,6 +2,7 @@ use std::fs::{self, File};
 use std::process::Command;
 use std::{fmt, io, str};
 
+use byte_unit::Byte;
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
 use serde::Serialize;
@@ -185,7 +186,7 @@ pub struct Attachment {
     pub compress: Option<Compression>,
 
     /// Automatically compress the attachment if it exceeds a given size in MB.
-    pub auto_compress: Option<f64>,
+    pub auto_compress: Option<Byte>,
 
     /// Automatically truncate plain text attachments if exceeding a number of lines.
     auto_truncate: Option<usize>,
@@ -240,7 +241,7 @@ impl Attachment {
     }
 
     /// Automatically compress the attachment if it exceeds a given size in MB.
-    pub fn auto_compress(mut self, value: Option<f64>) -> Self {
+    pub fn auto_compress(mut self, value: Option<Byte>) -> Self {
         self.auto_compress = value;
         self
     }
@@ -251,7 +252,8 @@ impl Attachment {
     pub fn auto_truncate(mut self, value: Option<usize>) -> Self {
         // inject file size compression trigger if none was specified
         if value.is_some() && self.auto_compress.is_none() {
-            self.auto_compress = Some(1.0);
+            let size = "1000KiB".parse().unwrap();
+            self.auto_compress = Some(size);
         }
         self.auto_truncate = value;
         self
@@ -310,7 +312,7 @@ impl Attachment {
         // determine if a file of a given size will be auto-compressed
         let auto_compress = |bytes: usize| -> bool {
             self.auto_compress
-                .map(|x| x * 1e6 < bytes as f64)
+                .map(|x| x < Byte::from(bytes))
                 .unwrap_or_default()
         };
 
