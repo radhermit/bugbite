@@ -210,16 +210,11 @@ impl Parameters {
             query.insert("sort", value);
         } else {
             // sort by ascending ID by default
-            let order = Order::Ascending(OrderField::Id);
-            query.insert("sort", order.api());
+            query.insert("sort", Order::Ascending(OrderField::Id));
         }
 
-        if let Some(value) = self.limit {
-            query.insert("limit", value);
-        } else {
-            // default to the common maximum limit, without this the default limit is used
-            query.insert("limit", "100");
-        }
+        // default to the common maximum limit, without this the default limit is used
+        query.insert("limit", self.limit.unwrap_or(100));
 
         Ok(query.encode())
     }
@@ -255,7 +250,7 @@ impl<'a> QueryBuilder<'a> {
     /// Match conditionally existent array field values.
     fn exists(&mut self, field: ExistsField, status: bool) {
         let status = if status { "*" } else { "!*" };
-        self.insert(field.api(), status);
+        self.insert(field, status);
     }
 
     fn id<I>(&mut self, values: I) -> crate::Result<()>
