@@ -33,7 +33,13 @@ struct Options {
     item_ids: bool,
 
     /// save attachments into a base directory
-    #[arg(short, long, value_name = "PATH", default_value = ".")]
+    #[arg(
+        short,
+        long,
+        value_name = "PATH",
+        default_value = ".",
+        conflicts_with_all = ["list", "output"],
+    )]
     dir: Utf8PathBuf,
 }
 
