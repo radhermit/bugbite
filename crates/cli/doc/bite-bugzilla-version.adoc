@@ -1,0 +1,23 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-version - get bugzilla version
+
+== Synopsis
+
+*bite bugzilla version* [<options>]::
+    Get bugzilla version.
+
+*bite bugzilla version* [-h|--help]::
+    Output help information.
+
+== Description
+
+Get bugzilla version.
+
+include::include/global-options.adoc[]
+
+== See Also
+
+linkcmd:bite-bugzilla[1]

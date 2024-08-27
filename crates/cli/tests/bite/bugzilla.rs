@@ -17,6 +17,7 @@ mod get;
 mod history;
 mod search;
 mod update;
+mod version;
 
 static TEST_DATA: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("bugbite/bugzilla"));
 static TEST_OUTPUT: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("output/bugzilla"));

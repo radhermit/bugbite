@@ -21,6 +21,7 @@ mod get;
 pub mod history;
 pub mod search;
 pub mod update;
+pub mod version;
 
 // TODO: improve API for setting user info on config creation
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -157,6 +158,10 @@ impl Service {
         S: fmt::Display,
     {
         update::Request::new(self, ids)
+    }
+
+    pub fn version(&self) -> version::Request {
+        version::Request::new(self)
     }
 }
 

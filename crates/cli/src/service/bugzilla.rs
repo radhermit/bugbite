@@ -21,6 +21,7 @@ mod get;
 mod history;
 mod search;
 mod update;
+mod version;
 
 #[derive(Args)]
 #[clap(next_help_heading = "Authentication")]
@@ -104,6 +105,9 @@ enum Subcommand {
     /// Update bugs
     #[command(alias = "u")]
     Update(Box<update::Command>),
+
+    /// Get bugzilla version
+    Version(version::Command),
 }
 
 impl Subcommand {
@@ -114,8 +118,9 @@ impl Subcommand {
             Self::Create(cmd) => cmd.run(service).await,
             Self::Get(cmd) => cmd.run(service).await,
             Self::History(cmd) => cmd.run(service).await,
-            Self::Update(cmd) => cmd.run(service).await,
             Self::Search(cmd) => cmd.run(service).await,
+            Self::Update(cmd) => cmd.run(service).await,
+            Self::Version(cmd) => cmd.run(service).await,
         }
     }
 }

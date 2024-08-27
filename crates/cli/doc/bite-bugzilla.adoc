@@ -65,6 +65,9 @@ linkcmd:bite-bugzilla-search[1]::
 linkcmd:bite-bugzilla-update[1]::
 	update bugs
 
+linkcmd:bite-bugzilla-version[1]::
+	get bugzilla version
+
 == See Also
 
 linkcmd:bite[1]
