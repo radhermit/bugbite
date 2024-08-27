@@ -80,18 +80,28 @@ async fn list() {
     let expected =
         fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-without-data")).unwrap();
 
-    // default output for single attachment
     for opt in ["-l", "--list"] {
+        // conflicts with -d/--dir and -o/--output
+        for x in ["-d", "--dir", "-o", "--output"] {
+            cmd("bite bugzilla attachment get 123")
+                .arg(opt)
+                .args([x, "arg"])
+                .assert()
+                .stdout("")
+                .stderr(predicate::str::contains("cannot be used with"))
+                .failure()
+                .code(2);
+        }
+
+        // default output for single attachment
         cmd("bite bugzilla attachment get 123")
             .arg(opt)
             .assert()
             .stdout(predicate::str::diff(expected.clone()))
             .stderr("")
             .success();
-    }
 
-    // verbose output for single attachment
-    for opt in ["-l", "--list"] {
+        // verbose output for single attachment
         cmd("bite bugzilla attachment get 123 -v")
             .arg(opt)
             .assert()
@@ -110,18 +120,16 @@ async fn list() {
     let expected =
         fs::read_to_string(TEST_OUTPUT.join("attachment/get/multiple-without-data")).unwrap();
 
-    // default output for multiple attachments
     for opt in ["-l", "--list"] {
+        // default output for multiple attachments
         cmd("bite bugzilla attachment get 123 124 125")
             .arg(opt)
             .assert()
             .stdout(predicate::str::diff(expected.clone()))
             .stderr("")
             .success();
-    }
 
-    // verbose output for multiple attachments
-    for opt in ["-l", "--list"] {
+        // verbose output for multiple attachments
         cmd("bite bugzilla attachment get 123 124 125 -v")
             .arg(opt)
             .assert()
