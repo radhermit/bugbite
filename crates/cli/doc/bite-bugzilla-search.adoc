@@ -90,14 +90,14 @@ service default.
 Ordering is especially useful in combination with -l/--limit to get the first
 or last results of an ordered match.
 +
+.Least recently updated:
+ bite bugzilla search -l 10 -o updated
++
 .Most popular by votes:
  bite bugzilla search --limit 10 --order=-votes
 +
 .Highest comment count:
  bite bugzilla search --limit 10 --order=-comments
-+
-.Least recently updated:
- bite bugzilla search --limit 10 --order=updated
 +
 // TODO: link to rust docs for field descriptions
 Possible values: alias, assignee, blocks, comments, component, created,

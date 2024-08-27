@@ -92,6 +92,12 @@ results by each field in order.
 +
 If an invalid sorting request is made, the default ordering will be used.
 +
+.Issues closed in the last day ordered by modification time:
+ bite redmine search -s closed -u 1d -o updated
++
+.Highest priority issues:
+ bite redmine search -l 10 --order=-priority
++
 .Possible values:
 - *assignee*: user the issue is assigned to
 - *author*: user who created the issue
