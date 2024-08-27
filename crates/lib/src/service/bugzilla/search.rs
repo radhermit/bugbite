@@ -1266,22 +1266,6 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn append<K, V>(&mut self, key: K, value: V)
-    where
-        K: Api,
-        V: Api,
-    {
-        self.query.append(key.api(), value.api());
-    }
-
-    fn insert<K, V>(&mut self, key: K, value: V)
-    where
-        K: Api,
-        V: Api,
-    {
-        self.query.insert(key.api(), value.api());
-    }
-
     fn advanced_field<F, K, V>(&mut self, field: F, operator: K, value: V)
     where
         F: Api,
