@@ -39,6 +39,12 @@ Use `-` for standard output.
 .Output attachment data to standard output:
  bite bugzilla attachment get 123 -o -
 
+*-D, --deleted*::
+    Include deleted attachments.
+
+*-O, --obsolete*::
+    Include obsolete attachments.
+
 *-i, --item-ids*::
     Treat ID arguments as bug IDs or aliases, not attachment IDs.
 +

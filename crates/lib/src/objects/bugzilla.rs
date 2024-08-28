@@ -96,8 +96,14 @@ impl Attachment {
         format_size(self.size, BINARY)
     }
 
+    /// Return true if the attachment has no data, otherwise false.
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
+    }
+
+    /// Return true if the attachment has been deleted, otherwise false.
+    pub fn is_deleted(&self) -> bool {
+        self.size == 0
     }
 }
 

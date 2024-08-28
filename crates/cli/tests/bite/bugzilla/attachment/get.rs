@@ -77,8 +77,6 @@ async fn list() {
             TEST_DATA.join("attachment/get/single-without-data.json"),
         )
         .await;
-    let expected =
-        fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-without-data")).unwrap();
 
     for opt in ["-l", "--list"] {
         // conflicts with -d/--dir and -o/--output
@@ -97,7 +95,7 @@ async fn list() {
         cmd("bite bugzilla attachment get 123")
             .arg(opt)
             .assert()
-            .stdout(predicate::str::diff(expected.clone()))
+            .stdout(predicate::str::diff("123: test.txt").trim())
             .stderr("")
             .success();
 
@@ -105,7 +103,7 @@ async fn list() {
         cmd("bite bugzilla attachment get 123 -v")
             .arg(opt)
             .assert()
-            .stdout(predicate::str::diff(expected.clone()))
+            .stdout(predicate::str::diff("123: test.txt").trim())
             .stderr(predicate::str::is_empty().not())
             .success();
     }
@@ -117,23 +115,43 @@ async fn list() {
             TEST_DATA.join("attachment/get/multiple-without-data.json"),
         )
         .await;
-    let expected =
-        fs::read_to_string(TEST_OUTPUT.join("attachment/get/multiple-without-data")).unwrap();
 
     for opt in ["-l", "--list"] {
         // default output for multiple attachments
-        cmd("bite bugzilla attachment get 123 124 125")
+        cmd("bite bugzilla attachment get 123 124 125 126")
             .arg(opt)
             .assert()
-            .stdout(predicate::str::diff(expected.clone()))
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                123: test file 1 (test1)
+                124: test file 2 (test2.txt)
+            "}))
             .stderr("")
             .success();
 
+        // including deleted and obsolete
+        for opts in [["-D", "-O"], ["--deleted", "--obsolete"]] {
+            cmd("bite bugzilla attachment get 123 124 125 126")
+                .arg(opt)
+                .args(opts)
+                .assert()
+                .stdout(predicate::str::diff(indoc::indoc! {"
+                    123: test file 1 (test1)
+                    124: test file 2 (test2.txt)
+                    125: patch file (test.patch)
+                    126: patch file (test.patch) (deleted)
+                "}))
+                .stderr("")
+                .success();
+        }
+
         // verbose output for multiple attachments
-        cmd("bite bugzilla attachment get 123 124 125 -v")
+        cmd("bite bugzilla attachment get 123 124 125 126 -v")
             .arg(opt)
             .assert()
-            .stdout(predicate::str::diff(expected.clone()))
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                123: test file 1 (test1)
+                124: test file 2 (test2.txt)
+            "}))
             .stderr(predicate::str::is_empty().not())
             .success();
     }

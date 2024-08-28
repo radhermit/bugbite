@@ -28,6 +28,14 @@ struct Options {
     )]
     output: Option<String>,
 
+    /// include deleted attachments
+    #[arg(short = 'D', long)]
+    deleted: bool,
+
+    /// include obsolete attachments
+    #[arg(short = 'O', long)]
+    obsolete: bool,
+
     /// request attachments from bug IDs or aliases
     #[arg(short, long)]
     item_ids: bool,
@@ -78,6 +86,11 @@ impl Command {
                 .await?
         };
 
+        // conditionally skip deleted and obsolete attachments
+        let attachments = attachments.iter().filter(|x| {
+            (self.options.obsolete || !x.is_obsolete) && (self.options.deleted || !x.is_deleted())
+        });
+
         if self.options.list {
             for attachment in attachments {
                 attachment.render(&mut stdout, *COLUMNS)?;
@@ -89,7 +102,7 @@ impl Command {
                         .write_all(attachment.as_ref())
                         .context("failed writing to standard output")?;
                 } else {
-                    fs::write(name, &attachment).context("failed writing to file: {name}")?;
+                    fs::write(name, attachment).context("failed writing to file: {name}")?;
                 }
             }
         } else {
@@ -111,7 +124,7 @@ impl Command {
                 }
 
                 writeln!(stdout, "Saving attachment: {path}")?;
-                fs::write(&path, &attachment).context("failed saving attachment")?;
+                fs::write(&path, attachment).context("failed saving attachment")?;
             }
         }
 
