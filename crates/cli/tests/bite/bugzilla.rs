@@ -13,6 +13,7 @@ use super::*;
 mod attachment;
 mod comment;
 mod create;
+mod fields;
 mod get;
 mod history;
 mod search;

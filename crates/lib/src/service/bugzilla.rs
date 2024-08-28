@@ -17,6 +17,7 @@ use super::{ClientBuilder, ServiceKind};
 pub mod attachment;
 pub mod comment;
 pub mod create;
+pub mod fields;
 mod get;
 pub mod history;
 pub mod search;
@@ -130,6 +131,10 @@ impl Service {
 
     pub fn create(&self) -> create::Request {
         create::Request::new(self)
+    }
+
+    pub fn fields(&self) -> fields::Request {
+        fields::Request::new(self)
     }
 
     pub fn get<I, S>(&self, ids: I) -> get::Request

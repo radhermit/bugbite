@@ -5,6 +5,7 @@ use std::str::FromStr;
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
+use indexmap::IndexSet;
 use itertools::{Either, Itertools};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -448,4 +449,42 @@ impl RenderSearch<FilterField> for Bug {
             _ => self.render(&[BugField::Id]),
         }
     }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct BugzillaField {
+    id: u64,
+    #[serde(rename = "type")]
+    kind: u64,
+    is_custom: bool,
+    name: String,
+    display_name: String,
+    is_mandatory: bool,
+    #[serde(default)]
+    values: Vec<BugzillaFieldValue>,
+}
+
+impl fmt::Display for BugzillaField {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "Name: {}", self.name)?;
+        write!(f, "Display name: {}", self.display_name)?;
+        if !self.values.is_empty() {
+            let values = self
+                .values
+                .iter()
+                .filter_map(|x| x.name.as_ref())
+                .collect::<IndexSet<_>>();
+            let values = values.iter().join(", ");
+            write!(f, "\nValues: {values}")?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct BugzillaFieldValue {
+    name: Option<String>,
+    sort_key: Option<u64>,
+    description: Option<String>,
+    is_open: Option<bool>,
 }

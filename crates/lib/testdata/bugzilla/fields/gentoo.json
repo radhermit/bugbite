@@ -1,0 +1,3970 @@
+{
+  "fields": [
+    {
+      "display_name": "Bug #",
+      "id": 1,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "bug_id",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Summary",
+      "id": 2,
+      "is_custom": false,
+      "is_mandatory": true,
+      "is_on_bug_entry": false,
+      "name": "short_desc",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Classification",
+      "id": 52,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "classification",
+      "type": 2,
+      "value_field": null,
+      "values": [
+        {
+          "name": "Unclassified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": []
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Product",
+      "id": 3,
+      "is_custom": false,
+      "is_mandatory": true,
+      "is_on_bug_entry": false,
+      "name": "product",
+      "type": 2,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Version",
+      "id": 4,
+      "is_custom": false,
+      "is_mandatory": true,
+      "is_on_bug_entry": false,
+      "name": "version",
+      "type": 0,
+      "value_field": "product",
+      "values": [
+        {
+          "is_active": false,
+          "name": "1.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.0 RC6 r14",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.1a",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.2",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.3",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.4",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.4_rc1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.4_rc2",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.4_rc3",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.4_rc4",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "10.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "10.1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2004.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2004.1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2004.2",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2004.3",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2005.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2005.1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2006.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2006.1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2007.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2008.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2008.0_beta1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2008.0_beta2",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "autobuilds",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2004.3",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2005.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2005.1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2006.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2006.1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2007.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2008.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2008.0_beta1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2008.0_beta2",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "autobuild",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Mirrors"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Developers/Staff"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Security"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2.0",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2.1",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "2.2",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Community Relations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Foundation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs on www.gentoo.org"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo/Alt"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Council"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "GURU"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Quality Assurance"
+          ]
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Platform",
+      "id": 5,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "rep_platform",
+      "type": 2,
+      "value_field": null,
+      "values": [
+        {
+          "name": "All",
+          "sort_key": 200,
+          "sortkey": 200,
+          "visibility_values": []
+        },
+        {
+          "name": "Other",
+          "sort_key": 400,
+          "sortkey": 400,
+          "visibility_values": []
+        },
+        {
+          "name": "AMD64",
+          "sort_key": 500,
+          "sortkey": 500,
+          "visibility_values": []
+        },
+        {
+          "name": "x86",
+          "sort_key": 600,
+          "sortkey": 600,
+          "visibility_values": []
+        },
+        {
+          "name": "Alpha",
+          "sort_key": 700,
+          "sortkey": 700,
+          "visibility_values": []
+        },
+        {
+          "name": "Sparc",
+          "sort_key": 800,
+          "sortkey": 800,
+          "visibility_values": []
+        },
+        {
+          "name": "IA64",
+          "sort_key": 900,
+          "sortkey": 900,
+          "visibility_values": []
+        },
+        {
+          "name": "PPC",
+          "sort_key": 1000,
+          "sortkey": 1000,
+          "visibility_values": []
+        },
+        {
+          "name": "PPC64",
+          "sort_key": 1050,
+          "sortkey": 1050,
+          "visibility_values": []
+        },
+        {
+          "name": "MIPS",
+          "sort_key": 1100,
+          "sortkey": 1100,
+          "visibility_values": []
+        },
+        {
+          "name": "HPPA",
+          "sort_key": 1300,
+          "sortkey": 1300,
+          "visibility_values": []
+        },
+        {
+          "name": "s390",
+          "sort_key": 1400,
+          "sortkey": 1400,
+          "visibility_values": []
+        },
+        {
+          "name": "sh",
+          "sort_key": 1500,
+          "sortkey": 1500,
+          "visibility_values": []
+        },
+        {
+          "name": "Sparc64",
+          "sort_key": 1600,
+          "sortkey": 1600,
+          "visibility_values": []
+        },
+        {
+          "name": "ARM",
+          "sort_key": 1700,
+          "sortkey": 1700,
+          "visibility_values": []
+        },
+        {
+          "name": "ARM64",
+          "sort_key": 1750,
+          "sortkey": 1750,
+          "visibility_values": []
+        },
+        {
+          "name": "m68k",
+          "sort_key": 1800,
+          "sortkey": 1800,
+          "visibility_values": []
+        },
+        {
+          "name": "riscv",
+          "sort_key": 1850,
+          "sortkey": 1850,
+          "visibility_values": []
+        },
+        {
+          "name": "Loong",
+          "sort_key": 1900,
+          "sortkey": 1900,
+          "visibility_values": []
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "URL",
+      "id": 6,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "bug_file_loc",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "OS/Version",
+      "id": 7,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "op_sys",
+      "type": 2,
+      "value_field": null,
+      "values": [
+        {
+          "name": "Other",
+          "sort_key": 100,
+          "sortkey": 100,
+          "visibility_values": []
+        },
+        {
+          "name": "Linux",
+          "sort_key": 400,
+          "sortkey": 400,
+          "visibility_values": []
+        },
+        {
+          "name": "All",
+          "sort_key": 500,
+          "sortkey": 500,
+          "visibility_values": []
+        },
+        {
+          "name": "FreeBSD",
+          "sort_key": 600,
+          "sortkey": 600,
+          "visibility_values": []
+        },
+        {
+          "name": "OS X",
+          "sort_key": 700,
+          "sortkey": 700,
+          "visibility_values": []
+        },
+        {
+          "name": "GNU/kFreeBSD",
+          "sort_key": 800,
+          "sortkey": 800,
+          "visibility_values": []
+        },
+        {
+          "name": "NetBSD",
+          "sort_key": 900,
+          "sortkey": 900,
+          "visibility_values": []
+        },
+        {
+          "name": "OpenBSD",
+          "sort_key": 1000,
+          "sortkey": 1000,
+          "visibility_values": []
+        },
+        {
+          "name": "DragonFly",
+          "sort_key": 1100,
+          "sortkey": 1100,
+          "visibility_values": []
+        },
+        {
+          "name": "Solaris",
+          "sort_key": 1200,
+          "sortkey": 1200,
+          "visibility_values": []
+        },
+        {
+          "name": "AIX",
+          "sort_key": 1300,
+          "sortkey": 1300,
+          "visibility_values": []
+        },
+        {
+          "name": "HPUX",
+          "sort_key": 1400,
+          "sortkey": 1400,
+          "visibility_values": []
+        },
+        {
+          "name": "IRIX",
+          "sort_key": 1500,
+          "sortkey": 1500,
+          "visibility_values": []
+        },
+        {
+          "name": "Interix",
+          "sort_key": 1600,
+          "sortkey": 1600,
+          "visibility_values": []
+        },
+        {
+          "name": "FreeMiNT",
+          "sort_key": 1700,
+          "sortkey": 1700,
+          "visibility_values": []
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Status",
+      "id": 8,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "bug_status",
+      "type": 2,
+      "value_field": null,
+      "values": [
+        {
+          "can_change_to": [
+            {
+              "comment_required": true,
+              "name": "UNCONFIRMED"
+            },
+            {
+              "comment_required": true,
+              "name": "CONFIRMED"
+            },
+            {
+              "comment_required": true,
+              "name": "IN_PROGRESS"
+            }
+          ],
+          "is_open": true,
+          "name": null,
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": []
+        },
+        {
+          "can_change_to": [
+            {
+              "comment_required": false,
+              "name": "CONFIRMED"
+            },
+            {
+              "comment_required": false,
+              "name": "IN_PROGRESS"
+            },
+            {
+              "comment_required": false,
+              "name": "RESOLVED"
+            }
+          ],
+          "is_open": true,
+          "name": "UNCONFIRMED",
+          "sort_key": 100,
+          "sortkey": 100,
+          "visibility_values": []
+        },
+        {
+          "can_change_to": [
+            {
+              "comment_required": false,
+              "name": "UNCONFIRMED"
+            },
+            {
+              "comment_required": false,
+              "name": "IN_PROGRESS"
+            },
+            {
+              "comment_required": false,
+              "name": "RESOLVED"
+            }
+          ],
+          "is_open": true,
+          "name": "CONFIRMED",
+          "sort_key": 200,
+          "sortkey": 200,
+          "visibility_values": []
+        },
+        {
+          "can_change_to": [
+            {
+              "comment_required": false,
+              "name": "CONFIRMED"
+            },
+            {
+              "comment_required": false,
+              "name": "RESOLVED"
+            }
+          ],
+          "is_open": true,
+          "name": "IN_PROGRESS",
+          "sort_key": 300,
+          "sortkey": 300,
+          "visibility_values": []
+        },
+        {
+          "can_change_to": [
+            {
+              "comment_required": false,
+              "name": "UNCONFIRMED"
+            },
+            {
+              "comment_required": false,
+              "name": "CONFIRMED"
+            }
+          ],
+          "is_open": false,
+          "name": "RESOLVED",
+          "sort_key": 500,
+          "sortkey": 500,
+          "visibility_values": []
+        },
+        {
+          "can_change_to": [
+            {
+              "comment_required": false,
+              "name": "UNCONFIRMED"
+            },
+            {
+              "comment_required": false,
+              "name": "CONFIRMED"
+            },
+            {
+              "comment_required": false,
+              "name": "IN_PROGRESS"
+            },
+            {
+              "comment_required": false,
+              "name": "RESOLVED"
+            }
+          ],
+          "is_open": false,
+          "name": "VERIFIED",
+          "sort_key": 600,
+          "sortkey": 600,
+          "visibility_values": []
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Status Whiteboard",
+      "id": 9,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "status_whiteboard",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Keywords",
+      "id": 10,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "keywords",
+      "type": 8,
+      "value_field": null,
+      "values": [
+        {
+          "description": "Added by maintainers. Any arch team that stabilizes a package for their own arch can stabilize other arches at the same time without further testing.",
+          "name": "ALLARCHES"
+        },
+        {
+          "description": "This is a real bug that should get attention soon.",
+          "name": "Bug"
+        },
+        {
+          "description": "Have NATTkA CC arches once sanity-check succeeds",
+          "name": "CC-ARCHES"
+        },
+        {
+          "description": "Marks an issue to be a user submitted ebuild.",
+          "name": "EBUILD"
+        },
+        {
+          "description": "Defines a 'Goal' within the product. A top level feature that can be used for tracking duplicate/similar reports and requests. (metabugs are similar)",
+          "name": "Goal"
+        },
+        {
+          "description": "Contains content that should be reviewed for integration.\r\nPatches, apps/scripts, etc...",
+          "name": "Inclusion"
+        },
+        {
+          "description": "A case where someone is working on this maintained-needed ebuild in an overlay to test their fixes before including it in an ebuild in the tree.",
+          "name": "InOverlay"
+        },
+        {
+          "description": "Fix has been added to a VCS(either CVS, SVN, Git, ...) repository. Will be closed when fixes are applied to a stable level package.",
+          "name": "InVCS"
+        },
+        {
+          "description": "Request for a package to be keyworded for ~arch",
+          "name": "KEYWORDREQ"
+        },
+        {
+          "description": "The bug will be dealt with at a later date.",
+          "name": "LATER"
+        },
+        {
+          "description": "Someone has to provide a patch for the bug to receive further attention.",
+          "name": "NeedPatch"
+        },
+        {
+          "description": "This bug contains a patch",
+          "name": "PATCH"
+        },
+        {
+          "description": "Package is currently package masked.",
+          "name": "PMASKED"
+        },
+        {
+          "description": "The bug has a pull request filed (should be linked via 'See also'!).",
+          "name": "PullRequest"
+        },
+        {
+          "description": "The ebuild has a *DEPEND on a package that is not needed or has\r\nimproper syntax.",
+          "name": "QAbaddep"
+        },
+        {
+          "description": "The ebuild uses die in a way that causes the ebuild to needlessly\r\nfail for a user.",
+          "name": "QAbaddie"
+        },
+        {
+          "description": "IUSE contains a bad USE flag, is missing a flag, or a flag appears\r\nto do nothing.",
+          "name": "QAbadiuse"
+        },
+        {
+          "description": "A trivial problem and QA will fix it if there is no response in a\r\nfew days.",
+          "name": "QAcanfix"
+        },
+        {
+          "description": "Two ebuilds reference the same file but have conflicting\r\ndigests for the file.",
+          "name": "QAdigestoverlap"
+        },
+        {
+          "description": "Code is present in the global scope of the ebuild that should\r\nnot be.",
+          "name": "QAglobalscope"
+        },
+        {
+          "description": "New bug.. Wasn't there before and doesn't pertain to a new feature.",
+          "name": "REGRESSION"
+        },
+        {
+          "description": "A Gentoo developer has reviewed the ebuild or patch for syntax and coding style.",
+          "name": "REVIEWED"
+        },
+        {
+          "description": "Add this on all security related issues.",
+          "name": "SECURITY"
+        },
+        {
+          "description": "Summer of Code Ideas",
+          "name": "SOCIDEAS"
+        },
+        {
+          "description": "Spam bug filed by a bot",
+          "name": "spam"
+        },
+        {
+          "description": "Ebuilds that have been marked as stable by arch testers",
+          "name": "STABLE"
+        },
+        {
+          "description": "Request for a package to be stablized",
+          "name": "STABLEREQ"
+        },
+        {
+          "description": "Ebuilds that have been marked as tested by arch testers",
+          "name": "TESTED"
+        },
+        {
+          "description": "A package/ebuild failed test(s)",
+          "name": "TESTFAILURE"
+        },
+        {
+          "description": "Easily identify bugs for overview included in larger projects.",
+          "name": "Tracker"
+        },
+        {
+          "description": "The bug/patch has been sent to the upstream developer",
+          "name": "UPSTREAM"
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Resolution",
+      "id": 11,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "resolution",
+      "type": 2,
+      "value_field": null,
+      "values": [
+        {
+          "name": "",
+          "sort_key": 100,
+          "sortkey": 100,
+          "visibility_values": []
+        },
+        {
+          "name": "FIXED",
+          "sort_key": 200,
+          "sortkey": 200,
+          "visibility_values": []
+        },
+        {
+          "name": "INVALID",
+          "sort_key": 300,
+          "sortkey": 300,
+          "visibility_values": []
+        },
+        {
+          "name": "WONTFIX",
+          "sort_key": 400,
+          "sortkey": 400,
+          "visibility_values": []
+        },
+        {
+          "name": "LATER",
+          "sort_key": 500,
+          "sortkey": 500,
+          "visibility_values": []
+        },
+        {
+          "name": "REMIND",
+          "sort_key": 600,
+          "sortkey": 600,
+          "visibility_values": []
+        },
+        {
+          "name": "DUPLICATE",
+          "sort_key": 700,
+          "sortkey": 700,
+          "visibility_values": []
+        },
+        {
+          "name": "WORKSFORME",
+          "sort_key": 800,
+          "sortkey": 800,
+          "visibility_values": []
+        },
+        {
+          "name": "CANTFIX",
+          "sort_key": 1000,
+          "sortkey": 1000,
+          "visibility_values": []
+        },
+        {
+          "name": "NEEDINFO",
+          "sort_key": 1100,
+          "sortkey": 1100,
+          "visibility_values": []
+        },
+        {
+          "name": "TEST-REQUEST",
+          "sort_key": 1200,
+          "sortkey": 1200,
+          "visibility_values": []
+        },
+        {
+          "name": "UPSTREAM",
+          "sort_key": 1300,
+          "sortkey": 1300,
+          "visibility_values": []
+        },
+        {
+          "name": "OBSOLETE",
+          "sort_key": 1400,
+          "sortkey": 1400,
+          "visibility_values": []
+        },
+        {
+          "name": "PKGREMOVED",
+          "sort_key": 1500,
+          "sortkey": 1500,
+          "visibility_values": []
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Severity",
+      "id": 12,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "bug_severity",
+      "type": 2,
+      "value_field": null,
+      "values": [
+        {
+          "name": "blocker",
+          "sort_key": 100,
+          "sortkey": 100,
+          "visibility_values": []
+        },
+        {
+          "name": "critical",
+          "sort_key": 200,
+          "sortkey": 200,
+          "visibility_values": []
+        },
+        {
+          "name": "major",
+          "sort_key": 300,
+          "sortkey": 300,
+          "visibility_values": []
+        },
+        {
+          "name": "normal",
+          "sort_key": 400,
+          "sortkey": 400,
+          "visibility_values": []
+        },
+        {
+          "name": "minor",
+          "sort_key": 500,
+          "sortkey": 500,
+          "visibility_values": []
+        },
+        {
+          "name": "trivial",
+          "sort_key": 600,
+          "sortkey": 600,
+          "visibility_values": []
+        },
+        {
+          "name": "enhancement",
+          "sort_key": 700,
+          "sortkey": 700,
+          "visibility_values": []
+        },
+        {
+          "name": "QA",
+          "sort_key": 800,
+          "sortkey": 800,
+          "visibility_values": []
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Priority",
+      "id": 13,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "priority",
+      "type": 2,
+      "value_field": null,
+      "values": [
+        {
+          "name": "Highest",
+          "sort_key": 100,
+          "sortkey": 100,
+          "visibility_values": []
+        },
+        {
+          "name": "High",
+          "sort_key": 200,
+          "sortkey": 200,
+          "visibility_values": []
+        },
+        {
+          "name": "Normal",
+          "sort_key": 300,
+          "sortkey": 300,
+          "visibility_values": []
+        },
+        {
+          "name": "Low",
+          "sort_key": 400,
+          "sortkey": 400,
+          "visibility_values": []
+        },
+        {
+          "name": "Lowest",
+          "sort_key": 500,
+          "sortkey": 500,
+          "visibility_values": []
+        },
+        {
+          "name": "---",
+          "sort_key": 600,
+          "sortkey": 600,
+          "visibility_values": []
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Component",
+      "id": 14,
+      "is_custom": false,
+      "is_mandatory": true,
+      "is_on_bug_entry": false,
+      "name": "component",
+      "type": 2,
+      "value_field": "product",
+      "values": [
+        {
+          "is_active": true,
+          "name": "Current packages",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Eclasses",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Hardened",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Keywording",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "New packages",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Overlays",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Profiles",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "SELinux",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Stabilization",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] baselayout",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Core system",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Development",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Games",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] GCC Porting",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] GNOME",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Java",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] KDE",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Keywording and Stabilization",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Library",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Printing",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Server",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "All ISO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Everything",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "GRP",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Hardened",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "InstallCD",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Installer",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "LiveCD/DVD/USB",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Netboot",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Stages",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Contributing ebuilds",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "CVS tutorial",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Developers HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Documentation Developer Policy",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Documentation Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Eclass HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Gentoo Linux Developer's Policy",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Guide XML",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Portage Documentation",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Submit New Documentation",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "User-Mode Linux Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Alsa Configuration Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "ATI FAQ",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Desktop Configuration Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "env.d HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Gentoo Alternative Installation Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Gentoo Java Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Gentoo Linux FAQ",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Gentoo Linux PPC FAQ",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Gentoo Linux PPC Installation Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Gentoo Linux rc-script Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Gentoo Linux Sparc Installation Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Gentoo Linux x86 Installation Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Gentoo Security Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Gentoolkit HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "GNUpg User Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Handbook",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Localisation Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "LVM HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Nano Basics Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "nVIDIA Trouble Shooting Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "OpenAFS Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Portage Manual",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Portage User Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "PPC QuickStart",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Prelink HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Printing HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Quick Start Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Submit New",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Translated Documentation",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "USE Variable HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Vi HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Virtual-mail HOWTO",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Archives",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Forums",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Gentoo Website",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Graphics",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Packages",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Planet",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Tyrian layout",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Wiki",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] About Gentoo",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Articles",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Changelog",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] CVS repository",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Documentation",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] News",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Project Web Spaces",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Social Contract",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Feature Request",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Mirrors"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "New Server",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Mirrors"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Server Problem",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Mirrors"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Catalyst",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "CouncilWebapp",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "eselect",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "genkernel",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "genkernel-next",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "gentoo-keys",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "GNAP",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Keychain",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "libbash",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "netifrc",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "OpenRC",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "PkgCore",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "PMS/EAPI",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "RecruitingWebapp",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Smolt",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Tenshi",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "New Developers",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Developers/Staff"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Policy / quizzes",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Developers/Staff"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Proxied Maintainers",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Developers/Staff"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Retirement",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Developers/Staff"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Auditing",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Security"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Default Configs",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Security"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "GLSA Errors",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Security"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Kernel",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Security"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Misc",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Security"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Runpath Issues",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Security"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Vulnerabilities",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Security"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Binary packages support",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Conceptual/Abstract Ideas",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Core",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Core - Configuration",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Core - Dependencies",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Core - Ebuild Support",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Core - External Interaction",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Core - Interface (emerge)",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Documentation",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Enhancement/Feature Requests",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Repoman",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Sandbox",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Third-Party Tools",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Tools",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Trackers",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Unclassified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Developer Relations",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Community Relations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "User Relations",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Community Relations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Bugzilla",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Bugzilla test",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Dev box issues",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Developer account issues",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Forums",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Gentoo Overlays",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Git",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "GitHub",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Mailing Lists",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other web server issues",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "spam",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Web Node Issues",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] BitTorrent services at http://torrents.gentoo.org",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] gpackages",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Artwork approval",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Foundation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Filings",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Foundation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Infra Support",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Foundation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Licenses",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Foundation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Proposals",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Foundation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Reimbursements",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Foundation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Installation Handbook",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs on www.gentoo.org"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "New Documentation",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs on www.gentoo.org"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other documents",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs on www.gentoo.org"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[CS]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[DE]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[ES]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[FI]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[FR]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[IT]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[JA]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[NL]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[PL]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[PT_BR]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[RO]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[RU]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "[ZH_TW]",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Devmanual",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "GLEP Changes",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Handbook",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "New GLEP submissions",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Policy Guide",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Project-specific documentation",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Developer Handbook",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "[OLD] Portage Documentation",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "FreeBSD",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo/Alt"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Mac OSX",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo/Alt"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "NetBSD",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo/Alt"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "OpenBSD",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo/Alt"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo/Alt"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Prefix Support",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo/Alt"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "unspecified",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Council"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Access requests",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "GURU"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Contributor problems",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "GURU"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Other bugs",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "GURU"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Package issues",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "GURU"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Trusted Contributor ascension",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "GURU"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Disputes/raising issues",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Quality Assurance"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Policies",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Quality Assurance"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "Trackers",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Quality Assurance"
+          ]
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "AssignedTo",
+      "id": 15,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "assigned_to",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "ReportedBy",
+      "id": 16,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "reporter",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Votes",
+      "id": 17,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "votes",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "QAContact",
+      "id": 18,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "qa_contact",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "CC",
+      "id": 19,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "cc",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Depends on",
+      "id": 20,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "dependson",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Blocks",
+      "id": 21,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "blocked",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Attachment description",
+      "id": 22,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "attachments.description",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Attachment filename",
+      "id": 38,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "attachments.filename",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Attachment mime type",
+      "id": 24,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "attachments.mimetype",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Attachment is patch",
+      "id": 25,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "attachments.ispatch",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Attachment is obsolete",
+      "id": 26,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "attachments.isobsolete",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Attachment is private",
+      "id": 39,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "attachments.isprivate",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Target Milestone",
+      "id": 28,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "target_milestone",
+      "type": 0,
+      "value_field": "product",
+      "values": [
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Portage Development"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Community Relations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Infrastructure"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Foundation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs on www.gentoo.org"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Doc Translations"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Documentation"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo/Alt"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Council"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "GURU"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Security"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Developers/Staff"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Hosted Projects"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Quality Assurance"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Gentoo Release Media"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-developer"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "[OLD] Docs-user"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Websites"
+          ]
+        },
+        {
+          "is_active": true,
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": [
+            "Mirrors"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.0",
+          "sort_key": 1,
+          "sortkey": 1,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.4",
+          "sort_key": 2,
+          "sortkey": 2,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.4 maint release",
+          "sort_key": 3,
+          "sortkey": 3,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "1.4.1",
+          "sort_key": 4,
+          "sortkey": 4,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        },
+        {
+          "is_active": false,
+          "name": "Future",
+          "sort_key": 255,
+          "sortkey": 255,
+          "visibility_values": [
+            "Gentoo Linux"
+          ]
+        }
+      ],
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Creation date",
+      "id": 55,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "creation_ts",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Last changed date",
+      "id": 29,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "delta_ts",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Comment",
+      "id": 31,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "longdesc",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Alias",
+      "id": 40,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "alias",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Ever Confirmed",
+      "id": 35,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "everconfirmed",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Reporter Accessible",
+      "id": 37,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "reporter_accessible",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "CC Accessible",
+      "id": 34,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "cclist_accessible",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Group",
+      "id": 41,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "bug_group",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Estimated Hours",
+      "id": 42,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "estimated_time",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Remaining Hours",
+      "id": 43,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "remaining_time",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Deadline",
+      "id": 53,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "deadline",
+      "type": 5,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Commenter",
+      "id": 54,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "commenter",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Flags",
+      "id": 44,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "flagtypes.name",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Flag Requestee",
+      "id": 51,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "requestees.login_name",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Flag Setter",
+      "id": 46,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "setters.login_name",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Hours Worked",
+      "id": 47,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "work_time",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Percentage Complete",
+      "id": 48,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "percentage_complete",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Content",
+      "id": 49,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "content",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Attachment data",
+      "id": 57,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "attach_data.thedata",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Days since bug changed",
+      "id": 30,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "days_elapsed",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Time Since Assignee Touched",
+      "id": 50,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "owner_idle_time",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Attachment creator",
+      "id": 61,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "attachments.submitter",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Comment is private",
+      "id": 63,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "longdescs.isprivate",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "See Also",
+      "id": 65,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "see_also",
+      "type": 7,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Number of Comments",
+      "id": 67,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "longdescs.count",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Personal Tags",
+      "id": 69,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "tag",
+      "type": 8,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "AssignedToName",
+      "id": 70,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "assigned_to_realname",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "ReportedByName",
+      "id": 72,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "reporter_realname",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "QAContactName",
+      "id": 74,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "qa_contact_realname",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Last Visit",
+      "id": 76,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "last_visit_ts",
+      "type": 5,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Comment Tag",
+      "id": 78,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "comment_tag",
+      "type": 0,
+      "visibility_field": null,
+      "visibility_values": []
+    },
+    {
+      "display_name": "Package list",
+      "id": 80,
+      "is_custom": true,
+      "is_mandatory": false,
+      "is_on_bug_entry": true,
+      "name": "cf_stabilisation_atoms",
+      "type": 4,
+      "visibility_field": "component",
+      "visibility_values": [
+        "Keywording",
+        "Stabilization"
+      ]
+    },
+    {
+      "display_name": "Runtime testing required",
+      "id": 82,
+      "is_custom": true,
+      "is_mandatory": false,
+      "is_on_bug_entry": true,
+      "name": "cf_runtime_testing_required",
+      "type": 2,
+      "value_field": null,
+      "values": [
+        {
+          "name": "---",
+          "sort_key": 0,
+          "sortkey": 0,
+          "visibility_values": []
+        },
+        {
+          "name": "Yes",
+          "sort_key": 1,
+          "sortkey": 1,
+          "visibility_values": []
+        },
+        {
+          "name": "No",
+          "sort_key": 2,
+          "sortkey": 2,
+          "visibility_values": []
+        },
+        {
+          "name": "Manual",
+          "sort_key": 3,
+          "sortkey": 3,
+          "visibility_values": []
+        }
+      ],
+      "visibility_field": "component",
+      "visibility_values": [
+        "Keywording",
+        "Stabilization"
+      ]
+    },
+    {
+      "display_name": "Restrict Comments",
+      "id": 83,
+      "is_custom": false,
+      "is_mandatory": false,
+      "is_on_bug_entry": false,
+      "name": "restrict_comments",
+      "type": 10,
+      "visibility_field": null,
+      "visibility_values": []
+    }
+  ]
+}

@@ -18,6 +18,7 @@ use super::Render;
 mod attachment;
 mod comment;
 mod create;
+mod fields;
 mod get;
 mod history;
 mod search;
@@ -92,6 +93,9 @@ enum Subcommand {
     #[command(alias = "c")]
     Create(Box<create::Command>),
 
+    /// Get bugzilla fields
+    Fields(fields::Command),
+
     /// Get bugs
     #[command(alias = "g")]
     Get(get::Command),
@@ -117,6 +121,7 @@ impl Subcommand {
             Self::Attachment(cmd) => cmd.run(service).await,
             Self::Comment(cmd) => cmd.run(service).await,
             Self::Create(cmd) => cmd.run(service).await,
+            Self::Fields(cmd) => cmd.run(service).await,
             Self::Get(cmd) => cmd.run(service).await,
             Self::History(cmd) => cmd.run(service).await,
             Self::Search(cmd) => cmd.run(service).await,
