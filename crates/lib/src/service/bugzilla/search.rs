@@ -920,6 +920,12 @@ impl From<String> for Match {
     }
 }
 
+impl From<&String> for Match {
+    fn from(s: &String) -> Self {
+        s.as_str().into()
+    }
+}
+
 impl From<bool> for ExistsOrValues<Match> {
     fn from(value: bool) -> Self {
         ExistsOrValues::Exists(value)
@@ -1693,6 +1699,9 @@ mod tests {
         let bugs = service.search().summary(["test"]).send().await.unwrap();
         assert_eq!(bugs.len(), 5);
 
+        // values using all match operator variants
+        let matches: Vec<_> = MatchOp::iter().map(|op| format!("{op} value")).collect();
+
         // alias
         service.search().alias(true).send().await.unwrap();
         service.search().alias(false).send().await.unwrap();
@@ -1710,6 +1719,9 @@ mod tests {
             .send()
             .await
             .unwrap();
+        for s in &matches {
+            service.search().alias(s).send().await.unwrap();
+        }
 
         // attachments
         service.search().attachments(true).send().await.unwrap();
@@ -1721,6 +1733,9 @@ mod tests {
             .send()
             .await
             .unwrap();
+        for s in &matches {
+            service.search().attachments(s).send().await.unwrap();
+        }
 
         // flags
         service.search().flags(true).send().await.unwrap();
@@ -1739,6 +1754,9 @@ mod tests {
             .send()
             .await
             .unwrap();
+        for s in &matches {
+            service.search().flags(s).send().await.unwrap();
+        }
 
         // groups
         service.search().groups(true).send().await.unwrap();
@@ -1757,6 +1775,9 @@ mod tests {
             .send()
             .await
             .unwrap();
+        for s in &matches {
+            service.search().groups(s).send().await.unwrap();
+        }
 
         // keywords
         service.search().keywords(true).send().await.unwrap();
@@ -1775,6 +1796,9 @@ mod tests {
             .send()
             .await
             .unwrap();
+        for s in &matches {
+            service.search().keywords(s).send().await.unwrap();
+        }
 
         // see_also
         service.search().see_also(true).send().await.unwrap();
@@ -1793,6 +1817,9 @@ mod tests {
             .send()
             .await
             .unwrap();
+        for s in &matches {
+            service.search().see_also(s).send().await.unwrap();
+        }
 
         // tags
         service.search().tags(true).send().await.unwrap();
@@ -1811,6 +1838,9 @@ mod tests {
             .send()
             .await
             .unwrap();
+        for s in &matches {
+            service.search().tags(s).send().await.unwrap();
+        }
 
         // whiteboard
         service.search().whiteboard(true).send().await.unwrap();
@@ -1829,6 +1859,9 @@ mod tests {
             .send()
             .await
             .unwrap();
+        for s in &matches {
+            service.search().whiteboard(s).send().await.unwrap();
+        }
 
         // url
         service.search().url(true).send().await.unwrap();
@@ -1847,6 +1880,9 @@ mod tests {
             .send()
             .await
             .unwrap();
+        for s in &matches {
+            service.search().url(s).send().await.unwrap();
+        }
 
         // changed
         for field in ChangeField::iter() {
