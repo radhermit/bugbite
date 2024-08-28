@@ -374,19 +374,7 @@ impl Parameters {
         let mut query = QueryBuilder::new(service);
 
         if let Some(values) = self.status {
-            // separate aliases from values
-            let (aliases, values): (Vec<_>, Vec<_>) =
-                values.into_iter().partition(|x| x.starts_with('@'));
-
-            // combine aliases via logical OR
-            for value in aliases {
-                query.status(value);
-            }
-
-            // combine values via logical OR
-            if !values.is_empty() {
-                query.or(|query| values.into_iter().for_each(|x| query.status(x)));
-            }
+            query.or(|query| values.into_iter().for_each(|x| query.status(x)));
         } else {
             // only return open bugs by default
             query.status("@open");
