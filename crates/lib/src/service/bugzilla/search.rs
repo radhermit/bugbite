@@ -80,6 +80,16 @@ impl<'a> Request<'a> {
         Ok(format!("{base}/buglist.cgi?{params}"))
     }
 
+    pub fn alias<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        let aliases = self.params.alias.get_or_insert_with(Default::default);
+        aliases.push(value.into());
+        self
+    }
+
     pub fn order<I>(mut self, values: I) -> Self
     where
         I: IntoIterator<Item = Order<OrderField>>,
@@ -820,6 +830,30 @@ impl From<String> for Match {
 impl From<&String> for Match {
     fn from(s: &String) -> Self {
         s.as_str().into()
+    }
+}
+
+impl From<bool> for ExistsOrValues<Match> {
+    fn from(value: bool) -> Self {
+        ExistsOrValues::Exists(value)
+    }
+}
+
+impl<T> From<T> for ExistsOrValues<Match>
+where
+    T: Into<Match>,
+{
+    fn from(value: T) -> Self {
+        ExistsOrValues::Values(vec![value.into()])
+    }
+}
+
+impl<T> From<&[T]> for ExistsOrValues<Match>
+where
+    T: Into<Match> + Copy,
+{
+    fn from(values: &[T]) -> Self {
+        ExistsOrValues::Values(values.iter().copied().map(Into::into).collect())
     }
 }
 
@@ -1571,6 +1605,24 @@ mod tests {
         server.respond(200, path.join("search/ids.json")).await;
         let bugs = service.search().summary(["test"]).send().await.unwrap();
         assert_eq!(bugs.len(), 5);
+
+        // alias
+        service.search().alias(true).send().await.unwrap();
+        service.search().alias(false).send().await.unwrap();
+        service.search().alias("value").send().await.unwrap();
+        service
+            .search()
+            .alias("value1")
+            .alias("value2")
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .alias(&["value1", "value2"] as &[&str])
+            .send()
+            .await
+            .unwrap();
 
         // order
         for field in OrderField::iter() {
