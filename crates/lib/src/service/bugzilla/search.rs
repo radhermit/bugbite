@@ -1669,16 +1669,6 @@ impl Api for ChangeField {
     }
 }
 
-impl TryFrom<String> for ChangeField {
-    type Error = Error;
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        value
-            .parse()
-            .map_err(|_| Error::InvalidValue(format!("unknown change field: {value}")))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use strum::IntoEnumIterator;
