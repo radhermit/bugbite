@@ -90,6 +90,84 @@ impl<'a> Request<'a> {
         self
     }
 
+    pub fn attachments<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        self.params.attachments = Some(value.into());
+        self
+    }
+
+    pub fn flags<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        let flags = self.params.flags.get_or_insert_with(Default::default);
+        flags.push(value.into());
+        self
+    }
+
+    pub fn groups<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        let groups = self.params.groups.get_or_insert_with(Default::default);
+        groups.push(value.into());
+        self
+    }
+
+    pub fn keywords<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        let keywords = self.params.keywords.get_or_insert_with(Default::default);
+        keywords.push(value.into());
+        self
+    }
+
+    pub fn see_also<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        let see_also = self.params.see_also.get_or_insert_with(Default::default);
+        see_also.push(value.into());
+        self
+    }
+
+    pub fn tags<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        let tags = self.params.tags.get_or_insert_with(Default::default);
+        tags.push(value.into());
+        self
+    }
+
+    pub fn whiteboard<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        let whiteboard = self.params.whiteboard.get_or_insert_with(Default::default);
+        whiteboard.push(value.into());
+        self
+    }
+
+    pub fn url<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        let url = self.params.url.get_or_insert_with(Default::default);
+        url.push(value.into());
+        self
+    }
+
     pub fn order<I>(mut self, values: I) -> Self
     where
         I: IntoIterator<Item = Order<OrderField>>,
@@ -1614,6 +1692,143 @@ mod tests {
         service
             .search()
             .alias(&["value1", "value2"] as &[&str])
+            .send()
+            .await
+            .unwrap();
+
+        // attachments
+        service.search().attachments(true).send().await.unwrap();
+        service.search().attachments(false).send().await.unwrap();
+        service.search().attachments("value").send().await.unwrap();
+        service
+            .search()
+            .attachments(&["value1", "value2"] as &[&str])
+            .send()
+            .await
+            .unwrap();
+
+        // flags
+        service.search().flags(true).send().await.unwrap();
+        service.search().flags(false).send().await.unwrap();
+        service.search().flags("value").send().await.unwrap();
+        service
+            .search()
+            .flags("value1")
+            .flags("value2")
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .flags(&["value1", "value2"] as &[&str])
+            .send()
+            .await
+            .unwrap();
+
+        // groups
+        service.search().groups(true).send().await.unwrap();
+        service.search().groups(false).send().await.unwrap();
+        service.search().groups("value").send().await.unwrap();
+        service
+            .search()
+            .groups("value1")
+            .groups("value2")
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .groups(&["value1", "value2"] as &[&str])
+            .send()
+            .await
+            .unwrap();
+
+        // keywords
+        service.search().keywords(true).send().await.unwrap();
+        service.search().keywords(false).send().await.unwrap();
+        service.search().keywords("value").send().await.unwrap();
+        service
+            .search()
+            .keywords("value1")
+            .keywords("value2")
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .keywords(&["value1", "value2"] as &[&str])
+            .send()
+            .await
+            .unwrap();
+
+        // see_also
+        service.search().see_also(true).send().await.unwrap();
+        service.search().see_also(false).send().await.unwrap();
+        service.search().see_also("value").send().await.unwrap();
+        service
+            .search()
+            .see_also("value1")
+            .see_also("value2")
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .see_also(&["value1", "value2"] as &[&str])
+            .send()
+            .await
+            .unwrap();
+
+        // tags
+        service.search().tags(true).send().await.unwrap();
+        service.search().tags(false).send().await.unwrap();
+        service.search().tags("value").send().await.unwrap();
+        service
+            .search()
+            .tags("value1")
+            .tags("value2")
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .tags(&["value1", "value2"] as &[&str])
+            .send()
+            .await
+            .unwrap();
+
+        // whiteboard
+        service.search().whiteboard(true).send().await.unwrap();
+        service.search().whiteboard(false).send().await.unwrap();
+        service.search().whiteboard("value").send().await.unwrap();
+        service
+            .search()
+            .whiteboard("value1")
+            .whiteboard("value2")
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .whiteboard(&["value1", "value2"] as &[&str])
+            .send()
+            .await
+            .unwrap();
+
+        // url
+        service.search().url(true).send().await.unwrap();
+        service.search().url(false).send().await.unwrap();
+        service.search().url("value").send().await.unwrap();
+        service
+            .search()
+            .url("value1")
+            .url("value2")
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .url(&["value1", "value2"] as &[&str])
             .send()
             .await
             .unwrap();
