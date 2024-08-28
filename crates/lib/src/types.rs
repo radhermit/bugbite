@@ -4,8 +4,8 @@ use std::hash::Hash;
 mod ordered_set;
 pub use ordered_set::OrderedSet;
 
-pub trait Ordered: Debug + PartialEq + Eq + PartialOrd + Ord + Clone + Hash {}
-impl<T> Ordered for T where T: Debug + PartialEq + Eq + PartialOrd + Ord + Clone + Hash {}
+pub trait Ordered: Debug + Ord + Clone + Hash {}
+impl<T> Ordered for T where T: Debug + Ord + Clone + Hash {}
 
 macro_rules! make_set_traits {
     ($($x:ty),+) => {$(
