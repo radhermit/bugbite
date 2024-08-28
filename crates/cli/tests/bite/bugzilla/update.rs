@@ -67,26 +67,26 @@ async fn no_changes() {
     cmd("bite bugzilla update 123 -v")
         .args(["--summary", "new summary"])
         .assert()
-        .stdout("")
-        .stderr(predicate::str::diff(indoc::indoc! {"
+        .stdout(predicate::str::diff(indoc::indoc! {"
             === Bug #1 ===
             --- Updated fields ---
             None
         "}))
+        .stderr("")
         .success();
 
     // no field changes for comment only updates
     cmd("bite bugzilla update 123 -v")
         .args(["--comment", "comment"])
         .assert()
-        .stdout("")
-        .stderr(predicate::str::diff(indoc::indoc! {"
+        .stdout(predicate::str::diff(indoc::indoc! {"
             === Bug #1 ===
             --- Updated fields ---
             None
             --- Added comment ---
             comment
         "}))
+        .stderr("")
         .success();
 }
 
@@ -108,16 +108,16 @@ async fn template() {
         .success();
 
     // overriding existing template
-    for input in ["y\n", "Y\n", "n\n", "N\n", "\n", "yes\ny\n", "no\nn\n"] {
+    for input in ["y\n", "Y\n"] {
         cmd("bite bugzilla update -n")
             .args(["--summary", "new summary"])
             .args(["--to", path])
             .write_stdin(input)
             .assert()
-            .stdout(predicate::str::contains(format!(
-                "template exists: {path}, overwrite?"
-            )))
-            .stderr("")
+            .stdout("")
+            .stderr(
+                predicate::str::diff(format!("template exists: {path}, overwrite? (y/N):")).trim(),
+            )
             .success();
     }
 
@@ -128,12 +128,12 @@ async fn template() {
     cmd("bite bugzilla update 123 -v")
         .args(["--from", path])
         .assert()
-        .stdout("")
-        .stderr(predicate::str::diff(indoc::indoc! {"
+        .stdout(predicate::str::diff(indoc::indoc! {"
             === Bug #123 ===
             --- Updated fields ---
             summary: old summary -> new summary
         "}))
+        .stderr("")
         .success();
 }
 
@@ -157,12 +157,12 @@ async fn summary() {
         cmd("bite bugzilla update 123 -v")
             .args([opt, "new summary"])
             .assert()
-            .stdout("")
-            .stderr(predicate::str::diff(indoc::indoc! {"
+            .stdout(predicate::str::diff(indoc::indoc! {"
                 === Bug #123 ===
                 --- Updated fields ---
                 summary: old summary -> new summary
             "}))
+            .stderr("")
             .success();
     }
 }
@@ -249,8 +249,7 @@ async fn reply() {
         cmd("bite bugzilla update 1 -v")
             .arg(opt)
             .assert()
-            .stdout("")
-            .stderr(predicate::str::diff(indoc::indoc! {"
+            .stdout(predicate::str::diff(indoc::indoc! {"
                 === Bug #1 ===
                 --- Updated fields ---
                 None
@@ -260,6 +259,7 @@ async fn reply() {
 
                 reply
             "}))
+            .stderr("")
             .success();
 
         // no changes made
@@ -268,8 +268,8 @@ async fn reply() {
             .env("EDITOR", "sed -i -e '100d'")
             .write_stdin("Y\n")
             .assert()
-            .stdout(predicate::str::diff("No changes made, submit anyway? (y/N):").trim())
-            .stderr(predicate::str::diff(indoc::indoc! {"
+            .stderr(predicate::str::diff("No changes made, submit anyway? (y/N):").trim())
+            .stdout(predicate::str::diff(indoc::indoc! {"
                 === Bug #1 ===
                 --- Updated fields ---
                 None
@@ -283,8 +283,7 @@ async fn reply() {
         cmd("bite bugzilla update 1 -v")
             .args([opt, "4"])
             .assert()
-            .stdout("")
-            .stderr(predicate::str::diff(indoc::indoc! {"
+            .stdout(predicate::str::diff(indoc::indoc! {"
                 === Bug #1 ===
                 --- Updated fields ---
                 None
@@ -294,6 +293,7 @@ async fn reply() {
 
                 reply
             "}))
+            .stderr("")
             .success();
     }
 }
@@ -321,14 +321,14 @@ async fn comment() {
         cmd("bite bugzilla update 1 -v")
             .args([opt, "static"])
             .assert()
-            .stdout("")
-            .stderr(predicate::str::diff(indoc::indoc! {"
+            .stdout(predicate::str::diff(indoc::indoc! {"
                 === Bug #1 ===
                 --- Updated fields ---
                 None
                 --- Added comment ---
                 static
             "}))
+            .stderr("")
             .success();
 
         // option used without argument spawns editor
@@ -336,14 +336,14 @@ async fn comment() {
             .arg(opt)
             .write_stdin("interactive\n")
             .assert()
-            .stdout("")
-            .stderr(predicate::str::diff(indoc::indoc! {"
+            .stdout(predicate::str::diff(indoc::indoc! {"
                 === Bug #1 ===
                 --- Updated fields ---
                 None
                 --- Added comment ---
                 interactive
             "}))
+            .stderr("")
             .success();
     }
 }

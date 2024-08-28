@@ -103,8 +103,11 @@ async fn list() {
         cmd("bite bugzilla attachment get 123 -v")
             .arg(opt)
             .assert()
-            .stdout(predicate::str::diff("123: test.txt").trim())
-            .stderr(predicate::str::is_empty().not())
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                123: test.txt
+                  (text/plain) 8 B, created by person, 2024-02-19 08:35:02 UTC
+            "}))
+            .stderr("")
             .success();
     }
 
@@ -128,16 +131,16 @@ async fn list() {
             .stderr("")
             .success();
 
-        // including deleted and obsolete
-        for opts in [["-D", "-O"], ["--deleted", "--obsolete"]] {
+        // include outdated attachments
+        for x in ["-O", "--outdated"] {
             cmd("bite bugzilla attachment get 123 124 125 126")
                 .arg(opt)
-                .args(opts)
+                .arg(x)
                 .assert()
                 .stdout(predicate::str::diff(indoc::indoc! {"
                     123: test file 1 (test1)
                     124: test file 2 (test2.txt)
-                    125: patch file (test.patch)
+                    125: patch file (test.patch) (obsolete)
                     126: patch file (test.patch) (deleted)
                 "}))
                 .stderr("")
@@ -150,9 +153,11 @@ async fn list() {
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
                 123: test file 1 (test1)
+                  (text/plain) 8 B, created by person, 2024-02-19 08:35:02 UTC
                 124: test file 2 (test2.txt)
+                  (text/plain) 8 B, created by person, 2024-02-19 08:35:02 UTC
             "}))
-            .stderr(predicate::str::is_empty().not())
+            .stderr("")
             .success();
     }
 }

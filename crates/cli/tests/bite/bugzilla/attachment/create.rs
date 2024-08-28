@@ -80,10 +80,10 @@ async fn single_bug() {
     cmd("bite bugzilla attachment create 1 -v")
         .arg(path)
         .assert()
-        .stdout("")
-        .stderr(predicate::str::contains(format!(
-            "{path}: attached to bug(s): 1 (attachment ID(s) 123)"
-        )))
+        .stdout(predicate::str::diff(indoc::formatdoc! {"
+            {path}: attached to bug(s): 1 (attachment ID(s) 123)
+        "}))
+        .stderr("")
         .success();
 
     // IDs from standard input
@@ -128,10 +128,10 @@ async fn multiple_bugs() {
     cmd("bite bugzilla attachment create 1,2 -v")
         .arg(path)
         .assert()
-        .stdout("")
-        .stderr(predicate::str::contains(format!(
-            "{path}: attached to bug(s): 1, 2 (attachment ID(s) 123, 124)"
-        )))
+        .stdout(predicate::str::diff(indoc::formatdoc! {"
+            {path}: attached to bug(s): 1, 2 (attachment ID(s) 123, 124)
+        "}))
+        .stderr("")
         .success();
 
     // IDs from standard input

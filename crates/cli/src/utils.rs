@@ -2,8 +2,9 @@ use std::borrow::Cow;
 use std::collections::VecDeque;
 use std::env;
 use std::ffi::OsStr;
-use std::io::{stdin, stdout, BufRead, Write};
+use std::io::{stderr, stdin, stdout, BufRead, Write};
 use std::process::{Command, ExitStatus, Stdio};
+use std::sync::atomic::AtomicBool;
 
 use anyhow::{Context, Result};
 use bugbite::utils::is_terminal;
@@ -16,12 +17,12 @@ pub(crate) fn confirm<S>(prompt: S, default: bool) -> Result<bool>
 where
     S: std::fmt::Display,
 {
-    let mut stdout = stdout().lock();
+    let mut stderr = stderr().lock();
     let mut stdin = stdin().lock();
     let vals = if default { "Y/n" } else { "y/N" };
     loop {
-        write!(stdout, "{prompt} ({vals}): ")?;
-        stdout.flush()?;
+        write!(stderr, "{prompt} ({vals}): ")?;
+        stderr.flush()?;
         let mut answer = String::new();
         stdin.read_line(&mut answer)?;
         let value = answer.trim();
@@ -33,7 +34,7 @@ where
         } else if value == "N" || value == "n" {
             return Ok(false);
         } else {
-            writeln!(stdout, "please answer y or n")?;
+            writeln!(stderr, "please answer y or n")?;
         }
     }
 }
@@ -101,6 +102,22 @@ pub(crate) fn truncate(data: &str, width: usize) -> Cow<'_, str> {
         Cow::Borrowed(data)
     }
 }
+
+pub(crate) static VERBOSE: AtomicBool = AtomicBool::new(false);
+
+macro_rules! verbose {
+    ($handle:expr, $data:expr) => {
+        if $crate::utils::VERBOSE.load(std::sync::atomic::Ordering::Acquire) {
+            writeln!($handle, $data)
+        } else {
+            Ok(())
+        }
+    };
+    ($enable:expr) => {
+        $crate::utils::VERBOSE.store($enable, std::sync::atomic::Ordering::SeqCst);
+    };
+}
+pub(crate) use verbose;
 
 macro_rules! wrapped_doc {
     ($content:expr) => {{

@@ -1,4 +1,5 @@
 use std::hash::Hash;
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 use std::str::FromStr;
 use std::{fmt, fs};
@@ -13,9 +14,8 @@ use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
 use tempfile::NamedTempFile;
-use tracing::info;
 
-use crate::utils::{confirm, launch_editor};
+use crate::utils::{confirm, launch_editor, verbose};
 
 #[derive(Clone)]
 struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
@@ -401,8 +401,9 @@ impl Command {
 
         if !self.options.dry_run {
             let changes = request.send().await?;
+            let mut stdout = stdout().lock();
             for change in changes {
-                info!("{change}");
+                verbose!(stdout, "{change}")?;
             }
         }
 

@@ -1,3 +1,4 @@
+use std::io::{stdout, Write};
 use std::process::ExitCode;
 
 use bugbite::args::CsvOrStdin;
@@ -11,7 +12,8 @@ use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};
 use itertools::Itertools;
 use strum::VariantNames;
-use tracing::info;
+
+use crate::utils::verbose;
 
 #[derive(Args)]
 #[clap(next_help_heading = "Attachment options")]
@@ -151,9 +153,13 @@ impl Command {
             .await?;
 
         let item_ids = self.args.ids.iter().join(", ");
+        let mut stdout = stdout().lock();
         for (file, ids) in self.args.files.iter().zip(attachment_ids.iter()) {
             let ids = ids.iter().map(|x| x.to_string()).join(", ");
-            info!("{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})");
+            verbose!(
+                stdout,
+                "{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})"
+            )?;
         }
 
         Ok(ExitCode::SUCCESS)

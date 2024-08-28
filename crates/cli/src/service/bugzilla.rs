@@ -1,4 +1,5 @@
 use std::process::ExitCode;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use bugbite::objects::bugzilla::*;
 use bugbite::service::{
@@ -7,9 +8,9 @@ use bugbite::service::{
 };
 use clap::Args;
 use itertools::Itertools;
-use tracing::{debug, info};
+use tracing::debug;
 
-use crate::utils::truncate;
+use crate::utils::{truncate, verbose};
 
 use super::output::*;
 use super::Render;
@@ -125,18 +126,25 @@ impl Subcommand {
     }
 }
 
+static OUTDATED: AtomicBool = AtomicBool::new(false);
+
 impl Render for Attachment {
     fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
+        let obsolete = if self.is_obsolete { " (obsolete)" } else { "" };
         let deleted = if self.is_deleted() { " (deleted)" } else { "" };
         let line = if self.summary != self.file_name {
             format!(
-                "{}: {} ({}){deleted}",
+                "{}: {} ({}){obsolete}{deleted}",
                 self.id, self.summary, self.file_name
             )
         } else {
             format!("{}: {}{deleted}", self.id, self.summary)
         };
-        writeln!(f, "{}", truncate(&line, width))?;
+
+        // don't output obsolete or deleted attachments by default
+        if (!self.is_obsolete && !self.is_deleted()) || OUTDATED.load(Ordering::Acquire) {
+            writeln!(f, "{}", truncate(&line, width))?;
+        }
 
         // output additional attachment info on request
         let line = format!(
@@ -150,7 +158,7 @@ impl Render for Attachment {
             self.creator,
             self.updated
         );
-        info!("{line}");
+        verbose!(f, "{line}")?;
 
         Ok(())
     }

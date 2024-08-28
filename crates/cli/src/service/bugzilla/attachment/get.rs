@@ -1,6 +1,7 @@
 use std::fs;
 use std::io::{stdout, Write};
 use std::process::ExitCode;
+use std::sync::atomic::Ordering;
 
 use anyhow::Context;
 use bugbite::args::MaybeStdinVec;
@@ -9,6 +10,7 @@ use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
 use clap::Args;
 
+use crate::service::bugzilla::OUTDATED;
 use crate::service::Render;
 use crate::utils::COLUMNS;
 
@@ -28,13 +30,9 @@ struct Options {
     )]
     output: Option<String>,
 
-    /// include deleted attachments
-    #[arg(short = 'D', long)]
-    deleted: bool,
-
-    /// include obsolete attachments
+    /// include outdated attachments
     #[arg(short = 'O', long)]
-    obsolete: bool,
+    outdated: bool,
 
     /// request attachments from bug IDs or aliases
     #[arg(short, long)]
@@ -87,9 +85,12 @@ impl Command {
         };
 
         // conditionally skip deleted and obsolete attachments
-        let attachments = attachments.iter().filter(|x| {
-            (self.options.obsolete || !x.is_obsolete) && (self.options.deleted || !x.is_deleted())
-        });
+        if self.options.outdated {
+            OUTDATED.store(true, Ordering::SeqCst);
+        }
+        let attachments = attachments
+            .iter()
+            .filter(|x| self.options.outdated || (!x.is_obsolete && !x.is_deleted()));
 
         if self.options.list {
             for attachment in attachments {

@@ -8,25 +8,19 @@ use tracing_log::AsTrace;
 
 use crate::config::Config;
 use crate::subcmds::Subcommand;
-use crate::utils::{wrapped_doc, COLUMNS};
+use crate::utils::{verbose, wrapped_doc, COLUMNS};
 
 fn enable_logging(verbosity: LevelFilter) {
-    // Simplify log output when using info level since bugbite uses it for information messages
-    // that shouldn't be prefixed. The downside is warning and error level messages will also
-    // be non-prefixed, but they shouldn't occur during info level runs in most situations.
-    let format = if verbosity == LevelFilter::Info {
-        tracing_subscriber::fmt::format()
-            .with_level(false)
-            .with_target(false)
-            .without_time()
-            .compact()
-    } else {
-        tracing_subscriber::fmt::format()
-            .with_level(true)
-            .with_target(true)
-            .without_time()
-            .compact()
+    // enable verbose output
+    if verbosity >= LevelFilter::Info {
+        verbose!(true);
     };
+
+    let format = tracing_subscriber::fmt::format()
+        .with_level(true)
+        .with_target(true)
+        .without_time()
+        .compact();
 
     tracing_subscriber::fmt()
         .event_format(format)

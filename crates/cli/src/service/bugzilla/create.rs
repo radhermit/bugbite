@@ -12,9 +12,8 @@ use bugbite::utils::is_terminal;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
-use tracing::info;
 
-use crate::utils::confirm;
+use crate::utils::{confirm, verbose};
 
 #[derive(Args)]
 #[clap(next_help_heading = "Attribute options")]
@@ -236,7 +235,7 @@ impl Command {
             let mut stdout = stdout().lock();
             let id = request.send().await?;
             if is_terminal!(&stdout) {
-                info!("Created bug {id}");
+                verbose!(stdout, "Created bug {id}")?;
             } else {
                 writeln!(stdout, "{id}")?;
             }

@@ -6,10 +6,9 @@ use bugbite::utils::is_terminal;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use serde::Serialize;
-use tracing::info;
 
 use crate::service::Render;
-use crate::utils::{truncate, COLUMNS};
+use crate::utils::{truncate, verbose, COLUMNS};
 
 // indentation for text-wrapping header field values
 pub(crate) static INDENT: Lazy<String> = Lazy::new(|| " ".repeat(15));
@@ -67,7 +66,7 @@ where
     }
 
     if count > 0 {
-        info!(" * {count} found");
+        verbose!(f, " * {count} found")?;
     }
 
     Ok(())

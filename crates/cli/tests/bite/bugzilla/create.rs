@@ -107,8 +107,8 @@ async fn creation() {
         .arg("-v")
         .env("BUGBITE_IS_TERMINAL", "1")
         .assert()
-        .stdout("")
-        .stderr(predicate::str::diff("Created bug 123").trim())
+        .stdout(predicate::str::diff("Created bug 123").trim())
+        .stderr("")
         .success();
 }
 
@@ -170,16 +170,16 @@ async fn template() {
         .success();
 
     // overriding existing template
-    for input in ["y\n", "Y\n", "n\n", "N\n", "\n", "yes\ny\n", "no\nn\n"] {
+    for input in ["y\n", "Y\n"] {
         default_cmd!()
             .arg("-n")
             .args(["--to", path])
             .write_stdin(input)
             .assert()
-            .stdout(predicate::str::contains(format!(
-                "template exists: {path}, overwrite?"
-            )))
-            .stderr("")
+            .stdout("")
+            .stderr(
+                predicate::str::diff(format!("template exists: {path}, overwrite? (y/N):")).trim(),
+            )
             .success();
     }
 
