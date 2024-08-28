@@ -14,7 +14,7 @@ use serde_with::{
 };
 use strum::{Display, EnumString};
 
-use crate::serde::{non_empty_str, null_empty_set, null_empty_vec};
+use crate::serde::{non_empty_str, null_empty_set, null_empty_vec, null_empty_str};
 use crate::service::bugzilla::{BugField, FilterField, GroupField};
 use crate::traits::RenderSearch;
 use crate::types::OrderedSet;
@@ -472,7 +472,8 @@ impl fmt::Display for BugzillaField {
             let values = self
                 .values
                 .iter()
-                .filter_map(|x| x.name.as_ref())
+                .filter(|x| !x.name.is_empty())
+                .map(|x| x.name.as_str())
                 .collect::<IndexSet<_>>();
             let values = values.iter().join(", ");
             write!(f, "\nValues: {values}")?;
@@ -483,7 +484,8 @@ impl fmt::Display for BugzillaField {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct BugzillaFieldValue {
-    name: Option<String>,
+    #[serde(deserialize_with = "null_empty_str")]
+    name: String,
     sort_key: Option<u64>,
     description: Option<String>,
     is_open: Option<bool>,
