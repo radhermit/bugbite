@@ -125,7 +125,7 @@ respectively.
 .Search for unassigned issues:
  bite redmine search --assignee false
 
-*--attachments [<value>[,...]]*::
+*-@, --attachments [<value>[,...]]*::
     Restrict by attachments.
 +
 With no argument, all matches with attachments are returned. If the
@@ -139,7 +139,7 @@ Multiple values can be specified in a comma-separated list and will
 match if all of the specified values match.
 +
 .Search for issues with attachments:
- bite redmine search --attachments
+ bite redmine search -@
 +
 .Search for issues without attachments:
  bite redmine search --attachments false

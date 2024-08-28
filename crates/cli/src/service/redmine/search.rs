@@ -49,6 +49,7 @@ struct AttributeOptions {
 
     /// restrict by attachments
     #[arg(
+        short = '@',
         long,
         num_args = 0..=1,
         value_name = "VALUE[,...]",

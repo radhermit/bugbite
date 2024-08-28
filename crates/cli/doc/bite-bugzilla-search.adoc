@@ -136,7 +136,7 @@ application. See the <<Match Operators>> section for more information.
 .Contains `value1` or `value2`:
  bite bugzilla search --alias value1 --alias value1
 
-*--attachments* <value[,...]>::
+*-@, --attachments* <value[,...]>::
     Restrict by attachments.
 +
 With no argument, all bugs with attachments are returned. If the value is
@@ -144,7 +144,7 @@ With no argument, all bugs with attachments are returned. If the value is
 respectively.
 +
 .With attachments:
- bite bugzilla search --attachments
+ bite bugzilla search -@
 +
 .Without attachments:
  bite bugzilla search --attachments false
