@@ -168,6 +168,18 @@ impl<'a> Request<'a> {
         self
     }
 
+    pub fn changed(mut self, field: ChangeField) -> Self {
+        let changed = self.params.changed.get_or_insert_with(Default::default);
+        changed.push((vec![field], "<now".parse().unwrap()));
+        self
+    }
+
+    pub fn changed_at(mut self, field: ChangeField, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+        let changed = self.params.changed.get_or_insert_with(Default::default);
+        changed.push((vec![field], value));
+        self
+    }
+
     pub fn order<I>(mut self, values: I) -> Self
     where
         I: IntoIterator<Item = Order<OrderField>>,
@@ -1820,6 +1832,25 @@ mod tests {
             .send()
             .await
             .unwrap();
+
+        // changed
+        for field in ChangeField::iter() {
+            // ever changed
+            service
+                .search()
+                .changed(field)
+                .send()
+                .await
+                .unwrap();
+
+            // changed at a certain time
+            service
+                .search()
+                .changed_at(field, "1d".parse().unwrap())
+                .send()
+                .await
+                .unwrap();
+        }
 
         // order
         for field in OrderField::iter() {
