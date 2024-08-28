@@ -195,6 +195,27 @@ impl<'a> Request<'a> {
         self
     }
 
+    pub fn changed_from<S>(mut self, field: ChangeField, value: S) -> Self
+    where
+        S: fmt::Display,
+    {
+        let changed_from = self
+            .params
+            .changed_from
+            .get_or_insert_with(Default::default);
+        changed_from.push((field, value.to_string()));
+        self
+    }
+
+    pub fn changed_to<S>(mut self, field: ChangeField, value: S) -> Self
+    where
+        S: fmt::Display,
+    {
+        let changed_to = self.params.changed_to.get_or_insert_with(Default::default);
+        changed_to.push((field, value.to_string()));
+        self
+    }
+
     pub fn order<I>(mut self, values: I) -> Self
     where
         I: IntoIterator<Item = Order<OrderField>>,
@@ -1874,7 +1895,7 @@ mod tests {
             service.search().url(s).send().await.unwrap();
         }
 
-        // changed
+        // change related combinators
         for field in ChangeField::iter() {
             // ever changed
             service.search().changed(field).send().await.unwrap();
@@ -1907,6 +1928,22 @@ mod tests {
             service
                 .search()
                 .changed_by(field, ["user1", "user2"])
+                .send()
+                .await
+                .unwrap();
+
+            // changed from certain value
+            service
+                .search()
+                .changed_from(field, "value")
+                .send()
+                .await
+                .unwrap();
+
+            // changed to certain value
+            service
+                .search()
+                .changed_to(field, "value")
                 .send()
                 .await
                 .unwrap();
