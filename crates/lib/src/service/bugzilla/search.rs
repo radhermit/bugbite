@@ -827,12 +827,6 @@ impl From<String> for Match {
     }
 }
 
-impl From<&String> for Match {
-    fn from(s: &String) -> Self {
-        s.as_str().into()
-    }
-}
-
 impl From<bool> for ExistsOrValues<Match> {
     fn from(value: bool) -> Self {
         ExistsOrValues::Exists(value)
