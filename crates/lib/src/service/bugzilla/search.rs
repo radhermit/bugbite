@@ -1854,12 +1854,28 @@ mod tests {
             service.search().changed(field).send().await.unwrap();
 
             // changed at a certain time
-            service
-                .search()
-                .changed_at(field, "1d".parse().unwrap())
-                .send()
-                .await
-                .unwrap();
+            for time in [
+                "2020",
+                "2020-02-01",
+                "1h",
+                "<1d",
+                "<=1w",
+                ">=1m",
+                ">1y",
+                "2020..2021",
+                "2020..=2021",
+                "..2021",
+                "..=2021",
+                "2021..",
+                "..",
+            ] {
+                service
+                    .search()
+                    .changed_at(field, time.parse().unwrap())
+                    .send()
+                    .await
+                    .unwrap();
+            }
 
             // changed by certain user(s)
             service
