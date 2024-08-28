@@ -174,9 +174,24 @@ impl<'a> Request<'a> {
         self
     }
 
-    pub fn changed_at(mut self, field: ChangeField, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+    pub fn changed_at(
+        mut self,
+        field: ChangeField,
+        value: RangeOrValue<TimeDeltaOrStatic>,
+    ) -> Self {
         let changed = self.params.changed.get_or_insert_with(Default::default);
         changed.push((vec![field], value));
+        self
+    }
+
+    pub fn changed_by<I, S>(mut self, field: ChangeField, values: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        let changed_by = self.params.changed_by.get_or_insert_with(Default::default);
+        let values = values.into_iter().map(|x| x.to_string()).collect();
+        changed_by.push((vec![field], values));
         self
     }
 
@@ -1836,17 +1851,20 @@ mod tests {
         // changed
         for field in ChangeField::iter() {
             // ever changed
-            service
-                .search()
-                .changed(field)
-                .send()
-                .await
-                .unwrap();
+            service.search().changed(field).send().await.unwrap();
 
             // changed at a certain time
             service
                 .search()
                 .changed_at(field, "1d".parse().unwrap())
+                .send()
+                .await
+                .unwrap();
+
+            // changed by certain user(s)
+            service
+                .search()
+                .changed_by(field, ["user1", "user2"])
                 .send()
                 .await
                 .unwrap();
