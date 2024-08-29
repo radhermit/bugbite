@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
@@ -974,7 +975,7 @@ macro_rules! make_exists_or_values {
         }
     )+};
 }
-make_exists_or_values!(&[T], &Vec<T>, &IndexSet<T>);
+make_exists_or_values!(&[T], &Vec<T>, &HashSet<T>, &IndexSet<T>);
 
 impl<T, const N: usize> From<&[T; N]> for ExistsOrValues<Match>
 where
@@ -1764,6 +1765,8 @@ mod tests {
         service.search().alias(values).send().await.unwrap();
 
         // set
+        let values = HashSet::from(["value1", "value2"]);
+        service.search().alias(&values).send().await.unwrap();
         let values = IndexSet::from(["value1", "value2"]);
         service.search().alias(&values).send().await.unwrap();
     }
