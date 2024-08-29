@@ -11,7 +11,8 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::{
-    serde_as, skip_serializing_none, BoolFromInt, DeserializeFromStr, SerializeDisplay,
+    serde_as, skip_serializing_none, BoolFromInt, DefaultOnError, DeserializeFromStr,
+    SerializeDisplay,
 };
 use strum::{Display, EnumString};
 
@@ -453,10 +454,11 @@ impl RenderSearch<FilterField> for Bug {
 }
 
 /// Bugzilla field variants.
-#[derive(Serialize_repr, Deserialize_repr, Debug)]
+#[derive(Serialize_repr, Deserialize_repr, Default, Debug)]
 #[repr(u8)]
 pub enum BugzillaFieldKind {
     /// Unknown field type
+    #[default]
     Unknown,
     /// Single-line string
     String,
@@ -475,10 +477,12 @@ pub enum BugzillaFieldKind {
 }
 
 /// Bugzilla field metadata.
+#[serde_as]
 #[derive(Deserialize, Serialize, Debug)]
 pub struct BugzillaField {
     id: u64,
-    #[serde(rename = "type")]
+    #[serde_as(deserialize_as = "DefaultOnError")]
+    #[serde(default, rename = "type")]
     kind: BugzillaFieldKind,
     is_custom: bool,
     name: String,
