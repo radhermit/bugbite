@@ -86,8 +86,10 @@ impl<'a> Request<'a> {
         T: Into<ExistsOrValues<Match>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
-        let aliases = self.params.alias.get_or_insert_with(Default::default);
-        aliases.push(value.into());
+        self.params
+            .alias
+            .get_or_insert_with(Default::default)
+            .push(value.into());
         self
     }
 
@@ -104,8 +106,10 @@ impl<'a> Request<'a> {
         T: Into<ExistsOrValues<Match>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
-        let flags = self.params.flags.get_or_insert_with(Default::default);
-        flags.push(value.into());
+        self.params
+            .flags
+            .get_or_insert_with(Default::default)
+            .push(value.into());
         self
     }
 
@@ -114,8 +118,10 @@ impl<'a> Request<'a> {
         T: Into<ExistsOrValues<Match>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
-        let groups = self.params.groups.get_or_insert_with(Default::default);
-        groups.push(value.into());
+        self.params
+            .groups
+            .get_or_insert_with(Default::default)
+            .push(value.into());
         self
     }
 
@@ -124,8 +130,10 @@ impl<'a> Request<'a> {
         T: Into<ExistsOrValues<Match>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
-        let keywords = self.params.keywords.get_or_insert_with(Default::default);
-        keywords.push(value.into());
+        self.params
+            .keywords
+            .get_or_insert_with(Default::default)
+            .push(value.into());
         self
     }
 
@@ -134,8 +142,10 @@ impl<'a> Request<'a> {
         T: Into<ExistsOrValues<Match>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
-        let see_also = self.params.see_also.get_or_insert_with(Default::default);
-        see_also.push(value.into());
+        self.params
+            .see_also
+            .get_or_insert_with(Default::default)
+            .push(value.into());
         self
     }
 
@@ -144,8 +154,10 @@ impl<'a> Request<'a> {
         T: Into<ExistsOrValues<Match>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
-        let tags = self.params.tags.get_or_insert_with(Default::default);
-        tags.push(value.into());
+        self.params
+            .tags
+            .get_or_insert_with(Default::default)
+            .push(value.into());
         self
     }
 
@@ -154,8 +166,10 @@ impl<'a> Request<'a> {
         T: Into<ExistsOrValues<Match>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
-        let whiteboard = self.params.whiteboard.get_or_insert_with(Default::default);
-        whiteboard.push(value.into());
+        self.params
+            .whiteboard
+            .get_or_insert_with(Default::default)
+            .push(value.into());
         self
     }
 
@@ -164,14 +178,18 @@ impl<'a> Request<'a> {
         T: Into<ExistsOrValues<Match>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
-        let url = self.params.url.get_or_insert_with(Default::default);
-        url.push(value.into());
+        self.params
+            .url
+            .get_or_insert_with(Default::default)
+            .push(value.into());
         self
     }
 
     pub fn changed(mut self, field: ChangeField) -> Self {
-        let changed = self.params.changed.get_or_insert_with(Default::default);
-        changed.push((vec![field], "<now".parse().unwrap()));
+        self.params
+            .changed
+            .get_or_insert_with(Default::default)
+            .push((vec![field], "<now".parse().unwrap()));
         self
     }
 
@@ -180,8 +198,10 @@ impl<'a> Request<'a> {
         field: ChangeField,
         value: RangeOrValue<TimeDeltaOrStatic>,
     ) -> Self {
-        let changed = self.params.changed.get_or_insert_with(Default::default);
-        changed.push((vec![field], value));
+        self.params
+            .changed
+            .get_or_insert_with(Default::default)
+            .push((vec![field], value));
         self
     }
 
@@ -190,9 +210,11 @@ impl<'a> Request<'a> {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        let changed_by = self.params.changed_by.get_or_insert_with(Default::default);
         let values = values.into_iter().map(|x| x.to_string()).collect();
-        changed_by.push((vec![field], values));
+        self.params
+            .changed_by
+            .get_or_insert_with(Default::default)
+            .push((vec![field], values));
         self
     }
 
@@ -200,11 +222,10 @@ impl<'a> Request<'a> {
     where
         S: fmt::Display,
     {
-        let changed_from = self
-            .params
+        self.params
             .changed_from
-            .get_or_insert_with(Default::default);
-        changed_from.push((field, value.to_string()));
+            .get_or_insert_with(Default::default)
+            .push((field, value.to_string()));
         self
     }
 
@@ -212,8 +233,99 @@ impl<'a> Request<'a> {
     where
         S: fmt::Display,
     {
-        let changed_to = self.params.changed_to.get_or_insert_with(Default::default);
-        changed_to.push((field, value.to_string()));
+        self.params
+            .changed_to
+            .get_or_insert_with(Default::default)
+            .push((field, value.to_string()));
+        self
+    }
+
+    pub fn assignee<I, T>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<Match>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .assignee
+            .get_or_insert_with(Default::default)
+            .push(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn attacher<I, T>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<Match>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .attacher
+            .get_or_insert_with(Default::default)
+            .push(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn commenter<I, T>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<Match>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .commenter
+            .get_or_insert_with(Default::default)
+            .push(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn cc<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .cc
+            .get_or_insert_with(Default::default)
+            .push(value.into());
+        self
+    }
+
+    pub fn flagger<I, T>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<Match>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .flagger
+            .get_or_insert_with(Default::default)
+            .push(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn qa<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<Match>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .qa
+            .get_or_insert_with(Default::default)
+            .push(value.into());
+        self
+    }
+
+    pub fn reporter<I, T>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<Match>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .reporter
+            .get_or_insert_with(Default::default)
+            .push(values.into_iter().map(Into::into).collect());
         self
     }
 
@@ -1922,6 +2034,37 @@ mod tests {
                 .await
                 .unwrap();
         }
+
+        // assignee
+        service.search().assignee(["value"]).send().await.unwrap();
+
+        // attacher
+        service.search().attacher(["value"]).send().await.unwrap();
+
+        // cc
+        service.search().cc(true).send().await.unwrap();
+        service.search().cc(false).send().await.unwrap();
+        service.search().cc("value").send().await.unwrap();
+        for s in &matches {
+            service.search().cc(s).send().await.unwrap();
+        }
+
+        // commenter
+        service.search().commenter(["value"]).send().await.unwrap();
+
+        // flagger
+        service.search().flagger(["value"]).send().await.unwrap();
+
+        // qa
+        service.search().qa(true).send().await.unwrap();
+        service.search().qa(false).send().await.unwrap();
+        service.search().qa("value").send().await.unwrap();
+        for s in &matches {
+            service.search().qa(s).send().await.unwrap();
+        }
+
+        // reporter
+        service.search().reporter(["value"]).send().await.unwrap();
 
         // fields
         service
