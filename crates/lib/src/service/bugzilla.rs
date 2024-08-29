@@ -2,6 +2,8 @@ use std::collections::HashSet;
 use std::fmt;
 use std::str::FromStr;
 
+use indexmap::IndexMap;
+use once_cell::sync::Lazy;
 use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
@@ -9,6 +11,7 @@ use strum::{Display, EnumIter, EnumString, IntoEnumIterator, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
+use crate::objects::bugzilla::{BugzillaField, BugzillaFieldName};
 use crate::traits::{Api, WebClient, WebService};
 use crate::Error;
 
@@ -24,8 +27,16 @@ pub mod search;
 pub mod update;
 pub mod version;
 
+/// Common default values used for unset fields.
+pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
+    ["unspecified", "Unspecified", "---", "--", "-", ""]
+        .iter()
+        .map(|s| s.to_string())
+        .collect()
+});
+
 // TODO: improve API for setting user info on config creation
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Config {
     base: Url,
     pub user: Option<String>,
@@ -76,6 +87,32 @@ impl Service {
     pub fn item_url<I: fmt::Display>(&self, id: I) -> String {
         let base = self.base().as_str().trim_end_matches('/');
         format!("{base}/show_bug.cgi?id={id}")
+    }
+
+    pub(crate) fn deserialize_custom_fields(
+        &self,
+        data: &mut serde_json::Value,
+    ) -> IndexMap<BugzillaFieldName, String> {
+        let mut custom_fields = IndexMap::new();
+
+        if let Some(map) = data.as_object_mut() {
+            for field in &self.config.cache.custom_fields {
+                let Some(value) = map.remove(&field.name.id) else {
+                    continue;
+                };
+
+                // TODO: handle different custom field value types
+                let serde_json::Value::String(value) = value else {
+                    continue;
+                };
+
+                if !UNSET_VALUES.contains(&value) {
+                    custom_fields.insert(field.name.clone(), value);
+                }
+            }
+        }
+
+        custom_fields
     }
 
     /// Substitute user alias for matching value.
@@ -440,7 +477,7 @@ impl Api for FilterField {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default)]
 pub struct ServiceCache {
-    fields: HashSet<String>,
+    custom_fields: Vec<BugzillaField>,
 }

@@ -51,7 +51,7 @@ pub enum ServiceKind {
     Redmine,
 }
 
-#[derive(EnumAsInner, Deserialize, Serialize, Debug, Clone)]
+#[derive(EnumAsInner, Deserialize, Serialize, Debug)]
 pub enum Config {
     Bugzilla(bugzilla::Config),
     Github(github::Config),

@@ -120,12 +120,14 @@ impl RequestSend for Request<'_> {
         };
 
         let mut bugs = vec![];
-        for value in data {
+        for mut value in data {
+            let custom_fields = self.service.deserialize_custom_fields(&mut value);
             let mut bug: Bug = serde_json::from_value(value)
                 .map_err(|e| Error::InvalidResponse(format!("failed deserializing bug: {e}")))?;
             bug.attachments = attachments.next().unwrap_or_default();
             bug.comments = comments.next().unwrap_or_default();
             bug.history = history.next().unwrap_or_default();
+            bug.custom_fields = custom_fields;
             bugs.push(bug);
         }
 

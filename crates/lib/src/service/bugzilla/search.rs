@@ -59,9 +59,17 @@ impl RequestSend for Request<'_> {
         let request = self.service.client.get(url).auth_optional(self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
-        let data = data["bugs"].take();
-        let bugs = serde_json::from_value(data)
-            .map_err(|e| Error::InvalidResponse(format!("failed deserializing bugs: {e}")))?;
+        let mut bugs = vec![];
+        if let serde_json::Value::Array(values) = data["bugs"].take() {
+            for mut value in values {
+                let custom_fields = self.service.deserialize_custom_fields(&mut value);
+                let mut bug: Bug = serde_json::from_value(value).map_err(|e| {
+                    Error::InvalidResponse(format!("failed deserializing bug: {e}"))
+                })?;
+                bug.custom_fields = custom_fields;
+                bugs.push(bug);
+            }
+        }
         Ok(bugs)
     }
 }

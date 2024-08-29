@@ -1,13 +1,12 @@
 use std::cmp::Ordering;
-use std::collections::HashSet;
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 
 use chrono::prelude::*;
 use humansize::{format_size, BINARY};
-use indexmap::IndexSet;
+use indexmap::{IndexMap, IndexSet};
 use itertools::{Either, Itertools};
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::{
@@ -17,20 +16,12 @@ use serde_with::{
 use strum::{Display, EnumString};
 
 use crate::serde::non_empty_str;
-use crate::service::bugzilla::{BugField, FilterField, GroupField};
+use crate::service::bugzilla::{BugField, FilterField, GroupField, UNSET_VALUES};
 use crate::traits::RenderSearch;
 use crate::types::OrderedSet;
 use crate::Error;
 
 use super::{stringify, Base64, Item};
-
-/// Common default values used for unset fields.
-static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
-    ["unspecified", "Unspecified", "---", "--", "-", ""]
-        .iter()
-        .map(|s| s.to_string())
-        .collect()
-});
 
 /// A file attachment on a bug.
 #[serde_as]
@@ -301,7 +292,7 @@ pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(
 
 #[serde_as]
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq)]
 #[serde(default)]
 pub struct Bug {
     pub id: u64,
@@ -377,6 +368,8 @@ pub struct Bug {
     pub attachments: Vec<Attachment>,
     #[serde(skip)]
     pub history: Vec<Event>,
+    #[serde(skip)]
+    pub custom_fields: IndexMap<BugzillaFieldName, String>,
 }
 
 impl From<Bug> for Item {
@@ -477,6 +470,46 @@ pub enum BugzillaFieldKind {
     Integer,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct BugzillaFieldName {
+    #[serde(rename = "name")]
+    pub id: String,
+    #[serde(rename = "display_name")]
+    pub display: String,
+}
+
+impl PartialEq for BugzillaFieldName {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for BugzillaFieldName {}
+
+impl Hash for BugzillaFieldName {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
+}
+
+impl Ord for BugzillaFieldName {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.id.cmp(&other.id)
+    }
+}
+
+impl PartialOrd for BugzillaFieldName {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl fmt::Display for BugzillaFieldName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.display)
+    }
+}
+
 /// Bugzilla field metadata.
 #[serde_as]
 #[derive(Deserialize, Serialize, Debug)]
@@ -484,10 +517,10 @@ pub struct BugzillaField {
     id: u64,
     #[serde_as(deserialize_as = "DefaultOnError")]
     #[serde(default, rename = "type")]
-    kind: BugzillaFieldKind,
+    pub kind: BugzillaFieldKind,
     is_custom: bool,
-    name: String,
-    display_name: String,
+    #[serde(flatten)]
+    pub name: BugzillaFieldName,
     is_mandatory: bool,
     #[serde(default)]
     values: Vec<BugzillaFieldValue>,
@@ -495,8 +528,8 @@ pub struct BugzillaField {
 
 impl fmt::Display for BugzillaField {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "Name: {}", self.name)?;
-        write!(f, "Display name: {}", self.display_name)?;
+        writeln!(f, "Name: {}", self.name.id)?;
+        write!(f, "Display name: {}", self.name.display)?;
         if !self.values.is_empty() {
             let values = self
                 .values
