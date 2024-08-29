@@ -515,7 +515,7 @@ impl fmt::Display for BugzillaField {
 pub struct BugzillaFieldValue {
     #[serde(deserialize_with = "null_empty_str")]
     name: String,
-    sort_key: Option<u64>,
+    sort_key: Option<i64>,
     description: Option<String>,
     is_open: Option<bool>,
 }
