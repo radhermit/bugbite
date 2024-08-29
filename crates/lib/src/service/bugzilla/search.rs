@@ -1865,7 +1865,9 @@ mod tests {
             // changed at a certain time
             for time in [
                 "2020",
+                "2020-02",
                 "2020-02-01",
+                "2020-02-01T01:02:03Z",
                 "1h",
                 "<1d",
                 "<=1w",
