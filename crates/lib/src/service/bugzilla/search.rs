@@ -962,12 +962,35 @@ where
     }
 }
 
-impl<T> From<&[T]> for ExistsOrValues<Match>
+macro_rules! make_exists_or_values {
+    ($($x:ty),+) => {$(
+        impl<T> From<$x> for ExistsOrValues<Match>
+        where
+            T: Into<Match> + Copy,
+        {
+            fn from(values: $x) -> Self {
+                ExistsOrValues::Values(values.iter().copied().map(Into::into).collect())
+            }
+        }
+    )+};
+}
+make_exists_or_values!(&[T], &Vec<T>, &IndexSet<T>);
+
+impl<T, const N: usize> From<&[T; N]> for ExistsOrValues<Match>
 where
     T: Into<Match> + Copy,
 {
-    fn from(values: &[T]) -> Self {
+    fn from(values: &[T; N]) -> Self {
         ExistsOrValues::Values(values.iter().copied().map(Into::into).collect())
+    }
+}
+
+impl<T, const N: usize> From<[T; N]> for ExistsOrValues<Match>
+where
+    T: Into<Match>,
+{
+    fn from(values: [T; N]) -> Self {
+        ExistsOrValues::Values(values.into_iter().map(Into::into).collect())
     }
 }
 
@@ -1699,6 +1722,52 @@ mod tests {
 
     use super::*;
 
+    // From<ExistsOrValues<Match>> trait conversion testing
+    #[tokio::test]
+    async fn exists_or_values_match() {
+        let path = TESTDATA_PATH.join("bugzilla");
+        let server = TestServer::new().await;
+        let config = Config::new(server.uri()).unwrap();
+        let service = Service::new(config, Default::default()).unwrap();
+        server.respond(200, path.join("search/ids.json")).await;
+
+        // boolean
+        service.search().alias(true).send().await.unwrap();
+        service.search().alias(false).send().await.unwrap();
+
+        // string
+        let value = "value".to_string();
+        service.search().alias("value").send().await.unwrap();
+        service.search().alias(&value).send().await.unwrap();
+        service.search().alias(value).send().await.unwrap();
+
+        // array
+        service
+            .search()
+            .alias(["value1", "value2"])
+            .send()
+            .await
+            .unwrap();
+
+        // vector
+        let values = vec!["value1", "value2"];
+        service.search().alias(&values).send().await.unwrap();
+        service
+            .search()
+            .alias(values.as_slice())
+            .send()
+            .await
+            .unwrap();
+
+        // slice
+        let values = &["value1", "value2"];
+        service.search().alias(values).send().await.unwrap();
+
+        // set
+        let values = IndexSet::from(["value1", "value2"]);
+        service.search().alias(&values).send().await.unwrap();
+    }
+
     #[tokio::test]
     async fn request() {
         let path = TESTDATA_PATH.join("bugzilla");
@@ -1717,19 +1786,6 @@ mod tests {
         service.search().alias(true).send().await.unwrap();
         service.search().alias(false).send().await.unwrap();
         service.search().alias("value").send().await.unwrap();
-        service
-            .search()
-            .alias("value1")
-            .alias("value2")
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .alias(&["value1", "value2"] as &[&str])
-            .send()
-            .await
-            .unwrap();
         for s in &matches {
             service.search().alias(s).send().await.unwrap();
         }
@@ -1738,12 +1794,6 @@ mod tests {
         service.search().attachments(true).send().await.unwrap();
         service.search().attachments(false).send().await.unwrap();
         service.search().attachments("value").send().await.unwrap();
-        service
-            .search()
-            .attachments(&["value1", "value2"] as &[&str])
-            .send()
-            .await
-            .unwrap();
         for s in &matches {
             service.search().attachments(s).send().await.unwrap();
         }
@@ -1752,19 +1802,6 @@ mod tests {
         service.search().flags(true).send().await.unwrap();
         service.search().flags(false).send().await.unwrap();
         service.search().flags("value").send().await.unwrap();
-        service
-            .search()
-            .flags("value1")
-            .flags("value2")
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .flags(&["value1", "value2"] as &[&str])
-            .send()
-            .await
-            .unwrap();
         for s in &matches {
             service.search().flags(s).send().await.unwrap();
         }
@@ -1773,19 +1810,6 @@ mod tests {
         service.search().groups(true).send().await.unwrap();
         service.search().groups(false).send().await.unwrap();
         service.search().groups("value").send().await.unwrap();
-        service
-            .search()
-            .groups("value1")
-            .groups("value2")
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .groups(&["value1", "value2"] as &[&str])
-            .send()
-            .await
-            .unwrap();
         for s in &matches {
             service.search().groups(s).send().await.unwrap();
         }
@@ -1794,19 +1818,6 @@ mod tests {
         service.search().keywords(true).send().await.unwrap();
         service.search().keywords(false).send().await.unwrap();
         service.search().keywords("value").send().await.unwrap();
-        service
-            .search()
-            .keywords("value1")
-            .keywords("value2")
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .keywords(&["value1", "value2"] as &[&str])
-            .send()
-            .await
-            .unwrap();
         for s in &matches {
             service.search().keywords(s).send().await.unwrap();
         }
@@ -1815,19 +1826,6 @@ mod tests {
         service.search().see_also(true).send().await.unwrap();
         service.search().see_also(false).send().await.unwrap();
         service.search().see_also("value").send().await.unwrap();
-        service
-            .search()
-            .see_also("value1")
-            .see_also("value2")
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .see_also(&["value1", "value2"] as &[&str])
-            .send()
-            .await
-            .unwrap();
         for s in &matches {
             service.search().see_also(s).send().await.unwrap();
         }
@@ -1836,19 +1834,6 @@ mod tests {
         service.search().tags(true).send().await.unwrap();
         service.search().tags(false).send().await.unwrap();
         service.search().tags("value").send().await.unwrap();
-        service
-            .search()
-            .tags("value1")
-            .tags("value2")
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .tags(&["value1", "value2"] as &[&str])
-            .send()
-            .await
-            .unwrap();
         for s in &matches {
             service.search().tags(s).send().await.unwrap();
         }
@@ -1857,19 +1842,6 @@ mod tests {
         service.search().whiteboard(true).send().await.unwrap();
         service.search().whiteboard(false).send().await.unwrap();
         service.search().whiteboard("value").send().await.unwrap();
-        service
-            .search()
-            .whiteboard("value1")
-            .whiteboard("value2")
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .whiteboard(&["value1", "value2"] as &[&str])
-            .send()
-            .await
-            .unwrap();
         for s in &matches {
             service.search().whiteboard(s).send().await.unwrap();
         }
@@ -1878,19 +1850,6 @@ mod tests {
         service.search().url(true).send().await.unwrap();
         service.search().url(false).send().await.unwrap();
         service.search().url("value").send().await.unwrap();
-        service
-            .search()
-            .url("value1")
-            .url("value2")
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .url(&["value1", "value2"] as &[&str])
-            .send()
-            .await
-            .unwrap();
         for s in &matches {
             service.search().url(s).send().await.unwrap();
         }

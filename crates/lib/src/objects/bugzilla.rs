@@ -14,7 +14,7 @@ use serde_with::{
 };
 use strum::{Display, EnumString};
 
-use crate::serde::{non_empty_str, null_empty_set, null_empty_vec, null_empty_str};
+use crate::serde::{non_empty_str, null_empty_set, null_empty_str, null_empty_vec};
 use crate::service::bugzilla::{BugField, FilterField, GroupField};
 use crate::traits::RenderSearch;
 use crate::types::OrderedSet;
