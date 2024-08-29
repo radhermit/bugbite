@@ -1,11 +1,10 @@
 use chrono::prelude::*;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
+use serde_with::{serde_as, skip_serializing_none, DefaultOnNull};
 
 use std::fmt;
 
-use crate::serde::null_empty_str;
 use crate::service::redmine::IssueField;
 use crate::traits::RenderSearch;
 
@@ -69,6 +68,7 @@ impl fmt::Display for Person {
     }
 }
 
+#[serde_as]
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
 pub struct Comment {
     /// The number of the comment local to the issue.
@@ -76,7 +76,8 @@ pub struct Comment {
     /// The description is 0, comments start at 1.
     #[serde(default)]
     pub count: u64,
-    #[serde(rename = "notes", default, deserialize_with = "null_empty_str")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
+    #[serde(default, rename = "notes")]
     pub text: String,
     pub user: Person,
     #[serde(rename = "created_on")]

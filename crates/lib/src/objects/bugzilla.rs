@@ -11,12 +11,12 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::{
-    serde_as, skip_serializing_none, BoolFromInt, DefaultOnError, DeserializeFromStr,
-    SerializeDisplay,
+    serde_as, skip_serializing_none, BoolFromInt, DefaultOnError, DefaultOnNull,
+    DeserializeFromStr, SerializeDisplay,
 };
 use strum::{Display, EnumString};
 
-use crate::serde::{non_empty_str, null_empty_set, null_empty_str, null_empty_vec};
+use crate::serde::non_empty_str;
 use crate::service::bugzilla::{BugField, FilterField, GroupField};
 use crate::traits::RenderSearch;
 use crate::types::OrderedSet;
@@ -78,7 +78,7 @@ pub struct Attachment {
     pub updated: DateTime<Utc>,
 
     /// Flags of the attachment.
-    #[serde(deserialize_with = "null_empty_vec")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub flags: Vec<BugFlag>,
 
@@ -299,6 +299,7 @@ pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(
     })
 }
 
+#[serde_as]
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Hash)]
 #[serde(default)]
@@ -342,30 +343,30 @@ pub struct Bug {
     pub priority: Option<String>,
     #[serde(deserialize_with = "unset_value_str")]
     pub severity: Option<String>,
-    #[serde(deserialize_with = "null_empty_set")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "OrderedSet::is_empty")]
     pub groups: OrderedSet<String>,
-    #[serde(deserialize_with = "null_empty_set")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "OrderedSet::is_empty")]
     pub keywords: OrderedSet<String>,
-    #[serde(deserialize_with = "null_empty_set")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "OrderedSet::is_empty")]
     pub cc: OrderedSet<String>,
-    #[serde(deserialize_with = "null_empty_set")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "OrderedSet::is_empty")]
     pub blocks: OrderedSet<u64>,
-    #[serde(deserialize_with = "null_empty_set")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "OrderedSet::is_empty")]
     pub depends_on: OrderedSet<u64>,
     #[serde(rename = "dupe_of")]
     pub duplicate_of: Option<u64>,
-    #[serde(deserialize_with = "null_empty_vec")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub flags: Vec<BugFlag>,
-    #[serde(deserialize_with = "null_empty_set")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "OrderedSet::is_empty")]
     pub tags: OrderedSet<String>,
-    #[serde(deserialize_with = "null_empty_set")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "OrderedSet::is_empty")]
     pub see_also: OrderedSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
@@ -511,9 +512,10 @@ impl fmt::Display for BugzillaField {
 }
 
 /// Legal values for relevant field types.
+#[serde_as]
 #[derive(Deserialize, Serialize, Debug)]
 pub struct BugzillaFieldValue {
-    #[serde(deserialize_with = "null_empty_str")]
+    #[serde_as(deserialize_as = "DefaultOnNull")]
     name: String,
     sort_key: Option<i64>,
     description: Option<String>,
