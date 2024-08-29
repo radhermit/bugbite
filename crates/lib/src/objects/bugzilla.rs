@@ -9,6 +9,7 @@ use indexmap::IndexSet;
 use itertools::{Either, Itertools};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::{
     serde_as, skip_serializing_none, BoolFromInt, DeserializeFromStr, SerializeDisplay,
 };
@@ -451,11 +452,34 @@ impl RenderSearch<FilterField> for Bug {
     }
 }
 
+/// Bugzilla field variants.
+#[derive(Serialize_repr, Deserialize_repr, Debug)]
+#[repr(u8)]
+pub enum BugzillaFieldKind {
+    /// Unknown field type
+    Unknown,
+    /// Single-line string
+    String,
+    /// Single value
+    Value,
+    /// Multiple value
+    MultiValue,
+    /// Multi-line text
+    Text,
+    DateTime,
+    BugId,
+    SeeAlso,
+    Keywords,
+    Date,
+    Integer,
+}
+
+/// Bugzilla field metadata.
 #[derive(Deserialize, Serialize, Debug)]
 pub struct BugzillaField {
     id: u64,
     #[serde(rename = "type")]
-    kind: u64,
+    kind: BugzillaFieldKind,
     is_custom: bool,
     name: String,
     display_name: String,
@@ -482,6 +506,7 @@ impl fmt::Display for BugzillaField {
     }
 }
 
+/// Legal values for relevant field types.
 #[derive(Deserialize, Serialize, Debug)]
 pub struct BugzillaFieldValue {
     #[serde(deserialize_with = "null_empty_str")]
