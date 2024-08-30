@@ -288,7 +288,6 @@ impl<'a> WebClient<'a> for Service {
     DeserializeFromStr,
     SerializeDisplay,
     Debug,
-    Default,
     Eq,
     PartialEq,
     Hash,
@@ -300,7 +299,6 @@ pub enum GroupField {
     /// All possible fields
     All,
     /// All default fields
-    #[default]
     Default,
     /// All extra fields
     Extra,
