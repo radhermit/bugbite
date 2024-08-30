@@ -470,12 +470,16 @@ pub enum BugzillaFieldKind {
     Integer,
 }
 
+/// Bugzilla field name.
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct BugzillaFieldName {
+    /// Unique ID used internally by bugzilla.
     #[serde(rename = "name")]
-    pub id: String,
+    pub(crate) id: String,
+
+    /// Name shown in the user interface.
     #[serde(rename = "display_name")]
-    pub display: String,
+    display: String,
 }
 
 impl PartialEq for BugzillaFieldName {
