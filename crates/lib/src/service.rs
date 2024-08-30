@@ -60,11 +60,13 @@ pub enum Config {
 
 impl Config {
     pub fn new(kind: ServiceKind, base: &str) -> crate::Result<Self> {
-        match kind {
-            ServiceKind::Bugzilla => Ok(Config::Bugzilla(bugzilla::Config::new(base)?)),
-            ServiceKind::Github => Ok(Config::Github(github::Config::new(base)?)),
-            ServiceKind::Redmine => Ok(Config::Redmine(redmine::Config::new(base)?)),
-        }
+        let config = match kind {
+            ServiceKind::Bugzilla => Self::Bugzilla(bugzilla::Config::new(base)?),
+            ServiceKind::Github => Self::Github(github::Config::new(base)?),
+            ServiceKind::Redmine => Self::Redmine(redmine::Config::new(base)?),
+        };
+
+        Ok(config)
     }
 
     pub fn base(&self) -> &Url {
