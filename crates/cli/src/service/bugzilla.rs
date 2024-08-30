@@ -133,35 +133,40 @@ impl Subcommand {
 
 static OUTDATED: AtomicBool = AtomicBool::new(false);
 
-impl Render for Attachment {
-    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        let obsolete = if self.is_obsolete { " (obsolete)" } else { "" };
-        let deleted = if self.is_deleted() { " (deleted)" } else { "" };
-        let line = if self.summary != self.file_name {
+impl Render<&Attachment> for Service {
+    fn render<W: std::io::Write>(
+        &self,
+        item: &Attachment,
+        f: &mut W,
+        width: usize,
+    ) -> std::io::Result<()> {
+        let obsolete = if item.is_obsolete { " (obsolete)" } else { "" };
+        let deleted = if item.is_deleted() { " (deleted)" } else { "" };
+        let line = if item.summary != item.file_name {
             format!(
                 "{}: {} ({}){obsolete}{deleted}",
-                self.id, self.summary, self.file_name
+                item.id, item.summary, item.file_name
             )
         } else {
-            format!("{}: {}{deleted}", self.id, self.summary)
+            format!("{}: {}{deleted}", item.id, item.summary)
         };
 
         // don't output obsolete or deleted attachments by default
-        if (!self.is_obsolete && !self.is_deleted()) || OUTDATED.load(Ordering::Acquire) {
+        if (!item.is_obsolete && !item.is_deleted()) || OUTDATED.load(Ordering::Acquire) {
             writeln!(f, "{}", truncate(&line, width))?;
         }
 
         // output additional attachment info on request
         let line = format!(
             "  ({}) {}, created by {}, {}",
-            if self.is_patch {
+            if item.is_patch {
                 "patch"
             } else {
-                &self.content_type
+                &item.content_type
             },
-            self.human_size(),
-            self.creator,
-            self.updated
+            item.human_size(),
+            item.creator,
+            item.updated
         );
         verbose!(f, "{line}")?;
 
@@ -169,44 +174,59 @@ impl Render for Attachment {
     }
 }
 
-impl Render for Comment {
-    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        if self.count != 0 {
-            write!(f, "Comment #{}", self.count)?;
+impl Render<&Comment> for Service {
+    fn render<W: std::io::Write>(
+        &self,
+        item: &Comment,
+        f: &mut W,
+        width: usize,
+    ) -> std::io::Result<()> {
+        if item.count != 0 {
+            write!(f, "Comment #{}", item.count)?;
         } else {
             write!(f, "Description")?;
         }
-        if !self.tags.is_empty() {
-            write!(f, " ({})", self.tags.iter().join(", "))?;
+        if !item.tags.is_empty() {
+            write!(f, " ({})", item.tags.iter().join(", "))?;
         }
-        if self.is_private {
+        if item.is_private {
             write!(f, " (private)")?;
         }
-        writeln!(f, " by {}, {}", self.creator, self.created)?;
+        writeln!(f, " by {}, {}", item.creator, item.created)?;
         writeln!(f, "{}", "-".repeat(width))?;
         // wrap comment text
-        let wrapped = textwrap::wrap(self.text.trim(), width);
+        let wrapped = textwrap::wrap(item.text.trim(), width);
         writeln!(f, "{}", wrapped.iter().join("\n"))
     }
 }
 
-impl Render for Event {
-    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        if !self.changes.is_empty() {
-            writeln!(f, "Changes made by {}, {}", self.who, self.when)?;
+impl Render<&Event> for Service {
+    fn render<W: std::io::Write>(
+        &self,
+        item: &Event,
+        f: &mut W,
+        width: usize,
+    ) -> std::io::Result<()> {
+        if !item.changes.is_empty() {
+            writeln!(f, "Changes made by {}, {}", item.who, item.when)?;
             writeln!(f, "{}", "-".repeat(width))?;
-            for change in &self.changes {
-                change.render(f, width)?;
+            for change in &item.changes {
+                self.render(change, f, width)?;
             }
         }
         Ok(())
     }
 }
 
-impl Render for Change {
-    fn render<W: std::io::Write>(&self, f: &mut W, _width: usize) -> std::io::Result<()> {
-        let name = &self.field_name;
-        match (self.removed.as_deref(), self.added.as_deref()) {
+impl Render<&Change> for Service {
+    fn render<W: std::io::Write>(
+        &self,
+        item: &Change,
+        f: &mut W,
+        _width: usize,
+    ) -> std::io::Result<()> {
+        let name = &item.field_name;
+        match (item.removed.as_deref(), item.added.as_deref()) {
             (Some(removed), None) => writeln!(f, "{name}: -{removed}"),
             (Some(removed), Some(added)) => writeln!(f, "{name}: {removed} -> {added}"),
             (None, Some(added)) => writeln!(f, "{name}: +{added}"),
@@ -215,78 +235,88 @@ impl Render for Change {
     }
 }
 
-impl Render for BugUpdate<'_> {
-    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        match self {
-            Self::Comment(comment) => comment.render(f, width),
-            Self::Event(event) => event.render(f, width),
+impl Render<&BugUpdate<'_>> for Service {
+    fn render<W: std::io::Write>(
+        &self,
+        item: &BugUpdate,
+        f: &mut W,
+        width: usize,
+    ) -> std::io::Result<()> {
+        match item {
+            BugUpdate::Comment(comment) => self.render(*comment, f, width),
+            BugUpdate::Event(event) => self.render(*event, f, width),
         }
     }
 }
 
-impl Render for Bug {
-    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        output_field_wrapped!(f, "Summary", &self.summary, width);
-        output_field!(f, "Assignee", &self.assigned_to, width);
-        output_field!(f, "QA", &self.qa_contact, width);
-        output_field!(f, "Creator", &self.creator, width);
-        output_field!(f, "Created", &self.created, width);
-        output_field!(f, "Updated", &self.updated, width);
-        output_field!(f, "Deadline", &self.deadline, width);
-        output_field!(f, "Status", &self.status, width);
-        output_field!(f, "Resolution", &self.resolution, width);
-        output_field!(f, "Duplicate of", &self.duplicate_of, width);
-        output_field!(f, "Whiteboard", &self.whiteboard, width);
-        output_field!(f, "Component", &self.component, width);
-        output_field!(f, "Version", &self.version, width);
-        output_field!(f, "Target", &self.target, width);
-        output_field!(f, "Product", &self.product, width);
-        output_field!(f, "Platform", &self.platform, width);
-        output_field!(f, "OS", &self.op_sys, width);
-        output_field!(f, "Priority", &self.priority, width);
-        output_field!(f, "Severity", &self.severity, width);
-        writeln!(f, "{:<12} : {}", "ID", self.id)?;
-        wrapped_csv(f, "Alias", &self.alias, width)?;
-        wrapped_csv(f, "Groups", &self.groups, width)?;
-        wrapped_csv(f, "Keywords", &self.keywords, width)?;
-        wrapped_csv(f, "CC", &self.cc, width)?;
-        wrapped_csv(f, "Flags", &self.flags, width)?;
-        wrapped_csv(f, "Tags", &self.tags, width)?;
-        wrapped_csv(f, "Blocks", &self.blocks, width)?;
-        wrapped_csv(f, "Depends on", &self.depends_on, width)?;
-        output_field!(f, "URL", &self.url, width);
-        if !self.see_also.is_empty() {
-            truncated_list(f, "See also", &self.see_also, width)?;
+impl Render<&Bug> for Service {
+    fn render<W: std::io::Write>(
+        &self,
+        item: &Bug,
+        f: &mut W,
+        width: usize,
+    ) -> std::io::Result<()> {
+        output_field_wrapped!(f, "Summary", &item.summary, width);
+        output_field!(f, "Assignee", &item.assigned_to, width);
+        output_field!(f, "QA", &item.qa_contact, width);
+        output_field!(f, "Creator", &item.creator, width);
+        output_field!(f, "Created", &item.created, width);
+        output_field!(f, "Updated", &item.updated, width);
+        output_field!(f, "Deadline", &item.deadline, width);
+        output_field!(f, "Status", &item.status, width);
+        output_field!(f, "Resolution", &item.resolution, width);
+        output_field!(f, "Duplicate of", &item.duplicate_of, width);
+        output_field!(f, "Whiteboard", &item.whiteboard, width);
+        output_field!(f, "Component", &item.component, width);
+        output_field!(f, "Version", &item.version, width);
+        output_field!(f, "Target", &item.target, width);
+        output_field!(f, "Product", &item.product, width);
+        output_field!(f, "Platform", &item.platform, width);
+        output_field!(f, "OS", &item.op_sys, width);
+        output_field!(f, "Priority", &item.priority, width);
+        output_field!(f, "Severity", &item.severity, width);
+        writeln!(f, "{:<12} : {}", "ID", item.id)?;
+        wrapped_csv(f, "Alias", &item.alias, width)?;
+        wrapped_csv(f, "Groups", &item.groups, width)?;
+        wrapped_csv(f, "Keywords", &item.keywords, width)?;
+        wrapped_csv(f, "CC", &item.cc, width)?;
+        wrapped_csv(f, "Flags", &item.flags, width)?;
+        wrapped_csv(f, "Tags", &item.tags, width)?;
+        wrapped_csv(f, "Blocks", &item.blocks, width)?;
+        wrapped_csv(f, "Depends on", &item.depends_on, width)?;
+        output_field!(f, "URL", &item.url, width);
+        if !item.see_also.is_empty() {
+            truncated_list(f, "See also", &item.see_also, width)?;
         }
 
         // TODO: handle different custom field value types
-        for (name, value) in &self.custom_fields {
+        for (name, value) in &item.custom_fields {
             let options = textwrap::Options::new(width - 15).subsequent_indent(&INDENT);
             let wrapped = textwrap::wrap(value, &options);
             let data = wrapped.iter().join("\n");
             writeln!(f, "{name:<12} : {data}")?;
         }
 
-        if !self.comments.is_empty() {
-            writeln!(f, "{:<12} : {}", "Comments", self.comments.len())?;
+        if !item.comments.is_empty() {
+            writeln!(f, "{:<12} : {}", "Comments", item.comments.len())?;
         }
 
-        if !self.history.is_empty() {
-            writeln!(f, "{:<12} : {}", "Changes", self.history.len())?;
+        if !item.history.is_empty() {
+            writeln!(f, "{:<12} : {}", "Changes", item.history.len())?;
         }
 
-        if !self.attachments.is_empty() {
-            writeln!(f, "\n{:<12} : {}", "Attachments", self.attachments.len())?;
+        if !item.attachments.is_empty() {
+            writeln!(f, "\n{:<12} : {}", "Attachments", item.attachments.len())?;
             writeln!(f, "{}", "-".repeat(width))?;
-            for attachment in &self.attachments {
-                attachment.render(f, width)?;
+            for attachment in &item.attachments {
+                self.render(attachment, f, width)?;
             }
         }
 
         // render updates in order of occurrence
-        for update in self.updates() {
+        for update in item.updates() {
             writeln!(f)?;
-            update.render(f, width)?;
+            self.render(&update, f, width)?;
         }
 
         Ok(())

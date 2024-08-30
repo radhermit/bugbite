@@ -79,7 +79,7 @@ impl Command {
                 let mut comments_iter = comments.iter().peekable();
                 while let Some(comment) = comments_iter.next() {
                     // render comment
-                    comment.render(&mut stdout, width)?;
+                    service.render(comment, &mut stdout, width)?;
                     // add new line between comments
                     if comments_iter.peek().is_some() {
                         writeln!(stdout)?;

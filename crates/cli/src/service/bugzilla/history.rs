@@ -67,7 +67,7 @@ impl Command {
                 let mut events = events.iter().peekable();
                 while let Some(event) = events.next() {
                     // render event
-                    event.render(&mut stdout, width)?;
+                    service.render(event, &mut stdout, width)?;
                     // add new line between events
                     if events.peek().is_some() {
                         writeln!(stdout)?;

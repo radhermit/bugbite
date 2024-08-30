@@ -45,7 +45,7 @@ impl Command {
                 .comments(!self.options.no_comments)
                 .send()
                 .await?;
-            render_items(issues)?;
+            render_items(service, &issues)?;
         }
 
         Ok(ExitCode::SUCCESS)

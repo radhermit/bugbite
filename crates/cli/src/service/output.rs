@@ -72,10 +72,10 @@ where
     Ok(())
 }
 
-pub(crate) fn render_items<I, R>(items: I) -> Result<(), bugbite::Error>
+pub(crate) fn render_items<I, S, T>(service: &S, items: I) -> Result<(), bugbite::Error>
 where
-    I: IntoIterator<Item = R>,
-    R: Render,
+    I: IntoIterator<Item = T>,
+    S: Render<T>,
 {
     let mut stdout = stdout().lock();
 
@@ -88,7 +88,7 @@ where
 
     for item in items {
         writeln!(stdout, "{}", "=".repeat(width))?;
-        item.render(&mut stdout, width)?;
+        service.render(item, &mut stdout, width)?;
     }
 
     Ok(())

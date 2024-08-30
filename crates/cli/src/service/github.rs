@@ -82,10 +82,15 @@ impl Subcommand {
     }
 }
 
-impl Render for Issue {
-    fn render<W: std::io::Write>(&self, f: &mut W, width: usize) -> std::io::Result<()> {
-        output_field_wrapped!(f, "Title", &self.title, width);
-        writeln!(f, "{:<12} : {}", "ID", self.id)?;
+impl Render<&Issue> for Service {
+    fn render<W: std::io::Write>(
+        &self,
+        item: &Issue,
+        f: &mut W,
+        width: usize,
+    ) -> std::io::Result<()> {
+        output_field_wrapped!(f, "Title", &item.title, width);
+        writeln!(f, "{:<12} : {}", "ID", item.id)?;
 
         Ok(())
     }

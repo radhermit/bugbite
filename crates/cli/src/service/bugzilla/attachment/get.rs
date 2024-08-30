@@ -94,7 +94,7 @@ impl Command {
 
         if self.options.list {
             for attachment in attachments {
-                attachment.render(&mut stdout, *COLUMNS)?;
+                service.render(attachment, &mut stdout, *COLUMNS)?;
             }
         } else if let Some(name) = self.options.output.as_deref() {
             for attachment in attachments {
