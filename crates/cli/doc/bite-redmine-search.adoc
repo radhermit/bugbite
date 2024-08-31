@@ -80,6 +80,8 @@ If the value is higher than the maximum limit that value is used instead and if
 the limit is set to zero, the default limit is used. Note that the maximum and
 default limits are generally not equal, with most instances using 100 and 25,
 respectively.
++
+Note that setting an explicit limit will disable result pagination.
 
 *-O, --offset <value>*::
     Set the starting position for results.

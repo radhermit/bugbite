@@ -75,6 +75,8 @@ updated, url, version, whiteboard
 If the value is higher than the maximum service limit that value is used
 instead. If the limit is set to zero, all matching results are returned up to
 the service limit.
++
+Note that setting an explicit limit will disable result pagination.
 
 *-O, --offset <value>*::
     Set the starting position for results.
