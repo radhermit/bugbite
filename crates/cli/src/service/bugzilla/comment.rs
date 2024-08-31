@@ -59,11 +59,9 @@ pub(super) struct Command {
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids: Vec<_> = self.ids.iter().flatten().collect();
-        let comments = service
-            .comment(&ids)
-            .params(self.params.into())
-            .send()
-            .await?;
+        let mut request = service.comment(&ids);
+        request.params = self.params.into();
+        let comments = request.send().await?;
         let mut data = ids.iter().zip(comments).peekable();
         let mut stdout = stdout().lock();
 

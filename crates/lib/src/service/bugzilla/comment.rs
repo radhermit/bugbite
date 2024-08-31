@@ -53,11 +53,6 @@ impl<'a> Request<'a> {
         Ok(url)
     }
 
-    pub fn params(mut self, params: Parameters) -> Self {
-        self.params = params;
-        self
-    }
-
     pub fn attachment(mut self, value: bool) -> Self {
         self.params.attachment = Some(value);
         self
