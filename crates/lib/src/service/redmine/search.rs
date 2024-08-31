@@ -139,8 +139,9 @@ impl<'a> Request<'a> {
             query.insert("sort", Order::Ascending(OrderField::Id));
         }
 
-        // default to the common maximum limit, without this the default limit is used
-        query.insert("limit", self.params.limit.unwrap_or(100));
+        if let Some(value) = &self.params.limit {
+            query.insert("limit", value);
+        }
 
         if let Some(value) = &self.params.offset {
             query.insert("offset", value);

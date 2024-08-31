@@ -99,8 +99,8 @@ impl<'a> Request<'a> {
                 let items = req.send().await?;
                 let count = items.len();
 
-                for bug in items {
-                    yield bug;
+                for item in items {
+                    yield item;
                 }
 
                 if !paged || count != max {
