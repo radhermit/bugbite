@@ -41,7 +41,7 @@ impl fmt::Display for FieldChange {
 #[derive(Deserialize, Debug, Eq, PartialEq)]
 pub struct BugChange {
     id: u64,
-    comment: Option<Comment>,
+    comment: Option<String>,
     changes: IndexMap<String, FieldChange>,
 }
 
@@ -156,7 +156,7 @@ impl RequestSend for Request<'_> {
             .map_err(|e| Error::InvalidResponse(format!("failed deserializing changes: {e}")))?;
         if let Some(comment) = params.comment.as_ref() {
             for change in changes.iter_mut() {
-                change.comment = Some(comment.clone());
+                change.comment = Some(comment.to_string());
             }
         }
         Ok(changes)
@@ -301,13 +301,13 @@ impl<'a, T> FromIterator<&'a SetChange<T>> for Changes<&'a T> {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
-struct Comment {
-    body: String,
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
+struct Comment<'a> {
+    body: Cow<'a, str>,
     is_private: bool,
 }
 
-impl fmt::Display for Comment {
+impl fmt::Display for Comment<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.body)
     }
@@ -457,9 +457,9 @@ impl Parameters {
             params.cc = Some(iter.collect());
         }
 
-        if let Some(value) = &self.comment {
+        if let Some(value) = self.comment.as_deref() {
             params.comment = Some(Comment {
-                body: value.clone(),
+                body: Cow::Borrowed(value),
                 is_private: self.comment_is_private.unwrap_or_default(),
             });
         } else if let Some(path) = &self.comment_from {
@@ -467,7 +467,7 @@ impl Parameters {
                 Error::InvalidValue(format!("failed reading comment file: {path}: {e}"))
             })?;
             params.comment = Some(Comment {
-                body: data,
+                body: Cow::Owned(data),
                 is_private: self.comment_is_private.unwrap_or_default(),
             });
         }
@@ -543,7 +543,7 @@ struct RequestParameters<'a> {
     assigned_to: Option<&'a str>,
     blocks: Option<SetChanges<&'a u64>>,
     cc: Option<Changes<&'a str>>,
-    comment: Option<Comment>,
+    comment: Option<Comment<'a>>,
     comment_is_private: Option<IndexMap<u64, bool>>,
     component: Option<&'a str>,
     depends_on: Option<SetChanges<&'a u64>>,
