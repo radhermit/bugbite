@@ -284,6 +284,23 @@ impl<T: FromStr + Clone> FromIterator<SetChange<T>> for Changes<T> {
     }
 }
 
+impl<'a, T> FromIterator<&'a SetChange<T>> for Changes<&'a T> {
+    fn from_iter<I: IntoIterator<Item = &'a SetChange<T>>>(iterable: I) -> Self {
+        let (mut add, mut remove) = (vec![], vec![]);
+        for change in iterable {
+            match change {
+                SetChange::Add(value) | SetChange::Set(value) => add.push(value),
+                SetChange::Remove(value) => remove.push(value),
+            }
+        }
+
+        Self {
+            add: Some(add),
+            remove: Some(remove),
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
 struct Comment {
     body: String,
@@ -395,10 +412,7 @@ impl Parameters {
             depends_on: self.depends.as_ref().map(|x| x.iter().collect()),
             dupe_of: self.duplicate_of,
             flags: self.flags.as_deref(),
-            groups: self
-                .groups
-                .as_ref()
-                .map(|x| x.clone().into_iter().collect()),
+            groups: self.groups.as_ref().map(|x| x.iter().collect()),
             keywords: self.keywords.as_ref().map(|x| x.iter().collect()),
             op_sys: self.os.as_deref(),
             platform: self.platform.as_deref(),
@@ -535,7 +549,7 @@ struct RequestParameters<'a> {
     depends_on: Option<SetChanges<&'a u64>>,
     dupe_of: Option<u64>,
     flags: Option<&'a [Flag]>,
-    groups: Option<Changes<String>>,
+    groups: Option<Changes<&'a String>>,
     keywords: Option<SetChanges<&'a String>>,
     op_sys: Option<&'a str>,
     platform: Option<&'a str>,
