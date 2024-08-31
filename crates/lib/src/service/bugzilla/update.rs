@@ -569,7 +569,7 @@ struct RequestParameters<'a> {
     whiteboard: Option<&'a str>,
 
     #[serde(flatten)]
-    custom_fields: Option<IndexMap<String, &'a String>>,
+    custom_fields: Option<IndexMap<Cow<'a, String>, &'a String>>,
 }
 
 #[cfg(test)]

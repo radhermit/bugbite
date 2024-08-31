@@ -26,11 +26,11 @@ pub(crate) use or;
 macro_rules! prefix {
     ($prefix:expr, $value:expr) => {{
         let prefix = $prefix;
-        let value = $value.to_string();
+        let value = $value;
         if !value.starts_with($prefix) {
-            format!("{prefix}{value}")
+            std::borrow::Cow::Owned(format!("{prefix}{value}"))
         } else {
-            value
+            std::borrow::Cow::Borrowed(value)
         }
     }};
 }

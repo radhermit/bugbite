@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt;
 use std::future::Future;
 
@@ -28,6 +29,12 @@ impl Api for String {
 }
 
 impl Api for &str {
+    fn api(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl<T: fmt::Display + Clone> Api for Cow<'_, T> {
     fn api(&self) -> String {
         self.to_string()
     }
