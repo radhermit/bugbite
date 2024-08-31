@@ -2,6 +2,15 @@
 
 *-v, --verbose*::
     Increase logging verbosity.
++
+Verbosity levels in increasing order are error, warning, info, debug, and
+trace. The default level is warning causing errors and warnings to be shown.
+Each `-v/--verbose` option specified increases the level up to the maximum so
+`bite -vv ...` runs the given subcommand at the debug level.
++
+WARNING: Running at the trace level leaks authentication data as it outputs raw
+response structures including URLs which often include injected login parameters
+for authenticated sessions.
 
 *-q, --quiet*::
     Decrease logging verbosity.
