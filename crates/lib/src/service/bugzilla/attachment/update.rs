@@ -28,6 +28,26 @@ impl<'a> Request<'a> {
         }
     }
 
+    /// Encode parameters into the form required for the request.
+    fn encode(&self) -> crate::Result<RequestParameters> {
+        // verify parameters exist
+        if self.params == Parameters::default() {
+            return Err(Error::EmptyParams);
+        }
+
+        Ok(RequestParameters {
+            ids: &self.ids,
+            file_name: self.params.name.as_deref(),
+            summary: self.params.description.as_deref(),
+            comment: self.params.comment.as_deref(),
+            content_type: self.params.mime_type.as_deref(),
+            is_patch: self.params.patch,
+            is_private: self.params.private,
+            is_obsolete: self.params.obsolete,
+            flags: self.params.flags.as_deref(),
+        })
+    }
+
     fn url(&self) -> crate::Result<Url> {
         let id = self
             .ids
@@ -49,7 +69,7 @@ impl RequestSend for Request<'_> {
 
     async fn send(&self) -> crate::Result<Self::Output> {
         let url = self.url()?;
-        let params = self.params.encode(&self.ids)?;
+        let params = self.encode()?;
         let request = self
             .service
             .client
@@ -102,28 +122,6 @@ pub struct Parameters {
 
     /// Mark the attachment private on creation.
     pub private: Option<bool>,
-}
-
-impl Parameters {
-    /// Encode parameters into the form required for the request.
-    fn encode<'a>(&'a self, ids: &'a [String]) -> crate::Result<RequestParameters<'a>> {
-        // verify parameters exist
-        if self == &Self::default() {
-            return Err(Error::EmptyParams);
-        }
-
-        Ok(RequestParameters {
-            ids,
-            file_name: self.name.as_deref(),
-            summary: self.description.as_deref(),
-            comment: self.comment.as_deref(),
-            content_type: self.mime_type.as_deref(),
-            is_patch: self.patch,
-            is_private: self.private,
-            is_obsolete: self.obsolete,
-            flags: self.flags.as_deref(),
-        })
-    }
 }
 
 /// Internal attachment update request parameters.

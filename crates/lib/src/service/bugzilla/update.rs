@@ -142,7 +142,7 @@ impl RequestSend for Request<'_> {
 
     async fn send(&self) -> crate::Result<Self::Output> {
         let url = self.url()?;
-        let params = self.params.encode(self.service, &self.ids).await?;
+        let params = self.encode().await?;
         let request = self
             .service
             .client
@@ -154,9 +154,9 @@ impl RequestSend for Request<'_> {
         let data = data["bugs"].take();
         let mut changes: Vec<BugChange> = serde_json::from_value(data)
             .map_err(|e| Error::InvalidResponse(format!("failed deserializing changes: {e}")))?;
-        if let Some(comment) = params.comment.as_ref() {
+        if let Some(comment) = &self.params.comment {
             for change in changes.iter_mut() {
-                change.comment = Some(comment.to_string());
+                change.comment = Some(comment.clone());
             }
         }
         Ok(changes)
@@ -183,6 +183,134 @@ impl<'a> Request<'a> {
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
         let url = self.service.config.base.join(&format!("rest/bug/{id}"))?;
         Ok(url)
+    }
+
+    /// Encode parameters into the form required for the request.
+    async fn encode(&'a self) -> crate::Result<RequestParameters> {
+        // verify parameters exist
+        if self.params == Parameters::default() {
+            return Err(Error::EmptyParams);
+        }
+
+        let mut params = RequestParameters {
+            ids: &self.ids,
+            alias: self.params.alias.as_ref().map(|x| x.iter().collect()),
+            blocks: self.params.blocks.as_ref().map(|x| x.iter().collect()),
+            component: self.params.component.as_deref(),
+            depends_on: self.params.depends.as_ref().map(|x| x.iter().collect()),
+            dupe_of: self.params.duplicate_of,
+            flags: self.params.flags.as_deref(),
+            groups: self.params.groups.as_ref().map(|x| x.iter().collect()),
+            keywords: self.params.keywords.as_ref().map(|x| x.iter().collect()),
+            op_sys: self.params.os.as_deref(),
+            platform: self.params.platform.as_deref(),
+            priority: self.params.priority.as_deref(),
+            product: self.params.product.as_deref(),
+            resolution: self.params.resolution.as_deref(),
+            severity: self.params.severity.as_deref(),
+            status: self.params.status.as_deref(),
+            summary: self.params.summary.as_deref(),
+            target_milestone: self.params.target.as_deref(),
+            url: self.params.url.as_deref(),
+            version: self.params.version.as_deref(),
+            whiteboard: self.params.whiteboard.as_deref(),
+            custom_fields: self.params.custom_fields.as_ref(),
+            ..Default::default()
+        };
+
+        if let Some(value) = self.params.assignee.as_deref() {
+            if value.is_empty() {
+                params.reset_assigned_to = Some(true);
+            } else {
+                let user = self.service.replace_user_alias(value);
+                params.assigned_to = Some(user);
+            }
+        }
+
+        if let Some(values) = &self.params.cc {
+            let iter = values.iter().map(|c| match c {
+                SetChange::Add(value) => SetChange::Add(self.service.replace_user_alias(value)),
+                SetChange::Remove(value) => {
+                    SetChange::Remove(self.service.replace_user_alias(value))
+                }
+                SetChange::Set(value) => SetChange::Set(self.service.replace_user_alias(value)),
+            });
+
+            params.cc = Some(iter.collect());
+        }
+
+        if let Some(value) = self.params.comment.as_deref() {
+            params.comment = Some(Comment {
+                body: Cow::Borrowed(value),
+                is_private: self.params.comment_is_private.unwrap_or_default(),
+            });
+        } else if let Some(path) = &self.params.comment_from {
+            let data = fs::read_to_string(path).map_err(|e| {
+                Error::InvalidValue(format!("failed reading comment file: {path}: {e}"))
+            })?;
+            params.comment = Some(Comment {
+                body: Cow::Owned(data),
+                is_private: self.params.comment_is_private.unwrap_or_default(),
+            });
+        }
+
+        if let Some((value, is_private)) = &self.params.comment_privacy {
+            let id = match params.ids {
+                [x] => x,
+                _ => {
+                    return Err(Error::InvalidValue(
+                        "can't toggle comment privacy for multiple bugs".to_string(),
+                    ))
+                }
+            };
+            let comments = self
+                .service
+                .comment([id])
+                .send()
+                .await?
+                .into_iter()
+                .next()
+                .expect("invalid comments response");
+
+            let mut toggled = IndexMap::new();
+            for c in comments {
+                if value.contains(&c.count) {
+                    toggled.insert(c.id, is_private.unwrap_or(!c.is_private));
+                }
+            }
+
+            params.comment_is_private = Some(toggled);
+        }
+
+        if let Some(value) = self.params.qa.as_deref() {
+            if value.is_empty() {
+                params.reset_qa_contact = Some(true);
+            } else {
+                let user = self.service.replace_user_alias(value);
+                params.qa_contact = Some(user);
+            }
+        }
+
+        if let Some(values) = &self.params.see_also {
+            // convert bug IDs to full URLs
+            let parse = |value: &'a str| -> Cow<'a, str> {
+                if let Ok(id) = value.parse::<u64>() {
+                    Cow::Owned(self.service.item_url(id))
+                } else {
+                    Cow::Borrowed(value)
+                }
+            };
+
+            let iter = values.iter().map(|x| match x {
+                SetChange::Add(value) => SetChange::Add(parse(value)),
+                SetChange::Remove(value) => SetChange::Remove(parse(value)),
+                SetChange::Set(value) => SetChange::Set(parse(value)),
+            });
+
+            params.see_also = Some(iter.collect());
+        }
+
+        Ok(params)
     }
 }
 
@@ -391,135 +519,6 @@ impl Parameters {
         or!(self.version, other.version);
         or!(self.whiteboard, other.whiteboard);
         or!(self.custom_fields, other.custom_fields);
-    }
-
-    /// Encode parameters into the form required for the request.
-    async fn encode<'a>(
-        &'a self,
-        service: &'a Service,
-        ids: &'a [String],
-    ) -> crate::Result<RequestParameters<'a>> {
-        // verify parameters exist
-        if self == &Self::default() {
-            return Err(Error::EmptyParams);
-        }
-
-        let mut params = RequestParameters {
-            ids,
-            alias: self.alias.as_ref().map(|x| x.iter().collect()),
-            blocks: self.blocks.as_ref().map(|x| x.iter().collect()),
-            component: self.component.as_deref(),
-            depends_on: self.depends.as_ref().map(|x| x.iter().collect()),
-            dupe_of: self.duplicate_of,
-            flags: self.flags.as_deref(),
-            groups: self.groups.as_ref().map(|x| x.iter().collect()),
-            keywords: self.keywords.as_ref().map(|x| x.iter().collect()),
-            op_sys: self.os.as_deref(),
-            platform: self.platform.as_deref(),
-            priority: self.priority.as_deref(),
-            product: self.product.as_deref(),
-            resolution: self.resolution.as_deref(),
-            severity: self.severity.as_deref(),
-            status: self.status.as_deref(),
-            summary: self.summary.as_deref(),
-            target_milestone: self.target.as_deref(),
-            url: self.url.as_deref(),
-            version: self.version.as_deref(),
-            whiteboard: self.whiteboard.as_deref(),
-            custom_fields: self.custom_fields.as_ref(),
-            ..Default::default()
-        };
-
-        if let Some(value) = self.assignee.as_deref() {
-            if value.is_empty() {
-                params.reset_assigned_to = Some(true);
-            } else {
-                let user = service.replace_user_alias(value);
-                params.assigned_to = Some(user);
-            }
-        }
-
-        if let Some(values) = &self.cc {
-            let iter = values.iter().map(|c| match c {
-                SetChange::Add(value) => SetChange::Add(service.replace_user_alias(value)),
-                SetChange::Remove(value) => SetChange::Remove(service.replace_user_alias(value)),
-                SetChange::Set(value) => SetChange::Set(service.replace_user_alias(value)),
-            });
-
-            params.cc = Some(iter.collect());
-        }
-
-        if let Some(value) = self.comment.as_deref() {
-            params.comment = Some(Comment {
-                body: Cow::Borrowed(value),
-                is_private: self.comment_is_private.unwrap_or_default(),
-            });
-        } else if let Some(path) = &self.comment_from {
-            let data = fs::read_to_string(path).map_err(|e| {
-                Error::InvalidValue(format!("failed reading comment file: {path}: {e}"))
-            })?;
-            params.comment = Some(Comment {
-                body: Cow::Owned(data),
-                is_private: self.comment_is_private.unwrap_or_default(),
-            });
-        }
-
-        if let Some((value, is_private)) = &self.comment_privacy {
-            let id = match params.ids {
-                [x] => x,
-                _ => {
-                    return Err(Error::InvalidValue(
-                        "can't toggle comment privacy for multiple bugs".to_string(),
-                    ))
-                }
-            };
-            let comments = service
-                .comment([id])
-                .send()
-                .await?
-                .into_iter()
-                .next()
-                .expect("invalid comments response");
-
-            let mut toggled = IndexMap::new();
-            for c in comments {
-                if value.contains(&c.count) {
-                    toggled.insert(c.id, is_private.unwrap_or(!c.is_private));
-                }
-            }
-
-            params.comment_is_private = Some(toggled);
-        }
-
-        if let Some(value) = self.qa.as_deref() {
-            if value.is_empty() {
-                params.reset_qa_contact = Some(true);
-            } else {
-                let user = service.replace_user_alias(value);
-                params.qa_contact = Some(user);
-            }
-        }
-
-        if let Some(values) = &self.see_also {
-            // convert bug IDs to full URLs
-            let parse = |value: &'a str| -> Cow<'a, str> {
-                if let Ok(id) = value.parse::<u64>() {
-                    Cow::Owned(service.item_url(id))
-                } else {
-                    Cow::Borrowed(value)
-                }
-            };
-
-            let iter = values.iter().map(|x| match x {
-                SetChange::Add(value) => SetChange::Add(parse(value)),
-                SetChange::Remove(value) => SetChange::Remove(parse(value)),
-                SetChange::Set(value) => SetChange::Set(parse(value)),
-            });
-
-            params.see_also = Some(iter.collect());
-        }
-
-        Ok(params)
     }
 }
 

@@ -50,7 +50,7 @@ impl RequestSend for Request<'_> {
     type Output = Vec<Bug>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
-        let params = self.params.encode(self.service)?;
+        let params = self.encode()?;
         let url = self
             .service
             .config
@@ -82,10 +82,411 @@ impl<'a> Request<'a> {
         }
     }
 
+    fn encode(&self) -> crate::Result<String> {
+        let mut query = QueryBuilder::new(self.service);
+
+        if let Some(values) = &self.params.status {
+            query.or(|query| values.iter().for_each(|x| query.status(x)));
+        } else {
+            // only return open bugs by default
+            query.status("@open");
+        }
+
+        if let Some(values) = self.params.order.as_deref() {
+            query.order(values);
+        } else {
+            // sort by ascending ID by default
+            query.order(&[Order::Ascending(OrderField::Id)]);
+        }
+
+        if let Some(values) = &self.params.fields {
+            query.fields(values.iter().copied());
+        } else {
+            // limit requested fields by default to decrease bandwidth and speed up response
+            query.fields([BugField::Id, BugField::Summary]);
+        }
+
+        if let Some(value) = &self.params.limit {
+            query.insert("limit", value);
+        }
+
+        if let Some(value) = &self.params.offset {
+            query.insert("offset", value);
+        }
+
+        if let Some(values) = &self.params.alias {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        // HACK: Work around a server bug where regular "isempty" queries don't
+                        // work with the alias field so use inverted existence queries instead for
+                        // nonexistence.
+                        ExistsOrValues::Exists(true) => query.exists(ExistsField::Alias, true),
+                        ExistsOrValues::Exists(false) => {
+                            query.not(|query| query.exists(ExistsField::Alias, true))
+                        }
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.alias(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.attachments {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachments, *value),
+                ExistsOrValues::Values(values) => query.attachments(values),
+            }
+        }
+
+        if let Some(values) = &self.params.flags {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.flags(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.groups {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Groups, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.groups(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.keywords {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => {
+                            query.exists(ExistsField::Keywords, *value)
+                        }
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.keywords(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.see_also {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::SeeAlso, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.see_also(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.tags {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Tags, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.tags(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.whiteboard {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => {
+                            query.exists(ExistsField::Whiteboard, *value)
+                        }
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.whiteboard(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.url {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Url, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.url(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.changed {
+            for (fields, interval) in values {
+                query.changed(fields.iter().map(|f| (f, interval)));
+            }
+        }
+
+        if let Some(values) = &self.params.changed_by {
+            for (fields, users) in values {
+                query.changed_by(fields.iter().map(|f| (f, users)));
+            }
+        }
+
+        if let Some(values) = &self.params.changed_from {
+            query.changed_from(values);
+        }
+
+        if let Some(values) = &self.params.changed_to {
+            query.changed_to(values);
+        }
+
+        if let Some(value) = &self.params.comments {
+            query.comments(value);
+        }
+
+        if let Some(value) = &self.params.votes {
+            query.votes(value);
+        }
+
+        if let Some(values) = &self.params.assignee {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.assignee(x)))
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.attacher {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.attacher(x)))
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.cc {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.cc(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.commenter {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.commenter(x)))
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.flagger {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.flagger(x)))
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.qa {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.qa(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.reporter {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.reporter(x)))
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.comment {
+            query.and(|query| values.iter().for_each(|x| query.comment(x)));
+        }
+
+        if let Some(value) = &self.params.comment_is_private {
+            query.comment_is_private(*value);
+        }
+
+        if let Some(values) = &self.params.comment_tag {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.comment_tag(x)))
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.summary {
+            query.and(|query| values.iter().for_each(|x| query.summary(x)));
+        }
+
+        if let Some(values) = &self.params.blocks {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.blocks(*x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.depends {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.depends(*x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.ids {
+            query.or(|query| values.iter().for_each(|x| query.id(x)));
+        }
+
+        if let Some(values) = &self.params.priority {
+            query.or(|query| values.iter().for_each(|x| query.priority(x)));
+        }
+
+        if let Some(values) = &self.params.severity {
+            query.or(|query| values.iter().for_each(|x| query.severity(x)));
+        }
+
+        if let Some(values) = &self.params.version {
+            query.or(|query| values.iter().for_each(|x| query.version(x)));
+        }
+
+        if let Some(values) = &self.params.component {
+            query.or(|query| values.iter().for_each(|x| query.component(x)));
+        }
+
+        if let Some(values) = &self.params.product {
+            query.or(|query| values.iter().for_each(|x| query.product(x)));
+        }
+
+        if let Some(values) = &self.params.platform {
+            query.or(|query| values.iter().for_each(|x| query.platform(x)));
+        }
+
+        if let Some(values) = &self.params.os {
+            query.or(|query| values.iter().for_each(|x| query.os(x)));
+        }
+
+        if let Some(values) = &self.params.resolution {
+            query.or(|query| values.iter().for_each(|x| query.resolution(x)));
+        }
+
+        if let Some(values) = &self.params.target {
+            query.or(|query| values.iter().for_each(|x| query.target(x)));
+        }
+
+        if let Some(value) = &self.params.created {
+            query.created(value);
+        }
+
+        if let Some(value) = &self.params.updated {
+            query.updated(value);
+        }
+
+        if let Some(value) = &self.params.closed {
+            query.changed([(&ChangeField::Status, value)]);
+            query.status("@closed");
+        }
+
+        if let Some(value) = &self.params.quicksearch {
+            query.insert("quicksearch", value);
+        }
+
+        if let Some(values) = &self.params.custom_fields {
+            query.or(|query| {
+                for (name, value) in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(name, *value),
+                        ExistsOrValues::Values(values) => query
+                            .and(|query| values.iter().for_each(|x| query.custom_field(name, x))),
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.attachment_description {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.attachment_description(x)))
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.attachment_filename {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.attachment_filename(x)))
+                }
+            });
+        }
+
+        if let Some(values) = &self.params.attachment_mime {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.attachment_mime(x)))
+                }
+            });
+        }
+
+        if let Some(value) = &self.params.attachment_is_obsolete {
+            query.attachment_is_obsolete(*value);
+        }
+
+        if let Some(value) = &self.params.attachment_is_patch {
+            query.attachment_is_patch(*value);
+        }
+
+        if let Some(value) = &self.params.attachment_is_private {
+            query.attachment_is_private(*value);
+        }
+
+        Ok(query.encode())
+    }
+
     /// Return the website URL for a query.
     pub fn search_url(self) -> crate::Result<String> {
         let base = self.service.config.base().as_str().trim_end_matches('/');
-        let params = self.params.encode(self.service)?;
+        let params = self.encode()?;
         Ok(format!("{base}/buglist.cgi?{params}"))
     }
 
@@ -571,407 +972,6 @@ impl Parameters {
         or!(self.summary, other.summary);
         or!(self.quicksearch, other.quicksearch);
         or!(self.custom_fields, other.custom_fields);
-    }
-
-    fn encode(&self, service: &Service) -> crate::Result<String> {
-        let mut query = QueryBuilder::new(service);
-
-        if let Some(values) = &self.status {
-            query.or(|query| values.iter().for_each(|x| query.status(x)));
-        } else {
-            // only return open bugs by default
-            query.status("@open");
-        }
-
-        if let Some(values) = self.order.as_deref() {
-            query.order(values);
-        } else {
-            // sort by ascending ID by default
-            query.order(&[Order::Ascending(OrderField::Id)]);
-        }
-
-        if let Some(values) = &self.fields {
-            query.fields(values.iter().copied());
-        } else {
-            // limit requested fields by default to decrease bandwidth and speed up response
-            query.fields([BugField::Id, BugField::Summary]);
-        }
-
-        if let Some(value) = &self.limit {
-            query.insert("limit", value);
-        }
-
-        if let Some(value) = &self.offset {
-            query.insert("offset", value);
-        }
-
-        if let Some(values) = &self.alias {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        // HACK: Work around a server bug where regular "isempty" queries don't
-                        // work with the alias field so use inverted existence queries instead for
-                        // nonexistence.
-                        ExistsOrValues::Exists(true) => query.exists(ExistsField::Alias, true),
-                        ExistsOrValues::Exists(false) => {
-                            query.not(|query| query.exists(ExistsField::Alias, true))
-                        }
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.alias(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.attachments {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachments, *value),
-                ExistsOrValues::Values(values) => query.attachments(values),
-            }
-        }
-
-        if let Some(values) = &self.flags {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.flags(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.groups {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Groups, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.groups(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.keywords {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => {
-                            query.exists(ExistsField::Keywords, *value)
-                        }
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.keywords(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.see_also {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::SeeAlso, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.see_also(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.tags {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Tags, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.tags(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.whiteboard {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => {
-                            query.exists(ExistsField::Whiteboard, *value)
-                        }
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.whiteboard(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.url {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Url, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.url(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.changed {
-            for (fields, interval) in values {
-                query.changed(fields.iter().map(|f| (f, interval)));
-            }
-        }
-
-        if let Some(values) = &self.changed_by {
-            for (fields, users) in values {
-                query.changed_by(fields.iter().map(|f| (f, users)));
-            }
-        }
-
-        if let Some(values) = &self.changed_from {
-            query.changed_from(values);
-        }
-
-        if let Some(values) = &self.changed_to {
-            query.changed_to(values);
-        }
-
-        if let Some(value) = &self.comments {
-            query.comments(value);
-        }
-
-        if let Some(value) = &self.votes {
-            query.votes(value);
-        }
-
-        if let Some(values) = &self.assignee {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.assignee(x)))
-                }
-            });
-        }
-
-        if let Some(values) = &self.attacher {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.attacher(x)))
-                }
-            });
-        }
-
-        if let Some(values) = &self.cc {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.cc(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.commenter {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.commenter(x)))
-                }
-            });
-        }
-
-        if let Some(values) = &self.flagger {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.flagger(x)))
-                }
-            });
-        }
-
-        if let Some(values) = &self.qa {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.qa(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.reporter {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.reporter(x)))
-                }
-            });
-        }
-
-        if let Some(values) = &self.comment {
-            query.and(|query| values.iter().for_each(|x| query.comment(x)));
-        }
-
-        if let Some(value) = &self.comment_is_private {
-            query.comment_is_private(*value);
-        }
-
-        if let Some(values) = &self.comment_tag {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.comment_tag(x)))
-                }
-            });
-        }
-
-        if let Some(values) = &self.summary {
-            query.and(|query| values.iter().for_each(|x| query.summary(x)));
-        }
-
-        if let Some(values) = &self.blocks {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.blocks(*x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.depends {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, *value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.depends(*x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.ids {
-            query.or(|query| values.iter().for_each(|x| query.id(x)));
-        }
-
-        if let Some(values) = &self.priority {
-            query.or(|query| values.iter().for_each(|x| query.priority(x)));
-        }
-
-        if let Some(values) = &self.severity {
-            query.or(|query| values.iter().for_each(|x| query.severity(x)));
-        }
-
-        if let Some(values) = &self.version {
-            query.or(|query| values.iter().for_each(|x| query.version(x)));
-        }
-
-        if let Some(values) = &self.component {
-            query.or(|query| values.iter().for_each(|x| query.component(x)));
-        }
-
-        if let Some(values) = &self.product {
-            query.or(|query| values.iter().for_each(|x| query.product(x)));
-        }
-
-        if let Some(values) = &self.platform {
-            query.or(|query| values.iter().for_each(|x| query.platform(x)));
-        }
-
-        if let Some(values) = &self.os {
-            query.or(|query| values.iter().for_each(|x| query.os(x)));
-        }
-
-        if let Some(values) = &self.resolution {
-            query.or(|query| values.iter().for_each(|x| query.resolution(x)));
-        }
-
-        if let Some(values) = &self.target {
-            query.or(|query| values.iter().for_each(|x| query.target(x)));
-        }
-
-        if let Some(value) = &self.created {
-            query.created(value);
-        }
-
-        if let Some(value) = &self.updated {
-            query.updated(value);
-        }
-
-        if let Some(value) = &self.closed {
-            query.changed([(&ChangeField::Status, value)]);
-            query.status("@closed");
-        }
-
-        if let Some(value) = &self.quicksearch {
-            query.insert("quicksearch", value);
-        }
-
-        if let Some(values) = &self.custom_fields {
-            query.or(|query| {
-                for (name, value) in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(name, *value),
-                        ExistsOrValues::Values(values) => query
-                            .and(|query| values.iter().for_each(|x| query.custom_field(name, x))),
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = &self.attachment_description {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.attachment_description(x)))
-                }
-            });
-        }
-
-        if let Some(values) = &self.attachment_filename {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.attachment_filename(x)))
-                }
-            });
-        }
-
-        if let Some(values) = &self.attachment_mime {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.attachment_mime(x)))
-                }
-            });
-        }
-
-        if let Some(value) = &self.attachment_is_obsolete {
-            query.attachment_is_obsolete(*value);
-        }
-
-        if let Some(value) = &self.attachment_is_patch {
-            query.attachment_is_patch(*value);
-        }
-
-        if let Some(value) = &self.attachment_is_private {
-            query.attachment_is_private(*value);
-        }
-
-        Ok(query.encode())
     }
 }
 

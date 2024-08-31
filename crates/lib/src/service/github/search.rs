@@ -67,16 +67,6 @@ impl Parameters {
         self.order = Some(value);
         self
     }
-
-    pub(crate) fn encode(&self, service: &super::Service) -> crate::Result<String> {
-        let mut query = QueryBuilder::new(service);
-
-        if let Some(value) = &self.order {
-            query.insert("sort", value);
-        }
-
-        Ok(query.encode())
-    }
 }
 
 /// Valid search order sorting terms.
@@ -118,6 +108,16 @@ impl<'a> Request<'a> {
             params: Default::default(),
         }
     }
+
+    fn encode(&self) -> crate::Result<String> {
+        let mut query = QueryBuilder::new(self.service);
+
+        if let Some(value) = &self.params.order {
+            query.insert("sort", value);
+        }
+
+        Ok(query.encode())
+    }
 }
 
 impl RequestMerge<&Utf8Path> for Request<'_> {
@@ -140,7 +140,7 @@ impl RequestSend for Request<'_> {
 
     async fn send(&self) -> crate::Result<Self::Output> {
         debug!("{:?}", self.params);
-        let _params = self.params.encode(self.service)?;
+        let _params = self.encode()?;
         todo!("search requests unsupported")
     }
 }

@@ -40,7 +40,7 @@ impl RequestSend for Request<'_> {
 
     async fn send(&self) -> crate::Result<Self::Output> {
         let url = self.service.config.base.join("rest/bug")?;
-        let params = self.params.encode(self.service)?;
+        let params = self.encode()?;
         let request = self
             .service
             .client
@@ -60,6 +60,77 @@ impl<'a> Request<'a> {
             service,
             params: Default::default(),
         }
+    }
+
+    /// Encode parameters into the form required for the request.
+    fn encode(&self) -> crate::Result<RequestParameters> {
+        let params = RequestParameters {
+            // required fields with defaults
+            op_sys: self.params.os.as_deref().unwrap_or("All"),
+            platform: self.params.platform.as_deref().unwrap_or("All"),
+            priority: self.params.priority.as_deref().unwrap_or("Normal"),
+            severity: self.params.severity.as_deref().unwrap_or("normal"),
+            version: self.params.version.as_deref().unwrap_or("unspecified"),
+
+            // required fields without defaults
+            component: self.params.component.as_deref().unwrap_or_default(),
+            description: self.params.description.as_deref().unwrap_or_default(),
+            product: self.params.product.as_deref().unwrap_or_default(),
+            summary: self.params.summary.as_deref().unwrap_or_default(),
+
+            // optional fields
+            alias: self.params.alias.as_deref(),
+            assigned_to: self
+                .params
+                .assignee
+                .as_deref()
+                .map(|x| self.service.replace_user_alias(x)),
+            blocks: self.params.blocks.as_deref(),
+            cc: self.params.cc.as_deref(),
+            depends_on: self.params.depends.as_deref(),
+            flags: self.params.flags.as_deref(),
+            groups: self.params.groups.as_deref(),
+            keywords: self.params.keywords.as_deref(),
+            qa_contact: self
+                .params
+                .qa
+                .as_deref()
+                .map(|x| self.service.replace_user_alias(x)),
+            resolution: self.params.resolution.as_deref(),
+            see_also: self.params.see_also.as_deref(),
+            status: self.params.status.as_deref(),
+            target_milestone: self.params.target.as_deref(),
+            url: self.params.url.as_deref(),
+            whiteboard: self.params.whiteboard.as_deref(),
+            custom_fields: self.params.custom_fields.as_ref(),
+        };
+
+        // verify required fields are non-empty
+        let mut missing = vec![];
+        for (value, name) in [
+            (params.component, "component"),
+            (params.description, "description"),
+            (params.op_sys, "os"),
+            (params.platform, "platform"),
+            (params.priority, "priority"),
+            (params.product, "product"),
+            (params.severity, "severity"),
+            (params.summary, "summary"),
+            (params.version, "version"),
+        ] {
+            if value.is_empty() {
+                missing.push(name);
+            }
+        }
+
+        if !missing.is_empty() {
+            let fields = missing.iter().sorted().join(", ");
+            return Err(Error::InvalidRequest(format!(
+                "missing required fields: {fields}"
+            )));
+        }
+
+        Ok(params)
     }
 
     pub fn alias<I, S>(mut self, value: I) -> Self
@@ -347,72 +418,6 @@ impl Parameters {
         or!(self.url, other.url);
         or!(self.version, other.version);
         or!(self.whiteboard, other.whiteboard);
-    }
-
-    /// Encode parameters into the form required for the request.
-    fn encode<'a>(&'a self, service: &'a Service) -> crate::Result<RequestParameters<'a>> {
-        let params = RequestParameters {
-            // required fields with defaults
-            op_sys: self.os.as_deref().unwrap_or("All"),
-            platform: self.platform.as_deref().unwrap_or("All"),
-            priority: self.priority.as_deref().unwrap_or("Normal"),
-            severity: self.severity.as_deref().unwrap_or("normal"),
-            version: self.version.as_deref().unwrap_or("unspecified"),
-
-            // required fields without defaults
-            component: self.component.as_deref().unwrap_or_default(),
-            description: self.description.as_deref().unwrap_or_default(),
-            product: self.product.as_deref().unwrap_or_default(),
-            summary: self.summary.as_deref().unwrap_or_default(),
-
-            // optional fields
-            alias: self.alias.as_deref(),
-            assigned_to: self
-                .assignee
-                .as_deref()
-                .map(|x| service.replace_user_alias(x)),
-            blocks: self.blocks.as_deref(),
-            cc: self.cc.as_deref(),
-            depends_on: self.depends.as_deref(),
-            flags: self.flags.as_deref(),
-            groups: self.groups.as_deref(),
-            keywords: self.keywords.as_deref(),
-            qa_contact: self.qa.as_deref().map(|x| service.replace_user_alias(x)),
-            resolution: self.resolution.as_deref(),
-            see_also: self.see_also.as_deref(),
-            status: self.status.as_deref(),
-            target_milestone: self.target.as_deref(),
-            url: self.url.as_deref(),
-            whiteboard: self.whiteboard.as_deref(),
-            custom_fields: self.custom_fields.as_ref(),
-        };
-
-        // verify required fields are non-empty
-        let mut missing = vec![];
-        for (value, name) in [
-            (params.component, "component"),
-            (params.description, "description"),
-            (params.op_sys, "os"),
-            (params.platform, "platform"),
-            (params.priority, "priority"),
-            (params.product, "product"),
-            (params.severity, "severity"),
-            (params.summary, "summary"),
-            (params.version, "version"),
-        ] {
-            if value.is_empty() {
-                missing.push(name);
-            }
-        }
-
-        if !missing.is_empty() {
-            let fields = missing.iter().sorted().join(", ");
-            return Err(Error::InvalidRequest(format!(
-                "missing required fields: {fields}"
-            )));
-        }
-
-        Ok(params)
     }
 }
 

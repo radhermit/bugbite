@@ -33,10 +33,92 @@ impl<'a> Request<'a> {
         }
     }
 
+    fn encode(&self) -> crate::Result<String> {
+        let mut query = QueryBuilder::new(self.service);
+
+        if let Some(values) = &self.params.blocks {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, *value),
+                ExistsOrValues::Values(values) => query.insert("blocks", values.iter().join(",")),
+            }
+        }
+
+        if let Some(values) = &self.params.blocked {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocked, *value),
+                ExistsOrValues::Values(values) => query.insert("blocked", values.iter().join(",")),
+            }
+        }
+
+        if let Some(values) = &self.params.relates {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Relates, *value),
+                ExistsOrValues::Values(values) => query.insert("relates", values.iter().join(",")),
+            }
+        }
+
+        if let Some(values) = &self.params.ids {
+            query.id(values)?;
+        }
+
+        if let Some(value) = &self.params.closed {
+            query.time("closed_on", value);
+        }
+
+        if let Some(value) = &self.params.created {
+            query.time("created_on", value);
+        }
+
+        if let Some(value) = &self.params.updated {
+            query.time("updated_on", value);
+        }
+
+        if let Some(value) = &self.params.assignee {
+            query.exists(ExistsField::Assignee, *value);
+        }
+
+        if let Some(values) = &self.params.attachments {
+            match values {
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachment, *value),
+                ExistsOrValues::Values(values) => {
+                    let value = quoted_strings(values);
+                    // TODO: support other operators, currently this specifies the `contains` op
+                    query.insert("attachment", format!("~{value}"));
+                }
+            }
+        }
+
+        if let Some(values) = &self.params.summary {
+            let value = quoted_strings(values);
+            // TODO: support other operators, currently this specifies the `contains` op
+            query.insert("subject", format!("~{value}"));
+        }
+
+        // limit to open issues by default
+        query.status(self.params.status.as_deref().unwrap_or("@open"))?;
+
+        if let Some(values) = &self.params.order {
+            let value = values.iter().map(|x| x.api()).join(",");
+            query.insert("sort", value);
+        } else {
+            // sort by ascending ID by default
+            query.insert("sort", Order::Ascending(OrderField::Id));
+        }
+
+        // default to the common maximum limit, without this the default limit is used
+        query.insert("limit", self.params.limit.unwrap_or(100));
+
+        if let Some(value) = &self.params.offset {
+            query.insert("offset", value);
+        }
+
+        Ok(query.encode())
+    }
+
     /// Return the website URL for a query.
     pub fn search_url(self) -> crate::Result<String> {
         let base = self.service.config.base().as_str().trim_end_matches('/');
-        let params = self.params.encode(self.service)?;
+        let params = self.encode()?;
         Ok(format!("{base}/issues?set_filter=1&{params}"))
     }
 
@@ -76,7 +158,7 @@ impl RequestSend for Request<'_> {
     type Output = Vec<Issue>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
-        let params = self.params.encode(self.service)?;
+        let params = self.encode()?;
         let url = self
             .service
             .config
@@ -141,88 +223,6 @@ impl Parameters {
         or!(self.order, other.order);
         or!(self.status, other.status);
         or!(self.summary, other.summary);
-    }
-
-    fn encode(&self, service: &Service) -> crate::Result<String> {
-        let mut query = QueryBuilder::new(service);
-
-        if let Some(values) = &self.blocks {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, *value),
-                ExistsOrValues::Values(values) => query.insert("blocks", values.iter().join(",")),
-            }
-        }
-
-        if let Some(values) = &self.blocked {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocked, *value),
-                ExistsOrValues::Values(values) => query.insert("blocked", values.iter().join(",")),
-            }
-        }
-
-        if let Some(values) = &self.relates {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Relates, *value),
-                ExistsOrValues::Values(values) => query.insert("relates", values.iter().join(",")),
-            }
-        }
-
-        if let Some(values) = &self.ids {
-            query.id(values)?;
-        }
-
-        if let Some(value) = &self.closed {
-            query.time("closed_on", value);
-        }
-
-        if let Some(value) = &self.created {
-            query.time("created_on", value);
-        }
-
-        if let Some(value) = &self.updated {
-            query.time("updated_on", value);
-        }
-
-        if let Some(value) = &self.assignee {
-            query.exists(ExistsField::Assignee, *value);
-        }
-
-        if let Some(values) = &self.attachments {
-            match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachment, *value),
-                ExistsOrValues::Values(values) => {
-                    let value = quoted_strings(values);
-                    // TODO: support other operators, currently this specifies the `contains` op
-                    query.insert("attachment", format!("~{value}"));
-                }
-            }
-        }
-
-        if let Some(values) = &self.summary {
-            let value = quoted_strings(values);
-            // TODO: support other operators, currently this specifies the `contains` op
-            query.insert("subject", format!("~{value}"));
-        }
-
-        // limit to open issues by default
-        query.status(self.status.as_deref().unwrap_or("@open"))?;
-
-        if let Some(values) = &self.order {
-            let value = values.iter().map(|x| x.api()).join(",");
-            query.insert("sort", value);
-        } else {
-            // sort by ascending ID by default
-            query.insert("sort", Order::Ascending(OrderField::Id));
-        }
-
-        // default to the common maximum limit, without this the default limit is used
-        query.insert("limit", self.limit.unwrap_or(100));
-
-        if let Some(value) = &self.offset {
-            query.insert("offset", value);
-        }
-
-        Ok(query.encode())
     }
 }
 
