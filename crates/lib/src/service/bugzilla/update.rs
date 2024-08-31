@@ -396,7 +396,7 @@ impl Parameters {
     /// Encode parameters into the form required for the request.
     async fn encode<'a>(
         &'a self,
-        service: &Service,
+        service: &'a Service,
         ids: &'a [String],
     ) -> crate::Result<RequestParameters<'a>> {
         // verify parameters exist
@@ -438,7 +438,7 @@ impl Parameters {
             ..Default::default()
         };
 
-        if let Some(value) = self.assignee.as_ref() {
+        if let Some(value) = self.assignee.as_deref() {
             if value.is_empty() {
                 params.reset_assigned_to = Some(true);
             } else {
@@ -499,7 +499,7 @@ impl Parameters {
             params.comment_is_private = Some(toggled);
         }
 
-        if let Some(value) = self.qa.as_ref() {
+        if let Some(value) = self.qa.as_deref() {
             if value.is_empty() {
                 params.reset_qa_contact = Some(true);
             } else {
@@ -540,9 +540,9 @@ impl Parameters {
 struct RequestParameters<'a> {
     ids: &'a [String],
     alias: Option<SetChanges<&'a String>>,
-    assigned_to: Option<String>,
+    assigned_to: Option<&'a str>,
     blocks: Option<SetChanges<&'a u64>>,
-    cc: Option<Changes<String>>,
+    cc: Option<Changes<&'a str>>,
     comment: Option<Comment>,
     comment_is_private: Option<IndexMap<u64, bool>>,
     component: Option<&'a str>,
@@ -555,7 +555,7 @@ struct RequestParameters<'a> {
     platform: Option<&'a str>,
     priority: Option<&'a str>,
     product: Option<&'a str>,
-    qa_contact: Option<String>,
+    qa_contact: Option<&'a str>,
     reset_assigned_to: Option<bool>,
     reset_qa_contact: Option<bool>,
     resolution: Option<&'a str>,

@@ -117,12 +117,11 @@ impl Service {
 
     /// Substitute user alias for matching value.
     // TODO: support pulling aliases from the config?
-    pub(crate) fn replace_user_alias<S: AsRef<str>>(&self, value: S) -> String {
-        let value = value.as_ref();
+    pub(crate) fn replace_user_alias<'a>(&'a self, value: &'a str) -> &'a str {
         if value == "@me" {
-            self.config.user.as_deref().unwrap_or(value).to_string()
+            self.config.user.as_deref().unwrap_or(value)
         } else {
-            value.to_string()
+            value
         }
     }
 

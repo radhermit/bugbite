@@ -350,7 +350,7 @@ impl Parameters {
     }
 
     /// Encode parameters into the form required for the request.
-    fn encode<'a>(&'a self, service: &Service) -> crate::Result<RequestParameters<'a>> {
+    fn encode<'a>(&'a self, service: &'a Service) -> crate::Result<RequestParameters<'a>> {
         let params = RequestParameters {
             // required fields with defaults
             op_sys: self.os.as_deref().unwrap_or("All"),
@@ -458,14 +458,14 @@ struct RequestParameters<'a> {
 
     // optional fields
     alias: Option<&'a [String]>,
-    assigned_to: Option<String>,
+    assigned_to: Option<&'a str>,
     blocks: Option<&'a [String]>,
     cc: Option<&'a [String]>,
     depends_on: Option<&'a [String]>,
     flags: Option<&'a [Flag]>,
     groups: Option<&'a [String]>,
     keywords: Option<&'a [String]>,
-    qa_contact: Option<String>,
+    qa_contact: Option<&'a str>,
     resolution: Option<&'a str>,
     see_also: Option<&'a [String]>,
     status: Option<&'a str>,

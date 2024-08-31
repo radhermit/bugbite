@@ -1052,7 +1052,7 @@ impl Match {
     fn replace_user_alias(&self, service: &Service) -> Self {
         Self {
             op: self.op,
-            value: service.replace_user_alias(&self.value),
+            value: service.replace_user_alias(&self.value).to_string(),
         }
     }
 }
