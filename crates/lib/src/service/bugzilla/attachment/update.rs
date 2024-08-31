@@ -8,66 +8,6 @@ use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
-/// Attachment update parameters.
-#[derive(Debug, Default)]
-pub struct Parameters {
-    /// Comment related to the attachment.
-    pub comment: Option<String>,
-
-    /// Attachment description.
-    pub description: Option<String>,
-
-    /// Attachment flags.
-    pub flags: Option<Vec<Flag>>,
-
-    /// MIME type of the attachment.
-    pub mime_type: Option<String>,
-
-    /// Attachment file name.
-    pub name: Option<String>,
-
-    /// Attachment is obsolete.
-    pub obsolete: Option<bool>,
-
-    /// Attachment is a patch file.
-    pub patch: Option<bool>,
-
-    /// Mark the attachment private on creation.
-    pub private: Option<bool>,
-}
-
-impl Parameters {
-    /// Encode parameters into the form required for the request.
-    fn encode<'a>(&'a self, ids: &'a [String]) -> RequestParameters<'a> {
-        RequestParameters {
-            ids,
-            file_name: self.name.as_deref(),
-            summary: self.description.as_deref(),
-            comment: self.comment.as_deref(),
-            content_type: self.mime_type.as_deref(),
-            is_patch: self.patch,
-            is_private: self.private,
-            is_obsolete: self.obsolete,
-            flags: self.flags.as_deref(),
-        }
-    }
-}
-
-/// Internal attachment update request parameters.
-#[skip_serializing_none]
-#[derive(Serialize)]
-struct RequestParameters<'a> {
-    ids: &'a [String],
-    file_name: Option<&'a str>,
-    summary: Option<&'a str>,
-    comment: Option<&'a str>,
-    content_type: Option<&'a str>,
-    is_patch: Option<bool>,
-    is_private: Option<bool>,
-    is_obsolete: Option<bool>,
-    flags: Option<&'a [Flag]>,
-}
-
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
@@ -102,11 +42,6 @@ impl<'a> Request<'a> {
 
         Ok(url)
     }
-
-    pub fn params(mut self, params: Parameters) -> Self {
-        self.params = params;
-        self
-    }
 }
 
 impl RequestSend for Request<'_> {
@@ -114,7 +49,7 @@ impl RequestSend for Request<'_> {
 
     async fn send(&self) -> crate::Result<Self::Output> {
         let url = self.url()?;
-        let params = self.params.encode(&self.ids);
+        let params = self.params.encode(&self.ids)?;
         let request = self
             .service
             .client
@@ -139,6 +74,71 @@ impl RequestSend for Request<'_> {
 
         Ok(ids)
     }
+}
+
+/// Attachment update parameters.
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct Parameters {
+    /// Comment related to the attachment.
+    pub comment: Option<String>,
+
+    /// Attachment description.
+    pub description: Option<String>,
+
+    /// Attachment flags.
+    pub flags: Option<Vec<Flag>>,
+
+    /// MIME type of the attachment.
+    pub mime_type: Option<String>,
+
+    /// Attachment file name.
+    pub name: Option<String>,
+
+    /// Attachment is obsolete.
+    pub obsolete: Option<bool>,
+
+    /// Attachment is a patch file.
+    pub patch: Option<bool>,
+
+    /// Mark the attachment private on creation.
+    pub private: Option<bool>,
+}
+
+impl Parameters {
+    /// Encode parameters into the form required for the request.
+    fn encode<'a>(&'a self, ids: &'a [String]) -> crate::Result<RequestParameters<'a>> {
+        // verify parameters exist
+        if self == &Self::default() {
+            return Err(Error::EmptyParams);
+        }
+
+        Ok(RequestParameters {
+            ids,
+            file_name: self.name.as_deref(),
+            summary: self.description.as_deref(),
+            comment: self.comment.as_deref(),
+            content_type: self.mime_type.as_deref(),
+            is_patch: self.patch,
+            is_private: self.private,
+            is_obsolete: self.obsolete,
+            flags: self.flags.as_deref(),
+        })
+    }
+}
+
+/// Internal attachment update request parameters.
+#[skip_serializing_none]
+#[derive(Serialize)]
+struct RequestParameters<'a> {
+    ids: &'a [String],
+    file_name: Option<&'a str>,
+    summary: Option<&'a str>,
+    comment: Option<&'a str>,
+    content_type: Option<&'a str>,
+    is_patch: Option<bool>,
+    is_private: Option<bool>,
+    is_obsolete: Option<bool>,
+    flags: Option<&'a [Flag]>,
 }
 
 #[cfg(test)]

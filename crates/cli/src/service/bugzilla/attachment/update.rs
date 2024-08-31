@@ -102,12 +102,9 @@ pub(super) struct Command {
 impl Command {
     pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
-        let _ = service
-            .attachment_update(ids)
-            .params(self.params.into())
-            .send()
-            .await?;
-
+        let mut request = service.attachment_update(ids);
+        request.params = self.params.into();
+        request.send().await?;
         Ok(ExitCode::SUCCESS)
     }
 }
