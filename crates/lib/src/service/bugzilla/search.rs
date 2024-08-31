@@ -1333,12 +1333,12 @@ impl QueryBuilder<'_> {
         self.advanced_field("bug_file_loc", value.op, value);
     }
 
-    fn changed<'a, I>(&mut self, values: I)
+    fn changed<'a, F, I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (&'a ChangeField, &'a RangeOrValue<TimeDeltaOrStatic>)>,
+        F: Api,
+        I: IntoIterator<Item = (F, &'a RangeOrValue<TimeDeltaOrStatic>)>,
     {
         for (field, target) in values {
-            let field = field.api();
             match target {
                 RangeOrValue::Value(value) => self.advanced_field(field, "changedafter", value),
                 RangeOrValue::RangeOp(value) => match value {
@@ -1385,37 +1385,40 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn changed_by<'a, I, J, S>(&mut self, values: I)
+    fn changed_by<F, I, J, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (&'a ChangeField, J)>,
+        F: Api,
+        I: IntoIterator<Item = (F, J)>,
         J: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
         for (field, users) in values {
             for user in users {
                 let user = self.service.replace_user_alias(user.as_ref());
-                self.advanced_field(field.api(), "changedby", user);
+                self.advanced_field(&field, "changedby", user);
             }
         }
     }
 
-    fn changed_from<'a, I, S>(&mut self, values: I)
+    fn changed_from<'a, F, I, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = &'a (ChangeField, S)>,
+        F: Api + 'a,
+        I: IntoIterator<Item = &'a (F, S)>,
         S: Api + 'a,
     {
         for (field, value) in values {
-            self.advanced_field(field.api(), "changedfrom", value);
+            self.advanced_field(field, "changedfrom", value);
         }
     }
 
-    fn changed_to<'a, I, S>(&mut self, values: I)
+    fn changed_to<'a, F, I, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = &'a (ChangeField, S)>,
+        F: Api + 'a,
+        I: IntoIterator<Item = &'a (F, S)>,
         S: Api + 'a,
     {
         for (field, value) in values {
-            self.advanced_field(field.api(), "changedto", value);
+            self.advanced_field(field, "changedto", value);
         }
     }
 
