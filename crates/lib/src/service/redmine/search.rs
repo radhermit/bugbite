@@ -75,7 +75,7 @@ impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
 impl RequestSend for Request<'_> {
     type Output = Vec<Issue>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let params = self.params.encode(self.service)?;
         let url = self
             .service
@@ -141,53 +141,53 @@ impl Parameters {
         or!(self.summary, other.summary);
     }
 
-    fn encode(self, service: &Service) -> crate::Result<String> {
+    fn encode(&self, service: &Service) -> crate::Result<String> {
         let mut query = QueryBuilder::new(service);
 
-        if let Some(values) = self.blocks {
+        if let Some(values) = &self.blocks {
             match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, *value),
                 ExistsOrValues::Values(values) => query.insert("blocks", values.iter().join(",")),
             }
         }
 
-        if let Some(values) = self.blocked {
+        if let Some(values) = &self.blocked {
             match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocked, value),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocked, *value),
                 ExistsOrValues::Values(values) => query.insert("blocked", values.iter().join(",")),
             }
         }
 
-        if let Some(values) = self.relates {
+        if let Some(values) = &self.relates {
             match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Relates, value),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Relates, *value),
                 ExistsOrValues::Values(values) => query.insert("relates", values.iter().join(",")),
             }
         }
 
-        if let Some(values) = self.ids {
+        if let Some(values) = &self.ids {
             query.id(values)?;
         }
 
-        if let Some(value) = self.closed {
+        if let Some(value) = &self.closed {
             query.time("closed_on", value);
         }
 
-        if let Some(value) = self.created {
+        if let Some(value) = &self.created {
             query.time("created_on", value);
         }
 
-        if let Some(value) = self.updated {
+        if let Some(value) = &self.updated {
             query.time("updated_on", value);
         }
 
-        if let Some(value) = self.assignee {
-            query.exists(ExistsField::Assignee, value);
+        if let Some(value) = &self.assignee {
+            query.exists(ExistsField::Assignee, *value);
         }
 
-        if let Some(values) = self.attachments {
+        if let Some(values) = &self.attachments {
             match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachment, value),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachment, *value),
                 ExistsOrValues::Values(values) => {
                     let value = quoted_strings(values);
                     // TODO: support other operators, currently this specifies the `contains` op
@@ -196,7 +196,7 @@ impl Parameters {
             }
         }
 
-        if let Some(values) = self.summary {
+        if let Some(values) = &self.summary {
             let value = quoted_strings(values);
             // TODO: support other operators, currently this specifies the `contains` op
             query.insert("subject", format!("~{value}"));
@@ -205,7 +205,7 @@ impl Parameters {
         // limit to open issues by default
         query.status(self.status.as_deref().unwrap_or("@open"))?;
 
-        if let Some(values) = self.order {
+        if let Some(values) = &self.order {
             let value = values.iter().map(|x| x.api()).join(",");
             query.insert("sort", value);
         } else {
@@ -253,12 +253,9 @@ impl<'a> QueryBuilder<'a> {
         self.insert(field, status);
     }
 
-    fn id<I>(&mut self, values: I) -> crate::Result<()>
-    where
-        I: IntoIterator<Item = RangeOrValue<u64>>,
-    {
+    fn id(&mut self, values: &[RangeOrValue<u64>]) -> crate::Result<()> {
         let (ids, ranges): (Vec<_>, Vec<_>) = values
-            .into_iter()
+            .iter()
             .partition(|x| matches!(x, RangeOrValue::Value(_)));
 
         if !ids.is_empty() && !ranges.is_empty() {
@@ -300,14 +297,14 @@ impl<'a> QueryBuilder<'a> {
         Ok(())
     }
 
-    fn time(&mut self, field: &str, value: RangeOrValue<TimeDeltaOrStatic>) {
+    fn time(&mut self, field: &str, value: &RangeOrValue<TimeDeltaOrStatic>) {
         match value {
             RangeOrValue::Value(value) => {
                 let value = value.api();
                 self.insert(field, format!(">={value}"));
             }
-            RangeOrValue::RangeOp(value) => self.range_op(field, &value),
-            RangeOrValue::Range(value) => self.range(field, &value),
+            RangeOrValue::RangeOp(value) => self.range_op(field, value),
+            RangeOrValue::Range(value) => self.range(field, value),
         }
     }
 

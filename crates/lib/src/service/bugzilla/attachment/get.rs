@@ -59,7 +59,7 @@ impl<'a> Request<'a> {
 impl RequestSend for Request<'_> {
     type Output = Vec<Attachment>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let request = self
             .service
             .client
@@ -70,8 +70,8 @@ impl RequestSend for Request<'_> {
         let mut data = data["attachments"].take();
 
         let mut attachments = vec![];
-        for id in self.ids {
-            let data = data[&id].take();
+        for id in &self.ids {
+            let data = data[id].take();
 
             // bugzilla doesn't return errors for nonexistent attachment IDs
             if data.is_null() {

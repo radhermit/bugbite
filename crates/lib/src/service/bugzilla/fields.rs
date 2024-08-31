@@ -17,7 +17,7 @@ impl<'a> Request<'a> {
 impl RequestSend for Request<'_> {
     type Output = Vec<BugzillaField>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let url = self.service.config.base.join("rest/field/bug")?;
         let request = self.service.client.get(url);
         let response = request.send().await?;

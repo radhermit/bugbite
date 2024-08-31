@@ -58,7 +58,7 @@ pub trait RequestMerge<T> {
 pub trait RequestSend {
     type Output;
 
-    fn send(self) -> impl Future<Output = crate::Result<Self::Output>>;
+    fn send(&self) -> impl Future<Output = crate::Result<Self::Output>>;
 }
 
 /// Inject service authentication data into a request.

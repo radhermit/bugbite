@@ -79,7 +79,7 @@ enum Field {
 impl RequestSend for Request<'_> {
     type Output = Vec<Issue>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let futures: Vec<_> = self
             .urls()?
             .into_iter()
@@ -93,7 +93,7 @@ impl RequestSend for Request<'_> {
             .collect();
 
         let mut issues = vec![];
-        for (future, id) in futures.into_iter().zip(self.ids.into_iter()) {
+        for (future, id) in futures.into_iter().zip(&self.ids) {
             let response = future.await?;
             let mut data = self
                 .service

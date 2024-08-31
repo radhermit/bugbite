@@ -68,10 +68,10 @@ impl Parameters {
         self
     }
 
-    pub(crate) fn encode(self, service: &super::Service) -> crate::Result<String> {
+    pub(crate) fn encode(&self, service: &super::Service) -> crate::Result<String> {
         let mut query = QueryBuilder::new(service);
 
-        if let Some(value) = self.order {
+        if let Some(value) = &self.order {
             query.insert("sort", value);
         }
 
@@ -138,7 +138,7 @@ impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
 impl RequestSend for Request<'_> {
     type Output = Vec<Issue>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         debug!("{:?}", self.params);
         let _params = self.params.encode(self.service)?;
         todo!("search requests unsupported")

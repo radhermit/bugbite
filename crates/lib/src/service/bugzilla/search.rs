@@ -1,8 +1,8 @@
 use std::collections::HashSet;
+use std::fmt;
 use std::fs;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
-use std::{fmt, iter};
 
 use camino::Utf8Path;
 use indexmap::IndexSet;
@@ -49,7 +49,7 @@ impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
 impl RequestSend for Request<'_> {
     type Output = Vec<Bug>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let params = self.params.encode(self.service)?;
         let url = self
             .service
@@ -563,35 +563,35 @@ impl Parameters {
         or!(self.custom_fields, other.custom_fields);
     }
 
-    fn encode(self, service: &Service) -> crate::Result<String> {
+    fn encode(&self, service: &Service) -> crate::Result<String> {
         let mut query = QueryBuilder::new(service);
 
-        if let Some(values) = self.status {
-            query.or(|query| values.into_iter().for_each(|x| query.status(x)));
+        if let Some(values) = &self.status {
+            query.or(|query| values.iter().for_each(|x| query.status(x)));
         } else {
             // only return open bugs by default
             query.status("@open");
         }
 
-        if let Some(values) = self.order {
-            query.order(values)?;
+        if let Some(values) = self.order.as_deref() {
+            query.order(values);
         } else {
             // sort by ascending ID by default
-            query.order([Order::Ascending(OrderField::Id)])?;
+            query.order(&[Order::Ascending(OrderField::Id)]);
         }
 
-        if let Some(values) = self.fields {
-            query.fields(values);
+        if let Some(values) = &self.fields {
+            query.fields(values.iter().copied());
         } else {
             // limit requested fields by default to decrease bandwidth and speed up response
             query.fields([BugField::Id, BugField::Summary]);
         }
 
-        if let Some(value) = self.limit {
+        if let Some(value) = &self.limit {
             query.insert("limit", value);
         }
 
-        if let Some(values) = self.alias {
+        if let Some(values) = &self.alias {
             query.or(|query| {
                 for value in values {
                     match value {
@@ -603,352 +603,350 @@ impl Parameters {
                             query.not(|query| query.exists(ExistsField::Alias, true))
                         }
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.alias(x)))
+                            query.and(|query| values.iter().for_each(|x| query.alias(x)))
                         }
                     }
                 }
             });
         }
 
-        if let Some(values) = self.attachments {
+        if let Some(values) = &self.attachments {
             match values {
-                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachments, value),
+                ExistsOrValues::Exists(value) => query.exists(ExistsField::Attachments, *value),
                 ExistsOrValues::Values(values) => query.attachments(values),
             }
         }
 
-        if let Some(values) = self.flags {
+        if let Some(values) = &self.flags {
             query.or(|query| {
                 for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Flags, *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.flags(x)))
+                            query.and(|query| values.iter().for_each(|x| query.flags(x)))
                         }
                     }
                 }
             });
         }
 
-        if let Some(values) = self.groups {
+        if let Some(values) = &self.groups {
             query.or(|query| {
                 for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Groups, value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Groups, *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.groups(x)))
+                            query.and(|query| values.iter().for_each(|x| query.groups(x)))
                         }
                     }
                 }
             });
         }
 
-        if let Some(values) = self.keywords {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Keywords, value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.keywords(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = self.see_also {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::SeeAlso, value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.see_also(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = self.tags {
-            query.or(|query| {
-                for value in values {
-                    match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Tags, value),
-                        ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.tags(x)))
-                        }
-                    }
-                }
-            });
-        }
-
-        if let Some(values) = self.whiteboard {
+        if let Some(values) = &self.keywords {
             query.or(|query| {
                 for value in values {
                     match value {
                         ExistsOrValues::Exists(value) => {
-                            query.exists(ExistsField::Whiteboard, value)
+                            query.exists(ExistsField::Keywords, *value)
                         }
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.whiteboard(x)))
+                            query.and(|query| values.iter().for_each(|x| query.keywords(x)))
                         }
                     }
                 }
             });
         }
 
-        if let Some(values) = self.url {
+        if let Some(values) = &self.see_also {
             query.or(|query| {
                 for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Url, value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::SeeAlso, *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.url(x)))
+                            query.and(|query| values.iter().for_each(|x| query.see_also(x)))
                         }
                     }
                 }
             });
         }
 
-        if let Some(values) = self.changed {
+        if let Some(values) = &self.tags {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Tags, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.tags(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.whiteboard {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => {
+                            query.exists(ExistsField::Whiteboard, *value)
+                        }
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.whiteboard(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.url {
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Url, *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.url(x)))
+                        }
+                    }
+                }
+            });
+        }
+
+        if let Some(values) = &self.changed {
             for (fields, interval) in values {
-                query.changed(fields.into_iter().map(|f| (f, &interval)));
+                query.changed(fields.iter().map(|f| (f, interval)));
             }
         }
 
-        if let Some(values) = self.changed_by {
+        if let Some(values) = &self.changed_by {
             for (fields, users) in values {
-                query.changed_by(fields.into_iter().map(|f| (f, &users)));
+                query.changed_by(fields.iter().map(|f| (f, users)));
             }
         }
 
-        if let Some(values) = self.changed_from {
+        if let Some(values) = &self.changed_from {
             query.changed_from(values);
         }
 
-        if let Some(values) = self.changed_to {
+        if let Some(values) = &self.changed_to {
             query.changed_to(values);
         }
 
-        if let Some(value) = self.comments {
+        if let Some(value) = &self.comments {
             query.comments(value);
         }
 
-        if let Some(value) = self.votes {
+        if let Some(value) = &self.votes {
             query.votes(value);
         }
 
-        if let Some(values) = self.assignee {
+        if let Some(values) = &self.assignee {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.assignee(x)))
+                    query.and(|query| value.iter().for_each(|x| query.assignee(x)))
                 }
             });
         }
 
-        if let Some(values) = self.attacher {
+        if let Some(values) = &self.attacher {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.attacher(x)))
+                    query.and(|query| value.iter().for_each(|x| query.attacher(x)))
                 }
             });
         }
 
-        if let Some(values) = self.cc {
+        if let Some(values) = &self.cc {
             query.or(|query| {
                 for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Cc, *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.cc(x)))
+                            query.and(|query| values.iter().for_each(|x| query.cc(x)))
                         }
                     }
                 }
             });
         }
 
-        if let Some(values) = self.commenter {
+        if let Some(values) = &self.commenter {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.commenter(x)))
+                    query.and(|query| value.iter().for_each(|x| query.commenter(x)))
                 }
             });
         }
 
-        if let Some(values) = self.flagger {
+        if let Some(values) = &self.flagger {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.flagger(x)))
+                    query.and(|query| value.iter().for_each(|x| query.flagger(x)))
                 }
             });
         }
 
-        if let Some(values) = self.qa {
+        if let Some(values) = &self.qa {
             query.or(|query| {
                 for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Qa, *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.qa(x)))
+                            query.and(|query| values.iter().for_each(|x| query.qa(x)))
                         }
                     }
                 }
             });
         }
 
-        if let Some(values) = self.reporter {
+        if let Some(values) = &self.reporter {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.reporter(x)))
+                    query.and(|query| value.iter().for_each(|x| query.reporter(x)))
                 }
             });
         }
 
-        if let Some(values) = self.comment {
-            query.op_field("AND", "longdesc", values)
+        if let Some(values) = &self.comment {
+            query.and(|query| values.iter().for_each(|x| query.comment(x)));
         }
 
-        if let Some(value) = self.comment_is_private {
-            query.comment_is_private(value);
+        if let Some(value) = &self.comment_is_private {
+            query.comment_is_private(*value);
         }
 
-        if let Some(values) = self.comment_tag {
+        if let Some(values) = &self.comment_tag {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.comment_tag(x)))
+                    query.and(|query| value.iter().for_each(|x| query.comment_tag(x)))
                 }
             });
         }
 
-        if let Some(values) = self.summary {
-            query.op_field("AND", "short_desc", values)
+        if let Some(values) = &self.summary {
+            query.and(|query| values.iter().for_each(|x| query.summary(x)));
         }
 
-        if let Some(values) = self.blocks {
+        if let Some(values) = &self.blocks {
             query.or(|query| {
                 for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.blocks(x)))
+                            query.and(|query| values.iter().for_each(|x| query.blocks(*x)))
                         }
                     }
                 }
             });
         }
 
-        if let Some(values) = self.depends {
+        if let Some(values) = &self.depends {
             query.or(|query| {
                 for value in values {
                     match value {
-                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, value),
+                        ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.into_iter().for_each(|x| query.depends(x)))
+                            query.and(|query| values.iter().for_each(|x| query.depends(*x)))
                         }
                     }
                 }
             });
         }
 
-        if let Some(values) = self.ids {
-            query.or(|query| values.into_iter().for_each(|x| query.id(x)));
+        if let Some(values) = &self.ids {
+            query.or(|query| values.iter().for_each(|x| query.id(x)));
         }
 
-        if let Some(values) = self.priority {
-            query.or(|query| values.into_iter().for_each(|x| query.priority(x)));
+        if let Some(values) = &self.priority {
+            query.or(|query| values.iter().for_each(|x| query.priority(x)));
         }
 
-        if let Some(values) = self.severity {
-            query.or(|query| values.into_iter().for_each(|x| query.severity(x)));
+        if let Some(values) = &self.severity {
+            query.or(|query| values.iter().for_each(|x| query.severity(x)));
         }
 
-        if let Some(values) = self.version {
-            query.or(|query| values.into_iter().for_each(|x| query.version(x)));
+        if let Some(values) = &self.version {
+            query.or(|query| values.iter().for_each(|x| query.version(x)));
         }
 
-        if let Some(values) = self.component {
-            query.or(|query| values.into_iter().for_each(|x| query.component(x)));
+        if let Some(values) = &self.component {
+            query.or(|query| values.iter().for_each(|x| query.component(x)));
         }
 
-        if let Some(values) = self.product {
-            query.or(|query| values.into_iter().for_each(|x| query.product(x)));
+        if let Some(values) = &self.product {
+            query.or(|query| values.iter().for_each(|x| query.product(x)));
         }
 
-        if let Some(values) = self.platform {
-            query.or(|query| values.into_iter().for_each(|x| query.platform(x)));
+        if let Some(values) = &self.platform {
+            query.or(|query| values.iter().for_each(|x| query.platform(x)));
         }
 
-        if let Some(values) = self.os {
-            query.or(|query| values.into_iter().for_each(|x| query.os(x)));
+        if let Some(values) = &self.os {
+            query.or(|query| values.iter().for_each(|x| query.os(x)));
         }
 
-        if let Some(values) = self.resolution {
-            query.or(|query| values.into_iter().for_each(|x| query.resolution(x)));
+        if let Some(values) = &self.resolution {
+            query.or(|query| values.iter().for_each(|x| query.resolution(x)));
         }
 
-        if let Some(values) = self.target {
-            query.or(|query| values.into_iter().for_each(|x| query.target(x)));
+        if let Some(values) = &self.target {
+            query.or(|query| values.iter().for_each(|x| query.target(x)));
         }
 
-        if let Some(value) = self.created {
+        if let Some(value) = &self.created {
             query.created(value);
         }
 
-        if let Some(value) = self.updated {
+        if let Some(value) = &self.updated {
             query.updated(value);
         }
 
-        if let Some(value) = self.closed {
-            query.changed([(ChangeField::Status, &value)]);
+        if let Some(value) = &self.closed {
+            query.changed([(&ChangeField::Status, value)]);
             query.status("@closed");
         }
 
-        if let Some(value) = self.quicksearch {
+        if let Some(value) = &self.quicksearch {
             query.insert("quicksearch", value);
         }
 
-        if let Some(values) = self.custom_fields {
+        if let Some(values) = &self.custom_fields {
             query.custom_fields(values);
         }
 
-        if let Some(values) = self.attachment_description {
+        if let Some(values) = &self.attachment_description {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| {
-                        value
-                            .into_iter()
-                            .for_each(|x| query.attachment_description(x))
-                    })
+                    query.and(|query| value.iter().for_each(|x| query.attachment_description(x)))
                 }
             });
         }
 
-        if let Some(values) = self.attachment_filename {
+        if let Some(values) = &self.attachment_filename {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.attachment_filename(x)))
+                    query.and(|query| value.iter().for_each(|x| query.attachment_filename(x)))
                 }
             });
         }
 
-        if let Some(values) = self.attachment_mime {
+        if let Some(values) = &self.attachment_mime {
             query.or(|query| {
                 for value in values {
-                    query.and(|query| value.into_iter().for_each(|x| query.attachment_mime(x)))
+                    query.and(|query| value.iter().for_each(|x| query.attachment_mime(x)))
                 }
             });
         }
 
-        if let Some(value) = self.attachment_is_obsolete {
-            query.attachment_is_obsolete(value);
+        if let Some(value) = &self.attachment_is_obsolete {
+            query.attachment_is_obsolete(*value);
         }
 
-        if let Some(value) = self.attachment_is_patch {
-            query.attachment_is_patch(value);
+        if let Some(value) = &self.attachment_is_patch {
+            query.attachment_is_patch(*value);
         }
 
-        if let Some(value) = self.attachment_is_private {
-            query.attachment_is_private(value);
+        if let Some(value) = &self.attachment_is_private {
+            query.attachment_is_private(*value);
         }
 
         Ok(query.encode())
@@ -1040,9 +1038,11 @@ pub struct Match {
 
 impl Match {
     /// Substitute user alias for matching value.
-    fn replace_user_alias(mut self, service: &Service) -> Self {
-        self.value = service.replace_user_alias(&self.value);
-        self
+    fn replace_user_alias(&self, service: &Service) -> Self {
+        Self {
+            op: self.op,
+            value: service.replace_user_alias(&self.value),
+        }
     }
 }
 
@@ -1183,10 +1183,10 @@ impl<const N: usize> From<[i64; N]> for ExistsOrValues<i64> {
 }
 
 impl QueryBuilder<'_> {
-    fn id(&mut self, value: RangeOrValue<i64>) {
+    fn id(&mut self, value: &RangeOrValue<i64>) {
         match value {
             RangeOrValue::Value(value) => {
-                if value >= 0 {
+                if *value >= 0 {
                     self.advanced_field("bug_id", "equals", value);
                 } else {
                     self.advanced_field("bug_id", "notequals", value.abs());
@@ -1197,30 +1197,25 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn alias<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn alias(&mut self, value: &Match) {
         self.advanced_field("alias", value.op, value);
     }
 
-    fn assignee<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into().replace_user_alias(self.service);
+    fn assignee(&mut self, value: &Match) {
+        let value = value.replace_user_alias(self.service);
         self.advanced_field("assigned_to", value.op, value);
     }
 
     /// Search for attachments with matching descriptions or filenames.
-    fn attachments<I, S>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
+    fn attachments(&mut self, values: &[Match]) {
         self.advanced_count += 1;
         let num = self.advanced_count;
         self.insert(format!("f{num}"), "OP");
         self.insert(format!("j{num}"), "OR");
 
-        for value in values.into_iter().map(Into::into) {
-            self.advanced_field("attachments.description", value.op, &value);
-            self.advanced_field("attachments.filename", value.op, &value);
+        for value in values {
+            self.advanced_field("attachments.description", value.op, value);
+            self.advanced_field("attachments.filename", value.op, value);
         }
 
         self.advanced_count += 1;
@@ -1228,18 +1223,15 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), "CP");
     }
 
-    fn attachment_description<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn attachment_description(&mut self, value: &Match) {
         self.advanced_field("attachments.description", value.op, value);
     }
 
-    fn attachment_filename<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn attachment_filename(&mut self, value: &Match) {
         self.advanced_field("attachments.filename", value.op, value);
     }
 
-    fn attachment_mime<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn attachment_mime(&mut self, value: &Match) {
         self.advanced_field("attachments.mimetype", value.op, value);
     }
 
@@ -1255,31 +1247,32 @@ impl QueryBuilder<'_> {
         self.boolean("attachments.isprivate", value)
     }
 
+    fn comment(&mut self, value: &Match) {
+        self.advanced_field("longdesc", value.op, value);
+    }
+
     fn comment_is_private(&mut self, value: bool) {
         self.boolean("longdescs.isprivate", value)
     }
 
-    fn comment_tag<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn comment_tag(&mut self, value: &Match) {
         self.advanced_field("comment_tag", value.op, value);
     }
 
-    fn qa<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn qa(&mut self, value: &Match) {
         self.advanced_field("qa_contact", value.op, value);
     }
 
-    fn reporter<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into().replace_user_alias(self.service);
+    fn reporter(&mut self, value: &Match) {
+        let value = value.replace_user_alias(self.service);
         self.advanced_field("reporter", value.op, value);
     }
 
-    fn resolution<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn resolution(&mut self, value: &Match) {
         self.advanced_field("resolution", value.op, value);
     }
 
-    fn created(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) {
+    fn created(&mut self, value: &RangeOrValue<TimeDeltaOrStatic>) {
         match value {
             RangeOrValue::Value(value) => {
                 self.advanced_field("creation_ts", "greaterthaneq", value)
@@ -1289,7 +1282,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn updated(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) {
+    fn updated(&mut self, value: &RangeOrValue<TimeDeltaOrStatic>) {
         match value {
             RangeOrValue::Value(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
             RangeOrValue::RangeOp(value) => self.range_op("delta_ts", value),
@@ -1297,45 +1290,33 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn order<I, T>(&mut self, values: I) -> crate::Result<()>
-    where
-        I: IntoIterator<Item = T>,
-        T: TryInto<Order<OrderField>>,
-        <T as TryInto<Order<OrderField>>>::Error: std::fmt::Display,
-    {
-        let values: Vec<_> = values
-            .into_iter()
-            .map(|x| x.try_into())
-            .try_collect()
-            .map_err(|e| Error::InvalidValue(format!("{e}")))?;
+    fn order(&mut self, values: &[Order<OrderField>]) {
         let value = values.iter().map(|x| x.api()).join(",");
         self.insert("order", value);
-        Ok(())
     }
 
-    fn attacher<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into().replace_user_alias(self.service);
+    fn attacher(&mut self, value: &Match) {
+        let value = value.replace_user_alias(self.service);
         self.advanced_field("attachments.submitter", value.op, value);
     }
 
-    fn commenter<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into().replace_user_alias(self.service);
+    fn commenter(&mut self, value: &Match) {
+        let value = value.replace_user_alias(self.service);
         self.advanced_field("commenter", value.op, value);
     }
 
-    fn flagger<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into().replace_user_alias(self.service);
+    fn flagger(&mut self, value: &Match) {
+        let value = value.replace_user_alias(self.service);
         self.advanced_field("setters.login_name", value.op, value);
     }
 
-    fn url<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn url(&mut self, value: &Match) {
         self.advanced_field("bug_file_loc", value.op, value);
     }
 
     fn changed<'a, I>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (ChangeField, &'a RangeOrValue<TimeDeltaOrStatic>)>,
+        I: IntoIterator<Item = (&'a ChangeField, &'a RangeOrValue<TimeDeltaOrStatic>)>,
     {
         for (field, target) in values {
             let field = field.api();
@@ -1385,9 +1366,9 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn changed_by<I, J, S>(&mut self, values: I)
+    fn changed_by<'a, I, J, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (ChangeField, J)>,
+        I: IntoIterator<Item = (&'a ChangeField, J)>,
         J: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
@@ -1399,45 +1380,37 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn changed_from<I, S>(&mut self, values: I)
+    fn changed_from<'a, I, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (ChangeField, S)>,
-        S: fmt::Display,
+        I: IntoIterator<Item = &'a (ChangeField, S)>,
+        S: Api + 'a,
     {
         for (field, value) in values {
-            self.advanced_field(field.api(), "changedfrom", value.to_string());
+            self.advanced_field(field.api(), "changedfrom", value);
         }
     }
 
-    fn changed_to<I, S>(&mut self, values: I)
+    fn changed_to<'a, I, S>(&mut self, values: I)
     where
-        I: IntoIterator<Item = (ChangeField, S)>,
-        S: fmt::Display,
+        I: IntoIterator<Item = &'a (ChangeField, S)>,
+        S: Api + 'a,
     {
         for (field, value) in values {
-            self.advanced_field(field.api(), "changedto", value.to_string());
+            self.advanced_field(field.api(), "changedto", value);
         }
     }
 
-    fn custom_fields<I, K, V>(&mut self, values: I)
-    where
-        I: IntoIterator<Item = (K, V)>,
-        K: fmt::Display,
-        V: Into<Match>,
-    {
+    fn custom_fields(&mut self, values: &[(String, Match)]) {
         for (name, value) in values {
-            let value = value.into();
             self.advanced_field(prefix!("cf_", name), value.op, value);
         }
     }
 
-    fn priority<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn priority(&mut self, value: &Match) {
         self.advanced_field("priority", value.op, value);
     }
 
-    fn severity<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn severity(&mut self, value: &Match) {
         self.advanced_field("bug_severity", value.op, value);
     }
 
@@ -1458,52 +1431,47 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn version<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn version(&mut self, value: &Match) {
         self.advanced_field("version", value.op, value);
     }
 
-    fn component<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn component(&mut self, value: &Match) {
         self.advanced_field("component", value.op, value);
     }
 
-    fn product<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn product(&mut self, value: &Match) {
         self.advanced_field("product", value.op, value);
     }
 
-    fn platform<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn platform(&mut self, value: &Match) {
         self.advanced_field("platform", value.op, value);
     }
 
-    fn os<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn os(&mut self, value: &Match) {
         self.advanced_field("op_sys", value.op, value);
     }
 
-    fn see_also<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn see_also(&mut self, value: &Match) {
         self.advanced_field("see_also", value.op, value);
     }
 
-    fn tags<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn summary(&mut self, value: &Match) {
+        self.advanced_field("short_desc", value.op, value);
+    }
+
+    fn tags(&mut self, value: &Match) {
         self.advanced_field("tag", value.op, value);
     }
 
-    fn target<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn target(&mut self, value: &Match) {
         self.advanced_field("target_milestone", value.op, value);
     }
 
-    fn whiteboard<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn whiteboard(&mut self, value: &Match) {
         self.advanced_field("whiteboard", value.op, value);
     }
 
-    fn votes(&mut self, value: RangeOrValue<u64>) {
+    fn votes(&mut self, value: &RangeOrValue<u64>) {
         match value {
             RangeOrValue::Value(value) => self.advanced_field("votes", "equals", value),
             RangeOrValue::RangeOp(value) => self.range_op("votes", value),
@@ -1511,7 +1479,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn comments(&mut self, value: RangeOrValue<u64>) {
+    fn comments(&mut self, value: &RangeOrValue<u64>) {
         match value {
             RangeOrValue::Value(value) => self.advanced_field("longdescs.count", "equals", value),
             RangeOrValue::RangeOp(value) => self.range_op("longdescs.count", value),
@@ -1549,23 +1517,20 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn flags<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn flags(&mut self, value: &Match) {
         self.advanced_field("flagtypes.name", value.op, value)
     }
 
-    fn groups<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn groups(&mut self, value: &Match) {
         self.advanced_field("bug_group", value.op, value)
     }
 
-    fn keywords<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into();
+    fn keywords(&mut self, value: &Match) {
         self.advanced_field("keywords", value.op, value)
     }
 
-    fn cc<V: Into<Match>>(&mut self, value: V) {
-        let value = value.into().replace_user_alias(self.service);
+    fn cc(&mut self, value: &Match) {
+        let value = value.replace_user_alias(self.service);
         self.advanced_field("cc", value.op, value);
     }
 
@@ -1582,7 +1547,7 @@ impl QueryBuilder<'_> {
         self.insert("include_fields", fields.iter().map(|f| f.api()).join(","));
     }
 
-    fn range_op<T>(&mut self, field: &str, value: RangeOp<T>)
+    fn range_op<T>(&mut self, field: &str, value: &RangeOp<T>)
     where
         T: Api + Eq,
     {
@@ -1608,15 +1573,15 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn range<T>(&mut self, field: &str, value: Range<T>)
+    fn range<T>(&mut self, field: &str, value: &Range<T>)
     where
         T: Api + Eq,
     {
         match value {
             Range::Range(r) => {
                 self.and(|query| {
-                    query.advanced_field(field, "greaterthaneq", r.start);
-                    query.advanced_field(field, "lessthan", r.end);
+                    query.advanced_field(field, "greaterthaneq", &r.start);
+                    query.advanced_field(field, "lessthan", &r.end);
                 });
             }
             Range::Inclusive(r) => self.and(|query| {
@@ -1624,13 +1589,13 @@ impl QueryBuilder<'_> {
                 query.advanced_field(field, "lessthaneq", r.end());
             }),
             Range::To(r) => {
-                self.advanced_field(field, "lessthan", r.end);
+                self.advanced_field(field, "lessthan", &r.end);
             }
             Range::ToInclusive(r) => {
-                self.advanced_field(field, "lessthaneq", r.end);
+                self.advanced_field(field, "lessthaneq", &r.end);
             }
             Range::From(r) => {
-                self.advanced_field(field, "greaterthaneq", r.start);
+                self.advanced_field(field, "greaterthaneq", &r.start);
             }
             Range::Full(_) => (),
         }
@@ -1647,37 +1612,6 @@ impl QueryBuilder<'_> {
         self.insert(format!("f{num}"), field);
         self.insert(format!("o{num}"), operator);
         self.insert(format!("v{num}"), value);
-    }
-
-    fn op<I, F, V>(&mut self, op: &str, values: I)
-    where
-        I: IntoIterator<Item = (F, V)>,
-        F: Api,
-        V: Into<Match>,
-    {
-        self.advanced_count += 1;
-        let num = self.advanced_count;
-        self.insert(format!("f{num}"), "OP");
-        self.insert(format!("j{num}"), op);
-
-        for (field, value) in values {
-            let value = value.into();
-            self.advanced_field(field, value.op, value);
-        }
-
-        self.advanced_count += 1;
-        let num = self.advanced_count;
-        self.insert(format!("f{num}"), "CP");
-    }
-
-    fn op_field<F, I, S>(&mut self, op: &str, field: F, values: I)
-    where
-        F: Api + Copy,
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
-    {
-        let fields = iter::repeat_with(|| field);
-        self.op(op, fields.zip(values))
     }
 
     fn op_func<F: FnOnce(&mut Self)>(&mut self, op: &str, func: F) {

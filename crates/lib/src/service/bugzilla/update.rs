@@ -139,9 +139,9 @@ impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
 impl RequestSend for Request<'_> {
     type Output = Vec<BugChange>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let url = self.url()?;
-        let params = self.params.encode(self.service, self.ids).await?;
+        let params = self.params.encode(self.service, &self.ids).await?;
         let request = self
             .service
             .client
@@ -234,8 +234,8 @@ struct SetChanges<T> {
     set: Option<Vec<T>>,
 }
 
-impl<T: FromStr + Clone> FromIterator<SetChange<T>> for SetChanges<T> {
-    fn from_iter<I: IntoIterator<Item = SetChange<T>>>(iterable: I) -> Self {
+impl<'a, T: FromStr + Clone> FromIterator<&'a SetChange<T>> for SetChanges<&'a T> {
+    fn from_iter<I: IntoIterator<Item = &'a SetChange<T>>>(iterable: I) -> Self {
         let (mut add, mut remove, mut set) = (vec![], vec![], vec![]);
         for change in iterable {
             match change {
@@ -376,37 +376,44 @@ impl Parameters {
     }
 
     /// Encode parameters into the form required for the request.
-    async fn encode(self, service: &Service, ids: Vec<String>) -> crate::Result<RequestParameters> {
+    async fn encode<'a>(
+        &'a self,
+        service: &Service,
+        ids: &'a [String],
+    ) -> crate::Result<RequestParameters<'a>> {
         // verify parameters exist
-        if self == Self::default() {
+        if self == &Self::default() {
             return Err(Error::EmptyParams);
         }
 
         let mut params = RequestParameters {
             ids,
-            alias: self.alias.map(|x| x.into_iter().collect()),
-            blocks: self.blocks.map(|x| x.into_iter().collect()),
-            component: self.component,
-            depends_on: self.depends.map(|x| x.into_iter().collect()),
+            alias: self.alias.as_ref().map(|x| x.iter().collect()),
+            blocks: self.blocks.as_ref().map(|x| x.iter().collect()),
+            component: self.component.as_deref(),
+            depends_on: self.depends.as_ref().map(|x| x.iter().collect()),
             dupe_of: self.duplicate_of,
-            flags: self.flags,
-            groups: self.groups.map(|x| x.into_iter().collect()),
-            keywords: self.keywords.map(|x| x.into_iter().collect()),
-            op_sys: self.os,
-            platform: self.platform,
-            priority: self.priority,
-            product: self.product,
-            resolution: self.resolution,
-            severity: self.severity,
-            status: self.status,
-            summary: self.summary,
-            target_milestone: self.target,
-            url: self.url,
-            version: self.version,
-            whiteboard: self.whiteboard,
+            flags: self.flags.as_deref(),
+            groups: self
+                .groups
+                .as_ref()
+                .map(|x| x.clone().into_iter().collect()),
+            keywords: self.keywords.as_ref().map(|x| x.iter().collect()),
+            op_sys: self.os.as_deref(),
+            platform: self.platform.as_deref(),
+            priority: self.priority.as_deref(),
+            product: self.product.as_deref(),
+            resolution: self.resolution.as_deref(),
+            severity: self.severity.as_deref(),
+            status: self.status.as_deref(),
+            summary: self.summary.as_deref(),
+            target_milestone: self.target.as_deref(),
+            url: self.url.as_deref(),
+            version: self.version.as_deref(),
+            whiteboard: self.whiteboard.as_deref(),
 
             // auto-prefix custom field names
-            custom_fields: self.custom_fields.map(|values| {
+            custom_fields: self.custom_fields.as_ref().map(|values| {
                 values
                     .into_iter()
                     .map(|(name, value)| (prefix!("cf_", name), value))
@@ -425,8 +432,8 @@ impl Parameters {
             }
         }
 
-        if let Some(values) = self.cc {
-            let iter = values.into_iter().map(|c| match c {
+        if let Some(values) = &self.cc {
+            let iter = values.iter().map(|c| match c {
                 SetChange::Add(value) => SetChange::Add(service.replace_user_alias(value)),
                 SetChange::Remove(value) => SetChange::Remove(service.replace_user_alias(value)),
                 SetChange::Set(value) => SetChange::Set(service.replace_user_alias(value)),
@@ -435,12 +442,12 @@ impl Parameters {
             params.cc = Some(iter.collect());
         }
 
-        if let Some(value) = self.comment {
+        if let Some(value) = &self.comment {
             params.comment = Some(Comment {
-                body: value,
+                body: value.clone(),
                 is_private: self.comment_is_private.unwrap_or_default(),
             });
-        } else if let Some(path) = self.comment_from.as_ref() {
+        } else if let Some(path) = &self.comment_from {
             let data = fs::read_to_string(path).map_err(|e| {
                 Error::InvalidValue(format!("failed reading comment file: {path}: {e}"))
             })?;
@@ -450,8 +457,8 @@ impl Parameters {
             });
         }
 
-        if let Some((value, is_private)) = self.comment_privacy {
-            let id = match &params.ids[..] {
+        if let Some((value, is_private)) = &self.comment_privacy {
+            let id = match params.ids {
                 [x] => x,
                 _ => {
                     return Err(Error::InvalidValue(
@@ -486,9 +493,9 @@ impl Parameters {
             }
         }
 
-        if let Some(values) = self.see_also {
+        if let Some(values) = &self.see_also {
             // convert bug IDs to full URLs
-            let iter = values.into_iter().map(|x| match x {
+            let iter = values.iter().map(|x| match x {
                 SetChange::Add(value) if value.parse::<u64>().is_ok() => {
                     SetChange::Add(service.item_url(value))
                 }
@@ -498,7 +505,7 @@ impl Parameters {
                 SetChange::Set(value) if value.parse::<u64>().is_ok() => {
                     SetChange::Set(service.item_url(value))
                 }
-                c => c,
+                c => c.clone(),
             });
 
             params.see_also = Some(iter.collect());
@@ -514,39 +521,39 @@ impl Parameters {
 /// information.
 #[skip_serializing_none]
 #[derive(Serialize, Default, Eq, PartialEq)]
-struct RequestParameters {
-    ids: Vec<String>,
-    alias: Option<SetChanges<String>>,
+struct RequestParameters<'a> {
+    ids: &'a [String],
+    alias: Option<SetChanges<&'a String>>,
     assigned_to: Option<String>,
-    blocks: Option<SetChanges<u64>>,
+    blocks: Option<SetChanges<&'a u64>>,
     cc: Option<Changes<String>>,
     comment: Option<Comment>,
     comment_is_private: Option<IndexMap<u64, bool>>,
-    component: Option<String>,
-    depends_on: Option<SetChanges<u64>>,
+    component: Option<&'a str>,
+    depends_on: Option<SetChanges<&'a u64>>,
     dupe_of: Option<u64>,
-    flags: Option<Vec<Flag>>,
+    flags: Option<&'a [Flag]>,
     groups: Option<Changes<String>>,
-    keywords: Option<SetChanges<String>>,
-    op_sys: Option<String>,
-    platform: Option<String>,
-    priority: Option<String>,
-    product: Option<String>,
+    keywords: Option<SetChanges<&'a String>>,
+    op_sys: Option<&'a str>,
+    platform: Option<&'a str>,
+    priority: Option<&'a str>,
+    product: Option<&'a str>,
     qa_contact: Option<String>,
     reset_assigned_to: Option<bool>,
     reset_qa_contact: Option<bool>,
-    resolution: Option<String>,
+    resolution: Option<&'a str>,
     see_also: Option<Changes<String>>,
-    severity: Option<String>,
-    status: Option<String>,
-    summary: Option<String>,
-    target_milestone: Option<String>,
-    url: Option<String>,
-    version: Option<String>,
-    whiteboard: Option<String>,
+    severity: Option<&'a str>,
+    status: Option<&'a str>,
+    summary: Option<&'a str>,
+    target_milestone: Option<&'a str>,
+    url: Option<&'a str>,
+    version: Option<&'a str>,
+    whiteboard: Option<&'a str>,
 
     #[serde(flatten)]
-    custom_fields: Option<IndexMap<String, String>>,
+    custom_fields: Option<IndexMap<String, &'a String>>,
 }
 
 #[cfg(test)]

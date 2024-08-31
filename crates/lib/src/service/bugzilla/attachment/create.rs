@@ -272,9 +272,13 @@ impl Attachment {
     }
 
     /// Build an attachment for request submission.
-    fn build(self, ids: &[String], temp_dir_path: &Utf8Path) -> crate::Result<RequestAttachment> {
+    fn build<'a>(
+        &'a self,
+        ids: &'a [String],
+        temp_dir_path: &Utf8Path,
+    ) -> crate::Result<RequestAttachment<'a>> {
         let path_is_dir = self.path.is_dir();
-        let mut path = self.path;
+        let mut path = self.path.clone();
         let mut file_name = path
             .file_name()
             .map(|s| s.to_string())
@@ -350,15 +354,15 @@ impl Attachment {
         }
 
         Ok(RequestAttachment {
-            ids: ids.to_vec(),
+            ids,
             data: Base64(data),
-            content_type: self.mime_type.unwrap_or(mime_type),
-            file_name: self.name.unwrap_or(file_name.clone()),
-            summary: self.description.unwrap_or(file_name),
-            comment: self.comment.unwrap_or_default(),
+            content_type: self.mime_type.clone().unwrap_or(mime_type),
+            file_name: self.name.clone().unwrap_or(file_name.clone()),
+            summary: self.description.clone().unwrap_or(file_name),
+            comment: self.comment.as_deref().unwrap_or_default(),
             is_patch,
             is_private: self.is_private.unwrap_or_default(),
-            flags: self.flags,
+            flags: self.flags.as_deref(),
         })
     }
 }
@@ -366,16 +370,16 @@ impl Attachment {
 /// Attachment object used for request submission.
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
-struct RequestAttachment {
-    ids: Vec<String>,
+struct RequestAttachment<'a> {
+    ids: &'a [String],
     data: Base64,
     file_name: String,
     content_type: String,
     summary: String,
-    comment: String,
+    comment: &'a str,
     is_patch: bool,
     is_private: bool,
-    flags: Option<Vec<Flag>>,
+    flags: Option<&'a [Flag]>,
 }
 
 #[derive(Debug)]
@@ -425,7 +429,7 @@ impl<'a> Request<'a> {
 impl RequestSend for Request<'_> {
     type Output = Vec<Vec<u64>>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let url = self.url()?;
 
         if self.attachments.is_empty() {
@@ -441,7 +445,7 @@ impl RequestSend for Request<'_> {
             .ok_or_else(|| Error::InvalidValue("non-unicode temporary dir path".to_string()))?;
 
         let mut futures = vec![];
-        for attachment in self.attachments {
+        for attachment in &self.attachments {
             let attachment = attachment.build(&self.ids, temp_dir_path)?;
             futures.push(
                 self.service

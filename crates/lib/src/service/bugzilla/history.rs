@@ -75,7 +75,7 @@ impl<'a> Request<'a> {
 impl RequestSend for Request<'_> {
     type Output = Vec<Vec<Event>>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let request = self
             .service
             .client

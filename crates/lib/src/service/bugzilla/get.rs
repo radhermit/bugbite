@@ -85,7 +85,7 @@ impl<'a> Request<'a> {
 impl RequestSend for Request<'_> {
     type Output = Vec<Bug>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let request = self
             .service
             .client
@@ -93,9 +93,9 @@ impl RequestSend for Request<'_> {
             .auth_optional(self.service);
 
         // send data requests
-        let attachments = self.attachments.map(|r| r.send());
-        let comments = self.comments.map(|r| r.send());
-        let history = self.history.map(|r| r.send());
+        let attachments = self.attachments.as_ref().map(|r| r.send());
+        let comments = self.comments.as_ref().map(|r| r.send());
+        let history = self.history.as_ref().map(|r| r.send());
 
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;

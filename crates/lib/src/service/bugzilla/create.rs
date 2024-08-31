@@ -38,7 +38,7 @@ impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
 impl RequestSend for Request<'_> {
     type Output = u64;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let url = self.service.config.base.join("rest/bug")?;
         let params = self.params.encode(self.service)?;
         let request = self
@@ -350,40 +350,43 @@ impl Parameters {
     }
 
     /// Encode parameters into the form required for the request.
-    fn encode(self, service: &Service) -> crate::Result<RequestParameters> {
+    fn encode<'a>(&'a self, service: &Service) -> crate::Result<RequestParameters<'a>> {
         let params = RequestParameters {
             // required fields with defaults
-            op_sys: self.os.unwrap_or_else(|| "All".to_string()),
-            platform: self.platform.unwrap_or_else(|| "All".to_string()),
-            priority: self.priority.unwrap_or_else(|| "Normal".to_string()),
-            severity: self.severity.unwrap_or_else(|| "normal".to_string()),
-            version: self.version.unwrap_or_else(|| "unspecified".to_string()),
+            op_sys: self.os.as_deref().unwrap_or("All"),
+            platform: self.platform.as_deref().unwrap_or("All"),
+            priority: self.priority.as_deref().unwrap_or("Normal"),
+            severity: self.severity.as_deref().unwrap_or("normal"),
+            version: self.version.as_deref().unwrap_or("unspecified"),
 
             // required fields without defaults
-            component: self.component.unwrap_or_default(),
-            description: self.description.unwrap_or_default(),
-            product: self.product.unwrap_or_default(),
-            summary: self.summary.unwrap_or_default(),
+            component: self.component.as_deref().unwrap_or_default(),
+            description: self.description.as_deref().unwrap_or_default(),
+            product: self.product.as_deref().unwrap_or_default(),
+            summary: self.summary.as_deref().unwrap_or_default(),
 
             // optional fields
-            alias: self.alias,
-            assigned_to: self.assignee.map(|x| service.replace_user_alias(x)),
-            blocks: self.blocks,
-            cc: self.cc,
-            depends_on: self.depends,
-            flags: self.flags,
-            groups: self.groups,
-            keywords: self.keywords,
-            qa_contact: self.qa.map(|x| service.replace_user_alias(x)),
-            resolution: self.resolution,
-            see_also: self.see_also,
-            status: self.status,
-            target_milestone: self.target,
-            url: self.url,
-            whiteboard: self.whiteboard,
+            alias: self.alias.as_deref(),
+            assigned_to: self
+                .assignee
+                .as_deref()
+                .map(|x| service.replace_user_alias(x)),
+            blocks: self.blocks.as_deref(),
+            cc: self.cc.as_deref(),
+            depends_on: self.depends.as_deref(),
+            flags: self.flags.as_deref(),
+            groups: self.groups.as_deref(),
+            keywords: self.keywords.as_deref(),
+            qa_contact: self.qa.as_deref().map(|x| service.replace_user_alias(x)),
+            resolution: self.resolution.as_deref(),
+            see_also: self.see_also.as_deref(),
+            status: self.status.as_deref(),
+            target_milestone: self.target.as_deref(),
+            url: self.url.as_deref(),
+            whiteboard: self.whiteboard.as_deref(),
 
             // auto-prefix custom field names
-            custom_fields: self.custom_fields.map(|values| {
+            custom_fields: self.custom_fields.as_ref().map(|values| {
                 values
                     .into_iter()
                     .map(|(name, value)| (prefix!("cf_", name), value))
@@ -394,15 +397,15 @@ impl Parameters {
         // verify required fields are non-empty
         let mut missing = vec![];
         for (value, name) in [
-            (&params.component, "component"),
-            (&params.description, "description"),
-            (&params.op_sys, "os"),
-            (&params.platform, "platform"),
-            (&params.priority, "priority"),
-            (&params.product, "product"),
-            (&params.severity, "severity"),
-            (&params.summary, "summary"),
-            (&params.version, "version"),
+            (params.component, "component"),
+            (params.description, "description"),
+            (params.op_sys, "os"),
+            (params.platform, "platform"),
+            (params.priority, "priority"),
+            (params.product, "product"),
+            (params.severity, "severity"),
+            (params.summary, "summary"),
+            (params.version, "version"),
         ] {
             if value.is_empty() {
                 missing.push(name);
@@ -441,37 +444,37 @@ impl From<Bug> for Parameters {
 /// information.
 #[skip_serializing_none]
 #[derive(Serialize)]
-struct RequestParameters {
+struct RequestParameters<'a> {
     // required fields
-    component: String,
-    description: String,
-    op_sys: String,
-    platform: String,
-    priority: String,
-    product: String,
-    severity: String,
-    summary: String,
-    version: String,
+    component: &'a str,
+    description: &'a str,
+    op_sys: &'a str,
+    platform: &'a str,
+    priority: &'a str,
+    product: &'a str,
+    severity: &'a str,
+    summary: &'a str,
+    version: &'a str,
 
     // optional fields
-    alias: Option<Vec<String>>,
+    alias: Option<&'a [String]>,
     assigned_to: Option<String>,
-    blocks: Option<Vec<String>>,
-    cc: Option<Vec<String>>,
-    depends_on: Option<Vec<String>>,
-    flags: Option<Vec<Flag>>,
-    groups: Option<Vec<String>>,
-    keywords: Option<Vec<String>>,
+    blocks: Option<&'a [String]>,
+    cc: Option<&'a [String]>,
+    depends_on: Option<&'a [String]>,
+    flags: Option<&'a [Flag]>,
+    groups: Option<&'a [String]>,
+    keywords: Option<&'a [String]>,
     qa_contact: Option<String>,
-    resolution: Option<String>,
-    see_also: Option<Vec<String>>,
-    status: Option<String>,
-    target_milestone: Option<String>,
-    url: Option<String>,
-    whiteboard: Option<String>,
+    resolution: Option<&'a str>,
+    see_also: Option<&'a [String]>,
+    status: Option<&'a str>,
+    target_milestone: Option<&'a str>,
+    url: Option<&'a str>,
+    whiteboard: Option<&'a str>,
 
     #[serde(flatten)]
-    custom_fields: Option<IndexMap<String, String>>,
+    custom_fields: Option<IndexMap<String, &'a String>>,
 }
 
 #[cfg(test)]

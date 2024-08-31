@@ -38,17 +38,17 @@ pub struct Parameters {
 
 impl Parameters {
     /// Encode parameters into the form required for the request.
-    fn encode(self, ids: Vec<String>) -> RequestParameters {
+    fn encode<'a>(&'a self, ids: &'a [String]) -> RequestParameters<'a> {
         RequestParameters {
             ids,
-            file_name: self.name,
-            summary: self.description,
-            comment: self.comment,
-            content_type: self.mime_type,
+            file_name: self.name.as_deref(),
+            summary: self.description.as_deref(),
+            comment: self.comment.as_deref(),
+            content_type: self.mime_type.as_deref(),
             is_patch: self.patch,
             is_private: self.private,
             is_obsolete: self.obsolete,
-            flags: self.flags,
+            flags: self.flags.as_deref(),
         }
     }
 }
@@ -56,16 +56,16 @@ impl Parameters {
 /// Internal attachment update request parameters.
 #[skip_serializing_none]
 #[derive(Serialize)]
-struct RequestParameters {
-    ids: Vec<String>,
-    file_name: Option<String>,
-    summary: Option<String>,
-    comment: Option<String>,
-    content_type: Option<String>,
+struct RequestParameters<'a> {
+    ids: &'a [String],
+    file_name: Option<&'a str>,
+    summary: Option<&'a str>,
+    comment: Option<&'a str>,
+    content_type: Option<&'a str>,
     is_patch: Option<bool>,
     is_private: Option<bool>,
     is_obsolete: Option<bool>,
-    flags: Option<Vec<Flag>>,
+    flags: Option<&'a [Flag]>,
 }
 
 #[derive(Debug)]
@@ -112,9 +112,9 @@ impl<'a> Request<'a> {
 impl RequestSend for Request<'_> {
     type Output = Vec<u64>;
 
-    async fn send(self) -> crate::Result<Self::Output> {
+    async fn send(&self) -> crate::Result<Self::Output> {
         let url = self.url()?;
-        let params = self.params.encode(self.ids);
+        let params = self.params.encode(&self.ids);
         let request = self
             .service
             .client
