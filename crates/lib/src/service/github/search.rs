@@ -8,18 +8,18 @@ use strum::{Display, EnumIter, EnumString, VariantNames};
 use tracing::debug;
 
 use crate::objects::github::Issue;
-use crate::query::{self, Order};
+use crate::query::{Order, Query};
 use crate::traits::{Api, RequestMerge, RequestSend};
 use crate::utils::or;
 use crate::Error;
 
 struct QueryBuilder<'a> {
     _service: &'a super::Service,
-    query: query::QueryBuilder,
+    query: Query,
 }
 
 impl Deref for QueryBuilder<'_> {
-    type Target = query::QueryBuilder;
+    type Target = Query;
 
     fn deref(&self) -> &Self::Target {
         &self.query
@@ -109,14 +109,14 @@ impl<'a> Request<'a> {
         }
     }
 
-    fn encode(&self) -> crate::Result<String> {
+    fn encode(&self) -> crate::Result<QueryBuilder> {
         let mut query = QueryBuilder::new(self.service);
 
         if let Some(value) = &self.params.order {
             query.insert("sort", value);
         }
 
-        Ok(query.encode())
+        Ok(query)
     }
 }
 

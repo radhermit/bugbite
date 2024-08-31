@@ -9,17 +9,11 @@ use crate::traits::Api;
 use crate::Error;
 
 #[derive(Debug, Default)]
-pub(crate) struct QueryBuilder {
+pub(crate) struct Query {
     query: ListOrderedMultimap<String, String>,
 }
 
-impl QueryBuilder {
-    pub(crate) fn encode(&self) -> String {
-        let mut params = url::form_urlencoded::Serializer::new(String::new());
-        params.extend_pairs(self.query.iter());
-        params.finish()
-    }
-
+impl Query {
     pub(crate) fn append<K, V>(&mut self, key: K, value: V)
     where
         K: Api,
@@ -34,6 +28,15 @@ impl QueryBuilder {
         V: Api,
     {
         self.query.insert(key.api(), value.api());
+    }
+}
+
+impl<'a> IntoIterator for &'a Query {
+    type Item = (&'a String, &'a String);
+    type IntoIter = ordered_multimap::list_ordered_multimap::Iter<'a, String, String>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.query.iter()
     }
 }
 

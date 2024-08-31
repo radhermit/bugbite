@@ -42,7 +42,7 @@ where
 pub(crate) fn launch_browser<I, S>(urls: I) -> Result<()>
 where
     I: IntoIterator<Item = S>,
-    S: AsRef<OsStr>,
+    S: AsRef<str>,
 {
     let browser = env::var("BROWSER").unwrap_or_default();
     let mut args = shlex::split(&browser)
@@ -55,7 +55,7 @@ where
     for url in urls {
         Command::new(cmd)
             .args(&args)
-            .arg(url)
+            .arg(url.as_ref())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .spawn()

@@ -1,8 +1,7 @@
 use std::collections::HashSet;
-use std::fmt;
-use std::fs;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
+use std::{fmt, fs};
 
 use camino::Utf8Path;
 use indexmap::IndexSet;
@@ -10,11 +9,12 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 use strum::{Display, EnumIter, EnumString, VariantNames};
+use url::Url;
 
 use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
-use crate::query::{self, Order};
+use crate::query::{Order, Query};
 use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, WebService};
@@ -50,12 +50,9 @@ impl RequestSend for Request<'_> {
     type Output = Vec<Bug>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
+        let mut url = self.service.config.base.join("rest/bug")?;
         let params = self.encode()?;
-        let url = self
-            .service
-            .config
-            .base
-            .join(&format!("rest/bug?{params}"))?;
+        url.query_pairs_mut().extend_pairs(&params.query);
         let request = self.service.client.get(url).auth_optional(self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
@@ -82,7 +79,7 @@ impl<'a> Request<'a> {
         }
     }
 
-    fn encode(&self) -> crate::Result<String> {
+    fn encode(&self) -> crate::Result<QueryBuilder> {
         let mut query = QueryBuilder::new(self.service);
 
         if let Some(values) = &self.params.status {
@@ -480,14 +477,15 @@ impl<'a> Request<'a> {
             query.attachment_is_private(*value);
         }
 
-        Ok(query.encode())
+        Ok(query)
     }
 
     /// Return the website URL for a query.
-    pub fn search_url(self) -> crate::Result<String> {
-        let base = self.service.config.base().as_str().trim_end_matches('/');
+    pub fn search_url(self) -> crate::Result<Url> {
+        let mut url = self.service.config.base.join("buglist.cgi")?;
         let params = self.encode()?;
-        Ok(format!("{base}/buglist.cgi?{params}"))
+        url.query_pairs_mut().extend_pairs(&params.query);
+        Ok(url)
     }
 
     pub fn alias<T>(mut self, value: T) -> Self
@@ -982,12 +980,12 @@ impl Parameters {
 #[derive(Debug)]
 struct QueryBuilder<'a> {
     service: &'a Service,
-    query: query::QueryBuilder,
+    query: Query,
     advanced_count: u64,
 }
 
 impl Deref for QueryBuilder<'_> {
-    type Target = query::QueryBuilder;
+    type Target = Query;
 
     fn deref(&self) -> &Self::Target {
         &self.query

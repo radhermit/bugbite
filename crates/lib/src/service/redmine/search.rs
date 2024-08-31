@@ -6,11 +6,12 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString, VariantNames};
+use url::Url;
 
 use crate::args::ExistsOrValues;
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
-use crate::query::{self, Order};
+use crate::query::{Order, Query};
 use crate::service::redmine::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, WebService};
@@ -33,7 +34,7 @@ impl<'a> Request<'a> {
         }
     }
 
-    fn encode(&self) -> crate::Result<String> {
+    fn encode(&self) -> crate::Result<QueryBuilder> {
         let mut query = QueryBuilder::new(self.service);
 
         if let Some(values) = &self.params.blocks {
@@ -112,14 +113,15 @@ impl<'a> Request<'a> {
             query.insert("offset", value);
         }
 
-        Ok(query.encode())
+        Ok(query)
     }
 
     /// Return the website URL for a query.
-    pub fn search_url(self) -> crate::Result<String> {
-        let base = self.service.config.base().as_str().trim_end_matches('/');
+    pub fn search_url(self) -> crate::Result<Url> {
+        let mut url = self.service.config.base.join("issues?set_filter=1")?;
         let params = self.encode()?;
-        Ok(format!("{base}/issues?set_filter=1&{params}"))
+        url.query_pairs_mut().extend_pairs(&params.query);
+        Ok(url)
     }
 
     pub fn order<I>(mut self, values: I) -> Self
@@ -158,12 +160,9 @@ impl RequestSend for Request<'_> {
     type Output = Vec<Issue>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
+        let mut url = self.service.config.base.join("issues.json")?;
         let params = self.encode()?;
-        let url = self
-            .service
-            .config
-            .base()
-            .join(&format!("issues.json?{params}"))?;
+        url.query_pairs_mut().extend_pairs(&params.query);
         let request = self.service.client.get(url).auth_optional(self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
@@ -228,11 +227,11 @@ impl Parameters {
 
 struct QueryBuilder<'a> {
     _service: &'a Service,
-    query: query::QueryBuilder,
+    query: Query,
 }
 
 impl Deref for QueryBuilder<'_> {
-    type Target = query::QueryBuilder;
+    type Target = Query;
 
     fn deref(&self) -> &Self::Target {
         &self.query
