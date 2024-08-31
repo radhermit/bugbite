@@ -133,6 +133,9 @@ macro_rules! verbose {
     ($enable:expr) => {
         $crate::utils::VERBOSE.store($enable, std::sync::atomic::Ordering::SeqCst);
     };
+    () => {
+        $crate::utils::VERBOSE.load(std::sync::atomic::Ordering::Acquire)
+    };
 }
 pub(crate) use verbose;
 
