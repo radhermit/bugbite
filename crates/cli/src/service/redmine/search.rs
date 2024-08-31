@@ -10,7 +10,7 @@ use bugbite::service::redmine::search::{OrderField, Parameters};
 use bugbite::service::redmine::IssueField;
 use bugbite::service::redmine::Service;
 use bugbite::time::TimeDeltaOrStatic;
-use bugbite::traits::{RequestMerge, RequestSend};
+use bugbite::traits::RequestMerge;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 
@@ -228,8 +228,8 @@ impl Command {
             let url = request.search_url()?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
-            let items = request.send().await?;
-            render_search(f, items, &fields, self.options.json)?;
+            let items = request.stream().await;
+            render_search(f, items, &fields, self.options.json).await?;
         }
 
         Ok(ExitCode::SUCCESS)

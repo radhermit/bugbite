@@ -3,6 +3,10 @@ use std::io::{self, IsTerminal, Write};
 
 use bugbite::traits::RenderSearch;
 use bugbite::utils::is_terminal;
+use futures::{
+    pin_mut,
+    stream::{Stream, TryStreamExt},
+};
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use serde::Serialize;
@@ -33,20 +37,21 @@ where
     Ok(())
 }
 
-pub(crate) fn render_search<I, V, T, W>(
+pub(crate) async fn render_search<I, V, T, W>(
     f: &mut W,
     items: I,
     fields: &[T],
     json: bool,
 ) -> Result<(), bugbite::Error>
 where
-    I: IntoIterator<Item = V>,
+    I: Stream<Item = bugbite::Result<V>>,
     V: RenderSearch<T> + Serialize,
     W: IsTerminal + Write,
 {
     let mut count = 0;
 
-    for item in items {
+    pin_mut!(items);
+    while let Some(item) = items.try_next().await? {
         count += 1;
         if json {
             let data = serde_json::to_string(&item).expect("failed serializing item");

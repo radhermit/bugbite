@@ -3,7 +3,9 @@ use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 use std::{fmt, fs};
 
+use async_stream::try_stream;
 use camino::Utf8Path;
+use futures::stream::Stream;
 use indexmap::IndexSet;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -23,7 +25,7 @@ use crate::Error;
 
 use super::{BugField, FilterField};
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
@@ -76,6 +78,39 @@ impl<'a> Request<'a> {
         Self {
             service,
             params: Default::default(),
+        }
+    }
+
+    // TODO: submit multiple requests at once?
+    pub async fn stream(&self) -> impl Stream<Item = crate::Result<Bug>> + '_ {
+        try_stream! {
+            // TODO: pull max from service config
+            let limit = self.params.limit.unwrap_or(10000);
+            let mut offset = self.params.offset.unwrap_or_default();
+            let mut req = self.clone().limit(limit);
+
+            loop {
+                req.params.offset = Some(offset);
+                let items = req.send().await?;
+
+                // no more items exist
+                if items.is_empty() {
+                    break;
+                }
+
+                let mut count = 0;
+                for bug in items {
+                    yield bug;
+                    count += 1;
+                }
+
+                // no additional items exist
+                if count < limit {
+                    break;
+                }
+
+                offset += limit;
+            }
         }
     }
 

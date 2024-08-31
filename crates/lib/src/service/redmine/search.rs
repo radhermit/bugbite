@@ -1,7 +1,9 @@
 use std::ops::{Deref, DerefMut};
 use std::{fmt, fs};
 
+use async_stream::try_stream;
 use camino::Utf8Path;
+use futures::stream::Stream;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -18,7 +20,7 @@ use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, WebService};
 use crate::utils::or;
 use crate::Error;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
@@ -31,6 +33,40 @@ impl<'a> Request<'a> {
         Self {
             service,
             params: Default::default(),
+        }
+    }
+
+    // TODO: submit multiple requests at once?
+    pub async fn stream(&self) -> impl Stream<Item = crate::Result<Issue>> + '_ {
+        try_stream! {
+            // TODO: pull max from service config
+            let limit = self.params.limit.unwrap_or(100);
+            let mut offset = self.params.offset.unwrap_or_default();
+            let mut req = self.clone();
+            req.params.limit = Some(limit);
+
+            loop {
+                req.params.offset = Some(offset);
+                let items = req.send().await?;
+
+                // no more items exist
+                if items.is_empty() {
+                    break;
+                }
+
+                let mut count = 0;
+                for item in items {
+                    yield item;
+                    count += 1;
+                }
+
+                // no additional item exist
+                if count < limit {
+                    break;
+                }
+
+                offset += limit;
+            }
         }
     }
 
