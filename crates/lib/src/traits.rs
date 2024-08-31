@@ -46,6 +46,12 @@ impl Api for u64 {
     }
 }
 
+impl Api for usize {
+    fn api(&self) -> String {
+        self.to_string()
+    }
+}
+
 impl Api for i64 {
     fn api(&self) -> String {
         self.to_string()

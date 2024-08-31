@@ -334,11 +334,11 @@ struct QueryOptions {
 
     /// limit result count
     #[arg(short, long)]
-    limit: Option<u64>,
+    limit: Option<usize>,
 
     /// result starting position
     #[arg(short = 'O', long)]
-    offset: Option<u64>,
+    offset: Option<usize>,
 
     /// order query results
     #[arg(short, long, value_name = "FIELD[,...]")]

@@ -44,25 +44,15 @@ impl<'a> Request<'a> {
             let mut offset = self.params.offset.unwrap_or_default();
             let mut req = self.clone();
             req.params.limit = Some(limit);
+            let mut count = limit;
 
-            loop {
+            while count == limit {
                 req.params.offset = Some(offset);
                 let items = req.send().await?;
+                count = items.len();
 
-                // no more items exist
-                if items.is_empty() {
-                    break;
-                }
-
-                let mut count = 0;
                 for item in items {
                     yield item;
-                    count += 1;
-                }
-
-                // no additional item exist
-                if count < limit {
-                    break;
                 }
 
                 offset += limit;
@@ -224,8 +214,8 @@ pub struct Parameters {
     pub updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
     pub closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
-    pub limit: Option<u64>,
-    pub offset: Option<u64>,
+    pub limit: Option<usize>,
+    pub offset: Option<usize>,
     pub order: Option<Vec<Order<OrderField>>>,
 
     pub status: Option<String>,

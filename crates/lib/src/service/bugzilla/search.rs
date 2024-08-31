@@ -88,25 +88,15 @@ impl<'a> Request<'a> {
             let limit = self.params.limit.unwrap_or(10000);
             let mut offset = self.params.offset.unwrap_or_default();
             let mut req = self.clone().limit(limit);
+            let mut count = limit;
 
-            loop {
+            while count == limit {
                 req.params.offset = Some(offset);
                 let items = req.send().await?;
+                count = items.len();
 
-                // no more items exist
-                if items.is_empty() {
-                    break;
-                }
-
-                let mut count = 0;
                 for bug in items {
                     yield bug;
-                    count += 1;
-                }
-
-                // no additional items exist
-                if count < limit {
-                    break;
                 }
 
                 offset += limit;
@@ -848,12 +838,12 @@ impl<'a> Request<'a> {
         self
     }
 
-    pub fn limit(mut self, value: u64) -> Self {
+    pub fn limit(mut self, value: usize) -> Self {
         self.params.limit = Some(value);
         self
     }
 
-    pub fn offset(mut self, value: u64) -> Self {
+    pub fn offset(mut self, value: usize) -> Self {
         self.params.offset = Some(value);
         self
     }
@@ -900,8 +890,8 @@ pub struct Parameters {
 
     #[serde(skip_serializing)]
     pub fields: Option<Vec<FilterField>>,
-    pub limit: Option<u64>,
-    pub offset: Option<u64>,
+    pub limit: Option<usize>,
+    pub offset: Option<usize>,
     pub order: Option<Vec<Order<OrderField>>>,
 
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
