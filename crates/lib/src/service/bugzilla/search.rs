@@ -1113,19 +1113,33 @@ impl From<i64> for ExistsOrValues<i64> {
     }
 }
 
-macro_rules! make_exists_or_values_match {
+macro_rules! make_exists_or_values_match_ref {
     ($($x:ty),+) => {$(
-        impl<T> From<$x> for ExistsOrValues<Match>
-        where
-            T: Into<Match> + Copy,
-        {
+        impl From<$x> for ExistsOrValues<Match> {
             fn from(values: $x) -> Self {
                 ExistsOrValues::Values(values.iter().copied().map(Into::into).collect())
             }
         }
     )+};
 }
-make_exists_or_values_match!(&[T], &Vec<T>, &HashSet<T>, &IndexSet<T>);
+make_exists_or_values_match_ref!(&[&str], &Vec<&str>, &HashSet<&str>, &IndexSet<&str>);
+make_exists_or_values_match_ref!(
+    &[&String],
+    &Vec<&String>,
+    &HashSet<&String>,
+    &IndexSet<&String>
+);
+
+macro_rules! make_exists_or_values_match_owned {
+    ($($x:ty),+) => {$(
+        impl From<$x> for ExistsOrValues<Match> {
+            fn from(values: $x) -> Self {
+                ExistsOrValues::Values(values.into_iter().map(Into::into).collect())
+            }
+        }
+    )+};
+}
+make_exists_or_values_match_owned!(&[String], &Vec<String>, &HashSet<String>, &IndexSet<String>);
 
 macro_rules! make_exists_or_values_i64 {
     ($($x:ty),+) => {$(
@@ -1923,7 +1937,7 @@ mod tests {
             .await
             .unwrap();
 
-        // vector
+        // vector str
         let values = vec!["value1", "value2"];
         service.search().alias(&values).send().await.unwrap();
         service
@@ -1932,15 +1946,47 @@ mod tests {
             .send()
             .await
             .unwrap();
+        // vector owned
+        let values: Vec<_> = values.iter().map(|x| x.to_string()).collect();
+        service.search().alias(&values).send().await.unwrap();
+        service
+            .search()
+            .alias(values.as_slice())
+            .send()
+            .await
+            .unwrap();
+        // vector ref
+        let values: Vec<_> = values.iter().collect();
+        service.search().alias(&values).send().await.unwrap();
+        service
+            .search()
+            .alias(values.as_slice())
+            .send()
+            .await
+            .unwrap();
 
-        // slice
+        // slice str
         let values = &["value1", "value2"];
         service.search().alias(values).send().await.unwrap();
 
-        // set
+        // hashset str
         let values = HashSet::from(["value1", "value2"]);
         service.search().alias(&values).send().await.unwrap();
+        // hashset owned
+        let values: HashSet<_> = values.iter().map(|x| x.to_string()).collect();
+        service.search().alias(&values).send().await.unwrap();
+        // hashset ref
+        let values: HashSet<_> = values.iter().collect();
+        service.search().alias(&values).send().await.unwrap();
+
+        // IndexSet str
         let values = IndexSet::from(["value1", "value2"]);
+        service.search().alias(&values).send().await.unwrap();
+        // IndexSet owned
+        let values: IndexSet<_> = values.iter().map(|x| x.to_string()).collect();
+        service.search().alias(&values).send().await.unwrap();
+        // IndexSet ref
+        let values: IndexSet<_> = values.iter().collect();
         service.search().alias(&values).send().await.unwrap();
     }
 
@@ -1962,73 +2008,55 @@ mod tests {
         service.search().alias(true).send().await.unwrap();
         service.search().alias(false).send().await.unwrap();
         service.search().alias("value").send().await.unwrap();
-        for s in &matches {
-            service.search().alias(s).send().await.unwrap();
-        }
+        service.search().alias(&matches).send().await.unwrap();
 
         // attachments
         service.search().attachments(true).send().await.unwrap();
         service.search().attachments(false).send().await.unwrap();
         service.search().attachments("value").send().await.unwrap();
-        for s in &matches {
-            service.search().attachments(s).send().await.unwrap();
-        }
+        service.search().attachments(&matches).send().await.unwrap();
 
         // flags
         service.search().flags(true).send().await.unwrap();
         service.search().flags(false).send().await.unwrap();
         service.search().flags("value").send().await.unwrap();
-        for s in &matches {
-            service.search().flags(s).send().await.unwrap();
-        }
+        service.search().flags(&matches).send().await.unwrap();
 
         // groups
         service.search().groups(true).send().await.unwrap();
         service.search().groups(false).send().await.unwrap();
         service.search().groups("value").send().await.unwrap();
-        for s in &matches {
-            service.search().groups(s).send().await.unwrap();
-        }
+        service.search().groups(&matches).send().await.unwrap();
 
         // keywords
         service.search().keywords(true).send().await.unwrap();
         service.search().keywords(false).send().await.unwrap();
         service.search().keywords("value").send().await.unwrap();
-        for s in &matches {
-            service.search().keywords(s).send().await.unwrap();
-        }
+        service.search().keywords(&matches).send().await.unwrap();
 
         // see_also
         service.search().see_also(true).send().await.unwrap();
         service.search().see_also(false).send().await.unwrap();
         service.search().see_also("value").send().await.unwrap();
-        for s in &matches {
-            service.search().see_also(s).send().await.unwrap();
-        }
+        service.search().see_also(&matches).send().await.unwrap();
 
         // tags
         service.search().tags(true).send().await.unwrap();
         service.search().tags(false).send().await.unwrap();
         service.search().tags("value").send().await.unwrap();
-        for s in &matches {
-            service.search().tags(s).send().await.unwrap();
-        }
+        service.search().tags(&matches).send().await.unwrap();
 
         // whiteboard
         service.search().whiteboard(true).send().await.unwrap();
         service.search().whiteboard(false).send().await.unwrap();
         service.search().whiteboard("value").send().await.unwrap();
-        for s in &matches {
-            service.search().whiteboard(s).send().await.unwrap();
-        }
+        service.search().whiteboard(&matches).send().await.unwrap();
 
         // url
         service.search().url(true).send().await.unwrap();
         service.search().url(false).send().await.unwrap();
         service.search().url("value").send().await.unwrap();
-        for s in &matches {
-            service.search().url(s).send().await.unwrap();
-        }
+        service.search().url(&matches).send().await.unwrap();
 
         // change related combinators
         for field in ChangeField::iter() {
@@ -2106,9 +2134,7 @@ mod tests {
         service.search().cc(true).send().await.unwrap();
         service.search().cc(false).send().await.unwrap();
         service.search().cc("value").send().await.unwrap();
-        for s in &matches {
-            service.search().cc(s).send().await.unwrap();
-        }
+        service.search().cc(&matches).send().await.unwrap();
 
         // commenter
         service.search().commenter(["value"]).send().await.unwrap();
@@ -2120,9 +2146,7 @@ mod tests {
         service.search().qa(true).send().await.unwrap();
         service.search().qa(false).send().await.unwrap();
         service.search().qa("value").send().await.unwrap();
-        for s in &matches {
-            service.search().qa(s).send().await.unwrap();
-        }
+        service.search().qa(&matches).send().await.unwrap();
 
         // reporter
         service.search().reporter(["value"]).send().await.unwrap();
