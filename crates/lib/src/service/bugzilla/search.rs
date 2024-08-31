@@ -83,23 +83,31 @@ impl<'a> Request<'a> {
 
     // TODO: submit multiple requests at once?
     pub async fn stream(&self) -> impl Stream<Item = crate::Result<Bug>> + '_ {
-        try_stream! {
-            // TODO: pull max from service config
-            let limit = self.params.limit.unwrap_or(10000);
-            let mut offset = self.params.offset.unwrap_or_default();
-            let mut req = self.clone().limit(limit);
-            let mut count = limit;
+        // TODO: pull max from service config
+        let max = 10000;
+        let paged = self.params.limit.is_none();
 
-            while count == limit {
+        try_stream! {
+            let mut offset = self.params.offset.unwrap_or_default();
+            let mut req = self.clone();
+            if paged {
+                req.params.limit = Some(max);
+            }
+
+            loop {
                 req.params.offset = Some(offset);
                 let items = req.send().await?;
-                count = items.len();
+                let count = items.len();
 
                 for bug in items {
                     yield bug;
                 }
 
-                offset += limit;
+                if !paged || count != max {
+                    break;
+                }
+
+                offset += max;
             }
         }
     }
