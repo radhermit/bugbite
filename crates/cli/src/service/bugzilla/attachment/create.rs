@@ -158,10 +158,8 @@ impl Command {
         let item_ids = self.args.ids.iter().join(", ");
         for (file, ids) in self.args.files.iter().zip(attachment_ids.iter()) {
             let ids = ids.iter().map(|x| x.to_string()).join(", ");
-            verbose!(
-                f,
-                "{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})"
-            )?;
+            let line = format!("{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})");
+            verbose!(f, "{line}")?;
         }
 
         Ok(ExitCode::SUCCESS)

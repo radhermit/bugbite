@@ -123,9 +123,9 @@ pub(crate) use prefix;
 pub(crate) static VERBOSE: AtomicBool = AtomicBool::new(false);
 
 macro_rules! verbose {
-    ($handle:expr, $data:expr) => {
+    ($dst:expr, $($arg:tt)+) => {
         if $crate::utils::VERBOSE.load(std::sync::atomic::Ordering::Acquire) {
-            writeln!($handle, $data)
+            writeln!($dst, $($arg)+)
         } else {
             Ok(())
         }
