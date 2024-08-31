@@ -188,13 +188,13 @@ impl<'a> Request<'a> {
 
 /// Supported change variants for set-based fields.
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Eq, PartialEq, Clone)]
-pub enum SetChange<T: Clone> {
+pub enum SetChange<T> {
     Add(T),
     Remove(T),
     Set(T),
 }
 
-impl<T: FromStr + Clone> FromStr for SetChange<T> {
+impl<T: FromStr> FromStr for SetChange<T> {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
@@ -217,7 +217,7 @@ impl<T: FromStr + Clone> FromStr for SetChange<T> {
     }
 }
 
-impl<T: FromStr + Clone + fmt::Display> fmt::Display for SetChange<T> {
+impl<T: fmt::Display> fmt::Display for SetChange<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Add(value) => write!(f, "+{value}"),
@@ -235,7 +235,7 @@ struct SetChanges<T> {
     set: Option<Vec<T>>,
 }
 
-impl<'a, T: FromStr + Clone> FromIterator<&'a SetChange<T>> for SetChanges<&'a T> {
+impl<'a, T: FromStr> FromIterator<&'a SetChange<T>> for SetChanges<&'a T> {
     fn from_iter<I: IntoIterator<Item = &'a SetChange<T>>>(iterable: I) -> Self {
         let (mut add, mut remove, mut set) = (vec![], vec![], vec![]);
         for change in iterable {
@@ -267,7 +267,7 @@ struct Changes<T> {
     remove: Option<Vec<T>>,
 }
 
-impl<T: FromStr + Clone> FromIterator<SetChange<T>> for Changes<T> {
+impl<T> FromIterator<SetChange<T>> for Changes<T> {
     fn from_iter<I: IntoIterator<Item = SetChange<T>>>(iterable: I) -> Self {
         let (mut add, mut remove) = (vec![], vec![]);
         for change in iterable {
@@ -315,7 +315,7 @@ impl fmt::Display for Comment {
 
 /// Bug update parameters.
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq)]
 pub struct Parameters {
     pub alias: Option<Vec<SetChange<String>>>,
     pub assignee: Option<String>,
