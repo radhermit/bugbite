@@ -15,7 +15,7 @@ use clap::{Args, ValueHint};
 use itertools::Itertools;
 use tempfile::NamedTempFile;
 
-use crate::utils::{confirm, launch_editor, verbose};
+use crate::utils::{confirm, launch_editor, prefix, verbose};
 
 #[derive(Clone)]
 struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
@@ -252,9 +252,12 @@ impl From<Params> for Parameters {
             version: value.version,
             whiteboard: value.whiteboard,
 
-            custom_fields: value
-                .custom_fields
-                .map(|x| x.into_iter().tuples().collect()),
+            custom_fields: value.custom_fields.map(|x| {
+                x.into_iter()
+                    .tuples()
+                    .map(|(k, v)| (prefix!("cf_", k), v))
+                    .collect()
+            }),
         }
     }
 }

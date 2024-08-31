@@ -18,7 +18,7 @@ use crate::query::{self, Order};
 use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, WebService};
-use crate::utils::{or, prefix};
+use crate::utils::or;
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -1413,7 +1413,7 @@ impl QueryBuilder<'_> {
 
     fn custom_fields(&mut self, values: &[(String, Match)]) {
         for (name, value) in values {
-            self.advanced_field(prefix!("cf_", name), value.op, value);
+            self.advanced_field(name, value.op, value);
         }
     }
 

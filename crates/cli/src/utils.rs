@@ -103,6 +103,20 @@ pub(crate) fn truncate(data: &str, width: usize) -> Cow<'_, str> {
     }
 }
 
+/// Prefix a string with a given value if missing.
+macro_rules! prefix {
+    ($prefix:expr, $value:expr) => {{
+        let prefix = $prefix;
+        let value = $value.to_string();
+        if !value.starts_with($prefix) {
+            format!("{prefix}{value}")
+        } else {
+            value
+        }
+    }};
+}
+pub(crate) use prefix;
+
 pub(crate) static VERBOSE: AtomicBool = AtomicBool::new(false);
 
 macro_rules! verbose {

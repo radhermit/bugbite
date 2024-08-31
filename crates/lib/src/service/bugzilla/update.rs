@@ -14,7 +14,7 @@ use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Service;
 use crate::traits::{Contains, InjectAuth, RequestMerge, RequestSend, WebService};
-use crate::utils::{or, prefix};
+use crate::utils::or;
 use crate::Error;
 
 /// Changes made to a field.
@@ -426,15 +426,7 @@ impl Parameters {
             url: self.url.as_deref(),
             version: self.version.as_deref(),
             whiteboard: self.whiteboard.as_deref(),
-
-            // auto-prefix custom field names
-            custom_fields: self.custom_fields.as_ref().map(|values| {
-                values
-                    .into_iter()
-                    .map(|(name, value)| (prefix!("cf_", name), value))
-                    .collect()
-            }),
-
+            custom_fields: self.custom_fields.as_ref(),
             ..Default::default()
         };
 
@@ -569,7 +561,7 @@ struct RequestParameters<'a> {
     whiteboard: Option<&'a str>,
 
     #[serde(flatten)]
-    custom_fields: Option<IndexMap<Cow<'a, String>, &'a String>>,
+    custom_fields: Option<&'a IndexMap<String, String>>,
 }
 
 #[cfg(test)]

@@ -21,7 +21,7 @@ use itertools::Itertools;
 use strum::VariantNames;
 
 use crate::service::output::render_search;
-use crate::utils::{confirm, launch_browser};
+use crate::utils::{confirm, launch_browser, prefix};
 
 /// Parse a string into a ChangeField, adding possible values to the error on failure.
 fn change_field(s: &str) -> anyhow::Result<ChangeField> {
@@ -591,7 +591,7 @@ impl From<Params> for Parameters {
             custom_fields: value.attr.custom_fields.map(|x| {
                 x.into_iter()
                     .tuples()
-                    .map(|(name, value)| (name, value.into()))
+                    .map(|(k, v)| (prefix!("cf_", k), v.into()))
                     .collect()
             }),
         }

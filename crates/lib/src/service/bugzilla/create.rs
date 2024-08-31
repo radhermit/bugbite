@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::{fmt, fs};
 
 use camino::Utf8Path;
@@ -10,7 +9,7 @@ use serde_with::skip_serializing_none;
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, RequestMerge, RequestSend, WebService};
-use crate::utils::{or, prefix};
+use crate::utils::or;
 use crate::Error;
 
 #[derive(Serialize, Debug)]
@@ -385,14 +384,7 @@ impl Parameters {
             target_milestone: self.target.as_deref(),
             url: self.url.as_deref(),
             whiteboard: self.whiteboard.as_deref(),
-
-            // auto-prefix custom field names
-            custom_fields: self.custom_fields.as_ref().map(|values| {
-                values
-                    .into_iter()
-                    .map(|(name, value)| (prefix!("cf_", name), value))
-                    .collect()
-            }),
+            custom_fields: self.custom_fields.as_ref(),
         };
 
         // verify required fields are non-empty
@@ -475,7 +467,7 @@ struct RequestParameters<'a> {
     whiteboard: Option<&'a str>,
 
     #[serde(flatten)]
-    custom_fields: Option<IndexMap<Cow<'a, String>, &'a String>>,
+    custom_fields: Option<&'a IndexMap<String, String>>,
 }
 
 #[cfg(test)]
