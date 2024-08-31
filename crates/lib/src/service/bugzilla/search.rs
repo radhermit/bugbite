@@ -416,6 +416,11 @@ impl<'a> Request<'a> {
         self
     }
 
+    pub fn offset(mut self, value: u64) -> Self {
+        self.params.offset = Some(value);
+        self
+    }
+
     pub fn quicksearch<S: Into<String>>(mut self, value: S) -> Self {
         self.params.quicksearch = Some(value.into());
         self
@@ -459,6 +464,7 @@ pub struct Parameters {
     #[serde(skip_serializing)]
     pub fields: Option<Vec<FilterField>>,
     pub limit: Option<u64>,
+    pub offset: Option<u64>,
     pub order: Option<Vec<Order<OrderField>>>,
 
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
@@ -533,6 +539,7 @@ impl Parameters {
 
         or!(self.fields, other.fields);
         or!(self.limit, other.limit);
+        or!(self.offset, other.offset);
         or!(self.order, other.order);
 
         or!(self.created, other.created);
@@ -589,6 +596,10 @@ impl Parameters {
 
         if let Some(value) = &self.limit {
             query.insert("limit", value);
+        }
+
+        if let Some(value) = &self.offset {
+            query.insert("offset", value);
         }
 
         if let Some(values) = &self.alias {

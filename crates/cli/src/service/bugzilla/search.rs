@@ -347,6 +347,10 @@ struct QueryOptions {
     #[arg(short, long)]
     limit: Option<u64>,
 
+    /// result starting position
+    #[arg(short = 'O', long)]
+    offset: Option<u64>,
+
     /// order query results
     #[arg(short, long, value_name = "FIELD[,...]")]
     order: Option<Csv<Order<OrderField>>>,
@@ -476,6 +480,7 @@ impl From<Params> for Parameters {
         Self {
             fields: Some(value.query.fields.into_iter().map(Into::into).collect()),
             limit: value.query.limit,
+            offset: value.query.offset,
             order: value.query.order.map(|x| x.into_iter().collect()),
             quicksearch: value.query.quicksearch,
 
