@@ -119,7 +119,7 @@ updated, url, version, votes, whiteboard
 
 == Attribute options
 
-*-A, --alias* <value[,...]>::
+*-A, --alias* [<value[,...]>]::
     Restrict by alias.
 +
 With no argument, all bugs with aliases are returned. If the value is `true` or
@@ -145,7 +145,7 @@ application. See the <<Match Operators>> section for more information.
 .Contains `value1` or `value2`:
  bite bugzilla search --alias value1 --alias value1
 
-*-@, --attachments* <value[,...]>::
+*-@, --attachments* [<value[,...]>]::
     Restrict by attachments.
 +
 With no argument, all bugs with attachments are returned. If the value is
@@ -168,7 +168,7 @@ any of the specified values match.
 .Attachment description or file name contains `log` or `test`:
  bite bugzilla search --attachments log,test
 
-*-B, --blocks* <id[,...]>::
+*-B, --blocks* [<id[,...]>]::
     Restrict by blockers.
 +
 With no argument, all bugs with blockers are returned. If the value is `true`
@@ -227,7 +227,7 @@ interface of the form `cf_field_name` with the `cf_` prefix being optional.
 .Custom field equals `test`:
  bite bugzilla search --cf field_name '== test'
 
-*-D, --depends* <id[,...]>::
+*-D, --depends* [<id[,...]>]::
     Restrict by dependencies.
 +
 With no argument, all bugs with dependencies are returned. If the value is
@@ -263,7 +263,7 @@ Values can use the `-` prefix to search for non-dependencies.
 +
 Values are taken from standard input when `-`.
 
-*-F, --flags* <value[,...]>::
+*-F, --flags* [<value[,...]>]::
     Restrict by flag.
 +
 With no argument, all bugs with flags are returned. If the value is `true` or
@@ -289,7 +289,7 @@ application. See the <<Match Operators>> section for more information.
 .Contains `value1` or `value2`:
  bite bugzilla search --flags value1 --flags value1
 
-*-g, --groups* <value[,...]>::
+*-g, --groups* [<value[,...]>]::
     Restrict by group.
 +
 With no argument, all bugs with groups are returned. If the value is `true` or
@@ -345,7 +345,7 @@ for more information, and values are taken from standard input when `-`.
 .Any ID matching values taken from a file:
  cat file | bite bugzilla search --id -
 
-*-k, --keywords* <value[,...]>::
+*-k, --keywords* [<value[,...]>]::
     Restrict by keyword.
 +
 With no argument, all bugs with keywords are returned. If the value is `true`
@@ -411,7 +411,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*-U, --see-also* <value[,...]>::
+*-U, --see-also* [<value[,...]>]::
     Restrict by tracker URLs.
 +
 With no argument, all bugs with tracker URLs are returned. If the value is
@@ -468,7 +468,7 @@ last value when multiple are specified.
 .All bugs assigned to yourself:
  bite bugzilla search --status @all --assignee @me
 
-*-t, --tags* <value[,...]>::
+*-t, --tags* [<value[,...]>]::
     Restrict by personal tags.
 +
 With no argument, all bugs with personal tags are returned. If the value is
@@ -494,7 +494,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*--url* <value[,...]>::
+*--url* [<value[,...]>]::
     Restrict by URL.
 +
 With no argument, all bugs with a URL are returned. If the value is `true` or
@@ -519,7 +519,7 @@ query application. See the <<Match Operators>> section for more information.
 +
 Multiple values can be specified in a comma-separated list for logical OR.
 
-*-w, --whiteboard* <value[,...]>::
+*-w, --whiteboard* [<value[,...]>]::
     Restrict by whiteboard.
 +
 With no argument, all bugs with whiteboard info are returned. If the value is
