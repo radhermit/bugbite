@@ -372,6 +372,30 @@ impl<'a> Request<'a> {
         self
     }
 
+    pub fn blocks<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<i64>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .blocks
+            .get_or_insert_with(Default::default)
+            .push(value.into());
+        self
+    }
+
+    pub fn depends<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<i64>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .depends
+            .get_or_insert_with(Default::default)
+            .push(value.into());
+        self
+    }
+
     pub fn created(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
         self.params.created = Some(value);
         self
@@ -1068,7 +1092,7 @@ impl From<&String> for Match {
     }
 }
 
-impl From<bool> for ExistsOrValues<Match> {
+impl<T> From<bool> for ExistsOrValues<T> {
     fn from(value: bool) -> Self {
         ExistsOrValues::Exists(value)
     }
@@ -1083,7 +1107,13 @@ where
     }
 }
 
-macro_rules! make_exists_or_values {
+impl From<i64> for ExistsOrValues<i64> {
+    fn from(value: i64) -> Self {
+        ExistsOrValues::Values(vec![value])
+    }
+}
+
+macro_rules! make_exists_or_values_match {
     ($($x:ty),+) => {$(
         impl<T> From<$x> for ExistsOrValues<Match>
         where
@@ -1095,7 +1125,18 @@ macro_rules! make_exists_or_values {
         }
     )+};
 }
-make_exists_or_values!(&[T], &Vec<T>, &HashSet<T>, &IndexSet<T>);
+make_exists_or_values_match!(&[T], &Vec<T>, &HashSet<T>, &IndexSet<T>);
+
+macro_rules! make_exists_or_values_i64 {
+    ($($x:ty),+) => {$(
+        impl From<$x> for ExistsOrValues<i64> {
+            fn from(values: $x) -> Self {
+                ExistsOrValues::Values(values.iter().copied().map(Into::into).collect())
+            }
+        }
+    )+};
+}
+make_exists_or_values_i64!(&[i64], &Vec<i64>, &HashSet<i64>, &IndexSet<i64>);
 
 impl<T, const N: usize> From<&[T; N]> for ExistsOrValues<Match>
 where
@@ -1106,11 +1147,23 @@ where
     }
 }
 
+impl<const N: usize> From<&[i64; N]> for ExistsOrValues<i64> {
+    fn from(values: &[i64; N]) -> Self {
+        ExistsOrValues::Values(values.iter().copied().map(Into::into).collect())
+    }
+}
+
 impl<T, const N: usize> From<[T; N]> for ExistsOrValues<Match>
 where
     T: Into<Match>,
 {
     fn from(values: [T; N]) -> Self {
+        ExistsOrValues::Values(values.into_iter().map(Into::into).collect())
+    }
+}
+
+impl<const N: usize> From<[i64; N]> for ExistsOrValues<i64> {
+    fn from(values: [i64; N]) -> Self {
         ExistsOrValues::Values(values.into_iter().map(Into::into).collect())
     }
 }
@@ -1898,7 +1951,9 @@ mod tests {
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
-        server.respond(200, path.join("search/nonexistent.json")).await;
+        server
+            .respond(200, path.join("search/nonexistent.json"))
+            .await;
 
         // values using all match operator variants
         let matches: Vec<_> = MatchOp::iter().map(|op| format!("{op} value")).collect();
@@ -2088,5 +2143,19 @@ mod tests {
         for field in FilterField::iter() {
             service.search().fields([field]).send().await.unwrap();
         }
+
+        // blocks
+        service.search().blocks(true).send().await.unwrap();
+        service.search().blocks(false).send().await.unwrap();
+        service.search().blocks(1).send().await.unwrap();
+        service.search().blocks(-1).send().await.unwrap();
+        service.search().blocks([1, -2]).send().await.unwrap();
+
+        // depends
+        service.search().depends(true).send().await.unwrap();
+        service.search().depends(false).send().await.unwrap();
+        service.search().depends(1).send().await.unwrap();
+        service.search().depends(-1).send().await.unwrap();
+        service.search().depends([1, -2]).send().await.unwrap();
     }
 }
