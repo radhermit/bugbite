@@ -1419,7 +1419,7 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn custom_field(&mut self, name: &str, value: &Match) {
+    fn custom_field<F: Api>(&mut self, name: F, value: &Match) {
         self.advanced_field(name, value.op, value);
     }
 
