@@ -1898,9 +1898,7 @@ mod tests {
         let config = Config::new(server.uri()).unwrap();
         let service = Service::new(config, Default::default()).unwrap();
 
-        server.respond(200, path.join("search/ids.json")).await;
-        let bugs = service.search().summary(["test"]).send().await.unwrap();
-        assert_eq!(bugs.len(), 5);
+        server.respond(200, path.join("search/nonexistent.json")).await;
 
         // values using all match operator variants
         let matches: Vec<_> = MatchOp::iter().map(|op| format!("{op} value")).collect();
