@@ -81,6 +81,14 @@ the limit is set to zero, the default limit is used. Note that the maximum and
 default limits are generally not equal, with most instances using 100 and 25,
 respectively.
 
+*-O, --offset <value>*::
+    Set the starting position for results.
++
+Used in conjunction with the `-l/--limit`, offset defines the starting position
+for the search. For example, given a search that would return 100 results, setting
+limit to 10 and offset to 10 would return results 11 through 20 from the set
+of 100.
+
 *-o, --order <field[,...]>*::
     Order the query results.
 +

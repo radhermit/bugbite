@@ -24,9 +24,13 @@ struct QueryOptions {
     #[arg(short, long, value_name = "FIELD[,...]", default_value = "id,subject")]
     fields: Csv<IssueField>,
 
-    /// limit the number of results
+    /// limit result count
     #[arg(short, long)]
     limit: Option<u64>,
+
+    /// result starting position
+    #[arg(short = 'O', long)]
+    offset: Option<u64>,
 
     /// order query results
     #[arg(short, long, value_name = "FIELD[,...]")]
@@ -148,6 +152,7 @@ impl From<Params> for Parameters {
             closed: value.time.closed,
             status: value.attr.status,
             limit: value.query.limit,
+            offset: value.query.offset,
             order: value.query.order.map(|x| x.into_iter().collect()),
             summary: value.summary.map(|x| x.into_iter().flatten().collect()),
         }

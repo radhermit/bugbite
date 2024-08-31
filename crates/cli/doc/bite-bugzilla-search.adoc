@@ -80,8 +80,8 @@ the service limit.
     Set the starting position for results.
 +
 Used in conjunction with the `-l/--limit`, offset defines the starting position
-for the search. For example, given a search that would return 100 bugs, setting
-limit to 10 and offset to 10 would return bugs 11 through 20 from the set
+for the search. For example, given a search that would return 100 results, setting
+limit to 10 and offset to 10 would return results 11 through 20 from the set
 of 100.
 
 *-o, --order <field[,...]>*::

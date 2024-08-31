@@ -108,6 +108,7 @@ pub struct Parameters {
     pub closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
     pub limit: Option<u64>,
+    pub offset: Option<u64>,
     pub order: Option<Vec<Order<OrderField>>>,
 
     pub status: Option<String>,
@@ -136,6 +137,7 @@ impl Parameters {
         or!(self.updated, other.updated);
         or!(self.closed, other.closed);
         or!(self.limit, other.limit);
+        or!(self.offset, other.offset);
         or!(self.order, other.order);
         or!(self.status, other.status);
         or!(self.summary, other.summary);
@@ -215,6 +217,10 @@ impl Parameters {
 
         // default to the common maximum limit, without this the default limit is used
         query.insert("limit", self.limit.unwrap_or(100));
+
+        if let Some(value) = &self.offset {
+            query.insert("offset", value);
+        }
 
         Ok(query.encode())
     }
