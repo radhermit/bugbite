@@ -53,17 +53,12 @@ impl<'a> Request<'a> {
         Ok(url)
     }
 
-    pub fn params(mut self, params: Parameters) -> Self {
-        self.params = params;
-        self
-    }
-
-    pub fn created_after(mut self, interval: TimeDeltaOrStatic) -> Self {
+    pub fn created_after(&mut self, interval: TimeDeltaOrStatic) -> &mut Self {
         self.params.created_after = Some(interval);
         self
     }
 
-    pub fn creator<S>(mut self, value: S) -> Self
+    pub fn creator<S>(&mut self, value: S) -> &mut Self
     where
         S: Into<String>,
     {
