@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::hash::Hash;
 use std::str::FromStr;
 use std::{fmt, fs};
@@ -495,17 +496,18 @@ impl Parameters {
 
         if let Some(values) = &self.see_also {
             // convert bug IDs to full URLs
+            let parse = |value: &'a str| -> Cow<'a, str> {
+                if let Ok(id) = value.parse::<u64>() {
+                    Cow::Owned(service.item_url(id))
+                } else {
+                    Cow::Borrowed(value)
+                }
+            };
+
             let iter = values.iter().map(|x| match x {
-                SetChange::Add(value) if value.parse::<u64>().is_ok() => {
-                    SetChange::Add(service.item_url(value))
-                }
-                SetChange::Remove(value) if value.parse::<u64>().is_ok() => {
-                    SetChange::Remove(service.item_url(value))
-                }
-                SetChange::Set(value) if value.parse::<u64>().is_ok() => {
-                    SetChange::Set(service.item_url(value))
-                }
-                c => c.clone(),
+                SetChange::Add(value) => SetChange::Add(parse(value)),
+                SetChange::Remove(value) => SetChange::Remove(parse(value)),
+                SetChange::Set(value) => SetChange::Set(parse(value)),
             });
 
             params.see_also = Some(iter.collect());
@@ -543,7 +545,7 @@ struct RequestParameters<'a> {
     reset_assigned_to: Option<bool>,
     reset_qa_contact: Option<bool>,
     resolution: Option<&'a str>,
-    see_also: Option<Changes<String>>,
+    see_also: Option<Changes<Cow<'a, str>>>,
     severity: Option<&'a str>,
     status: Option<&'a str>,
     summary: Option<&'a str>,
