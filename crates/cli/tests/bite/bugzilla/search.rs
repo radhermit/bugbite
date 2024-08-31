@@ -202,14 +202,6 @@ async fn changed() {
         .failure()
         .code(2);
 
-    // invalid field
-    cmd("bite bugzilla search --changed invalid")
-        .assert()
-        .stdout("")
-        .stderr(predicate::str::contains("invalid change field"))
-        .failure()
-        .code(2);
-
     // single
     cmd("bite bugzilla search --changed alias")
         .assert()
@@ -270,14 +262,6 @@ async fn changed_by() {
         .failure()
         .code(2);
 
-    // invalid field
-    cmd("bite bugzilla search --changed-by invalid=user")
-        .assert()
-        .stdout("")
-        .stderr(predicate::str::contains("invalid change field"))
-        .failure()
-        .code(2);
-
     // single
     cmd("bite bugzilla search --changed-by alias=user")
         .assert()
@@ -316,14 +300,6 @@ async fn changed_from() {
         .failure()
         .code(2);
 
-    // invalid field
-    cmd("bite bugzilla search --changed-from invalid=user")
-        .assert()
-        .stdout("")
-        .stderr(predicate::str::contains("invalid change field"))
-        .failure()
-        .code(2);
-
     // single
     cmd("bite bugzilla search --changed-from alias=user")
         .assert()
@@ -352,14 +328,6 @@ async fn changed_to() {
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("missing value"))
-        .failure()
-        .code(2);
-
-    // invalid field
-    cmd("bite bugzilla search --changed-to invalid=user")
-        .assert()
-        .stdout("")
-        .stderr(predicate::str::contains("invalid change field"))
         .failure()
         .code(2);
 

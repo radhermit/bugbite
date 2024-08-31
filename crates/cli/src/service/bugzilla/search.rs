@@ -9,31 +9,20 @@ use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::bugzilla::Service;
 use bugbite::service::bugzilla::{
-    search::{ChangeField, Match, OrderField, Parameters},
+    search::{Match, OrderField, Parameters},
     FilterField,
 };
 use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::{RequestMerge, RequestSend};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
-use crossterm::style::Stylize;
-use itertools::Itertools;
-use strum::VariantNames;
 
 use crate::service::output::render_search;
 use crate::utils::{confirm, launch_browser, prefix};
 
-/// Parse a string into a ChangeField, adding possible values to the error on failure.
-fn change_field(s: &str) -> anyhow::Result<ChangeField> {
-    s.parse().map_err(|_| {
-        let possible = ChangeField::VARIANTS.iter().map(|s| s.green()).join(", ");
-        anyhow::anyhow!("invalid change field: {s}\n  [possible values: {possible}]")
-    })
-}
-
 #[derive(Clone)]
 struct Changed {
-    fields: Vec<ChangeField>,
+    fields: Vec<String>,
     interval: RangeOrValue<TimeDeltaOrStatic>,
 }
 
@@ -43,7 +32,7 @@ impl FromStr for Changed {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (raw_fields, time) = s.split_once('=').unwrap_or((s, "<now"));
         Ok(Self {
-            fields: raw_fields.split(',').map(change_field).try_collect()?,
+            fields: raw_fields.split(',').map(|x| prefix!("cf_", x)).collect(),
             interval: time.parse()?,
         })
     }
@@ -51,7 +40,7 @@ impl FromStr for Changed {
 
 #[derive(Clone)]
 struct ChangedBy {
-    fields: Vec<ChangeField>,
+    fields: Vec<String>,
     users: Vec<String>,
 }
 
@@ -64,7 +53,7 @@ impl FromStr for ChangedBy {
         };
 
         Ok(Self {
-            fields: raw_fields.split(',').map(change_field).try_collect()?,
+            fields: raw_fields.split(',').map(|x| prefix!("cf_", x)).collect(),
             users: users.split(',').map(|s| s.to_string()).collect(),
         })
     }
@@ -72,7 +61,7 @@ impl FromStr for ChangedBy {
 
 #[derive(Clone)]
 struct ChangedValue {
-    field: ChangeField,
+    field: String,
     value: String,
 }
 
@@ -85,7 +74,7 @@ impl FromStr for ChangedValue {
         };
 
         Ok(Self {
-            field: change_field(field)?,
+            field: prefix!("cf_", field),
             value: value.to_string(),
         })
     }

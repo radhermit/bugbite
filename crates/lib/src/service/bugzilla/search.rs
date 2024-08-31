@@ -193,28 +193,29 @@ impl<'a> Request<'a> {
         self
     }
 
-    pub fn changed(mut self, field: ChangeField) -> Self {
+    pub fn changed<F: fmt::Display>(mut self, field: F) -> Self {
         self.params
             .changed
             .get_or_insert_with(Default::default)
-            .push((vec![field], "<now".parse().unwrap()));
+            .push((vec![field.to_string()], "<now".parse().unwrap()));
         self
     }
 
-    pub fn changed_at(
+    pub fn changed_at<F: fmt::Display>(
         mut self,
-        field: ChangeField,
+        field: F,
         value: RangeOrValue<TimeDeltaOrStatic>,
     ) -> Self {
         self.params
             .changed
             .get_or_insert_with(Default::default)
-            .push((vec![field], value));
+            .push((vec![field.to_string()], value));
         self
     }
 
-    pub fn changed_by<I, S>(mut self, field: ChangeField, values: I) -> Self
+    pub fn changed_by<F, I, S>(mut self, field: F, values: I) -> Self
     where
+        F: fmt::Display,
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
@@ -222,29 +223,31 @@ impl<'a> Request<'a> {
         self.params
             .changed_by
             .get_or_insert_with(Default::default)
-            .push((vec![field], values));
+            .push((vec![field.to_string()], values));
         self
     }
 
-    pub fn changed_from<S>(mut self, field: ChangeField, value: S) -> Self
+    pub fn changed_from<F, S>(mut self, field: F, value: S) -> Self
     where
+        F: fmt::Display,
         S: fmt::Display,
     {
         self.params
             .changed_from
             .get_or_insert_with(Default::default)
-            .push((field, value.to_string()));
+            .push((field.to_string(), value.to_string()));
         self
     }
 
-    pub fn changed_to<S>(mut self, field: ChangeField, value: S) -> Self
+    pub fn changed_to<F, S>(mut self, field: F, value: S) -> Self
     where
+        F: fmt::Display,
         S: fmt::Display,
     {
         self.params
             .changed_to
             .get_or_insert_with(Default::default)
-            .push((field, value.to_string()));
+            .push((field.to_string(), value.to_string()));
         self
     }
 
@@ -448,10 +451,10 @@ pub struct Parameters {
     pub attachment_is_patch: Option<bool>,
     pub attachment_is_private: Option<bool>,
 
-    pub changed: Option<Vec<(Vec<ChangeField>, RangeOrValue<TimeDeltaOrStatic>)>>,
-    pub changed_by: Option<Vec<(Vec<ChangeField>, Vec<String>)>>,
-    pub changed_from: Option<Vec<(ChangeField, String)>>,
-    pub changed_to: Option<Vec<(ChangeField, String)>>,
+    pub changed: Option<Vec<(Vec<String>, RangeOrValue<TimeDeltaOrStatic>)>>,
+    pub changed_by: Option<Vec<(Vec<String>, Vec<String>)>>,
+    pub changed_from: Option<Vec<(String, String)>>,
+    pub changed_to: Option<Vec<(String, String)>>,
 
     pub assignee: Option<Vec<Vec<Match>>>,
     pub attacher: Option<Vec<Vec<Match>>>,
