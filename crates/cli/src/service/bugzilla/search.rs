@@ -129,7 +129,7 @@ struct AttributeOptions {
     component: Option<Csv<Match>>,
 
     /// restrict by custom field
-    #[arg(long = "cf", num_args = 2, value_names = ["NAME", "VALUE"])]
+    #[arg(long = "cf", value_name = "NAME[=VALUE]")]
     custom_fields: Option<Vec<String>>,
 
     /// restrict by dependencies
@@ -590,8 +590,10 @@ impl From<Params> for Parameters {
 
             custom_fields: value.attr.custom_fields.map(|x| {
                 x.into_iter()
-                    .tuples()
-                    .map(|(k, v)| (prefix!("cf_", k), v.into()))
+                    .map(|s| {
+                        let (name, value) = s.split_once('=').unwrap_or((&s, "true"));
+                        (prefix!("cf_", name), value.parse().unwrap())
+                    })
                     .collect()
             }),
         }

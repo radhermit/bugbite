@@ -492,7 +492,7 @@ pub struct Parameters {
     pub votes: Option<RangeOrValue<u64>>,
     pub summary: Option<Vec<Match>>,
     pub quicksearch: Option<String>,
-    pub custom_fields: Option<Vec<(String, Match)>>,
+    pub custom_fields: Option<Vec<(String, ExistsOrValues<Match>)>>,
 }
 
 impl Parameters {
@@ -921,7 +921,15 @@ impl Parameters {
         }
 
         if let Some(values) = &self.custom_fields {
-            query.custom_fields(values);
+            query.or(|query| {
+                for (name, value) in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists(name, *value),
+                        ExistsOrValues::Values(values) => query
+                            .and(|query| values.iter().for_each(|x| query.custom_field(name, x))),
+                    }
+                }
+            });
         }
 
         if let Some(values) = &self.attachment_description {
@@ -1411,10 +1419,8 @@ impl QueryBuilder<'_> {
         }
     }
 
-    fn custom_fields(&mut self, values: &[(String, Match)]) {
-        for (name, value) in values {
-            self.advanced_field(name, value.op, value);
-        }
+    fn custom_field(&mut self, name: &str, value: &Match) {
+        self.advanced_field(name, value.op, value);
     }
 
     fn priority(&mut self, value: &Match) {
@@ -1499,11 +1505,11 @@ impl QueryBuilder<'_> {
     }
 
     /// Match bugs with conditionally existent array field values.
-    fn exists(&mut self, field: ExistsField, status: bool) {
+    fn exists<F: Api>(&mut self, field: F, status: bool) {
         self.advanced_count += 1;
         let num = self.advanced_count;
         let status = if status { "isnotempty" } else { "isempty" };
-        self.insert(format!("f{num}"), field.api());
+        self.insert(format!("f{num}"), field);
         self.insert(format!("o{num}"), status);
     }
 

@@ -165,23 +165,22 @@ async fn custom_fields() {
         .failure()
         .code(2);
 
-    // missing value
+    // existing
     cmd("bite bugzilla search --cf field")
         .assert()
         .stdout("")
-        .stderr(predicate::str::contains("2 values required"))
-        .failure()
-        .code(2);
+        .stderr("")
+        .success();
 
     // single
-    cmd("bite bugzilla search --cf field value")
+    cmd("bite bugzilla search --cf field=value")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // multiple
-    cmd("bite bugzilla search --cf field2 value --cf field2 '!= value'")
+    cmd("bite bugzilla search --cf field1=value --cf field1='!= value'")
         .assert()
         .stdout("")
         .stderr("")

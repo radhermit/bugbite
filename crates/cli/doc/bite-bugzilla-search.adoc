@@ -212,20 +212,30 @@ query application. See the <<Match Operators>> section for more information.
 Multiple values can be specified in a comma-separated list for logical OR.
 
 // TODO: mention using fields subcommand to show custom fields
-*--cf <name> <value>*::
+*--cf <name>[=<value>]*::
     Restrict by custom field.
 +
-Values search for matching substrings or can use match operators to alter their
-query application. See the <<Match Operators>> section for more information.
+With no value, all bugs with the related custom field are returned. If the
+value is `true` or `false`, all bugs with or without the custom field are
+returned, respectively.
 +
 Custom field names must match the underlying values used in the Bugzilla web
 interface of the form `cf_field_name` with the `cf_` prefix being optional.
 +
+.Custom field exists:
+ bite bugzilla search --cf field_name
++
+.Custom field doesn't exist:
+ bite bugzilla search --cf field_name=false
++
+Values search for matching substrings or can use match operators to alter their
+query application. See the <<Match Operators>> section for more information.
++
 .Custom field containing `test`:
- bite bugzilla search --cf field_name test
+ bite bugzilla search --cf field_name=test
 +
 .Custom field equals `test`:
- bite bugzilla search --cf field_name '== test'
+ bite bugzilla search --cf field_name='== test'
 
 *-D, --depends* [<id[,...]>]::
     Restrict by dependencies.
