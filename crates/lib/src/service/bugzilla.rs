@@ -35,6 +35,9 @@ pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
         .collect()
 });
 
+/// Maximum number of results that can be returned by a search request.
+static MAX_SEARCH_RESULTS: usize = 10000;
+
 // TODO: improve API for setting user info on config creation
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Config {
@@ -42,6 +45,7 @@ pub struct Config {
     pub user: Option<String>,
     pub password: Option<String>,
     pub key: Option<String>,
+    pub max_search_results: usize,
     cache: ServiceCache,
 }
 
@@ -56,6 +60,7 @@ impl Config {
             user: None,
             password: None,
             key: None,
+            max_search_results: MAX_SEARCH_RESULTS,
             cache: Default::default(),
         })
     }

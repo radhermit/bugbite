@@ -83,9 +83,8 @@ impl<'a> Request<'a> {
 
     // TODO: submit multiple requests at once?
     pub async fn stream(&self) -> impl Stream<Item = crate::Result<Bug>> + '_ {
-        // TODO: pull max from service config
-        let max = 10000;
         let paged = self.params.limit.is_none();
+        let max = self.service.config.max_search_results;
 
         try_stream! {
             let mut offset = self.params.offset.unwrap_or_default();

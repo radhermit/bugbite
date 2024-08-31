@@ -14,6 +14,9 @@ use super::{ClientBuilder, ServiceKind};
 pub mod get;
 pub mod search;
 
+/// Maximum number of results that can be returned by a search request.
+static MAX_SEARCH_RESULTS: usize = 100;
+
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
@@ -21,6 +24,7 @@ pub struct Config {
     pub user: Option<String>,
     pub password: Option<String>,
     pub key: Option<String>,
+    pub max_search_results: usize,
     cache: ServiceCache,
 }
 
@@ -44,6 +48,7 @@ impl Config {
             user: None,
             password: None,
             key: None,
+            max_search_results: MAX_SEARCH_RESULTS,
             cache: Default::default(),
         })
     }
