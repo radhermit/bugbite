@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use std::collections::VecDeque;
 use std::env;
 use std::ffi::OsStr;
-use std::io::{stderr, stdin, stdout, BufRead, Write};
+use std::io::{stderr, stdin, BufRead, IsTerminal, Write};
 use std::process::{Command, ExitStatus, Stdio};
 use std::sync::atomic::AtomicBool;
 
@@ -94,8 +94,11 @@ pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {
 });
 
 /// Truncate a string to the requested width of graphemes.
-pub(crate) fn truncate(data: &str, width: usize) -> Cow<'_, str> {
-    if data.len() > width && is_terminal!(&stdout()) {
+pub(crate) fn truncate<'a, W>(f: &W, data: &'a str, width: usize) -> Cow<'a, str>
+where
+    W: IsTerminal,
+{
+    if data.len() > width && is_terminal!(f) {
         let mut iter = UnicodeSegmentation::graphemes(data, true).take(*COLUMNS);
         Cow::Owned(iter.join(""))
     } else {

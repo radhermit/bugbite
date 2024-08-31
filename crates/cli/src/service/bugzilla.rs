@@ -1,3 +1,4 @@
+use std::io::{self, IsTerminal, Write};
 use std::process::ExitCode;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -54,7 +55,14 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) async fn run(self, config: &crate::config::Config) -> anyhow::Result<ExitCode> {
+    pub(crate) async fn run<W>(
+        self,
+        config: &crate::config::Config,
+        f: &mut W,
+    ) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let connection = self.service.connection.as_str();
         let url = if ["https://", "http://"]
             .iter()
@@ -76,7 +84,7 @@ impl Command {
 
         let service = Service::new(config, builder)?;
         debug!("Service: {service}");
-        self.cmd.run(&service).await
+        self.cmd.run(&service, f).await
     }
 }
 
@@ -116,17 +124,20 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+    async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         match self {
-            Self::Attachment(cmd) => cmd.run(service).await,
-            Self::Comment(cmd) => cmd.run(service).await,
-            Self::Create(cmd) => cmd.run(service).await,
-            Self::Fields(cmd) => cmd.run(service).await,
-            Self::Get(cmd) => cmd.run(service).await,
-            Self::History(cmd) => cmd.run(service).await,
-            Self::Search(cmd) => cmd.run(service).await,
-            Self::Update(cmd) => cmd.run(service).await,
-            Self::Version(cmd) => cmd.run(service).await,
+            Self::Attachment(cmd) => cmd.run(service, f).await,
+            Self::Comment(cmd) => cmd.run(service, f).await,
+            Self::Create(cmd) => cmd.run(service, f).await,
+            Self::Fields(cmd) => cmd.run(service, f).await,
+            Self::Get(cmd) => cmd.run(service, f).await,
+            Self::History(cmd) => cmd.run(service, f).await,
+            Self::Search(cmd) => cmd.run(service, f).await,
+            Self::Update(cmd) => cmd.run(service, f).await,
+            Self::Version(cmd) => cmd.run(service, f).await,
         }
     }
 }
@@ -134,12 +145,10 @@ impl Subcommand {
 static OUTDATED: AtomicBool = AtomicBool::new(false);
 
 impl Render<&Attachment> for Service {
-    fn render<W: std::io::Write>(
-        &self,
-        item: &Attachment,
-        f: &mut W,
-        width: usize,
-    ) -> std::io::Result<()> {
+    fn render<W>(&self, item: &Attachment, f: &mut W, width: usize) -> io::Result<()>
+    where
+        W: IsTerminal + Write,
+    {
         let obsolete = if item.is_obsolete { " (obsolete)" } else { "" };
         let deleted = if item.is_deleted() { " (deleted)" } else { "" };
         let line = if item.summary != item.file_name {
@@ -153,7 +162,7 @@ impl Render<&Attachment> for Service {
 
         // don't output obsolete or deleted attachments by default
         if (!item.is_obsolete && !item.is_deleted()) || OUTDATED.load(Ordering::Acquire) {
-            writeln!(f, "{}", truncate(&line, width))?;
+            writeln!(f, "{}", truncate(f, &line, width))?;
         }
 
         // output additional attachment info on request
@@ -175,12 +184,10 @@ impl Render<&Attachment> for Service {
 }
 
 impl Render<&Comment> for Service {
-    fn render<W: std::io::Write>(
-        &self,
-        item: &Comment,
-        f: &mut W,
-        width: usize,
-    ) -> std::io::Result<()> {
+    fn render<W>(&self, item: &Comment, f: &mut W, width: usize) -> io::Result<()>
+    where
+        W: IsTerminal + Write,
+    {
         if item.count != 0 {
             write!(f, "Comment #{}", item.count)?;
         } else {
@@ -201,12 +208,10 @@ impl Render<&Comment> for Service {
 }
 
 impl Render<&Event> for Service {
-    fn render<W: std::io::Write>(
-        &self,
-        item: &Event,
-        f: &mut W,
-        width: usize,
-    ) -> std::io::Result<()> {
+    fn render<W>(&self, item: &Event, f: &mut W, width: usize) -> io::Result<()>
+    where
+        W: IsTerminal + Write,
+    {
         if !item.changes.is_empty() {
             writeln!(f, "Changes made by {}, {}", item.who, item.when)?;
             writeln!(f, "{}", "-".repeat(width))?;
@@ -219,12 +224,10 @@ impl Render<&Event> for Service {
 }
 
 impl Render<&Change> for Service {
-    fn render<W: std::io::Write>(
-        &self,
-        item: &Change,
-        f: &mut W,
-        _width: usize,
-    ) -> std::io::Result<()> {
+    fn render<W>(&self, item: &Change, f: &mut W, _width: usize) -> io::Result<()>
+    where
+        W: IsTerminal + Write,
+    {
         let name = &item.field_name;
         match (item.removed.as_deref(), item.added.as_deref()) {
             (Some(removed), None) => writeln!(f, "{name}: -{removed}"),
@@ -236,12 +239,10 @@ impl Render<&Change> for Service {
 }
 
 impl Render<&BugUpdate<'_>> for Service {
-    fn render<W: std::io::Write>(
-        &self,
-        item: &BugUpdate,
-        f: &mut W,
-        width: usize,
-    ) -> std::io::Result<()> {
+    fn render<W>(&self, item: &BugUpdate, f: &mut W, width: usize) -> io::Result<()>
+    where
+        W: IsTerminal + Write,
+    {
         match item {
             BugUpdate::Comment(comment) => self.render(*comment, f, width),
             BugUpdate::Event(event) => self.render(*event, f, width),
@@ -250,12 +251,10 @@ impl Render<&BugUpdate<'_>> for Service {
 }
 
 impl Render<&Bug> for Service {
-    fn render<W: std::io::Write>(
-        &self,
-        item: &Bug,
-        f: &mut W,
-        width: usize,
-    ) -> std::io::Result<()> {
+    fn render<W>(&self, item: &Bug, f: &mut W, width: usize) -> io::Result<()>
+    where
+        W: IsTerminal + Write,
+    {
         output_field_wrapped!(f, "Summary", &item.summary, width);
         output_field!(f, "Assignee", &item.assigned_to, width);
         output_field!(f, "QA", &item.qa_contact, width);

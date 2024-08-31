@@ -1,5 +1,5 @@
 use std::hash::Hash;
-use std::io::{stdout, Write};
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 use std::str::FromStr;
 use std::{fmt, fs};
@@ -368,7 +368,10 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 }
 
 impl Command {
-    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let ids = self.ids.into_iter().flatten().collect::<Vec<_>>();
         let mut request = service.update(ids);
 
@@ -404,9 +407,8 @@ impl Command {
 
         if !self.options.dry_run {
             let changes = request.send().await?;
-            let mut stdout = stdout().lock();
             for change in changes {
-                verbose!(stdout, "{change}")?;
+                verbose!(f, "{change}")?;
             }
         }
 

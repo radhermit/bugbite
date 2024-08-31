@@ -1,3 +1,5 @@
+use std::io::{self, IsTerminal, Write};
+
 // output and rendering support
 pub(crate) mod output;
 
@@ -8,7 +10,7 @@ pub(crate) mod redmine;
 
 /// Render an item for output to the terminal.
 pub(crate) trait Render<T> {
-    fn render<W: std::io::Write>(&self, item: T, f: &mut W, width: usize) -> std::io::Result<()>;
+    fn render<W: IsTerminal + Write>(&self, item: T, f: &mut W, width: usize) -> io::Result<()>;
 }
 
 #[derive(clap::Args)]

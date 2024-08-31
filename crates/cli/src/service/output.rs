@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::io::{stdout, Write};
+use std::io::{self, IsTerminal, Write};
 
 use bugbite::traits::RenderSearch;
 use bugbite::utils::is_terminal;
@@ -14,15 +14,10 @@ use crate::utils::{truncate, verbose, COLUMNS};
 pub(crate) static INDENT: Lazy<String> = Lazy::new(|| " ".repeat(15));
 
 /// Output an iterable field in wrapped CSV format.
-pub(crate) fn wrapped_csv<I, W, S>(
-    f: &mut W,
-    name: &str,
-    data: I,
-    width: usize,
-) -> std::io::Result<()>
+pub(crate) fn wrapped_csv<I, W, S>(f: &mut W, name: &str, data: I, width: usize) -> io::Result<()>
 where
     I: IntoIterator<Item = S>,
-    W: std::io::Write,
+    W: IsTerminal + Write,
     S: std::fmt::Display,
 {
     let rendered = data.into_iter().join(", ");
@@ -39,7 +34,7 @@ where
 }
 
 pub(crate) fn render_search<I, V, T, W>(
-    mut f: W,
+    f: &mut W,
     items: I,
     fields: &[T],
     json: bool,
@@ -47,7 +42,7 @@ pub(crate) fn render_search<I, V, T, W>(
 where
     I: IntoIterator<Item = V>,
     V: RenderSearch<T> + Serialize,
-    W: std::io::Write,
+    W: IsTerminal + Write,
 {
     let mut count = 0;
 
@@ -59,7 +54,7 @@ where
         } else {
             let line = item.render(fields);
             if !line.is_empty() {
-                let data = truncate(&line, *COLUMNS);
+                let data = truncate(f, &line, *COLUMNS);
                 writeln!(f, "{data}")?;
             }
         }
@@ -72,23 +67,26 @@ where
     Ok(())
 }
 
-pub(crate) fn render_items<I, S, T>(service: &S, items: I) -> Result<(), bugbite::Error>
+pub(crate) fn render_items<I, S, T, W>(
+    f: &mut W,
+    service: &S,
+    items: I,
+) -> Result<(), bugbite::Error>
 where
     I: IntoIterator<Item = T>,
     S: Render<T>,
+    W: IsTerminal + Write,
 {
-    let mut stdout = stdout().lock();
-
     // text wrap width
-    let width = if is_terminal!(&stdout) && *COLUMNS <= 90 && *COLUMNS >= 50 {
+    let width = if is_terminal!(f) && *COLUMNS <= 90 && *COLUMNS >= 50 {
         *COLUMNS
     } else {
         90
     };
 
     for item in items {
-        writeln!(stdout, "{}", "=".repeat(width))?;
-        service.render(item, &mut stdout, width)?;
+        writeln!(f, "{}", "=".repeat(width))?;
+        service.render(item, f, width)?;
     }
 
     Ok(())
@@ -100,9 +98,9 @@ pub(crate) fn truncated_list<W, I, S>(
     name: &str,
     data: I,
     width: usize,
-) -> std::io::Result<()>
+) -> io::Result<()>
 where
-    W: std::io::Write,
+    W: IsTerminal + Write,
     I: IntoIterator<Item = S>,
     <I as IntoIterator>::IntoIter: ExactSizeIterator,
     S: std::fmt::Display,
@@ -112,13 +110,13 @@ where
         Ordering::Equal => {
             let value = values.next().unwrap();
             let line = format!("{name:<12} : {value}");
-            writeln!(f, "{}", truncate(&line, width))?;
+            writeln!(f, "{}", truncate(f, &line, width))?;
         }
         Ordering::Greater => {
             writeln!(f, "{name:<12} :")?;
             for value in values {
                 let line = format!("  {value}");
-                writeln!(f, "{}", truncate(&line, width))?;
+                writeln!(f, "{}", truncate(f, &line, width))?;
             }
         }
         Ordering::Less => (),
@@ -131,7 +129,7 @@ macro_rules! output_field {
     ($fmt:expr, $name:expr, $value:expr, $width:expr) => {
         if let Some(value) = $value {
             let line = format!("{:<12} : {value}", $name);
-            let data = $crate::utils::truncate(&line, $width);
+            let data = $crate::utils::truncate($fmt, &line, $width);
             writeln!($fmt, "{data}")?;
         }
     };

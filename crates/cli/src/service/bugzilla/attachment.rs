@@ -1,3 +1,4 @@
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::service::bugzilla::Service;
@@ -13,8 +14,11 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
-        self.command.run(service).await
+    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
+        self.command.run(service, f).await
     }
 }
 
@@ -34,11 +38,14 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+    async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         match self {
-            Self::Create(cmd) => cmd.run(service).await,
-            Self::Get(cmd) => cmd.run(service).await,
-            Self::Update(cmd) => cmd.run(service).await,
+            Self::Create(cmd) => cmd.run(service, f).await,
+            Self::Get(cmd) => cmd.run(service, f).await,
+            Self::Update(cmd) => cmd.run(service, f).await,
         }
     }
 }

@@ -1,4 +1,4 @@
-use std::io::{stdout, Write};
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -57,13 +57,15 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let ids: Vec<_> = self.ids.iter().flatten().collect();
         let mut request = service.comment(&ids);
         request.params = self.params.into();
         let comments = request.send().await?;
         let mut data = ids.iter().zip(comments).peekable();
-        let mut stdout = stdout().lock();
 
         // text wrap width
         let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
@@ -72,21 +74,21 @@ impl Command {
             if !comments.is_empty() {
                 // output bug ID header
                 let bug_id = format!("Bug: {id} ");
-                writeln!(stdout, "{bug_id}{}", "=".repeat(width - bug_id.len()))?;
+                writeln!(f, "{bug_id}{}", "=".repeat(width - bug_id.len()))?;
 
                 let mut comments_iter = comments.iter().peekable();
                 while let Some(comment) = comments_iter.next() {
                     // render comment
-                    service.render(comment, &mut stdout, width)?;
+                    service.render(comment, f, width)?;
                     // add new line between comments
                     if comments_iter.peek().is_some() {
-                        writeln!(stdout)?;
+                        writeln!(f)?;
                     }
                 }
 
                 // add new line between bugs
                 if data.peek().is_some() {
-                    writeln!(stdout)?;
+                    writeln!(f)?;
                 }
             }
         }

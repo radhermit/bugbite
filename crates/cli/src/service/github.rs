@@ -1,3 +1,4 @@
+use std::io::{self, IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::objects::github::*;
@@ -39,7 +40,14 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) async fn run(self, config: &crate::config::Config) -> anyhow::Result<ExitCode> {
+    pub(crate) async fn run<W>(
+        self,
+        config: &crate::config::Config,
+        f: &mut W,
+    ) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let connection = self.service.connection.as_str();
         let url = if ["https://", "http://"]
             .iter()
@@ -59,7 +67,7 @@ impl Command {
 
         let service = Service::new(config, builder)?;
         debug!("Service: {service}");
-        self.cmd.run(&service).await
+        self.cmd.run(&service, f).await
     }
 }
 
@@ -74,21 +82,22 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+    async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         match self {
-            Self::Get(cmd) => cmd.run(service).await,
-            Self::Search(cmd) => cmd.run(service).await,
+            Self::Get(cmd) => cmd.run(service, f).await,
+            Self::Search(cmd) => cmd.run(service, f).await,
         }
     }
 }
 
 impl Render<&Issue> for Service {
-    fn render<W: std::io::Write>(
-        &self,
-        item: &Issue,
-        f: &mut W,
-        width: usize,
-    ) -> std::io::Result<()> {
+    fn render<W>(&self, item: &Issue, f: &mut W, width: usize) -> io::Result<()>
+    where
+        W: IsTerminal + Write,
+    {
         output_field_wrapped!(f, "Title", &item.title, width);
         writeln!(f, "{:<12} : {}", "ID", item.id)?;
 

@@ -1,3 +1,4 @@
+use std::io::stdout;
 use std::process::ExitCode;
 
 use strum::VariantNames;
@@ -25,11 +26,12 @@ pub(crate) enum Subcommand {
 
 impl Subcommand {
     pub(crate) async fn run(self, config: &Config) -> anyhow::Result<ExitCode> {
+        let mut stdout = stdout().lock();
         match self {
-            Self::Bugzilla(cmd) => cmd.run(config).await,
-            Self::Github(cmd) => cmd.run(config).await,
-            Self::Redmine(cmd) => cmd.run(config).await,
-            Self::Show(cmd) => cmd.run(),
+            Self::Bugzilla(cmd) => cmd.run(config, &mut stdout).await,
+            Self::Github(cmd) => cmd.run(config, &mut stdout).await,
+            Self::Redmine(cmd) => cmd.run(config, &mut stdout).await,
+            Self::Show(cmd) => cmd.run(&mut stdout),
         }
     }
 }

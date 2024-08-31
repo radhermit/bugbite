@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{stdout, Write};
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 use std::sync::atomic::Ordering;
 
@@ -62,10 +62,12 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(&self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
         let multiple_bugs = self.options.item_ids && ids.len() > 1;
-        let mut stdout = stdout().lock();
 
         let attachments = if self.options.item_ids {
             service
@@ -94,13 +96,12 @@ impl Command {
 
         if self.options.list {
             for attachment in attachments {
-                service.render(attachment, &mut stdout, *COLUMNS)?;
+                service.render(attachment, f, *COLUMNS)?;
             }
         } else if let Some(name) = self.options.output.as_deref() {
             for attachment in attachments {
                 if name == "-" {
-                    stdout
-                        .write_all(attachment.as_ref())
+                    f.write_all(attachment.as_ref())
                         .context("failed writing to standard output")?;
                 } else {
                     fs::write(name, attachment).context("failed writing to file: {name}")?;
@@ -124,7 +125,7 @@ impl Command {
                     anyhow::bail!("file already exists: {path}");
                 }
 
-                writeln!(stdout, "Saving attachment: {path}")?;
+                writeln!(f, "Saving attachment: {path}")?;
                 fs::write(&path, attachment).context("failed saving attachment")?;
             }
         }

@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::stdout;
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use anyhow::Context;
@@ -201,7 +201,10 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let mut request = service.search();
 
         // read attributes from template
@@ -226,8 +229,7 @@ impl Command {
             launch_browser([url])?;
         } else if !self.options.dry_run {
             let items = request.send().await?;
-            let stdout = stdout().lock();
-            render_search(stdout, items, &fields, self.options.json)?;
+            render_search(f, items, &fields, self.options.json)?;
         }
 
         Ok(ExitCode::SUCCESS)

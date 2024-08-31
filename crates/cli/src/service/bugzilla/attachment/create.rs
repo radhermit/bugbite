@@ -1,4 +1,4 @@
-use std::io::{stdout, Write};
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::CsvOrStdin;
@@ -133,7 +133,10 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(&self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let attachment_ids = service
             .attachment_create(&self.args.ids)
             .attachments(self.args.files.iter().map(|file| {
@@ -153,11 +156,10 @@ impl Command {
             .await?;
 
         let item_ids = self.args.ids.iter().join(", ");
-        let mut stdout = stdout().lock();
         for (file, ids) in self.args.files.iter().zip(attachment_ids.iter()) {
             let ids = ids.iter().map(|x| x.to_string()).join(", ");
             verbose!(
-                stdout,
+                f,
                 "{file}: attached to bug(s): {item_ids} (attachment ID(s) {ids})"
             )?;
         }

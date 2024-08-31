@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::process::ExitCode;
 
 use clap::Args;
@@ -12,8 +13,8 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run(self) -> anyhow::Result<ExitCode> {
-        self.command.run()
+    pub(super) fn run<W: Write>(self, f: &mut W) -> anyhow::Result<ExitCode> {
+        self.command.run(f)
     }
 }
 
@@ -26,10 +27,10 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run(self) -> anyhow::Result<ExitCode> {
+    fn run<W: Write>(self, f: &mut W) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Connections(cmd) => cmd.run(),
-            Self::Services(cmd) => cmd.run(),
+            Self::Connections(cmd) => cmd.run(f),
+            Self::Services(cmd) => cmd.run(f),
         }
     }
 }

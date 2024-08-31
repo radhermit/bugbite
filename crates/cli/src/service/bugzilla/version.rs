@@ -1,4 +1,4 @@
-use std::io::{stdout, Write};
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::service::bugzilla::Service;
@@ -9,10 +9,12 @@ use clap::Args;
 pub(super) struct Command;
 
 impl Command {
-    pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(&self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let version = service.version().send().await?;
-        let mut stdout = stdout().lock();
-        writeln!(stdout, "{version}")?;
+        writeln!(f, "{version}")?;
         Ok(ExitCode::SUCCESS)
     }
 }

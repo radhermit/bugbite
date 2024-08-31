@@ -1,3 +1,4 @@
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -33,7 +34,10 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(&self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(&self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
 
         if self.options.browser {
@@ -45,7 +49,7 @@ impl Command {
                 .comments(!self.options.no_comments)
                 .send()
                 .await?;
-            render_items(service, &issues)?;
+            render_items(f, service, &issues)?;
         }
 
         Ok(ExitCode::SUCCESS)

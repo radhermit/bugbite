@@ -1,4 +1,4 @@
-use std::io::{stdout, Write};
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::Csv;
@@ -48,11 +48,13 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let mut request = service.search();
         request.merge(self.params)?;
         let issues = request.send().await?;
-        let mut stdout = stdout().lock();
         let mut count = 0;
 
         for issue in issues {
@@ -61,14 +63,14 @@ impl Command {
             if line.len() > *COLUMNS {
                 // truncate line to the terminal width of graphemes
                 let mut iter = UnicodeSegmentation::graphemes(line.as_str(), true).take(*COLUMNS);
-                writeln!(stdout, "{}", iter.join(""))?;
+                writeln!(f, "{}", iter.join(""))?;
             } else {
-                writeln!(stdout, "{line}")?;
+                writeln!(f, "{line}")?;
             }
         }
 
-        if count > 0 && is_terminal!(&stdout) {
-            writeln!(stdout, " * {count} found")?;
+        if count > 0 && is_terminal!(f) {
+            writeln!(f, " * {count} found")?;
         }
 
         Ok(ExitCode::SUCCESS)

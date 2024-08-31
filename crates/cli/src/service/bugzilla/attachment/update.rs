@@ -1,3 +1,4 @@
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
@@ -100,7 +101,10 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(self, service: &Service, _f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let ids = &self.args.ids.iter().flatten().collect::<Vec<_>>();
         let mut request = service.attachment_update(ids);
         request.params = self.params.into();

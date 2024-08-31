@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{stdout, Write};
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use anyhow::Context;
@@ -206,7 +206,10 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run(self, service: &Service) -> anyhow::Result<ExitCode> {
+    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    where
+        W: IsTerminal + Write,
+    {
         let mut request = service.create();
 
         // merge attributes from template or bug
@@ -235,12 +238,11 @@ impl Command {
         }
 
         if !self.options.dry_run {
-            let mut stdout = stdout().lock();
             let id = request.send().await?;
-            if is_terminal!(&stdout) {
-                verbose!(stdout, "Created bug {id}")?;
+            if is_terminal!(f) {
+                verbose!(f, "Created bug {id}")?;
             } else {
-                writeln!(stdout, "{id}")?;
+                writeln!(f, "{id}")?;
             }
         }
 
