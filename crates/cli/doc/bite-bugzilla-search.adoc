@@ -642,10 +642,10 @@ given.
 *--changed-by* <field[,...]=user[,...]>::
     Restrict by fields changed by a given user.
 
-*--changed-from* <field> <value>::
+*--changed-from* <field=value>::
     Restrict by fields changed from a given value.
 
-*--changed-to* <field> <value>::
+*--changed-to* <field=value>::
     Restrict by fields changed to a given value.
 
 == Time options
