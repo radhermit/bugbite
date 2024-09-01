@@ -84,17 +84,21 @@ impl<'a> Request<'a> {
     // TODO: submit multiple requests at once?
     pub async fn stream(&self) -> impl Stream<Item = crate::Result<Bug>> + '_ {
         let paged = self.params.limit.is_none();
-        let max = self.service.config.max_search_results;
+        let limit = self.service.config.max_search_results;
+        let mut offset = self.params.offset.unwrap_or_default();
+
+        let mut req = self.clone();
+        if paged {
+            req.params.limit = Some(limit);
+        }
 
         try_stream! {
-            let mut offset = self.params.offset.unwrap_or_default();
-            let mut req = self.clone();
-            if paged {
-                req.params.limit = Some(max);
-            }
-
             loop {
-                req.params.offset = Some(offset);
+                if paged {
+                    req.params.offset = Some(offset);
+                    offset += limit;
+                }
+
                 let items = req.send().await?;
                 let count = items.len();
 
@@ -102,11 +106,9 @@ impl<'a> Request<'a> {
                     yield item;
                 }
 
-                if !paged || count != max {
+                if !paged || count != limit {
                     break;
                 }
-
-                offset += max;
             }
         }
     }
