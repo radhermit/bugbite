@@ -3,10 +3,7 @@ use std::io::{self, IsTerminal, Write};
 
 use bugbite::traits::RenderSearch;
 use bugbite::utils::is_terminal;
-use futures::{
-    pin_mut,
-    stream::{Stream, TryStreamExt},
-};
+use futures_util::{pin_mut, Stream, TryStreamExt};
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use serde::Serialize;

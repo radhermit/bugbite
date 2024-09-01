@@ -3,7 +3,7 @@ use std::{fmt, fs};
 
 use async_stream::try_stream;
 use camino::Utf8Path;
-use futures::stream::Stream;
+use futures_util::Stream;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
