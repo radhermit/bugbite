@@ -13,7 +13,7 @@ use bugbite::service::bugzilla::{
     FilterField,
 };
 use bugbite::time::TimeDeltaOrStatic;
-use bugbite::traits::RequestMerge;
+use bugbite::traits::{RequestMerge, RequestStream};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 
@@ -658,7 +658,7 @@ impl Command {
             let url = request.search_url()?;
             launch_browser([url])?;
         } else if !self.options.dry_run {
-            let items = request.stream().await;
+            let items = request.stream();
             render_search(f, items, &fields, self.options.json).await?;
         }
 

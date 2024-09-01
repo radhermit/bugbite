@@ -2,6 +2,8 @@ use std::borrow::Cow;
 use std::fmt;
 use std::future::Future;
 
+use async_stream::try_stream;
+use futures_util::Stream;
 use reqwest::RequestBuilder;
 use url::Url;
 
@@ -72,6 +74,48 @@ pub trait RequestSend {
     type Output;
 
     fn send(&self) -> impl Future<Output = crate::Result<Self::Output>>;
+}
+
+pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone {
+    type Item;
+
+    fn max_search_results(&self) -> usize;
+    fn limit(&self) -> Option<usize>;
+    fn set_limit(&mut self, value: usize);
+    fn offset(&self) -> Option<usize>;
+    fn set_offset(&mut self, value: usize);
+
+    // TODO: submit multiple requests at once?
+    fn stream(&self) -> impl Stream<Item = crate::Result<Self::Item>> + '_ {
+        let paged = self.limit().is_none();
+        let limit = self.max_search_results();
+        let mut offset = self.offset().unwrap_or_default();
+
+        let mut req = self.clone();
+        if paged {
+            req.set_limit(limit);
+        }
+
+        try_stream! {
+            loop {
+                if paged {
+                    req.set_offset(offset);
+                    offset += limit;
+                }
+
+                let items = req.send().await?;
+                let count = items.len();
+
+                for item in items {
+                    yield item;
+                }
+
+                if !paged || count != limit {
+                    break;
+                }
+            }
+        }
+    }
 }
 
 /// Inject service authentication data into a request.

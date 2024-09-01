@@ -1,9 +1,7 @@
 use std::ops::{Deref, DerefMut};
 use std::{fmt, fs};
 
-use async_stream::try_stream;
 use camino::Utf8Path;
-use futures_util::Stream;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -16,7 +14,7 @@ use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
 use crate::service::redmine::Service;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, WebService};
+use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, RequestStream, WebService};
 use crate::utils::or;
 use crate::Error;
 
@@ -33,38 +31,6 @@ impl<'a> Request<'a> {
         Self {
             service,
             params: Default::default(),
-        }
-    }
-
-    // TODO: submit multiple requests at once?
-    pub async fn stream(&self) -> impl Stream<Item = crate::Result<Issue>> + '_ {
-        let paged = self.params.limit.is_none();
-        let limit = self.service.config.max_search_results;
-        let mut offset = self.params.offset.unwrap_or_default();
-
-        let mut req = self.clone();
-        if paged {
-            req.params.limit = Some(limit);
-        }
-
-        try_stream! {
-            loop {
-                if paged {
-                    req.params.offset = Some(offset);
-                    offset += limit;
-                }
-
-                let items = req.send().await?;
-                let count = items.len();
-
-                for item in items {
-                    yield item;
-                }
-
-                if !paged || count != limit {
-                    break;
-                }
-            }
         }
     }
 
@@ -205,6 +171,30 @@ impl RequestSend for Request<'_> {
         let issues = serde_json::from_value(data)
             .map_err(|e| Error::InvalidResponse(format!("failed deserializing issues: {e}")))?;
         Ok(issues)
+    }
+}
+
+impl RequestStream for Request<'_> {
+    type Item = Issue;
+
+    fn max_search_results(&self) -> usize {
+        self.service.config.max_search_results
+    }
+
+    fn limit(&self) -> Option<usize> {
+        self.params.limit
+    }
+
+    fn set_limit(&mut self, value: usize) {
+        self.params.limit = Some(value);
+    }
+
+    fn offset(&self) -> Option<usize> {
+        self.params.offset
+    }
+
+    fn set_offset(&mut self, value: usize) {
+        self.params.offset = Some(value);
     }
 }
 
