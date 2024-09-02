@@ -113,13 +113,13 @@ impl Default for ClientBuilder {
 impl ClientBuilder {
     pub fn build(&self) -> crate::Result<reqwest::Client> {
         let mut builder = reqwest::Client::builder()
-            .hickory_dns(true)
-            .use_rustls_tls()
-            .user_agent(USER_AGENT)
             // TODO: switch to cookie_provider() once cookie (de)serialization is supported
             .cookie_store(true)
+            .danger_accept_invalid_certs(self.insecure)
+            .hickory_dns(true)
             .timeout(Duration::from_secs_f64(self.timeout))
-            .danger_accept_invalid_certs(self.insecure);
+            .use_rustls_tls()
+            .user_agent(USER_AGENT);
 
         if let Some(path) = self.certificate.as_deref() {
             let data = fs::read(path).map_err(|e| {
