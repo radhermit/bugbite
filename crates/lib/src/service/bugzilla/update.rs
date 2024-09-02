@@ -14,7 +14,6 @@ use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Service;
 use crate::traits::{Contains, InjectAuth, RequestMerge, RequestSend, WebService};
-use crate::utils::or;
 use crate::Error;
 
 /// Changes made to a field.
@@ -125,14 +124,14 @@ pub struct Request<'a> {
 impl RequestMerge<&Utf8Path> for Request<'_> {
     fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
         let params = Parameters::from_path(path)?;
-        self.params.merge(params);
+        self.merge(params);
         Ok(())
     }
 }
 
 impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
     fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.params.merge(value);
+        self.merge(value);
         Ok(())
     }
 }
@@ -183,6 +182,52 @@ impl<'a> Request<'a> {
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
         let url = self.service.config.base.join(&format!("rest/bug/{id}"))?;
         Ok(url)
+    }
+
+    /// Override parameters using the provided value if it exists.
+    fn merge<T: Into<Parameters>>(&mut self, other: T) {
+        let params = other.into();
+        self.params = Parameters {
+            alias: params.alias.or_else(|| self.params.alias.take()),
+            assignee: params.assignee.or_else(|| self.params.assignee.take()),
+            blocks: params.blocks.or_else(|| self.params.blocks.take()),
+            cc: params.cc.or_else(|| self.params.cc.take()),
+            comment: params.comment.or_else(|| self.params.comment.take()),
+            comment_from: params
+                .comment_from
+                .or_else(|| self.params.comment_from.take()),
+            comment_is_private: params
+                .comment_is_private
+                .or_else(|| self.params.comment_is_private.take()),
+            comment_privacy: params
+                .comment_privacy
+                .or_else(|| self.params.comment_privacy.take()),
+            component: params.component.or_else(|| self.params.component.take()),
+            depends: params.depends.or_else(|| self.params.depends.take()),
+            duplicate_of: params
+                .duplicate_of
+                .or_else(|| self.params.duplicate_of.take()),
+            flags: params.flags.or_else(|| self.params.flags.take()),
+            groups: params.groups.or_else(|| self.params.groups.take()),
+            keywords: params.keywords.or_else(|| self.params.keywords.take()),
+            os: params.os.or_else(|| self.params.os.take()),
+            platform: params.platform.or_else(|| self.params.platform.take()),
+            priority: params.priority.or_else(|| self.params.priority.take()),
+            product: params.product.or_else(|| self.params.product.take()),
+            qa: params.qa.or_else(|| self.params.qa.take()),
+            resolution: params.resolution.or_else(|| self.params.resolution.take()),
+            see_also: params.see_also.or_else(|| self.params.see_also.take()),
+            status: params.status.or_else(|| self.params.status.take()),
+            severity: params.severity.or_else(|| self.params.severity.take()),
+            target: params.target.or_else(|| self.params.target.take()),
+            summary: params.summary.or_else(|| self.params.summary.take()),
+            url: params.url.or_else(|| self.params.url.take()),
+            version: params.version.or_else(|| self.params.version.take()),
+            whiteboard: params.whiteboard.or_else(|| self.params.whiteboard.take()),
+            custom_fields: params
+                .custom_fields
+                .or_else(|| self.params.custom_fields.take()),
+        };
     }
 
     /// Encode parameters into the form required for the request.
@@ -485,40 +530,6 @@ impl Parameters {
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         toml::from_str(&data)
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
-    }
-
-    /// Override parameters using the provided value if it exists.
-    fn merge<T: Into<Self>>(&mut self, other: T) {
-        let other = other.into();
-        or!(self.alias, other.alias);
-        or!(self.assignee, other.assignee);
-        or!(self.blocks, other.blocks);
-        or!(self.cc, other.cc);
-        or!(self.comment, other.comment);
-        or!(self.comment_from, other.comment_from);
-        or!(self.comment_is_private, other.comment_is_private);
-        or!(self.comment_privacy, other.comment_privacy);
-        or!(self.component, other.component);
-        or!(self.depends, other.depends);
-        or!(self.duplicate_of, other.duplicate_of);
-        or!(self.flags, other.flags);
-        or!(self.groups, other.groups);
-        or!(self.keywords, other.keywords);
-        or!(self.os, other.os);
-        or!(self.platform, other.platform);
-        or!(self.priority, other.priority);
-        or!(self.product, other.product);
-        or!(self.qa, other.qa);
-        or!(self.resolution, other.resolution);
-        or!(self.see_also, other.see_also);
-        or!(self.status, other.status);
-        or!(self.severity, other.severity);
-        or!(self.target, other.target);
-        or!(self.summary, other.summary);
-        or!(self.url, other.url);
-        or!(self.version, other.version);
-        or!(self.whiteboard, other.whiteboard);
-        or!(self.custom_fields, other.custom_fields);
     }
 }
 

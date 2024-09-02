@@ -9,7 +9,6 @@ use serde_with::skip_serializing_none;
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, RequestMerge, RequestSend, WebService};
-use crate::utils::or;
 use crate::Error;
 
 #[derive(Serialize, Debug)]
@@ -23,14 +22,14 @@ pub struct Request<'a> {
 impl RequestMerge<&Utf8Path> for Request<'_> {
     fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
         let params = Parameters::from_path(path)?;
-        self.params.merge(params);
+        self.merge(params);
         Ok(())
     }
 }
 
 impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
     fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.params.merge(value);
+        self.merge(value);
         Ok(())
     }
 }
@@ -60,6 +59,42 @@ impl<'a> Request<'a> {
             service,
             params: Default::default(),
         }
+    }
+
+    /// Override parameters using the provided value if it exists.
+    fn merge<T: Into<Parameters>>(&mut self, other: T) {
+        let params = other.into();
+        self.params = Parameters {
+            alias: params.alias.or_else(|| self.params.alias.take()),
+            assignee: params.assignee.or_else(|| self.params.assignee.take()),
+            blocks: params.blocks.or_else(|| self.params.blocks.take()),
+            cc: params.cc.or_else(|| self.params.cc.take()),
+            component: params.component.or_else(|| self.params.component.take()),
+            custom_fields: params
+                .custom_fields
+                .or_else(|| self.params.custom_fields.take()),
+            depends: params.depends.or_else(|| self.params.depends.take()),
+            description: params
+                .description
+                .or_else(|| self.params.description.take()),
+            flags: params.flags.or_else(|| self.params.flags.take()),
+            groups: params.groups.or_else(|| self.params.groups.take()),
+            keywords: params.keywords.or_else(|| self.params.keywords.take()),
+            os: params.os.or_else(|| self.params.os.take()),
+            platform: params.platform.or_else(|| self.params.platform.take()),
+            priority: params.priority.or_else(|| self.params.priority.take()),
+            product: params.product.or_else(|| self.params.product.take()),
+            qa: params.qa.or_else(|| self.params.qa.take()),
+            resolution: params.resolution.or_else(|| self.params.resolution.take()),
+            see_also: params.see_also.or_else(|| self.params.see_also.take()),
+            status: params.status.or_else(|| self.params.status.take()),
+            severity: params.severity.or_else(|| self.params.severity.take()),
+            target: params.target.or_else(|| self.params.target.take()),
+            summary: params.summary.or_else(|| self.params.summary.take()),
+            url: params.url.or_else(|| self.params.url.take()),
+            version: params.version.or_else(|| self.params.version.take()),
+            whiteboard: params.whiteboard.or_else(|| self.params.whiteboard.take()),
+        };
     }
 
     /// Encode parameters into the form required for the request.
@@ -388,36 +423,6 @@ impl Parameters {
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         toml::from_str(&data)
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
-    }
-
-    /// Override parameters using the provided value if it exists.
-    fn merge<T: Into<Self>>(&mut self, other: T) {
-        let other = other.into();
-        or!(self.alias, other.alias);
-        or!(self.assignee, other.assignee);
-        or!(self.blocks, other.blocks);
-        or!(self.cc, other.cc);
-        or!(self.component, other.component);
-        or!(self.custom_fields, other.custom_fields);
-        or!(self.depends, other.depends);
-        or!(self.description, other.description);
-        or!(self.flags, other.flags);
-        or!(self.groups, other.groups);
-        or!(self.keywords, other.keywords);
-        or!(self.os, other.os);
-        or!(self.platform, other.platform);
-        or!(self.priority, other.priority);
-        or!(self.product, other.product);
-        or!(self.qa, other.qa);
-        or!(self.resolution, other.resolution);
-        or!(self.see_also, other.see_also);
-        or!(self.status, other.status);
-        or!(self.severity, other.severity);
-        or!(self.target, other.target);
-        or!(self.summary, other.summary);
-        or!(self.url, other.url);
-        or!(self.version, other.version);
-        or!(self.whiteboard, other.whiteboard);
     }
 }
 

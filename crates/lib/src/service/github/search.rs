@@ -10,7 +10,6 @@ use tracing::debug;
 use crate::objects::github::Issue;
 use crate::query::{Order, Query};
 use crate::traits::{Api, RequestMerge, RequestSend};
-use crate::utils::or;
 use crate::Error;
 
 struct QueryBuilder<'a> {
@@ -55,12 +54,6 @@ impl Parameters {
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         toml::from_str(&data)
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
-    }
-
-    /// Override parameters using the provided value if it exists.
-    fn merge<T: Into<Self>>(&mut self, other: T) {
-        let other = other.into();
-        or!(self.order, other.order);
     }
 
     pub fn order(mut self, value: Order<OrderField>) -> Self {
@@ -109,6 +102,14 @@ impl<'a> Request<'a> {
         }
     }
 
+    /// Override parameters using the provided value if it exists.
+    fn merge<T: Into<Parameters>>(&mut self, other: T) {
+        let params = other.into();
+        self.params = Parameters {
+            order: params.order.or_else(|| self.params.order.take()),
+        };
+    }
+
     fn encode(&self) -> crate::Result<QueryBuilder> {
         let mut query = QueryBuilder::new(self.service);
 
@@ -123,14 +124,14 @@ impl<'a> Request<'a> {
 impl RequestMerge<&Utf8Path> for Request<'_> {
     fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
         let params = Parameters::from_path(path)?;
-        self.params.merge(params);
+        self.merge(params);
         Ok(())
     }
 }
 
 impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
     fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.params.merge(value);
+        self.merge(value);
         Ok(())
     }
 }
