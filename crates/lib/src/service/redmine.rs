@@ -90,10 +90,9 @@ impl Service {
         format!("{base}/issues/{id}")
     }
 
-    pub fn get<I, S>(&self, ids: I) -> get::Request
+    pub fn get<I>(&self, ids: I) -> get::Request
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator<Item = u64>,
     {
         get::Request::new(self, ids)
     }

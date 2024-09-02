@@ -12,19 +12,18 @@ use crate::Error;
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
-    pub ids: Vec<String>,
+    pub ids: Vec<u64>,
     fields: IndexSet<Field>,
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> Self
+    pub(crate) fn new<I>(service: &'a Service, ids: I) -> Self
     where
-        I: IntoIterator<Item = S>,
-        S: std::fmt::Display,
+        I: IntoIterator<Item = u64>,
     {
         Self {
             service,
-            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            ids: ids.into_iter().collect(),
             fields: Default::default(),
         }
     }
@@ -161,7 +160,7 @@ mod tests {
         let service = Service::new(config, Default::default()).unwrap();
 
         // no IDs
-        let ids = Vec::<u32>::new();
+        let ids = Vec::<u64>::new();
         let err = service.get(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
