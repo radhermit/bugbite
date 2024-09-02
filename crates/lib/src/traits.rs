@@ -79,30 +79,18 @@ pub trait RequestSend {
 pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone {
     type Item;
 
-    fn max_search_results(&self) -> usize;
-    fn limit(&self) -> Option<usize>;
-    fn set_limit(&mut self, value: usize);
-    fn offset(&self) -> Option<usize>;
-    fn set_offset(&mut self, value: usize);
+    /// Return the number of results to request if paging is enabled.
+    fn paged(&mut self) -> Option<usize>;
+    /// Modify the request to return the next page of results.
+    fn next_page(&mut self, size: usize);
 
     // TODO: submit multiple requests at once?
     fn stream(&self) -> impl Stream<Item = crate::Result<Self::Item>> + '_ {
-        let paged = self.limit().is_none();
-        let limit = self.max_search_results();
-        let mut offset = self.offset().unwrap_or_default();
-
         let mut req = self.clone();
-        if paged {
-            req.set_limit(limit);
-        }
+        let paged = req.paged();
 
         try_stream! {
             loop {
-                if paged {
-                    req.set_offset(offset);
-                    offset += limit;
-                }
-
                 let items = req.send().await?;
                 let count = items.len();
 
@@ -110,8 +98,9 @@ pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone {
                     yield item;
                 }
 
-                if !paged || count != limit {
-                    break;
+                match paged {
+                    Some(size) if count == size => req.next_page(size),
+                    _ => break,
                 }
             }
         }

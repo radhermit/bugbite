@@ -74,24 +74,18 @@ impl RequestSend for Request<'_> {
 impl RequestStream for Request<'_> {
     type Item = Bug;
 
-    fn max_search_results(&self) -> usize {
-        self.service.config.max_search_results
+    fn paged(&mut self) -> Option<usize> {
+        if self.params.limit.is_none() {
+            self.params.limit = Some(self.service.config.max_search_results);
+            self.params.limit
+        } else {
+            None
+        }
     }
 
-    fn limit(&self) -> Option<usize> {
-        self.params.limit
-    }
-
-    fn set_limit(&mut self, value: usize) {
-        self.params.limit = Some(value);
-    }
-
-    fn offset(&self) -> Option<usize> {
-        self.params.offset
-    }
-
-    fn set_offset(&mut self, value: usize) {
-        self.params.offset = Some(value);
+    fn next_page(&mut self, size: usize) {
+        // TODO: move to get_or_insert_default() when it is stable
+        *self.params.offset.get_or_insert_with(Default::default) += size;
     }
 }
 
