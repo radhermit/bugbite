@@ -344,6 +344,15 @@ struct QueryOptions {
     #[arg(short, long, value_name = "FIELD[,...]")]
     order: Option<Csv<Order<OrderField>>>,
 
+    /// enable paging support
+    #[arg(
+        long,
+        num_args = 0..=1,
+        default_missing_value = "true",
+        value_name = "BOOL",
+    )]
+    paged: Option<bool>,
+
     /// search using quicksearch syntax
     #[arg(short = 'S', long, value_name = "QUERY")]
     quicksearch: Option<String>,
@@ -471,6 +480,7 @@ impl From<Params> for Parameters {
             limit: value.query.limit,
             offset: value.query.offset,
             order: value.query.order.map(|x| x.into_iter().collect()),
+            paged: value.query.paged,
             quicksearch: value.query.quicksearch,
 
             alias: value.attr.alias,

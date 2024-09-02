@@ -81,7 +81,8 @@ the limit is set to zero, the default limit is used. Note that the maximum and
 default limits are generally not equal, with most instances using 100 and 25,
 respectively.
 +
-Note that setting an explicit limit will disable result pagination.
+Note that setting an explicit limit will disable result paging unless `--paged`
+is used.
 
 *-O, --offset <value>*::
     Set the starting position for results.
@@ -119,6 +120,18 @@ If an invalid sorting request is made, the default ordering will be used.
 - *subject*: issue subject
 - *tracker*: issue type
 - *updated*: time when the issue was last updated
+
+*--paged [<bool>]*::
+    Enable result paging support.
++
+Forcibly enable paging with `-l/--limit` using the given limit value as the
+number of results per page.
++
+This allows setting a smaller page size to get quicker, initial results for
+large queries.
++
+.All closed issues using 25 items per page:
+ bite redmine search -s @closed -l 25 --paged
 
 == Attribute options
 

@@ -18,7 +18,6 @@ use crate::query::{Order, Query};
 use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, RequestStream, WebService};
-use crate::utils::or;
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -34,14 +33,14 @@ pub struct Request<'a> {
 impl RequestMerge<&Utf8Path> for Request<'_> {
     fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
         let params = Parameters::from_path(path)?;
-        self.params.merge(params);
+        self.merge(params);
         Ok(())
     }
 }
 
 impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
     fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.params.merge(value);
+        self.merge(value);
         Ok(())
     }
 }
@@ -75,8 +74,10 @@ impl RequestStream for Request<'_> {
     type Item = Bug;
 
     fn paged(&mut self) -> Option<usize> {
-        if self.params.limit.is_none() {
-            self.params.limit = Some(self.service.config.max_search_results);
+        if self.params.paged.unwrap_or_default() || self.params.limit.is_none() {
+            self.params
+                .limit
+                .get_or_insert(self.service.config.max_search_results);
             self.params.limit
         } else {
             None
@@ -95,6 +96,99 @@ impl<'a> Request<'a> {
             service,
             params: Default::default(),
         }
+    }
+
+    /// Override parameters using the provided value if it exists.
+    fn merge<T: Into<Parameters>>(&mut self, other: T) {
+        let params = other.into();
+        self.params = Parameters {
+            alias: params.alias.or_else(|| self.params.alias.take()),
+            attachments: params
+                .attachments
+                .or_else(|| self.params.attachments.take()),
+            flags: params.flags.or_else(|| self.params.flags.take()),
+            groups: params.groups.or_else(|| self.params.groups.take()),
+            keywords: params.keywords.or_else(|| self.params.keywords.take()),
+            see_also: params.see_also.or_else(|| self.params.see_also.take()),
+            tags: params.tags.or_else(|| self.params.tags.take()),
+            whiteboard: params.whiteboard.or_else(|| self.params.whiteboard.take()),
+            url: params.url.or_else(|| self.params.url.take()),
+
+            attachment_description: params
+                .attachment_description
+                .or_else(|| self.params.attachment_description.take()),
+            attachment_filename: params
+                .attachment_filename
+                .or_else(|| self.params.attachment_filename.take()),
+            attachment_mime: params
+                .attachment_mime
+                .or_else(|| self.params.attachment_mime.take()),
+            attachment_is_obsolete: params
+                .attachment_is_obsolete
+                .or_else(|| self.params.attachment_is_obsolete.take()),
+            attachment_is_patch: params
+                .attachment_is_patch
+                .or_else(|| self.params.attachment_is_patch.take()),
+            attachment_is_private: params
+                .attachment_is_private
+                .or_else(|| self.params.attachment_is_private.take()),
+
+            changed: params.changed.or_else(|| self.params.changed.take()),
+            changed_by: params.changed_by.or_else(|| self.params.changed_by.take()),
+            changed_from: params
+                .changed_from
+                .or_else(|| self.params.changed_from.take()),
+            changed_to: params.changed_to.or_else(|| self.params.changed_to.take()),
+
+            assignee: params.assignee.or_else(|| self.params.assignee.take()),
+            attacher: params.attacher.or_else(|| self.params.attacher.take()),
+            cc: params.cc.or_else(|| self.params.cc.take()),
+            commenter: params.commenter.or_else(|| self.params.commenter.take()),
+            flagger: params.flagger.or_else(|| self.params.flagger.take()),
+            qa: params.qa.or_else(|| self.params.qa.take()),
+            reporter: params.reporter.or_else(|| self.params.reporter.take()),
+
+            fields: params.fields.or_else(|| self.params.fields.take()),
+            limit: params.limit.or_else(|| self.params.limit.take()),
+            offset: params.offset.or_else(|| self.params.offset.take()),
+            order: params.order.or_else(|| self.params.order.take()),
+            paged: params.paged.or_else(|| self.params.paged.take()),
+
+            created: params.created.or_else(|| self.params.created.take()),
+            updated: params.updated.or_else(|| self.params.updated.take()),
+            closed: params.closed.or_else(|| self.params.closed.take()),
+
+            comment: params.comment.or_else(|| self.params.comment.take()),
+            comment_is_private: params
+                .comment_is_private
+                .or_else(|| self.params.comment_is_private.take()),
+            comment_tag: params
+                .comment_tag
+                .or_else(|| self.params.comment_tag.take()),
+
+            blocks: params.blocks.or_else(|| self.params.blocks.take()),
+            depends: params.depends.or_else(|| self.params.depends.take()),
+            ids: params.ids.or_else(|| self.params.ids.take()),
+            priority: params.priority.or_else(|| self.params.priority.take()),
+            severity: params.severity.or_else(|| self.params.severity.take()),
+            version: params.version.or_else(|| self.params.version.take()),
+            component: params.component.or_else(|| self.params.component.take()),
+            product: params.product.or_else(|| self.params.product.take()),
+            platform: params.platform.or_else(|| self.params.platform.take()),
+            os: params.os.or_else(|| self.params.os.take()),
+            resolution: params.resolution.or_else(|| self.params.resolution.take()),
+            status: params.status.or_else(|| self.params.status.take()),
+            target: params.target.or_else(|| self.params.target.take()),
+            comments: params.comments.or_else(|| self.params.comments.take()),
+            votes: params.votes.or_else(|| self.params.votes.take()),
+            summary: params.summary.or_else(|| self.params.summary.take()),
+            quicksearch: params
+                .quicksearch
+                .or_else(|| self.params.quicksearch.take()),
+            custom_fields: params
+                .custom_fields
+                .or_else(|| self.params.custom_fields.take()),
+        };
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {
@@ -886,6 +980,7 @@ pub struct Parameters {
     pub limit: Option<usize>,
     pub offset: Option<usize>,
     pub order: Option<Vec<Order<OrderField>>>,
+    pub paged: Option<bool>,
 
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
     pub updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
@@ -922,72 +1017,6 @@ impl Parameters {
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         toml::from_str(&data)
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
-    }
-
-    /// Override parameters using the provided value if it exists.
-    fn merge<T: Into<Self>>(&mut self, other: T) {
-        let other = other.into();
-        or!(self.alias, other.alias);
-        or!(self.attachments, other.attachments);
-        or!(self.flags, other.flags);
-        or!(self.groups, other.groups);
-        or!(self.keywords, other.keywords);
-        or!(self.see_also, other.see_also);
-        or!(self.tags, other.tags);
-        or!(self.whiteboard, other.whiteboard);
-        or!(self.url, other.url);
-
-        or!(self.attachment_description, other.attachment_description);
-        or!(self.attachment_filename, other.attachment_filename);
-        or!(self.attachment_mime, other.attachment_mime);
-        or!(self.attachment_is_obsolete, other.attachment_is_obsolete);
-        or!(self.attachment_is_patch, other.attachment_is_patch);
-        or!(self.attachment_is_private, other.attachment_is_private);
-
-        or!(self.changed, other.changed);
-        or!(self.changed_by, other.changed_by);
-        or!(self.changed_from, other.changed_from);
-        or!(self.changed_to, other.changed_to);
-
-        or!(self.assignee, other.assignee);
-        or!(self.attacher, other.attacher);
-        or!(self.cc, other.cc);
-        or!(self.commenter, other.commenter);
-        or!(self.flagger, other.flagger);
-        or!(self.qa, other.qa);
-        or!(self.reporter, other.reporter);
-
-        or!(self.fields, other.fields);
-        or!(self.limit, other.limit);
-        or!(self.offset, other.offset);
-        or!(self.order, other.order);
-
-        or!(self.created, other.created);
-        or!(self.updated, other.updated);
-        or!(self.closed, other.closed);
-
-        or!(self.comment, other.comment);
-        or!(self.comment_is_private, other.comment_is_private);
-        or!(self.comment_tag, other.comment_tag);
-
-        or!(self.blocks, other.blocks);
-        or!(self.depends, other.depends);
-        or!(self.ids, other.ids);
-        or!(self.priority, other.priority);
-        or!(self.severity, other.severity);
-        or!(self.version, other.version);
-        or!(self.component, other.component);
-        or!(self.product, other.product);
-        or!(self.platform, other.platform);
-        or!(self.os, other.os);
-        or!(self.resolution, other.resolution);
-        or!(self.status, other.status);
-        or!(self.target, other.target);
-        or!(self.comments, other.comments);
-        or!(self.votes, other.votes);
-        or!(self.summary, other.summary);
-        or!(self.quicksearch, other.quicksearch);
-        or!(self.custom_fields, other.custom_fields);
     }
 }
 

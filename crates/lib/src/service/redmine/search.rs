@@ -15,7 +15,6 @@ use crate::query::{Order, Query};
 use crate::service::redmine::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, RequestStream, WebService};
-use crate::utils::or;
 use crate::Error;
 
 #[derive(Serialize, Debug, Clone)]
@@ -32,6 +31,30 @@ impl<'a> Request<'a> {
             service,
             params: Default::default(),
         }
+    }
+
+    /// Override parameters using the provided value if it exists.
+    fn merge<T: Into<Parameters>>(&mut self, other: T) {
+        let params = other.into();
+        self.params = Parameters {
+            assignee: params.assignee.or_else(|| self.params.assignee.take()),
+            attachments: params
+                .attachments
+                .or_else(|| self.params.attachments.take()),
+            blocks: params.blocks.or_else(|| self.params.blocks.take()),
+            blocked: params.blocked.or_else(|| self.params.blocked.take()),
+            relates: params.relates.or_else(|| self.params.relates.take()),
+            ids: params.ids.or_else(|| self.params.ids.take()),
+            created: params.created.or_else(|| self.params.created.take()),
+            updated: params.updated.or_else(|| self.params.updated.take()),
+            closed: params.closed.or_else(|| self.params.closed.take()),
+            limit: params.limit.or_else(|| self.params.limit.take()),
+            offset: params.offset.or_else(|| self.params.offset.take()),
+            order: params.order.or_else(|| self.params.order.take()),
+            paged: params.paged.or_else(|| self.params.paged.take()),
+            status: params.status.or_else(|| self.params.status.take()),
+            summary: params.summary.or_else(|| self.params.summary.take()),
+        };
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {
@@ -145,14 +168,14 @@ impl<'a> Request<'a> {
 impl RequestMerge<&Utf8Path> for Request<'_> {
     fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
         let params = Parameters::from_path(path)?;
-        self.params.merge(params);
+        self.merge(params);
         Ok(())
     }
 }
 
 impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
     fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.params.merge(value);
+        self.merge(value);
         Ok(())
     }
 }
@@ -177,8 +200,10 @@ impl RequestStream for Request<'_> {
     type Item = Issue;
 
     fn paged(&mut self) -> Option<usize> {
-        if self.params.limit.is_none() {
-            self.params.limit = Some(self.service.config.max_search_results);
+        if self.params.paged.unwrap_or_default() || self.params.limit.is_none() {
+            self.params
+                .limit
+                .get_or_insert(self.service.config.max_search_results);
             self.params.limit
         } else {
             None
@@ -209,6 +234,7 @@ pub struct Parameters {
     pub limit: Option<usize>,
     pub offset: Option<usize>,
     pub order: Option<Vec<Order<OrderField>>>,
+    pub paged: Option<bool>,
 
     pub status: Option<String>,
     pub summary: Option<Vec<String>>,
@@ -221,25 +247,6 @@ impl Parameters {
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         toml::from_str(&data)
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
-    }
-
-    /// Override parameters using the provided value if it exists.
-    fn merge<T: Into<Self>>(&mut self, other: T) {
-        let other = other.into();
-        or!(self.assignee, other.assignee);
-        or!(self.attachments, other.attachments);
-        or!(self.blocks, other.blocks);
-        or!(self.blocked, other.blocked);
-        or!(self.relates, other.relates);
-        or!(self.ids, other.ids);
-        or!(self.created, other.created);
-        or!(self.updated, other.updated);
-        or!(self.closed, other.closed);
-        or!(self.limit, other.limit);
-        or!(self.offset, other.offset);
-        or!(self.order, other.order);
-        or!(self.status, other.status);
-        or!(self.summary, other.summary);
     }
 }
 

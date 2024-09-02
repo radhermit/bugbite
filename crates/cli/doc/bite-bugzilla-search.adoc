@@ -76,7 +76,8 @@ If the value is higher than the maximum service limit that value is used
 instead. If the limit is set to zero, all matching results are returned up to
 the service limit.
 +
-Note that setting an explicit limit will disable result pagination.
+Note that setting an explicit limit will disable result paging unless `--paged`
+is used.
 
 *-O, --offset <value>*::
     Set the starting position for results.
@@ -115,6 +116,18 @@ Possible values: alias, assignee, blocks, comments, component, created,
 deadline, depends, flags, id, keywords, last-visit, os, platform, priority,
 product, qa, reporter, resolution, severity, status, summary, tags, target,
 updated, url, version, votes, whiteboard
+
+*--paged [<bool>]*::
+    Enable result paging support.
++
+Forcibly enable paging with `-l/--limit` using the given limit value as the
+number of results per page.
++
+This allows setting a smaller page size to get quicker, initial results for
+large queries.
++
+.All closed issues using 25 items per page:
+ bite bugzilla search -s @closed -l 25 --paged
 
 *-S, --quicksearch <query>*::
     Search for bugs using quicksearch syntax.
