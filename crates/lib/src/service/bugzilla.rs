@@ -138,10 +138,9 @@ impl Service {
         attachment::create::Request::new(self, ids)
     }
 
-    pub fn attachment_get<I, S>(&self, ids: I) -> attachment::get::Request
+    pub fn attachment_get<I>(&self, ids: I) -> attachment::get::Request
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator<Item = u64>,
     {
         attachment::get::Request::new(self, ids)
     }
@@ -154,10 +153,9 @@ impl Service {
         attachment::get_item::Request::new(self, ids)
     }
 
-    pub fn attachment_update<I, S>(&self, ids: I) -> attachment::update::Request
+    pub fn attachment_update<I>(&self, ids: I) -> attachment::update::Request
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator<Item = u64>,
     {
         attachment::update::Request::new(self, ids)
     }

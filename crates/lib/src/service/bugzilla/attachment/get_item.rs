@@ -116,7 +116,7 @@ mod tests {
         let service = Service::new(config, Default::default()).unwrap();
 
         // no IDs
-        let ids = Vec::<u32>::new();
+        let ids = Vec::<u64>::new();
         let err = service.attachment_get_item(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");

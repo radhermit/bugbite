@@ -36,6 +36,31 @@ fn required_args() {
 }
 
 #[tokio::test]
+async fn invalid_ids() {
+    let server = start_server().await;
+    server
+        .respond(200, TEST_DATA.join("attachment/get/single-plain-text.json"))
+        .await;
+
+    // string IDs only work with -i/--item-ids
+    cmd("bite bugzilla attachment get abc")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff("Error: invalid attachment ID: abc").trim())
+        .failure()
+        .code(1);
+
+    for opt in ["-i", "--item-ids"] {
+        cmd("bite bugzilla attachment get abc")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+    }
+}
+
+#[tokio::test]
 async fn nonexistent_bug() {
     let server = start_server().await;
 

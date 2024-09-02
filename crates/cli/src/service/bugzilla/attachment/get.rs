@@ -3,12 +3,13 @@ use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 use std::sync::atomic::Ordering;
 
-use anyhow::Context;
+use anyhow::{anyhow, Context};
 use bugbite::args::MaybeStdinVec;
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
 use clap::Args;
+use itertools::Itertools;
 
 use crate::service::bugzilla::OUTDATED;
 use crate::service::Render;
@@ -66,8 +67,8 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
-        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
-        let multiple_bugs = self.options.item_ids && ids.len() > 1;
+        let multiple_bugs = self.options.item_ids && self.ids.len() > 1;
+        let ids = self.ids.iter().flatten();
 
         let attachments = if self.options.item_ids {
             service
@@ -79,6 +80,11 @@ impl Command {
                 .flatten()
                 .collect()
         } else {
+            // convert IDs to numeric values
+            let ids: Vec<_> = ids
+                .map(|x| x.parse().map_err(|_| anyhow!("invalid attachment ID: {x}")))
+                .try_collect()?;
+
             service
                 .attachment_get(ids)
                 .data(!self.options.list)

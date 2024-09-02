@@ -8,19 +8,18 @@ use crate::Error;
 #[derive(Debug)]
 pub struct Request<'a> {
     service: &'a Service,
-    pub ids: Vec<String>,
+    pub ids: Vec<u64>,
     pub data: bool,
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> Self
+    pub(crate) fn new<I>(service: &'a Service, ids: I) -> Self
     where
-        I: IntoIterator<Item = S>,
-        S: std::fmt::Display,
+        I: IntoIterator<Item = u64>,
     {
         Self {
             service,
-            ids: ids.into_iter().map(|s| s.to_string()).collect(),
+            ids: ids.into_iter().collect(),
             data: true,
         }
     }
@@ -39,8 +38,8 @@ impl<'a> Request<'a> {
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
-        for id in &self.ids[1..] {
-            url.query_pairs_mut().append_pair("attachment_ids", id);
+        for id in self.ids[1..].iter().map(|x| x.to_string()) {
+            url.query_pairs_mut().append_pair("attachment_ids", &id);
         }
 
         if !self.data {
@@ -70,8 +69,8 @@ impl RequestSend for Request<'_> {
         let mut data = data["attachments"].take();
 
         let mut attachments = vec![];
-        for id in &self.ids {
-            let data = data[id].take();
+        for id in self.ids.iter().map(|x| x.to_string()) {
+            let data = data[&id].take();
 
             // bugzilla doesn't return errors for nonexistent attachment IDs
             if data.is_null() {
@@ -109,7 +108,7 @@ mod tests {
         let service = Service::new(config, Default::default()).unwrap();
 
         // no IDs
-        let ids = Vec::<u32>::new();
+        let ids = Vec::<u64>::new();
         let err = service.attachment_get(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
