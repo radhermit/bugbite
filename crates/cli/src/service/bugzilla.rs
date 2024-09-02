@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use bugbite::objects::bugzilla::*;
 use bugbite::service::{
     bugzilla::{Config, Service},
-    ClientBuilder, ServiceKind,
+    ServiceKind,
 };
 use clap::Args;
 use itertools::Itertools;
@@ -78,10 +78,7 @@ impl Command {
         config.user = self.auth.user;
         config.password = self.auth.password;
 
-        let builder = ClientBuilder::default()
-            .insecure(self.service.insecure)
-            .timeout(self.service.timeout);
-
+        let builder = self.service.into();
         let service = Service::new(config, builder)?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await

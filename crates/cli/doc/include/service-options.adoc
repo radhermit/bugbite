@@ -5,6 +5,13 @@
 +
 This can either be a pre-configured connection name or a service URL.
 
+*--certificate <path>*::
+    Add a custom root certificate.
++
+This can be used to connect to a server that has a self-signed certificate
+without having to use `--insecure`. Note that this requires a PEM encoded
+certificate file.
+
 *--insecure*::
     Ignore invalid service certificates when connecting.
 

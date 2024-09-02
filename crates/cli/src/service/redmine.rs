@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use bugbite::objects::redmine::*;
 use bugbite::service::{
     redmine::{Config, Service},
-    ClientBuilder, ServiceKind,
+    ServiceKind,
 };
 use itertools::Itertools;
 use tracing::debug;
@@ -67,10 +67,7 @@ impl Command {
         config.user = self.auth.user;
         config.password = self.auth.password;
 
-        let builder = ClientBuilder::default()
-            .insecure(self.service.insecure)
-            .timeout(self.service.timeout);
-
+        let builder = self.service.into();
         let service = Service::new(config, builder)?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await

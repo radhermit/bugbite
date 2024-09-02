@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use bugbite::objects::github::*;
 use bugbite::service::{
     github::{Config, Service},
-    ClientBuilder, ServiceKind,
+    ServiceKind,
 };
 use itertools::Itertools;
 use tracing::debug;
@@ -61,10 +61,7 @@ impl Command {
         let mut config = Config::new(url)?;
         config.token = self.auth.key;
 
-        let builder = ClientBuilder::default()
-            .insecure(self.service.insecure)
-            .timeout(self.service.timeout);
-
+        let builder = self.service.into();
         let service = Service::new(config, builder)?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await
