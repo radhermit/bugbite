@@ -105,7 +105,7 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
-        let ids = self.args.ids.iter().flatten().copied();
+        let ids = self.args.ids.into_iter().flatten();
         let mut request = service.attachment_update(ids);
         request.params = self.params.into();
         request.send().await?;

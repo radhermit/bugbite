@@ -372,7 +372,7 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
-        let ids = self.ids.into_iter().flatten().collect::<Vec<_>>();
+        let ids = self.ids.into_iter().flatten();
         let mut request = service.update(ids);
 
         // read attributes from template

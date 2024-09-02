@@ -61,7 +61,7 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
-        let ids: Vec<_> = self.ids.iter().flatten().collect();
+        let ids = self.ids.iter().flatten().collect::<Vec<_>>();
         let mut request = service.comment(&ids);
         request.params = self.params.into();
         let comments = request.send().await?;

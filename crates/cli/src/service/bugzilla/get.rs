@@ -46,10 +46,10 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
-        let ids = &self.ids.iter().flatten().collect::<Vec<_>>();
+        let ids = self.ids.iter().flatten();
 
         if self.browser {
-            let urls = ids.iter().map(|id| service.item_url(id));
+            let urls = ids.map(|id| service.item_url(id));
             launch_browser(urls)?;
         } else {
             let bugs = service

@@ -49,7 +49,7 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
-        let ids: Vec<_> = self.ids.iter().flatten().collect();
+        let ids = self.ids.iter().flatten().collect::<Vec<_>>();
         let mut request = service.history(&ids);
         request.params = self.params.into();
         let events = request.send().await?;
