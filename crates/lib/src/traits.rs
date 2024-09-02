@@ -79,12 +79,13 @@ pub trait RequestSend {
 pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone {
     type Item;
 
-    /// Return the number of results to request if paging is enabled.
+    /// Return the page size if paging is enabled.
     fn paged(&mut self) -> Option<usize>;
-    /// Modify the request to return the next page of results.
+    /// Modify the request to return the next page.
     fn next_page(&mut self, size: usize);
 
     // TODO: submit multiple requests at once?
+    /// Send requests and return the stream of items for them.
     fn stream(&self) -> impl Stream<Item = crate::Result<Self::Item>> + '_ {
         let mut req = self.clone();
         let paged = req.paged();
