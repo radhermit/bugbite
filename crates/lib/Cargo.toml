@@ -59,5 +59,6 @@ default-features = false
 features = ["cookies", "hickory-dns", "json", "rustls-tls"]
 
 [dev-dependencies]
+indoc = "2.0.5"
 serde_test = "1.0.177"
 tokio = { version = "1.40.0", features = ["full"] }

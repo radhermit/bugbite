@@ -87,3 +87,61 @@ impl<'a> IntoIterator for &'a Config {
         self.0.iter()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::env;
+
+    use tempfile::tempdir;
+
+    use super::*;
+
+    #[test]
+    fn load() {
+        // bundled services only
+        let mut config = Config::new().unwrap();
+        assert!(!config.is_empty());
+        let len = config.len();
+
+        // verify bundled gentoo connection doesn't set a user
+        let c = config.get("gentoo").unwrap().as_bugzilla().unwrap();
+        assert!(c.user.is_none());
+
+        let dir = tempdir().unwrap();
+        let dir_path = dir.path().to_str().unwrap();
+        env::set_current_dir(dir_path).unwrap();
+
+        // create service files
+        let service1 = indoc::indoc! {r#"
+            [new1]
+            type = "bugzilla"
+            base = "https://random.bugzilla.site/"
+        "#};
+        fs::write("1.toml", service1).unwrap();
+        let service2 = indoc::indoc! {r#"
+            [new2]
+            type = "redmine"
+            base = "https://random.redmine.site/"
+        "#};
+        fs::write("2.toml", service2).unwrap();
+        let gentoo = indoc::indoc! {r#"
+            [gentoo]
+            type = "bugzilla"
+            base = "https://bugs.gentoo.org/"
+            user = "user@email.com"
+        "#};
+        fs::write("gentoo.toml", gentoo).unwrap();
+
+        // add new service from file
+        config.load("1.toml").unwrap();
+        assert!(config.len() == len + 1);
+
+        // add new services from dir
+        config.load(dir_path).unwrap();
+        assert!(config.len() == len + 2);
+
+        // verify gentoo connection was overridden
+        let c = config.get("gentoo").unwrap().as_bugzilla().unwrap();
+        assert_eq!(c.user.as_deref().unwrap(), "user@email.com");
+    }
+}

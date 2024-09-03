@@ -296,6 +296,7 @@ dependencies = [
  "futures-util",
  "humansize",
  "indexmap",
+ "indoc",
  "infer",
  "itertools",
  "once_cell",
