@@ -45,7 +45,7 @@ impl Command {
     {
         let connection = self.service.connection.as_str();
         let mut config = config
-            .get(ServiceKind::Github, connection)?
+            .get_kind(ServiceKind::Github, connection)?
             .into_github()
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 

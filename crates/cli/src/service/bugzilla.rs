@@ -60,7 +60,7 @@ impl Command {
     {
         let connection = self.service.connection.as_str();
         let mut config = config
-            .get(ServiceKind::Bugzilla, connection)?
+            .get_kind(ServiceKind::Bugzilla, connection)?
             .into_bugzilla()
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 

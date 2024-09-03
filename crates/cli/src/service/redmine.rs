@@ -49,7 +49,7 @@ impl Command {
     {
         let connection = self.service.connection.as_str();
         let mut config = config
-            .get(ServiceKind::Redmine, connection)?
+            .get_kind(ServiceKind::Redmine, connection)?
             .into_redmine()
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 

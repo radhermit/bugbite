@@ -50,7 +50,7 @@ impl Config {
         Ok(())
     }
 
-    pub fn get(&self, kind: ServiceKind, name: &str) -> crate::Result<service::Config> {
+    pub fn get_kind(&self, kind: ServiceKind, name: &str) -> crate::Result<service::Config> {
         if ["https://", "http://"].iter().any(|s| name.starts_with(s)) {
             service::Config::new(kind, name)
         } else {
