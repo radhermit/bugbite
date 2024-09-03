@@ -1,0 +1,3 @@
+[pfsense]
+type = "redmine"
+base = "https://redmine.pfsense.org/projects/pfsense/"

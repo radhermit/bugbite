@@ -1,0 +1,3 @@
+[mozilla]
+type = "bugzilla"
+base = "https://bugzilla.mozilla.org/"

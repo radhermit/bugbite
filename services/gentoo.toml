@@ -1,0 +1,3 @@
+[gentoo]
+type = "bugzilla"
+base = "https://bugs.gentoo.org/"

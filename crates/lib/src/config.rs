@@ -9,7 +9,7 @@ use crate::service::{self, ServiceKind};
 use crate::Error;
 
 /// Bundled service data.
-static SERVICES_DATA: &str = include_str!("../../../data/services.toml");
+static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.toml"));
 
 /// Connection config support.
 #[derive(Deserialize, Serialize, Debug)]

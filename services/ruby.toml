@@ -1,0 +1,3 @@
+[ruby]
+type = "redmine"
+base = "https://bugs.ruby-lang.org/projects/ruby-master/"

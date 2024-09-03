@@ -1,0 +1,3 @@
+[gcc]
+type = "bugzilla"
+base = "https://gcc.gnu.org/bugzilla/"

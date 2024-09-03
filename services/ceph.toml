@@ -1,0 +1,3 @@
+[ceph]
+type = "redmine"
+base = "https://tracker.ceph.com/projects/ceph/"

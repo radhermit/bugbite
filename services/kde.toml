@@ -1,0 +1,3 @@
+[kde]
+type = "bugzilla"
+base = "https://bugs.kde.org/"
