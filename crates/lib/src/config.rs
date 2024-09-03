@@ -22,14 +22,19 @@ impl Config {
         Ok(connections)
     }
 
-    /// Load connections from a given file path.
-    pub fn load<P: AsRef<Utf8Path>>(path: P) -> crate::Result<Self> {
+    /// Load connections from a given file path, overriding any bundled matches.
+    pub fn load<P: AsRef<Utf8Path>>(&mut self, path: P) -> crate::Result<()> {
         let path = path.as_ref();
         let data = fs::read_to_string(path)
             .map_err(|e| Error::Config(format!("failed loading config: {path}: {e}")))?;
-        let config = toml::from_str(&data)
+        let config: Self = toml::from_str(&data)
             .map_err(|e| Error::Config(format!("failed parsing config: {path}: {e}")))?;
-        Ok(config)
+
+        // replace matching connections
+        self.0.extend(config.0);
+        self.0.sort_keys();
+
+        Ok(())
     }
 
     pub fn get(&self, kind: ServiceKind, name: &str) -> crate::Result<service::Config> {
