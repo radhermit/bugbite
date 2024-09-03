@@ -1,12 +1,10 @@
 use std::io::stderr;
 use std::process::ExitCode;
 
-use camino::Utf8PathBuf;
-use clap::{Parser, ValueHint};
+use clap::Parser;
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
 use tracing_log::AsTrace;
 
-use crate::config::Config;
 use crate::subcmds::Subcommand;
 use crate::utils::{verbose, wrapped_doc, COLUMNS};
 
@@ -47,10 +45,6 @@ fn enable_logging(verbosity: LevelFilter) {
     ")
 )]
 pub(crate) struct Command {
-    /// load config from a custom path
-    #[arg(long, value_name = "PATH", value_hint = ValueHint::FilePath)]
-    config: Option<Utf8PathBuf>,
-
     #[clap(flatten)]
     verbosity: Verbosity<WarnLevel>,
 
@@ -72,8 +66,7 @@ impl Command {
             libc::signal(libc::SIGPIPE, libc::SIG_DFL);
         }
 
-        let config = Config::load(cmd.config.as_deref())?;
-        cmd.subcmd.run(&config).await
+        cmd.subcmd.run().await
     }
 }
 

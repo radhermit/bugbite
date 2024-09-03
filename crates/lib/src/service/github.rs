@@ -16,7 +16,6 @@ pub mod search;
 pub struct Config {
     base: Url,
     pub token: Option<String>,
-    cache: ServiceCache,
 }
 
 impl Config {
@@ -25,11 +24,7 @@ impl Config {
         let base = Url::parse(&format!("{base}/"))
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
 
-        Ok(Self {
-            base,
-            token: None,
-            cache: Default::default(),
-        })
+        Ok(Self { base, token: None })
     }
 
     pub fn base(&self) -> &Url {
@@ -45,6 +40,7 @@ impl Config {
 #[derive(Debug)]
 pub struct Service {
     config: Config,
+    _cache: ServiceCache,
     _client: reqwest::Client,
 }
 
@@ -52,6 +48,7 @@ impl Service {
     pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
         Ok(Self {
             config,
+            _cache: Default::default(),
             _client: builder.build()?,
         })
     }

@@ -52,7 +52,7 @@ pub enum ServiceKind {
     Redmine,
 }
 
-#[derive(EnumAsInner, Deserialize, Serialize, Debug)]
+#[derive(EnumAsInner, Deserialize, Serialize, Debug, Clone)]
 #[serde(tag = "type", rename_all = "kebab-case")]
 pub enum Config {
     Bugzilla(bugzilla::Config),

@@ -17,13 +17,12 @@ pub mod search;
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
+    #[serde(skip)]
     pub(crate) web_base: Option<Url>,
     pub user: Option<String>,
     pub password: Option<String>,
     pub key: Option<String>,
     pub max_search_results: Option<usize>,
-    #[serde(default)]
-    cache: ServiceCache,
 }
 
 impl Config {
@@ -47,7 +46,6 @@ impl Config {
             password: None,
             key: None,
             max_search_results: None,
-            cache: Default::default(),
         })
     }
 
@@ -81,6 +79,7 @@ impl Config {
 #[derive(Debug)]
 pub struct Service {
     config: Config,
+    _cache: ServiceCache,
     client: reqwest::Client,
 }
 
@@ -88,6 +87,7 @@ impl Service {
     pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
         Ok(Self {
             config,
+            _cache: Default::default(),
             client: builder.build()?,
         })
     }

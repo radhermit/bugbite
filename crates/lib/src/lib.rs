@@ -5,7 +5,6 @@ pub mod objects;
 pub mod query;
 pub(crate) mod serde;
 pub mod service;
-pub mod services;
 #[cfg(feature = "test")]
 pub mod test;
 pub mod time;

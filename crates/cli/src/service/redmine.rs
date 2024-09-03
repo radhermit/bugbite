@@ -1,11 +1,10 @@
 use std::io::{self, IsTerminal, Write};
 use std::process::ExitCode;
 
+use anyhow::anyhow;
+use bugbite::config::Config;
 use bugbite::objects::redmine::*;
-use bugbite::service::{
-    redmine::{Config, Service},
-    ServiceKind,
-};
+use bugbite::service::{redmine::Service, ServiceKind};
 use itertools::Itertools;
 use tracing::debug;
 
@@ -44,25 +43,16 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) async fn run<W>(
-        self,
-        config: &crate::config::Config,
-        f: &mut W,
-    ) -> anyhow::Result<ExitCode>
+    pub(crate) async fn run<W>(self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {
         let connection = self.service.connection.as_str();
-        let url = if ["https://", "http://"]
-            .iter()
-            .any(|s| connection.starts_with(s))
-        {
-            Ok(connection)
-        } else {
-            config.get_kind(ServiceKind::Redmine, connection)
-        }?;
+        let mut config = config
+            .get(ServiceKind::Redmine, connection)?
+            .into_redmine()
+            .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 
-        let mut config = Config::new(url)?;
         config.key = self.auth.key;
         config.user = self.auth.user;
         config.password = self.auth.password;

@@ -23,9 +23,6 @@ include::include/global-options.adoc[]
 
 == Options
 
-*--config <path>*::
-    Load a config from a custom path.
-
 *-V, --version*::
     Print version and exit.
 

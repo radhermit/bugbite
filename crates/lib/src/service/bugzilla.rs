@@ -36,15 +36,13 @@ pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
 });
 
 // TODO: improve API for setting user info on config creation
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
     pub user: Option<String>,
     pub password: Option<String>,
     pub key: Option<String>,
     pub max_search_results: Option<usize>,
-    #[serde(default)]
-    pub cache: ServiceCache,
 }
 
 impl Config {
@@ -59,7 +57,6 @@ impl Config {
             password: None,
             key: None,
             max_search_results: None,
-            cache: Default::default(),
         })
     }
 
@@ -85,6 +82,7 @@ impl Config {
 #[derive(Debug)]
 pub struct Service {
     pub config: Config,
+    cache: ServiceCache,
     client: reqwest::Client,
 }
 
@@ -92,6 +90,7 @@ impl Service {
     pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
         Ok(Self {
             config,
+            cache: Default::default(),
             client: builder.build()?,
         })
     }
@@ -109,7 +108,7 @@ impl Service {
         let mut custom_fields = IndexMap::new();
 
         if let Some(map) = data.as_object_mut() {
-            for field in &self.config.cache.custom_fields {
+            for field in &self.cache.custom_fields {
                 let Some(value) = map.remove(&field.name.id) else {
                     continue;
                 };

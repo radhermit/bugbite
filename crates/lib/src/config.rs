@@ -1,19 +1,28 @@
 use std::fs;
+use std::ops::Deref;
 
 use camino::Utf8Path;
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
-use crate::service::ServiceKind;
+use crate::service::{self, ServiceKind};
 use crate::Error;
 
-/// Config support
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct Config {
-    connections: Vec<Connection>,
-}
+/// Bundled service data.
+static SERVICES_DATA: &str = include_str!("../../../data/services.toml");
+
+/// Connection config support.
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Config(IndexMap<String, service::Config>);
 
 impl Config {
-    /// Load connection configuration from a given file path.
+    pub fn new() -> crate::Result<Self> {
+        let connections = toml::from_str(SERVICES_DATA)
+            .map_err(|e| Error::Config(format!("failed loading bundled service data: {e}")))?;
+        Ok(connections)
+    }
+
+    /// Load connections from a given file path.
     pub fn load<P: AsRef<Utf8Path>>(path: P) -> crate::Result<Self> {
         let path = path.as_ref();
         let data = fs::read_to_string(path)
@@ -23,33 +32,22 @@ impl Config {
         Ok(config)
     }
 
-    /// Get all the config's connections.
-    pub fn connections(&self) -> &[Connection] {
-        &self.connections
+    pub fn get(&self, kind: ServiceKind, name: &str) -> crate::Result<service::Config> {
+        if ["https://", "http://"].iter().any(|s| name.starts_with(s)) {
+            service::Config::new(kind, name)
+        } else {
+            self.0
+                .get(name)
+                .cloned()
+                .ok_or_else(|| Error::InvalidValue(format!("unknown connection: {name}")))
+        }
     }
 }
 
-/// Connection config support
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct Connection {
-    name: String,
-    base: String,
-    service: ServiceKind,
-}
+impl Deref for Config {
+    type Target = IndexMap<String, service::Config>;
 
-impl Connection {
-    /// Get the connection's name.
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    /// Get the connection's base URL.
-    pub fn base(&self) -> &str {
-        &self.base
-    }
-
-    /// Get the connection's service type.
-    pub fn kind(&self) -> ServiceKind {
-        self.service
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }

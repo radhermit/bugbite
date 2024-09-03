@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::process::ExitCode;
 
+use bugbite::config::Config;
 use clap::Args;
 
 mod connections;
@@ -13,8 +14,8 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run<W: Write>(self, f: &mut W) -> anyhow::Result<ExitCode> {
-        self.command.run(f)
+    pub(super) fn run<W: Write>(&self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
+        self.command.run(config, f)
     }
 }
 
@@ -27,10 +28,10 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn run<W: Write>(self, f: &mut W) -> anyhow::Result<ExitCode> {
+    fn run<W: Write>(&self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
         match self {
-            Self::Connections(cmd) => cmd.run(f),
-            Self::Services(cmd) => cmd.run(f),
+            Self::Connections(cmd) => cmd.run(config, f),
+            Self::Services(cmd) => cmd.run(config, f),
         }
     }
 }

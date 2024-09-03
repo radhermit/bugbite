@@ -1,9 +1,9 @@
 use std::io::stdout;
 use std::process::ExitCode;
 
+use bugbite::config::Config;
 use strum::VariantNames;
 
-use crate::config::Config;
 use crate::service::*;
 
 mod show;
@@ -25,13 +25,14 @@ pub(crate) enum Subcommand {
 }
 
 impl Subcommand {
-    pub(crate) async fn run(self, config: &Config) -> anyhow::Result<ExitCode> {
+    pub(crate) async fn run(self) -> anyhow::Result<ExitCode> {
+        let config = Config::new()?;
         let mut stdout = stdout().lock();
         match self {
-            Self::Bugzilla(cmd) => cmd.run(config, &mut stdout).await,
-            Self::Github(cmd) => cmd.run(config, &mut stdout).await,
-            Self::Redmine(cmd) => cmd.run(config, &mut stdout).await,
-            Self::Show(cmd) => cmd.run(&mut stdout),
+            Self::Bugzilla(cmd) => cmd.run(&config, &mut stdout).await,
+            Self::Github(cmd) => cmd.run(&config, &mut stdout).await,
+            Self::Redmine(cmd) => cmd.run(&config, &mut stdout).await,
+            Self::Show(cmd) => cmd.run(&config, &mut stdout),
         }
     }
 }

@@ -7,7 +7,6 @@ use clap::{CommandFactory, ValueEnum};
 use clap_complete::Shell;
 
 mod command;
-mod config;
 mod service;
 mod subcmds;
 mod utils;

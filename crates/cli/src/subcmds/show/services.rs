@@ -1,8 +1,8 @@
 use std::io::Write;
 use std::process::ExitCode;
 
+use bugbite::config::Config;
 use bugbite::service::ServiceKind;
-use bugbite::services::SERVICES;
 use clap::Args;
 use indexmap::IndexMap;
 use itertools::Itertools;
@@ -11,9 +11,9 @@ use itertools::Itertools;
 pub(super) struct Subcommand {}
 
 impl Subcommand {
-    pub(super) fn run<W: Write>(self, f: &mut W) -> anyhow::Result<ExitCode> {
+    pub(super) fn run<W: Write>(&self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
         let mut services = IndexMap::<ServiceKind, Vec<(&str, &str)>>::new();
-        for (name, config) in SERVICES.iter() {
+        for (name, config) in config.iter() {
             services
                 .entry(config.kind())
                 .or_default()
