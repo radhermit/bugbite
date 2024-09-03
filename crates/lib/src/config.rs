@@ -32,19 +32,17 @@ impl Config {
         };
 
         let path = path.as_ref();
-        let mut configs = vec![];
 
         if path.is_dir() {
             for entry in path.read_dir_utf8()? {
                 let entry = entry?;
-                configs.push(load_file(entry.path())?);
+                self.0.extend(load_file(entry.path())?);
             }
         } else {
-            configs.push(load_file(path)?);
+            self.0.extend(load_file(path)?);
         }
 
-        // replace matching connections
-        self.0.extend(configs.into_iter().flatten());
+        // re-sort by connection name
         self.0.sort_keys();
 
         Ok(())
