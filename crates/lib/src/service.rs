@@ -53,6 +53,7 @@ pub enum ServiceKind {
 }
 
 #[derive(EnumAsInner, Deserialize, Serialize, Debug)]
+#[serde(tag = "type", rename_all = "kebab-case")]
 pub enum Config {
     Bugzilla(bugzilla::Config),
     Github(github::Config),

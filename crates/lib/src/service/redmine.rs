@@ -14,9 +14,6 @@ use super::{ClientBuilder, ServiceKind};
 pub mod get;
 pub mod search;
 
-/// Maximum number of results that can be returned by a search request.
-static MAX_SEARCH_RESULTS: usize = 100;
-
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
@@ -24,7 +21,8 @@ pub struct Config {
     pub user: Option<String>,
     pub password: Option<String>,
     pub key: Option<String>,
-    pub max_search_results: usize,
+    pub max_search_results: Option<usize>,
+    #[serde(default)]
     cache: ServiceCache,
 }
 
@@ -48,9 +46,17 @@ impl Config {
             user: None,
             password: None,
             key: None,
-            max_search_results: MAX_SEARCH_RESULTS,
+            max_search_results: None,
             cache: Default::default(),
         })
+    }
+
+    /// Maximum number of results that can be returned by a search request.
+    ///
+    /// Fallback to redmine's internal default of 100.
+    pub(crate) fn max_search_results(&self) -> usize {
+        let size = self.max_search_results.unwrap_or_default();
+        if size == 0 { 100 } else { size }
     }
 
     /// Return the base URL for the service.

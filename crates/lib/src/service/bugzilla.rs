@@ -35,9 +35,6 @@ pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
         .collect()
 });
 
-/// Maximum number of results that can be returned by a search request.
-static MAX_SEARCH_RESULTS: usize = 10000;
-
 // TODO: improve API for setting user info on config creation
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Config {
@@ -45,8 +42,9 @@ pub struct Config {
     pub user: Option<String>,
     pub password: Option<String>,
     pub key: Option<String>,
-    pub max_search_results: usize,
-    cache: ServiceCache,
+    pub max_search_results: Option<usize>,
+    #[serde(default)]
+    pub cache: ServiceCache,
 }
 
 impl Config {
@@ -60,9 +58,17 @@ impl Config {
             user: None,
             password: None,
             key: None,
-            max_search_results: MAX_SEARCH_RESULTS,
+            max_search_results: None,
             cache: Default::default(),
         })
+    }
+
+    /// Maximum number of results that can be returned by a search request.
+    ///
+    /// Fallback to bugzilla's internal default of 10000.
+    pub(crate) fn max_search_results(&self) -> usize {
+        let size = self.max_search_results.unwrap_or_default();
+        if size == 0 { 100 } else { size }
     }
 
     pub fn base(&self) -> &Url {
@@ -76,7 +82,7 @@ impl Config {
 
 #[derive(Debug)]
 pub struct Service {
-    config: Config,
+    pub config: Config,
     client: reqwest::Client,
 }
 

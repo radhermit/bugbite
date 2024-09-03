@@ -77,7 +77,7 @@ impl RequestStream for Request<'_> {
         if self.params.paged.unwrap_or_default() || self.params.limit.is_none() {
             self.params
                 .limit
-                .get_or_insert(self.service.config.max_search_results);
+                .get_or_insert_with(|| self.service.config.max_search_results());
             self.params.limit
         } else {
             None
