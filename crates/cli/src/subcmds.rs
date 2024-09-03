@@ -20,7 +20,7 @@ pub(crate) enum Subcommand {
     Redmine(redmine::Command),
 
     // regular subcommands
-    /// show various bite-related information
+    /// show service information
     Show(show::Command),
 }
 
