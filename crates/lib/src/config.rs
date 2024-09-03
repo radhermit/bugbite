@@ -51,3 +51,21 @@ impl Deref for Config {
         &self.0
     }
 }
+
+impl IntoIterator for Config {
+    type Item = (String, service::Config);
+    type IntoIter = indexmap::map::IntoIter<String, service::Config>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a Config {
+    type Item = (&'a String, &'a service::Config);
+    type IntoIter = indexmap::map::Iter<'a, String, service::Config>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
+    }
+}

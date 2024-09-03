@@ -13,7 +13,7 @@ pub(super) struct Subcommand {}
 impl Subcommand {
     pub(super) fn run<W: Write>(&self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
         let mut services = IndexMap::<ServiceKind, Vec<(&str, &str)>>::new();
-        for (name, config) in config.iter() {
+        for (name, config) in config {
             services
                 .entry(config.kind())
                 .or_default()
