@@ -530,6 +530,20 @@ pub struct BugzillaField {
     values: Vec<BugzillaFieldValue>,
 }
 
+impl PartialEq for BugzillaField {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
+impl Eq for BugzillaField {}
+
+impl Hash for BugzillaField {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+    }
+}
+
 impl fmt::Display for BugzillaField {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "Name: {}", self.name.id)?;

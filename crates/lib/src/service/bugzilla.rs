@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::fmt;
 use std::str::FromStr;
 
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
 use once_cell::sync::Lazy;
 use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
@@ -479,5 +479,6 @@ impl Api for FilterField {
 
 #[derive(Deserialize, Serialize, Debug, Default)]
 pub struct ServiceCache {
-    custom_fields: Vec<BugzillaField>,
+    fields: IndexSet<BugzillaField>,
+    custom_fields: IndexSet<BugzillaField>,
 }
