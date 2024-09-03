@@ -55,8 +55,10 @@ impl Config {
     ///
     /// Fallback to redmine's internal default of 100.
     pub(crate) fn max_search_results(&self) -> usize {
-        let size = self.max_search_results.unwrap_or_default();
-        if size == 0 { 100 } else { size }
+        match self.max_search_results.unwrap_or_default() {
+            0 => 100,
+            n => n,
+        }
     }
 
     /// Return the base URL for the service.

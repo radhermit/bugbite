@@ -67,8 +67,10 @@ impl Config {
     ///
     /// Fallback to bugzilla's internal default of 10000.
     pub(crate) fn max_search_results(&self) -> usize {
-        let size = self.max_search_results.unwrap_or_default();
-        if size == 0 { 100 } else { size }
+        match self.max_search_results.unwrap_or_default() {
+            0 => 10000,
+            n => n,
+        }
     }
 
     pub fn base(&self) -> &Url {
