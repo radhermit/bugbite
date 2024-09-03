@@ -42,6 +42,9 @@ linkcmd:bite-github[1]::
 linkcmd:bite-redmine[1]::
     redmine service support
 
+linkcmd:bite-show[1]::
+    show service information
+
 == Resources
 
 *Project web site:* https://github.com/radhermit/bugbite

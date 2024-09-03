@@ -1,0 +1,23 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-show-connections - Show available connections
+
+== Synopsis
+
+*bite show connections*::
+    Show available connections.
+
+*bite show connections* [-h|--help]::
+    Output help information.
+
+== Description
+
+Show available connections.
+
+include::include/global-options.adoc[]
+
+== See Also
+
+linkcmd:bite-show[1]

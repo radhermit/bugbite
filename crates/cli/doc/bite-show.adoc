@@ -1,0 +1,31 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-show - Show service information
+
+== Synopsis
+
+*bite show* [<options>] <command>::
+    Show service information.
+
+*bite show* [-h|--help]::
+    Output help information.
+
+== Description
+
+Show configured service information.
+
+include::include/global-options.adoc[]
+
+== Subcommands
+
+linkcmd:bite-show-connections[1]::
+    show available connections
+
+linkcmd:bite-show-services[1]::
+    show available services
+
+== See Also
+
+linkcmd:bite[1]

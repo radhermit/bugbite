@@ -1,0 +1,23 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-show-services - Show available services
+
+== Synopsis
+
+*bite show services*::
+    Show available services.
+
+*bite show services* [-h|--help]::
+    Output help information.
+
+== Description
+
+Show available services.
+
+include::include/global-options.adoc[]
+
+== See Also
+
+linkcmd:bite-show[1]
