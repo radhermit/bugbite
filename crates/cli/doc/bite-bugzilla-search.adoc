@@ -117,7 +117,7 @@ deadline, depends, flags, id, keywords, last-visit, os, platform, priority,
 product, qa, reporter, resolution, severity, status, summary, tags, target,
 updated, url, version, votes, whiteboard
 
-*--paged [<bool>]*::
+*--paged*::
     Enable result paging support.
 +
 Forcibly enable paging with `-l/--limit` using the given limit value as the

@@ -345,12 +345,7 @@ struct QueryOptions {
     order: Option<Csv<Order<OrderField>>>,
 
     /// enable paging support
-    #[arg(
-        long,
-        num_args = 0..=1,
-        default_missing_value = "true",
-        value_name = "BOOL",
-    )]
+    #[arg(long, num_args = 0, default_missing_value = "true")]
     paged: Option<bool>,
 
     /// search using quicksearch syntax
