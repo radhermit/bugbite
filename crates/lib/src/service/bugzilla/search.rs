@@ -905,9 +905,8 @@ pub struct Parameters {
 
 try_from_toml!(Parameters, "template");
 
-impl<T: Into<Self>> Merge<T> for Parameters {
-    fn merge(&mut self, other: T) {
-        let other = other.into();
+impl Merge for Parameters {
+    fn merge(&mut self, other: Self) {
         *self = Self {
             alias: self.alias.merge(other.alias),
             attachments: self.attachments.merge(other.attachments),
@@ -977,7 +976,7 @@ impl<T: Into<Self>> Merge<T> for Parameters {
             summary: self.summary.merge(other.summary),
             quicksearch: self.quicksearch.merge(other.quicksearch),
             custom_fields: self.custom_fields.merge(other.custom_fields),
-        };
+        }
     }
 }
 

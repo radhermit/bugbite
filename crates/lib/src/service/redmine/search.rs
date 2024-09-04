@@ -204,9 +204,8 @@ pub struct Parameters {
 
 try_from_toml!(Parameters, "template");
 
-impl<T: Into<Self>> Merge<T> for Parameters {
-    fn merge(&mut self, other: T) {
-        let other = other.into();
+impl Merge for Parameters {
+    fn merge(&mut self, other: Self) {
         *self = Self {
             assignee: self.assignee.merge(other.assignee),
             attachments: self.attachments.merge(other.attachments),
@@ -223,7 +222,7 @@ impl<T: Into<Self>> Merge<T> for Parameters {
             paged: self.paged.merge(other.paged),
             status: self.status.merge(other.status),
             summary: self.summary.merge(other.summary),
-        };
+        }
     }
 }
 

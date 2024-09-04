@@ -42,14 +42,13 @@ pub struct Authentication {
     pub password: Option<String>,
 }
 
-impl<T: Into<Self>> Merge<T> for Authentication {
-    fn merge(&mut self, other: T) {
-        let other = other.into();
+impl Merge for Authentication {
+    fn merge(&mut self, other: Self) {
         *self = Self {
             key: self.key.merge(other.key),
             user: self.user.merge(other.user),
             password: self.password.merge(other.password),
-        };
+        }
     }
 }
 

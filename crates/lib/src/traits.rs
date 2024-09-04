@@ -76,8 +76,8 @@ impl<T> MergeOption<T> for Option<T> {
     }
 }
 
-pub trait Merge<T> {
-    fn merge(&mut self, other: T);
+pub trait Merge {
+    fn merge(&mut self, other: Self);
 }
 
 macro_rules! try_from_toml {

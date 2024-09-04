@@ -649,7 +649,7 @@ impl Command {
 
         // command line parameters override template
         let fields = self.params.query.fields.clone();
-        request.params.merge(self.params);
+        request.params.merge(self.params.into());
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {

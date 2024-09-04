@@ -8,7 +8,7 @@ use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{AsRefStr, Display, EnumIter, EnumString, VariantNames};
 use url::Url;
 
-use crate::traits::{MergeOption, WebClient};
+use crate::traits::{Merge, MergeOption, WebClient};
 use crate::Error;
 
 pub mod bugzilla;
@@ -101,6 +101,16 @@ pub struct ClientParameters {
     pub timeout: Option<f64>,
 }
 
+impl Merge for ClientParameters {
+    fn merge(&mut self, other: Self) {
+        *self = Self {
+            certificate: self.certificate.merge(other.certificate),
+            insecure: self.insecure.merge(other.insecure),
+            timeout: self.timeout.merge(other.timeout),
+        }
+    }
+}
+
 impl ClientParameters {
     fn build(&self) -> crate::Result<reqwest::Client> {
         let mut builder = reqwest::Client::builder()
@@ -124,16 +134,6 @@ impl ClientParameters {
         builder
             .build()
             .map_err(|e| Error::InvalidValue(format!("failed creating client: {e}")))
-    }
-
-    /// Override parameters using the provided value if it exists.
-    pub fn merge<T: Into<Self>>(&mut self, other: T) {
-        let other = other.into();
-        *self = Self {
-            certificate: self.certificate.merge(other.certificate),
-            insecure: self.insecure.merge(other.insecure),
-            timeout: self.timeout.merge(other.timeout),
-        }
     }
 }
 

@@ -48,12 +48,11 @@ pub struct Parameters {
 
 try_from_toml!(Parameters, "template");
 
-impl<T: Into<Self>> Merge<T> for Parameters {
-    fn merge(&mut self, other: T) {
-        let other = other.into();
+impl Merge for Parameters {
+    fn merge(&mut self, other: Self) {
         *self = Self {
             order: self.order.merge(other.order),
-        };
+        }
     }
 }
 

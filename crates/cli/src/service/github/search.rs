@@ -53,7 +53,7 @@ impl Command {
         W: IsTerminal + Write,
     {
         let mut request = service.search();
-        request.params.merge(self.params);
+        request.params.merge(self.params.into());
         let issues = request.send().await?;
         let mut count = 0;
 

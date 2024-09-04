@@ -6,6 +6,7 @@ use bugbite::config::Config;
 use bugbite::objects::redmine::*;
 use bugbite::service::redmine::{self, Service};
 use bugbite::service::ServiceKind;
+use bugbite::traits::Merge;
 use itertools::Itertools;
 use tracing::debug;
 
@@ -66,8 +67,8 @@ impl Command {
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 
         // cli options override config settings
-        config.auth.merge(self.auth);
-        config.client.merge(self.service);
+        config.auth.merge(self.auth.into());
+        config.client.merge(self.service.into());
 
         let service = Service::from_config(config)?;
         debug!("Service: {service}");

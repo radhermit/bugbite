@@ -6,7 +6,7 @@ use strum::{Display, EnumString, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
-use crate::traits::{MergeOption, WebClient, WebService};
+use crate::traits::{Merge, MergeOption, WebClient, WebService};
 use crate::Error;
 
 use super::{ClientParameters, ServiceKind};
@@ -21,10 +21,8 @@ pub struct Authentication {
     pub password: Option<String>,
 }
 
-impl Authentication {
-    /// Override parameters using the provided value if it exists.
-    pub fn merge<T: Into<Self>>(&mut self, other: T) {
-        let other = other.into();
+impl Merge for Authentication {
+    fn merge(&mut self, other: Self) {
         *self = Self {
             key: self.key.merge(other.key),
             user: self.user.merge(other.user),
