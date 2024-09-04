@@ -117,7 +117,7 @@ impl Service {
         format!("{base}/show_bug.cgi?id={id}")
     }
 
-    pub(crate) fn deserialize_custom_fields(
+    fn deserialize_custom_fields(
         &self,
         data: &mut serde_json::Value,
     ) -> IndexMap<BugzillaFieldName, String> {
@@ -145,7 +145,7 @@ impl Service {
 
     /// Substitute user alias for matching value.
     // TODO: support pulling aliases from the config?
-    pub(crate) fn replace_user_alias<'a>(&'a self, value: &'a str) -> &'a str {
+    fn replace_user_alias<'a>(&'a self, value: &'a str) -> &'a str {
         if value == "@me" {
             self.config.user.as_deref().unwrap_or(value)
         } else {
