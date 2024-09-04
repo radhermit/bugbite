@@ -501,8 +501,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("redmine");
         let server = TestServer::new().await;
-        let config = Config::new(server.uri()).unwrap();
-        let service = Service::new(config, Default::default()).unwrap();
+        let service = Config::new(server.uri()).unwrap().service().unwrap();
 
         server
             .respond(200, path.join("search/nonexistent.json"))

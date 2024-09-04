@@ -141,8 +141,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let config = Config::new(server.uri()).unwrap();
-        let service = Service::new(config, Default::default()).unwrap();
+        let service = Config::new(server.uri()).unwrap().service().unwrap();
 
         // no IDs
         let ids = Vec::<u32>::new();

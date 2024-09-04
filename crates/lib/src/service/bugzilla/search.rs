@@ -1913,8 +1913,7 @@ mod tests {
     async fn exists_or_values_match() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let config = Config::new(server.uri()).unwrap();
-        let service = Service::new(config, Default::default()).unwrap();
+        let service = Config::new(server.uri()).unwrap().service().unwrap();
         server.respond(200, path.join("search/ids.json")).await;
 
         // boolean
@@ -1993,7 +1992,7 @@ mod tests {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let config = Config::new(server.uri()).unwrap();
-        let service = Service::new(config, Default::default()).unwrap();
+        let service = config.service().unwrap();
 
         server
             .respond(200, path.join("search/nonexistent.json"))

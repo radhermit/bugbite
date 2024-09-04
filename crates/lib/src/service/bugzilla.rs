@@ -60,6 +60,11 @@ impl Config {
         })
     }
 
+    /// Create a new Service from a Config.
+    pub fn service(self) -> crate::Result<Service> {
+        Service::new(self, ClientBuilder::default())
+    }
+
     /// Maximum number of results that can be returned by a search request.
     ///
     /// Fallback to bugzilla's internal default of 10000.
@@ -87,11 +92,14 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+    pub fn new<T>(config: Config, client: T) -> crate::Result<Self>
+    where
+        T: Into<ClientBuilder>,
+    {
         Ok(Self {
             config,
             cache: Default::default(),
-            client: builder.build()?,
+            client: client.into().build()?,
         })
     }
 

@@ -27,6 +27,11 @@ impl Config {
         Ok(Self { base, token: None })
     }
 
+    /// Create a new Service from a Config.
+    pub fn service(self) -> crate::Result<Service> {
+        Service::new(self, ClientBuilder::default())
+    }
+
     pub fn base(&self) -> &Url {
         &self.base
     }
@@ -45,11 +50,14 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+    pub fn new<T>(config: Config, client: T) -> crate::Result<Self>
+    where
+        T: Into<ClientBuilder>,
+    {
         Ok(Self {
             config,
             _cache: Default::default(),
-            _client: builder.build()?,
+            _client: client.into().build()?,
         })
     }
 

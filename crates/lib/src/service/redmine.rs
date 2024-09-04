@@ -49,6 +49,11 @@ impl Config {
         })
     }
 
+    /// Create a new Service from a Config.
+    pub fn service(self) -> crate::Result<Service> {
+        Service::new(self, ClientBuilder::default())
+    }
+
     /// Maximum number of results that can be returned by a search request.
     ///
     /// Fallback to redmine's internal default of 100.
@@ -84,11 +89,14 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new(config: Config, builder: ClientBuilder) -> crate::Result<Self> {
+    pub fn new<T>(config: Config, client: T) -> crate::Result<Self>
+    where
+        T: Into<ClientBuilder>,
+    {
         Ok(Self {
             config,
             _cache: Default::default(),
-            client: builder.build()?,
+            client: client.into().build()?,
         })
     }
 

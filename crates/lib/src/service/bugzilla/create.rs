@@ -493,7 +493,7 @@ mod tests {
         let mut config = Config::new(server.uri()).unwrap();
         config.user = Some("user".to_string());
         config.password = Some("pass".to_string());
-        let service = Service::new(config, Default::default()).unwrap();
+        let service = config.service().unwrap();
 
         // missing required fields without defaults
         let err = service.create().send().await.unwrap_err();

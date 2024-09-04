@@ -54,7 +54,7 @@ impl Command {
         // auth options override config settings
         config.token = config.token.merge(self.auth.key);
 
-        let service = Service::new(config, self.service.into())?;
+        let service = Service::new(config, self.service)?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await
     }
