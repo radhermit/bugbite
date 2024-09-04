@@ -55,7 +55,7 @@ impl Config {
     /// Maximum number of results that can be returned by a search request.
     ///
     /// Fallback to redmine's internal default of 100.
-    pub(crate) fn max_search_results(&self) -> usize {
+    fn max_search_results(&self) -> usize {
         match self.max_search_results.unwrap_or_default() {
             0 => 100,
             n => n,

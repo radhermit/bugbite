@@ -66,7 +66,7 @@ impl Config {
     /// Maximum number of results that can be returned by a search request.
     ///
     /// Fallback to bugzilla's internal default of 10000.
-    pub(crate) fn max_search_results(&self) -> usize {
+    fn max_search_results(&self) -> usize {
         match self.max_search_results.unwrap_or_default() {
             0 => 10000,
             n => n,
