@@ -51,10 +51,13 @@ impl Command {
             .into_github()
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 
-        // auth options override config settings
+        // cli options override config settings
         config.token = config.token.merge(self.auth.key);
+        config.client.certificate = config.client.certificate.merge(self.service.certificate);
+        config.client.insecure = config.client.insecure.merge(self.service.insecure);
+        config.client.timeout = config.client.timeout.merge(self.service.timeout);
 
-        let service = Service::new(config, self.service)?;
+        let service = Service::new(config)?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await
     }

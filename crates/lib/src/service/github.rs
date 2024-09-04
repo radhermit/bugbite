@@ -7,7 +7,7 @@ use url::Url;
 use crate::traits::{WebClient, WebService};
 use crate::Error;
 
-use super::{ClientBuilder, ServiceKind};
+use super::{ClientParameters, ServiceKind};
 
 mod get;
 pub mod search;
@@ -16,6 +16,8 @@ pub mod search;
 pub struct Config {
     base: Url,
     pub token: Option<String>,
+    #[serde(flatten)]
+    pub client: ClientParameters,
 }
 
 impl Config {
@@ -24,12 +26,16 @@ impl Config {
         let base = Url::parse(&format!("{base}/"))
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
 
-        Ok(Self { base, token: None })
+        Ok(Self {
+            base,
+            token: None,
+            client: Default::default(),
+        })
     }
 
     /// Create a new Service from a Config.
     pub fn service(self) -> crate::Result<Service> {
-        Service::new(self, ClientBuilder::default())
+        Service::new(self)
     }
 
     pub fn base(&self) -> &Url {
@@ -50,14 +56,12 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new<T>(config: Config, client: T) -> crate::Result<Self>
-    where
-        T: Into<ClientBuilder>,
-    {
+    pub fn new(config: Config) -> crate::Result<Self> {
+        let _client = config.client.build()?;
         Ok(Self {
             config,
             _cache: Default::default(),
-            _client: client.into().build()?,
+            _client,
         })
     }
 

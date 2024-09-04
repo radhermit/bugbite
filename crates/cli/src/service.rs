@@ -1,6 +1,5 @@
 use std::io::{self, IsTerminal, Write};
 
-use bugbite::service::ClientBuilder;
 use camino::Utf8PathBuf;
 
 // output and rendering support
@@ -28,20 +27,15 @@ struct ServiceOptions {
     certificate: Option<Utf8PathBuf>,
 
     /// ignore invalid service certificates
-    #[arg(long, conflicts_with = "certificate")]
-    insecure: bool,
+    #[arg(
+        long,
+        num_args = 0,
+        default_missing_value = "true",
+        conflicts_with = "certificate"
+    )]
+    insecure: Option<bool>,
 
     /// request timeout in seconds
-    #[arg(short, long, value_name = "SECONDS", default_value = "30")]
-    timeout: f64,
-}
-
-impl From<ServiceOptions> for ClientBuilder {
-    fn from(value: ServiceOptions) -> Self {
-        Self {
-            certificate: value.certificate,
-            insecure: value.insecure,
-            timeout: value.timeout,
-        }
-    }
+    #[arg(short, long, value_name = "SECONDS")]
+    timeout: Option<f64>,
 }

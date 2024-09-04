@@ -9,7 +9,7 @@ use url::Url;
 use crate::traits::{WebClient, WebService};
 use crate::Error;
 
-use super::{ClientBuilder, ServiceKind};
+use super::{ClientParameters, ServiceKind};
 
 pub mod get;
 pub mod search;
@@ -23,6 +23,8 @@ pub struct Config {
     pub password: Option<String>,
     pub key: Option<String>,
     pub max_search_results: Option<usize>,
+    #[serde(flatten)]
+    pub client: ClientParameters,
 }
 
 impl Config {
@@ -46,12 +48,13 @@ impl Config {
             password: None,
             key: None,
             max_search_results: None,
+            client: Default::default(),
         })
     }
 
     /// Create a new Service from a Config.
     pub fn service(self) -> crate::Result<Service> {
-        Service::new(self, ClientBuilder::default())
+        Service::new(self)
     }
 
     /// Maximum number of results that can be returned by a search request.
@@ -89,14 +92,12 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new<T>(config: Config, client: T) -> crate::Result<Self>
-    where
-        T: Into<ClientBuilder>,
-    {
+    pub fn new(config: Config) -> crate::Result<Self> {
+        let client = config.client.build()?;
         Ok(Self {
             config,
             _cache: Default::default(),
-            client: client.into().build()?,
+            client,
         })
     }
 

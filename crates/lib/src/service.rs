@@ -94,31 +94,21 @@ impl fmt::Display for Config {
     }
 }
 
-#[derive(Debug)]
-pub struct ClientBuilder {
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+pub struct ClientParameters {
     pub certificate: Option<Utf8PathBuf>,
-    pub insecure: bool,
-    pub timeout: f64,
+    pub insecure: Option<bool>,
+    pub timeout: Option<f64>,
 }
 
-impl Default for ClientBuilder {
-    fn default() -> Self {
-        Self {
-            certificate: None,
-            insecure: false,
-            timeout: 30.0,
-        }
-    }
-}
-
-impl ClientBuilder {
+impl ClientParameters {
     fn build(&self) -> crate::Result<reqwest::Client> {
         let mut builder = reqwest::Client::builder()
             // TODO: switch to cookie_provider() once cookie (de)serialization is supported
             .cookie_store(true)
-            .danger_accept_invalid_certs(self.insecure)
+            .danger_accept_invalid_certs(self.insecure.unwrap_or_default())
             .hickory_dns(true)
-            .timeout(Duration::from_secs_f64(self.timeout))
+            .timeout(Duration::from_secs_f64(self.timeout.unwrap_or(30.0)))
             .use_rustls_tls()
             .user_agent(USER_AGENT);
 
