@@ -1,7 +1,6 @@
 use std::fs;
 use std::ops::{Deref, DerefMut};
 
-use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString, VariantNames};
@@ -9,7 +8,7 @@ use tracing::debug;
 
 use crate::objects::github::Issue;
 use crate::query::{Order, Query};
-use crate::traits::{Api, Merge, MergeOption, RequestSend};
+use crate::traits::{try_from_toml, Api, Merge, MergeOption, RequestSend};
 use crate::Error;
 
 struct QueryBuilder<'a> {
@@ -47,34 +46,14 @@ pub struct Parameters {
     pub order: Option<Order<OrderField>>,
 }
 
-impl Merge<&Utf8Path> for Parameters {
-    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        self.merge(Self::from_path(path)?)
-    }
-}
+try_from_toml!(Parameters, "template");
 
 impl<T: Into<Self>> Merge<T> for Parameters {
-    fn merge(&mut self, other: T) -> crate::Result<()> {
+    fn merge(&mut self, other: T) {
         let other = other.into();
         *self = Self {
             order: self.order.merge(other.order),
         };
-        Ok(())
-    }
-}
-
-impl Parameters {
-    /// Load parameters in TOML format from a file.
-    pub fn from_path(path: &Utf8Path) -> crate::Result<Self> {
-        let data = fs::read_to_string(path)
-            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
-        toml::from_str(&data)
-            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
-    }
-
-    pub fn order(mut self, value: Order<OrderField>) -> Self {
-        self.order = Some(value);
-        self
     }
 }
 
@@ -126,6 +105,11 @@ impl<'a> Request<'a> {
         }
 
         Ok(query)
+    }
+
+    pub fn order(mut self, value: Order<OrderField>) -> Self {
+        self.params.order = Some(value);
+        self
     }
 }
 

@@ -7,6 +7,7 @@ use bugbite::config::Config;
 use bugbite::objects::bugzilla::*;
 use bugbite::service::bugzilla::{self, Service};
 use bugbite::service::ServiceKind;
+use bugbite::traits::Merge;
 use clap::Args;
 use itertools::Itertools;
 use tracing::debug;

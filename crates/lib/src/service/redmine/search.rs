@@ -1,7 +1,6 @@
 use std::ops::{Deref, DerefMut};
 use std::{fmt, fs};
 
-use camino::Utf8Path;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -14,7 +13,9 @@ use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
 use crate::service::redmine::Service;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, WebService};
+use crate::traits::{
+    try_from_toml, Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, WebService,
+};
 use crate::Error;
 
 #[derive(Serialize, Debug, Clone)]
@@ -201,14 +202,10 @@ pub struct Parameters {
     pub summary: Option<Vec<String>>,
 }
 
-impl Merge<&Utf8Path> for Parameters {
-    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        self.merge(Self::from_path(path)?)
-    }
-}
+try_from_toml!(Parameters, "template");
 
 impl<T: Into<Self>> Merge<T> for Parameters {
-    fn merge(&mut self, other: T) -> crate::Result<()> {
+    fn merge(&mut self, other: T) {
         let other = other.into();
         *self = Self {
             assignee: self.assignee.merge(other.assignee),
@@ -227,17 +224,6 @@ impl<T: Into<Self>> Merge<T> for Parameters {
             status: self.status.merge(other.status),
             summary: self.summary.merge(other.summary),
         };
-        Ok(())
-    }
-}
-
-impl Parameters {
-    /// Load parameters in TOML format from a file.
-    fn from_path(path: &Utf8Path) -> crate::Result<Self> {
-        let data = fs::read_to_string(path)
-            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
-        toml::from_str(&data)
-            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
     }
 }
 

@@ -3,7 +3,7 @@ use std::hash::Hash;
 use std::str::FromStr;
 use std::{fmt, fs};
 
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -13,7 +13,9 @@ use url::Url;
 use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Service;
-use crate::traits::{Contains, InjectAuth, Merge, MergeOption, RequestSend, WebService};
+use crate::traits::{
+    try_from_toml, Contains, InjectAuth, Merge, MergeOption, RequestSend, WebService,
+};
 use crate::Error;
 
 /// Changes made to a field.
@@ -462,14 +464,10 @@ pub struct Parameters {
     pub custom_fields: Option<IndexMap<String, String>>,
 }
 
-impl Merge<&Utf8Path> for Parameters {
-    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        self.merge(Self::from_path(path)?)
-    }
-}
+try_from_toml!(Parameters, "template");
 
 impl<T: Into<Self>> Merge<T> for Parameters {
-    fn merge(&mut self, other: T) -> crate::Result<()> {
+    fn merge(&mut self, other: T) {
         let other = other.into();
         *self = Self {
             alias: self.alias.merge(other.alias),
@@ -502,17 +500,6 @@ impl<T: Into<Self>> Merge<T> for Parameters {
             whiteboard: self.whiteboard.merge(other.whiteboard),
             custom_fields: self.custom_fields.merge(other.custom_fields),
         };
-        Ok(())
-    }
-}
-
-impl Parameters {
-    /// Load parameters in TOML format from a file.
-    fn from_path(path: &Utf8Path) -> crate::Result<Self> {
-        let data = fs::read_to_string(path)
-            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
-        toml::from_str(&data)
-            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
     }
 }
 

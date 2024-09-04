@@ -12,7 +12,7 @@ use tracing::{debug, trace};
 use url::Url;
 
 use crate::objects::bugzilla::{BugzillaField, BugzillaFieldName};
-use crate::traits::{Api, MergeOption, WebClient, WebService};
+use crate::traits::{Api, Merge, MergeOption, WebClient, WebService};
 use crate::Error;
 
 use super::{ClientParameters, ServiceKind};
@@ -42,15 +42,14 @@ pub struct Authentication {
     pub password: Option<String>,
 }
 
-impl Authentication {
-    /// Override parameters using the provided value if it exists.
-    pub fn merge<T: Into<Self>>(&mut self, other: T) {
+impl<T: Into<Self>> Merge<T> for Authentication {
+    fn merge(&mut self, other: T) {
         let other = other.into();
         *self = Self {
             key: self.key.merge(other.key),
             user: self.user.merge(other.user),
             password: self.password.merge(other.password),
-        }
+        };
     }
 }
 

@@ -1,6 +1,5 @@
 use std::{fmt, fs};
 
-use camino::Utf8Path;
 use indexmap::IndexMap;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -8,7 +7,7 @@ use serde_with::skip_serializing_none;
 
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Service;
-use crate::traits::{InjectAuth, Merge, MergeOption, RequestSend, WebService};
+use crate::traits::{try_from_toml, InjectAuth, Merge, MergeOption, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Serialize, Debug)]
@@ -365,14 +364,10 @@ pub struct Parameters {
     pub custom_fields: Option<IndexMap<String, String>>,
 }
 
-impl Merge<&Utf8Path> for Parameters {
-    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        self.merge(Self::from_path(path)?)
-    }
-}
+try_from_toml!(Parameters, "template");
 
 impl<T: Into<Self>> Merge<T> for Parameters {
-    fn merge(&mut self, other: T) -> crate::Result<()> {
+    fn merge(&mut self, other: T) {
         let other = other.into();
         *self = Self {
             alias: self.alias.merge(other.alias),
@@ -401,17 +396,6 @@ impl<T: Into<Self>> Merge<T> for Parameters {
             version: self.version.merge(other.version),
             whiteboard: self.whiteboard.merge(other.whiteboard),
         };
-        Ok(())
-    }
-}
-
-impl Parameters {
-    /// Load parameters in TOML format from a file.
-    fn from_path(path: &Utf8Path) -> crate::Result<Self> {
-        let data = fs::read_to_string(path)
-            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
-        toml::from_str(&data)
-            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
     }
 }
 

@@ -77,8 +77,26 @@ impl<T> MergeOption<T> for Option<T> {
 }
 
 pub trait Merge<T> {
-    fn merge(&mut self, value: T) -> crate::Result<()>;
+    fn merge(&mut self, other: T);
 }
+
+macro_rules! try_from_toml {
+    ($x:ty, $desc:expr) => {
+        impl TryFrom<&camino::Utf8Path> for $x {
+            type Error = $crate::Error;
+
+            fn try_from(path: &camino::Utf8Path) -> $crate::Result<Self> {
+                let data = fs::read_to_string(path).map_err(|e| {
+                    Error::InvalidValue(format!("failed loading {}: {path}: {e}", $desc))
+                })?;
+                toml::from_str(&data).map_err(|e| {
+                    Error::InvalidValue(format!("failed parsing {}: {path}: {e}", $desc))
+                })
+            }
+        }
+    };
+}
+pub(crate) use try_from_toml;
 
 pub trait RequestSend {
     type Output;

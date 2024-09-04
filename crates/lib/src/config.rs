@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::service::{self, ServiceKind};
+use crate::traits::try_from_toml;
 use crate::Error;
 
 /// Bundled service data.
@@ -15,6 +16,8 @@ static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.to
 /// Connection config support.
 #[derive(Deserialize, Serialize, Debug, Default)]
 pub struct Config(IndexMap<String, service::Config>);
+
+try_from_toml!(Config, "config");
 
 impl Config {
     /// Create a new Config including bundled services.
@@ -25,22 +28,15 @@ impl Config {
 
     /// Load connections from a given path, overriding any bundled matches.
     pub fn load<P: AsRef<Utf8Path>>(&mut self, path: P) -> crate::Result<()> {
-        let load_file = |path: &Utf8Path| -> crate::Result<Self> {
-            let data = fs::read_to_string(path)
-                .map_err(|e| Error::Config(format!("failed loading config: {path}: {e}")))?;
-            toml::from_str(&data)
-                .map_err(|e| Error::Config(format!("failed parsing config: {path}: {e}")))
-        };
-
         let path = path.as_ref();
 
         if path.is_dir() {
             for entry in path.read_dir_utf8()? {
                 let entry = entry?;
-                self.0.extend(load_file(entry.path())?);
+                self.0.extend(Self::try_from(entry.path())?);
             }
         } else {
-            self.0.extend(load_file(path)?);
+            self.0.extend(Self::try_from(path)?);
         }
 
         // re-sort by connection name

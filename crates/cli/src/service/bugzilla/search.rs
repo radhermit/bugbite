@@ -644,12 +644,12 @@ impl Command {
 
         // read attributes from template
         if let Some(path) = self.options.from.as_deref() {
-            request.params.merge(path)?;
+            request.params.merge(Parameters::try_from(path)?);
         }
 
         // command line parameters override template
         let fields = self.params.query.fields.clone();
-        request.params.merge(self.params)?;
+        request.params.merge(self.params);
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {

@@ -214,7 +214,7 @@ impl Command {
 
         // merge attributes from template or bug
         if let Some(path) = self.options.from.as_deref() {
-            request.params.merge(path)?;
+            request.params.merge(Parameters::try_from(path)?);
         } else if let Some(id) = self.options.from_bug {
             let bug = service
                 .get([id])
@@ -223,11 +223,11 @@ impl Command {
                 .into_iter()
                 .next()
                 .expect("failed getting bug");
-            request.params.merge(bug)?;
+            request.params.merge(bug);
         }
 
         // command line parameters override template
-        request.params.merge(self.params)?;
+        request.params.merge(self.params);
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
