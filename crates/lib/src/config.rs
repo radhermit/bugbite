@@ -4,6 +4,7 @@ use std::ops::Deref;
 use camino::Utf8Path;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 use crate::service::{self, ServiceKind};
 use crate::Error;
@@ -49,13 +50,12 @@ impl Config {
     }
 
     pub fn get_kind(&self, kind: ServiceKind, name: &str) -> crate::Result<service::Config> {
-        if ["https://", "http://"].iter().any(|s| name.starts_with(s)) {
+        if let Some(config) = self.0.get(name).cloned() {
+            Ok(config)
+        } else if Url::parse(name).is_ok() {
             service::Config::new(kind, name)
         } else {
-            self.0
-                .get(name)
-                .cloned()
-                .ok_or_else(|| Error::InvalidValue(format!("unknown connection: {name}")))
+            Err(Error::InvalidValue(format!("unknown connection: {name}")))
         }
     }
 }
