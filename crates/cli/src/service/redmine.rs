@@ -5,6 +5,7 @@ use anyhow::anyhow;
 use bugbite::config::Config;
 use bugbite::objects::redmine::*;
 use bugbite::service::{redmine::Service, ServiceKind};
+use bugbite::traits::MergeOption;
 use itertools::Itertools;
 use tracing::debug;
 
@@ -53,9 +54,9 @@ impl Command {
             .into_redmine()
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 
-        config.key = self.auth.key;
-        config.user = self.auth.user;
-        config.password = self.auth.password;
+        config.key = config.key.merge(self.auth.key);
+        config.user = config.user.merge(self.auth.user);
+        config.password = config.password.merge(self.auth.password);
 
         let builder = self.service.into();
         let service = Service::new(config, builder)?;

@@ -5,6 +5,7 @@ use anyhow::anyhow;
 use bugbite::config::Config;
 use bugbite::objects::github::*;
 use bugbite::service::{github::Service, ServiceKind};
+use bugbite::traits::MergeOption;
 use itertools::Itertools;
 use tracing::debug;
 
@@ -49,7 +50,7 @@ impl Command {
             .into_github()
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 
-        config.token = self.auth.key;
+        config.token = config.token.merge(self.auth.key);
 
         let builder = self.service.into();
         let service = Service::new(config, builder)?;
