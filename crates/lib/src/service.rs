@@ -112,7 +112,7 @@ impl Default for ClientBuilder {
 }
 
 impl ClientBuilder {
-    pub fn build(&self) -> crate::Result<reqwest::Client> {
+    fn build(&self) -> crate::Result<reqwest::Client> {
         let mut builder = reqwest::Client::builder()
             // TODO: switch to cookie_provider() once cookie (de)serialization is supported
             .cookie_store(true)
