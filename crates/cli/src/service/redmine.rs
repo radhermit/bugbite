@@ -60,8 +60,7 @@ impl Command {
         config.user = config.user.merge(self.auth.user);
         config.password = config.password.merge(self.auth.password);
 
-        let builder = self.service.into();
-        let service = Service::new(config, builder)?;
+        let service = Service::new(config, self.service.into())?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await
     }
