@@ -38,7 +38,7 @@ struct Authentication {
     user: Option<String>,
 
     /// password
-    #[arg(short, long, requires = "user", env = "BUGBITE_PASS")]
+    #[arg(short, long, env = "BUGBITE_PASS")]
     password: Option<String>,
 }
 
