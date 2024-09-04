@@ -31,19 +31,17 @@ impl Subcommand {
     pub(crate) async fn run(self) -> anyhow::Result<ExitCode> {
         let mut config = Config::new();
 
+        // determine user config directory
+        let config_dir =
+            dirs_next::config_dir().ok_or_else(|| anyhow!("failed getting config directory"))?;
+        let config_dir = Utf8PathBuf::from_path_buf(config_dir)
+            .map_err(|e| anyhow!("invalid bugbite config directory: {e:?}"))?
+            .join("bugbite");
+
         // load custom user services
         match env::var("BUGBITE_CONFIG").as_deref() {
-            Err(_) => {
-                let config_dir = dirs_next::config_dir()
-                    .ok_or_else(|| anyhow!("failed getting config directory"))?;
-                let path = Utf8PathBuf::from_path_buf(config_dir)
-                    .map_err(|e| anyhow!("invalid bugbite config directory: {e:?}"))?
-                    .join("bugbite");
-                if path.exists() {
-                    config.load(path)?;
-                }
-            }
-            Ok("false") => (),
+            Err(_) if config_dir.exists() => config.load(config_dir)?,
+            Ok("false") | Err(_) => (),
             Ok(path) => config.load(path)?,
         }
 
