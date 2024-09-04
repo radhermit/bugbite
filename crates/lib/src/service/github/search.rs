@@ -9,7 +9,7 @@ use tracing::debug;
 
 use crate::objects::github::Issue;
 use crate::query::{Order, Query};
-use crate::traits::{Api, MergeOption, RequestMerge, RequestSend};
+use crate::traits::{Api, Merge, MergeOption, RequestSend};
 use crate::Error;
 
 struct QueryBuilder<'a> {
@@ -45,6 +45,22 @@ impl<'a> QueryBuilder<'a> {
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct Parameters {
     pub order: Option<Order<OrderField>>,
+}
+
+impl Merge<&Utf8Path> for Parameters {
+    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        self.merge(Self::from_path(path)?)
+    }
+}
+
+impl<T: Into<Self>> Merge<T> for Parameters {
+    fn merge(&mut self, other: T) -> crate::Result<()> {
+        let other = other.into();
+        *self = Self {
+            order: self.order.merge(other.order),
+        };
+        Ok(())
+    }
 }
 
 impl Parameters {
@@ -102,14 +118,6 @@ impl<'a> Request<'a> {
         }
     }
 
-    /// Override parameters using the provided value if it exists.
-    fn merge<T: Into<Parameters>>(&mut self, other: T) {
-        let params = other.into();
-        self.params = Parameters {
-            order: self.params.order.merge(params.order),
-        };
-    }
-
     fn encode(&self) -> crate::Result<QueryBuilder> {
         let mut query = QueryBuilder::new(self.service);
 
@@ -118,21 +126,6 @@ impl<'a> Request<'a> {
         }
 
         Ok(query)
-    }
-}
-
-impl RequestMerge<&Utf8Path> for Request<'_> {
-    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        let params = Parameters::from_path(path)?;
-        self.merge(params);
-        Ok(())
-    }
-}
-
-impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
-    fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.merge(value);
-        Ok(())
     }
 }
 

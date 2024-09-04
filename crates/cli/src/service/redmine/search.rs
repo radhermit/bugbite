@@ -10,7 +10,7 @@ use bugbite::service::redmine::search::{OrderField, Parameters};
 use bugbite::service::redmine::IssueField;
 use bugbite::service::redmine::Service;
 use bugbite::time::TimeDeltaOrStatic;
-use bugbite::traits::{RequestMerge, RequestStream};
+use bugbite::traits::{Merge, RequestStream};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 
@@ -219,12 +219,12 @@ impl Command {
 
         // read attributes from template
         if let Some(path) = self.options.from.as_deref() {
-            request.merge(path)?;
+            request.params.merge(path)?;
         }
 
         // command line parameters override template
         let fields = self.params.query.fields.clone();
-        request.merge(self.params)?;
+        request.params.merge(self.params)?;
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {

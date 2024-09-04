@@ -76,7 +76,7 @@ impl<T> MergeOption<T> for Option<T> {
     }
 }
 
-pub trait RequestMerge<T> {
+pub trait Merge<T> {
     fn merge(&mut self, value: T) -> crate::Result<()>;
 }
 

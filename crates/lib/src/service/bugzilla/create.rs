@@ -8,7 +8,7 @@ use serde_with::skip_serializing_none;
 
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Service;
-use crate::traits::{InjectAuth, MergeOption, RequestMerge, RequestSend, WebService};
+use crate::traits::{InjectAuth, Merge, MergeOption, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Serialize, Debug)]
@@ -17,21 +17,6 @@ pub struct Request<'a> {
     service: &'a Service,
     #[serde(flatten)]
     pub params: Parameters,
-}
-
-impl RequestMerge<&Utf8Path> for Request<'_> {
-    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        let params = Parameters::from_path(path)?;
-        self.merge(params);
-        Ok(())
-    }
-}
-
-impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
-    fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.merge(value);
-        Ok(())
-    }
 }
 
 impl RequestSend for Request<'_> {
@@ -59,38 +44,6 @@ impl<'a> Request<'a> {
             service,
             params: Default::default(),
         }
-    }
-
-    /// Override parameters using the provided value if it exists.
-    fn merge<T: Into<Parameters>>(&mut self, other: T) {
-        let params = other.into();
-        self.params = Parameters {
-            alias: self.params.alias.merge(params.alias),
-            assignee: self.params.assignee.merge(params.assignee),
-            blocks: self.params.blocks.merge(params.blocks),
-            cc: self.params.cc.merge(params.cc),
-            component: self.params.component.merge(params.component),
-            custom_fields: self.params.custom_fields.merge(params.custom_fields),
-            depends: self.params.depends.merge(params.depends),
-            description: self.params.description.merge(params.description),
-            flags: self.params.flags.merge(params.flags),
-            groups: self.params.groups.merge(params.groups),
-            keywords: self.params.keywords.merge(params.keywords),
-            os: self.params.os.merge(params.os),
-            platform: self.params.platform.merge(params.platform),
-            priority: self.params.priority.merge(params.priority),
-            product: self.params.product.merge(params.product),
-            qa: self.params.qa.merge(params.qa),
-            resolution: self.params.resolution.merge(params.resolution),
-            see_also: self.params.see_also.merge(params.see_also),
-            status: self.params.status.merge(params.status),
-            severity: self.params.severity.merge(params.severity),
-            target: self.params.target.merge(params.target),
-            summary: self.params.summary.merge(params.summary),
-            url: self.params.url.merge(params.url),
-            version: self.params.version.merge(params.version),
-            whiteboard: self.params.whiteboard.merge(params.whiteboard),
-        };
     }
 
     /// Encode parameters into the form required for the request.
@@ -410,6 +363,46 @@ pub struct Parameters {
 
     #[serde(flatten)]
     pub custom_fields: Option<IndexMap<String, String>>,
+}
+
+impl Merge<&Utf8Path> for Parameters {
+    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        self.merge(Self::from_path(path)?)
+    }
+}
+
+impl<T: Into<Self>> Merge<T> for Parameters {
+    fn merge(&mut self, other: T) -> crate::Result<()> {
+        let other = other.into();
+        *self = Self {
+            alias: self.alias.merge(other.alias),
+            assignee: self.assignee.merge(other.assignee),
+            blocks: self.blocks.merge(other.blocks),
+            cc: self.cc.merge(other.cc),
+            component: self.component.merge(other.component),
+            custom_fields: self.custom_fields.merge(other.custom_fields),
+            depends: self.depends.merge(other.depends),
+            description: self.description.merge(other.description),
+            flags: self.flags.merge(other.flags),
+            groups: self.groups.merge(other.groups),
+            keywords: self.keywords.merge(other.keywords),
+            os: self.os.merge(other.os),
+            platform: self.platform.merge(other.platform),
+            priority: self.priority.merge(other.priority),
+            product: self.product.merge(other.product),
+            qa: self.qa.merge(other.qa),
+            resolution: self.resolution.merge(other.resolution),
+            see_also: self.see_also.merge(other.see_also),
+            status: self.status.merge(other.status),
+            severity: self.severity.merge(other.severity),
+            target: self.target.merge(other.target),
+            summary: self.summary.merge(other.summary),
+            url: self.url.merge(other.url),
+            version: self.version.merge(other.version),
+            whiteboard: self.whiteboard.merge(other.whiteboard),
+        };
+        Ok(())
+    }
 }
 
 impl Parameters {

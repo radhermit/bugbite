@@ -17,9 +17,7 @@ use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
 use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{
-    Api, InjectAuth, MergeOption, RequestMerge, RequestSend, RequestStream, WebService,
-};
+use crate::traits::{Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, WebService};
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -30,21 +28,6 @@ pub struct Request<'a> {
     service: &'a Service,
     #[serde(flatten)]
     pub params: Parameters,
-}
-
-impl RequestMerge<&Utf8Path> for Request<'_> {
-    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        let params = Parameters::from_path(path)?;
-        self.merge(params);
-        Ok(())
-    }
-}
-
-impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
-    fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.merge(value);
-        Ok(())
-    }
 }
 
 impl RequestSend for Request<'_> {
@@ -98,93 +81,6 @@ impl<'a> Request<'a> {
             service,
             params: Default::default(),
         }
-    }
-
-    /// Override parameters using the provided value if it exists.
-    fn merge<T: Into<Parameters>>(&mut self, other: T) {
-        let params = other.into();
-        self.params = Parameters {
-            alias: self.params.alias.merge(params.alias),
-            attachments: self.params.attachments.merge(params.attachments),
-            flags: self.params.flags.merge(params.flags),
-            groups: self.params.groups.merge(params.groups),
-            keywords: self.params.keywords.merge(params.keywords),
-            see_also: self.params.see_also.merge(params.see_also),
-            tags: self.params.tags.merge(params.tags),
-            whiteboard: self.params.whiteboard.merge(params.whiteboard),
-            url: self.params.url.merge(params.url),
-
-            attachment_description: self
-                .params
-                .attachment_description
-                .merge(params.attachment_description),
-            attachment_filename: self
-                .params
-                .attachment_filename
-                .merge(params.attachment_filename),
-            attachment_mime: self.params.attachment_mime.merge(params.attachment_mime),
-            attachment_is_obsolete: self
-                .params
-                .attachment_is_obsolete
-                .merge(params.attachment_is_obsolete),
-            attachment_is_patch: self
-                .params
-                .attachment_is_patch
-                .merge(params.attachment_is_patch),
-            attachment_is_private: self
-                .params
-                .attachment_is_private
-                .merge(params.attachment_is_private),
-
-            changed: self.params.changed.merge(params.changed),
-            changed_by: self.params.changed_by.merge(params.changed_by),
-            changed_from: self.params.changed_from.merge(params.changed_from),
-            changed_to: self.params.changed_to.merge(params.changed_to),
-
-            assignee: self.params.assignee.merge(params.assignee),
-            attacher: self.params.attacher.merge(params.attacher),
-            cc: self.params.cc.merge(params.cc),
-            commenter: self.params.commenter.merge(params.commenter),
-            flagger: self.params.flagger.merge(params.flagger),
-            qa: self.params.qa.merge(params.qa),
-            reporter: self.params.reporter.merge(params.reporter),
-
-            fields: self.params.fields.merge(params.fields),
-            limit: self.params.limit.merge(params.limit),
-            offset: self.params.offset.merge(params.offset),
-            order: self.params.order.merge(params.order),
-            paged: self.params.paged.merge(params.paged),
-
-            created: self.params.created.merge(params.created),
-            updated: self.params.updated.merge(params.updated),
-            closed: self.params.closed.merge(params.closed),
-
-            comment: self.params.comment.merge(params.comment),
-            comment_is_private: self
-                .params
-                .comment_is_private
-                .merge(params.comment_is_private),
-            comment_tag: self.params.comment_tag.merge(params.comment_tag),
-
-            blocks: self.params.blocks.merge(params.blocks),
-            depends: self.params.depends.merge(params.depends),
-            ids: self.params.ids.merge(params.ids),
-            priority: self.params.priority.merge(params.priority),
-            severity: self.params.severity.merge(params.severity),
-            version: self.params.version.merge(params.version),
-            component: self.params.component.merge(params.component),
-            product: self.params.product.merge(params.product),
-            platform: self.params.platform.merge(params.platform),
-            os: self.params.os.merge(params.os),
-            resolution: self.params.resolution.merge(params.resolution),
-            status: self.params.status.merge(params.status),
-            target: self.params.target.merge(params.target),
-            comments: self.params.comments.merge(params.comments),
-            votes: self.params.votes.merge(params.votes),
-            summary: self.params.summary.merge(params.summary),
-            quicksearch: self.params.quicksearch.merge(params.quicksearch),
-            custom_fields: self.params.custom_fields.merge(params.custom_fields),
-        };
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {
@@ -1004,6 +900,89 @@ pub struct Parameters {
     pub summary: Option<Vec<Match>>,
     pub quicksearch: Option<String>,
     pub custom_fields: Option<Vec<(String, ExistsOrValues<Match>)>>,
+}
+
+impl Merge<&Utf8Path> for Parameters {
+    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        self.merge(Self::from_path(path)?)
+    }
+}
+
+impl<T: Into<Self>> Merge<T> for Parameters {
+    fn merge(&mut self, other: T) -> crate::Result<()> {
+        let other = other.into();
+        *self = Self {
+            alias: self.alias.merge(other.alias),
+            attachments: self.attachments.merge(other.attachments),
+            flags: self.flags.merge(other.flags),
+            groups: self.groups.merge(other.groups),
+            keywords: self.keywords.merge(other.keywords),
+            see_also: self.see_also.merge(other.see_also),
+            tags: self.tags.merge(other.tags),
+            whiteboard: self.whiteboard.merge(other.whiteboard),
+            url: self.url.merge(other.url),
+
+            attachment_description: self
+                .attachment_description
+                .merge(other.attachment_description),
+            attachment_filename: self.attachment_filename.merge(other.attachment_filename),
+            attachment_mime: self.attachment_mime.merge(other.attachment_mime),
+            attachment_is_obsolete: self
+                .attachment_is_obsolete
+                .merge(other.attachment_is_obsolete),
+            attachment_is_patch: self.attachment_is_patch.merge(other.attachment_is_patch),
+            attachment_is_private: self
+                .attachment_is_private
+                .merge(other.attachment_is_private),
+
+            changed: self.changed.merge(other.changed),
+            changed_by: self.changed_by.merge(other.changed_by),
+            changed_from: self.changed_from.merge(other.changed_from),
+            changed_to: self.changed_to.merge(other.changed_to),
+
+            assignee: self.assignee.merge(other.assignee),
+            attacher: self.attacher.merge(other.attacher),
+            cc: self.cc.merge(other.cc),
+            commenter: self.commenter.merge(other.commenter),
+            flagger: self.flagger.merge(other.flagger),
+            qa: self.qa.merge(other.qa),
+            reporter: self.reporter.merge(other.reporter),
+
+            fields: self.fields.merge(other.fields),
+            limit: self.limit.merge(other.limit),
+            offset: self.offset.merge(other.offset),
+            order: self.order.merge(other.order),
+            paged: self.paged.merge(other.paged),
+
+            created: self.created.merge(other.created),
+            updated: self.updated.merge(other.updated),
+            closed: self.closed.merge(other.closed),
+
+            comment: self.comment.merge(other.comment),
+            comment_is_private: self.comment_is_private.merge(other.comment_is_private),
+            comment_tag: self.comment_tag.merge(other.comment_tag),
+
+            blocks: self.blocks.merge(other.blocks),
+            depends: self.depends.merge(other.depends),
+            ids: self.ids.merge(other.ids),
+            priority: self.priority.merge(other.priority),
+            severity: self.severity.merge(other.severity),
+            version: self.version.merge(other.version),
+            component: self.component.merge(other.component),
+            product: self.product.merge(other.product),
+            platform: self.platform.merge(other.platform),
+            os: self.os.merge(other.os),
+            resolution: self.resolution.merge(other.resolution),
+            status: self.status.merge(other.status),
+            target: self.target.merge(other.target),
+            comments: self.comments.merge(other.comments),
+            votes: self.votes.merge(other.votes),
+            summary: self.summary.merge(other.summary),
+            quicksearch: self.quicksearch.merge(other.quicksearch),
+            custom_fields: self.custom_fields.merge(other.custom_fields),
+        };
+        Ok(())
+    }
 }
 
 impl Parameters {

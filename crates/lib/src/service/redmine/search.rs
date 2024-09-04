@@ -14,9 +14,7 @@ use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
 use crate::service::redmine::Service;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{
-    Api, InjectAuth, MergeOption, RequestMerge, RequestSend, RequestStream, WebService,
-};
+use crate::traits::{Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, WebService};
 use crate::Error;
 
 #[derive(Serialize, Debug, Clone)]
@@ -33,28 +31,6 @@ impl<'a> Request<'a> {
             service,
             params: Default::default(),
         }
-    }
-
-    /// Override parameters using the provided value if it exists.
-    fn merge<T: Into<Parameters>>(&mut self, other: T) {
-        let params = other.into();
-        self.params = Parameters {
-            assignee: self.params.assignee.merge(params.assignee),
-            attachments: self.params.attachments.merge(params.attachments),
-            blocks: self.params.blocks.merge(params.blocks),
-            blocked: self.params.blocked.merge(params.blocked),
-            relates: self.params.relates.merge(params.relates),
-            ids: self.params.ids.merge(params.ids),
-            created: self.params.created.merge(params.created),
-            updated: self.params.updated.merge(params.updated),
-            closed: self.params.closed.merge(params.closed),
-            limit: self.params.limit.merge(params.limit),
-            offset: self.params.offset.merge(params.offset),
-            order: self.params.order.merge(params.order),
-            paged: self.params.paged.merge(params.paged),
-            status: self.params.status.merge(params.status),
-            summary: self.params.summary.merge(params.summary),
-        };
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {
@@ -165,21 +141,6 @@ impl<'a> Request<'a> {
     }
 }
 
-impl RequestMerge<&Utf8Path> for Request<'_> {
-    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        let params = Parameters::from_path(path)?;
-        self.merge(params);
-        Ok(())
-    }
-}
-
-impl<T: Into<Parameters>> RequestMerge<T> for Request<'_> {
-    fn merge(&mut self, value: T) -> crate::Result<()> {
-        self.merge(value);
-        Ok(())
-    }
-}
-
 impl RequestSend for Request<'_> {
     type Output = Vec<Issue>;
 
@@ -238,6 +199,36 @@ pub struct Parameters {
 
     pub status: Option<String>,
     pub summary: Option<Vec<String>>,
+}
+
+impl Merge<&Utf8Path> for Parameters {
+    fn merge(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        self.merge(Self::from_path(path)?)
+    }
+}
+
+impl<T: Into<Self>> Merge<T> for Parameters {
+    fn merge(&mut self, other: T) -> crate::Result<()> {
+        let other = other.into();
+        *self = Self {
+            assignee: self.assignee.merge(other.assignee),
+            attachments: self.attachments.merge(other.attachments),
+            blocks: self.blocks.merge(other.blocks),
+            blocked: self.blocked.merge(other.blocked),
+            relates: self.relates.merge(other.relates),
+            ids: self.ids.merge(other.ids),
+            created: self.created.merge(other.created),
+            updated: self.updated.merge(other.updated),
+            closed: self.closed.merge(other.closed),
+            limit: self.limit.merge(other.limit),
+            offset: self.offset.merge(other.offset),
+            order: self.order.merge(other.order),
+            paged: self.paged.merge(other.paged),
+            status: self.status.merge(other.status),
+            summary: self.summary.merge(other.summary),
+        };
+        Ok(())
+    }
 }
 
 impl Parameters {

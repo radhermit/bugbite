@@ -5,7 +5,7 @@ use bugbite::args::Csv;
 use bugbite::query::Order;
 use bugbite::service::github::search::{OrderField, Parameters};
 use bugbite::service::github::Service;
-use bugbite::traits::{RequestMerge, RequestSend};
+use bugbite::traits::{Merge, RequestSend};
 use bugbite::utils::is_terminal;
 use clap::Args;
 use itertools::Itertools;
@@ -53,7 +53,7 @@ impl Command {
         W: IsTerminal + Write,
     {
         let mut request = service.search();
-        request.merge(self.params)?;
+        request.params.merge(self.params)?;
         let issues = request.send().await?;
         let mut count = 0;
 

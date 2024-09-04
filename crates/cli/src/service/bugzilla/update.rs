@@ -9,7 +9,7 @@ use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange};
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::{RequestMerge, RequestSend};
+use bugbite::traits::{Merge, RequestSend};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
@@ -377,11 +377,11 @@ impl Command {
 
         // read attributes from template
         if let Some(path) = self.options.from.as_deref() {
-            request.merge(path)?;
+            request.params.merge(path)?;
         }
 
         // command line parameters override template
-        request.merge(self.params)?;
+        request.params.merge(self.params)?;
 
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
