@@ -18,7 +18,7 @@ pub mod search;
 pub struct Config {
     base: Url,
     #[serde(skip)]
-    pub(crate) web_base: Option<Url>,
+    web_base: Option<Url>,
     pub user: Option<String>,
     pub password: Option<String>,
     pub key: Option<String>,

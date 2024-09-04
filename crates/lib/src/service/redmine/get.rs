@@ -17,7 +17,7 @@ pub struct Request<'a> {
 }
 
 impl<'a> Request<'a> {
-    pub(crate) fn new<I>(service: &'a Service, ids: I) -> Self
+    pub(super) fn new<I>(service: &'a Service, ids: I) -> Self
     where
         I: IntoIterator<Item = u64>,
     {
