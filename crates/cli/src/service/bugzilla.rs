@@ -59,12 +59,14 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
+        // load or create a service config
         let connection = self.service.connection.as_str();
         let mut config = config
             .get_kind(ServiceKind::Bugzilla, connection)?
             .into_bugzilla()
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 
+        // auth options override config settings
         config.key = config.key.merge(self.auth.key);
         config.user = config.user.merge(self.auth.user);
         config.password = config.password.merge(self.auth.password);

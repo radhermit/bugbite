@@ -44,12 +44,14 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
+        // load or create a service config
         let connection = self.service.connection.as_str();
         let mut config = config
             .get_kind(ServiceKind::Github, connection)?
             .into_github()
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 
+        // auth options override config settings
         config.token = config.token.merge(self.auth.key);
 
         let builder = self.service.into();
