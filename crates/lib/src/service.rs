@@ -61,7 +61,7 @@ pub enum Config {
 }
 
 impl Config {
-    pub fn new(kind: ServiceKind, base: &str) -> crate::Result<Self> {
+    pub(super) fn new(kind: ServiceKind, base: &str) -> crate::Result<Self> {
         let config = match kind {
             ServiceKind::Bugzilla => Self::Bugzilla(bugzilla::Config::new(base)?),
             ServiceKind::Github => Self::Github(github::Config::new(base)?),

@@ -569,7 +569,6 @@ struct RequestParameters<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::service::bugzilla::Config;
     use crate::test::*;
 
     use super::*;
@@ -577,7 +576,7 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let server = TestServer::new().await;
-        let service = Config::new(server.uri()).unwrap().service().unwrap();
+        let service = Service::new(server.uri()).unwrap();
 
         // no IDs
         let ids = Vec::<u32>::new();

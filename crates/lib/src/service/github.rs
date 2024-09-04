@@ -21,7 +21,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(base: &str) -> crate::Result<Self> {
+    pub(super) fn new(base: &str) -> crate::Result<Self> {
         let base = base.trim_end_matches('/');
         let base = Url::parse(&format!("{base}/"))
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
@@ -31,11 +31,6 @@ impl Config {
             token: None,
             client: Default::default(),
         })
-    }
-
-    /// Create a new Service from a Config.
-    pub fn service(self) -> crate::Result<Service> {
-        Service::new(self)
     }
 
     pub fn base(&self) -> &Url {
@@ -56,7 +51,19 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new(config: Config) -> crate::Result<Self> {
+    /// Create a new Service from a given base URL.
+    pub fn new(base: &str) -> crate::Result<Self> {
+        let config = Config::new(base)?;
+        let _client = config.client.build()?;
+        Ok(Self {
+            config,
+            _cache: Default::default(),
+            _client,
+        })
+    }
+
+    /// Create a new Service from a Config.
+    pub fn from_config(config: Config) -> crate::Result<Self> {
         let _client = config.client.build()?;
         Ok(Self {
             config,

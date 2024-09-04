@@ -492,7 +492,6 @@ impl Api for Order<OrderField> {
 mod tests {
     use strum::IntoEnumIterator;
 
-    use crate::service::redmine::Config;
     use crate::test::*;
 
     use super::*;
@@ -501,7 +500,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("redmine");
         let server = TestServer::new().await;
-        let service = Config::new(server.uri()).unwrap().service().unwrap();
+        let service = Service::new(server.uri()).unwrap();
 
         server
             .respond(200, path.join("search/nonexistent.json"))

@@ -146,7 +146,6 @@ impl Parameters {
 
 #[cfg(test)]
 mod tests {
-    use crate::service::bugzilla::Config;
     use crate::test::*;
 
     use super::*;
@@ -155,7 +154,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let service = Config::new(server.uri()).unwrap().service().unwrap();
+        let service = Service::new(server.uri()).unwrap();
 
         // no IDs
         let ids = Vec::<u32>::new();

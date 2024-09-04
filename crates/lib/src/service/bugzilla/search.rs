@@ -1903,7 +1903,7 @@ impl Api for ChangeField {
 mod tests {
     use strum::IntoEnumIterator;
 
-    use crate::service::bugzilla::{Config, GroupField};
+    use crate::service::bugzilla::GroupField;
     use crate::test::*;
 
     use super::*;
@@ -1913,7 +1913,7 @@ mod tests {
     async fn exists_or_values_match() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let service = Config::new(server.uri()).unwrap().service().unwrap();
+        let service = Service::new(server.uri()).unwrap();
         server.respond(200, path.join("search/ids.json")).await;
 
         // boolean
@@ -1991,8 +1991,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let config = Config::new(server.uri()).unwrap();
-        let service = config.service().unwrap();
+        let service = Service::new(server.uri()).unwrap();
 
         server
             .respond(200, path.join("search/nonexistent.json"))

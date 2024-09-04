@@ -28,7 +28,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(base: &str) -> crate::Result<Self> {
+    pub(super) fn new(base: &str) -> crate::Result<Self> {
         let web_base = if let Some((base, _project)) = base.split_once("/projects/") {
             let url = Url::parse(base)
                 .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
@@ -50,11 +50,6 @@ impl Config {
             max_search_results: None,
             client: Default::default(),
         })
-    }
-
-    /// Create a new Service from a Config.
-    pub fn service(self) -> crate::Result<Service> {
-        Service::new(self)
     }
 
     /// Maximum number of results that can be returned by a search request.
@@ -92,7 +87,19 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new(config: Config) -> crate::Result<Self> {
+    /// Create a new Service from a given base URL.
+    pub fn new(base: &str) -> crate::Result<Self> {
+        let config = Config::new(base)?;
+        let client = config.client.build()?;
+        Ok(Self {
+            config,
+            _cache: Default::default(),
+            client,
+        })
+    }
+
+    /// Create a new Service from a Config.
+    pub fn from_config(config: Config) -> crate::Result<Self> {
         let client = config.client.build()?;
         Ok(Self {
             config,
