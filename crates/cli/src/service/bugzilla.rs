@@ -5,8 +5,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use anyhow::anyhow;
 use bugbite::config::Config;
 use bugbite::objects::bugzilla::*;
-use bugbite::service::{bugzilla::Service, ServiceKind};
-use bugbite::traits::MergeOption;
+use bugbite::service::bugzilla::{self, Service};
+use bugbite::service::ServiceKind;
 use clap::Args;
 use itertools::Itertools;
 use tracing::debug;
@@ -42,6 +42,16 @@ struct Authentication {
     password: Option<String>,
 }
 
+impl From<Authentication> for bugzilla::Authentication {
+    fn from(value: Authentication) -> Self {
+        Self {
+            key: value.key,
+            user: value.user,
+            password: value.password,
+        }
+    }
+}
+
 #[derive(Args)]
 pub(crate) struct Command {
     #[clap(flatten)]
@@ -67,9 +77,7 @@ impl Command {
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 
         // cli options override config settings
-        config.key = config.key.merge(self.auth.key);
-        config.user = config.user.merge(self.auth.user);
-        config.password = config.password.merge(self.auth.password);
+        config.auth.merge(self.auth);
         config.client.merge(self.service);
 
         let service = Service::from_config(config)?;

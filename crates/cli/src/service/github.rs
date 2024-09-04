@@ -4,8 +4,8 @@ use std::process::ExitCode;
 use anyhow::anyhow;
 use bugbite::config::Config;
 use bugbite::objects::github::*;
-use bugbite::service::{github::Service, ServiceKind};
-use bugbite::traits::MergeOption;
+use bugbite::service::github::{self, Service};
+use bugbite::service::ServiceKind;
 use itertools::Itertools;
 use tracing::debug;
 
@@ -25,6 +25,15 @@ struct Authentication {
     /// username
     #[arg(short, long, env = "BUGBITE_USER")]
     user: Option<String>,
+}
+
+impl From<Authentication> for github::Authentication {
+    fn from(value: Authentication) -> Self {
+        Self {
+            user: value.user,
+            token: value.key,
+        }
+    }
 }
 
 #[derive(clap::Args)]
@@ -52,7 +61,7 @@ impl Command {
             .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
 
         // cli options override config settings
-        config.token = config.token.merge(self.auth.key);
+        config.auth.merge(self.auth);
         config.client.merge(self.service);
 
         let service = Service::from_config(config)?;

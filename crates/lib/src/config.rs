@@ -103,7 +103,7 @@ mod tests {
 
         // verify bundled gentoo connection doesn't set a user
         let c = config.get("gentoo").unwrap().as_bugzilla().unwrap();
-        assert!(c.user.is_none());
+        assert!(c.auth.user.is_none());
 
         let dir = tempdir().unwrap();
         let dir_path = dir.path().to_str().unwrap();
@@ -140,6 +140,6 @@ mod tests {
 
         // verify gentoo connection was overridden
         let c = config.get("gentoo").unwrap().as_bugzilla().unwrap();
-        assert_eq!(c.user.as_deref().unwrap(), "user@email.com");
+        assert_eq!(c.auth.user.as_deref().unwrap(), "user@email.com");
     }
 }

@@ -6,7 +6,7 @@ use strum::{Display, EnumString, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
-use crate::traits::{WebClient, WebService};
+use crate::traits::{MergeOption, WebClient, WebService};
 use crate::Error;
 
 use super::{ClientParameters, ServiceKind};
@@ -14,17 +14,35 @@ use super::{ClientParameters, ServiceKind};
 pub mod get;
 pub mod search;
 
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+pub struct Authentication {
+    pub key: Option<String>,
+    pub user: Option<String>,
+    pub password: Option<String>,
+}
+
+impl Authentication {
+    /// Override parameters using the provided value if it exists.
+    pub fn merge<T: Into<Self>>(&mut self, other: T) {
+        let other = other.into();
+        *self = Self {
+            key: self.key.merge(other.key),
+            user: self.user.merge(other.user),
+            password: self.password.merge(other.password),
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
     #[serde(skip)]
     web_base: Option<Url>,
-    pub user: Option<String>,
-    pub password: Option<String>,
-    pub key: Option<String>,
-    pub max_search_results: Option<usize>,
+    #[serde(flatten)]
+    pub auth: Authentication,
     #[serde(flatten)]
     pub client: ClientParameters,
+    pub max_search_results: Option<usize>,
 }
 
 impl Config {
@@ -44,11 +62,9 @@ impl Config {
         Ok(Self {
             base,
             web_base,
-            user: None,
-            password: None,
-            key: None,
-            max_search_results: None,
+            auth: Default::default(),
             client: Default::default(),
+            max_search_results: None,
         })
     }
 
@@ -141,10 +157,10 @@ impl<'a> WebService<'a> for Service {
         request: RequestBuilder,
         required: bool,
     ) -> crate::Result<RequestBuilder> {
-        let config = &self.config;
-        if let Some(key) = config.key.as_ref() {
+        let auth = &self.config.auth;
+        if let Some(key) = auth.key.as_ref() {
             Ok(request.header("X-Redmine-API-Key", key))
-        } else if let (Some(user), Some(pass)) = (&config.user, &config.password) {
+        } else if let (Some(user), Some(pass)) = (&auth.user, &auth.password) {
             Ok(request.basic_auth(user, Some(pass)))
         } else if !required {
             Ok(request)

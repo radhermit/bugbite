@@ -8,7 +8,7 @@ pub const PASSWORD: &str = "bugbite";
 
 pub static SERVICE: Lazy<Service> = Lazy::new(|| {
     let mut service = Service::new(BASE).unwrap();
-    service.config.user = Some(USER.to_string());
-    service.config.password = Some(PASSWORD.to_string());
+    service.config.auth.user = Some(USER.to_string());
+    service.config.auth.password = Some(PASSWORD.to_string());
     service
 });

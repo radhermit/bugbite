@@ -4,7 +4,7 @@ use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::traits::{WebClient, WebService};
+use crate::traits::{MergeOption, WebClient, WebService};
 use crate::Error;
 
 use super::{ClientParameters, ServiceKind};
@@ -12,10 +12,28 @@ use super::{ClientParameters, ServiceKind};
 mod get;
 pub mod search;
 
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+pub struct Authentication {
+    pub user: Option<String>,
+    pub token: Option<String>,
+}
+
+impl Authentication {
+    /// Override parameters using the provided value if it exists.
+    pub fn merge<T: Into<Self>>(&mut self, other: T) {
+        let other = other.into();
+        *self = Self {
+            user: self.user.merge(other.user),
+            token: self.token.merge(other.token),
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
-    pub token: Option<String>,
+    #[serde(flatten)]
+    pub auth: Authentication,
     #[serde(flatten)]
     pub client: ClientParameters,
 }
@@ -28,7 +46,7 @@ impl Config {
 
         Ok(Self {
             base,
-            token: None,
+            auth: Default::default(),
             client: Default::default(),
         })
     }

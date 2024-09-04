@@ -490,8 +490,8 @@ mod tests {
         let server = TestServer::new().await;
         // TODO: improve API for setting user info on config creation
         let mut service = Service::new(server.uri()).unwrap();
-        service.config.user = Some("user".to_string());
-        service.config.password = Some("pass".to_string());
+        service.config.auth.user = Some("user".to_string());
+        service.config.auth.password = Some("pass".to_string());
 
         // missing required fields without defaults
         let err = service.create().send().await.unwrap_err();
