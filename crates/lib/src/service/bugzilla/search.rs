@@ -17,7 +17,9 @@ use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
 use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, RequestStream, WebService};
+use crate::traits::{
+    Api, InjectAuth, MergeOption, RequestMerge, RequestSend, RequestStream, WebService,
+};
 use crate::Error;
 
 use super::{BugField, FilterField};
@@ -102,92 +104,86 @@ impl<'a> Request<'a> {
     fn merge<T: Into<Parameters>>(&mut self, other: T) {
         let params = other.into();
         self.params = Parameters {
-            alias: params.alias.or_else(|| self.params.alias.take()),
-            attachments: params
-                .attachments
-                .or_else(|| self.params.attachments.take()),
-            flags: params.flags.or_else(|| self.params.flags.take()),
-            groups: params.groups.or_else(|| self.params.groups.take()),
-            keywords: params.keywords.or_else(|| self.params.keywords.take()),
-            see_also: params.see_also.or_else(|| self.params.see_also.take()),
-            tags: params.tags.or_else(|| self.params.tags.take()),
-            whiteboard: params.whiteboard.or_else(|| self.params.whiteboard.take()),
-            url: params.url.or_else(|| self.params.url.take()),
+            alias: self.params.alias.merge(params.alias),
+            attachments: self.params.attachments.merge(params.attachments),
+            flags: self.params.flags.merge(params.flags),
+            groups: self.params.groups.merge(params.groups),
+            keywords: self.params.keywords.merge(params.keywords),
+            see_also: self.params.see_also.merge(params.see_also),
+            tags: self.params.tags.merge(params.tags),
+            whiteboard: self.params.whiteboard.merge(params.whiteboard),
+            url: self.params.url.merge(params.url),
 
-            attachment_description: params
+            attachment_description: self
+                .params
                 .attachment_description
-                .or_else(|| self.params.attachment_description.take()),
-            attachment_filename: params
+                .merge(params.attachment_description),
+            attachment_filename: self
+                .params
                 .attachment_filename
-                .or_else(|| self.params.attachment_filename.take()),
-            attachment_mime: params
-                .attachment_mime
-                .or_else(|| self.params.attachment_mime.take()),
-            attachment_is_obsolete: params
+                .merge(params.attachment_filename),
+            attachment_mime: self.params.attachment_mime.merge(params.attachment_mime),
+            attachment_is_obsolete: self
+                .params
                 .attachment_is_obsolete
-                .or_else(|| self.params.attachment_is_obsolete.take()),
-            attachment_is_patch: params
+                .merge(params.attachment_is_obsolete),
+            attachment_is_patch: self
+                .params
                 .attachment_is_patch
-                .or_else(|| self.params.attachment_is_patch.take()),
-            attachment_is_private: params
+                .merge(params.attachment_is_patch),
+            attachment_is_private: self
+                .params
                 .attachment_is_private
-                .or_else(|| self.params.attachment_is_private.take()),
+                .merge(params.attachment_is_private),
 
-            changed: params.changed.or_else(|| self.params.changed.take()),
-            changed_by: params.changed_by.or_else(|| self.params.changed_by.take()),
-            changed_from: params
-                .changed_from
-                .or_else(|| self.params.changed_from.take()),
-            changed_to: params.changed_to.or_else(|| self.params.changed_to.take()),
+            changed: self.params.changed.merge(params.changed),
+            changed_by: self.params.changed_by.merge(params.changed_by),
+            changed_from: self.params.changed_from.merge(params.changed_from),
+            changed_to: self.params.changed_to.merge(params.changed_to),
 
-            assignee: params.assignee.or_else(|| self.params.assignee.take()),
-            attacher: params.attacher.or_else(|| self.params.attacher.take()),
-            cc: params.cc.or_else(|| self.params.cc.take()),
-            commenter: params.commenter.or_else(|| self.params.commenter.take()),
-            flagger: params.flagger.or_else(|| self.params.flagger.take()),
-            qa: params.qa.or_else(|| self.params.qa.take()),
-            reporter: params.reporter.or_else(|| self.params.reporter.take()),
+            assignee: self.params.assignee.merge(params.assignee),
+            attacher: self.params.attacher.merge(params.attacher),
+            cc: self.params.cc.merge(params.cc),
+            commenter: self.params.commenter.merge(params.commenter),
+            flagger: self.params.flagger.merge(params.flagger),
+            qa: self.params.qa.merge(params.qa),
+            reporter: self.params.reporter.merge(params.reporter),
 
-            fields: params.fields.or_else(|| self.params.fields.take()),
-            limit: params.limit.or_else(|| self.params.limit.take()),
-            offset: params.offset.or_else(|| self.params.offset.take()),
-            order: params.order.or_else(|| self.params.order.take()),
-            paged: params.paged.or_else(|| self.params.paged.take()),
+            fields: self.params.fields.merge(params.fields),
+            limit: self.params.limit.merge(params.limit),
+            offset: self.params.offset.merge(params.offset),
+            order: self.params.order.merge(params.order),
+            paged: self.params.paged.merge(params.paged),
 
-            created: params.created.or_else(|| self.params.created.take()),
-            updated: params.updated.or_else(|| self.params.updated.take()),
-            closed: params.closed.or_else(|| self.params.closed.take()),
+            created: self.params.created.merge(params.created),
+            updated: self.params.updated.merge(params.updated),
+            closed: self.params.closed.merge(params.closed),
 
-            comment: params.comment.or_else(|| self.params.comment.take()),
-            comment_is_private: params
+            comment: self.params.comment.merge(params.comment),
+            comment_is_private: self
+                .params
                 .comment_is_private
-                .or_else(|| self.params.comment_is_private.take()),
-            comment_tag: params
-                .comment_tag
-                .or_else(|| self.params.comment_tag.take()),
+                .merge(params.comment_is_private),
+            comment_tag: self.params.comment_tag.merge(params.comment_tag),
 
-            blocks: params.blocks.or_else(|| self.params.blocks.take()),
-            depends: params.depends.or_else(|| self.params.depends.take()),
-            ids: params.ids.or_else(|| self.params.ids.take()),
-            priority: params.priority.or_else(|| self.params.priority.take()),
-            severity: params.severity.or_else(|| self.params.severity.take()),
-            version: params.version.or_else(|| self.params.version.take()),
-            component: params.component.or_else(|| self.params.component.take()),
-            product: params.product.or_else(|| self.params.product.take()),
-            platform: params.platform.or_else(|| self.params.platform.take()),
-            os: params.os.or_else(|| self.params.os.take()),
-            resolution: params.resolution.or_else(|| self.params.resolution.take()),
-            status: params.status.or_else(|| self.params.status.take()),
-            target: params.target.or_else(|| self.params.target.take()),
-            comments: params.comments.or_else(|| self.params.comments.take()),
-            votes: params.votes.or_else(|| self.params.votes.take()),
-            summary: params.summary.or_else(|| self.params.summary.take()),
-            quicksearch: params
-                .quicksearch
-                .or_else(|| self.params.quicksearch.take()),
-            custom_fields: params
-                .custom_fields
-                .or_else(|| self.params.custom_fields.take()),
+            blocks: self.params.blocks.merge(params.blocks),
+            depends: self.params.depends.merge(params.depends),
+            ids: self.params.ids.merge(params.ids),
+            priority: self.params.priority.merge(params.priority),
+            severity: self.params.severity.merge(params.severity),
+            version: self.params.version.merge(params.version),
+            component: self.params.component.merge(params.component),
+            product: self.params.product.merge(params.product),
+            platform: self.params.platform.merge(params.platform),
+            os: self.params.os.merge(params.os),
+            resolution: self.params.resolution.merge(params.resolution),
+            status: self.params.status.merge(params.status),
+            target: self.params.target.merge(params.target),
+            comments: self.params.comments.merge(params.comments),
+            votes: self.params.votes.merge(params.votes),
+            summary: self.params.summary.merge(params.summary),
+            quicksearch: self.params.quicksearch.merge(params.quicksearch),
+            custom_fields: self.params.custom_fields.merge(params.custom_fields),
         };
     }
 

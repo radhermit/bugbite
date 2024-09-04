@@ -14,7 +14,9 @@ use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
 use crate::service::redmine::Service;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{Api, InjectAuth, RequestMerge, RequestSend, RequestStream, WebService};
+use crate::traits::{
+    Api, InjectAuth, MergeOption, RequestMerge, RequestSend, RequestStream, WebService,
+};
 use crate::Error;
 
 #[derive(Serialize, Debug, Clone)]
@@ -37,23 +39,21 @@ impl<'a> Request<'a> {
     fn merge<T: Into<Parameters>>(&mut self, other: T) {
         let params = other.into();
         self.params = Parameters {
-            assignee: params.assignee.or_else(|| self.params.assignee.take()),
-            attachments: params
-                .attachments
-                .or_else(|| self.params.attachments.take()),
-            blocks: params.blocks.or_else(|| self.params.blocks.take()),
-            blocked: params.blocked.or_else(|| self.params.blocked.take()),
-            relates: params.relates.or_else(|| self.params.relates.take()),
-            ids: params.ids.or_else(|| self.params.ids.take()),
-            created: params.created.or_else(|| self.params.created.take()),
-            updated: params.updated.or_else(|| self.params.updated.take()),
-            closed: params.closed.or_else(|| self.params.closed.take()),
-            limit: params.limit.or_else(|| self.params.limit.take()),
-            offset: params.offset.or_else(|| self.params.offset.take()),
-            order: params.order.or_else(|| self.params.order.take()),
-            paged: params.paged.or_else(|| self.params.paged.take()),
-            status: params.status.or_else(|| self.params.status.take()),
-            summary: params.summary.or_else(|| self.params.summary.take()),
+            assignee: self.params.assignee.merge(params.assignee),
+            attachments: self.params.attachments.merge(params.attachments),
+            blocks: self.params.blocks.merge(params.blocks),
+            blocked: self.params.blocked.merge(params.blocked),
+            relates: self.params.relates.merge(params.relates),
+            ids: self.params.ids.merge(params.ids),
+            created: self.params.created.merge(params.created),
+            updated: self.params.updated.merge(params.updated),
+            closed: self.params.closed.merge(params.closed),
+            limit: self.params.limit.merge(params.limit),
+            offset: self.params.offset.merge(params.offset),
+            order: self.params.order.merge(params.order),
+            paged: self.params.paged.merge(params.paged),
+            status: self.params.status.merge(params.status),
+            summary: self.params.summary.merge(params.summary),
         };
     }
 

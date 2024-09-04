@@ -13,7 +13,7 @@ use url::Url;
 use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Service;
-use crate::traits::{Contains, InjectAuth, RequestMerge, RequestSend, WebService};
+use crate::traits::{Contains, InjectAuth, MergeOption, RequestMerge, RequestSend, WebService};
 use crate::Error;
 
 /// Changes made to a field.
@@ -188,45 +188,38 @@ impl<'a> Request<'a> {
     fn merge<T: Into<Parameters>>(&mut self, other: T) {
         let params = other.into();
         self.params = Parameters {
-            alias: params.alias.or_else(|| self.params.alias.take()),
-            assignee: params.assignee.or_else(|| self.params.assignee.take()),
-            blocks: params.blocks.or_else(|| self.params.blocks.take()),
-            cc: params.cc.or_else(|| self.params.cc.take()),
-            comment: params.comment.or_else(|| self.params.comment.take()),
-            comment_from: params
-                .comment_from
-                .or_else(|| self.params.comment_from.take()),
-            comment_is_private: params
+            alias: self.params.alias.merge(params.alias),
+            assignee: self.params.assignee.merge(params.assignee),
+            blocks: self.params.blocks.merge(params.blocks),
+            cc: self.params.cc.merge(params.cc),
+            comment: self.params.comment.merge(params.comment),
+            comment_from: self.params.comment_from.merge(params.comment_from),
+            comment_is_private: self
+                .params
                 .comment_is_private
-                .or_else(|| self.params.comment_is_private.take()),
-            comment_privacy: params
-                .comment_privacy
-                .or_else(|| self.params.comment_privacy.take()),
-            component: params.component.or_else(|| self.params.component.take()),
-            depends: params.depends.or_else(|| self.params.depends.take()),
-            duplicate_of: params
-                .duplicate_of
-                .or_else(|| self.params.duplicate_of.take()),
-            flags: params.flags.or_else(|| self.params.flags.take()),
-            groups: params.groups.or_else(|| self.params.groups.take()),
-            keywords: params.keywords.or_else(|| self.params.keywords.take()),
-            os: params.os.or_else(|| self.params.os.take()),
-            platform: params.platform.or_else(|| self.params.platform.take()),
-            priority: params.priority.or_else(|| self.params.priority.take()),
-            product: params.product.or_else(|| self.params.product.take()),
-            qa: params.qa.or_else(|| self.params.qa.take()),
-            resolution: params.resolution.or_else(|| self.params.resolution.take()),
-            see_also: params.see_also.or_else(|| self.params.see_also.take()),
-            status: params.status.or_else(|| self.params.status.take()),
-            severity: params.severity.or_else(|| self.params.severity.take()),
-            target: params.target.or_else(|| self.params.target.take()),
-            summary: params.summary.or_else(|| self.params.summary.take()),
-            url: params.url.or_else(|| self.params.url.take()),
-            version: params.version.or_else(|| self.params.version.take()),
-            whiteboard: params.whiteboard.or_else(|| self.params.whiteboard.take()),
-            custom_fields: params
-                .custom_fields
-                .or_else(|| self.params.custom_fields.take()),
+                .merge(params.comment_is_private),
+            comment_privacy: self.params.comment_privacy.merge(params.comment_privacy),
+            component: self.params.component.merge(params.component),
+            depends: self.params.depends.merge(params.depends),
+            duplicate_of: self.params.duplicate_of.merge(params.duplicate_of),
+            flags: self.params.flags.merge(params.flags),
+            groups: self.params.groups.merge(params.groups),
+            keywords: self.params.keywords.merge(params.keywords),
+            os: self.params.os.merge(params.os),
+            platform: self.params.platform.merge(params.platform),
+            priority: self.params.priority.merge(params.priority),
+            product: self.params.product.merge(params.product),
+            qa: self.params.qa.merge(params.qa),
+            resolution: self.params.resolution.merge(params.resolution),
+            see_also: self.params.see_also.merge(params.see_also),
+            status: self.params.status.merge(params.status),
+            severity: self.params.severity.merge(params.severity),
+            target: self.params.target.merge(params.target),
+            summary: self.params.summary.merge(params.summary),
+            url: self.params.url.merge(params.url),
+            version: self.params.version.merge(params.version),
+            whiteboard: self.params.whiteboard.merge(params.whiteboard),
+            custom_fields: self.params.custom_fields.merge(params.custom_fields),
         };
     }
 

@@ -9,7 +9,7 @@ use tracing::debug;
 
 use crate::objects::github::Issue;
 use crate::query::{Order, Query};
-use crate::traits::{Api, RequestMerge, RequestSend};
+use crate::traits::{Api, MergeOption, RequestMerge, RequestSend};
 use crate::Error;
 
 struct QueryBuilder<'a> {
@@ -106,7 +106,7 @@ impl<'a> Request<'a> {
     fn merge<T: Into<Parameters>>(&mut self, other: T) {
         let params = other.into();
         self.params = Parameters {
-            order: params.order.or_else(|| self.params.order.take()),
+            order: self.params.order.merge(params.order),
         };
     }
 

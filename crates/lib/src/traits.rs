@@ -66,6 +66,16 @@ impl<T: Api> Api for &T {
     }
 }
 
+pub trait MergeOption<T> {
+    fn merge(&mut self, value: Option<T>) -> Self;
+}
+
+impl<T> MergeOption<T> for Option<T> {
+    fn merge(&mut self, value: Option<T>) -> Self {
+        value.or_else(|| self.take())
+    }
+}
+
 pub trait RequestMerge<T> {
     fn merge(&mut self, value: T) -> crate::Result<()>;
 }
