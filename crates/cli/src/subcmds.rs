@@ -26,7 +26,7 @@ pub(crate) enum Subcommand {
 
 impl Subcommand {
     pub(crate) async fn run(self) -> anyhow::Result<ExitCode> {
-        let config = Config::new()?;
+        let config = Config::new();
         let mut stdout = stdout().lock();
         match self {
             Self::Bugzilla(cmd) => cmd.run(&config, &mut stdout).await,

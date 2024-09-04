@@ -12,14 +12,14 @@ use crate::Error;
 static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.toml"));
 
 /// Connection config support.
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Default)]
 pub struct Config(IndexMap<String, service::Config>);
 
 impl Config {
-    pub fn new() -> crate::Result<Self> {
-        let connections = toml::from_str(SERVICES_DATA)
-            .map_err(|e| Error::Config(format!("failed loading bundled service data: {e}")))?;
-        Ok(connections)
+    /// Create a new Config including bundled services.
+    pub fn new() -> Self {
+        toml::from_str(SERVICES_DATA)
+            .unwrap_or_else(|e| panic!("failed loading bundled service data: {e}"))
     }
 
     /// Load connections from a given path, overriding any bundled matches.
@@ -97,7 +97,7 @@ mod tests {
     #[test]
     fn load() {
         // bundled services only
-        let mut config = Config::new().unwrap();
+        let mut config = Config::new();
         assert!(!config.is_empty());
         let len = config.len();
 
