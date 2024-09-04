@@ -7,6 +7,6 @@ pub(crate) fn cmd<S: AsRef<str>>(cmd: S) -> Command {
     let mut cmd = assert_cmd::Command::cargo_bin(cmd).unwrap();
     cmd.args(args);
     // disable config loading by default
-    cmd.env("BITE_NO_CONFIG", "1");
+    cmd.env("BUGBITE_CONFIG", "false");
     cmd
 }
