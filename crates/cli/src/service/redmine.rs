@@ -59,9 +59,7 @@ impl Command {
         config.key = config.key.merge(self.auth.key);
         config.user = config.user.merge(self.auth.user);
         config.password = config.password.merge(self.auth.password);
-        config.client.certificate = config.client.certificate.merge(self.service.certificate);
-        config.client.insecure = config.client.insecure.merge(self.service.insecure);
-        config.client.timeout = config.client.timeout.merge(self.service.timeout);
+        config.client.merge(self.service);
 
         let service = Service::from_config(config)?;
         debug!("Service: {service}");

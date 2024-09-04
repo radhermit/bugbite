@@ -1,5 +1,6 @@
 use std::io::{self, IsTerminal, Write};
 
+use bugbite::service::ClientParameters;
 use camino::Utf8PathBuf;
 
 // output and rendering support
@@ -38,4 +39,14 @@ struct ServiceOptions {
     /// request timeout in seconds
     #[arg(short, long, value_name = "SECONDS")]
     timeout: Option<f64>,
+}
+
+impl From<ServiceOptions> for ClientParameters {
+    fn from(value: ServiceOptions) -> Self {
+        Self {
+            certificate: value.certificate,
+            insecure: value.insecure,
+            timeout: value.timeout,
+        }
+    }
 }
