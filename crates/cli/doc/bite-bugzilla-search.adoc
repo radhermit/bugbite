@@ -571,6 +571,9 @@ Values search for matching substrings and multiple values can be specified in a
 comma-separated list for logical AND or multiple options for logical OR. Match
 operators can also be used alter query application, see the <<Match Operators>>
 section for more information.
++
+.Debug attachments:
+ bite bugzilla search --attachment-description debug
 
 *--attachment-filename* <value[,...]>::
     Restrict by attachment file name.
@@ -579,6 +582,9 @@ Values search for matching substrings and multiple values can be specified in a
 comma-separated list for logical AND or multiple options for logical OR. Match
 operators can also be used alter query application, see the <<Match Operators>>
 section for more information.
++
+.Tarball attachments:
+ bite bugzilla search --attachment-filename '=* .+\.tar\..+'
 
 *--attachment-mime* <value[,...]>::
     Restrict by attachment MIME type.
@@ -587,6 +593,9 @@ Values search for matching substrings and multiple values can be specified in a
 comma-separated list for logical AND or multiple options for logical OR. Match
 operators can also be used alter query application, see the <<Match Operators>>
 section for more information.
++
+.Text-based attachments:
+ bite bugzilla search --attachment-mime '=* text/.+'
 
 *--attachment-is-obsolete* [<bool>]::
     Restrict by attachment obsolete status.
