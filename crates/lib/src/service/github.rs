@@ -94,9 +94,9 @@ impl Service {
         format!("{base}/issues/{id}")
     }
 
-    pub fn get<S>(&self, _ids: &[S], _comments: bool) -> crate::Result<get::Request>
+    pub fn get<I>(&self, _ids: I) -> get::Request
     where
-        S: std::fmt::Display,
+        I: IntoIterator<Item = u64>,
     {
         todo!("get requests unsupported")
     }

@@ -34,13 +34,13 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
-        let ids = &self.ids.iter().flatten().copied().collect::<Vec<_>>();
+        let ids = self.ids.into_iter().flatten();
 
         if self.options.browser {
-            let urls = ids.iter().map(|id| service.item_url(id));
+            let urls = ids.map(|id| service.item_url(id));
             launch_browser(urls)?;
         } else {
-            let issues = service.get(ids, false)?.send().await?;
+            let issues = service.get(ids).send().await?;
             render_items(f, service, &issues)?;
         }
 
