@@ -58,7 +58,7 @@ format to a space-separated list of the field values.
 Group fields relate to groups of bug fields and are most useful when using JSON
 formatted output:
 +
-.Return all open bugs created in the past day rendered in JSON:
+.Open bugs created in the past day rendered in JSON:
  bite bugzilla search --created 1d -f all --json
 +
 // TODO: link to rust docs for field descriptions
@@ -709,11 +709,14 @@ current service connection.
 *-a, --assignee* <user[,...]>::
     Restrict by assignee user.
 +
-.All bugs assigned to yourself:
+.Assigned to yourself:
  bite bugzilla search --assignee @me
 
 *--attacher* <user[,...]>::
     Restrict by attachment creation user.
++
+.Attachment created by Gmail user:
+ bite bugzilla search --attacher @gmail.com
 
 *--cc* [<user[,...]>]::
     Restrict by CC user.
@@ -731,9 +734,15 @@ See the information above in the <<User Options>> section for regular values.
 
 *--commenter* <user[,...]>::
     Restrict by commenting user.
++
+.No comment made by Gentoo devs:
+ bite bugzilla search --commenter '!~ @gentoo.org'
 
 *--flagger* <user[,...]>::
     Restrict by flag creation user.
++
+.Flagged by user1 and user2:
+ bite bugzilla search --flagger user1,user2
 
 *--qa* [<user[,...]>]::
     Restrict by QA contact user.
@@ -752,6 +761,9 @@ See the information above in the <<User Options>> section for regular values.
 
 *-R, --reporter* <user[,...]>::
     Restrict by reporting user.
++
+.Reported by user1 or user2:
+ bite bugzilla search --reporter user1 --reporter user2
 
 == Comment options
 
