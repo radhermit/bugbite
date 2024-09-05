@@ -68,6 +68,7 @@ fn custom_config() {
         // $HOME dir
         cmd("bite show connections")
             .env_remove("BUGBITE_CONFIG")
+            .env_remove("XDG_CONFIG_HOME")
             .env("HOME", home_path)
             .assert()
             .stdout(predicate::str::contains("bugzilla-test"))
