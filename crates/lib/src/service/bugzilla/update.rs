@@ -234,6 +234,9 @@ impl<'a> Request<'a> {
             let data = fs::read_to_string(path).map_err(|e| {
                 Error::InvalidValue(format!("failed reading comment file: {path}: {e}"))
             })?;
+            if data.trim().is_empty() {
+                return Err(Error::InvalidValue(format!("empty comment file: {path}")));
+            }
             params.comment = Some(Comment {
                 body: Cow::Owned(data),
                 is_private: self.params.comment_is_private.unwrap_or_default(),

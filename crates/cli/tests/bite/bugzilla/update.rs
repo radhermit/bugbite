@@ -370,10 +370,6 @@ async fn comment_from() {
         .respond(200, TEST_DATA.join("update/no-changes.json"))
         .await;
 
-    let file = NamedTempFile::new().unwrap();
-    let path = file.path().to_str().unwrap();
-    fs::write(path, "comment-from-file").unwrap();
-
     for opt in ["-F", "--comment-from"] {
         // missing path
         cmd("bite bugzilla update 1")
@@ -394,6 +390,20 @@ async fn comment_from() {
             ))
             .failure()
             .code(1);
+
+        let file = NamedTempFile::new().unwrap();
+        let path = file.path().to_str().unwrap();
+
+        // empty file
+        cmd("bite bugzilla update 1")
+            .args([opt, path])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::contains("empty comment file"))
+            .failure()
+            .code(1);
+
+        fs::write(path, "comment-from-file").unwrap();
 
         // verbose output
         cmd("bite bugzilla update 1 -v")
