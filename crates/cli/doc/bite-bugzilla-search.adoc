@@ -590,12 +590,21 @@ section for more information.
 
 *--attachment-is-obsolete* [<bool>]::
     Restrict by attachment obsolete status.
++
+.With obsolete attachments:
+ bite bugzilla search --attachment-is-obsolete
 
 *--attachment-is-patch* [<bool>]::
     Restrict by attachment patch status.
++
+.With patch attachments:
+ bite bugzilla search --attachment-is-patch
 
 *--attachment-is-private* [<bool>]::
     Restrict by attachment private status.
++
+.With no private attachments:
+ bite bugzilla search --attachment-is-private false
 
 == Range options
 
@@ -774,6 +783,9 @@ Taken from standard input when `-`.
 
 *--comment-is-private* [<bool>]::
     Restrict by comment private status.
++
+.With private comments:
+ bite bugzilla search --comment-is-private
 
 *--comment-tag* <value[,...]>::
     Restrict by comment tag.
