@@ -1,5 +1,5 @@
 use predicates::prelude::*;
-use tempfile::tempdir;
+use tempfile::{tempdir, NamedTempFile};
 use wiremock::matchers;
 
 use crate::command::cmd;
@@ -357,6 +357,54 @@ async fn comment() {
                 None
                 --- Added comment ---
                 interactive
+            "}))
+            .stderr("")
+            .success();
+    }
+}
+
+#[tokio::test]
+async fn comment_from() {
+    let server = start_server_with_auth().await;
+    server
+        .respond(200, TEST_DATA.join("update/no-changes.json"))
+        .await;
+
+    let file = NamedTempFile::new().unwrap();
+    let path = file.path().to_str().unwrap();
+    fs::write(path, "comment-from-file").unwrap();
+
+    for opt in ["-F", "--comment-from"] {
+        // missing path
+        cmd("bite bugzilla update 1")
+            .arg(opt)
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::contains("a value is required"))
+            .failure()
+            .code(2);
+
+        // nonexistent path
+        cmd("bite bugzilla update 1")
+            .args([opt, "nonexistent"])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::contains(
+                "failed reading comment file: nonexistent",
+            ))
+            .failure()
+            .code(1);
+
+        // verbose output
+        cmd("bite bugzilla update 1 -v")
+            .args([opt, path])
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                === Bug #1 ===
+                --- Updated fields ---
+                None
+                --- Added comment ---
+                comment-from-file
             "}))
             .stderr("")
             .success();
