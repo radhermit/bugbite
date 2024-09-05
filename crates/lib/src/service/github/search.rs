@@ -3,7 +3,7 @@ use std::ops::{Deref, DerefMut};
 
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use strum::{Display, EnumIter, EnumString, VariantNames};
+use strum::{Display, EnumIter, EnumString};
 use tracing::debug;
 
 use crate::objects::github::Issue;
@@ -57,7 +57,7 @@ impl Merge for Parameters {
 }
 
 /// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone)]
+#[derive(Display, EnumIter, EnumString, Debug, Clone)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
     Comments,

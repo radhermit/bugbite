@@ -7,7 +7,7 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
-use strum::{AsRefStr, Display, EnumIter, EnumString, VariantNames};
+use strum::{AsRefStr, Display, EnumIter, EnumString};
 use url::Url;
 
 use crate::args::ExistsOrValues;
@@ -1679,7 +1679,7 @@ impl QueryBuilder<'_> {
 }
 
 /// Bug fields composed of value arrays.
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum ExistsField {
     Alias,
@@ -1719,7 +1719,7 @@ impl Api for ExistsField {
 }
 
 /// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, Debug, PartialEq, Eq, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
     Alias,

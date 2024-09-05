@@ -4,7 +4,7 @@ use std::{fmt, fs};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use strum::{Display, EnumIter, EnumString, VariantNames};
+use strum::{Display, EnumIter, EnumString};
 use url::Url;
 
 use crate::args::ExistsOrValues;
@@ -388,7 +388,7 @@ where
         .join(" ")
 }
 
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, Debug, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum ExistsField {
     Assignee,
@@ -412,7 +412,7 @@ impl Api for ExistsField {
 }
 
 /// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, VariantNames, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, Debug, PartialEq, Eq, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
     /// person the issue is assigned to

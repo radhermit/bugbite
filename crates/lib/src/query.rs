@@ -3,7 +3,6 @@ use std::str::FromStr;
 
 use ordered_multimap::ListOrderedMultimap;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
-use strum::VariantNames;
 
 use crate::traits::Api;
 use crate::Error;
@@ -47,7 +46,7 @@ pub enum Order<T> {
     Descending(T),
 }
 
-impl<T: FromStr + VariantNames> TryFrom<&str> for Order<T> {
+impl<T: FromStr> TryFrom<&str> for Order<T> {
     type Error = Error;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -55,7 +54,7 @@ impl<T: FromStr + VariantNames> TryFrom<&str> for Order<T> {
     }
 }
 
-impl<T: FromStr + VariantNames> FromStr for Order<T> {
+impl<T: FromStr> FromStr for Order<T> {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::Result<Self> {
