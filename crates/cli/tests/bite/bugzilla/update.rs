@@ -331,6 +331,21 @@ async fn comment() {
             .stderr("")
             .success();
 
+        // comment from stdin
+        cmd("bite bugzilla update 1 -v")
+            .args([opt, "-"])
+            .write_stdin("comment\n")
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                === Bug #1 ===
+                --- Updated fields ---
+                None
+                --- Added comment ---
+                comment
+            "}))
+            .stderr("")
+            .success();
+
         // option used without argument spawns editor
         cmd("bite bugzilla update 1 -v")
             .arg(opt)
