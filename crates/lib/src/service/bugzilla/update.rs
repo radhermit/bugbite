@@ -140,9 +140,9 @@ impl RequestSend for Request<'_> {
         let data = data["bugs"].take();
         let mut changes: Vec<BugChange> = serde_json::from_value(data)
             .map_err(|e| Error::InvalidResponse(format!("failed deserializing changes: {e}")))?;
-        if let Some(comment) = &self.params.comment {
+        if let Some(comment) = &params.comment {
             for change in changes.iter_mut() {
-                change.comment = Some(comment.clone());
+                change.comment = Some(comment.body.to_string());
             }
         }
         Ok(changes)
