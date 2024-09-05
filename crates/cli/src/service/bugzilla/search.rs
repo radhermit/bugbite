@@ -32,7 +32,7 @@ impl FromStr for Changed {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (raw_fields, time) = s.split_once('=').unwrap_or((s, "<now"));
         Ok(Self {
-            fields: raw_fields.split(',').map(|x| prefix!("cf_", x)).collect(),
+            fields: raw_fields.split(',').map(Into::into).collect(),
             interval: time.parse()?,
         })
     }
@@ -53,8 +53,8 @@ impl FromStr for ChangedBy {
         };
 
         Ok(Self {
-            fields: raw_fields.split(',').map(|x| prefix!("cf_", x)).collect(),
-            users: users.split(',').map(|s| s.to_string()).collect(),
+            fields: raw_fields.split(',').map(Into::into).collect(),
+            users: users.split(',').map(Into::into).collect(),
         })
     }
 }
@@ -74,7 +74,7 @@ impl FromStr for ChangedValue {
         };
 
         Ok(Self {
-            field: prefix!("cf_", field),
+            field: field.to_string(),
             value: value.to_string(),
         })
     }

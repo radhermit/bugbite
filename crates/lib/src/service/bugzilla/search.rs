@@ -7,7 +7,7 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
-use strum::{Display, EnumIter, EnumString, VariantNames};
+use strum::{AsRefStr, Display, EnumIter, EnumString, VariantNames};
 use url::Url;
 
 use crate::args::ExistsOrValues;
@@ -239,22 +239,22 @@ impl<'a> Request<'a> {
 
         if let Some(values) = &self.params.changed {
             for (fields, interval) in values {
-                query.changed(fields.iter().map(|f| (f, interval)));
+                query.changed(fields.iter().map(|f| (f, interval)))?;
             }
         }
 
         if let Some(values) = &self.params.changed_by {
             for (fields, users) in values {
-                query.changed_by(fields.iter().map(|f| (f, users)));
+                query.changed_by(fields.iter().map(|f| (f, users)))?;
             }
         }
 
         if let Some(values) = &self.params.changed_from {
-            query.changed_from(values);
+            query.changed_from(values)?;
         }
 
         if let Some(values) = &self.params.changed_to {
-            query.changed_to(values);
+            query.changed_to(values)?;
         }
 
         if let Some(value) = &self.params.comments {
@@ -426,7 +426,7 @@ impl<'a> Request<'a> {
         }
 
         if let Some(value) = &self.params.closed {
-            query.changed([(&ChangeField::Status, value)]);
+            query.changed([(StaticChangeField::Status, value)])?;
             query.status("@closed");
         }
 
@@ -597,7 +597,10 @@ impl<'a> Request<'a> {
         self
     }
 
-    pub fn changed<F: fmt::Display>(mut self, field: F) -> Self {
+    pub fn changed<F>(mut self, field: F) -> Self
+    where
+        F: fmt::Display,
+    {
         self.params
             .changed
             .get_or_insert_with(Default::default)
@@ -605,11 +608,10 @@ impl<'a> Request<'a> {
         self
     }
 
-    pub fn changed_at<F: fmt::Display>(
-        mut self,
-        field: F,
-        value: RangeOrValue<TimeDeltaOrStatic>,
-    ) -> Self {
+    pub fn changed_at<F>(mut self, field: F, value: RangeOrValue<TimeDeltaOrStatic>) -> Self
+    where
+        F: fmt::Display,
+    {
         self.params
             .changed
             .get_or_insert_with(Default::default)
@@ -1341,12 +1343,13 @@ impl QueryBuilder<'_> {
         self.advanced_field("bug_file_loc", value.op, value);
     }
 
-    fn changed<'a, F, I>(&mut self, values: I)
+    fn changed<'a, F, I>(&mut self, values: I) -> crate::Result<()>
     where
-        F: Api,
+        F: AsRef<str>,
         I: IntoIterator<Item = (F, &'a RangeOrValue<TimeDeltaOrStatic>)>,
     {
         for (field, target) in values {
+            let field = ChangeField::from_str(field.as_ref())?;
             match target {
                 RangeOrValue::Value(value) => self.advanced_field(field, "changedafter", value),
                 RangeOrValue::RangeOp(value) => match value {
@@ -1391,43 +1394,50 @@ impl QueryBuilder<'_> {
                 },
             }
         }
+        Ok(())
     }
 
-    fn changed_by<F, I, J, S>(&mut self, values: I)
+    fn changed_by<F, I, J, S>(&mut self, values: I) -> crate::Result<()>
     where
-        F: Api,
+        F: AsRef<str>,
         I: IntoIterator<Item = (F, J)>,
         J: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
         for (field, users) in values {
+            let field = ChangeField::from_str(field.as_ref())?;
             for user in users {
                 let user = self.service.replace_user_alias(user.as_ref());
                 self.advanced_field(&field, "changedby", user);
             }
         }
+        Ok(())
     }
 
-    fn changed_from<'a, F, I, S>(&mut self, values: I)
+    fn changed_from<'a, F, I, S>(&mut self, values: I) -> crate::Result<()>
     where
-        F: Api + 'a,
+        F: AsRef<str> + 'a,
         I: IntoIterator<Item = &'a (F, S)>,
         S: Api + 'a,
     {
         for (field, value) in values {
+            let field = ChangeField::from_str(field.as_ref())?;
             self.advanced_field(field, "changedfrom", value);
         }
+        Ok(())
     }
 
-    fn changed_to<'a, F, I, S>(&mut self, values: I)
+    fn changed_to<'a, F, I, S>(&mut self, values: I) -> crate::Result<()>
     where
-        F: Api + 'a,
+        F: AsRef<str> + 'a,
         I: IntoIterator<Item = &'a (F, S)>,
         S: Api + 'a,
     {
         for (field, value) in values {
+            let field = ChangeField::from_str(field.as_ref())?;
             self.advanced_field(field, "changedto", value);
         }
+        Ok(())
     }
 
     fn custom_field<F: Api>(&mut self, name: F, value: &Match) {
@@ -1789,12 +1799,12 @@ impl Api for Order<OrderField> {
     }
 }
 
-/// Valid change fields.
+/// Valid static change fields.
 #[derive(
+    AsRefStr,
     Display,
     EnumIter,
     EnumString,
-    VariantNames,
     DeserializeFromStr,
     SerializeDisplay,
     Debug,
@@ -1804,7 +1814,7 @@ impl Api for Order<OrderField> {
     Copy,
 )]
 #[strum(serialize_all = "kebab-case")]
-pub enum ChangeField {
+pub enum StaticChangeField {
     Alias,
     Assignee,
     Blocks,
@@ -1831,7 +1841,7 @@ pub enum ChangeField {
     Whiteboard,
 }
 
-impl Api for ChangeField {
+impl Api for StaticChangeField {
     fn api(&self) -> String {
         let value = match self {
             Self::Alias => "alias",
@@ -1860,6 +1870,45 @@ impl Api for ChangeField {
             Self::Whiteboard => "status_whiteboard",
         };
         value.to_string()
+    }
+}
+
+/// Valid change fields.
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
+pub enum ChangeField {
+    Static(StaticChangeField),
+    Custom(String),
+}
+
+impl fmt::Display for ChangeField {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Static(value) => value.fmt(f),
+            Self::Custom(value) => value.fmt(f),
+        }
+    }
+}
+
+impl FromStr for ChangeField {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.starts_with("cf_") {
+            Ok(Self::Custom(s.to_string()))
+        } else {
+            s.parse()
+                .map(Self::Static)
+                .map_err(|_| Error::InvalidValue(format!("invalid change field: {s}")))
+        }
+    }
+}
+
+impl Api for ChangeField {
+    fn api(&self) -> String {
+        match self {
+            Self::Static(value) => value.api(),
+            Self::Custom(value) => value.api(),
+        }
     }
 }
 
@@ -2019,7 +2068,7 @@ mod tests {
         service.search().url(&matches).send().await.unwrap();
 
         // change related combinators
-        for field in ChangeField::iter() {
+        for field in StaticChangeField::iter() {
             // ever changed
             service.search().changed(field).send().await.unwrap();
 
