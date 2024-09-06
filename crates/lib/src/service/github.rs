@@ -30,7 +30,7 @@ impl Merge for Authentication {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
-    name: Option<String>,
+    pub name: String,
     #[serde(flatten)]
     pub auth: Authentication,
     #[serde(flatten)]
@@ -50,17 +50,19 @@ impl Config {
             client: Default::default(),
         })
     }
+}
 
-    pub fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    pub fn base(&self) -> &Url {
+impl WebClient for Config {
+    fn base(&self) -> &Url {
         &self.base
     }
 
-    pub fn kind(&self) -> ServiceKind {
+    fn kind(&self) -> ServiceKind {
         ServiceKind::Github
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 }
 
@@ -135,13 +137,17 @@ impl<'a> WebService<'a> for Service {
     }
 }
 
-impl<'a> WebClient<'a> for Service {
+impl WebClient for Service {
     fn base(&self) -> &Url {
         self.config.base()
     }
 
     fn kind(&self) -> ServiceKind {
         self.config.kind()
+    }
+
+    fn name(&self) -> &str {
+        self.config.name()
     }
 }
 

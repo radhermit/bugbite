@@ -1,5 +1,5 @@
+use std::env;
 use std::ops::Deref;
-use std::{env, fs};
 
 use camino::Utf8Path;
 use indexmap::IndexMap;
@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::service::{self, ServiceKind};
-use crate::traits::try_from_toml;
+use crate::traits::WebClient;
 use crate::utils::config_dir;
 use crate::Error;
 
@@ -17,8 +17,6 @@ static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.to
 /// Connection config support.
 #[derive(Deserialize, Serialize, Debug, Default)]
 pub struct Config(IndexMap<String, service::Config>);
-
-try_from_toml!(Config, "config");
 
 impl Config {
     /// Create a new Config.
@@ -38,17 +36,29 @@ impl Config {
         Ok(config)
     }
 
+    /// Add a connection config from a given path.
+    fn add_config(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        let config = service::Config::try_from_path(path)?;
+        if config.name().trim().is_empty() {
+            Err(Error::InvalidValue(format!(
+                "invalid connection name: {path}"
+            )))
+        } else {
+            self.0.insert(config.name().to_string(), config);
+            Ok(())
+        }
+    }
+
     /// Load connections from a given path, overriding any bundled matches.
     pub fn load<P: AsRef<Utf8Path>>(&mut self, path: P) -> crate::Result<()> {
         let path = path.as_ref();
-
         if path.is_dir() {
             for entry in path.read_dir_utf8()? {
                 let entry = entry?;
-                self.0.extend(Self::try_from(entry.path())?);
+                self.add_config(entry.path())?;
             }
         } else {
-            self.0.extend(Self::try_from(path)?);
+            self.add_config(path)?;
         }
 
         // re-sort by connection name
@@ -96,6 +106,8 @@ impl<'a> IntoIterator for &'a Config {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
     use tempfile::tempdir;
 
     use super::*;
@@ -119,20 +131,20 @@ mod tests {
 
         // create service files
         let service1 = indoc::indoc! {r#"
-            [new1]
             type = "bugzilla"
+            name = "new1"
             base = "https://random.bugzilla.site/"
         "#};
         fs::write("1.toml", service1).unwrap();
         let service2 = indoc::indoc! {r#"
-            [new2]
             type = "redmine"
+            name = "new2"
             base = "https://random.redmine.site/"
         "#};
         fs::write("2.toml", service2).unwrap();
         let gentoo = indoc::indoc! {r#"
-            [gentoo]
             type = "bugzilla"
+            name = "gentoo"
             base = "https://bugs.gentoo.org/"
             user = "user@email.com"
         "#};

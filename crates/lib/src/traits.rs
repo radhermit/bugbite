@@ -85,24 +85,6 @@ pub trait Merge {
     fn merge(&mut self, other: Self);
 }
 
-macro_rules! try_from_toml {
-    ($x:ty, $desc:expr) => {
-        impl TryFrom<&camino::Utf8Path> for $x {
-            type Error = $crate::Error;
-
-            fn try_from(path: &camino::Utf8Path) -> $crate::Result<Self> {
-                let data = fs::read_to_string(path).map_err(|e| {
-                    Error::InvalidValue(format!("failed loading {}: {path}: {e}", $desc))
-                })?;
-                toml::from_str(&data).map_err(|e| {
-                    Error::InvalidValue(format!("failed parsing {}: {path}: {e}", $desc))
-                })
-            }
-        }
-    };
-}
-pub(crate) use try_from_toml;
-
 pub trait RequestSend {
     type Output;
 
@@ -143,16 +125,24 @@ pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone {
 
 pub trait RequestTemplate: Serialize {
     type Template: for<'a> Deserialize<'a>;
+    type Service: WebClient;
+    const TYPE: &'static str;
 
-    fn config_path(&self, name: &str) -> Option<String>;
+    fn service(&self) -> &Self::Service;
+
+    /// Return the config path for a template file.
+    fn config_path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
+        let service_name = self.service().name();
+        if service_name.is_empty() {
+            Ok(Utf8PathBuf::from(name))
+        } else {
+            let path = format!("templates/{service_name}/{}/{name}", Self::TYPE);
+            config_dir().map(|x| x.join(path))
+        }
+    }
 
     fn load_template(&self, name: &str) -> crate::Result<Self::Template> {
-        let path = if let Some(path) = self.config_path(name) {
-            config_dir()?.join(path)
-        } else {
-            Utf8PathBuf::from(name)
-        };
-
+        let path = self.config_path(name)?;
         let data = fs::read_to_string(&path)
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         toml::from_str(&data)
@@ -165,12 +155,7 @@ pub trait RequestTemplate: Serialize {
         if name == "-" {
             write!(stdout(), "{data}")?;
         } else {
-            let path = if let Some(path) = self.config_path(name) {
-                config_dir()?.join(path)
-            } else {
-                Utf8PathBuf::from(name)
-            };
-
+            let path = self.config_path(name)?;
             fs::create_dir_all(path.parent().expect("invalid template path"))
                 .map_err(|e| Error::IO(format!("failed created template dir: {e}")))?;
             fs::write(&path, data)
@@ -213,9 +198,11 @@ pub(crate) trait WebService<'a>: fmt::Display {
     async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response>;
 }
 
-pub trait WebClient<'a> {
+pub trait WebClient {
     /// Return the base URL for a service.
     fn base(&self) -> &Url;
     /// Return the service variant.
     fn kind(&self) -> ServiceKind;
+    /// Return the connection name.
+    fn name(&self) -> &str;
 }

@@ -1,3 +1,3 @@
-[ruby]
 type = "redmine"
+name = "ruby"
 base = "https://bugs.ruby-lang.org/projects/ruby-master/"

@@ -8,7 +8,10 @@ fn bundle_services(path: &str) {
     let mut f = File::create(&out_path).unwrap();
     for entry in fs::read_dir(path).unwrap() {
         let entry = entry.unwrap();
-        let data = fs::read(entry.path()).unwrap();
+        let path = entry.path();
+        let data = fs::read(&path).unwrap();
+        let name = path.file_stem().unwrap().to_str().unwrap();
+        writeln!(f, "[{name}]").unwrap();
         f.write_all(&data).unwrap();
     }
 }

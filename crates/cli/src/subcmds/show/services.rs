@@ -3,6 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::config::Config;
 use bugbite::service::ServiceKind;
+use bugbite::traits::WebClient;
 use clap::Args;
 use indexmap::IndexMap;
 use itertools::Itertools;

@@ -39,12 +39,11 @@ impl RequestSend for Request<'_> {
 
 impl RequestTemplate for Request<'_> {
     type Template = Parameters;
+    type Service = Service;
+    const TYPE: &'static str = "create";
 
-    fn config_path(&self, name: &str) -> Option<String> {
+    fn service(&self) -> &Self::Service {
         self.service
-            .config
-            .name()
-            .map(|x| format!("templates/{x}/create/{name}"))
     }
 }
 

@@ -34,7 +34,7 @@ impl Merge for Authentication {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
-    name: Option<String>,
+    pub name: String,
     #[serde(skip)]
     web_base: Option<Url>,
     #[serde(flatten)]
@@ -78,23 +78,23 @@ impl Config {
         }
     }
 
-    pub fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    /// Return the base URL for the service.
-    pub fn base(&self) -> &Url {
-        &self.base
-    }
-
     /// Return the base URL for the service, removing any project subpath if it exists.
     pub fn web_base(&self) -> &Url {
         self.web_base.as_ref().unwrap_or(&self.base)
     }
+}
 
-    /// Return the service variant.
-    pub fn kind(&self) -> ServiceKind {
+impl WebClient for Config {
+    fn base(&self) -> &Url {
+        &self.base
+    }
+
+    fn kind(&self) -> ServiceKind {
         ServiceKind::Redmine
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 }
 
@@ -208,13 +208,17 @@ impl<'a> WebService<'a> for Service {
     }
 }
 
-impl<'a> WebClient<'a> for Service {
+impl WebClient for Service {
     fn base(&self) -> &Url {
         self.config.base()
     }
 
     fn kind(&self) -> ServiceKind {
         self.config.kind()
+    }
+
+    fn name(&self) -> &str {
+        self.config.name()
     }
 }
 

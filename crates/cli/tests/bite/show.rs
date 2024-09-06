@@ -35,8 +35,8 @@ fn custom_config() {
     let file = dir.join("config");
     let file_path = file.to_str().unwrap();
     let config = indoc::indoc! {r#"
-        [bugzilla-test]
         type = "bugzilla"
+        name = "bugzilla-test"
         base = "http://127.0.0.1:8080/"
     "#};
     fs::write(file_path, config).unwrap();

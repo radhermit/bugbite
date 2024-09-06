@@ -7,18 +7,19 @@ use tracing::debug;
 
 use crate::objects::github::Issue;
 use crate::query::{Order, Query};
+use crate::service::github::Service;
 use crate::traits::{Api, Merge, MergeOption, RequestSend, RequestTemplate};
 
 #[derive(Serialize, Debug)]
 pub struct Request<'a> {
     #[serde(skip)]
-    service: &'a super::Service,
+    service: &'a Service,
     #[serde(flatten)]
     pub params: Parameters,
 }
 
 impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a super::Service) -> Self {
+    pub(super) fn new(service: &'a Service) -> Self {
         Self {
             service,
             params: Default::default(),
@@ -53,17 +54,16 @@ impl RequestSend for Request<'_> {
 
 impl RequestTemplate for Request<'_> {
     type Template = Parameters;
+    type Service = Service;
+    const TYPE: &'static str = "search";
 
-    fn config_path(&self, name: &str) -> Option<String> {
+    fn service(&self) -> &Self::Service {
         self.service
-            .config
-            .name()
-            .map(|x| format!("templates/{x}/search/{name}"))
     }
 }
 
 struct QueryBuilder<'a> {
-    _service: &'a super::Service,
+    _service: &'a Service,
     query: Query,
 }
 
@@ -82,7 +82,7 @@ impl DerefMut for QueryBuilder<'_> {
 }
 
 impl<'a> QueryBuilder<'a> {
-    fn new(_service: &'a super::Service) -> Self {
+    fn new(_service: &'a Service) -> Self {
         Self {
             _service,
             query: Default::default(),

@@ -1,7 +1,7 @@
 use std::time::Duration;
 use std::{fmt, fs};
 
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use enum_as_inner::EnumAsInner;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
@@ -71,15 +71,16 @@ impl Config {
         Ok(config)
     }
 
-    pub fn name(&self) -> Option<&str> {
-        match self {
-            Self::Bugzilla(config) => config.name(),
-            Self::Github(config) => config.name(),
-            Self::Redmine(config) => config.name(),
-        }
+    pub(super) fn try_from_path(path: &Utf8Path) -> crate::Result<Self> {
+        let data = fs::read_to_string(path)
+            .map_err(|e| Error::InvalidValue(format!("failed loading config: {path}: {e}")))?;
+        toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing config: {path}: {e}")))
     }
+}
 
-    pub fn base(&self) -> &Url {
+impl WebClient for Config {
+    fn base(&self) -> &Url {
         match self {
             Self::Bugzilla(config) => config.base(),
             Self::Github(config) => config.base(),
@@ -87,18 +88,20 @@ impl Config {
         }
     }
 
-    pub fn kind(&self) -> ServiceKind {
+    fn kind(&self) -> ServiceKind {
         match self {
             Self::Bugzilla(config) => config.kind(),
             Self::Github(config) => config.kind(),
             Self::Redmine(config) => config.kind(),
         }
     }
-}
 
-impl fmt::Display for Config {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} -- {}", self.kind(), self.base())
+    fn name(&self) -> &str {
+        match self {
+            Self::Bugzilla(config) => config.name(),
+            Self::Github(config) => config.name(),
+            Self::Redmine(config) => config.name(),
+        }
     }
 }
 
@@ -152,8 +155,8 @@ pub enum Service {
     Redmine(redmine::Service),
 }
 
-impl Service {
-    pub fn base(&self) -> &Url {
+impl WebClient for Service {
+    fn base(&self) -> &Url {
         match self {
             Self::Bugzilla(service) => service.base(),
             Self::Github(service) => service.base(),
@@ -161,11 +164,19 @@ impl Service {
         }
     }
 
-    pub fn kind(&self) -> ServiceKind {
+    fn kind(&self) -> ServiceKind {
         match self {
             Self::Bugzilla(service) => service.kind(),
             Self::Github(service) => service.kind(),
             Self::Redmine(service) => service.kind(),
+        }
+    }
+
+    fn name(&self) -> &str {
+        match self {
+            Self::Bugzilla(service) => service.name(),
+            Self::Github(service) => service.name(),
+            Self::Redmine(service) => service.name(),
         }
     }
 }

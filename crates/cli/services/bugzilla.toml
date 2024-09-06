@@ -1,5 +1,5 @@
-[bugzilla]
 type = "bugzilla"
+name = "bugzilla-test"
 base = "http://127.0.0.1:8080/"
 user = "bugbite@bugbite.test"
 password = "bugbite"
