@@ -9,7 +9,7 @@ use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange};
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::{Merge, RequestSend};
+use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
@@ -377,7 +377,7 @@ impl Command {
 
         // read attributes from template
         if let Some(path) = self.options.from.as_deref() {
-            request.params.merge(Parameters::try_from(path)?);
+            request.params.merge_template(path)?;
         }
 
         // command line parameters override template
@@ -386,8 +386,7 @@ impl Command {
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                let data = toml::to_string(&request)?;
-                fs::write(path, data).context("failed writing template")?;
+                request.params.save_template(path)?;
             }
         }
 

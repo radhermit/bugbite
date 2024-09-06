@@ -1,4 +1,4 @@
-use std::{fmt, fs};
+use std::fmt;
 
 use indexmap::IndexMap;
 use itertools::Itertools;
@@ -7,14 +7,12 @@ use serde_with::skip_serializing_none;
 
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Service;
-use crate::traits::{try_from_toml, InjectAuth, Merge, MergeOption, RequestSend, WebService};
+use crate::traits::{InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService};
 use crate::Error;
 
-#[derive(Serialize, Debug)]
+#[derive(Debug)]
 pub struct Request<'a> {
-    #[serde(skip)]
     service: &'a Service,
-    #[serde(flatten)]
     pub params: Parameters,
 }
 
@@ -364,7 +362,7 @@ pub struct Parameters {
     pub custom_fields: Option<IndexMap<String, String>>,
 }
 
-try_from_toml!(Parameters, "template");
+impl RequestTemplate for Parameters {}
 
 impl Merge for Parameters {
     fn merge(&mut self, other: Self) {

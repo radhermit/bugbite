@@ -1,13 +1,16 @@
 use std::borrow::Cow;
-use std::fmt;
 use std::future::Future;
+use std::{fmt, fs};
 
 use async_stream::try_stream;
+use camino::Utf8Path;
 use futures_util::Stream;
 use reqwest::RequestBuilder;
+use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::service::ServiceKind;
+use crate::Error;
 
 /// Return true if a type contains a given object, otherwise false.
 pub trait Contains<T> {
@@ -133,6 +136,25 @@ pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone {
                 }
             }
         }
+    }
+}
+
+pub trait RequestTemplate: for<'a> Deserialize<'a> + Serialize + Merge {
+    fn merge_template(&mut self, path: &Utf8Path) -> crate::Result<()> {
+        let data = fs::read_to_string(path)
+            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
+        let params = toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))?;
+        self.merge(params);
+        Ok(())
+    }
+
+    fn save_template(&self, path: &Utf8Path) -> crate::Result<()> {
+        let data = toml::to_string(self)
+            .map_err(|e| Error::InvalidValue(format!("failed serializing request: {e}")))?;
+        fs::write(path, data)
+            .map_err(|e| Error::IO(format!("failed saving template: {path}: {e}")))?;
+        Ok(())
     }
 }
 

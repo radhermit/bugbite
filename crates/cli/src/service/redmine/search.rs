@@ -1,8 +1,6 @@
-use std::fs;
 use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
-use anyhow::Context;
 use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
 use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
@@ -10,7 +8,7 @@ use bugbite::service::redmine::search::{OrderField, Parameters};
 use bugbite::service::redmine::IssueField;
 use bugbite::service::redmine::Service;
 use bugbite::time::TimeDeltaOrStatic;
-use bugbite::traits::{Merge, RequestStream};
+use bugbite::traits::{Merge, RequestStream, RequestTemplate};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
 
@@ -219,7 +217,7 @@ impl Command {
 
         // read attributes from template
         if let Some(path) = self.options.from.as_deref() {
-            request.params.merge(Parameters::try_from(path)?);
+            request.params.merge_template(path)?;
         }
 
         // command line parameters override template
@@ -229,8 +227,7 @@ impl Command {
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                let data = toml::to_string(&request)?;
-                fs::write(path, data).context("failed writing template")?;
+                request.params.save_template(path)?;
             }
         }
 

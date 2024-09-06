@@ -1,5 +1,5 @@
+use std::fmt;
 use std::ops::{Deref, DerefMut};
-use std::{fmt, fs};
 
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -14,15 +14,13 @@ use crate::query::{Order, Query};
 use crate::service::redmine::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
-    try_from_toml, Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, WebService,
+    Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, RequestTemplate, WebService,
 };
 use crate::Error;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct Request<'a> {
-    #[serde(skip)]
     service: &'a Service,
-    #[serde(flatten)]
     pub params: Parameters,
 }
 
@@ -202,7 +200,7 @@ pub struct Parameters {
     pub summary: Option<Vec<String>>,
 }
 
-try_from_toml!(Parameters, "template");
+impl RequestTemplate for Parameters {}
 
 impl Merge for Parameters {
     fn merge(&mut self, other: Self) {

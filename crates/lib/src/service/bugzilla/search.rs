@@ -1,7 +1,7 @@
 use std::collections::HashSet;
+use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
-use std::{fmt, fs};
 
 use indexmap::IndexSet;
 use itertools::Itertools;
@@ -17,17 +17,15 @@ use crate::query::{Order, Query};
 use crate::service::bugzilla::Service;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
-    try_from_toml, Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, WebService,
+    Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, RequestTemplate, WebService,
 };
 use crate::Error;
 
 use super::{BugField, FilterField};
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct Request<'a> {
-    #[serde(skip)]
     service: &'a Service,
-    #[serde(flatten)]
     pub params: Parameters,
 }
 
@@ -904,7 +902,7 @@ pub struct Parameters {
     pub custom_fields: Option<Vec<(String, ExistsOrValues<Match>)>>,
 }
 
-try_from_toml!(Parameters, "template");
+impl RequestTemplate for Parameters {}
 
 impl Merge for Parameters {
     fn merge(&mut self, other: Self) {

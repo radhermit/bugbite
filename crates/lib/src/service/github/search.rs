@@ -1,4 +1,3 @@
-use std::fs;
 use std::ops::{Deref, DerefMut};
 
 use serde::{Deserialize, Serialize};
@@ -8,79 +7,7 @@ use tracing::debug;
 
 use crate::objects::github::Issue;
 use crate::query::{Order, Query};
-use crate::traits::{try_from_toml, Api, Merge, MergeOption, RequestSend};
-use crate::Error;
-
-struct QueryBuilder<'a> {
-    _service: &'a super::Service,
-    query: Query,
-}
-
-impl Deref for QueryBuilder<'_> {
-    type Target = Query;
-
-    fn deref(&self) -> &Self::Target {
-        &self.query
-    }
-}
-
-impl DerefMut for QueryBuilder<'_> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.query
-    }
-}
-
-impl<'a> QueryBuilder<'a> {
-    fn new(_service: &'a super::Service) -> Self {
-        Self {
-            _service,
-            query: Default::default(),
-        }
-    }
-}
-
-/// Issue search parameters.
-#[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
-pub struct Parameters {
-    pub order: Option<Order<OrderField>>,
-}
-
-try_from_toml!(Parameters, "template");
-
-impl Merge for Parameters {
-    fn merge(&mut self, other: Self) {
-        *self = Self {
-            order: self.order.merge(other.order),
-        }
-    }
-}
-
-/// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, Debug, Clone)]
-#[strum(serialize_all = "kebab-case")]
-pub enum OrderField {
-    Comments,
-    Created,
-    Interactions,
-    Reactions,
-    Updated,
-}
-
-impl Api for OrderField {
-    fn api(&self) -> String {
-        self.to_string()
-    }
-}
-
-impl Api for Order<OrderField> {
-    fn api(&self) -> String {
-        match self {
-            Order::Ascending(field) => field.api(),
-            Order::Descending(field) => format!("-{}", field.api()),
-        }
-    }
-}
+use crate::traits::{Api, Merge, MergeOption, RequestSend, RequestTemplate};
 
 #[derive(Debug)]
 pub struct Request<'a> {
@@ -119,5 +46,76 @@ impl RequestSend for Request<'_> {
         debug!("{:?}", self.params);
         let _params = self.encode()?;
         todo!("search requests unsupported")
+    }
+}
+
+struct QueryBuilder<'a> {
+    _service: &'a super::Service,
+    query: Query,
+}
+
+impl Deref for QueryBuilder<'_> {
+    type Target = Query;
+
+    fn deref(&self) -> &Self::Target {
+        &self.query
+    }
+}
+
+impl DerefMut for QueryBuilder<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.query
+    }
+}
+
+impl<'a> QueryBuilder<'a> {
+    fn new(_service: &'a super::Service) -> Self {
+        Self {
+            _service,
+            query: Default::default(),
+        }
+    }
+}
+
+/// Issue search parameters.
+#[skip_serializing_none]
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+pub struct Parameters {
+    pub order: Option<Order<OrderField>>,
+}
+
+impl RequestTemplate for Parameters {}
+
+impl Merge for Parameters {
+    fn merge(&mut self, other: Self) {
+        *self = Self {
+            order: self.order.merge(other.order),
+        }
+    }
+}
+
+/// Valid search order sorting terms.
+#[derive(Display, EnumIter, EnumString, Debug, Clone)]
+#[strum(serialize_all = "kebab-case")]
+pub enum OrderField {
+    Comments,
+    Created,
+    Interactions,
+    Reactions,
+    Updated,
+}
+
+impl Api for OrderField {
+    fn api(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl Api for Order<OrderField> {
+    fn api(&self) -> String {
+        match self {
+            Order::Ascending(field) => field.api(),
+            Order::Descending(field) => format!("-{}", field.api()),
+        }
     }
 }

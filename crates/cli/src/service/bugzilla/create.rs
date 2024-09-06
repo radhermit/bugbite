@@ -1,13 +1,11 @@
-use std::fs;
 use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
-use anyhow::Context;
 use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::create::Parameters;
 use bugbite::service::bugzilla::Service;
-use bugbite::traits::{Merge, RequestSend};
+use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use bugbite::utils::is_terminal;
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
@@ -214,7 +212,7 @@ impl Command {
 
         // merge attributes from template or bug
         if let Some(path) = self.options.from.as_deref() {
-            request.params.merge(Parameters::try_from(path)?);
+            request.params.merge_template(path)?;
         } else if let Some(id) = self.options.from_bug {
             let bug = service
                 .get([id])
@@ -232,8 +230,7 @@ impl Command {
         // write attributes to template
         if let Some(path) = self.options.to.as_ref() {
             if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                let data = toml::to_string(&request)?;
-                fs::write(path, data).context("failed writing template")?;
+                request.params.save_template(path)?;
             }
         }
 

@@ -14,7 +14,7 @@ use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Service;
 use crate::traits::{
-    try_from_toml, Contains, InjectAuth, Merge, MergeOption, RequestSend, WebService,
+    Contains, InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService,
 };
 use crate::Error;
 
@@ -113,13 +113,10 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Debug)]
 pub struct Request<'a> {
-    #[serde(skip)]
     service: &'a Service,
-    #[serde(skip)]
     pub ids: Vec<String>,
-    #[serde(flatten)]
     pub params: Parameters,
 }
 
@@ -467,7 +464,7 @@ pub struct Parameters {
     pub custom_fields: Option<IndexMap<String, String>>,
 }
 
-try_from_toml!(Parameters, "template");
+impl RequestTemplate for Parameters {}
 
 impl Merge for Parameters {
     fn merge(&mut self, other: Self) {
