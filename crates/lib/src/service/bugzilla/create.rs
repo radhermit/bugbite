@@ -1,5 +1,6 @@
 use std::fmt;
 
+use camino::Utf8PathBuf;
 use indexmap::IndexMap;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -8,11 +9,14 @@ use serde_with::skip_serializing_none;
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService};
+use crate::utils::config_dir;
 use crate::Error;
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct Request<'a> {
+    #[serde(skip)]
     service: &'a Service,
+    #[serde(flatten)]
     pub params: Parameters,
 }
 
@@ -32,6 +36,19 @@ impl RequestSend for Request<'_> {
         let mut data = self.service.parse_response(response).await?;
         serde_json::from_value(data["id"].take())
             .map_err(|e| Error::InvalidResponse(format!("failed deserializing id: {e}")))
+    }
+}
+
+impl RequestTemplate for Request<'_> {
+    type Template = Parameters;
+
+    fn path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
+        if let Some(service_name) = self.service.config.name() {
+            let path = format!("templates/{service_name}/create/{name}");
+            config_dir().map(|x| x.join(path))
+        } else {
+            Ok(Utf8PathBuf::from(name))
+        }
     }
 }
 
@@ -361,8 +378,6 @@ pub struct Parameters {
     #[serde(flatten)]
     pub custom_fields: Option<IndexMap<String, String>>,
 }
-
-impl RequestTemplate for Parameters {}
 
 impl Merge for Parameters {
     fn merge(&mut self, other: Self) {

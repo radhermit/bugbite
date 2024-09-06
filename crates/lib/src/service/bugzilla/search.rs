@@ -3,6 +3,7 @@ use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
+use camino::Utf8PathBuf;
 use indexmap::IndexSet;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -19,13 +20,16 @@ use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
     Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, RequestTemplate, WebService,
 };
+use crate::utils::config_dir;
 use crate::Error;
 
 use super::{BugField, FilterField};
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct Request<'a> {
+    #[serde(skip)]
     service: &'a Service,
+    #[serde(flatten)]
     pub params: Parameters,
 }
 
@@ -71,6 +75,19 @@ impl RequestStream for Request<'_> {
     fn next_page(&mut self, size: usize) {
         // TODO: move to get_or_insert_default() when it is stable
         *self.params.offset.get_or_insert_with(Default::default) += size;
+    }
+}
+
+impl RequestTemplate for Request<'_> {
+    type Template = Parameters;
+
+    fn path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
+        if let Some(service_name) = self.service.config.name() {
+            let path = format!("templates/{service_name}/search/{name}");
+            config_dir().map(|x| x.join(path))
+        } else {
+            Ok(Utf8PathBuf::from(name))
+        }
     }
 }
 
@@ -901,8 +918,6 @@ pub struct Parameters {
     pub quicksearch: Option<String>,
     pub custom_fields: Option<Vec<(String, ExistsOrValues<Match>)>>,
 }
-
-impl RequestTemplate for Parameters {}
 
 impl Merge for Parameters {
     fn merge(&mut self, other: Self) {

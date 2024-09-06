@@ -169,20 +169,6 @@ async fn template() {
         .stderr("")
         .success();
 
-    // overriding existing template
-    for input in ["y\n", "Y\n"] {
-        default_cmd!()
-            .arg("-n")
-            .args(["--to", path])
-            .write_stdin(input)
-            .assert()
-            .stdout("")
-            .stderr(
-                predicate::str::diff(format!("template exists: {path}, overwrite? (y/N):")).trim(),
-            )
-            .success();
-    }
-
     server
         .respond(200, TEST_DATA.join("create/creation.json"))
         .await;

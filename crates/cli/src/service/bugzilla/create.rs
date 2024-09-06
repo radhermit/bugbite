@@ -7,11 +7,11 @@ use bugbite::service::bugzilla::create::Parameters;
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use bugbite::utils::is_terminal;
-use camino::Utf8PathBuf;
-use clap::{Args, ValueHint};
+use clap::Args;
 use itertools::Itertools;
 
-use crate::utils::{confirm, prefix, verbose};
+use crate::service::TemplateOptions;
+use crate::utils::{prefix, verbose};
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
@@ -172,32 +172,18 @@ pub(super) struct Options {
     #[arg(short = 'n', long)]
     dry_run: bool,
 
-    /// read attributes from template
-    #[arg(
-        long,
-        value_name = "PATH",
-        value_hint = ValueHint::FilePath,
-        conflicts_with = "from_bug",
-    )]
-    from: Option<Utf8PathBuf>,
-
     /// read attributes from an existing bug
     #[arg(long, value_name = "ID", conflicts_with = "from")]
     from_bug: Option<String>,
-
-    /// write attributes to template
-    #[arg(
-        long,
-        value_name = "PATH",
-        value_hint = ValueHint::FilePath,
-    )]
-    to: Option<Utf8PathBuf>,
 }
 
 #[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
+
+    #[clap(flatten)]
+    template: TemplateOptions,
 
     #[clap(flatten)]
     params: Params,
@@ -211,8 +197,9 @@ impl Command {
         let mut request = service.create();
 
         // merge attributes from template or bug
-        if let Some(path) = self.options.from.as_deref() {
-            request.params.merge_template(path)?;
+        if let Some(name) = self.template.from.as_deref() {
+            let params = request.load_template(name)?;
+            request.params.merge(params);
         } else if let Some(id) = self.options.from_bug {
             let bug = service
                 .get([id])
@@ -228,10 +215,8 @@ impl Command {
         request.params.merge(self.params.into());
 
         // write attributes to template
-        if let Some(path) = self.options.to.as_ref() {
-            if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                request.params.save_template(path)?;
-            }
+        if let Some(name) = self.template.to.as_deref() {
+            request.save_template(name)?;
         }
 
         if !self.options.dry_run {

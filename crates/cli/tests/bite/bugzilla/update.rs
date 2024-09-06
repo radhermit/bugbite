@@ -107,20 +107,6 @@ async fn template() {
         .stderr("")
         .success();
 
-    // overriding existing template
-    for input in ["y\n", "Y\n"] {
-        cmd("bite bugzilla update -n")
-            .args(["--summary", "new summary"])
-            .args(["--to", path])
-            .write_stdin(input)
-            .assert()
-            .stdout("")
-            .stderr(
-                predicate::str::diff(format!("template exists: {path}, overwrite? (y/N):")).trim(),
-            )
-            .success();
-    }
-
     server
         .respond(200, TEST_DATA.join("update/summary.json"))
         .await;

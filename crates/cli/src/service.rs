@@ -2,6 +2,7 @@ use std::io::{self, IsTerminal, Write};
 
 use bugbite::service::ClientParameters;
 use camino::Utf8PathBuf;
+use clap::Args;
 
 // output and rendering support
 pub(crate) mod output;
@@ -16,7 +17,7 @@ pub(crate) trait Render<T> {
     fn render<W: IsTerminal + Write>(&self, item: T, f: &mut W, width: usize) -> io::Result<()>;
 }
 
-#[derive(clap::Args, Debug)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Service options")]
 struct ServiceOptions {
     /// service connection
@@ -49,4 +50,16 @@ impl From<ServiceOptions> for ClientParameters {
             timeout: value.timeout,
         }
     }
+}
+
+#[derive(Args, Debug)]
+#[clap(next_help_heading = "Template options")]
+pub(super) struct TemplateOptions {
+    /// read attributes from template
+    #[arg(long, value_name = "NAME")]
+    from: Option<String>,
+
+    /// write attributes to template
+    #[arg(long, value_name = "NAME")]
+    to: Option<String>,
 }

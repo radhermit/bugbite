@@ -15,6 +15,7 @@ use clap::{Args, ValueHint};
 use itertools::Itertools;
 use tempfile::NamedTempFile;
 
+use crate::service::TemplateOptions;
 use crate::utils::{confirm, launch_editor, prefix, verbose};
 
 #[derive(Clone, Debug)]
@@ -279,28 +280,15 @@ pub(super) struct Options {
         conflicts_with_all = ["comment", "comment_from"],
     )]
     reply: Option<Vec<usize>>,
-
-    /// read attributes from template
-    #[arg(
-        long,
-        value_name = "PATH",
-        value_hint = ValueHint::FilePath,
-    )]
-    from: Option<Utf8PathBuf>,
-
-    /// write attributes to template
-    #[arg(
-        long,
-        value_name = "PATH",
-        value_hint = ValueHint::FilePath,
-    )]
-    to: Option<Utf8PathBuf>,
 }
 
 #[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
+
+    #[clap(flatten)]
+    template: TemplateOptions,
 
     #[clap(flatten)]
     params: Params,
@@ -376,18 +364,17 @@ impl Command {
         let mut request = service.update(ids);
 
         // read attributes from template
-        if let Some(path) = self.options.from.as_deref() {
-            request.params.merge_template(path)?;
+        if let Some(name) = self.template.from.as_deref() {
+            let params = request.load_template(name)?;
+            request.params.merge(params);
         }
 
         // command line parameters override template
         request.params.merge(self.params.into());
 
         // write attributes to template
-        if let Some(path) = self.options.to.as_ref() {
-            if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                request.params.save_template(path)?;
-            }
+        if let Some(name) = self.template.to.as_deref() {
+            request.save_template(name)?;
         }
 
         // interactively create reply or comment

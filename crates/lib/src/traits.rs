@@ -1,9 +1,10 @@
 use std::borrow::Cow;
 use std::future::Future;
+use std::io::{stdout, Write};
 use std::{fmt, fs};
 
 use async_stream::try_stream;
-use camino::Utf8Path;
+use camino::Utf8PathBuf;
 use futures_util::Stream;
 use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
@@ -139,21 +140,31 @@ pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone {
     }
 }
 
-pub trait RequestTemplate: for<'a> Deserialize<'a> + Serialize + Merge {
-    fn merge_template(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        let data = fs::read_to_string(path)
+pub trait RequestTemplate: Serialize {
+    type Template: for<'a> Deserialize<'a>;
+
+    fn path(&self, name: &str) -> crate::Result<Utf8PathBuf>;
+
+    fn load_template(&self, name: &str) -> crate::Result<Self::Template> {
+        let path = self.path(name)?;
+        let data = fs::read_to_string(&path)
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
-        let params = toml::from_str(&data)
-            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))?;
-        self.merge(params);
-        Ok(())
+        toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
     }
 
-    fn save_template(&self, path: &Utf8Path) -> crate::Result<()> {
+    fn save_template(&self, name: &str) -> crate::Result<()> {
         let data = toml::to_string(self)
             .map_err(|e| Error::InvalidValue(format!("failed serializing template: {e}")))?;
-        fs::write(path, data)
-            .map_err(|e| Error::IO(format!("failed saving template: {path}: {e}")))?;
+        if name == "-" {
+            write!(stdout(), "{data}")?;
+        } else {
+            let path = self.path(name)?;
+            fs::create_dir_all(path.parent().expect("invalid template path"))
+                .map_err(|e| Error::IO(format!("failed created template dir: {e}")))?;
+            fs::write(&path, data)
+                .map_err(|e| Error::IO(format!("failed saving template: {path}: {e}")))?;
+        }
         Ok(())
     }
 }

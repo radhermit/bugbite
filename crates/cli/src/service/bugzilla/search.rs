@@ -12,11 +12,11 @@ use bugbite::service::bugzilla::{
 };
 use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::{Merge, RequestStream, RequestTemplate};
-use camino::Utf8PathBuf;
-use clap::{Args, ValueHint};
+use clap::Args;
 
 use crate::service::output::render_search;
-use crate::utils::{confirm, launch_browser, prefix};
+use crate::service::TemplateOptions;
+use crate::utils::{launch_browser, prefix};
 
 #[derive(Clone, Debug)]
 struct ExistsOrMatches(ExistsOrValues<Match>);
@@ -653,28 +653,15 @@ pub(super) struct Options {
     /// output in JSON format
     #[arg(long)]
     json: bool,
-
-    /// read attributes from template
-    #[arg(
-        long,
-        value_name = "PATH",
-        value_hint = ValueHint::FilePath,
-    )]
-    from: Option<Utf8PathBuf>,
-
-    /// write attributes to template
-    #[arg(
-        long,
-        value_name = "PATH",
-        value_hint = ValueHint::FilePath,
-    )]
-    to: Option<Utf8PathBuf>,
 }
 
 #[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
+
+    #[clap(flatten)]
+    template: TemplateOptions,
 
     #[clap(flatten)]
     params: Params,
@@ -688,8 +675,9 @@ impl Command {
         let mut request = service.search();
 
         // read attributes from template
-        if let Some(path) = self.options.from.as_deref() {
-            request.params.merge_template(path)?;
+        if let Some(name) = self.template.from.as_deref() {
+            let params = request.load_template(name)?;
+            request.params.merge(params);
         }
 
         // command line parameters override template
@@ -697,10 +685,8 @@ impl Command {
         request.params.merge(self.params.into());
 
         // write attributes to template
-        if let Some(path) = self.options.to.as_ref() {
-            if !path.exists() || confirm(format!("template exists: {path}, overwrite?"), false)? {
-                request.params.save_template(path)?;
-            }
+        if let Some(name) = self.template.to.as_deref() {
+            request.save_template(name)?;
         }
 
         if self.options.browser {

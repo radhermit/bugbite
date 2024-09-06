@@ -1,5 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
+use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString};
@@ -8,10 +9,13 @@ use tracing::debug;
 use crate::objects::github::Issue;
 use crate::query::{Order, Query};
 use crate::traits::{Api, Merge, MergeOption, RequestSend, RequestTemplate};
+use crate::utils::config_dir;
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct Request<'a> {
+    #[serde(skip)]
     service: &'a super::Service,
+    #[serde(flatten)]
     pub params: Parameters,
 }
 
@@ -49,6 +53,19 @@ impl RequestSend for Request<'_> {
     }
 }
 
+impl RequestTemplate for Request<'_> {
+    type Template = Parameters;
+
+    fn path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
+        if let Some(service_name) = self.service.config.name() {
+            let path = format!("templates/{service_name}/search/{name}");
+            config_dir().map(|x| x.join(path))
+        } else {
+            Ok(Utf8PathBuf::from(name))
+        }
+    }
+}
+
 struct QueryBuilder<'a> {
     _service: &'a super::Service,
     query: Query,
@@ -83,8 +100,6 @@ impl<'a> QueryBuilder<'a> {
 pub struct Parameters {
     pub order: Option<Order<OrderField>>,
 }
-
-impl RequestTemplate for Parameters {}
 
 impl Merge for Parameters {
     fn merge(&mut self, other: Self) {
