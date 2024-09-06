@@ -1348,46 +1348,68 @@ impl QueryBuilder<'_> {
         I: IntoIterator<Item = (F, &'a RangeOrValue<TimeDeltaOrStatic>)>,
     {
         for (field, target) in values {
-            let field = ChangeField::from_str(field.as_ref())?;
+            let (status, field) = ChangeField::invertable(field)?;
             match target {
-                RangeOrValue::Value(value) => self.advanced_field(field, "changedafter", value),
+                RangeOrValue::Value(value) => self.not(status, |query| {
+                    query.advanced_field(field, "changedafter", value)
+                }),
                 RangeOrValue::RangeOp(value) => match value {
                     RangeOp::Less(value) => {
-                        self.advanced_field(field, "changedbefore", value);
+                        self.not(status, |query| {
+                            query.advanced_field(field, "changedbefore", value)
+                        });
                     }
                     RangeOp::LessOrEqual(value) => {
-                        self.advanced_field(field, "changedbefore", value);
+                        self.not(status, |query| {
+                            query.advanced_field(field, "changedbefore", value)
+                        });
                     }
                     RangeOp::Equal(value) => {
-                        self.advanced_field(field, "equals", value);
+                        self.not(status, |query| query.advanced_field(field, "equals", value));
                     }
                     RangeOp::NotEqual(value) => {
-                        self.advanced_field(field, "notequals", value);
+                        self.not(status, |query| {
+                            query.advanced_field(field, "notequals", value)
+                        });
                     }
                     RangeOp::GreaterOrEqual(value) => {
-                        self.advanced_field(field, "changedafter", value);
+                        self.not(status, |query| {
+                            query.advanced_field(field, "changedafter", value);
+                        });
                     }
                     RangeOp::Greater(value) => {
-                        self.advanced_field(field, "changedafter", value);
+                        self.not(status, |query| {
+                            query.advanced_field(field, "changedafter", value);
+                        });
                     }
                 },
                 RangeOrValue::Range(value) => match value {
                     Range::Range(r) => {
-                        self.advanced_field(&field, "changedafter", &r.start);
-                        self.advanced_field(&field, "changedbefore", &r.end);
+                        self.not(status, |query| {
+                            query.advanced_field(&field, "changedafter", &r.start);
+                            query.advanced_field(&field, "changedbefore", &r.end);
+                        });
                     }
                     Range::Inclusive(r) => {
-                        self.advanced_field(&field, "changedafter", r.start());
-                        self.advanced_field(&field, "changedbefore", r.end());
+                        self.not(status, |query| {
+                            query.advanced_field(&field, "changedafter", r.start());
+                            query.advanced_field(&field, "changedbefore", r.end());
+                        });
                     }
                     Range::To(r) => {
-                        self.advanced_field(field, "changedbefore", &r.end);
+                        self.not(status, |query| {
+                            query.advanced_field(field, "changedbefore", &r.end)
+                        });
                     }
                     Range::ToInclusive(r) => {
-                        self.advanced_field(field, "changedbefore", &r.end);
+                        self.not(status, |query| {
+                            query.advanced_field(field, "changedbefore", &r.end);
+                        });
                     }
                     Range::From(r) => {
-                        self.advanced_field(field, "changedafter", &r.start);
+                        self.not(status, |query| {
+                            query.advanced_field(field, "changedafter", &r.start);
+                        });
                     }
                     Range::Full(_) => (),
                 },
@@ -1911,6 +1933,17 @@ impl Api for ChangeField {
         match self {
             Self::Static(value) => value.api(),
             Self::Custom(value) => value.api(),
+        }
+    }
+}
+
+impl ChangeField {
+    /// Parse invertable values, prefixing a field name with `!` inverts a query.
+    fn invertable<S: AsRef<str>>(field: S) -> crate::Result<(bool, Self)> {
+        let field = field.as_ref();
+        match field.strip_prefix('!') {
+            Some(value) => Ok((true, ChangeField::from_str(value)?)),
+            None => Ok((false, ChangeField::from_str(field)?)),
         }
     }
 }

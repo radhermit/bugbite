@@ -662,10 +662,13 @@ the overall comment count shown by the `get` or `comment` subcommands.
     Restrict by fields changed within a time interval.
 +
 By default, this will match any change to the specified fields if no time interval is
-given.
+given. Queries can be inverted per field by prefixing the field name with `!`.
 +
-.Summary has been changed:
+.Summary changed:
  bite bugzilla search --changed summary
++
+.Summary never changed:
+ bite bugzilla search --changed '!summary'
 +
 .Summary changed in the last week:
  bite bugzilla search --changed summary=1w
