@@ -195,9 +195,9 @@ or `false`, all bugs with or without blockers are returned, respectively.
 .Without blockers:
  bite bugzilla search --blocks false
 +
-Regular values search for matching blockers and multiple values can
-be specified in a comma-separated list for logical AND or multiple
-options for logical OR.
+Regular values search for matching blockers and multiple values can be
+specified in a comma-separated list for logical AND or multiple options for
+logical OR. Also, values are taken from standard input when `-`.
 +
 .Blocked on bug 10:
  bite bugzilla search --blocks 10
@@ -216,7 +216,17 @@ Values can use the `-` prefix to search for non-blockers.
 .Blocked on bug 10 but not bug 11:
  bite bugzilla search --blocks 10,-11
 +
-Values are taken from standard input when `-`.
+Range values are supported, (see sections <<Range Operators>> and <<Ranges>>
+for more information.
++
+.Blocked on bugs greater than or equal to 10:
+ bite bugzilla search --blocks '>=10'
++
+.Blocked on bugs between 10 and 20:
+ bite bugzilla search --blocks 10..20
++
+.Blocked on bugs matching a given search:
+ bite bugzilla search test -f id | bite bugzilla search --blocks -
 
 *-C, --component* <value[,...]>::
     Restrict by component.
@@ -267,7 +277,7 @@ respectively.
 +
 Regular values search for matching dependencies and multiple values can be
 specified in a comma-separated list for logical AND or multiple options for
-logical OR.
+logical OR. Also, values are taken from standard input when `-`.
 +
 .Depends on bug 10:
  bite bugzilla search --depends 10
@@ -286,7 +296,17 @@ Values can use the `-` prefix to search for non-dependencies.
 .Depends on bug 10 but not 11:
  bite bugzilla search --depends 10,-11
 +
-Values are taken from standard input when `-`.
+Range values are supported, (see sections <<Range Operators>> and <<Ranges>>
+for more information.
++
+.Depends on bugs greater than or equal to 10:
+ bite bugzilla search --depends '>=10'
++
+.Depends on bugs between 10 and 20:
+ bite bugzilla search --depends 10..20
++
+.Depends on bugs matching a given search:
+ bite bugzilla search test -f id | bite bugzilla search --depends -
 
 *-F, --flags* [<value[,...]>]::
     Restrict by flag.
@@ -343,7 +363,8 @@ application. See the <<Match Operators>> section for more information.
 *--id* <id[,...]>::
     Restrict by ID.
 +
-Regular values search for exact bug identifiers.
+Regular values search for exact bug identifiers. Also, values are taken from
+standard input when `-`.
 +
 .Equal to 10:
  bite bugzilla search --id 10
@@ -359,7 +380,7 @@ Multiple values can be specified in a comma-separated list for logical OR.
  bite bugzilla search --id 10,20
 +
 Range values are supported, (see sections <<Range Operators>> and <<Ranges>>
-for more information, and values are taken from standard input when `-`.
+for more information.
 +
 .IDs greater than or equal to 10:
  bite bugzilla search --id '>=10'
@@ -791,7 +812,7 @@ See the information above in the <<User Options>> section for regular values.
 *--comment* <term>::
     Strings to search for in the comments.
 +
-Taken from standard input when `-`.
+Values are taken from standard input when `-`.
 
 *--comment-is-private* [<bool>]::
     Restrict by comment private status.
@@ -815,7 +836,7 @@ section for more information.
 *[<terms>]*::
     Strings to search for in the summary.
 +
-Taken from standard input when `-`.
+Values are taken from standard input when `-`.
 +
 .Summary contains `test`:
  bite bugzilla search test

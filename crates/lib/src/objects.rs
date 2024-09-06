@@ -103,6 +103,12 @@ impl<T: fmt::Display + Eq> fmt::Display for RangeOrValue<T> {
     }
 }
 
+impl<T: Eq> From<T> for RangeOrValue<T> {
+    fn from(value: T) -> Self {
+        Self::Value(value)
+    }
+}
+
 static RANGE_OP_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"^(?<op>[<>]=?|!?=)(?<value>.+)$").unwrap());
 

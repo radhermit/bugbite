@@ -356,7 +356,7 @@ impl<'a> Request<'a> {
                     match value {
                         ExistsOrValues::Exists(value) => query.exists(ExistsField::Blocks, *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.blocks(*x)))
+                            query.and(|query| values.iter().for_each(|x| query.blocks(x)))
                         }
                     }
                 }
@@ -369,7 +369,7 @@ impl<'a> Request<'a> {
                     match value {
                         ExistsOrValues::Exists(value) => query.exists(ExistsField::Depends, *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.depends(*x)))
+                            query.and(|query| values.iter().for_each(|x| query.depends(x)))
                         }
                     }
                 }
@@ -782,7 +782,7 @@ impl<'a> Request<'a> {
 
     pub fn blocks<T>(mut self, value: T) -> Self
     where
-        T: Into<ExistsOrValues<i64>>,
+        T: Into<ExistsOrValues<RangeOrValue<i64>>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
         self.params
@@ -794,7 +794,7 @@ impl<'a> Request<'a> {
 
     pub fn depends<T>(mut self, value: T) -> Self
     where
-        T: Into<ExistsOrValues<i64>>,
+        T: Into<ExistsOrValues<RangeOrValue<i64>>>,
     {
         // TODO: move to get_or_insert_default() when it is stable
         self.params
@@ -884,8 +884,8 @@ pub struct Parameters {
     pub comment_is_private: Option<bool>,
     pub comment_tag: Option<Vec<Vec<Match>>>,
 
-    pub blocks: Option<Vec<ExistsOrValues<i64>>>,
-    pub depends: Option<Vec<ExistsOrValues<i64>>>,
+    pub blocks: Option<Vec<ExistsOrValues<RangeOrValue<i64>>>>,
+    pub depends: Option<Vec<ExistsOrValues<RangeOrValue<i64>>>>,
     pub ids: Option<Vec<RangeOrValue<i64>>>,
     pub priority: Option<Vec<Match>>,
     pub severity: Option<Vec<Match>>,
@@ -1135,9 +1135,9 @@ where
     }
 }
 
-impl From<i64> for ExistsOrValues<i64> {
+impl From<i64> for ExistsOrValues<RangeOrValue<i64>> {
     fn from(value: i64) -> Self {
-        ExistsOrValues::Values(vec![value])
+        ExistsOrValues::Values(vec![value.into()])
     }
 }
 
@@ -1171,7 +1171,7 @@ make_exists_or_values_match_owned!(&[String], &Vec<String>, &HashSet<String>, &I
 
 macro_rules! make_exists_or_values_i64 {
     ($($x:ty),+) => {$(
-        impl From<$x> for ExistsOrValues<i64> {
+        impl From<$x> for ExistsOrValues<RangeOrValue<i64>> {
             fn from(values: $x) -> Self {
                 ExistsOrValues::Values(values.iter().copied().map(Into::into).collect())
             }
@@ -1189,7 +1189,7 @@ where
     }
 }
 
-impl<const N: usize> From<&[i64; N]> for ExistsOrValues<i64> {
+impl<const N: usize> From<&[i64; N]> for ExistsOrValues<RangeOrValue<i64>> {
     fn from(values: &[i64; N]) -> Self {
         ExistsOrValues::Values(values.iter().copied().map(Into::into).collect())
     }
@@ -1204,7 +1204,7 @@ where
     }
 }
 
-impl<const N: usize> From<[i64; N]> for ExistsOrValues<i64> {
+impl<const N: usize> From<[i64; N]> for ExistsOrValues<RangeOrValue<i64>> {
     fn from(values: [i64; N]) -> Self {
         ExistsOrValues::Values(values.into_iter().map(Into::into).collect())
     }
@@ -1568,19 +1568,31 @@ impl QueryBuilder<'_> {
         self.advanced_field(field, "equals", status as u64);
     }
 
-    fn blocks(&mut self, value: i64) {
-        if value >= 0 {
-            self.advanced_field("blocked", "equals", value);
-        } else {
-            self.advanced_field("blocked", "notequals", value.abs());
+    fn blocks(&mut self, value: &RangeOrValue<i64>) {
+        match value {
+            RangeOrValue::Value(value) => {
+                if *value >= 0 {
+                    self.advanced_field("blocked", "equals", value);
+                } else {
+                    self.advanced_field("blocked", "notequals", value.abs());
+                }
+            }
+            RangeOrValue::RangeOp(value) => self.range_op("blocked", value),
+            RangeOrValue::Range(value) => self.range("blocked", value),
         }
     }
 
-    fn depends(&mut self, value: i64) {
-        if value >= 0 {
-            self.advanced_field("dependson", "equals", value);
-        } else {
-            self.advanced_field("dependson", "notequals", value.abs());
+    fn depends(&mut self, value: &RangeOrValue<i64>) {
+        match value {
+            RangeOrValue::Value(value) => {
+                if *value >= 0 {
+                    self.advanced_field("dependson", "equals", value);
+                } else {
+                    self.advanced_field("dependson", "notequals", value.abs());
+                }
+            }
+            RangeOrValue::RangeOp(value) => self.range_op("dependson", value),
+            RangeOrValue::Range(value) => self.range("dependson", value),
         }
     }
 

@@ -128,7 +128,7 @@ struct AttributeOptions {
         value_name = "ID[,...]",
         default_missing_value = "true",
     )]
-    blocks: Option<Vec<ExistsOrValues<MaybeStdinVec<i64>>>>,
+    blocks: Option<Vec<ExistsOrValues<MaybeStdinVec<RangeOrValue<i64>>>>>,
 
     /// restrict by component
     #[arg(short = 'C', long, value_name = "VALUE[,...]")]
@@ -146,7 +146,7 @@ struct AttributeOptions {
         value_name = "ID[,...]",
         default_missing_value = "true",
     )]
-    depends: Option<Vec<ExistsOrValues<MaybeStdinVec<i64>>>>,
+    depends: Option<Vec<ExistsOrValues<MaybeStdinVec<RangeOrValue<i64>>>>>,
 
     /// restrict by flag
     #[arg(
