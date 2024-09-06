@@ -5,6 +5,16 @@ use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::Error;
 
+/// Get the user config directory for bugbite.
+pub fn config_dir() -> crate::Result<Utf8PathBuf> {
+    let config_dir = dirs_next::config_dir()
+        .ok_or_else(|| Error::InvalidValue("failed getting config directory".to_string()))?;
+    let config_dir = Utf8PathBuf::from_path_buf(config_dir)
+        .map_err(|e| Error::InvalidValue(format!("invalid bugbite config directory: {e:?}")))?;
+
+    Ok(config_dir.join("bugbite"))
+}
+
 /// Get the current working directory as an absolute [`Utf8PathBuf`].
 pub fn current_dir() -> crate::Result<Utf8PathBuf> {
     Utf8PathBuf::from(".")

@@ -1,5 +1,5 @@
-use std::fs;
 use std::ops::Deref;
+use std::{env, fs};
 
 use camino::Utf8Path;
 use indexmap::IndexMap;
@@ -8,6 +8,7 @@ use url::Url;
 
 use crate::service::{self, ServiceKind};
 use crate::traits::try_from_toml;
+use crate::utils::config_dir;
 use crate::Error;
 
 /// Bundled service data.
@@ -20,10 +21,21 @@ pub struct Config(IndexMap<String, service::Config>);
 try_from_toml!(Config, "config");
 
 impl Config {
-    /// Create a new Config including bundled services.
-    pub fn new() -> Self {
-        toml::from_str(SERVICES_DATA)
-            .unwrap_or_else(|e| panic!("failed loading bundled service data: {e}"))
+    /// Create a new Config.
+    pub fn new() -> crate::Result<Self> {
+        // load bundled services
+        let mut config: Self = toml::from_str(SERVICES_DATA)
+            .unwrap_or_else(|e| panic!("failed loading bundled service data: {e}"));
+
+        // load custom user services
+        let services_dir = config_dir()?.join("services");
+        match env::var("BUGBITE_CONFIG").as_deref() {
+            Err(_) if services_dir.exists() => config.load(services_dir)?,
+            Ok("false") | Err(_) => (),
+            Ok(path) => config.load(path)?,
+        }
+
+        Ok(config)
     }
 
     /// Load connections from a given path, overriding any bundled matches.
@@ -84,16 +96,16 @@ impl<'a> IntoIterator for &'a Config {
 
 #[cfg(test)]
 mod tests {
-    use std::env;
-
     use tempfile::tempdir;
 
     use super::*;
 
     #[test]
     fn load() {
-        // bundled services only
-        let mut config = Config::new();
+        // ignore custom user services
+        env::set_var("BUGBITE_CONFIG", "false");
+
+        let mut config = Config::new().unwrap();
         assert!(!config.is_empty());
         let len = config.len();
 

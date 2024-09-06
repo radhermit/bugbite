@@ -29,7 +29,7 @@ fn custom_config() {
     let home_path = dir.path().to_str().unwrap();
     let dir = dir.path().join(".config");
     let xdg_path = dir.to_str().unwrap();
-    let dir = dir.join("bugbite");
+    let dir = dir.join("bugbite/services");
     let dir_path = dir.to_str().unwrap();
     fs::create_dir_all(dir_path).unwrap();
     let file = dir.join("config");
