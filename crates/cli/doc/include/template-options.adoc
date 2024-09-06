@@ -13,3 +13,5 @@ Using `-n/--dry-run` allows creating templates without service interaction.
 
 *--to <name>*::
     Write request attributes to a template.
++
+Use `-` for standard output instead of writing to a file.
