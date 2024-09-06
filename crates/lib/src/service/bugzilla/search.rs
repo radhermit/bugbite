@@ -1364,13 +1364,16 @@ impl QueryBuilder<'_> {
                             query.advanced_field(field, "changedbefore", value)
                         });
                     }
-                    RangeOp::Equal(value) => {
-                        self.not(status, |query| query.advanced_field(field, "equals", value));
+                    // TODO: use more specific Range type that doesn't include equality ops
+                    RangeOp::Equal(_) => {
+                        return Err(Error::InvalidValue(format!(
+                            "equality operator invalid for change values: {target}"
+                        )))
                     }
-                    RangeOp::NotEqual(value) => {
-                        self.not(status, |query| {
-                            query.advanced_field(field, "notequals", value)
-                        });
+                    RangeOp::NotEqual(_) => {
+                        return Err(Error::InvalidValue(format!(
+                            "equality operator invalid for change values: {target}"
+                        )))
                     }
                     RangeOp::GreaterOrEqual(value) => {
                         self.not(status, |query| {
@@ -2137,6 +2140,16 @@ mod tests {
                     .send()
                     .await
                     .unwrap();
+            }
+
+            // invalid equality operator usage
+            for time in ["=2020", "!=2020-02-01", "=1d", "!=1w"] {
+                assert!(service
+                    .search()
+                    .changed_at(field, time.parse().unwrap())
+                    .send()
+                    .await
+                    .is_err());
             }
 
             // changed by certain user(s)
