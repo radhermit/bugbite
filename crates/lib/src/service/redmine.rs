@@ -34,6 +34,7 @@ impl Merge for Authentication {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
+    name: Option<String>,
     #[serde(skip)]
     web_base: Option<Url>,
     #[serde(flatten)]
@@ -60,9 +61,10 @@ impl Config {
         Ok(Self {
             base,
             web_base,
+            name: Default::default(),
             auth: Default::default(),
             client: Default::default(),
-            max_search_results: None,
+            max_search_results: Default::default(),
         })
     }
 
@@ -74,6 +76,10 @@ impl Config {
             0 => 100,
             n => n,
         }
+    }
+
+    pub fn name(&self) -> Option<&str> {
+        self.name.as_deref()
     }
 
     /// Return the base URL for the service.

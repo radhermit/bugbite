@@ -71,6 +71,14 @@ impl Config {
         Ok(config)
     }
 
+    pub fn name(&self) -> Option<&str> {
+        match self {
+            Self::Bugzilla(config) => config.name(),
+            Self::Github(config) => config.name(),
+            Self::Redmine(config) => config.name(),
+        }
+    }
+
     pub fn base(&self) -> &Url {
         match self {
             Self::Bugzilla(config) => config.base(),

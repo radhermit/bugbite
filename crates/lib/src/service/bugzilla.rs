@@ -56,6 +56,7 @@ impl Merge for Authentication {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     base: Url,
+    name: Option<String>,
     #[serde(flatten)]
     pub auth: Authentication,
     #[serde(flatten)]
@@ -71,9 +72,10 @@ impl Config {
 
         Ok(Self {
             base,
+            name: Default::default(),
             auth: Default::default(),
             client: Default::default(),
-            max_search_results: None,
+            max_search_results: Default::default(),
         })
     }
 
@@ -85,6 +87,10 @@ impl Config {
             0 => 10000,
             n => n,
         }
+    }
+
+    pub fn name(&self) -> Option<&str> {
+        self.name.as_deref()
     }
 
     pub fn base(&self) -> &Url {
