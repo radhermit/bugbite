@@ -1141,6 +1141,24 @@ impl From<i64> for ExistsOrValues<RangeOrValue<i64>> {
     }
 }
 
+macro_rules! make_exists_or_values_range {
+    ($($x:ty),+) => {$(
+        impl<T: Eq> From<$x> for ExistsOrValues<RangeOrValue<T>> {
+            fn from(value: $x) -> Self {
+                ExistsOrValues::Values(vec![value.into()])
+            }
+        }
+    )+};
+}
+make_exists_or_values_range!(
+    std::ops::Range<T>,
+    std::ops::RangeInclusive<T>,
+    std::ops::RangeTo<T>,
+    std::ops::RangeToInclusive<T>,
+    std::ops::RangeFrom<T>,
+    std::ops::RangeFull
+);
+
 macro_rules! make_exists_or_values_match_ref {
     ($($x:ty),+) => {$(
         impl From<$x> for ExistsOrValues<Match> {
@@ -2249,6 +2267,12 @@ mod tests {
         service.search().blocks(1).send().await.unwrap();
         service.search().blocks(-1).send().await.unwrap();
         service.search().blocks([1, -2]).send().await.unwrap();
+        service.search().blocks(10..20).send().await.unwrap();
+        service.search().blocks(10..=20).send().await.unwrap();
+        service.search().blocks(..20).send().await.unwrap();
+        service.search().blocks(..=20).send().await.unwrap();
+        service.search().blocks(10..).send().await.unwrap();
+        service.search().blocks(..).send().await.unwrap();
 
         // depends
         service.search().depends(true).send().await.unwrap();
@@ -2256,5 +2280,11 @@ mod tests {
         service.search().depends(1).send().await.unwrap();
         service.search().depends(-1).send().await.unwrap();
         service.search().depends([1, -2]).send().await.unwrap();
+        service.search().depends(10..20).send().await.unwrap();
+        service.search().depends(10..=20).send().await.unwrap();
+        service.search().depends(..20).send().await.unwrap();
+        service.search().depends(..=20).send().await.unwrap();
+        service.search().depends(10..).send().await.unwrap();
+        service.search().depends(..).send().await.unwrap();
     }
 }

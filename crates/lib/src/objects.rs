@@ -103,9 +103,45 @@ impl<T: fmt::Display + Eq> fmt::Display for RangeOrValue<T> {
     }
 }
 
-impl<T: Eq> From<T> for RangeOrValue<T> {
-    fn from(value: T) -> Self {
+impl From<i64> for RangeOrValue<i64> {
+    fn from(value: i64) -> Self {
         Self::Value(value)
+    }
+}
+
+impl<T: Eq> From<std::ops::Range<T>> for RangeOrValue<T> {
+    fn from(value: std::ops::Range<T>) -> Self {
+        Self::Range(Range::Range(value))
+    }
+}
+
+impl<T: Eq> From<std::ops::RangeInclusive<T>> for RangeOrValue<T> {
+    fn from(value: std::ops::RangeInclusive<T>) -> Self {
+        Self::Range(Range::Inclusive(value))
+    }
+}
+
+impl<T: Eq> From<std::ops::RangeTo<T>> for RangeOrValue<T> {
+    fn from(value: std::ops::RangeTo<T>) -> Self {
+        Self::Range(Range::To(value))
+    }
+}
+
+impl<T: Eq> From<std::ops::RangeToInclusive<T>> for RangeOrValue<T> {
+    fn from(value: std::ops::RangeToInclusive<T>) -> Self {
+        Self::Range(Range::ToInclusive(value))
+    }
+}
+
+impl<T: Eq> From<std::ops::RangeFrom<T>> for RangeOrValue<T> {
+    fn from(value: std::ops::RangeFrom<T>) -> Self {
+        Self::Range(Range::From(value))
+    }
+}
+
+impl<T: Eq> From<std::ops::RangeFull> for RangeOrValue<T> {
+    fn from(value: std::ops::RangeFull) -> Self {
+        Self::Range(Range::Full(value))
     }
 }
 
