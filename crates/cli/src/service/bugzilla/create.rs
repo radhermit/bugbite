@@ -168,10 +168,6 @@ impl From<Params> for Parameters {
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Create options")]
 pub(super) struct Options {
-    /// skip service interaction
-    #[arg(short = 'n', long)]
-    dry_run: bool,
-
     /// read attributes from an existing bug
     #[arg(long, value_name = "ID", conflicts_with = "from")]
     from_bug: Option<String>,
@@ -219,7 +215,7 @@ impl Command {
             request.save_template(name)?;
         }
 
-        if !self.options.dry_run {
+        if !self.template.dry_run {
             let id = request.send().await?;
             if is_terminal!(f) {
                 verbose!(f, "Created bug {id}")?;

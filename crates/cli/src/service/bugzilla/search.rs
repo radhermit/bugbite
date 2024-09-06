@@ -646,10 +646,6 @@ pub(super) struct Options {
     #[arg(short, long)]
     browser: bool,
 
-    /// skip service interaction
-    #[arg(short = 'n', long)]
-    dry_run: bool,
-
     /// output in JSON format
     #[arg(long)]
     json: bool,
@@ -692,7 +688,7 @@ impl Command {
         if self.options.browser {
             let url = request.search_url()?;
             launch_browser([url])?;
-        } else if !self.options.dry_run {
+        } else if !self.template.dry_run {
             let items = request.stream();
             render_search(f, items, &fields, self.options.json).await?;
         }

@@ -20,9 +20,6 @@ include::include/global-options.adoc[]
 
 == Update options
 
-*-n, --dry-run*::
-    Skip service interaction.
-
 *-R, --reply*::
     Interactively reply to specific comments for a given bug.
 +
@@ -42,27 +39,11 @@ Multiple arguments can be specified in a comma-separated list.
 .Reply to the last comment:
  bite bugzilla update 123 --reply
 
-*--from* <path>::
-    Read attributes from a template.
-+
-Value must be the path to a valid template file. Templates use the TOML format
-and generally map long option names to values.
-+
-Fields that don't match known bug field names target custom fields.
-+
-Command-line parameters override corresponding template values.
-+
+include::include/template-options.adoc[]
+
 .Update bug using template:
  bite bugzilla update 123 --from path/to/new.toml -c 'updated using template'
 
-*--to* <path>::
-    Write attributes to a template.
-+
-Value is the file path where the TOML template file will be written.
-+
-Combining this option with -n/--dry-run allows creating templates without any
-service interaction.
-+
 .Create template using specified values:
  bite bugzilla update -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
 

@@ -20,22 +20,6 @@ include::include/global-options.adoc[]
 
 == Create options
 
-*-n, --dry-run*::
-    Skip service interaction.
-
-*--from* <path>::
-    Read attributes from a template.
-+
-Value must be the path to a valid template file. Templates use the TOML format
-and generally map long option names to values.
-+
-Fields that don't match known bug field names target custom fields.
-+
-Command-line parameters override corresponding template values.
-+
-.Create bug using template:
- bite bugzilla create --from path/to/new.toml -S summary -D description
-
 *--from-bug* <id>::
     Read attributes from an existing bug.
 +
@@ -48,14 +32,11 @@ using existing bugs to edit and use later without creating a new bug.
 .Create bug using existing bug:
  bite bugzilla create --from-bug 123 --to path/to/new.toml --dry-run
 
-*--to* <path>::
-    Write attributes to a template.
-+
-Value is the file path where the TOML template file will be written.
-+
-Combining this option with -n/--dry-run allows creating templates without any
-service interaction.
-+
+include::include/template-options.adoc[]
+
+.Create bug using template:
+ bite bugzilla create --from path/to/new.toml -S summary -D description
+
 .Create template using specified values:
  bite bugzilla create -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
 

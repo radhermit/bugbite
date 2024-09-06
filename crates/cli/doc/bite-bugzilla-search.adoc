@@ -25,26 +25,10 @@ include::include/global-options.adoc[]
 +
 This uses `$BROWSER` to open URLs, falling back to `xdg-open` if undefined.
 
-*-n, --dry-run*::
-    Skip service interaction.
-
 *--json*::
     Output in JSON format.
 
-*--from <path>*::
-    Read search attributes from a template.
-+
-Template files use the TOML format and generally map long option names to values.
-+
-Explicitly specified options override corresponding template values.
-
-*--to <path>*::
-    Write search attributes to a template.
-+
-Combining with `-n/--dry-run` allows creating templates without service interaction.
-+
-.Create a template:
- bite bugzilla search -c 1d -n --to template.toml
+include::include/template-options.adoc[]
 
 == Query options
 

@@ -266,10 +266,6 @@ impl From<Params> for Parameters {
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Update options")]
 pub(super) struct Options {
-    /// skip service interaction
-    #[arg(short = 'n', long)]
-    dry_run: bool,
-
     /// reply to specific comments
     #[arg(
         short = 'R',
@@ -391,7 +387,7 @@ impl Command {
             }
         }
 
-        if !self.options.dry_run {
+        if !self.template.dry_run {
             let changes = request.send().await?;
             for change in changes {
                 verbose!(f, "{change}")?;

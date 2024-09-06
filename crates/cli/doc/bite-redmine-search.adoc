@@ -28,26 +28,13 @@ This uses `$BROWSER` to open URLs, falling back to `xdg-open` if undefined.
 .Open search for all issues updated in the last week in a browser:
  bite redmine search -s @any --updated 1w -b
 
-*-n, --dry-run*::
-    Skip service interaction.
-
 *--json*::
     Output in JSON format.
 +
 .Return all open issues created in the past day rendered in JSON:
  bite redmine search --created 1d --json
 
-*--from <path>*::
-    Read search attributes from a template.
-+
-Template files use the TOML format and generally map long option names to values.
-+
-Explicitly specified options override corresponding template values.
-
-*--to <path>*::
-    Write search attributes to a template.
-+
-Combining with --dry-run allows creating templates without service interaction.
+include::include/template-options.adoc[]
 
 == Query options
 

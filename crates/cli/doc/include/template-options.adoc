@@ -1,0 +1,15 @@
+== Template Options
+
+Template files use the TOML format and generally map long option names to
+values. Explicitly specified options override corresponding template values.
+
+Using `-n/--dry-run` allows creating templates without service interaction.
+
+*-n, --dry-run*::
+    Skip service interaction.
+
+*--from <name>*::
+    Read request attributes from a template.
+
+*--to <name>*::
+    Write request attributes to a template.

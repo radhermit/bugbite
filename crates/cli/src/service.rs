@@ -55,6 +55,10 @@ impl From<ServiceOptions> for ClientParameters {
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Template options")]
 pub(super) struct TemplateOptions {
+    /// skip service interaction
+    #[arg(short = 'n', long)]
+    dry_run: bool,
+
     /// read attributes from template
     #[arg(long, value_name = "NAME")]
     from: Option<String>,
