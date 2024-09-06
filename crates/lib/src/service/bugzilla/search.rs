@@ -1411,7 +1411,12 @@ impl QueryBuilder<'_> {
                             query.advanced_field(field, "changedafter", &r.start);
                         });
                     }
-                    Range::Full(_) => (),
+                    Range::Full(_) => {
+                        let value = TimeDeltaOrStatic::from_str("now").unwrap();
+                        self.not(status, |query| {
+                            query.advanced_field(field, "changedbefore", value)
+                        });
+                    }
                 },
             }
         }
