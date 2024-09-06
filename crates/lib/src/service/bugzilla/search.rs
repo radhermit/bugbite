@@ -2024,7 +2024,7 @@ mod tests {
 
     use super::*;
 
-    // From<ExistsOrValues<Match>> trait conversion testing
+    // ExistsOrValues<Match> trait conversion testing
     #[tokio::test]
     async fn exists_or_values_match() {
         let path = TESTDATA_PATH.join("bugzilla");
@@ -2101,6 +2101,47 @@ mod tests {
         // IndexSet ref
         let values: IndexSet<_> = values.iter().collect();
         service.search().alias(&values).send().await.unwrap();
+    }
+
+    // ExistsOrValues<RangeOrValue<i64>> trait conversion testing
+    #[tokio::test]
+    async fn exists_or_values_range_i64() {
+        let path = TESTDATA_PATH.join("bugzilla");
+        let server = TestServer::new().await;
+        let service = Service::new(server.uri()).unwrap();
+        server.respond(200, path.join("search/ids.json")).await;
+
+        // boolean
+        service.search().blocks(true).send().await.unwrap();
+        service.search().blocks(false).send().await.unwrap();
+
+        // i64
+        service.search().blocks(1).send().await.unwrap();
+
+        // array
+        service.search().blocks([1, 2]).send().await.unwrap();
+
+        // vector
+        let values = vec![1, 2];
+        service.search().blocks(&values).send().await.unwrap();
+        service
+            .search()
+            .blocks(values.as_slice())
+            .send()
+            .await
+            .unwrap();
+
+        // slice
+        let values = &[1, 2];
+        service.search().blocks(values).send().await.unwrap();
+
+        // hashset
+        let values = HashSet::from([1, 2]);
+        service.search().blocks(&values).send().await.unwrap();
+
+        // IndexSet str
+        let values = IndexSet::from([1, 2]);
+        service.search().blocks(&values).send().await.unwrap();
     }
 
     #[tokio::test]
