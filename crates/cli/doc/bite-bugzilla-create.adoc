@@ -29,16 +29,16 @@ relevant, required fields for creation.
 Combining this option with -n/--dry-run and --to allows creating templates
 using existing bugs to edit and use later without creating a new bug.
 +
-.Create bug using existing bug:
- bite bugzilla create --from-bug 123 --to path/to/new.toml --dry-run
+.Create template using existing bug:
+ bite bugzilla create --from-bug 123 --to template1 --dry-run
 
 include::include/template-options.adoc[]
 
 .Create bug using template:
- bite bugzilla create --from path/to/new.toml -S summary -D description
+ bite bugzilla create --from template1 -S summary -D description
 
 .Create template using specified values:
- bite bugzilla create -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
+ bite bugzilla create -p TestProduct -C TestComponent --to template1 --dry-run
 
 == Attribute options
 

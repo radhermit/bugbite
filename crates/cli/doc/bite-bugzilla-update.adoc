@@ -42,10 +42,10 @@ Multiple arguments can be specified in a comma-separated list.
 include::include/template-options.adoc[]
 
 .Update bug using template:
- bite bugzilla update 123 --from path/to/new.toml -c 'updated using template'
+ bite bugzilla update 123 --from template1 -c 'updated using template'
 
 .Create template using specified values:
- bite bugzilla update -p TestProduct -C TestComponent --to path/to/new.toml --dry-run
+ bite bugzilla update -p TestProduct -C TestComponent --to template1 --dry-run
 
 == Attribute options
 
