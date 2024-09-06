@@ -123,9 +123,8 @@ impl<'a> Request<'a> {
                         // HACK: Work around a server bug where regular "isempty" queries don't
                         // work with the alias field so use inverted existence queries instead for
                         // nonexistence.
-                        ExistsOrValues::Exists(true) => query.exists(ExistsField::Alias, true),
-                        ExistsOrValues::Exists(false) => {
-                            query.not(|query| query.exists(ExistsField::Alias, true))
+                        ExistsOrValues::Exists(value) => {
+                            query.not(!value, |query| query.exists(ExistsField::Alias, true))
                         }
                         ExistsOrValues::Values(values) => {
                             query.and(|query| values.iter().for_each(|x| query.alias(x)))
@@ -1671,10 +1670,12 @@ impl QueryBuilder<'_> {
         self.op_func("AND", func)
     }
 
-    fn not<F: FnOnce(&mut Self)>(&mut self, func: F) {
+    fn not<F: FnOnce(&mut Self)>(&mut self, status: bool, func: F) {
         func(self);
-        let num = self.advanced_count;
-        self.insert(format!("n{num}"), "1");
+        if status {
+            let num = self.advanced_count;
+            self.insert(format!("n{num}"), "1");
+        }
     }
 }
 
