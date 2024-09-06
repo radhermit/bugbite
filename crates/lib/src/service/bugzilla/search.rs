@@ -1854,7 +1854,7 @@ impl Api for StaticChangeField {
             Self::Flags => "flagtypes.name",
             Self::Keywords => "keywords",
             Self::Os => "op_sys",
-            Self::Platform => "platform",
+            Self::Platform => "rep_platform",
             Self::Priority => "priority",
             Self::Product => "product",
             Self::Reporter => "reporter",
