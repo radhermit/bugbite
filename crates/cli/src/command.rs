@@ -27,7 +27,7 @@ fn enable_logging(verbosity: LevelFilter) {
         .init();
 }
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 #[command(
     name = "bite",
     version,
@@ -99,11 +99,17 @@ mod tests {
                 for (lineno, line) in doc.lines().enumerate().filter(|(_, x)| x.starts_with(' ')) {
                     for cmd in line.trim().split(" | ").filter(|x| x.starts_with("bite ")) {
                         let args = shlex::split(cmd).unwrap();
-                        if let Err(e) = Command::try_parse_from(args) {
-                            panic!(
-                                "failed parsing: {cmd}\nfile: {name}, line {}\n{e}",
-                                lineno + 1
-                            );
+                        match Command::try_parse_from(args) {
+                            Err(e) => {
+                                panic!(
+                                    "failed parsing: {cmd}\nfile: {name}, line {}\n{e}",
+                                    lineno + 1
+                                );
+                            }
+                            Ok(cmd) => {
+                                // verify Debug is derived for all commands
+                                let _ = format!("{cmd:?}");
+                            }
                         }
                         reset_stdin();
                     }

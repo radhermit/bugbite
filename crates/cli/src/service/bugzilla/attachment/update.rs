@@ -8,7 +8,7 @@ use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
 use clap::Args;
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Attachment options")]
 struct Params {
     /// update comment
@@ -81,7 +81,7 @@ impl From<Params> for Parameters {
     }
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Arguments")]
 struct Arguments {
     // TODO: rework stdin support once clap supports custom containers
@@ -91,7 +91,7 @@ struct Arguments {
     ids: Vec<MaybeStdinVec<u64>>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     params: Params,

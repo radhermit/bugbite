@@ -11,7 +11,7 @@ use clap::Args;
 use crate::service::Render;
 use crate::utils::COLUMNS;
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "History options")]
 struct Params {
     /// event occurred at this time or later
@@ -32,7 +32,7 @@ impl From<Params> for Parameters {
     }
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     params: Params,

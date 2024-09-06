@@ -5,7 +5,7 @@ use bugbite::config::Config;
 use clap::Args;
 use itertools::Itertools;
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Subcommand {}
 
 impl Subcommand {

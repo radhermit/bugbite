@@ -15,7 +15,7 @@ use crate::service::bugzilla::OUTDATED;
 use crate::service::Render;
 use crate::utils::COLUMNS;
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Attachment options")]
 struct Options {
     /// list attachment metadata
@@ -50,7 +50,7 @@ struct Options {
     dir: Utf8PathBuf,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,

@@ -17,7 +17,7 @@ use clap::{Args, ValueHint};
 use crate::service::output::render_search;
 use crate::utils::{confirm, launch_browser};
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Query options")]
 struct QueryOptions {
     /// fields to output
@@ -46,7 +46,7 @@ struct QueryOptions {
     paged: Option<bool>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct AttributeOptions {
     /// restrict by assignee status
@@ -114,7 +114,7 @@ struct AttributeOptions {
     status: Option<String>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Time options")]
 struct TimeOptions {
     /// restrict by creation time
@@ -131,7 +131,7 @@ struct TimeOptions {
 }
 
 /// Available search parameters.
-#[derive(Args)]
+#[derive(Args, Debug)]
 struct Params {
     #[clap(flatten)]
     query: QueryOptions,
@@ -169,7 +169,7 @@ impl From<Params> for Parameters {
     }
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Search options")]
 pub(super) struct Options {
     /// open in browser
@@ -201,7 +201,7 @@ pub(super) struct Options {
     to: Option<Utf8PathBuf>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,

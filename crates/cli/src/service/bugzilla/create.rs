@@ -15,7 +15,7 @@ use itertools::Itertools;
 
 use crate::utils::{confirm, prefix, verbose};
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct Params {
     /// set aliases
@@ -167,7 +167,7 @@ impl From<Params> for Parameters {
     }
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Create options")]
 pub(super) struct Options {
     /// skip service interaction
@@ -196,7 +196,7 @@ pub(super) struct Options {
     to: Option<Utf8PathBuf>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,

@@ -15,7 +15,7 @@ use strum::VariantNames;
 
 use crate::utils::verbose;
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Attachment options")]
 struct Options {
     /// attachment comment
@@ -67,7 +67,7 @@ struct Options {
     private: Option<bool>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Compression options")]
 struct CompressionOptions {
     /// compress attachment
@@ -104,7 +104,7 @@ struct CompressionOptions {
     auto_truncate: Option<usize>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Arguments")]
 struct Arguments {
     /// bug IDs or aliases
@@ -120,7 +120,7 @@ struct Arguments {
     files: Vec<Utf8PathBuf>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,

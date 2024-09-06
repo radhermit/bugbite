@@ -5,7 +5,7 @@ use bugbite::service::bugzilla::Service;
 use bugbite::traits::RequestSend;
 use clap::Args;
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Command;
 
 impl Command {

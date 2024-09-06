@@ -27,7 +27,7 @@ mod search;
 mod update;
 mod version;
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
     /// API key
@@ -53,7 +53,7 @@ impl From<Authentication> for bugzilla::Authentication {
     }
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(crate) struct Command {
     #[clap(flatten)]
     service: super::ServiceOptions,
@@ -87,7 +87,7 @@ impl Command {
     }
 }
 
-#[derive(clap::Subcommand)]
+#[derive(clap::Subcommand, Debug)]
 enum Subcommand {
     /// Attachment commands
     #[command(alias = "a")]

@@ -16,7 +16,7 @@ use super::Render;
 mod get;
 mod search;
 
-#[derive(clap::Args)]
+#[derive(clap::Args, Debug)]
 #[clap(next_help_heading = "Authentication")]
 struct Authentication {
     /// GitHub personal access token
@@ -37,7 +37,7 @@ impl From<Authentication> for github::Authentication {
     }
 }
 
-#[derive(clap::Args)]
+#[derive(clap::Args, Debug)]
 pub(crate) struct Command {
     #[clap(flatten)]
     service: super::ServiceOptions,
@@ -71,7 +71,7 @@ impl Command {
     }
 }
 
-#[derive(clap::Subcommand)]
+#[derive(clap::Subcommand, Debug)]
 enum Subcommand {
     /// Get issues
     #[command(alias = "g")]

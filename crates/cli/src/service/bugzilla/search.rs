@@ -20,7 +20,7 @@ use clap::{Args, ValueHint};
 use crate::service::output::render_search;
 use crate::utils::{confirm, launch_browser, prefix};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct ExistsOrMatches(ExistsOrValues<Match>);
 
 impl ExistsOrMatches {
@@ -37,7 +37,7 @@ impl FromStr for ExistsOrMatches {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Changed {
     fields: Vec<String>,
     interval: RangeOrValue<TimeDeltaOrStatic>,
@@ -55,7 +55,7 @@ impl FromStr for Changed {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct ChangedBy {
     fields: Vec<String>,
     users: Vec<String>,
@@ -76,7 +76,7 @@ impl FromStr for ChangedBy {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct ChangedValue {
     field: String,
     value: String,
@@ -97,7 +97,7 @@ impl FromStr for ChangedValue {
     }
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct AttributeOptions {
     /// restrict by alias
@@ -264,7 +264,7 @@ struct AttributeOptions {
     whiteboard: Option<Vec<ExistsOrMatches>>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Attachment options")]
 struct AttachmentOptions {
     /// restrict by description
@@ -310,7 +310,7 @@ struct AttachmentOptions {
     attachment_is_private: Option<bool>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Range options")]
 struct RangeOptions {
     /// restrict by comments
@@ -322,7 +322,7 @@ struct RangeOptions {
     votes: Option<RangeOrValue<u64>>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Change options")]
 struct ChangeOptions {
     /// fields changed within time interval
@@ -342,7 +342,7 @@ struct ChangeOptions {
     changed_to: Option<Vec<ChangedValue>>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Query options")]
 struct QueryOptions {
     /// fields to output
@@ -370,7 +370,7 @@ struct QueryOptions {
     quicksearch: Option<String>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Time options")]
 struct TimeOptions {
     /// restrict by creation time
@@ -386,7 +386,7 @@ struct TimeOptions {
     closed: Option<RangeOrValue<TimeDeltaOrStatic>>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "User options")]
 struct UserOptions {
     /// user is assignee
@@ -428,7 +428,7 @@ struct UserOptions {
     reporter: Option<Vec<Csv<Match>>>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Comment options")]
 struct CommentOptions {
     /// strings to search for in comments
@@ -454,7 +454,7 @@ struct CommentOptions {
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#search-bugs for more
 /// information.
-#[derive(Args)]
+#[derive(Args, Debug)]
 struct Params {
     #[clap(flatten)]
     query: QueryOptions,
@@ -641,7 +641,7 @@ impl From<Params> for Parameters {
     }
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Search options")]
 pub(super) struct Options {
     /// open in browser
@@ -673,7 +673,7 @@ pub(super) struct Options {
     to: Option<Utf8PathBuf>,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,

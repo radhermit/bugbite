@@ -7,7 +7,7 @@ mod create;
 mod get;
 mod update;
 
-#[derive(clap::Args)]
+#[derive(clap::Args, Debug)]
 pub(crate) struct Command {
     #[command(subcommand)]
     command: Subcommand,
@@ -22,7 +22,7 @@ impl Command {
     }
 }
 
-#[derive(clap::Subcommand)]
+#[derive(clap::Subcommand, Debug)]
 enum Subcommand {
     /// Create attachments
     #[command(alias = "c")]

@@ -9,7 +9,7 @@ use clap::Args;
 use crate::service::output::render_items;
 use crate::utils::launch_browser;
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 #[clap(next_help_heading = "Get options")]
 struct Options {
     /// disable comments
@@ -21,7 +21,7 @@ struct Options {
     browser: bool,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,

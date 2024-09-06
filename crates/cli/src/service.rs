@@ -16,7 +16,7 @@ pub(crate) trait Render<T> {
     fn render<W: IsTerminal + Write>(&self, item: T, f: &mut W, width: usize) -> io::Result<()>;
 }
 
-#[derive(clap::Args)]
+#[derive(clap::Args, Debug)]
 #[clap(next_help_heading = "Service options")]
 struct ServiceOptions {
     /// service connection
