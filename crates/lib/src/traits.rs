@@ -151,7 +151,7 @@ pub trait RequestTemplate: for<'a> Deserialize<'a> + Serialize + Merge {
 
     fn save_template(&self, path: &Utf8Path) -> crate::Result<()> {
         let data = toml::to_string(self)
-            .map_err(|e| Error::InvalidValue(format!("failed serializing request: {e}")))?;
+            .map_err(|e| Error::InvalidValue(format!("failed serializing template: {e}")))?;
         fs::write(path, data)
             .map_err(|e| Error::IO(format!("failed saving template: {path}: {e}")))?;
         Ok(())
