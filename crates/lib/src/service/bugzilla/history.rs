@@ -79,18 +79,14 @@ impl RequestSend for Request<'_> {
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let Value::Array(bugs) = data["bugs"].take() else {
-            return Err(Error::InvalidResponse(
-                "invalid service response to history request".to_string(),
-            ));
+            return Err(Error::InvalidResponse("history request".to_string()));
         };
 
         let mut history = vec![];
 
         for mut bug in bugs {
             let Value::Array(data) = bug["history"].take() else {
-                return Err(Error::InvalidResponse(
-                    "invalid service response to history request".to_string(),
-                ));
+                return Err(Error::InvalidResponse("history request".to_string()));
             };
 
             // deserialize and filter events

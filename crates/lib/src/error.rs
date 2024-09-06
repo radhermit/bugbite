@@ -12,7 +12,7 @@ pub enum Error {
     InvalidUrl(url::ParseError),
     #[error("{0}")]
     InvalidRequest(String),
-    #[error("{0}")]
+    #[error("invalid service response: {0}")]
     InvalidResponse(String),
     #[error("{0}")]
     InvalidValue(String),

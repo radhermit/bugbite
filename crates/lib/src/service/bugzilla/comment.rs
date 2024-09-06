@@ -85,9 +85,7 @@ impl RequestSend for Request<'_> {
         let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
         let serde_json::value::Value::Object(data) = data else {
-            return Err(Error::InvalidResponse(
-                "invalid service response to comment request".to_string(),
-            ));
+            return Err(Error::InvalidResponse("comment request".to_string()));
         };
 
         // Bugzilla's response always uses bug IDs even if attachments were requested via
@@ -96,9 +94,7 @@ impl RequestSend for Request<'_> {
 
         for (_id, mut data) in data {
             let Value::Array(data) = data["comments"].take() else {
-                return Err(Error::InvalidResponse(
-                    "invalid service response to comment request".to_string(),
-                ));
+                return Err(Error::InvalidResponse("comment request".to_string()));
             };
 
             // deserialize and filter comments

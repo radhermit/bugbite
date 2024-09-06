@@ -79,7 +79,7 @@ impl RequestSend for Request<'_> {
         let mut data = self.service.parse_response(response).await?;
         let Value::Array(data) = data["attachments"].take() else {
             return Err(Error::InvalidResponse(
-                "invalid service response to attachment update request".to_string(),
+                "attachment update request".to_string(),
             ));
         };
 

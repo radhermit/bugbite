@@ -100,9 +100,7 @@ impl RequestSend for Request<'_> {
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let Value::Array(data) = data["bugs"].take() else {
-            return Err(Error::InvalidResponse(
-                "invalid service response to get request".to_string(),
-            ));
+            return Err(Error::InvalidResponse("get request".to_string()));
         };
 
         // parse data requests

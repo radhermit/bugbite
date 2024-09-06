@@ -25,9 +25,7 @@ impl RequestSend for Request<'_> {
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let Value::String(version) = data["version"].take() else {
-            return Err(Error::InvalidResponse(
-                "invalid service response to version request".to_string(),
-            ));
+            return Err(Error::InvalidResponse("version request".to_string()));
         };
 
         Ok(version)

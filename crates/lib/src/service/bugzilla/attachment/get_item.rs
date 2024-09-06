@@ -78,9 +78,7 @@ impl RequestSend for Request<'_> {
         let mut attachments = vec![];
         for (id, values) in data {
             let Value::Array(data) = values else {
-                return Err(Error::InvalidResponse(
-                    "invalid service response to attachment get request".to_string(),
-                ));
+                return Err(Error::InvalidResponse("attachment get request".to_string()));
             };
 
             let mut bug_attachments = vec![];
