@@ -67,7 +67,7 @@ macro_rules! stringify {
 use stringify;
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
-pub enum RangeOrValue<T: PartialEq + Eq> {
+pub enum RangeOrValue<T: Eq> {
     Value(T),
     RangeOp(RangeOp<T>),
     Range(Range<T>),
@@ -107,7 +107,7 @@ static RANGE_OP_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"^(?<op>[<>]=?|!?=)(?<value>.+)$").unwrap());
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
-pub enum RangeOp<T: PartialEq + Eq> {
+pub enum RangeOp<T: Eq> {
     Less(T),
     LessOrEqual(T),
     Equal(T),
@@ -159,7 +159,7 @@ impl<T: fmt::Display + Eq> fmt::Display for RangeOp<T> {
 }
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
-pub enum Range<T: PartialEq + Eq> {
+pub enum Range<T: Eq> {
     Range(std::ops::Range<T>),                  // 0..1
     Inclusive(std::ops::RangeInclusive<T>),     // 0..=1
     To(std::ops::RangeTo<T>),                   // ..1
