@@ -16,7 +16,7 @@ use clap::Args;
 
 use crate::service::output::render_search;
 use crate::service::TemplateOptions;
-use crate::utils::{launch_browser, prefix};
+use crate::utils::launch_browser;
 
 #[derive(Clone, Debug)]
 struct ExistsOrMatches(ExistsOrValues<Match>);
@@ -631,7 +631,7 @@ impl From<Params> for Parameters {
                 x.into_iter()
                     .map(|s| {
                         let (name, value) = s.split_once('=').unwrap_or((&s, "true"));
-                        (prefix!("cf_", name), value.parse().unwrap())
+                        (name.to_string(), value.parse().unwrap())
                     })
                     .collect()
             }),

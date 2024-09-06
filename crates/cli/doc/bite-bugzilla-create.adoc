@@ -94,12 +94,12 @@ options.
     Set custom fields.
 +
 Custom field names must match the raw values used by bugzilla itself in the form of
-`cf_custom_field_name` with the `cf_` prefix being optional for bite usage.
+`cf_custom_field_name`.
 +
 Multiple arguments can be specified via multiple options.
 +
 .Create bug with custom field:
- bite bugzilla create --cf stabilisation_atoms '=cat/pkg-1'
+ bite bugzilla create --cf cf_stabilisation_atoms '=cat/pkg-1'
 
 *-d, --depends* <id[,...]>::
     Set dependencies.

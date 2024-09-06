@@ -11,7 +11,7 @@ use clap::Args;
 use itertools::Itertools;
 
 use crate::service::TemplateOptions;
-use crate::utils::{prefix, verbose};
+use crate::utils::verbose;
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
@@ -155,12 +155,9 @@ impl From<Params> for Parameters {
             version: value.version,
             whiteboard: value.whiteboard,
 
-            custom_fields: value.custom_fields.map(|x| {
-                x.into_iter()
-                    .tuples()
-                    .map(|(k, v)| (prefix!("cf_", k), v))
-                    .collect()
-            }),
+            custom_fields: value
+                .custom_fields
+                .map(|x| x.into_iter().tuples().collect()),
         }
     }
 }
