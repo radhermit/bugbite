@@ -1,7 +1,6 @@
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 
-use camino::Utf8PathBuf;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -17,7 +16,6 @@ use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
     Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, RequestTemplate, WebService,
 };
-use crate::utils::config_dir;
 use crate::Error;
 
 #[derive(Serialize, Debug, Clone)]
@@ -183,13 +181,11 @@ impl RequestStream for Request<'_> {
 impl RequestTemplate for Request<'_> {
     type Template = Parameters;
 
-    fn path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
-        if let Some(service_name) = self.service.config.name() {
-            let path = format!("templates/{service_name}/search/{name}");
-            config_dir().map(|x| x.join(path))
-        } else {
-            Ok(Utf8PathBuf::from(name))
-        }
+    fn config_path(&self, name: &str) -> Option<String> {
+        self.service
+            .config
+            .name()
+            .map(|x| format!("templates/{x}/search/{name}"))
     }
 }
 

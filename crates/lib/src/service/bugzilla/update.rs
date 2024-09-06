@@ -16,7 +16,6 @@ use crate::service::bugzilla::Service;
 use crate::traits::{
     Contains, InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService,
 };
-use crate::utils::config_dir;
 use crate::Error;
 
 /// Changes made to a field.
@@ -153,13 +152,11 @@ impl RequestSend for Request<'_> {
 impl RequestTemplate for Request<'_> {
     type Template = Parameters;
 
-    fn path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
-        if let Some(service_name) = self.service.config.name() {
-            let path = format!("templates/{service_name}/update/{name}");
-            config_dir().map(|x| x.join(path))
-        } else {
-            Ok(Utf8PathBuf::from(name))
-        }
+    fn config_path(&self, name: &str) -> Option<String> {
+        self.service
+            .config
+            .name()
+            .map(|x| format!("templates/{x}/update/{name}"))
     }
 }
 

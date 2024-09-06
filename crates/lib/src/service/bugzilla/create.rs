@@ -1,6 +1,5 @@
 use std::fmt;
 
-use camino::Utf8PathBuf;
 use indexmap::IndexMap;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -9,7 +8,6 @@ use serde_with::skip_serializing_none;
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService};
-use crate::utils::config_dir;
 use crate::Error;
 
 #[derive(Serialize, Debug)]
@@ -42,13 +40,11 @@ impl RequestSend for Request<'_> {
 impl RequestTemplate for Request<'_> {
     type Template = Parameters;
 
-    fn path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
-        if let Some(service_name) = self.service.config.name() {
-            let path = format!("templates/{service_name}/create/{name}");
-            config_dir().map(|x| x.join(path))
-        } else {
-            Ok(Utf8PathBuf::from(name))
-        }
+    fn config_path(&self, name: &str) -> Option<String> {
+        self.service
+            .config
+            .name()
+            .map(|x| format!("templates/{x}/create/{name}"))
     }
 }
 

@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::service::ServiceKind;
+use crate::utils::config_dir;
 use crate::Error;
 
 /// Return true if a type contains a given object, otherwise false.
@@ -143,10 +144,15 @@ pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone {
 pub trait RequestTemplate: Serialize {
     type Template: for<'a> Deserialize<'a>;
 
-    fn path(&self, name: &str) -> crate::Result<Utf8PathBuf>;
+    fn config_path(&self, name: &str) -> Option<String>;
 
     fn load_template(&self, name: &str) -> crate::Result<Self::Template> {
-        let path = self.path(name)?;
+        let path = if let Some(path) = self.config_path(name) {
+            config_dir()?.join(path)
+        } else {
+            Utf8PathBuf::from(name)
+        };
+
         let data = fs::read_to_string(&path)
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
         toml::from_str(&data)
@@ -159,7 +165,12 @@ pub trait RequestTemplate: Serialize {
         if name == "-" {
             write!(stdout(), "{data}")?;
         } else {
-            let path = self.path(name)?;
+            let path = if let Some(path) = self.config_path(name) {
+                config_dir()?.join(path)
+            } else {
+                Utf8PathBuf::from(name)
+            };
+
             fs::create_dir_all(path.parent().expect("invalid template path"))
                 .map_err(|e| Error::IO(format!("failed created template dir: {e}")))?;
             fs::write(&path, data)
