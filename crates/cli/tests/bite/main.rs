@@ -121,9 +121,16 @@ async fn doc() {
                     }
 
                     let cmd_str = args.iter().join(" ");
-                    if let Err(e) = cmd(cmd_str).assert().try_success() {
+                    let cmd_result = cmd(cmd_str).assert();
+                    let output = cmd_result.get_output();
+                    let stderr = std::str::from_utf8(&output.stderr).unwrap().trim();
+                    // ignore command errors requiring multiple responses
+                    let invalid_response = stderr.starts_with("Error: invalid service response: ");
+                    // ignore command errors trying to read files
+                    let missing_file = stderr.ends_with(": No such file or directory (os error 2)");
+                    if !output.status.success() && (!invalid_response && !missing_file) {
                         panic!(
-                            "failed running: {s}\nfile: {name}, line {}\n{e}",
+                            "failed running: {s}\nfile: {name}, line {}\nstderr: {stderr}",
                             lineno + 1
                         );
                     }
