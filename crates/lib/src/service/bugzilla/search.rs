@@ -387,7 +387,16 @@ impl<'a> Request<'a> {
         }
 
         if let Some(values) = &self.params.ids {
-            query.or(|query| values.iter().for_each(|x| query.id(x)));
+            query.or(|query| {
+                for value in values {
+                    match value {
+                        ExistsOrValues::Exists(value) => query.exists("bug_id", *value),
+                        ExistsOrValues::Values(values) => {
+                            query.and(|query| values.iter().for_each(|x| query.ids(x)))
+                        }
+                    }
+                }
+            });
         }
 
         if let Some(values) = &self.params.priority {
@@ -814,6 +823,18 @@ impl<'a> Request<'a> {
         self
     }
 
+    pub fn ids<T>(mut self, value: T) -> Self
+    where
+        T: Into<ExistsOrValues<RangeOrValue<i64>>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .ids
+            .get_or_insert_with(Default::default)
+            .push(value.into());
+        self
+    }
+
     pub fn created(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
         self.params.created = Some(value);
         self
@@ -896,7 +917,7 @@ pub struct Parameters {
 
     pub blocks: Option<Vec<ExistsOrValues<RangeOrValue<i64>>>>,
     pub depends: Option<Vec<ExistsOrValues<RangeOrValue<i64>>>>,
-    pub ids: Option<Vec<RangeOrValue<i64>>>,
+    pub ids: Option<Vec<ExistsOrValues<RangeOrValue<i64>>>>,
     pub priority: Option<Vec<Match>>,
     pub severity: Option<Vec<Match>>,
     pub version: Option<Vec<Match>>,
@@ -1237,7 +1258,7 @@ impl<const N: usize> From<[i64; N]> for ExistsOrValues<RangeOrValue<i64>> {
 }
 
 impl QueryBuilder<'_> {
-    fn id(&mut self, value: &RangeOrValue<i64>) {
+    fn ids(&mut self, value: &RangeOrValue<i64>) {
         match value {
             RangeOrValue::Value(value) => {
                 if *value >= 0 {
@@ -2294,5 +2315,18 @@ mod tests {
         service.search().depends(..=20).send().await.unwrap();
         service.search().depends(10..).send().await.unwrap();
         service.search().depends(..).send().await.unwrap();
+
+        // ids
+        service.search().ids(true).send().await.unwrap();
+        service.search().ids(false).send().await.unwrap();
+        service.search().ids(1).send().await.unwrap();
+        service.search().ids(-1).send().await.unwrap();
+        service.search().ids([1, -2]).send().await.unwrap();
+        service.search().ids(10..20).send().await.unwrap();
+        service.search().ids(10..=20).send().await.unwrap();
+        service.search().ids(..20).send().await.unwrap();
+        service.search().ids(..=20).send().await.unwrap();
+        service.search().ids(10..).send().await.unwrap();
+        service.search().ids(..).send().await.unwrap();
     }
 }

@@ -168,7 +168,7 @@ struct AttributeOptions {
 
     /// restrict by ID
     #[arg(long, num_args = 1, value_name = "ID[,...]", value_delimiter = ',')]
-    id: Option<Vec<MaybeStdinVec<RangeOrValue<i64>>>>,
+    id: Option<Vec<ExistsOrValues<MaybeStdinVec<RangeOrValue<i64>>>>>,
 
     /// restrict by keyword
     #[arg(
@@ -534,7 +534,10 @@ impl From<Params> for Parameters {
                 .attr
                 .depends
                 .map(|x| x.into_iter().map(|x| x.flatten()).collect()),
-            ids: value.attr.id.map(|x| x.into_iter().flatten().collect()),
+            ids: value
+                .attr
+                .id
+                .map(|x| x.into_iter().map(|x| x.flatten()).collect()),
             priority: value.attr.priority.map(|x| x.into_inner()),
             severity: value.attr.severity.map(|x| x.into_inner()),
             version: value.attr.version.map(|x| x.into_inner()),
