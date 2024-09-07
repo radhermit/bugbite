@@ -98,12 +98,20 @@ async fn no_matches() {
 async fn template() {
     let server = start_server().await;
 
+    // output template to stdout
+    cmd("bite bugzilla search -c 1d -n")
+        .args(["--to", "-"])
+        .assert()
+        .stdout(predicate::str::diff("created = \"1d\"").trim())
+        .stderr("")
+        .success();
+
     let dir = tempdir().unwrap();
     let path = dir.path().join("template");
     let path = path.to_str().unwrap();
 
-    // create template
-    cmd("bite bugzilla search --dry-run test")
+    // save template to a specific path
+    cmd("bite bugzilla search -c 1d -n")
         .args(["--to", path])
         .assert()
         .stdout("")
@@ -114,6 +122,7 @@ async fn template() {
         .respond(200, TEST_DATA.join("search/nonexistent.json"))
         .await;
 
+    // load template
     cmd("bite bugzilla search")
         .args(["--from", path])
         .assert()
