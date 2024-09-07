@@ -256,7 +256,6 @@ mod tests {
         // create temporary config dir
         let dir = tempdir().unwrap();
         env::set_current_dir(dir.path()).unwrap();
-        env::set_var("HOME", dir.path());
         let path = dir.path().join("dir/template");
         let path_str = path.to_str().unwrap();
 
@@ -282,12 +281,29 @@ mod tests {
         service.config.name = "service".to_string();
         let time = "2d".parse().unwrap();
         let request = service.search().created(time);
-        request.save_template("test").unwrap();
-        assert_eq!(
-            fs::read_to_string(".config/bugbite/templates/service/search/test")
-                .unwrap()
-                .trim(),
-            r#"created = "2d""#
-        );
+
+        // depends on linux specific config dir handling
+        if cfg!(target_os = "linux") {
+            // $XDG_CONFIG_HOME takes precedence over $HOME
+            env::set_var("HOME", dir.path());
+            env::set_var("XDG_CONFIG_HOME", dir.path());
+            request.save_template("test").unwrap();
+            assert_eq!(
+                fs::read_to_string("bugbite/templates/service/search/test")
+                    .unwrap()
+                    .trim(),
+                r#"created = "2d""#
+            );
+
+            // $HOME is used when $XDG_CONFIG_HOME is unset
+            env::remove_var("XDG_CONFIG_HOME");
+            request.save_template("test").unwrap();
+            assert_eq!(
+                fs::read_to_string(".config/bugbite/templates/service/search/test")
+                    .unwrap()
+                    .trim(),
+                r#"created = "2d""#
+            );
+        }
     }
 }
