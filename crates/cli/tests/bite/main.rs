@@ -2,6 +2,7 @@ use std::{env, fs};
 
 use bugbite::test::{build_path, TestServer};
 use camino::Utf8PathBuf;
+use indexmap::IndexSet;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use predicates::prelude::*;
@@ -77,6 +78,13 @@ async fn doc() {
     let doc_dir = build_path!(env!("CARGO_MANIFEST_DIR"), "doc");
     let data_dir = TEST_DATA_PATH.join("bugbite");
 
+    // command targets to test with templating
+    let templates = [
+        "bite-bugzilla-search",
+        "bite-bugzilla-create",
+        "bite-bugzilla-update",
+    ];
+
     for entry in doc_dir.read_dir_utf8().unwrap() {
         let entry = entry.unwrap();
         let path = entry.path();
@@ -104,9 +112,10 @@ async fn doc() {
             for (lineno, line) in doc.lines().enumerate().filter(|(_, x)| x.starts_with(' ')) {
                 for s in line.trim().split(" | ").filter(|x| x.starts_with(&cmd_str)) {
                     let args = shlex::split(s).unwrap();
+                    let args: IndexSet<_> = args.iter().map(|x| x.as_str()).collect();
 
                     // skip commands reading from stdin
-                    if args.iter().any(|x| x == "-") {
+                    if args.contains("-") {
                         continue;
                     }
 
@@ -133,6 +142,34 @@ async fn doc() {
                             "failed running: {s}\nfile: {name}, line {}\nstderr: {stderr}",
                             lineno + 1
                         );
+                    }
+
+                    // test templates for working commands
+                    if output.status.success()
+                        && templates.contains(&stem)
+                        && !(args.contains("--to") || args.contains("--from"))
+                    {
+                        // save template
+                        let mut save_args = args.clone();
+                        save_args.extend(["-n", "--to", "template"]);
+                        let cmd_str = save_args.iter().join(" ");
+                        if cmd(cmd_str).assert().try_success().is_err() {
+                            panic!(
+                                "failed saving template: {s}\nfile: {name}, line {}",
+                                lineno + 1
+                            );
+                        }
+
+                        // load template
+                        let mut load_args = args.clone();
+                        load_args.extend(["--from", "template"]);
+                        let cmd_str = load_args.iter().join(" ");
+                        if cmd(cmd_str).assert().try_success().is_err() {
+                            panic!(
+                                "failed loading template: {s}\nfile: {name}, line {}",
+                                lineno + 1
+                            );
+                        }
                     }
                 }
             }
