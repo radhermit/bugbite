@@ -1902,19 +1902,7 @@ impl Api for Order<OrderField> {
 }
 
 /// Valid static change fields.
-#[derive(
-    AsRefStr,
-    Display,
-    EnumIter,
-    EnumString,
-    DeserializeFromStr,
-    SerializeDisplay,
-    Debug,
-    PartialEq,
-    Eq,
-    Clone,
-    Copy,
-)]
+#[derive(AsRefStr, Display, EnumIter, EnumString)]
 #[strum(serialize_all = "kebab-case")]
 pub enum StaticChangeField {
     Alias,
@@ -1978,19 +1966,9 @@ impl Api for StaticChangeField {
 }
 
 /// Valid change fields.
-#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub enum ChangeField {
     Static(StaticChangeField),
     Custom(String),
-}
-
-impl fmt::Display for ChangeField {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Static(value) => value.fmt(f),
-            Self::Custom(value) => value.fmt(f),
-        }
-    }
 }
 
 impl FromStr for ChangeField {
@@ -2245,13 +2223,13 @@ mod tests {
         // change related combinators
         for field in StaticChangeField::iter() {
             // ever changed
-            service.search().changed(field).send().await.unwrap();
+            service.search().changed(&field).send().await.unwrap();
 
             // changed at a certain time
             for time in &times {
                 service
                     .search()
-                    .changed_at(field, time.parse().unwrap())
+                    .changed_at(&field, time.parse().unwrap())
                     .send()
                     .await
                     .unwrap();
@@ -2261,7 +2239,7 @@ mod tests {
             for time in ["=2020", "!=2020-02-01", "=1d", "!=1w"] {
                 assert!(service
                     .search()
-                    .changed_at(field, time.parse().unwrap())
+                    .changed_at(&field, time.parse().unwrap())
                     .send()
                     .await
                     .is_err());
@@ -2270,7 +2248,7 @@ mod tests {
             // changed by certain user(s)
             service
                 .search()
-                .changed_by(field, ["user1", "user2"])
+                .changed_by(&field, ["user1", "user2"])
                 .send()
                 .await
                 .unwrap();
@@ -2278,7 +2256,7 @@ mod tests {
             // changed from certain value
             service
                 .search()
-                .changed_from(field, "value")
+                .changed_from(&field, "value")
                 .send()
                 .await
                 .unwrap();
@@ -2286,7 +2264,7 @@ mod tests {
             // changed to certain value
             service
                 .search()
-                .changed_to(field, "value")
+                .changed_to(&field, "value")
                 .send()
                 .await
                 .unwrap();
