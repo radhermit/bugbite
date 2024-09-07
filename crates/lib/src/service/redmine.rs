@@ -178,7 +178,10 @@ impl<'a> WebService<'a> for Service {
         match response.error_for_status_ref() {
             Ok(_) => {
                 let mut data: serde_json::Value = response.json().await?;
-                debug!("{data}");
+                debug!(
+                    "response data:\n{}",
+                    serde_json::to_string_pretty(&data).unwrap()
+                );
                 let errors = data["errors"].take();
                 if !errors.is_null() {
                     let errors: Vec<_> = serde_json::from_value(errors).map_err(|e| {
@@ -192,7 +195,7 @@ impl<'a> WebService<'a> for Service {
             }
             Err(e) => {
                 if let Ok(mut data) = response.json::<serde_json::Value>().await {
-                    debug!("{data}");
+                    debug!("error:\n{}", serde_json::to_string_pretty(&data).unwrap());
                     let errors = data["errors"].take();
                     if !errors.is_null() {
                         let errors: Vec<_> = serde_json::from_value(errors).map_err(|e| {

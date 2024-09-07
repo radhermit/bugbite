@@ -302,13 +302,16 @@ impl<'a> WebService<'a> for Service {
         match response.error_for_status_ref() {
             Ok(_) => {
                 let data: serde_json::Value = response.json().await?;
-                debug!("{data}");
+                debug!(
+                    "response data:\n{}",
+                    serde_json::to_string_pretty(&data).unwrap()
+                );
                 return_if_error!(&data);
                 Ok(data)
             }
             Err(e) => {
                 if let Ok(data) = response.json::<serde_json::Value>().await {
-                    debug!("{data}");
+                    debug!("error:\n{}", serde_json::to_string_pretty(&data).unwrap());
                     return_if_error!(&data);
                 }
                 Err(e.into())
