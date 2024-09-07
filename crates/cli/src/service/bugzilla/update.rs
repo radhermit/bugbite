@@ -359,8 +359,7 @@ impl Command {
         // read attributes from templates
         if let Some(names) = &self.template.from {
             for name in names {
-                let params = request.load_template(name)?;
-                request.params.merge(params);
+                request.load_template(name)?;
             }
         }
 

@@ -124,11 +124,12 @@ pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone {
 }
 
 pub trait RequestTemplate: Serialize {
-    type Template: for<'a> Deserialize<'a>;
+    type Params: for<'a> Deserialize<'a> + Merge;
     type Service: WebClient;
     const TYPE: &'static str;
 
     fn service(&self) -> &Self::Service;
+    fn params(&mut self) -> &mut Self::Params;
 
     /// Return the config path for a template file.
     fn config_path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
@@ -142,7 +143,7 @@ pub trait RequestTemplate: Serialize {
     }
 
     /// Load a request template using the given name.
-    fn load_template(&self, s: &str) -> crate::Result<Self::Template> {
+    fn load_template(&mut self, s: &str) -> crate::Result<()> {
         let name = s.trim();
         if name.is_empty() {
             return Err(Error::InvalidValue(format!("invalid template name: {s:?}")));
@@ -151,8 +152,11 @@ pub trait RequestTemplate: Serialize {
         let path = self.config_path(name)?;
         let data = fs::read_to_string(&path)
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {name}: {e}")))?;
-        toml::from_str(&data)
-            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {name}: {e}")))
+        let params = toml::from_str(&data)
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {name}: {e}")))?;
+        self.params().merge(params);
+
+        Ok(())
     }
 
     /// Save a request template using the given name.

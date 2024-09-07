@@ -179,12 +179,16 @@ impl RequestStream for Request<'_> {
 }
 
 impl RequestTemplate for Request<'_> {
-    type Template = Parameters;
+    type Params = Parameters;
     type Service = Service;
     const TYPE: &'static str = "search";
 
     fn service(&self) -> &Self::Service {
         self.service
+    }
+
+    fn params(&mut self) -> &mut Self::Params {
+        &mut self.params
     }
 }
 

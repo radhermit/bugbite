@@ -192,8 +192,7 @@ impl Command {
         // merge attributes from templates or bug
         if let Some(names) = &self.template.from {
             for name in names {
-                let params = request.load_template(name)?;
-                request.params.merge(params);
+                request.load_template(name)?;
             }
         } else if let Some(id) = self.options.from_bug {
             let bug = service
