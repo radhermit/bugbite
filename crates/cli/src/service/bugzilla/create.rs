@@ -189,10 +189,12 @@ impl Command {
     {
         let mut request = service.create();
 
-        // merge attributes from template or bug
-        if let Some(name) = self.template.from.as_deref() {
-            let params = request.load_template(name)?;
-            request.params.merge(params);
+        // merge attributes from templates or bug
+        if let Some(names) = &self.template.from {
+            for name in names {
+                let params = request.load_template(name)?;
+                request.params.merge(params);
+            }
         } else if let Some(id) = self.options.from_bug {
             let bug = service
                 .get([id])

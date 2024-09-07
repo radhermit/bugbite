@@ -59,9 +59,9 @@ pub(super) struct TemplateOptions {
     #[arg(short = 'n', long)]
     dry_run: bool,
 
-    /// read attributes from template
-    #[arg(long, value_name = "NAME")]
-    from: Option<String>,
+    /// read attributes from templates
+    #[arg(long, value_name = "NAME[,...]", value_delimiter = ',')]
+    from: Option<Vec<String>>,
 
     /// write attributes to template
     #[arg(long, value_name = "NAME")]

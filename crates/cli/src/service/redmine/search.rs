@@ -198,10 +198,12 @@ impl Command {
     {
         let mut request = service.search();
 
-        // read attributes from template
-        if let Some(name) = self.template.from.as_deref() {
-            let params = request.load_template(name)?;
-            request.params.merge(params);
+        // read attributes from templates
+        if let Some(names) = &self.template.from {
+            for name in names {
+                let params = request.load_template(name)?;
+                request.params.merge(params);
+            }
         }
 
         // command line parameters override template
