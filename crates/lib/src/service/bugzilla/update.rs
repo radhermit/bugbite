@@ -358,92 +358,6 @@ impl<T: fmt::Display> fmt::Display for SetChange<T> {
     }
 }
 
-#[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
-struct SetChanges<T> {
-    add: Option<Vec<T>>,
-    remove: Option<Vec<T>>,
-    set: Option<Vec<T>>,
-}
-
-impl<'a, T: FromStr> FromIterator<&'a SetChange<T>> for SetChanges<&'a T> {
-    fn from_iter<I: IntoIterator<Item = &'a SetChange<T>>>(iterable: I) -> Self {
-        let (mut add, mut remove, mut set) = (vec![], vec![], vec![]);
-        for change in iterable {
-            match change {
-                SetChange::Add(value) => add.push(value),
-                SetChange::Remove(value) => remove.push(value),
-                SetChange::Set(value) => set.push(value),
-            }
-        }
-
-        let set = if !set.is_empty() || (add.is_empty() && remove.is_empty()) {
-            Some(set)
-        } else {
-            None
-        };
-
-        Self {
-            add: Some(add),
-            remove: Some(remove),
-            set,
-        }
-    }
-}
-
-#[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Eq, PartialEq)]
-struct Changes<T> {
-    add: Option<Vec<T>>,
-    remove: Option<Vec<T>>,
-}
-
-impl<T> FromIterator<SetChange<T>> for Changes<T> {
-    fn from_iter<I: IntoIterator<Item = SetChange<T>>>(iterable: I) -> Self {
-        let (mut add, mut remove) = (vec![], vec![]);
-        for change in iterable {
-            match change {
-                SetChange::Add(value) | SetChange::Set(value) => add.push(value),
-                SetChange::Remove(value) => remove.push(value),
-            }
-        }
-
-        Self {
-            add: Some(add),
-            remove: Some(remove),
-        }
-    }
-}
-
-impl<'a, T> FromIterator<&'a SetChange<T>> for Changes<&'a T> {
-    fn from_iter<I: IntoIterator<Item = &'a SetChange<T>>>(iterable: I) -> Self {
-        let (mut add, mut remove) = (vec![], vec![]);
-        for change in iterable {
-            match change {
-                SetChange::Add(value) | SetChange::Set(value) => add.push(value),
-                SetChange::Remove(value) => remove.push(value),
-            }
-        }
-
-        Self {
-            add: Some(add),
-            remove: Some(remove),
-        }
-    }
-}
-
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq)]
-struct Comment<'a> {
-    body: Cow<'a, str>,
-    is_private: bool,
-}
-
-impl fmt::Display for Comment<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.body)
-    }
-}
-
 /// Bug update parameters.
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
@@ -517,12 +431,93 @@ impl Merge for Parameters {
     }
 }
 
+#[skip_serializing_none]
+#[derive(Serialize)]
+struct SetChanges<T> {
+    add: Option<Vec<T>>,
+    remove: Option<Vec<T>>,
+    set: Option<Vec<T>>,
+}
+
+impl<'a, T: FromStr> FromIterator<&'a SetChange<T>> for SetChanges<&'a T> {
+    fn from_iter<I: IntoIterator<Item = &'a SetChange<T>>>(iterable: I) -> Self {
+        let (mut add, mut remove, mut set) = (vec![], vec![], vec![]);
+        for change in iterable {
+            match change {
+                SetChange::Add(value) => add.push(value),
+                SetChange::Remove(value) => remove.push(value),
+                SetChange::Set(value) => set.push(value),
+            }
+        }
+
+        let set = if !set.is_empty() || (add.is_empty() && remove.is_empty()) {
+            Some(set)
+        } else {
+            None
+        };
+
+        Self {
+            add: Some(add),
+            remove: Some(remove),
+            set,
+        }
+    }
+}
+
+#[skip_serializing_none]
+#[derive(Serialize)]
+struct Changes<T> {
+    add: Option<Vec<T>>,
+    remove: Option<Vec<T>>,
+}
+
+impl<T> FromIterator<SetChange<T>> for Changes<T> {
+    fn from_iter<I: IntoIterator<Item = SetChange<T>>>(iterable: I) -> Self {
+        let (mut add, mut remove) = (vec![], vec![]);
+        for change in iterable {
+            match change {
+                SetChange::Add(value) | SetChange::Set(value) => add.push(value),
+                SetChange::Remove(value) => remove.push(value),
+            }
+        }
+
+        Self {
+            add: Some(add),
+            remove: Some(remove),
+        }
+    }
+}
+
+impl<'a, T> FromIterator<&'a SetChange<T>> for Changes<&'a T> {
+    fn from_iter<I: IntoIterator<Item = &'a SetChange<T>>>(iterable: I) -> Self {
+        let (mut add, mut remove) = (vec![], vec![]);
+        for change in iterable {
+            match change {
+                SetChange::Add(value) | SetChange::Set(value) => add.push(value),
+                SetChange::Remove(value) => remove.push(value),
+            }
+        }
+
+        Self {
+            add: Some(add),
+            remove: Some(remove),
+        }
+    }
+}
+
+/// Comment field for bug update request parameters.
+#[derive(Serialize)]
+struct Comment<'a> {
+    body: Cow<'a, str>,
+    is_private: bool,
+}
+
 /// Internal bug update request parameters.
 ///
 /// See https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#update-bug for more
 /// information.
 #[skip_serializing_none]
-#[derive(Serialize, Default, Eq, PartialEq)]
+#[derive(Serialize, Default)]
 struct RequestParameters<'a> {
     ids: &'a [String],
     alias: Option<SetChanges<&'a String>>,
