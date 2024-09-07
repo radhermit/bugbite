@@ -1,5 +1,5 @@
 use predicates::prelude::*;
-use tempfile::{tempdir, NamedTempFile};
+use tempfile::NamedTempFile;
 use wiremock::matchers;
 
 use crate::command::cmd;
@@ -94,9 +94,8 @@ async fn no_changes() {
 async fn template() {
     let server = start_server_with_auth().await;
 
-    let dir = tempdir().unwrap();
-    let path = dir.path().join("template");
-    let path = path.to_str().unwrap();
+    let file = NamedTempFile::new().unwrap();
+    let path = file.path().to_str().unwrap();
 
     // create template
     cmd("bite bugzilla update --dry-run")
@@ -435,10 +434,28 @@ async fn comment_privacy() {
         .failure()
         .code(1);
 
+    let file = NamedTempFile::new().unwrap();
+    let path = file.path().to_str().unwrap();
+
     // various values for targeted comments and comment ranges
     for arg in ["1", "1,2", "..", "1,2:false", "2..=5:true"] {
         cmd("bite bugzilla update 1")
             .args(["--comment-privacy", arg])
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+
+        // template support
+        cmd("bite bugzilla update 1")
+            .args(["--comment-privacy", arg])
+            .args(["-n", "--to", path])
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+        cmd("bite bugzilla update 1")
+            .args(["--from", path])
             .assert()
             .stdout("")
             .stderr("")
