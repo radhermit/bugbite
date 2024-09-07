@@ -302,7 +302,7 @@ impl<'a> QueryBuilder<'a> {
             return Err(Error::InvalidValue(
                 "multiple ID ranges specified".to_string(),
             ));
-        } else if let Some(value) = ranges.get(0) {
+        } else if let Some(value) = ranges.first() {
             match value {
                 RangeOrValue::RangeOp(value) => self.range_op("issue_id", value),
                 RangeOrValue::Range(value) => self.range("issue_id", value),
@@ -504,6 +504,8 @@ mod tests {
             .respond(200, path.join("search/nonexistent.json"))
             .await;
 
+        let op_ranges = ["<10", "<=10", "=10", "!=10", ">=10", ">10"];
+
         // ids
         service.search().id(1).send().await.unwrap();
         service.search().id(10..20).send().await.unwrap();
@@ -512,6 +514,10 @@ mod tests {
         service.search().id(..=20).send().await.unwrap();
         service.search().id(10..).send().await.unwrap();
         service.search().id(..).send().await.unwrap();
+        for s in &op_ranges {
+            let range: RangeOrValue<u64> = s.parse().unwrap();
+            service.search().id(range).send().await.unwrap();
+        }
 
         // order
         for field in OrderField::iter() {
