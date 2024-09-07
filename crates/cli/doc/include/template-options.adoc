@@ -3,10 +3,21 @@
 Template files use the TOML format and generally map long option names to
 values. Explicitly specified options override corresponding template values.
 
-Using `-n/--dry-run` allows creating templates without service interaction.
+Templates names without path separators are sourced from
+`${HOME}/.config/bugbite/templates/${CONNECTION}/${COMMAND}/${NAME}` (with
+$XDG_CONFIG_HOME as a fallback) where $CONNECTION is the current connection
+name, $COMMAND is the subcommand name, and $NAME is the requested template
+name. For example, `bite bugzilla -c gentoo search -n -c 1d --to test` would
+save a template to `${HOME}/.config/bugbite/templates/gentoo/search/test` while
+`bite bugzilla -c gentoo search --from test` would load it for use.
+
+Template names with path separators are treated as relative paths in the
+current working directory.
 
 *-n, --dry-run*::
     Skip service interaction.
++
+Using `-n/--dry-run` allows creating templates without service interaction.
 
 *--from <name>*::
     Read request attributes from a template.
