@@ -2169,6 +2169,25 @@ mod tests {
         // values using all match operator variants
         let matches: Vec<_> = MatchOp::iter().map(|op| format!("{op} value")).collect();
 
+        // valid TimeDeltaOrStatic values
+        let times = vec![
+            "2020",
+            "2020-02",
+            "2020-02-01",
+            "2020-02-01T01:02:03Z",
+            "1h",
+            "<1d",
+            "<=1w",
+            ">=1m",
+            ">1y",
+            "2020..2021",
+            "2020..=2021",
+            "..2021",
+            "..=2021",
+            "2021..",
+            "..",
+        ];
+
         // alias
         service.search().alias(true).send().await.unwrap();
         service.search().alias(false).send().await.unwrap();
@@ -2229,23 +2248,7 @@ mod tests {
             service.search().changed(field).send().await.unwrap();
 
             // changed at a certain time
-            for time in [
-                "2020",
-                "2020-02",
-                "2020-02-01",
-                "2020-02-01T01:02:03Z",
-                "1h",
-                "<1d",
-                "<=1w",
-                ">=1m",
-                ">1y",
-                "2020..2021",
-                "2020..=2021",
-                "..2021",
-                "..=2021",
-                "2021..",
-                "..",
-            ] {
+            for time in &times {
                 service
                     .search()
                     .changed_at(field, time.parse().unwrap())
@@ -2381,5 +2384,32 @@ mod tests {
         service.search().ids(..=20).send().await.unwrap();
         service.search().ids(10..).send().await.unwrap();
         service.search().ids(..).send().await.unwrap();
+
+        // time related combinators
+        for time in &times {
+            // created
+            service
+                .search()
+                .created(time.parse().unwrap())
+                .send()
+                .await
+                .unwrap();
+
+            // updated
+            service
+                .search()
+                .updated(time.parse().unwrap())
+                .send()
+                .await
+                .unwrap();
+
+            // closed
+            service
+                .search()
+                .closed(time.parse().unwrap())
+                .send()
+                .await
+                .unwrap();
+        }
     }
 }
