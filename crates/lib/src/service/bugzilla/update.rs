@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 use std::hash::Hash;
+use std::ops::Deref;
 use std::str::FromStr;
 use std::{fmt, fs};
 
@@ -8,6 +9,7 @@ use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
+use strum::{Display, EnumString};
 use url::Url;
 
 use crate::objects::{bugzilla::Flag, Range};
@@ -357,6 +359,29 @@ impl<T: fmt::Display> fmt::Display for SetChange<T> {
     }
 }
 
+/// Tri-state boolean logic that supports (de)serialization.
+#[derive(
+    DeserializeFromStr, SerializeDisplay, Display, EnumString, Debug, PartialEq, Eq, Clone, Copy,
+)]
+#[strum(serialize_all = "kebab-case")]
+pub enum TriBool {
+    False,
+    True,
+    None,
+}
+
+impl Deref for TriBool {
+    type Target = Option<bool>;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            Self::False => &Some(false),
+            Self::True => &Some(true),
+            Self::None => &None,
+        }
+    }
+}
+
 /// Bug update parameters.
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
@@ -368,7 +393,7 @@ pub struct Parameters {
     pub comment: Option<String>,
     pub comment_from: Option<Utf8PathBuf>,
     pub comment_is_private: Option<bool>,
-    pub comment_privacy: Option<(RangeOrSet<usize>, Option<bool>)>,
+    pub comment_privacy: Option<(RangeOrSet<usize>, TriBool)>,
     pub component: Option<String>,
     pub depends: Option<Vec<SetChange<u64>>>,
     pub duplicate_of: Option<u64>,

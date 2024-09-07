@@ -7,7 +7,7 @@ use std::{fmt, fs};
 use anyhow::Context;
 use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::objects::bugzilla::Flag;
-use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange};
+use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange, TriBool};
 use bugbite::service::bugzilla::Service;
 use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use camino::Utf8PathBuf;
@@ -22,7 +22,7 @@ use crate::utils::{confirm, launch_editor, verbose};
 struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
     raw: String,
     range_or_set: Option<RangeOrSet<T>>,
-    is_private: Option<bool>,
+    is_private: TriBool,
 }
 
 impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for CommentPrivacy<T>
@@ -33,9 +33,9 @@ where
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (range_or_set, is_private) = if let Some((ids, value)) = s.split_once(':') {
-            (Some(ids.parse()?), Some(value.parse()?))
+            (Some(ids.parse()?), value.parse()?)
         } else {
-            (Some(s.parse()?), None)
+            (Some(s.parse()?), TriBool::None)
         };
 
         Ok(Self {
