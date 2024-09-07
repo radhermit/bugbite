@@ -518,6 +518,10 @@ mod tests {
             let range: RangeOrValue<u64> = s.parse().unwrap();
             service.search().id(range).send().await.unwrap();
         }
+        let err = service.search().id(10).id(10..).send().await.unwrap_err();
+        assert_err_re!(err, "IDs and ID ranges specified");
+        let err = service.search().id(..10).id(10..).send().await.unwrap_err();
+        assert_err_re!(err, "multiple ID ranges specified");
 
         // order
         for field in OrderField::iter() {
