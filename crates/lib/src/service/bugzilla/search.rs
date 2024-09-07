@@ -1050,12 +1050,13 @@ impl<'a> QueryBuilder<'a> {
 }
 
 /// Advanced field matching operators.
-#[derive(Display, EnumIter, EnumString, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, Debug, Default, PartialEq, Eq, Clone, Copy)]
 enum MatchOp {
     /// Contains case-sensitive substring.
     #[strum(serialize = "=~")]
     CaseSubstring,
     /// Contains substring.
+    #[default]
     #[strum(serialize = "~~")]
     Substring,
     /// Doesn't contain substring.
@@ -1093,7 +1094,7 @@ impl Api for MatchOp {
 /// Advanced field match.
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub struct Match {
-    op: MatchOp,
+    op: Option<MatchOp>,
     value: String,
 }
 
@@ -1105,6 +1106,10 @@ impl Match {
             value: service.replace_user_alias(&self.value).to_string(),
         }
     }
+
+    fn op(&self) -> MatchOp {
+        self.op.unwrap_or_default()
+    }
 }
 
 impl Api for Match {
@@ -1115,7 +1120,10 @@ impl Api for Match {
 
 impl fmt::Display for Match {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} {}", self.op, self.value)
+        if let Some(op) = &self.op {
+            write!(f, "{op} ")?;
+        }
+        write!(f, "{}", self.value)
     }
 }
 
@@ -1132,9 +1140,9 @@ impl From<&str> for Match {
         let values = s.split_once(' ').map(|(op, value)| (op.parse(), value));
 
         let (op, value) = if let Some((Ok(op), value)) = values {
-            (op, value.into())
+            (Some(op), value.into())
         } else {
-            (MatchOp::Substring, s.into())
+            (None, s.into())
         };
 
         Self { op, value }
@@ -1277,12 +1285,12 @@ impl QueryBuilder<'_> {
     }
 
     fn alias(&mut self, value: &Match) {
-        self.advanced_field("alias", value.op, value);
+        self.advanced_field("alias", value.op(), value);
     }
 
     fn assignee(&mut self, value: &Match) {
         let value = value.replace_user_alias(self.service);
-        self.advanced_field("assigned_to", value.op, value);
+        self.advanced_field("assigned_to", value.op(), value);
     }
 
     /// Search for attachments with matching descriptions or filenames.
@@ -1293,8 +1301,8 @@ impl QueryBuilder<'_> {
         self.insert(format!("j{num}"), "OR");
 
         for value in values {
-            self.advanced_field("attachments.description", value.op, value);
-            self.advanced_field("attachments.filename", value.op, value);
+            self.advanced_field("attachments.description", value.op(), value);
+            self.advanced_field("attachments.filename", value.op(), value);
         }
 
         self.advanced_count += 1;
@@ -1303,15 +1311,15 @@ impl QueryBuilder<'_> {
     }
 
     fn attachment_description(&mut self, value: &Match) {
-        self.advanced_field("attachments.description", value.op, value);
+        self.advanced_field("attachments.description", value.op(), value);
     }
 
     fn attachment_filename(&mut self, value: &Match) {
-        self.advanced_field("attachments.filename", value.op, value);
+        self.advanced_field("attachments.filename", value.op(), value);
     }
 
     fn attachment_mime(&mut self, value: &Match) {
-        self.advanced_field("attachments.mimetype", value.op, value);
+        self.advanced_field("attachments.mimetype", value.op(), value);
     }
 
     fn attachment_is_obsolete(&mut self, value: bool) {
@@ -1327,7 +1335,7 @@ impl QueryBuilder<'_> {
     }
 
     fn comment(&mut self, value: &Match) {
-        self.advanced_field("longdesc", value.op, value);
+        self.advanced_field("longdesc", value.op(), value);
     }
 
     fn comment_is_private(&mut self, value: bool) {
@@ -1335,20 +1343,20 @@ impl QueryBuilder<'_> {
     }
 
     fn comment_tag(&mut self, value: &Match) {
-        self.advanced_field("comment_tag", value.op, value);
+        self.advanced_field("comment_tag", value.op(), value);
     }
 
     fn qa(&mut self, value: &Match) {
-        self.advanced_field("qa_contact", value.op, value);
+        self.advanced_field("qa_contact", value.op(), value);
     }
 
     fn reporter(&mut self, value: &Match) {
         let value = value.replace_user_alias(self.service);
-        self.advanced_field("reporter", value.op, value);
+        self.advanced_field("reporter", value.op(), value);
     }
 
     fn resolution(&mut self, value: &Match) {
-        self.advanced_field("resolution", value.op, value);
+        self.advanced_field("resolution", value.op(), value);
     }
 
     fn created(&mut self, value: &RangeOrValue<TimeDeltaOrStatic>) {
@@ -1376,21 +1384,21 @@ impl QueryBuilder<'_> {
 
     fn attacher(&mut self, value: &Match) {
         let value = value.replace_user_alias(self.service);
-        self.advanced_field("attachments.submitter", value.op, value);
+        self.advanced_field("attachments.submitter", value.op(), value);
     }
 
     fn commenter(&mut self, value: &Match) {
         let value = value.replace_user_alias(self.service);
-        self.advanced_field("commenter", value.op, value);
+        self.advanced_field("commenter", value.op(), value);
     }
 
     fn flagger(&mut self, value: &Match) {
         let value = value.replace_user_alias(self.service);
-        self.advanced_field("setters.login_name", value.op, value);
+        self.advanced_field("setters.login_name", value.op(), value);
     }
 
     fn url(&mut self, value: &Match) {
-        self.advanced_field("bug_file_loc", value.op, value);
+        self.advanced_field("bug_file_loc", value.op(), value);
     }
 
     fn changed<'a, F, I>(&mut self, values: I) -> crate::Result<()>
@@ -1521,15 +1529,15 @@ impl QueryBuilder<'_> {
     }
 
     fn custom_field<F: Api>(&mut self, name: F, value: &Match) {
-        self.advanced_field(name, value.op, value);
+        self.advanced_field(name, value.op(), value);
     }
 
     fn priority(&mut self, value: &Match) {
-        self.advanced_field("priority", value.op, value);
+        self.advanced_field("priority", value.op(), value);
     }
 
     fn severity(&mut self, value: &Match) {
-        self.advanced_field("bug_severity", value.op, value);
+        self.advanced_field("bug_severity", value.op(), value);
     }
 
     fn status<S: AsRef<str>>(&mut self, value: S) {
@@ -1550,43 +1558,43 @@ impl QueryBuilder<'_> {
     }
 
     fn version(&mut self, value: &Match) {
-        self.advanced_field("version", value.op, value);
+        self.advanced_field("version", value.op(), value);
     }
 
     fn component(&mut self, value: &Match) {
-        self.advanced_field("component", value.op, value);
+        self.advanced_field("component", value.op(), value);
     }
 
     fn product(&mut self, value: &Match) {
-        self.advanced_field("product", value.op, value);
+        self.advanced_field("product", value.op(), value);
     }
 
     fn platform(&mut self, value: &Match) {
-        self.advanced_field("platform", value.op, value);
+        self.advanced_field("platform", value.op(), value);
     }
 
     fn os(&mut self, value: &Match) {
-        self.advanced_field("op_sys", value.op, value);
+        self.advanced_field("op_sys", value.op(), value);
     }
 
     fn see_also(&mut self, value: &Match) {
-        self.advanced_field("see_also", value.op, value);
+        self.advanced_field("see_also", value.op(), value);
     }
 
     fn summary(&mut self, value: &Match) {
-        self.advanced_field("short_desc", value.op, value);
+        self.advanced_field("short_desc", value.op(), value);
     }
 
     fn tags(&mut self, value: &Match) {
-        self.advanced_field("tag", value.op, value);
+        self.advanced_field("tag", value.op(), value);
     }
 
     fn target(&mut self, value: &Match) {
-        self.advanced_field("target_milestone", value.op, value);
+        self.advanced_field("target_milestone", value.op(), value);
     }
 
     fn whiteboard(&mut self, value: &Match) {
-        self.advanced_field("whiteboard", value.op, value);
+        self.advanced_field("whiteboard", value.op(), value);
     }
 
     fn votes(&mut self, value: &RangeOrValue<u64>) {
@@ -1648,20 +1656,20 @@ impl QueryBuilder<'_> {
     }
 
     fn flags(&mut self, value: &Match) {
-        self.advanced_field("flagtypes.name", value.op, value)
+        self.advanced_field("flagtypes.name", value.op(), value)
     }
 
     fn groups(&mut self, value: &Match) {
-        self.advanced_field("bug_group", value.op, value)
+        self.advanced_field("bug_group", value.op(), value)
     }
 
     fn keywords(&mut self, value: &Match) {
-        self.advanced_field("keywords", value.op, value)
+        self.advanced_field("keywords", value.op(), value)
     }
 
     fn cc(&mut self, value: &Match) {
         let value = value.replace_user_alias(self.service);
-        self.advanced_field("cc", value.op, value);
+        self.advanced_field("cc", value.op(), value);
     }
 
     fn fields<I, F>(&mut self, fields: I)
