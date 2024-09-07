@@ -276,27 +276,25 @@ impl<'a> QueryBuilder<'a> {
             .iter()
             .partition(|x| matches!(x, RangeOrValue::Value(_)));
 
-        if !ids.is_empty() && !ranges.is_empty() {
-            return Err(Error::InvalidValue(
-                "IDs and ID ranges specified".to_string(),
-            ));
-        }
-
         if !ids.is_empty() {
+            if !ranges.is_empty() {
+                return Err(Error::InvalidValue(
+                    "IDs and ID ranges specified".to_string(),
+                ));
+            }
+
             self.insert("issue_id", ids.iter().join(","));
         }
 
-        match &ranges[..] {
-            [] => (),
-            [value] => match value {
+        if ranges.len() > 1 {
+            return Err(Error::InvalidValue(
+                "multiple ID ranges specified".to_string(),
+            ));
+        } else if let Some(value) = ranges.get(0) {
+            match value {
                 RangeOrValue::RangeOp(value) => self.range_op("issue_id", value),
                 RangeOrValue::Range(value) => self.range("issue_id", value),
-                RangeOrValue::Value(_) => (),
-            },
-            _ => {
-                return Err(Error::InvalidValue(
-                    "multiple ID ranges specified".to_string(),
-                ))
+                RangeOrValue::Value(_) => unreachable!("failed partitioning values"),
             }
         }
 
