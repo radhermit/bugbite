@@ -133,7 +133,7 @@ pub trait RequestTemplate: Serialize {
     /// Return the config path for a template file.
     fn config_path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
         let service_name = self.service().name();
-        if service_name.is_empty() {
+        if service_name.is_empty() || name.contains(std::path::is_separator) {
             Ok(Utf8PathBuf::from(name))
         } else {
             let path = format!("templates/{service_name}/{}/{name}", Self::TYPE);
@@ -141,6 +141,7 @@ pub trait RequestTemplate: Serialize {
         }
     }
 
+    /// Load a request template using the given name.
     fn load_template(&self, name: &str) -> crate::Result<Self::Template> {
         let path = self.config_path(name)?;
         let data = fs::read_to_string(&path)
@@ -149,6 +150,7 @@ pub trait RequestTemplate: Serialize {
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {name}: {e}")))
     }
 
+    /// Save a request template using the given name.
     fn save_template(&self, name: &str) -> crate::Result<()> {
         let data = toml::to_string(self)
             .map_err(|e| Error::InvalidValue(format!("failed serializing template: {e}")))?;
