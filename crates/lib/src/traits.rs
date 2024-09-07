@@ -225,3 +225,69 @@ pub trait WebClient {
     /// Return the connection name.
     fn name(&self) -> &str;
 }
+
+#[cfg(test)]
+mod tests {
+    use std::env;
+
+    use tempfile::tempdir;
+
+    use crate::service::bugzilla::Service;
+    use crate::test::*;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn save_template() {
+        let server = TestServer::new().await;
+        let service = Service::new(server.uri()).unwrap();
+        let request = service.search();
+
+        // invalid names
+        for name in [" ", "", "\t"] {
+            let err = request.save_template(name).unwrap_err();
+            assert_err_re!(err, "invalid template name: ");
+        }
+
+        // empty template
+        let err = request.save_template("test").unwrap_err();
+        assert_err_re!(err, "empty request template: test");
+
+        // create temporary config dir
+        let dir = tempdir().unwrap();
+        env::set_current_dir(dir.path()).unwrap();
+        env::set_var("HOME", dir.path());
+        let path = dir.path().join("dir/template");
+        let path_str = path.to_str().unwrap();
+
+        let time = "1d".parse().unwrap();
+        let request = request.created(time);
+
+        // save to specific path
+        request.save_template(path_str).unwrap();
+        assert_eq!(
+            fs::read_to_string(path).unwrap().trim(),
+            r#"created = "1d""#
+        );
+
+        // unnamed services save to current working directory
+        request.save_template("test").unwrap();
+        assert_eq!(
+            fs::read_to_string("test").unwrap().trim(),
+            r#"created = "1d""#
+        );
+
+        // named services save to config dir path
+        let mut service = Service::new(server.uri()).unwrap();
+        service.config.name = "service".to_string();
+        let time = "2d".parse().unwrap();
+        let request = service.search().created(time);
+        request.save_template("test").unwrap();
+        assert_eq!(
+            fs::read_to_string(".config/bugbite/templates/service/search/test")
+                .unwrap()
+                .trim(),
+            r#"created = "2d""#
+        );
+    }
+}
