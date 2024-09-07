@@ -406,3 +406,42 @@ async fn comment_from() {
             .success();
     }
 }
+
+#[tokio::test]
+async fn comment_privacy() {
+    let server = start_server_with_auth().await;
+    server
+        .respond_match(
+            matchers::path("/rest/bug/1/comment"),
+            200,
+            TEST_DATA.join("comment/single-bug.json"),
+        )
+        .await;
+    server
+        .respond_match(
+            matchers::path("/rest/bug/1"),
+            200,
+            TEST_DATA.join("update/no-changes.json"),
+        )
+        .await;
+
+    // invalid when targeting multiple bugs
+    cmd("bite bugzilla update 1 2 --comment-privacy 1")
+        .assert()
+        .stdout("")
+        .stderr(
+            predicate::str::diff("Error: can't toggle comment privacy for multiple bugs").trim(),
+        )
+        .failure()
+        .code(1);
+
+    // various values for targeted comments and comment ranges
+    for arg in ["1", "1,2", "..", "1,2:false", "2..=5:true"] {
+        cmd("bite bugzilla update 1")
+            .args(["--comment-privacy", arg])
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+    }
+}
