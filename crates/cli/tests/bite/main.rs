@@ -78,13 +78,6 @@ async fn doc() {
     let doc_dir = build_path!(env!("CARGO_MANIFEST_DIR"), "doc");
     let data_dir = TEST_DATA_PATH.join("bugbite");
 
-    // command targets to test with templating
-    let templates = [
-        "bite-bugzilla-search",
-        "bite-bugzilla-create",
-        "bite-bugzilla-update",
-    ];
-
     for entry in doc_dir.read_dir_utf8().unwrap() {
         let entry = entry.unwrap();
         let path = entry.path();
@@ -109,6 +102,9 @@ async fn doc() {
             env::set_current_dir(&tmp_dir).unwrap();
 
             let doc = fs::read_to_string(path).unwrap();
+            // flag docs that support request templating
+            let templates = doc.contains("template-options.adoc[]");
+
             for (lineno, line) in doc.lines().enumerate().filter(|(_, x)| x.starts_with(' ')) {
                 for s in line.trim().split(" | ").filter(|x| x.starts_with(&cmd_str)) {
                     let args = shlex::split(s).unwrap();
@@ -146,7 +142,7 @@ async fn doc() {
 
                     // test templates for working commands
                     if output.status.success()
-                        && templates.contains(&stem)
+                        && templates
                         && !(args.contains("--to") || args.contains("--from"))
                     {
                         // save template
