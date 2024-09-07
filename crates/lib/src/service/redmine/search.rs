@@ -137,6 +137,21 @@ impl<'a> Request<'a> {
         self
     }
 
+    pub fn created(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+        self.params.created = Some(value);
+        self
+    }
+
+    pub fn updated(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+        self.params.updated = Some(value);
+        self
+    }
+
+    pub fn closed(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+        self.params.closed = Some(value);
+        self
+    }
+
     pub fn order<I>(mut self, values: I) -> Self
     where
         I: IntoIterator<Item = Order<OrderField>>,
@@ -504,7 +519,27 @@ mod tests {
             .respond(200, path.join("search/nonexistent.json"))
             .await;
 
+        // valid operator-based ranges
         let op_ranges = ["<10", "<=10", "=10", "!=10", ">=10", ">10"];
+
+        // valid TimeDeltaOrStatic values
+        let times = vec![
+            "2020",
+            "2020-02",
+            "2020-02-01",
+            "2020-02-01T01:02:03Z",
+            "1h",
+            "<1d",
+            "<=1w",
+            ">=1m",
+            ">1y",
+            "2020..2021",
+            "2020..=2021",
+            "..2021",
+            "..=2021",
+            "2021..",
+            "..",
+        ];
 
         // ids
         service.search().id(1).send().await.unwrap();
@@ -522,6 +557,33 @@ mod tests {
         assert_err_re!(err, "IDs and ID ranges specified");
         let err = service.search().id(..10).id(10..).send().await.unwrap_err();
         assert_err_re!(err, "multiple ID ranges specified");
+
+        // time related combinators
+        for time in &times {
+            // created
+            service
+                .search()
+                .created(time.parse().unwrap())
+                .send()
+                .await
+                .unwrap();
+
+            // updated
+            service
+                .search()
+                .updated(time.parse().unwrap())
+                .send()
+                .await
+                .unwrap();
+
+            // closed
+            service
+                .search()
+                .closed(time.parse().unwrap())
+                .send()
+                .await
+                .unwrap();
+        }
 
         // order
         for field in OrderField::iter() {
