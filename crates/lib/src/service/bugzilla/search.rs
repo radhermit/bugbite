@@ -23,7 +23,7 @@ use crate::Error;
 
 use super::{BugField, FilterField};
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
@@ -872,7 +872,7 @@ impl<'a> Request<'a> {
 
 /// Bug search parameters.
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
 pub struct Parameters {
     pub alias: Option<Vec<ExistsOrValues<Match>>>,
     pub attachments: Option<ExistsOrValues<Match>>,
@@ -1813,7 +1813,7 @@ impl Api for ExistsField {
 }
 
 /// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, Debug, Clone, Copy, PartialEq, Eq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
     Alias,

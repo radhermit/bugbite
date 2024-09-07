@@ -12,7 +12,7 @@ use super::{ClientParameters, ServiceKind};
 mod get;
 pub mod search;
 
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq)]
 pub struct Authentication {
     pub user: Option<String>,
     pub token: Option<String>,
@@ -27,7 +27,7 @@ impl Merge for Authentication {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Config {
     base: Url,
     pub name: String,
@@ -72,6 +72,12 @@ pub struct Service {
     config: Config,
     _cache: ServiceCache,
     _client: reqwest::Client,
+}
+
+impl PartialEq for Service {
+    fn eq(&self, other: &Self) -> bool {
+        self.config == other.config
+    }
 }
 
 impl Service {

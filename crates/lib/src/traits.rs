@@ -143,7 +143,7 @@ pub trait RequestTemplate: Serialize {
     }
 
     /// Load a request template using the given name.
-    fn load_template(&mut self, s: &str) -> crate::Result<()> {
+    fn load_template(&mut self, s: &str) -> crate::Result<&mut Self> {
         let name = s.trim();
         if name.is_empty() {
             return Err(Error::InvalidValue(format!("invalid template name: {s:?}")));
@@ -156,7 +156,7 @@ pub trait RequestTemplate: Serialize {
             .map_err(|e| Error::InvalidValue(format!("failed parsing template: {name}: {e}")))?;
         self.params().merge(params);
 
-        Ok(())
+        Ok(self)
     }
 
     /// Save a request template using the given name.
@@ -242,19 +242,22 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn save_template() {
+    async fn request_template() {
         let server = TestServer::new().await;
         let service = Service::new(server.uri()).unwrap();
-        let request = service.search();
+        let request1 = service.search();
+        let mut request2 = service.search();
 
         // invalid names
         for name in [" ", "", "\t"] {
-            let err = request.save_template(name).unwrap_err();
+            let err = request1.save_template(name).unwrap_err();
+            assert_err_re!(err, "invalid template name: ");
+            let err = request2.load_template(name).unwrap_err();
             assert_err_re!(err, "invalid template name: ");
         }
 
         // empty template
-        let err = request.save_template("test").unwrap_err();
+        let err = request1.save_template("test").unwrap_err();
         assert_err_re!(err, "empty request template: test");
 
         // create temporary config dir
@@ -264,50 +267,60 @@ mod tests {
         let path_str = path.to_str().unwrap();
 
         let time = "1d".parse().unwrap();
-        let request = request.created(time);
+        let request1 = request1.created(time);
 
         // save to specific path
-        request.save_template(path_str).unwrap();
+        request1.save_template(path_str).unwrap();
         assert_eq!(
-            fs::read_to_string(path).unwrap().trim(),
+            fs::read_to_string(&path).unwrap().trim(),
             r#"created = "1d""#
         );
+        assert_ne!(request1, request2);
+        request2.load_template(path_str).unwrap();
+        assert_eq!(request1, request2);
 
         // unnamed services save to current working directory
-        request.save_template("test").unwrap();
+        request1.save_template("test").unwrap();
         assert_eq!(
             fs::read_to_string("test").unwrap().trim(),
             r#"created = "1d""#
         );
+        request2.load_template("test").unwrap();
+        assert_eq!(request1, request2);
 
         // named services save to config dir path
         let mut service = Service::new(server.uri()).unwrap();
         service.config.name = "service".to_string();
         let time = "2d".parse().unwrap();
-        let request = service.search().created(time);
+        let request1 = service.search().created(time);
+        let mut request2 = service.search();
 
         // depends on linux specific config dir handling
         if cfg!(target_os = "linux") {
             // $XDG_CONFIG_HOME takes precedence over $HOME
             env::set_var("HOME", dir.path());
             env::set_var("XDG_CONFIG_HOME", dir.path());
-            request.save_template("test").unwrap();
+            request1.save_template("test").unwrap();
             assert_eq!(
                 fs::read_to_string("bugbite/templates/service/search/test")
                     .unwrap()
                     .trim(),
                 r#"created = "2d""#
             );
+            request2.load_template("test").unwrap();
+            assert_eq!(request1, request2);
 
             // $HOME is used when $XDG_CONFIG_HOME is unset
             env::remove_var("XDG_CONFIG_HOME");
-            request.save_template("test").unwrap();
+            request1.save_template("test").unwrap();
             assert_eq!(
                 fs::read_to_string(".config/bugbite/templates/service/search/test")
                     .unwrap()
                     .trim(),
                 r#"created = "2d""#
             );
+            request2.load_template("test").unwrap();
+            assert_eq!(request1, request2);
         }
     }
 }

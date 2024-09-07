@@ -10,7 +10,7 @@ use crate::service::bugzilla::Service;
 use crate::traits::{InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService};
 use crate::Error;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
@@ -347,7 +347,7 @@ impl<'a> Request<'a> {
 
 /// Bug creation parameters.
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
 pub struct Parameters {
     pub alias: Option<Vec<String>>,
     pub assignee: Option<String>,

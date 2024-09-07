@@ -10,7 +10,7 @@ use crate::query::{Order, Query};
 use crate::service::github::Service;
 use crate::traits::{Api, Merge, MergeOption, RequestSend, RequestTemplate};
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
@@ -96,7 +96,7 @@ impl<'a> QueryBuilder<'a> {
 
 /// Issue search parameters.
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
 pub struct Parameters {
     pub order: Option<Order<OrderField>>,
 }
@@ -110,7 +110,7 @@ impl Merge for Parameters {
 }
 
 /// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, Debug, Clone)]
+#[derive(Display, EnumIter, EnumString, Debug, Clone, Copy, PartialEq, Eq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
     Comments,

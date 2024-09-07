@@ -113,7 +113,7 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
@@ -446,7 +446,7 @@ impl fmt::Display for Comment<'_> {
 
 /// Bug update parameters.
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
 pub struct Parameters {
     pub alias: Option<Vec<SetChange<String>>>,
     pub assignee: Option<String>,

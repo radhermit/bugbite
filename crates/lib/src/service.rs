@@ -105,7 +105,7 @@ impl WebClient for Config {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq)]
 pub struct ClientParameters {
     pub certificate: Option<Utf8PathBuf>,
     pub insecure: Option<bool>,

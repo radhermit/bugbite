@@ -18,7 +18,7 @@ use crate::traits::{
 };
 use crate::Error;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request<'a> {
     #[serde(skip)]
     service: &'a Service,
@@ -194,7 +194,7 @@ impl RequestTemplate for Request<'_> {
 
 /// Issue search parameters.
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
 pub struct Parameters {
     pub assignee: Option<bool>,
     pub attachments: Option<ExistsOrValues<String>>,
@@ -424,7 +424,7 @@ impl Api for ExistsField {
 }
 
 /// Valid search order sorting terms.
-#[derive(Display, EnumIter, EnumString, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Display, EnumIter, EnumString, Debug, Clone, Copy, PartialEq, Eq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderField {
     /// person the issue is assigned to
