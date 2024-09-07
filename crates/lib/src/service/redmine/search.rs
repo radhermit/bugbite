@@ -125,6 +125,18 @@ impl<'a> Request<'a> {
         Ok(url)
     }
 
+    pub fn id<T>(mut self, value: T) -> Self
+    where
+        T: Into<RangeOrValue<u64>>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .ids
+            .get_or_insert_with(Default::default)
+            .push(value.into());
+        self
+    }
+
     pub fn order<I>(mut self, values: I) -> Self
     where
         I: IntoIterator<Item = Order<OrderField>>,
@@ -491,6 +503,15 @@ mod tests {
         server
             .respond(200, path.join("search/nonexistent.json"))
             .await;
+
+        // ids
+        service.search().id(1).send().await.unwrap();
+        service.search().id(10..20).send().await.unwrap();
+        service.search().id(10..=20).send().await.unwrap();
+        service.search().id(..20).send().await.unwrap();
+        service.search().id(..=20).send().await.unwrap();
+        service.search().id(10..).send().await.unwrap();
+        service.search().id(..).send().await.unwrap();
 
         // order
         for field in OrderField::iter() {

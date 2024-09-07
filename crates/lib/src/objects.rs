@@ -109,6 +109,12 @@ impl From<i64> for RangeOrValue<i64> {
     }
 }
 
+impl From<u64> for RangeOrValue<u64> {
+    fn from(value: u64) -> Self {
+        Self::Value(value)
+    }
+}
+
 impl<T: Eq> From<std::ops::Range<T>> for RangeOrValue<T> {
     fn from(value: std::ops::Range<T>) -> Self {
         Self::Range(Range::Range(value))
