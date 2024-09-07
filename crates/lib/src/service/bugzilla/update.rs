@@ -258,31 +258,30 @@ impl<'a> Request<'a> {
         }
 
         if let Some((value, is_private)) = &self.params.comment_privacy {
-            let id = match params.ids {
-                [x] => x,
-                _ => {
-                    return Err(Error::InvalidValue(
-                        "can't toggle comment privacy for multiple bugs".to_string(),
-                    ))
-                }
-            };
+            if params.ids.len() > 1 {
+                return Err(Error::InvalidValue(
+                    "can't toggle comment privacy for multiple bugs".to_string(),
+                ));
+            }
+
+            // pull comments for a given bug ID
             let comments = self
                 .service
-                .comment([id])
+                .comment([&params.ids[0]])
                 .send()
                 .await?
                 .into_iter()
                 .next()
                 .expect("invalid comments response");
 
-            let mut toggled = IndexMap::new();
             for c in comments {
                 if value.contains(&c.count) {
-                    toggled.insert(c.id, is_private.unwrap_or(!c.is_private));
+                    params
+                        .comment_is_private
+                        .get_or_insert_with(Default::default)
+                        .insert(c.id, is_private.unwrap_or(!c.is_private));
                 }
             }
-
-            params.comment_is_private = Some(toggled);
         }
 
         if let Some(value) = self.params.qa.as_deref() {
