@@ -164,12 +164,18 @@ pub trait RequestTemplate: Serialize {
 
         let data = toml::to_string(self)
             .map_err(|e| Error::InvalidValue(format!("failed serializing template: {e}")))?;
+        if data.trim().is_empty() {
+            return Err(Error::InvalidValue(format!(
+                "empty request template: {name}"
+            )));
+        }
+
         if name == "-" {
             write!(stdout(), "{data}")?;
         } else {
             let path = self.config_path(name)?;
             fs::create_dir_all(path.parent().expect("invalid template path"))
-                .map_err(|e| Error::IO(format!("failed created template dir: {e}")))?;
+                .map_err(|e| Error::IO(format!("failed creating template dir: {e}")))?;
             fs::write(&path, data)
                 .map_err(|e| Error::IO(format!("failed saving template: {name}: {e}")))?;
         }
