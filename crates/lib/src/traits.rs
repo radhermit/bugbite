@@ -133,7 +133,7 @@ pub trait RequestTemplate: Serialize {
     /// Return the config path for a template file.
     fn config_path(&self, name: &str) -> crate::Result<Utf8PathBuf> {
         let service_name = self.service().name();
-        if service_name.is_empty() || name.contains(std::path::is_separator) {
+        if service_name.trim().is_empty() || name.contains(std::path::is_separator) {
             Ok(Utf8PathBuf::from(name))
         } else {
             let path = format!("templates/{service_name}/{}/{name}", Self::TYPE);
@@ -142,7 +142,12 @@ pub trait RequestTemplate: Serialize {
     }
 
     /// Load a request template using the given name.
-    fn load_template(&self, name: &str) -> crate::Result<Self::Template> {
+    fn load_template(&self, s: &str) -> crate::Result<Self::Template> {
+        let name = s.trim();
+        if name.is_empty() {
+            return Err(Error::InvalidValue(format!("invalid template name: {s:?}")));
+        }
+
         let path = self.config_path(name)?;
         let data = fs::read_to_string(&path)
             .map_err(|e| Error::InvalidValue(format!("failed loading template: {name}: {e}")))?;
@@ -151,7 +156,12 @@ pub trait RequestTemplate: Serialize {
     }
 
     /// Save a request template using the given name.
-    fn save_template(&self, name: &str) -> crate::Result<()> {
+    fn save_template(&self, s: &str) -> crate::Result<()> {
+        let name = s.trim();
+        if name.is_empty() {
+            return Err(Error::InvalidValue(format!("invalid template name: {s:?}")));
+        }
+
         let data = toml::to_string(self)
             .map_err(|e| Error::InvalidValue(format!("failed serializing template: {e}")))?;
         if name == "-" {
@@ -163,6 +173,7 @@ pub trait RequestTemplate: Serialize {
             fs::write(&path, data)
                 .map_err(|e| Error::IO(format!("failed saving template: {name}: {e}")))?;
         }
+
         Ok(())
     }
 }

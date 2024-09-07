@@ -22,8 +22,9 @@ Using `-n/--dry-run` allows creating templates without service interaction.
 *--from <name[,...]>*::
     Read request attributes from templates.
 +
-Multiple templates can be specified in a comma-separated list and will be
-loaded in order with later field values overriding earlier ones.
+Multiple templates can be specified in a comma-separated list or via multiple
+options and will be loaded in order with later field values overriding earlier
+ones.
 
 *--to <name>*::
     Write request attributes to a template.
