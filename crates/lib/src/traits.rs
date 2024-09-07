@@ -144,9 +144,9 @@ pub trait RequestTemplate: Serialize {
     fn load_template(&self, name: &str) -> crate::Result<Self::Template> {
         let path = self.config_path(name)?;
         let data = fs::read_to_string(&path)
-            .map_err(|e| Error::InvalidValue(format!("failed loading template: {path}: {e}")))?;
+            .map_err(|e| Error::InvalidValue(format!("failed loading template: {name}: {e}")))?;
         toml::from_str(&data)
-            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {path}: {e}")))
+            .map_err(|e| Error::InvalidValue(format!("failed parsing template: {name}: {e}")))
     }
 
     fn save_template(&self, name: &str) -> crate::Result<()> {
@@ -159,7 +159,7 @@ pub trait RequestTemplate: Serialize {
             fs::create_dir_all(path.parent().expect("invalid template path"))
                 .map_err(|e| Error::IO(format!("failed created template dir: {e}")))?;
             fs::write(&path, data)
-                .map_err(|e| Error::IO(format!("failed saving template: {path}: {e}")))?;
+                .map_err(|e| Error::IO(format!("failed saving template: {name}: {e}")))?;
         }
         Ok(())
     }
