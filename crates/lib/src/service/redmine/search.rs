@@ -89,7 +89,7 @@ impl<'a> Request<'a> {
             }
         }
 
-        if let Some(values) = &self.params.summary {
+        if let Some(values) = &self.params.subject {
             let value = quoted_strings(values);
             // TODO: support other operators, currently this specifies the `contains` op
             query.insert("subject", format!("~{value}"));
@@ -240,7 +240,7 @@ pub struct Parameters {
     pub paged: Option<bool>,
 
     pub status: Option<String>,
-    pub summary: Option<Vec<String>>,
+    pub subject: Option<Vec<String>>,
 }
 
 impl Merge for Parameters {
@@ -260,7 +260,7 @@ impl Merge for Parameters {
             order: self.order.merge(other.order),
             paged: self.paged.merge(other.paged),
             status: self.status.merge(other.status),
-            summary: self.summary.merge(other.summary),
+            subject: self.subject.merge(other.subject),
         }
     }
 }

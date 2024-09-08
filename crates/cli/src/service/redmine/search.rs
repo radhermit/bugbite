@@ -140,9 +140,9 @@ struct Params {
     #[clap(flatten)]
     time: TimeOptions,
 
-    /// strings to search for in the summary
+    /// strings to search for in the subject
     #[clap(value_name = "TERM", help_heading = "Arguments")]
-    summary: Option<Vec<MaybeStdinVec<String>>>,
+    subject: Option<Vec<MaybeStdinVec<String>>>,
 }
 
 impl From<Params> for Parameters {
@@ -162,7 +162,7 @@ impl From<Params> for Parameters {
             offset: value.query.offset,
             order: value.query.order.map(|x| x.into_iter().collect()),
             paged: value.query.paged,
-            summary: value.summary.map(|x| x.into_iter().flatten().collect()),
+            subject: value.subject.map(|x| x.into_iter().flatten().collect()),
         }
     }
 }
