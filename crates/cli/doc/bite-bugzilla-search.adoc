@@ -62,6 +62,9 @@ the service limit.
 +
 Note that setting an explicit limit will disable result paging unless `--paged`
 is used.
++
+.First 10 open bugs:
+ bite bugzilla search -l 10
 
 *-O, --offset <value>*::
     Set the starting position for results.
@@ -70,6 +73,9 @@ Used in conjunction with the `-l/--limit`, offset defines the starting position
 for the search. For example, given a search that would return 100 results, setting
 limit to 10 and offset to 10 would return results 11 through 20 from the set
 of 100.
++
+.10 open bugs, skipping the first 100:
+ bite bugzilla search -l 10 -O 100
 
 *-o, --order <field[,...]>*::
     Order the query results.
@@ -115,6 +121,9 @@ large queries.
 
 *-S, --quicksearch <query>*::
     Search for bugs using quicksearch syntax.
++
+.Reported by user or assigned to them
+ bite bugzilla search -S 'ALL @user OR reporter:user'
 
 == Attribute options
 
