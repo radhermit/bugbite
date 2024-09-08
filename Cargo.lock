@@ -356,6 +356,7 @@ name = "bugbite-python"
 version = "0.0.1"
 dependencies = [
  "bugbite",
+ "indexmap",
  "pyo3",
 ]
 
@@ -1733,6 +1734,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "831e8e819a138c36e212f3af3fd9eeffed6bf1510a805af35b0edee5ffa59433"
 dependencies = [
  "cfg-if",
+ "indexmap",
  "indoc",
  "libc",
  "memoffset",
