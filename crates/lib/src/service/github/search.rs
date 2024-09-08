@@ -47,7 +47,7 @@ impl RequestSend for Request<'_> {
 
     async fn send(&self) -> crate::Result<Self::Output> {
         debug!("{:?}", self.params);
-        let _params = self.encode()?;
+        let _query = self.encode()?;
         todo!("search requests unsupported")
     }
 }

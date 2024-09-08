@@ -36,8 +36,8 @@ impl RequestSend for Request<'_> {
 
     async fn send(&self) -> crate::Result<Self::Output> {
         let mut url = self.service.config.base.join("rest/bug")?;
-        let params = self.encode()?;
-        url.query_pairs_mut().extend_pairs(&params.query);
+        let query = self.encode()?;
+        url.query_pairs_mut().extend_pairs(query.iter());
         let request = self.service.client.get(url).auth_optional(self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
@@ -510,8 +510,8 @@ impl<'a> Request<'a> {
     /// Return the website URL for a query.
     pub fn search_url(self) -> crate::Result<Url> {
         let mut url = self.service.config.base.join("buglist.cgi")?;
-        let params = self.encode()?;
-        url.query_pairs_mut().extend_pairs(&params.query);
+        let query = self.encode()?;
+        url.query_pairs_mut().extend_pairs(query.iter());
         Ok(url)
     }
 

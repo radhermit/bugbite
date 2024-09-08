@@ -1,4 +1,5 @@
 use std::fmt;
+use std::ops::Deref;
 use std::str::FromStr;
 
 use ordered_multimap::ListOrderedMultimap;
@@ -30,12 +31,11 @@ impl Query {
     }
 }
 
-impl<'a> IntoIterator for &'a Query {
-    type Item = (&'a String, &'a String);
-    type IntoIter = ordered_multimap::list_ordered_multimap::Iter<'a, String, String>;
+impl Deref for Query {
+    type Target = ListOrderedMultimap<String, String>;
 
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.iter()
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
