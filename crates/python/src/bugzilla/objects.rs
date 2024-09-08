@@ -1,7 +1,7 @@
 use bugbite::objects::bugzilla;
 use chrono::{DateTime, Utc};
 use pyo3::prelude::*;
-use pyo3::types::{timezone_utc_bound, PyDateTime};
+use pyo3::types::{timezone_utc_bound, PyDateTime, PyFrozenSet};
 
 #[pyclass(module = "bugbite.bugzilla.objects")]
 pub(super) struct Bug(bugzilla::Bug);
@@ -107,6 +107,16 @@ impl Bug {
     #[getter]
     fn duplicate_of(&self) -> Option<u64> {
         self.0.duplicate_of
+    }
+
+    #[getter]
+    fn blocks<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
+        PyFrozenSet::new_bound(py, &self.0.blocks).unwrap()
+    }
+
+    #[getter]
+    fn depends_on<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
+        PyFrozenSet::new_bound(py, &self.0.depends_on).unwrap()
     }
 }
 
