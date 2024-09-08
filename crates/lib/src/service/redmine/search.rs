@@ -167,6 +167,15 @@ impl<'a> Request<'a> {
         self.params.status = Some(value.into());
         self
     }
+
+    pub fn subject<I, S>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.params.subject = Some(values.into_iter().map(Into::into).collect());
+        self
+    }
 }
 
 impl RequestSend for Request<'_> {
@@ -594,5 +603,20 @@ mod tests {
                 .await
                 .unwrap();
         }
+
+        // subject
+        service.search().subject(["test"]).send().await.unwrap();
+        service
+            .search()
+            .subject(["test1", "test2"])
+            .send()
+            .await
+            .unwrap();
+        service
+            .search()
+            .subject(["test with whitespace"])
+            .send()
+            .await
+            .unwrap();
     }
 }
