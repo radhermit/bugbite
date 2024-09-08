@@ -1,4 +1,4 @@
-use bugbite::service::bugzilla::Service;
+use bugbite::service::bugzilla::{GroupField, Service};
 use bugbite::traits::RequestSend;
 use bugbite::traits::WebClient;
 use pyo3::prelude::*;
@@ -37,6 +37,7 @@ impl Bugzilla {
             let bugs = self
                 .0
                 .search()
+                .fields([GroupField::Default])
                 .summary([value])
                 .send()
                 .await
