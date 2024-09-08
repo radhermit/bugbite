@@ -4,6 +4,7 @@ use pyo3::wrap_pymodule;
 mod config;
 mod error;
 mod service;
+mod traits;
 
 pub(crate) use self::error::Error;
 

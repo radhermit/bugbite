@@ -1,9 +1,11 @@
+use pyo3::exceptions::{PyKeyError, PyTypeError};
 use pyo3::prelude::*;
 
 use crate::service;
+use crate::traits::ToStr;
 use crate::Error;
 
-#[pyclass(module = "bugbite.config")]
+#[pyclass(mapping, module = "bugbite.config")]
 pub(super) struct Config(::bugbite::config::Config);
 
 #[pymethods]
@@ -16,6 +18,29 @@ impl Config {
 
     fn __iter__(&self) -> PyResult<_Iter> {
         Ok(_Iter(self.0.clone().into_iter()))
+    }
+
+    fn __len__(&self) -> usize {
+        self.0.len()
+    }
+
+    fn __contains__(&self, object: PyObject, py: Python<'_>) -> bool {
+        if let Ok(name) = object.to_str(py) {
+            self.0.contains_key(name)
+        } else {
+            false
+        }
+    }
+
+    fn __getitem__(&self, object: PyObject, py: Python<'_>) -> PyResult<service::Config> {
+        if let Ok(name) = object.to_str(py) {
+            self.0
+                .get(name)
+                .map(|x| x.clone().into())
+                .ok_or_else(|| PyKeyError::new_err(name.to_string()))
+        } else {
+            Err(PyTypeError::new_err("Config indices must be strings"))
+        }
     }
 }
 
