@@ -127,7 +127,7 @@ impl From<bugzilla::Bug> for Bug {
 }
 
 #[pymodule]
-#[pyo3(name = "objects")]
+#[pyo3(name = "bugzilla_objects")]
 pub(super) fn ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Bug>()?;
     Ok(())

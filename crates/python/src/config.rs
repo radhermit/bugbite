@@ -25,6 +25,15 @@ impl Config {
             .try_into()
     }
 
+    /// Get a redmine service using a configured connection.
+    fn redmine(&self, name: &str) -> PyResult<crate::redmine::Redmine> {
+        self.0
+            .get(name)
+            .cloned()
+            .ok_or_else(|| BugbiteError::new_err(format!("unknown service: {name}")))?
+            .try_into()
+    }
+
     fn __iter__(&self) -> PyResult<_Iter> {
         Ok(_Iter(self.0.clone().into_iter()))
     }
