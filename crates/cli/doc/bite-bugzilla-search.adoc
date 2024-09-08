@@ -231,19 +231,19 @@ returned, respectively.
 Custom field names must match the underlying values used in the Bugzilla web
 interface of the form `cf_field_name`.
 +
-.Custom field exists:
+.With custom field:
  bite bugzilla search --cf cf_field_name
 +
-.Custom field doesn't exist:
+.Without custom field:
  bite bugzilla search --cf cf_field_name=false
 +
 Values search for matching substrings or can use match operators to alter their
 query application. See the <<Match Operators>> section for more information.
 +
-.Custom field containing `test`:
+.Contains `test`:
  bite bugzilla search --cf cf_field_name=test
 +
-.Custom field equals `test`:
+.Equals `test`:
  bite bugzilla search --cf cf_field_name='== test'
 
 *-D, --depends* [<id[,...]>]::
