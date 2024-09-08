@@ -1,8 +1,16 @@
 use bugbite::objects::bugzilla;
+use chrono::{DateTime, Utc};
 use pyo3::prelude::*;
+use pyo3::types::{timezone_utc_bound, PyDateTime};
 
 #[pyclass(module = "bugbite.bugzilla.objects")]
 pub(super) struct Bug(bugzilla::Bug);
+
+fn datetime(value: DateTime<Utc>, py: Python<'_>) -> Bound<'_, PyDateTime> {
+    let value = value.timestamp() as f64;
+    let tz = timezone_utc_bound(py);
+    PyDateTime::from_timestamp_bound(py, value, Some(&tz)).unwrap()
+}
 
 #[pymethods]
 impl Bug {
@@ -14,6 +22,16 @@ impl Bug {
     #[getter]
     fn assigned_to(&self) -> Option<&str> {
         self.0.assigned_to.as_deref()
+    }
+
+    #[getter]
+    fn created<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
+        self.0.created.map(|x| datetime(x, py))
+    }
+
+    #[getter]
+    fn updated<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
+        self.0.updated.map(|x| datetime(x, py))
     }
 
     #[getter]

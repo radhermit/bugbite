@@ -17,6 +17,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 bugbite = { path = "../lib", version = "0.0.12" }
+chrono = "0.4.38"
 indexmap = "2.5.0"
 pyo3 = { version = "0.22.2", features = ["extension-module", "indexmap"] }
 tokio = { version = "1.40.0", features = ["full"] }
