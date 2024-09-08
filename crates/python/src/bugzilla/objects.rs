@@ -55,6 +55,56 @@ impl Bug {
     }
 
     #[getter]
+    fn whiteboard(&self) -> Option<&str> {
+        self.0.whiteboard.as_deref()
+    }
+
+    #[getter]
+    fn product(&self) -> Option<&str> {
+        self.0.product.as_deref()
+    }
+
+    #[getter]
+    fn component(&self) -> Option<&str> {
+        self.0.component.as_deref()
+    }
+
+    #[getter]
+    fn version(&self) -> Option<&str> {
+        self.0.version.as_deref()
+    }
+
+    #[getter]
+    fn platform(&self) -> Option<&str> {
+        self.0.platform.as_deref()
+    }
+
+    #[getter]
+    fn op_sys(&self) -> Option<&str> {
+        self.0.op_sys.as_deref()
+    }
+
+    #[getter]
+    fn target(&self) -> Option<&str> {
+        self.0.target.as_deref()
+    }
+
+    #[getter]
+    fn priority(&self) -> Option<&str> {
+        self.0.priority.as_deref()
+    }
+
+    #[getter]
+    fn severity(&self) -> Option<&str> {
+        self.0.severity.as_deref()
+    }
+
+    #[getter]
+    fn url(&self) -> Option<&str> {
+        self.0.url.as_deref()
+    }
+
+    #[getter]
     fn duplicate_of(&self) -> Option<u64> {
         self.0.duplicate_of
     }
