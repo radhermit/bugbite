@@ -18,7 +18,6 @@ use strum::{Display, EnumString};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::{BugField, FilterField, GroupField, UNSET_VALUES};
 use crate::traits::RenderSearch;
-use crate::types::OrderedSet;
 use crate::Error;
 
 use super::{stringify, Base64, Item};
@@ -128,7 +127,7 @@ impl PartialOrd for BugUpdate<'_> {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
 pub struct Comment {
     /// Globally unique ID for the comment.
     pub id: u64,
@@ -150,7 +149,7 @@ pub struct Comment {
     pub created: DateTime<Utc>,
     pub is_private: bool,
     #[serde(default)]
-    pub tags: OrderedSet<String>,
+    pub tags: IndexSet<String>,
 }
 
 impl Comment {
@@ -270,7 +269,7 @@ impl fmt::Display for BugFlag {
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
 #[serde(untagged)]
 enum Alias {
-    List(OrderedSet<String>),
+    List(IndexSet<String>),
     String(String),
 }
 
@@ -280,9 +279,7 @@ pub(crate) fn unset_value_str<'de, D: Deserializer<'de>>(d: D) -> Result<Option<
 }
 
 /// Deserialize an alias as an ordered set of strings.
-pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(
-    d: D,
-) -> Result<OrderedSet<String>, D::Error> {
+pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(d: D) -> Result<IndexSet<String>, D::Error> {
     Option::<Alias>::deserialize(d).map(|o| match o {
         Some(Alias::List(values)) => values,
         Some(Alias::String(value)) => [value].into_iter().collect(),
@@ -297,8 +294,8 @@ pub(crate) fn alias_to_set<'de, D: Deserializer<'de>>(
 pub struct Bug {
     pub id: u64,
     #[serde(deserialize_with = "alias_to_set")]
-    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
-    pub alias: OrderedSet<String>,
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
+    pub alias: IndexSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub assigned_to: Option<String>,
     #[serde(deserialize_with = "non_empty_str")]
@@ -335,31 +332,31 @@ pub struct Bug {
     #[serde(deserialize_with = "unset_value_str")]
     pub severity: Option<String>,
     #[serde_as(deserialize_as = "DefaultOnNull")]
-    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
-    pub groups: OrderedSet<String>,
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
+    pub groups: IndexSet<String>,
     #[serde_as(deserialize_as = "DefaultOnNull")]
-    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
-    pub keywords: OrderedSet<String>,
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
+    pub keywords: IndexSet<String>,
     #[serde_as(deserialize_as = "DefaultOnNull")]
-    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
-    pub cc: OrderedSet<String>,
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
+    pub cc: IndexSet<String>,
     #[serde_as(deserialize_as = "DefaultOnNull")]
-    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
-    pub blocks: OrderedSet<u64>,
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
+    pub blocks: IndexSet<u64>,
     #[serde_as(deserialize_as = "DefaultOnNull")]
-    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
-    pub depends_on: OrderedSet<u64>,
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
+    pub depends_on: IndexSet<u64>,
     #[serde(rename = "dupe_of")]
     pub duplicate_of: Option<u64>,
     #[serde_as(deserialize_as = "DefaultOnNull")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub flags: Vec<BugFlag>,
     #[serde_as(deserialize_as = "DefaultOnNull")]
-    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
-    pub tags: OrderedSet<String>,
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
+    pub tags: IndexSet<String>,
     #[serde_as(deserialize_as = "DefaultOnNull")]
-    #[serde(skip_serializing_if = "OrderedSet::is_empty")]
-    pub see_also: OrderedSet<String>,
+    #[serde(skip_serializing_if = "IndexSet::is_empty")]
+    pub see_also: IndexSet<String>,
     #[serde(deserialize_with = "non_empty_str")]
     pub url: Option<String>,
     #[serde(skip)]
