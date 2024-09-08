@@ -519,8 +519,8 @@ mod tests {
             .respond(200, path.join("search/nonexistent.json"))
             .await;
 
-        // valid operator-based ranges
-        let op_ranges = ["<10", "<=10", "=10", "!=10", ">=10", ">10"];
+        // valid operator-based ID ranges
+        let id_ranges = ["<10", "<=10", "=10", "!=10", ">=10", ">10"];
 
         // valid TimeDeltaOrStatic values
         let times = vec![
@@ -549,7 +549,7 @@ mod tests {
         service.search().id(..=20).send().await.unwrap();
         service.search().id(10..).send().await.unwrap();
         service.search().id(..).send().await.unwrap();
-        for s in &op_ranges {
+        for s in &id_ranges {
             let range: RangeOrValue<u64> = s.parse().unwrap();
             service.search().id(range).send().await.unwrap();
         }

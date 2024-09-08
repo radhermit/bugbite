@@ -2147,6 +2147,9 @@ mod tests {
         // values using all match operator variants
         let matches: Vec<_> = MatchOp::iter().map(|op| format!("{op} value")).collect();
 
+        // valid operator-based ID ranges
+        let id_ranges = ["<10", "<=10", "=10", "!=10", ">=10", ">10"];
+
         // valid TimeDeltaOrStatic values
         let times = vec![
             "2020",
@@ -2362,6 +2365,10 @@ mod tests {
         service.search().ids(..=20).send().await.unwrap();
         service.search().ids(10..).send().await.unwrap();
         service.search().ids(..).send().await.unwrap();
+        for s in &id_ranges {
+            let range: ExistsOrValues<RangeOrValue<i64>> = s.parse().unwrap();
+            service.search().ids(range).send().await.unwrap();
+        }
 
         // time related combinators
         for time in &times {
