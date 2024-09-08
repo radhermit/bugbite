@@ -1,5 +1,5 @@
+use std::fs;
 use std::time::Duration;
-use std::{fmt, fs};
 
 use camino::{Utf8Path, Utf8PathBuf};
 use enum_as_inner::EnumAsInner;
@@ -145,44 +145,5 @@ impl ClientParameters {
         builder
             .build()
             .map_err(|e| Error::InvalidValue(format!("failed creating client: {e}")))
-    }
-}
-
-#[derive(EnumAsInner, Debug)]
-pub enum Service {
-    Bugzilla(bugzilla::Service),
-    Github(github::Service),
-    Redmine(redmine::Service),
-}
-
-impl WebClient for Service {
-    fn base(&self) -> &Url {
-        match self {
-            Self::Bugzilla(service) => service.base(),
-            Self::Github(service) => service.base(),
-            Self::Redmine(service) => service.base(),
-        }
-    }
-
-    fn kind(&self) -> ServiceKind {
-        match self {
-            Self::Bugzilla(service) => service.kind(),
-            Self::Github(service) => service.kind(),
-            Self::Redmine(service) => service.kind(),
-        }
-    }
-
-    fn name(&self) -> &str {
-        match self {
-            Self::Bugzilla(service) => service.name(),
-            Self::Github(service) => service.name(),
-            Self::Redmine(service) => service.name(),
-        }
-    }
-}
-
-impl fmt::Display for Service {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Service: {} -- {}", self.base(), self.kind())
     }
 }
