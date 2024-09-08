@@ -8,25 +8,25 @@ use crate::traits::Api;
 use crate::Error;
 
 #[derive(Debug, Default)]
-pub(crate) struct Query {
-    query: ListOrderedMultimap<String, String>,
-}
+pub(crate) struct Query(ListOrderedMultimap<String, String>);
 
 impl Query {
+    /// Appends a value to the list of values associated with the given key.
     pub(crate) fn append<K, V>(&mut self, key: K, value: V)
     where
         K: Api,
         V: Api,
     {
-        self.query.append(key.api(), value.api());
+        self.0.append(key.api(), value.api());
     }
 
+    /// Inserts a value overriding entries associated with the given key.
     pub(crate) fn insert<K, V>(&mut self, key: K, value: V)
     where
         K: Api,
         V: Api,
     {
-        self.query.insert(key.api(), value.api());
+        self.0.insert(key.api(), value.api());
     }
 }
 
@@ -35,7 +35,7 @@ impl<'a> IntoIterator for &'a Query {
     type IntoIter = ordered_multimap::list_ordered_multimap::Iter<'a, String, String>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.query.iter()
+        self.0.iter()
     }
 }
 
