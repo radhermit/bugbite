@@ -311,11 +311,11 @@ struct AttachmentOptions {
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Range options")]
 struct RangeOptions {
-    /// restrict by comments
+    /// restrict by comment count
     #[arg(long)]
     comments: Option<RangeOrValue<u64>>,
 
-    /// restrict by votes
+    /// restrict by vote count
     #[arg(long)]
     votes: Option<RangeOrValue<u64>>,
 }
@@ -429,7 +429,7 @@ struct UserOptions {
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Comment options")]
 struct CommentOptions {
-    /// strings to search for in comments
+    /// restrict by comment content
     #[clap(long, value_name = "TERM")]
     comment: Option<Vec<MaybeStdinVec<Match>>>,
 
@@ -478,7 +478,7 @@ struct Params {
     #[clap(flatten)]
     comment: CommentOptions,
 
-    /// summary strings to search for
+    /// restrict by summary content
     #[clap(value_name = "TERM", help_heading = "Arguments")]
     summary: Option<Vec<MaybeStdinVec<Match>>>,
 }

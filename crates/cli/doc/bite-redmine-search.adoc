@@ -264,7 +264,7 @@ Query issue status from the following options: @open, @closed, and @any.
 == Arguments
 
 *[<terms>]*::
-    Strings to search for in the subject.
+    Restrict by subject content.
 +
 Taken from standard input when `-`.
 +

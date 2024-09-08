@@ -140,7 +140,7 @@ struct Params {
     #[clap(flatten)]
     time: TimeOptions,
 
-    /// strings to search for in the subject
+    /// restrict by subject content
     #[clap(value_name = "TERM", help_heading = "Arguments")]
     subject: Option<Vec<MaybeStdinVec<String>>>,
 }

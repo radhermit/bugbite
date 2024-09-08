@@ -807,7 +807,12 @@ See the information above in the <<User Options>> section for regular values.
 == Comment options
 
 *--comment* <term>::
-    Strings to search for in the comments.
+    Restrict by comment content.
++
+Regular values search for matching substrings and multiple values can be
+specified in multiple options for logical AND. Values can use match operators
+to alter their query application. See the <<Match Operators>> section for more
+information.
 +
 Values are taken from standard input when `-`.
 
@@ -831,7 +836,12 @@ section for more information.
 == Arguments
 
 *[<terms>]*::
-    Strings to search for in the summary.
+    Restrict by summary content.
++
+Regular values search for matching substrings and multiple values can be
+specified in multiple options for logical AND. Values can use match operators
+to alter their query application. See the <<Match Operators>> section for more
+information.
 +
 Values are taken from standard input when `-`.
 +
