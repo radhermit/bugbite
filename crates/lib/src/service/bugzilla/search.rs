@@ -2396,5 +2396,14 @@ mod tests {
                 .await
                 .unwrap();
         }
+
+        service.search().limit(10).send().await.unwrap();
+        service.search().offset(10).send().await.unwrap();
+        service
+            .search()
+            .quicksearch("ALL @user OR reporter:user")
+            .send()
+            .await
+            .unwrap();
     }
 }
