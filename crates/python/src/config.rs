@@ -1,9 +1,9 @@
 use pyo3::exceptions::{PyKeyError, PyTypeError};
 use pyo3::prelude::*;
 
+use crate::error::{BugbiteError, Error};
 use crate::service;
 use crate::traits::ToStr;
-use crate::Error;
 
 #[pyclass(mapping, module = "bugbite.config")]
 pub(super) struct Config(::bugbite::config::Config);
@@ -14,6 +14,15 @@ impl Config {
     fn new() -> PyResult<Self> {
         let config = ::bugbite::config::Config::new().map_err(Error)?;
         Ok(Self(config))
+    }
+
+    /// Get a bugzilla service using a configured connection.
+    fn bugzilla(&self, name: &str) -> PyResult<crate::bugzilla::Bugzilla> {
+        self.0
+            .get(name)
+            .cloned()
+            .ok_or_else(|| BugbiteError::new_err(format!("unknown service: {name}")))?
+            .try_into()
     }
 
     fn __iter__(&self) -> PyResult<_Iter> {

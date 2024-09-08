@@ -358,6 +358,7 @@ dependencies = [
  "bugbite",
  "indexmap",
  "pyo3",
+ "tokio",
 ]
 
 [[package]]
