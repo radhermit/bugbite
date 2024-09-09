@@ -1,4 +1,5 @@
 use std::fmt;
+use std::sync::OnceLock;
 
 use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
@@ -36,7 +37,7 @@ pub struct Config {
     base: Url,
     pub name: String,
     #[serde(skip)]
-    web_base: Option<Url>,
+    web_base: OnceLock<Url>,
     #[serde(flatten)]
     pub auth: Authentication,
     #[serde(flatten)]
@@ -46,25 +47,29 @@ pub struct Config {
 
 impl Config {
     pub(super) fn new(base: &str) -> crate::Result<Self> {
-        let web_base = if let Some((base, _project)) = base.split_once("/projects/") {
-            let url = Url::parse(base)
-                .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
-            Some(url)
-        } else {
-            None
-        };
-
         let base = base.trim_end_matches('/');
         let base = Url::parse(&format!("{base}/"))
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
 
         Ok(Self {
             base,
-            web_base,
+            web_base: Default::default(),
             name: Default::default(),
             auth: Default::default(),
             client: Default::default(),
             max_search_results: Default::default(),
+        })
+    }
+
+    /// Return the base URL for the service, removing any project subpath if it exists.
+    fn web_base(&self) -> &Url {
+        self.web_base.get_or_init(|| {
+            if let Some((base, _project)) = self.base.as_str().split_once("/projects/") {
+                if let Ok(url) = Url::parse(base) {
+                    return url;
+                }
+            }
+            self.base.clone()
         })
     }
 
@@ -76,11 +81,6 @@ impl Config {
             0 => 100,
             n => n,
         }
-    }
-
-    /// Return the base URL for the service, removing any project subpath if it exists.
-    pub fn web_base(&self) -> &Url {
-        self.web_base.as_ref().unwrap_or(&self.base)
     }
 }
 
