@@ -52,9 +52,9 @@ impl SearchIter {
         slf
     }
 
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<PyResult<Issue>> {
+    fn __next__(&mut self) -> Option<PyResult<Issue>> {
         tokio().block_on(async {
-            match slf.0.try_next().await {
+            match self.0.try_next().await {
                 Err(e) => Some(Err(Error(e).into())),
                 Ok(v) => v.map(|x| Ok(x.into())),
             }
