@@ -1,5 +1,8 @@
 use bugbite::objects::redmine;
 use pyo3::prelude::*;
+use pyo3::types::PyDateTime;
+
+use crate::utils::datetime;
 
 #[pyclass(module = "bugbite.redmine")]
 pub(super) struct Issue(redmine::Issue);
@@ -19,6 +22,21 @@ impl Issue {
     #[getter]
     fn description(&self) -> Option<&str> {
         self.0.description.as_deref()
+    }
+
+    #[getter]
+    fn closed<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
+        self.0.closed.map(|x| datetime(x, py))
+    }
+
+    #[getter]
+    fn created<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
+        self.0.created.map(|x| datetime(x, py))
+    }
+
+    #[getter]
+    fn updated<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
+        self.0.updated.map(|x| datetime(x, py))
     }
 }
 
