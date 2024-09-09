@@ -35,9 +35,22 @@ impl Bugzilla {
         Ok(Self(service))
     }
 
-    fn search(&self, value: &str) -> SearchIter {
-        let stream = self.0.search().summary([value]).stream();
-        SearchIter(Box::pin(stream))
+    fn search(&self) -> SearchRequest {
+        SearchRequest(self.0.search())
+    }
+}
+
+#[pyclass(module = "bugbite.bugzilla")]
+struct SearchRequest(bugbite::service::bugzilla::search::Request);
+
+#[pymethods]
+impl SearchRequest {
+    fn __iter__(&self) -> SearchIter {
+        SearchIter(Box::pin(self.0.clone().stream()))
+    }
+
+    fn summary(&mut self, value: &str) {
+        self.0.params.summary = Some(vec![value.into()]);
     }
 }
 
