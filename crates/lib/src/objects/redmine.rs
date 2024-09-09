@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use chrono::prelude::*;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -18,9 +20,9 @@ pub struct Issue {
     pub assigned_to: Option<Person>,
     pub subject: Option<String>,
     pub description: Option<String>,
-    pub status: Option<FieldValue>,
-    pub tracker: Option<FieldValue>,
-    pub priority: Option<FieldValue>,
+    pub status: Option<Field>,
+    pub tracker: Option<Field>,
+    pub priority: Option<Field>,
     pub author: Option<Person>,
     #[serde(rename = "closed_on")]
     pub closed: Option<DateTime<Utc>>,
@@ -33,12 +35,20 @@ pub struct Issue {
 }
 
 #[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq)]
-pub struct FieldValue {
+pub struct Field {
     id: u64,
     name: String,
 }
 
-impl fmt::Display for FieldValue {
+impl Deref for Field {
+    type Target = str;
+
+    fn deref(&self) -> &str {
+        &self.name
+    }
+}
+
+impl fmt::Display for Field {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.name)
     }
