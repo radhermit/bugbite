@@ -1,6 +1,9 @@
+use std::borrow::Borrow;
+use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 
 use chrono::prelude::*;
+use indexmap::IndexSet;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, skip_serializing_none, DefaultOnNull};
@@ -24,6 +27,7 @@ pub struct Issue {
     pub tracker: Option<Field>,
     pub priority: Option<Field>,
     pub author: Option<Person>,
+    pub custom_fields: Option<IndexSet<CustomField>>,
     #[serde(rename = "closed_on")]
     pub closed: Option<DateTime<Utc>>,
     #[serde(rename = "created_on")]
@@ -34,7 +38,7 @@ pub struct Issue {
     pub comments: Vec<Comment>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
 pub struct Field {
     id: u64,
     name: String,
@@ -54,10 +58,38 @@ impl fmt::Display for Field {
     }
 }
 
-impl Issue {
-    pub fn search_display(&self) -> String {
-        self.id.to_string()
+#[derive(Deserialize, Serialize, Debug)]
+pub struct CustomField {
+    id: u64,
+    pub name: String,
+    pub value: CustomFieldValue,
+}
+
+impl PartialEq for CustomField {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
     }
+}
+
+impl Eq for CustomField {}
+
+impl Hash for CustomField {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+    }
+}
+
+impl Borrow<str> for CustomField {
+    fn borrow(&self) -> &str {
+        &self.name
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(untagged)]
+pub enum CustomFieldValue {
+    String(String),
+    Array(Vec<String>),
 }
 
 impl From<Issue> for Item {

@@ -132,6 +132,23 @@ impl Render<&Issue> for Service {
         output_field!(f, "Updated", &item.updated, width);
         writeln!(f, "{:<12} : {}", "ID", item.id)?;
 
+        if let Some(values) = &item.custom_fields {
+            for field in values {
+                match &field.value {
+                    CustomFieldValue::String(value) => {
+                        if !value.is_empty() {
+                            output_field!(f, &field.name, Some(value), width);
+                        }
+                    }
+                    CustomFieldValue::Array(values) => {
+                        if !values.is_empty() {
+                            wrapped_csv(f, &field.name, values, width)?;
+                        }
+                    }
+                }
+            }
+        }
+
         if !item.comments.is_empty() {
             writeln!(f, "{:<12} : {}", "Comments", item.comments.len())?;
         }

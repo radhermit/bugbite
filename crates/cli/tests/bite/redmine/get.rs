@@ -64,6 +64,8 @@ async fn single() {
         Created      : 2024-02-15 15:56:49 UTC
         Updated      : 2024-02-15 16:00:26 UTC
         ID           : 1
+        Custom field 4 : value
+        Custom field 5 : value
         Comments     : 2
 
         Description by john (John Smith), 2024-02-15 15:56:49 UTC
@@ -105,6 +107,8 @@ async fn single() {
                 Created      : 2024-02-15 15:56:49 UTC
                 Updated      : 2024-02-15 16:00:26 UTC
                 ID           : 1
+                Custom field 4 : value
+                Custom field 5 : value
             "}))
             .stderr("")
             .success();
