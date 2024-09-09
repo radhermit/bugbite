@@ -25,6 +25,21 @@ impl Issue {
     }
 
     #[getter]
+    fn priority(&self) -> Option<&str> {
+        self.0.priority.as_deref()
+    }
+
+    #[getter]
+    fn status(&self) -> Option<&str> {
+        self.0.status.as_deref()
+    }
+
+    #[getter]
+    fn tracker(&self) -> Option<&str> {
+        self.0.tracker.as_deref()
+    }
+
+    #[getter]
     fn closed<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
         self.0.closed.map(|x| datetime(x, py))
     }
