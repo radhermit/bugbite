@@ -1,6 +1,9 @@
-use bugbite::service::bugzilla::{self, GroupField};
-use bugbite::traits::RequestSend;
+use std::pin::Pin;
+
+use bugbite::service::bugzilla;
+use bugbite::traits::RequestStream;
 use bugbite::traits::WebClient;
+use futures_util::{Stream, TryStreamExt};
 use pyo3::prelude::*;
 
 use crate::error::{BugbiteError, Error};
@@ -32,17 +35,29 @@ impl Bugzilla {
         Ok(Self(service))
     }
 
-    fn search(&self, value: &str) -> PyResult<Vec<Bug>> {
+    fn search(&self, value: &str) -> SearchIter {
+        let stream = self.0.search().summary([value]).stream();
+        SearchIter(Box::pin(stream))
+    }
+}
+
+#[pyclass(module = "bugbite.bugzilla")]
+struct SearchIter(
+    Pin<Box<dyn Stream<Item = bugbite::Result<bugbite::objects::bugzilla::Bug>> + Send>>,
+);
+
+#[pymethods]
+impl SearchIter {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<PyResult<Bug>> {
         tokio().block_on(async {
-            let bugs = self
-                .0
-                .search()
-                .fields([GroupField::Default])
-                .summary([value])
-                .send()
-                .await
-                .map_err(Error)?;
-            Ok(bugs.into_iter().map(Into::into).collect())
+            match slf.0.try_next().await {
+                Err(e) => Some(Err(Error(e).into())),
+                Ok(v) => v.map(|x| Ok(x.into())),
+            }
         })
     }
 }

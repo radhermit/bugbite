@@ -357,6 +357,7 @@ version = "0.0.1"
 dependencies = [
  "bugbite",
  "chrono",
+ "futures-util",
  "indexmap",
  "pyo3",
  "tokio",
