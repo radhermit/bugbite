@@ -504,7 +504,7 @@ impl Request {
     }
 
     /// Return the website URL for a query.
-    pub fn search_url(self) -> crate::Result<Url> {
+    pub fn search_url(&self) -> crate::Result<Url> {
         let mut url = self.service.config.base.join("buglist.cgi")?;
         let query = self.encode()?;
         url.query_pairs_mut().extend_pairs(query.iter());
