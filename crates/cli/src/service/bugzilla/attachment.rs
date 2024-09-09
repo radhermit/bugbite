@@ -1,7 +1,7 @@
 use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
-use bugbite::service::bugzilla::Service;
+use bugbite::service::bugzilla::Bugzilla;
 
 mod create;
 mod get;
@@ -14,7 +14,7 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    pub(super) async fn run<W>(self, service: &Bugzilla, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {
@@ -38,7 +38,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    async fn run<W>(self, service: &Bugzilla, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {

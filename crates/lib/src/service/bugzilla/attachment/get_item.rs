@@ -2,25 +2,25 @@ use serde_json::Value;
 use url::Url;
 
 use crate::objects::bugzilla::Attachment;
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub struct Request<'a> {
-    service: &'a Service,
+pub struct Request {
+    service: Bugzilla,
     pub ids: Vec<String>,
     pub data: bool,
 }
 
-impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> Self
+impl Request {
+    pub(crate) fn new<I, S>(service: &Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
         Self {
-            service,
+            service: service.clone(),
             ids: ids.into_iter().map(|s| s.to_string()).collect(),
             data: true,
         }
@@ -57,7 +57,7 @@ impl<'a> Request<'a> {
     }
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<Vec<Attachment>>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
@@ -65,7 +65,7 @@ impl RequestSend for Request<'_> {
             .service
             .client
             .get(self.url()?)
-            .auth_optional(self.service);
+            .auth_optional(&self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
@@ -109,7 +109,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
 
         // no IDs
         let ids = Vec::<u64>::new();

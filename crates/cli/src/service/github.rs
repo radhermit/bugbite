@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use anyhow::anyhow;
 use bugbite::config::Config;
 use bugbite::objects::github::*;
-use bugbite::service::github::{self, Service};
+use bugbite::service::github::{self, Github};
 use bugbite::service::ServiceKind;
 use bugbite::traits::Merge;
 use itertools::Itertools;
@@ -65,7 +65,7 @@ impl Command {
         config.auth.merge(self.auth.into());
         config.client.merge(self.service.into());
 
-        let service = Service::from_config(config)?;
+        let service = config.into_service()?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await
     }
@@ -82,7 +82,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    async fn run<W>(self, service: &Github, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {
@@ -93,7 +93,7 @@ impl Subcommand {
     }
 }
 
-impl Render<&Issue> for Service {
+impl Render<&Issue> for Github {
     fn render<W>(&self, item: &Issue, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,

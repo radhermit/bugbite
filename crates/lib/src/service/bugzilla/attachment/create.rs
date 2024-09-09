@@ -12,7 +12,7 @@ use url::Url;
 
 use crate::objects::bugzilla::Flag;
 use crate::objects::Base64;
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
@@ -383,20 +383,20 @@ struct RequestAttachment<'a> {
 }
 
 #[derive(Debug)]
-pub struct Request<'a> {
-    service: &'a Service,
+pub struct Request {
+    service: Bugzilla,
     pub ids: Vec<String>,
     pub attachments: Vec<Attachment>,
 }
 
-impl<'a> Request<'a> {
-    pub(crate) fn new<I, S>(service: &'a Service, ids: I) -> Self
+impl Request {
+    pub(crate) fn new<I, S>(service: &Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
         Self {
-            service,
+            service: service.clone(),
             ids: ids.into_iter().map(|s| s.to_string()).collect(),
             attachments: Default::default(),
         }
@@ -426,7 +426,7 @@ impl<'a> Request<'a> {
     }
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<Vec<u64>>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
@@ -452,7 +452,7 @@ impl RequestSend for Request<'_> {
                     .client
                     .post(url.clone())
                     .json(&attachment)
-                    .auth(self.service)?
+                    .auth(&self.service)?
                     .send(),
             )
         }
@@ -480,7 +480,7 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
 
         // no IDs
         let ids = Vec::<u32>::new();

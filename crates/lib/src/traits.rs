@@ -236,7 +236,7 @@ mod tests {
 
     use tempfile::tempdir;
 
-    use crate::service::bugzilla::{Config, Service};
+    use crate::service::bugzilla::{Bugzilla, Config};
     use crate::test::*;
 
     use super::*;
@@ -244,7 +244,7 @@ mod tests {
     #[tokio::test]
     async fn request_template() {
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
         let request1 = service.search();
         let mut request2 = service.search();
 
@@ -291,7 +291,7 @@ mod tests {
         // named services save to config dir path
         let mut config = Config::new(server.uri()).unwrap();
         config.name = "service".to_string();
-        let service = Service::from_config(config).unwrap();
+        let service = config.into_service().unwrap();
         let time = "2d".parse().unwrap();
         let request1 = service.search().created(time);
         let mut request2 = service.search();

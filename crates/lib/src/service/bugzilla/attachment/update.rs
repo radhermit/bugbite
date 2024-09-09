@@ -4,24 +4,24 @@ use serde_with::skip_serializing_none;
 use url::Url;
 
 use crate::objects::bugzilla::Flag;
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub struct Request<'a> {
-    service: &'a Service,
+pub struct Request {
+    service: Bugzilla,
     pub ids: Vec<u64>,
     pub params: Parameters,
 }
 
-impl<'a> Request<'a> {
-    pub(crate) fn new<I>(service: &'a Service, ids: I) -> Self
+impl Request {
+    pub(crate) fn new<I>(service: &Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = u64>,
     {
         Self {
-            service,
+            service: service.clone(),
             ids: ids.into_iter().collect(),
             params: Default::default(),
         }
@@ -63,7 +63,7 @@ impl<'a> Request<'a> {
     }
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<u64>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
@@ -74,7 +74,7 @@ impl RequestSend for Request<'_> {
             .client
             .put(url)
             .json(&params)
-            .auth(self.service)?;
+            .auth(&self.service)?;
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let Value::Array(data) = data["attachments"].take() else {
@@ -147,7 +147,7 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
 
         // no IDs
         let ids = Vec::<u64>::new();

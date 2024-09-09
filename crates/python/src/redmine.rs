@@ -1,4 +1,4 @@
-use bugbite::service::redmine::Service;
+use bugbite::service::redmine;
 use bugbite::traits::RequestSend;
 use bugbite::traits::WebClient;
 use pyo3::prelude::*;
@@ -10,7 +10,7 @@ mod objects;
 use objects::Issue;
 
 #[pyclass(module = "bugbite.redmine")]
-pub(super) struct Redmine(pub(crate) Service);
+pub(super) struct Redmine(pub(crate) redmine::Redmine);
 
 impl TryFrom<bugbite::service::Config> for Redmine {
     type Error = PyErr;
@@ -19,7 +19,7 @@ impl TryFrom<bugbite::service::Config> for Redmine {
         let config = value
             .into_redmine()
             .map_err(|c| BugbiteError::new_err(format!("invalid service type: {}", c.kind())))?;
-        let service = Service::from_config(config).map_err(Error)?;
+        let service = config.into_service().map_err(Error)?;
         Ok(Self(service))
     }
 }
@@ -28,7 +28,7 @@ impl TryFrom<bugbite::service::Config> for Redmine {
 impl Redmine {
     #[new]
     fn new(base: &str) -> PyResult<Self> {
-        let service = Service::new(base).map_err(Error)?;
+        let service = redmine::Redmine::new(base).map_err(Error)?;
         Ok(Self(service))
     }
 

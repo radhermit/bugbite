@@ -14,7 +14,7 @@ use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::Bugzilla;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
     Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, RequestTemplate, WebService,
@@ -24,21 +24,21 @@ use crate::Error;
 use super::{BugField, FilterField};
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
-pub struct Request<'a> {
+pub struct Request {
     #[serde(skip)]
-    service: &'a Service,
+    service: Bugzilla,
     #[serde(flatten)]
     pub params: Parameters,
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<Bug>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
         let mut url = self.service.config.base.join("rest/bug")?;
         let query = self.encode()?;
         url.query_pairs_mut().extend_pairs(query.iter());
-        let request = self.service.client.get(url).auth_optional(self.service);
+        let request = self.service.client.get(url).auth_optional(&self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let mut bugs = vec![];
@@ -52,7 +52,7 @@ impl RequestSend for Request<'_> {
     }
 }
 
-impl RequestStream for Request<'_> {
+impl RequestStream for Request {
     type Item = Bug;
 
     fn paged(&mut self) -> Option<usize> {
@@ -72,13 +72,13 @@ impl RequestStream for Request<'_> {
     }
 }
 
-impl RequestTemplate for Request<'_> {
+impl RequestTemplate for Request {
     type Params = Parameters;
-    type Service = Service;
+    type Service = Bugzilla;
     const TYPE: &'static str = "search";
 
     fn service(&self) -> &Self::Service {
-        self.service
+        &self.service
     }
 
     fn params(&mut self) -> &mut Self::Params {
@@ -86,16 +86,16 @@ impl RequestTemplate for Request<'_> {
     }
 }
 
-impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a Service) -> Self {
+impl Request {
+    pub(super) fn new(service: &Bugzilla) -> Self {
         Self {
-            service,
+            service: service.clone(),
             params: Default::default(),
         }
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {
-        let mut query = QueryBuilder::new(self.service);
+        let mut query = QueryBuilder::new(&self.service);
 
         if let Some(values) = &self.params.status {
             query.or(|query| values.iter().for_each(|x| query.status(x)));
@@ -1016,7 +1016,7 @@ impl Merge for Parameters {
 /// information.
 #[derive(Debug)]
 struct QueryBuilder<'a> {
-    service: &'a Service,
+    service: &'a Bugzilla,
     query: Query,
     advanced_count: u64,
 }
@@ -1036,7 +1036,7 @@ impl DerefMut for QueryBuilder<'_> {
 }
 
 impl<'a> QueryBuilder<'a> {
-    fn new(service: &'a Service) -> Self {
+    fn new(service: &'a Bugzilla) -> Self {
         Self {
             service,
             query: Default::default(),
@@ -1096,7 +1096,7 @@ pub struct Match {
 
 impl Match {
     /// Substitute user alias for matching value.
-    fn replace_user_alias(&self, service: &Service) -> Self {
+    fn replace_user_alias(&self, service: &Bugzilla) -> Self {
         Self {
             op: self.op,
             value: service.replace_user_alias(&self.value).to_string(),
@@ -2015,7 +2015,7 @@ mod tests {
     async fn exists_or_values_match() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
         server.respond(200, path.join("search/ids.json")).await;
 
         // boolean
@@ -2094,7 +2094,7 @@ mod tests {
     async fn exists_or_values_range_i64() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
         server.respond(200, path.join("search/ids.json")).await;
 
         // boolean
@@ -2134,7 +2134,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
 
         server
             .respond(200, path.join("search/nonexistent.json"))

@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use anyhow::anyhow;
 use bugbite::config::Config;
 use bugbite::objects::bugzilla::*;
-use bugbite::service::bugzilla::{self, Service};
+use bugbite::service::bugzilla::{self, Bugzilla};
 use bugbite::service::ServiceKind;
 use bugbite::traits::Merge;
 use clap::Args;
@@ -81,7 +81,7 @@ impl Command {
         config.auth.merge(self.auth.into());
         config.client.merge(self.service.into());
 
-        let service = Service::from_config(config)?;
+        let service = config.into_service()?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await
     }
@@ -123,7 +123,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    async fn run<W>(self, service: &Bugzilla, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {
@@ -143,7 +143,7 @@ impl Subcommand {
 
 static OUTDATED: AtomicBool = AtomicBool::new(false);
 
-impl Render<&Attachment> for Service {
+impl Render<&Attachment> for Bugzilla {
     fn render<W>(&self, item: &Attachment, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
@@ -182,7 +182,7 @@ impl Render<&Attachment> for Service {
     }
 }
 
-impl Render<&Comment> for Service {
+impl Render<&Comment> for Bugzilla {
     fn render<W>(&self, item: &Comment, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
@@ -206,7 +206,7 @@ impl Render<&Comment> for Service {
     }
 }
 
-impl Render<&Event> for Service {
+impl Render<&Event> for Bugzilla {
     fn render<W>(&self, item: &Event, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
@@ -222,7 +222,7 @@ impl Render<&Event> for Service {
     }
 }
 
-impl Render<&Change> for Service {
+impl Render<&Change> for Bugzilla {
     fn render<W>(&self, item: &Change, f: &mut W, _width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
@@ -237,7 +237,7 @@ impl Render<&Change> for Service {
     }
 }
 
-impl Render<&BugUpdate<'_>> for Service {
+impl Render<&BugUpdate<'_>> for Bugzilla {
     fn render<W>(&self, item: &BugUpdate, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
@@ -249,7 +249,7 @@ impl Render<&BugUpdate<'_>> for Service {
     }
 }
 
-impl Render<&Bug> for Service {
+impl Render<&Bug> for Bugzilla {
     fn render<W>(&self, item: &Bug, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,

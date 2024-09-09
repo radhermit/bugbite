@@ -2,29 +2,29 @@ use serde_json::Value;
 use url::Url;
 
 use crate::objects::bugzilla::Bug;
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 use super::{attachment, comment, history};
 
 #[derive(Debug)]
-pub struct Request<'a> {
-    service: &'a Service,
+pub struct Request {
+    service: Bugzilla,
     pub ids: Vec<String>,
-    attachments: Option<attachment::get_item::Request<'a>>,
-    comments: Option<comment::Request<'a>>,
-    history: Option<history::Request<'a>>,
+    attachments: Option<attachment::get_item::Request>,
+    comments: Option<comment::Request>,
+    history: Option<history::Request>,
 }
 
-impl<'a> Request<'a> {
-    pub(super) fn new<I, S>(service: &'a Service, ids: I) -> Self
+impl Request {
+    pub(super) fn new<I, S>(service: &Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
         Self {
-            service,
+            service: service.clone(),
             ids: ids.into_iter().map(|s| s.to_string()).collect(),
             attachments: None,
             comments: None,
@@ -82,7 +82,7 @@ impl<'a> Request<'a> {
     }
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<Bug>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
@@ -90,7 +90,7 @@ impl RequestSend for Request<'_> {
             .service
             .client
             .get(self.url()?)
-            .auth_optional(self.service);
+            .auth_optional(&self.service);
 
         // send data requests
         let attachments = self.attachments.as_ref().map(|r| r.send());
@@ -140,7 +140,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
 
         // no IDs
         let ids = Vec::<u32>::new();

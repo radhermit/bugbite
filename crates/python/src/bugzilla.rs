@@ -1,4 +1,4 @@
-use bugbite::service::bugzilla::{GroupField, Service};
+use bugbite::service::bugzilla::{self, GroupField};
 use bugbite::traits::RequestSend;
 use bugbite::traits::WebClient;
 use pyo3::prelude::*;
@@ -10,7 +10,7 @@ mod objects;
 use objects::Bug;
 
 #[pyclass(module = "bugbite.bugzilla")]
-pub(super) struct Bugzilla(pub(crate) Service);
+pub(super) struct Bugzilla(pub(crate) bugzilla::Bugzilla);
 
 impl TryFrom<bugbite::service::Config> for Bugzilla {
     type Error = PyErr;
@@ -19,7 +19,7 @@ impl TryFrom<bugbite::service::Config> for Bugzilla {
         let config = value
             .into_bugzilla()
             .map_err(|c| BugbiteError::new_err(format!("invalid service type: {}", c.kind())))?;
-        let service = Service::from_config(config).map_err(Error)?;
+        let service = config.into_service().map_err(Error)?;
         Ok(Self(service))
     }
 }
@@ -28,7 +28,7 @@ impl TryFrom<bugbite::service::Config> for Bugzilla {
 impl Bugzilla {
     #[new]
     fn new(base: &str) -> PyResult<Self> {
-        let service = Service::new(base).map_err(Error)?;
+        let service = bugzilla::Bugzilla::new(base).map_err(Error)?;
         Ok(Self(service))
     }
 

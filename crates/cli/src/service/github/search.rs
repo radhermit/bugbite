@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use bugbite::args::Csv;
 use bugbite::query::Order;
 use bugbite::service::github::search::{OrderField, Parameters};
-use bugbite::service::github::Service;
+use bugbite::service::github::Github;
 use bugbite::traits::{Merge, RequestSend};
 use bugbite::utils::is_terminal;
 use clap::Args;
@@ -48,7 +48,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    pub(super) async fn run<W>(self, service: &Github, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {

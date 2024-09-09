@@ -1,6 +1,8 @@
 use std::collections::HashSet;
 use std::fmt;
+use std::ops::Deref;
 use std::str::FromStr;
+use std::sync::Arc;
 
 use indexmap::{IndexMap, IndexSet};
 use once_cell::sync::Lazy;
@@ -79,6 +81,16 @@ impl Config {
         })
     }
 
+    /// Create a new Service from a Config.
+    pub fn into_service(self) -> crate::Result<Bugzilla> {
+        let client = self.client.build()?;
+        Ok(Bugzilla(Arc::new(Service {
+            config: self,
+            cache: Default::default(),
+            client,
+        })))
+    }
+
     /// Maximum number of results that can be returned by a search request.
     ///
     /// Fallback to bugzilla's internal default of 10000.
@@ -111,27 +123,34 @@ pub struct Service {
     client: reqwest::Client,
 }
 
-impl PartialEq for Service {
+#[derive(Debug, Clone)]
+pub struct Bugzilla(Arc<Service>);
+
+impl Deref for Bugzilla {
+    type Target = Service;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl PartialEq for Bugzilla {
     fn eq(&self, other: &Self) -> bool {
         self.config == other.config
     }
 }
 
-impl Service {
+impl fmt::Display for Bugzilla {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} -- {}", self.kind(), self.base())
+    }
+}
+
+impl Bugzilla {
     /// Create a new Service from a given base URL.
     pub fn new(base: &str) -> crate::Result<Self> {
         let config = Config::new(base)?;
-        Self::from_config(config)
-    }
-
-    /// Create a new Service from a Config.
-    pub fn from_config(config: Config) -> crate::Result<Self> {
-        let client = config.client.build()?;
-        Ok(Self {
-            config,
-            cache: Default::default(),
-            client,
-        })
+        config.into_service()
     }
 
     /// Return the website URL for an item ID.
@@ -269,13 +288,7 @@ macro_rules! return_if_error {
     }};
 }
 
-impl fmt::Display for Service {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} -- {}", self.kind(), self.base())
-    }
-}
-
-impl<'a> WebService<'a> for Service {
+impl<'a> WebService<'a> for Bugzilla {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
 
@@ -320,7 +333,7 @@ impl<'a> WebService<'a> for Service {
     }
 }
 
-impl WebClient for Service {
+impl WebClient for Bugzilla {
     fn base(&self) -> &Url {
         self.config.base()
     }

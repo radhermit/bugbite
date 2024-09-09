@@ -6,7 +6,7 @@ use bugbite::objects::RangeOrValue;
 use bugbite::query::Order;
 use bugbite::service::redmine::search::{OrderField, Parameters};
 use bugbite::service::redmine::IssueField;
-use bugbite::service::redmine::Service;
+use bugbite::service::redmine::Redmine;
 use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::{Merge, RequestStream, RequestTemplate};
 use clap::Args;
@@ -192,7 +192,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    pub(super) async fn run<W>(self, service: &Redmine, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {

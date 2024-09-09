@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::create::Parameters;
-use bugbite::service::bugzilla::Service;
+use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use bugbite::utils::is_terminal;
 use clap::Args;
@@ -183,7 +183,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    pub(super) async fn run<W>(self, service: &Bugzilla, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {

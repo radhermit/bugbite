@@ -5,24 +5,24 @@ use strum::Display;
 use url::Url;
 
 use crate::objects::redmine::{Comment, Issue};
-use crate::service::redmine::Service;
+use crate::service::redmine::Redmine;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub struct Request<'a> {
-    service: &'a Service,
+pub struct Request {
+    service: Redmine,
     pub ids: Vec<u64>,
     fields: IndexSet<Field>,
 }
 
-impl<'a> Request<'a> {
-    pub(super) fn new<I>(service: &'a Service, ids: I) -> Self
+impl Request {
+    pub(super) fn new<I>(service: &Redmine, ids: I) -> Self
     where
         I: IntoIterator<Item = u64>,
     {
         Self {
-            service,
+            service: service.clone(),
             ids: ids.into_iter().collect(),
             fields: Default::default(),
         }
@@ -75,7 +75,7 @@ enum Field {
     Journals,
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<Issue>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
@@ -86,7 +86,7 @@ impl RequestSend for Request<'_> {
                 self.service
                     .client
                     .get(u)
-                    .auth_optional(self.service)
+                    .auth_optional(&self.service)
                     .send()
             })
             .collect();
@@ -155,7 +155,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("redmine");
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Redmine::new(server.uri()).unwrap();
 
         // no IDs
         let ids = Vec::<u64>::new();

@@ -1,20 +1,22 @@
 use crate::objects::bugzilla::BugzillaField;
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::Bugzilla;
 use crate::traits::{RequestSend, WebService};
 use crate::Error;
 
 #[derive(Debug)]
-pub struct Request<'a> {
-    service: &'a Service,
+pub struct Request {
+    service: Bugzilla,
 }
 
-impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a Service) -> Self {
-        Self { service }
+impl Request {
+    pub(super) fn new(service: &Bugzilla) -> Self {
+        Self {
+            service: service.clone(),
+        }
     }
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<BugzillaField>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
@@ -37,7 +39,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
 
         server.respond(200, path.join("fields/gentoo.json")).await;
         let fields = service.fields().send().await.unwrap();

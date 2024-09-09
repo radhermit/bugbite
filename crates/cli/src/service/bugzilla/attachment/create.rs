@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use bugbite::args::CsvOrStdin;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::attachment::create::{Attachment, Compression};
-use bugbite::service::bugzilla::Service;
+use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::RequestSend;
 use byte_unit::Byte;
 use camino::Utf8PathBuf;
@@ -133,7 +133,7 @@ pub(super) struct Command {
 }
 
 impl Command {
-    pub(super) async fn run<W>(&self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    pub(super) async fn run<W>(&self, service: &Bugzilla, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {

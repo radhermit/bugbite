@@ -11,7 +11,7 @@ use crate::args::ExistsOrValues;
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
-use crate::service::redmine::Service;
+use crate::service::redmine::Redmine;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
     Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, RequestTemplate, WebService,
@@ -19,23 +19,23 @@ use crate::traits::{
 use crate::Error;
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
-pub struct Request<'a> {
+pub struct Request {
     #[serde(skip)]
-    service: &'a Service,
+    service: Redmine,
     #[serde(flatten)]
     pub params: Parameters,
 }
 
-impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a Service) -> Self {
+impl Request {
+    pub(super) fn new(service: &Redmine) -> Self {
         Self {
-            service,
+            service: service.clone(),
             params: Default::default(),
         }
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {
-        let mut query = QueryBuilder::new(self.service);
+        let mut query = QueryBuilder::new(&self.service);
 
         if let Some(values) = &self.params.blocks {
             match values {
@@ -178,14 +178,14 @@ impl<'a> Request<'a> {
     }
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<Issue>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
         let mut url = self.service.config.base.join("issues.json")?;
         let query = self.encode()?;
         url.query_pairs_mut().extend_pairs(query.iter());
-        let request = self.service.client.get(url).auth_optional(self.service);
+        let request = self.service.client.get(url).auth_optional(&self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let data = data["issues"].take();
@@ -194,7 +194,7 @@ impl RequestSend for Request<'_> {
     }
 }
 
-impl RequestStream for Request<'_> {
+impl RequestStream for Request {
     type Item = Issue;
 
     fn paged(&mut self) -> Option<usize> {
@@ -214,13 +214,13 @@ impl RequestStream for Request<'_> {
     }
 }
 
-impl RequestTemplate for Request<'_> {
+impl RequestTemplate for Request {
     type Params = Parameters;
-    type Service = Service;
+    type Service = Redmine;
     const TYPE: &'static str = "search";
 
     fn service(&self) -> &Self::Service {
-        self.service
+        &self.service
     }
 
     fn params(&mut self) -> &mut Self::Params {
@@ -275,7 +275,7 @@ impl Merge for Parameters {
 }
 
 struct QueryBuilder<'a> {
-    _service: &'a Service,
+    _service: &'a Redmine,
     query: Query,
 }
 
@@ -294,7 +294,7 @@ impl DerefMut for QueryBuilder<'_> {
 }
 
 impl<'a> QueryBuilder<'a> {
-    fn new(_service: &'a Service) -> Self {
+    fn new(_service: &'a Redmine) -> Self {
         Self {
             _service,
             query: Default::default(),
@@ -522,7 +522,7 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("redmine");
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Redmine::new(server.uri()).unwrap();
 
         server
             .respond(200, path.join("search/nonexistent.json"))

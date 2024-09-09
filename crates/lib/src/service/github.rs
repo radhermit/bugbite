@@ -1,4 +1,6 @@
 use std::fmt;
+use std::ops::Deref;
+use std::sync::Arc;
 
 use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
@@ -50,6 +52,16 @@ impl Config {
             client: Default::default(),
         })
     }
+
+    /// Create a new Service from a Config.
+    pub fn into_service(self) -> crate::Result<Github> {
+        let _client = self.client.build()?;
+        Ok(Github(Arc::new(Service {
+            config: self,
+            _cache: Default::default(),
+            _client,
+        })))
+    }
 }
 
 impl WebClient for Config {
@@ -66,7 +78,6 @@ impl WebClient for Config {
     }
 }
 
-// TODO: remove this once authentication support is added
 #[derive(Debug)]
 pub struct Service {
     config: Config,
@@ -74,27 +85,34 @@ pub struct Service {
     _client: reqwest::Client,
 }
 
-impl PartialEq for Service {
+#[derive(Debug, Clone)]
+pub struct Github(Arc<Service>);
+
+impl Deref for Github {
+    type Target = Service;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl PartialEq for Github {
     fn eq(&self, other: &Self) -> bool {
         self.config == other.config
     }
 }
 
-impl Service {
+impl fmt::Display for Github {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} -- {}", self.kind(), self.base())
+    }
+}
+
+impl Github {
     /// Create a new Service from a given base URL.
     pub fn new(base: &str) -> crate::Result<Self> {
         let config = Config::new(base)?;
-        Self::from_config(config)
-    }
-
-    /// Create a new Service from a Config.
-    pub fn from_config(config: Config) -> crate::Result<Self> {
-        let _client = config.client.build()?;
-        Ok(Self {
-            config,
-            _cache: Default::default(),
-            _client,
-        })
+        config.into_service()
     }
 
     /// Return the website URL for an item ID.
@@ -115,13 +133,7 @@ impl Service {
     }
 }
 
-impl fmt::Display for Service {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} -- {}", self.kind(), self.base())
-    }
-}
-
-impl<'a> WebService<'a> for Service {
+impl<'a> WebService<'a> for Github {
     const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
 
@@ -138,7 +150,7 @@ impl<'a> WebService<'a> for Service {
     }
 }
 
-impl WebClient for Service {
+impl WebClient for Github {
     fn base(&self) -> &Url {
         self.config.base()
     }

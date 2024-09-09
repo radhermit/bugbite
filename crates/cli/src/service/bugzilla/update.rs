@@ -8,7 +8,7 @@ use anyhow::Context;
 use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::objects::bugzilla::Flag;
 use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange, TriBool};
-use bugbite::service::bugzilla::Service;
+use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use camino::Utf8PathBuf;
 use clap::{Args, ValueHint};
@@ -295,7 +295,7 @@ pub(super) struct Command {
 
 /// Interactively create a reply, pulling specified comments for pre-population.
 async fn get_reply(
-    service: &Service,
+    service: &Bugzilla,
     id: &str,
     comment_ids: &mut Vec<usize>,
 ) -> anyhow::Result<String> {
@@ -349,7 +349,7 @@ fn edit_comment(data: &str) -> anyhow::Result<String> {
 }
 
 impl Command {
-    pub(super) async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    pub(super) async fn run<W>(self, service: &Bugzilla, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {

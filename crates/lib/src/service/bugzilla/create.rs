@@ -6,19 +6,19 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::objects::bugzilla::{Bug, Flag};
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService};
 use crate::Error;
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
-pub struct Request<'a> {
+pub struct Request {
     #[serde(skip)]
-    service: &'a Service,
+    service: Bugzilla,
     #[serde(flatten)]
     pub params: Parameters,
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = u64;
 
     async fn send(&self) -> crate::Result<Self::Output> {
@@ -29,7 +29,7 @@ impl RequestSend for Request<'_> {
             .client
             .post(url)
             .json(&params)
-            .auth(self.service)?;
+            .auth(&self.service)?;
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         serde_json::from_value(data["id"].take())
@@ -37,13 +37,13 @@ impl RequestSend for Request<'_> {
     }
 }
 
-impl RequestTemplate for Request<'_> {
+impl RequestTemplate for Request {
     type Params = Parameters;
-    type Service = Service;
+    type Service = Bugzilla;
     const TYPE: &'static str = "create";
 
     fn service(&self) -> &Self::Service {
-        self.service
+        &self.service
     }
 
     fn params(&mut self) -> &mut Self::Params {
@@ -51,10 +51,10 @@ impl RequestTemplate for Request<'_> {
     }
 }
 
-impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a Service) -> Self {
+impl Request {
+    pub(super) fn new(service: &Bugzilla) -> Self {
         Self {
-            service,
+            service: service.clone(),
             params: Default::default(),
         }
     }
@@ -468,6 +468,7 @@ struct RequestParameters<'a> {
 mod tests {
     use std::str::FromStr;
 
+    use crate::service::bugzilla::Config;
     use crate::test::*;
 
     use super::*;
@@ -477,9 +478,10 @@ mod tests {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         // TODO: improve API for setting user info on config creation
-        let mut service = Service::new(server.uri()).unwrap();
-        service.config.auth.user = Some("user".to_string());
-        service.config.auth.password = Some("pass".to_string());
+        let mut config = Config::new(server.uri()).unwrap();
+        config.auth.user = Some("user".to_string());
+        config.auth.password = Some("pass".to_string());
+        let service = config.into_service().unwrap();
 
         // missing required fields without defaults
         let err = service.create().send().await.unwrap_err();

@@ -14,7 +14,7 @@ use url::Url;
 
 use crate::objects::{bugzilla::Flag, Range};
 use crate::serde::non_empty_str;
-use crate::service::bugzilla::Service;
+use crate::service::bugzilla::Bugzilla;
 use crate::traits::{
     Contains, InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService,
 };
@@ -116,16 +116,16 @@ impl<T: FromStr + PartialOrd + Eq + Hash> Contains<T> for RangeOrSet<T> {
 }
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
-pub struct Request<'a> {
+pub struct Request {
     #[serde(skip)]
-    service: &'a Service,
+    service: Bugzilla,
     #[serde(skip)]
     pub ids: Vec<String>,
     #[serde(flatten)]
     pub params: Parameters,
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<BugChange>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
@@ -136,7 +136,7 @@ impl RequestSend for Request<'_> {
             .client
             .put(url)
             .json(&params)
-            .auth(self.service)?;
+            .auth(&self.service)?;
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let data = data["bugs"].take();
@@ -151,13 +151,13 @@ impl RequestSend for Request<'_> {
     }
 }
 
-impl RequestTemplate for Request<'_> {
+impl RequestTemplate for Request {
     type Params = Parameters;
-    type Service = Service;
+    type Service = Bugzilla;
     const TYPE: &'static str = "update";
 
     fn service(&self) -> &Self::Service {
-        self.service
+        &self.service
     }
 
     fn params(&mut self) -> &mut Self::Params {
@@ -165,14 +165,14 @@ impl RequestTemplate for Request<'_> {
     }
 }
 
-impl<'a> Request<'a> {
-    pub(super) fn new<I, S>(service: &'a Service, ids: I) -> Self
+impl Request {
+    pub(super) fn new<I, S>(service: &Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
         Self {
-            service,
+            service: service.clone(),
             ids: ids.into_iter().map(|s| s.to_string()).collect(),
             params: Default::default(),
         }
@@ -187,8 +187,16 @@ impl<'a> Request<'a> {
         Ok(url)
     }
 
+    fn parse_id_to_url<'a>(&'a self, value: &'a str) -> Cow<'a, str> {
+        if let Ok(id) = value.parse::<u64>() {
+            Cow::Owned(self.service.item_url(id))
+        } else {
+            Cow::Borrowed(value)
+        }
+    }
+
     /// Encode parameters into the form required for the request.
-    async fn encode(&'a self) -> crate::Result<RequestParameters> {
+    async fn encode(&self) -> crate::Result<RequestParameters> {
         // verify parameters exist
         if self.params == Parameters::default() {
             return Err(Error::EmptyParams);
@@ -296,19 +304,10 @@ impl<'a> Request<'a> {
         }
 
         if let Some(values) = &self.params.see_also {
-            // convert bug IDs to full URLs
-            let parse = |value: &'a str| -> Cow<'a, str> {
-                if let Ok(id) = value.parse::<u64>() {
-                    Cow::Owned(self.service.item_url(id))
-                } else {
-                    Cow::Borrowed(value)
-                }
-            };
-
             let iter = values.iter().map(|x| match x {
-                SetChange::Add(value) => SetChange::Add(parse(value)),
-                SetChange::Remove(value) => SetChange::Remove(parse(value)),
-                SetChange::Set(value) => SetChange::Set(parse(value)),
+                SetChange::Add(value) => SetChange::Add(self.parse_id_to_url(value)),
+                SetChange::Remove(value) => SetChange::Remove(self.parse_id_to_url(value)),
+                SetChange::Set(value) => SetChange::Set(self.parse_id_to_url(value)),
             });
 
             params.see_also = Some(iter.collect());
@@ -586,7 +585,7 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let server = TestServer::new().await;
-        let service = Service::new(server.uri()).unwrap();
+        let service = Bugzilla::new(server.uri()).unwrap();
 
         // no IDs
         let ids = Vec::<u32>::new();

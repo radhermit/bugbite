@@ -7,27 +7,27 @@ use tracing::debug;
 
 use crate::objects::github::Issue;
 use crate::query::{Order, Query};
-use crate::service::github::Service;
+use crate::service::github::Github;
 use crate::traits::{Api, Merge, MergeOption, RequestSend, RequestTemplate};
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
-pub struct Request<'a> {
+pub struct Request {
     #[serde(skip)]
-    service: &'a Service,
+    service: Github,
     #[serde(flatten)]
     pub params: Parameters,
 }
 
-impl<'a> Request<'a> {
-    pub(super) fn new(service: &'a Service) -> Self {
+impl Request {
+    pub(super) fn new(service: &Github) -> Self {
         Self {
-            service,
+            service: service.clone(),
             params: Default::default(),
         }
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {
-        let mut query = QueryBuilder::new(self.service);
+        let mut query = QueryBuilder::new(&self.service);
 
         if let Some(value) = &self.params.order {
             query.insert("sort", value);
@@ -42,7 +42,7 @@ impl<'a> Request<'a> {
     }
 }
 
-impl RequestSend for Request<'_> {
+impl RequestSend for Request {
     type Output = Vec<Issue>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
@@ -52,13 +52,13 @@ impl RequestSend for Request<'_> {
     }
 }
 
-impl RequestTemplate for Request<'_> {
+impl RequestTemplate for Request {
     type Params = Parameters;
-    type Service = Service;
+    type Service = Github;
     const TYPE: &'static str = "search";
 
     fn service(&self) -> &Self::Service {
-        self.service
+        &self.service
     }
 
     fn params(&mut self) -> &mut Self::Params {
@@ -67,7 +67,7 @@ impl RequestTemplate for Request<'_> {
 }
 
 struct QueryBuilder<'a> {
-    _service: &'a Service,
+    _service: &'a Github,
     query: Query,
 }
 
@@ -86,7 +86,7 @@ impl DerefMut for QueryBuilder<'_> {
 }
 
 impl<'a> QueryBuilder<'a> {
-    fn new(_service: &'a Service) -> Self {
+    fn new(_service: &'a Github) -> Self {
         Self {
             _service,
             query: Default::default(),

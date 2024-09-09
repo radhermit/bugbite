@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use anyhow::anyhow;
 use bugbite::config::Config;
 use bugbite::objects::redmine::*;
-use bugbite::service::redmine::{self, Service};
+use bugbite::service::redmine::{self, Redmine};
 use bugbite::service::ServiceKind;
 use bugbite::traits::Merge;
 use itertools::Itertools;
@@ -70,7 +70,7 @@ impl Command {
         config.auth.merge(self.auth.into());
         config.client.merge(self.service.into());
 
-        let service = Service::from_config(config)?;
+        let service = config.into_service()?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await
     }
@@ -87,7 +87,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    async fn run<W>(self, service: &Service, f: &mut W) -> anyhow::Result<ExitCode>
+    async fn run<W>(self, service: &Redmine, f: &mut W) -> anyhow::Result<ExitCode>
     where
         W: IsTerminal + Write,
     {
@@ -98,7 +98,7 @@ impl Subcommand {
     }
 }
 
-impl Render<&Comment> for Service {
+impl Render<&Comment> for Redmine {
     fn render<W>(&self, item: &Comment, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
@@ -116,7 +116,7 @@ impl Render<&Comment> for Service {
     }
 }
 
-impl Render<&Issue> for Service {
+impl Render<&Issue> for Redmine {
     fn render<W>(&self, item: &Issue, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
