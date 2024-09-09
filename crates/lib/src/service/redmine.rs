@@ -119,12 +119,7 @@ impl Service {
     /// Create a new Service from a given base URL.
     pub fn new(base: &str) -> crate::Result<Self> {
         let config = Config::new(base)?;
-        let client = config.client.build()?;
-        Ok(Self {
-            config,
-            _cache: Default::default(),
-            client,
-        })
+        Self::from_config(config)
     }
 
     /// Create a new Service from a Config.
