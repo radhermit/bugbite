@@ -38,7 +38,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub(super) fn new(base: &str) -> crate::Result<Self> {
+    pub fn new(base: &str) -> crate::Result<Self> {
         let base = base.trim_end_matches('/');
         let base = Url::parse(&format!("{base}/"))
             .map_err(|e| Error::InvalidValue(format!("invalid URL: {base}: {e}")))?;
