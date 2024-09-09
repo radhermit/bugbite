@@ -11,7 +11,7 @@ use strum::{Display, EnumIter, EnumString, IntoEnumIterator, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
-use crate::objects::bugzilla::{BugzillaField, BugzillaFieldName};
+use crate::objects::bugzilla::{Bug, BugzillaField};
 use crate::traits::{Api, Merge, MergeOption, WebClient, WebService};
 use crate::Error;
 
@@ -145,13 +145,9 @@ impl Service {
         format!("{base}/show_bug.cgi?id={id}")
     }
 
-    fn deserialize_custom_fields(
-        &self,
-        data: &mut serde_json::Value,
-    ) -> IndexMap<BugzillaFieldName, String> {
+    fn deserialize_bug(&self, mut value: serde_json::Value) -> crate::Result<Bug> {
         let mut custom_fields = IndexMap::new();
-
-        if let Some(map) = data.as_object_mut() {
+        if let Some(map) = value.as_object_mut() {
             for field in &self.cache.custom_fields {
                 let Some(value) = map.remove(&field.name.id) else {
                     continue;
@@ -168,7 +164,10 @@ impl Service {
             }
         }
 
-        custom_fields
+        let mut bug: Bug = serde_json::from_value(value)
+            .map_err(|e| Error::InvalidResponse(format!("failed deserializing bug: {e}")))?;
+        bug.custom_fields = custom_fields;
+        Ok(bug)
     }
 
     /// Substitute user alias for matching value.
