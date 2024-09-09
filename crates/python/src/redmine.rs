@@ -1,6 +1,9 @@
+use std::pin::Pin;
+
 use bugbite::service::redmine;
-use bugbite::traits::RequestSend;
+use bugbite::traits::RequestStream;
 use bugbite::traits::WebClient;
+use futures_util::{Stream, TryStreamExt};
 use pyo3::prelude::*;
 
 use crate::error::{BugbiteError, Error};
@@ -32,16 +35,29 @@ impl Redmine {
         Ok(Self(service))
     }
 
-    fn search(&self, value: &str) -> PyResult<Vec<Issue>> {
+    fn search(&self, value: &str) -> SearchIter {
+        let stream = self.0.search().subject([value]).stream();
+        SearchIter(Box::pin(stream))
+    }
+}
+
+#[pyclass(module = "bugbite.redmine")]
+struct SearchIter(
+    Pin<Box<dyn Stream<Item = bugbite::Result<bugbite::objects::redmine::Issue>> + Send>>,
+);
+
+#[pymethods]
+impl SearchIter {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<PyResult<Issue>> {
         tokio().block_on(async {
-            let issues = self
-                .0
-                .search()
-                .subject([value])
-                .send()
-                .await
-                .map_err(Error)?;
-            Ok(issues.into_iter().map(Into::into).collect())
+            match slf.0.try_next().await {
+                Err(e) => Some(Err(Error(e).into())),
+                Ok(v) => v.map(|x| Ok(x.into())),
+            }
         })
     }
 }
