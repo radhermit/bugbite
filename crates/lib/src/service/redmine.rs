@@ -37,7 +37,7 @@ pub struct Config {
     base: Url,
     pub name: String,
     #[serde(skip)]
-    web_base: OnceLock<Url>,
+    web_base: OnceLock<Option<Url>>,
     #[serde(flatten)]
     pub auth: Authentication,
     #[serde(flatten)]
@@ -63,14 +63,17 @@ impl Config {
 
     /// Return the base URL for the service, removing any project subpath if it exists.
     fn web_base(&self) -> &Url {
-        self.web_base.get_or_init(|| {
-            if let Some((base, _project)) = self.base.as_str().split_once("/projects/") {
-                if let Ok(url) = Url::parse(base) {
-                    return url;
+        self.web_base
+            .get_or_init(|| {
+                if let Some((base, _project)) = self.base.as_str().split_once("/projects/") {
+                    if let Ok(url) = Url::parse(base) {
+                        return Some(url);
+                    }
                 }
-            }
-            self.base.clone()
-        })
+                None
+            })
+            .as_ref()
+            .unwrap_or(&self.base)
     }
 
     /// Maximum number of results that can be returned by a search request.
