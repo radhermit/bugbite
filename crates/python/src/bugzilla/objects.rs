@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use pyo3::prelude::*;
 use pyo3::types::{timezone_utc_bound, PyDateTime, PyFrozenSet};
 
-#[pyclass(module = "bugbite.bugzilla.objects")]
+#[pyclass(module = "bugbite.bugzilla")]
 pub(super) struct Bug(bugzilla::Bug);
 
 fn datetime(value: DateTime<Utc>, py: Python<'_>) -> Bound<'_, PyDateTime> {
@@ -124,11 +124,4 @@ impl From<bugzilla::Bug> for Bug {
     fn from(value: bugzilla::Bug) -> Self {
         Self(value)
     }
-}
-
-#[pymodule]
-#[pyo3(name = "bugzilla_objects")]
-pub(super) fn ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_class::<Bug>()?;
-    Ok(())
 }

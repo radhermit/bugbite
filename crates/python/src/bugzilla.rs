@@ -51,5 +51,6 @@ impl Bugzilla {
 #[pyo3(name = "bugzilla")]
 pub(super) fn ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Bugzilla>()?;
+    m.add_class::<Bug>()?;
     Ok(())
 }

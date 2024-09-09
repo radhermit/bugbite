@@ -50,5 +50,6 @@ impl Redmine {
 #[pyo3(name = "redmine")]
 pub(super) fn ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Redmine>()?;
+    m.add_class::<Issue>()?;
     Ok(())
 }
