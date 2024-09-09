@@ -1,8 +1,8 @@
 use std::pin::Pin;
 
 use bugbite::service::bugzilla;
-use bugbite::traits::RequestStream;
 use bugbite::traits::WebClient;
+use bugbite::traits::{RequestSend, RequestStream};
 use futures_util::{Stream, TryStreamExt};
 use pyo3::prelude::*;
 
@@ -33,6 +33,13 @@ impl Bugzilla {
     fn new(base: &str) -> PyResult<Self> {
         let service = bugzilla::Bugzilla::new(base).map_err(Error)?;
         Ok(Self(service))
+    }
+
+    fn get(&self, ids: Vec<String>) -> PyResult<Vec<Bug>> {
+        tokio().block_on(async {
+            let bugs = self.0.get(ids).send().await.map_err(Error)?;
+            Ok(bugs.into_iter().map(Into::into).collect())
+        })
     }
 
     fn search(&self) -> SearchRequest {
