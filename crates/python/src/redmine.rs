@@ -1,7 +1,7 @@
 use std::pin::Pin;
 
 use bugbite::service::redmine;
-use bugbite::traits::RequestStream;
+use bugbite::traits::{RequestSend, RequestStream};
 use bugbite::traits::WebClient;
 use futures_util::{Stream, TryStreamExt};
 use pyo3::prelude::*;
@@ -33,6 +33,13 @@ impl Redmine {
     fn new(base: &str) -> PyResult<Self> {
         let service = redmine::Redmine::new(base).map_err(Error)?;
         Ok(Self(service))
+    }
+
+    fn get(&self, ids: Vec<u64>) -> PyResult<Vec<Issue>> {
+        tokio().block_on(async {
+            let bugs = self.0.get(ids).send().await.map_err(Error)?;
+            Ok(bugs.into_iter().map(Into::into).collect())
+        })
     }
 
     fn search(&self, value: &str) -> SearchIter {
