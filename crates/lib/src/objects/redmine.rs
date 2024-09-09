@@ -11,7 +11,7 @@ use crate::traits::RenderSearch;
 use super::{stringify, Item};
 
 #[skip_serializing_none]
-#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq)]
 #[serde(default)]
 pub struct Issue {
     pub id: u64,
@@ -32,7 +32,7 @@ pub struct Issue {
     pub comments: Vec<Comment>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq)]
 pub struct FieldValue {
     id: u64,
     name: String,
@@ -56,7 +56,7 @@ impl From<Issue> for Item {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Clone)]
 pub struct Person {
     id: u64,
     name: String,
@@ -69,7 +69,7 @@ impl fmt::Display for Person {
 }
 
 #[serde_as]
-#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
 pub struct Comment {
     /// The number of the comment local to the issue.
     ///
