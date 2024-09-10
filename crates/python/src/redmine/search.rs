@@ -1,12 +1,13 @@
 use std::pin::Pin;
 
+use bugbite::objects::redmine;
 use bugbite::service::redmine::search;
 use bugbite::traits::RequestStream;
-use futures_util::{Stream, TryStreamExt};
+use futures_util::Stream;
 use pyo3::prelude::*;
 
 use crate::error::Error;
-use crate::utils::tokio;
+use crate::macros::stream_iterator;
 
 use super::Issue;
 
@@ -31,22 +32,6 @@ impl SearchRequest {
 }
 
 #[pyclass(module = "bugbite.redmine")]
-struct SearchIter(
-    Pin<Box<dyn Stream<Item = bugbite::Result<bugbite::objects::redmine::Issue>> + Send>>,
-);
+struct SearchIter(Pin<Box<dyn Stream<Item = bugbite::Result<redmine::Issue>> + Send>>);
 
-#[pymethods]
-impl SearchIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(&mut self) -> Option<PyResult<Issue>> {
-        tokio().block_on(async {
-            match self.0.try_next().await {
-                Err(e) => Some(Err(Error(e).into())),
-                Ok(v) => v.map(|x| Ok(x.into())),
-            }
-        })
-    }
-}
+stream_iterator!(SearchIter, Issue);

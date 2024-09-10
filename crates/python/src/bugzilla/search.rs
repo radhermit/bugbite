@@ -1,12 +1,13 @@
 use std::pin::Pin;
 
+use bugbite::objects::bugzilla;
 use bugbite::service::bugzilla::search;
 use bugbite::traits::RequestStream;
-use futures_util::{Stream, TryStreamExt};
+use futures_util::Stream;
 use pyo3::prelude::*;
 
 use crate::error::Error;
-use crate::utils::tokio;
+use crate::macros::stream_iterator;
 
 use super::Bug;
 
@@ -31,22 +32,6 @@ impl SearchRequest {
 }
 
 #[pyclass(module = "bugbite.bugzilla")]
-struct SearchIter(
-    Pin<Box<dyn Stream<Item = bugbite::Result<bugbite::objects::bugzilla::Bug>> + Send>>,
-);
+struct SearchIter(Pin<Box<dyn Stream<Item = bugbite::Result<bugzilla::Bug>> + Send>>);
 
-#[pymethods]
-impl SearchIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(&mut self) -> Option<PyResult<Bug>> {
-        tokio().block_on(async {
-            match self.0.try_next().await {
-                Err(e) => Some(Err(Error(e).into())),
-                Ok(v) => v.map(|x| Ok(x.into())),
-            }
-        })
-    }
-}
+stream_iterator!(SearchIter, Bug);

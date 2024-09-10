@@ -4,6 +4,7 @@ use pyo3::wrap_pymodule;
 mod bugzilla;
 mod config;
 mod error;
+mod macros;
 mod redmine;
 mod service;
 mod traits;
