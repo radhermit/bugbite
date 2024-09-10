@@ -10,7 +10,7 @@ use crate::error::{BugbiteError, Error};
 use crate::utils::tokio;
 
 mod objects;
-use objects::Bug;
+use objects::*;
 
 #[pyclass(module = "bugbite.bugzilla")]
 pub(super) struct Bugzilla(pub(crate) bugzilla::Bugzilla);
@@ -33,6 +33,16 @@ impl Bugzilla {
     fn new(base: &str) -> PyResult<Self> {
         let service = bugzilla::Bugzilla::new(base).map_err(Error)?;
         Ok(Self(service))
+    }
+
+    fn comment(&self, ids: Vec<String>) -> PyResult<Vec<Vec<Comment>>> {
+        tokio().block_on(async {
+            let comments = self.0.comment(ids).send().await.map_err(Error)?;
+            Ok(comments
+                .into_iter()
+                .map(|x| x.into_iter().map(Into::into).collect())
+                .collect())
+        })
     }
 
     fn get(&self, ids: Vec<String>) -> PyResult<Vec<Bug>> {

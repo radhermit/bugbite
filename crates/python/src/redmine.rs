@@ -1,8 +1,8 @@
 use std::pin::Pin;
 
 use bugbite::service::redmine;
-use bugbite::traits::{RequestSend, RequestStream};
 use bugbite::traits::WebClient;
+use bugbite::traits::{RequestSend, RequestStream};
 use futures_util::{Stream, TryStreamExt};
 use pyo3::prelude::*;
 

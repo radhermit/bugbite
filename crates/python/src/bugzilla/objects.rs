@@ -120,3 +120,55 @@ impl From<bugzilla::Bug> for Bug {
         Self(value)
     }
 }
+
+#[pyclass(module = "bugbite.bugzilla")]
+pub(super) struct Comment(bugzilla::Comment);
+
+#[pymethods]
+impl Comment {
+    #[getter]
+    fn id(&self) -> u64 {
+        self.0.id
+    }
+
+    #[getter]
+    fn bug_id(&self) -> u64 {
+        self.0.bug_id
+    }
+
+    #[getter]
+    fn attachment_id(&self) -> Option<u64> {
+        self.0.attachment_id
+    }
+
+    #[getter]
+    fn count(&self) -> usize {
+        self.0.count
+    }
+
+    #[getter]
+    fn text(&self) -> &str {
+        &self.0.text
+    }
+
+    #[getter]
+    fn creator(&self) -> &str {
+        &self.0.creator
+    }
+
+    #[getter]
+    fn created<'a>(&self, py: Python<'a>) -> Bound<'a, PyDateTime> {
+        datetime(self.0.created, py)
+    }
+
+    #[getter]
+    fn is_private(&self) -> bool {
+        self.0.is_private
+    }
+}
+
+impl From<bugzilla::Comment> for Comment {
+    fn from(value: bugzilla::Comment) -> Self {
+        Self(value)
+    }
+}
