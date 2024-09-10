@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.0.12
+
+### Fixed
+
+- Discard output from editor and browser commands when launching them.
+
+### Added
+
+- Support custom root certificate for service connections via --certificate.
+- Support loading custom user configs.
+- Support loading and saving templates for various actions (e.g. search) into
+  user config locations for named connections.
+
+#### Bugzilla
+
+- attachment create: Support unit symbols for --auto-compress value.
+- attachment get: Add -D/--deleted and -O/--obsolete options.
+- fields: Add initial fields command support.
+- search: Add -@ short option for --attachments.
+- search: Add support for restricting by bug closure time with --closed.
+- search: Add initial -O/--offset support.
+- search: Add support for custom field existence queries.
+- search: Add support for custom field changed-related queries.
+- search: Add initial paged request support.
+- search: Add inversion support for changed queries.
+- search: Add range support for blocks and depends queries.
+- version: Add initial version command support returning the service version.
+
+#### Redmine
+
+- search: Add initial -O/--offset support.
+- search: Add initial paged request support.
+
 ## 0.0.11
 
 ### Changed

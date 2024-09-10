@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.0.12
+
+### Added
+
+- Support custom root certificate for service connections.
+- Support loading custom user configs.
+- Support loading and saving templates for various actions (e.g. search) into
+  user config locations for named connections.
+
+#### Bugzilla
+
+- fields: Add initial fields request support
+- search: Add support for restricting by bug closure time.
+- search: Add initial offset support.
+- search: Add support for custom field existence queries.
+- search: Add support for custom field changed-related queries.
+- search: Add initial paged request support.
+- search: Add inversion support for changed queries.
+- search: Add range support for blocks and depends queries.
+- version: Add initial version request support returning the service version.
+
+#### Redmine
+
+- search: Add initial offset support.
+- search: Add initial paged request support.
+
 ## 0.0.11
 
 ### Changed
