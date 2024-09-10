@@ -7,7 +7,7 @@ name = "bugbite"
 description = "python bindings for bugbite"
 authors = [{name = "Tim Harder", email = "radhermit@gmail.com"}]
 requires-python = ">=3.11"
-keywords = ["gentoo"]
+keywords = ["bugs"]
 license = {text = "MIT"}
 classifiers = [
     "Programming Language :: Rust",
