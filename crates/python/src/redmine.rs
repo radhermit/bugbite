@@ -1,16 +1,14 @@
-use std::pin::Pin;
-
 use bugbite::service::redmine;
+use bugbite::traits::RequestSend;
 use bugbite::traits::WebClient;
-use bugbite::traits::{RequestSend, RequestStream};
-use futures_util::{Stream, TryStreamExt};
 use pyo3::prelude::*;
 
 use crate::error::{BugbiteError, Error};
 use crate::utils::tokio;
 
 mod objects;
-use objects::Issue;
+use objects::*;
+mod search;
 
 #[pyclass(module = "bugbite.redmine")]
 pub(super) struct Redmine(pub(crate) redmine::Redmine);
@@ -42,30 +40,8 @@ impl Redmine {
         })
     }
 
-    fn search(&self, value: &str) -> SearchIter {
-        let stream = self.0.search().subject([value]).stream();
-        SearchIter(Box::pin(stream))
-    }
-}
-
-#[pyclass(module = "bugbite.redmine")]
-struct SearchIter(
-    Pin<Box<dyn Stream<Item = bugbite::Result<bugbite::objects::redmine::Issue>> + Send>>,
-);
-
-#[pymethods]
-impl SearchIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(&mut self) -> Option<PyResult<Issue>> {
-        tokio().block_on(async {
-            match self.0.try_next().await {
-                Err(e) => Some(Err(Error(e).into())),
-                Ok(v) => v.map(|x| Ok(x.into())),
-            }
-        })
+    fn search(&self) -> search::SearchRequest {
+        self.0.search().into()
     }
 }
 
