@@ -45,6 +45,53 @@ linkcmd:bite-redmine[1]::
 linkcmd:bite-show[1]::
     show service information
 
+== Configuration
+
+Bite supports defining connections via TOML config files. Example files are
+found at `services/*` in the repo which are bundled in the bite binary,
+allowing for config-less, read-only service access. These configurations can be
+overridden (e.g. adding user authentication information) by copying the related
+config file to `$HOME/.config/bugbite/services/`. Note that the location
+`$XDG_CONFIG_HOME/bugbite/services/` is also supported and will take
+precendence if both `$XDG_CONFIG_HOME` and `$HOME` are defined.
+
+In order to see all configured connections use `bite show connections` that
+outputs a list of connection names or `bite show services` for additional
+service-related info per connection.
+
+In general, fields that are required for read-only access can be seen in the
+valid example below with field descriptions in comments:
+
+.Config example
+====
+# one of the service types supported by bugbite
+type = "bugzilla"
+
+# name of the connection
+name = "gentoo"
+
+# base URL of the service
+base = "https://bugs.gentoo.org/"
+
+# Additional, optional client-related parameters with defaults shown
+
+# custom root certificate in PEM format
+# default: unset
+certificate = "path/to/cert.pem"
+
+# allow connection to services with insecure certificates
+# default: false
+insecure = true
+
+# request timeout in seconds (defaults to 30 if unset)
+# default: 30
+timeout = 10
+====
+
+Each service type may support other config fields which are listed in the
+configuration section of the related service document along with a service
+specific example detailing all fields.
+
 == Resources
 
 *Project web site:* https://github.com/radhermit/bugbite

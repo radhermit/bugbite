@@ -68,6 +68,30 @@ linkcmd:bite-bugzilla-update[1]::
 linkcmd:bite-bugzilla-version[1]::
 	get bugzilla version
 
+== Configuration
+
+See the example below for a valid config including authentication information
+with descriptions of the custom service fields in comments:
+
+.Config example
+====
+type = "bugzilla"
+name = "gentoo"
+base = "https://bugs.gentoo.org/"
+
+# username for authentication
+user = "bugbite@bugbite.test"
+
+# password for authentication
+password = "bugbite"
+
+# API key for authentication
+key = "a-random-api-key"
+
+# maximum number of results allowed per search request
+max_search_results = 1000
+====
+
 == See Also
 
 linkcmd:bite[1]
