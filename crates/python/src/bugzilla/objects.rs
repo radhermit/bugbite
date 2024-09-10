@@ -113,6 +113,16 @@ impl Bug {
     fn depends_on<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
         PyFrozenSet::new_bound(py, &self.0.depends_on).unwrap()
     }
+
+    #[getter]
+    fn comments(&self) -> Vec<Comment> {
+        self.0
+            .comments
+            .clone()
+            .into_iter()
+            .map(Into::into)
+            .collect()
+    }
 }
 
 impl From<bugzilla::Bug> for Bug {

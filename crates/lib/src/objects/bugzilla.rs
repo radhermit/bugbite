@@ -127,7 +127,7 @@ impl PartialOrd for BugUpdate<'_> {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Clone)]
 pub struct Comment {
     /// Globally unique ID for the comment.
     pub id: u64,
