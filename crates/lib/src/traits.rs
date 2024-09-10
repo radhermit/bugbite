@@ -190,25 +190,25 @@ pub trait RequestTemplate: Serialize {
 /// Inject service authentication data into a request.
 pub(crate) trait InjectAuth: Sized {
     /// Authentication required for request.
-    fn auth<'a, W: WebService<'a>>(self, service: &'a W) -> crate::Result<Self>;
+    fn auth<W: WebService>(self, service: &W) -> crate::Result<Self>;
 
     /// Authentication optional for request.
-    fn auth_optional<'a, W: WebService<'a>>(self, service: &'a W) -> Self;
+    fn auth_optional<W: WebService>(self, service: &W) -> Self;
 }
 
 impl InjectAuth for RequestBuilder {
-    fn auth<'a, W: WebService<'a>>(self, service: &'a W) -> crate::Result<Self> {
+    fn auth<W: WebService>(self, service: &W) -> crate::Result<Self> {
         service.inject_auth(self, true)
     }
 
-    fn auth_optional<'a, W: WebService<'a>>(self, service: &'a W) -> Self {
+    fn auth_optional<W: WebService>(self, service: &W) -> Self {
         service
             .inject_auth(self, false)
             .expect("failed injecting optional auth")
     }
 }
 
-pub(crate) trait WebService<'a>: fmt::Display {
+pub(crate) trait WebService: fmt::Display {
     const API_VERSION: &'static str;
     type Response;
 

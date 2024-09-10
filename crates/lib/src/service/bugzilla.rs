@@ -288,7 +288,7 @@ macro_rules! return_if_error {
     }};
 }
 
-impl<'a> WebService<'a> for Bugzilla {
+impl WebService for Bugzilla {
     const API_VERSION: &'static str = "v1";
     type Response = serde_json::Value;
 

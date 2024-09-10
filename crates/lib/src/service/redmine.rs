@@ -168,7 +168,7 @@ impl Redmine {
     }
 }
 
-impl<'a> WebService<'a> for Redmine {
+impl WebService for Redmine {
     const API_VERSION: &'static str = "5.1";
     type Response = serde_json::Value;
 

@@ -133,7 +133,7 @@ impl Github {
     }
 }
 
-impl<'a> WebService<'a> for Github {
+impl WebService for Github {
     const API_VERSION: &'static str = "2022-11-28";
     type Response = serde_json::Value;
 
