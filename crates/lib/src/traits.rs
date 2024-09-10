@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::future::Future;
 use std::io::{stdout, Write};
 use std::{fmt, fs};
@@ -29,41 +28,19 @@ pub(crate) trait Api {
     fn api(&self) -> String;
 }
 
-impl Api for String {
-    fn api(&self) -> String {
-        self.clone()
-    }
+/// Implement Api trait for given types.
+#[macro_export]
+macro_rules! impl_api {
+    ($($type:ty),+) => {$(
+        impl Api for $type {
+            fn api(&self) -> String {
+                self.to_string()
+            }
+        }
+    )+};
 }
 
-impl Api for &str {
-    fn api(&self) -> String {
-        self.to_string()
-    }
-}
-
-impl<T: fmt::Display + Clone> Api for Cow<'_, T> {
-    fn api(&self) -> String {
-        self.to_string()
-    }
-}
-
-impl Api for u64 {
-    fn api(&self) -> String {
-        self.to_string()
-    }
-}
-
-impl Api for usize {
-    fn api(&self) -> String {
-        self.to_string()
-    }
-}
-
-impl Api for i64 {
-    fn api(&self) -> String {
-        self.to_string()
-    }
-}
+impl_api!(String, &str, u64, usize, i64);
 
 impl<T: Api> Api for &T {
     fn api(&self) -> String {
