@@ -56,7 +56,7 @@ See the example below for a valid config including authentication information
 with descriptions of the custom service fields in comments:
 
 .Config example
-====
+....
 type = "redmine"
 name = "ruby"
 base = "https://bugs.ruby-lang.org/"
@@ -72,7 +72,7 @@ key = "a-random-api-key"
 
 # maximum number of results allowed per search request
 max_search_results = 1000
-====
+....
 
 == See Also
 

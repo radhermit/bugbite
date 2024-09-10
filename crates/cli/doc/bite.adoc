@@ -63,7 +63,7 @@ In general, fields that are required for read-only access can be seen in the
 valid example below with field descriptions in comments:
 
 .Config example
-====
+....
 # one of the service types supported by bugbite
 type = "bugzilla"
 
@@ -86,7 +86,7 @@ insecure = true
 # request timeout in seconds (defaults to 30 if unset)
 # default: 30
 timeout = 10
-====
+....
 
 Each service type may support other config fields which are listed in the
 configuration section of the related service document along with a service
