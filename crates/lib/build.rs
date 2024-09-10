@@ -17,7 +17,7 @@ fn bundle_services(path: &str) {
 }
 
 fn main() {
-    let services_path = format!("{}/../../services", env!("CARGO_MANIFEST_DIR"));
+    let services_path = format!("{}/services", env!("CARGO_MANIFEST_DIR"));
     bundle_services(&services_path);
     println!("cargo::rerun-if-changed=build.rs");
     println!("cargo::rerun-if-changed={services_path}");
