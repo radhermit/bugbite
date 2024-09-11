@@ -1,7 +1,7 @@
+use bugbite::error::python::BugbiteError;
 use pyo3::exceptions::{PyKeyError, PyTypeError};
 use pyo3::prelude::*;
 
-use crate::error::{BugbiteError, Error};
 use crate::service;
 use crate::traits::ToStr;
 
@@ -12,7 +12,7 @@ pub(super) struct Config(::bugbite::config::Config);
 impl Config {
     #[new]
     fn new() -> PyResult<Self> {
-        let config = ::bugbite::config::Config::new().map_err(Error)?;
+        let config = ::bugbite::config::Config::new()?;
         Ok(Self(config))
     }
 

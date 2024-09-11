@@ -296,6 +296,7 @@ dependencies = [
  "itertools",
  "once_cell",
  "ordered-multimap",
+ "pyo3",
  "regex",
  "reqwest",
  "serde",

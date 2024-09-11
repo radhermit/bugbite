@@ -6,7 +6,6 @@ use bugbite::traits::{RequestStream, RequestTemplate};
 use futures_util::Stream;
 use pyo3::prelude::*;
 
-use crate::error::Error;
 use crate::macros::stream_iterator;
 
 use super::Bug;
@@ -27,12 +26,12 @@ impl SearchRequest {
     }
 
     fn load_template(&mut self, name: &str) -> PyResult<()> {
-        self.0.load_template(name).map_err(Error)?;
+        self.0.load_template(name)?;
         Ok(())
     }
 
     fn save_template(&mut self, name: &str) -> PyResult<()> {
-        self.0.save_template(name).map_err(Error)?;
+        self.0.save_template(name)?;
         Ok(())
     }
 

@@ -1,9 +1,9 @@
+use bugbite::error::python::BugbiteError;
 use bugbite::service::bugzilla;
 use bugbite::traits::RequestSend;
 use bugbite::traits::WebClient;
 use pyo3::prelude::*;
 
-use crate::error::{BugbiteError, Error};
 use crate::utils::tokio;
 
 mod objects;
@@ -20,7 +20,7 @@ impl TryFrom<bugbite::service::Config> for Bugzilla {
         let config = value
             .into_bugzilla()
             .map_err(|c| BugbiteError::new_err(format!("invalid service type: {}", c.kind())))?;
-        let service = config.into_service().map_err(Error)?;
+        let service = config.into_service()?;
         Ok(Self(service))
     }
 }
@@ -29,13 +29,13 @@ impl TryFrom<bugbite::service::Config> for Bugzilla {
 impl Bugzilla {
     #[new]
     fn new(base: &str) -> PyResult<Self> {
-        let service = bugzilla::Bugzilla::new(base).map_err(Error)?;
+        let service = bugzilla::Bugzilla::new(base)?;
         Ok(Self(service))
     }
 
     fn comment(&self, ids: Vec<String>) -> PyResult<Vec<Vec<Comment>>> {
         tokio().block_on(async {
-            let comments = self.0.comment(ids).send().await.map_err(Error)?;
+            let comments = self.0.comment(ids).send().await?;
             Ok(comments
                 .into_iter()
                 .map(|x| x.into_iter().map(Into::into).collect())
@@ -51,8 +51,7 @@ impl Bugzilla {
                 .get(ids)
                 .comments(comments.unwrap_or_default())
                 .send()
-                .await
-                .map_err(Error)?;
+                .await?;
             Ok(bugs.into_iter().map(Into::into).collect())
         })
     }

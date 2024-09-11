@@ -1,5 +1,8 @@
 use std::io;
 
+#[cfg(feature = "python")]
+pub mod python;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("authentication required")]

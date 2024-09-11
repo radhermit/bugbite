@@ -1,9 +1,9 @@
+use bugbite::error::python::BugbiteError;
 use pyo3::prelude::*;
 use pyo3::wrap_pymodule;
 
 mod bugzilla;
 mod config;
-mod error;
 mod macros;
 mod redmine;
 mod service;
@@ -26,6 +26,6 @@ fn ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
     sys_modules.set_item("bugbite.redmine", m.getattr("redmine")?)?;
     sys_modules.set_item("bugbite.service", m.getattr("service")?)?;
 
-    m.add("BugbiteError", py.get_type_bound::<error::BugbiteError>())?;
+    m.add("BugbiteError", py.get_type_bound::<BugbiteError>())?;
     Ok(())
 }

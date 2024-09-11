@@ -12,7 +12,7 @@ macro_rules! stream_iterator {
                 use ::futures_util::TryStreamExt;
                 $crate::utils::tokio().block_on(async {
                     match self.0.try_next().await {
-                        Err(e) => Some(Err(Error(e).into())),
+                        Err(e) => Some(Err(e.into())),
                         Ok(v) => v.map(|x| Ok(x.into())),
                     }
                 })

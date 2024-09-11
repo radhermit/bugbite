@@ -18,6 +18,8 @@ name = "bugbite"
 
 [features]
 default = []
+# support for python bindings
+python = ["dep:pyo3"]
 # external test support
 test = ["dep:wiremock"]
 # bugzilla integration tests that require a local instance
@@ -50,6 +52,9 @@ thiserror = "1.0.63"
 toml = "0.8.19"
 tracing = "0.1.40"
 url = { version = "2.5.2", features = ["serde"] }
+
+# used for python bindings
+pyo3 = { version = "0.22.2", optional = true }
 
 # exported test support deps
 wiremock = { version = "0.6.2", optional = true }
