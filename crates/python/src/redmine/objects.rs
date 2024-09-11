@@ -53,10 +53,52 @@ impl Issue {
     fn updated<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
         self.0.updated.map(|x| datetime(x, py))
     }
+
+    #[getter]
+    fn comments(&self) -> Vec<Comment> {
+        self.0
+            .comments
+            .clone()
+            .into_iter()
+            .map(Into::into)
+            .collect()
+    }
 }
 
 impl From<redmine::Issue> for Issue {
     fn from(value: redmine::Issue) -> Self {
+        Self(value)
+    }
+}
+
+#[pyclass(module = "bugbite.redmine")]
+pub(super) struct Comment(redmine::Comment);
+
+#[pymethods]
+impl Comment {
+    #[getter]
+    fn count(&self) -> u64 {
+        self.0.count
+    }
+
+    #[getter]
+    fn text(&self) -> &str {
+        &self.0.text
+    }
+
+    #[getter]
+    fn user(&self) -> String {
+        self.0.user.to_string()
+    }
+
+    #[getter]
+    fn created<'a>(&self, py: Python<'a>) -> Bound<'a, PyDateTime> {
+        datetime(self.0.created, py)
+    }
+}
+
+impl From<redmine::Comment> for Comment {
+    fn from(value: redmine::Comment) -> Self {
         Self(value)
     }
 }

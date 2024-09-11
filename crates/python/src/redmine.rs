@@ -33,10 +33,17 @@ impl Redmine {
         Ok(Self(service))
     }
 
-    fn get(&self, ids: Vec<u64>) -> PyResult<Vec<Issue>> {
+    #[pyo3(signature = (ids, *, comments=None))]
+    fn get(&self, ids: Vec<u64>, comments: Option<bool>) -> PyResult<Vec<Issue>> {
         tokio().block_on(async {
-            let bugs = self.0.get(ids).send().await.map_err(Error)?;
-            Ok(bugs.into_iter().map(Into::into).collect())
+            let issues = self
+                .0
+                .get(ids)
+                .comments(comments.unwrap_or_default())
+                .send()
+                .await
+                .map_err(Error)?;
+            Ok(issues.into_iter().map(Into::into).collect())
         })
     }
 

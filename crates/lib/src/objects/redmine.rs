@@ -111,7 +111,7 @@ impl fmt::Display for Person {
 }
 
 #[serde_as]
-#[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Clone)]
 pub struct Comment {
     /// The number of the comment local to the issue.
     ///
