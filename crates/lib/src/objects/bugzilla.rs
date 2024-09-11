@@ -172,14 +172,14 @@ impl Comment {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Event {
     pub who: String,
     pub when: DateTime<Utc>,
     pub changes: Vec<Change>,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Change {
     pub field_name: String,
     #[serde(deserialize_with = "non_empty_str")]

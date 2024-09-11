@@ -43,13 +43,19 @@ impl Bugzilla {
         })
     }
 
-    #[pyo3(signature = (ids, *, comments=None))]
-    fn get(&self, ids: Vec<String>, comments: Option<bool>) -> PyResult<Vec<Bug>> {
+    #[pyo3(signature = (ids, *, comments=None, history=None))]
+    fn get(
+        &self,
+        ids: Vec<String>,
+        comments: Option<bool>,
+        history: Option<bool>,
+    ) -> PyResult<Vec<Bug>> {
         tokio().block_on(async {
             let bugs = self
                 .0
                 .get(ids)
                 .comments(comments.unwrap_or_default())
+                .history(history.unwrap_or_default())
                 .send()
                 .await?;
             Ok(bugs.into_iter().map(Into::into).collect())

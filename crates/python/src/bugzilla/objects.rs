@@ -123,6 +123,11 @@ impl Bug {
             .map(Into::into)
             .collect()
     }
+
+    #[getter]
+    fn history(&self) -> Vec<Event> {
+        self.0.history.clone().into_iter().map(Into::into).collect()
+    }
 }
 
 impl From<bugzilla::Bug> for Bug {
@@ -179,6 +184,65 @@ impl Comment {
 
 impl From<bugzilla::Comment> for Comment {
     fn from(value: bugzilla::Comment) -> Self {
+        Self(value)
+    }
+}
+
+#[pyclass(module = "bugbite.bugzilla")]
+pub(super) struct Event(bugzilla::Event);
+
+#[pymethods]
+impl Event {
+    #[getter]
+    fn who(&self) -> &str {
+        &self.0.who
+    }
+
+    #[getter]
+    fn when<'a>(&self, py: Python<'a>) -> Bound<'a, PyDateTime> {
+        datetime(self.0.when, py)
+    }
+
+    #[getter]
+    fn changes(&self) -> Vec<Change> {
+        self.0.changes.clone().into_iter().map(Into::into).collect()
+    }
+}
+
+impl From<bugzilla::Event> for Event {
+    fn from(value: bugzilla::Event) -> Self {
+        Self(value)
+    }
+}
+
+#[pyclass(module = "bugbite.bugzilla")]
+pub(super) struct Change(bugzilla::Change);
+
+#[pymethods]
+impl Change {
+    #[getter]
+    fn field_name(&self) -> &str {
+        &self.0.field_name
+    }
+
+    #[getter]
+    fn removed(&self) -> Option<&str> {
+        self.0.removed.as_deref()
+    }
+
+    #[getter]
+    fn added(&self) -> Option<&str> {
+        self.0.added.as_deref()
+    }
+
+    #[getter]
+    fn attachment_id(&self) -> Option<u64> {
+        self.0.attachment_id
+    }
+}
+
+impl From<bugzilla::Change> for Change {
+    fn from(value: bugzilla::Change) -> Self {
         Self(value)
     }
 }
