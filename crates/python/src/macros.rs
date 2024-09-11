@@ -9,9 +9,8 @@ macro_rules! stream_iterator {
             }
 
             fn __next__(&mut self) -> Option<PyResult<$object>> {
-                use ::futures_util::TryStreamExt;
                 $crate::utils::tokio().block_on(async {
-                    match self.0.try_next().await {
+                    match ::futures_util::TryStreamExt::try_next(&mut self.0).await {
                         Err(e) => Some(Err(e.into())),
                         Ok(v) => v.map(|x| Ok(x.into())),
                     }
