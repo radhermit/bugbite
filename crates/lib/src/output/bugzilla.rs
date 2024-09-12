@@ -179,4 +179,4 @@ impl Render for Bug {
     }
 }
 
-impl_render_display!(Bug, Comment);
+impl_render_display!(Bug, Comment, Event);
