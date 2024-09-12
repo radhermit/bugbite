@@ -41,7 +41,7 @@ impl Command {
             launch_browser(urls)?;
         } else {
             let issues = service.get(ids).send().await?;
-            render_items(f, service, &issues)?;
+            render_items(f, &issues)?;
         }
 
         Ok(ExitCode::SUCCESS)

@@ -49,7 +49,7 @@ impl Command {
                 .comments(!self.options.no_comments)
                 .send()
                 .await?;
-            render_items(f, service, &issues)?;
+            render_items(f, &issues)?;
         }
 
         Ok(ExitCode::SUCCESS)

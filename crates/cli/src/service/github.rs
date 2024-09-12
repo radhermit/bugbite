@@ -93,13 +93,13 @@ impl Subcommand {
     }
 }
 
-impl Render<&Issue> for Github {
-    fn render<W>(&self, item: &Issue, f: &mut W, width: usize) -> io::Result<()>
+impl Render for Issue {
+    fn render<W>(&self, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
     {
-        output_field_wrapped!(f, "Title", &item.title, width);
-        writeln!(f, "{:<12} : {}", "ID", item.id)?;
+        output_field_wrapped!(f, "Title", &self.title, width);
+        writeln!(f, "{:<12} : {}", "ID", self.id)?;
 
         Ok(())
     }

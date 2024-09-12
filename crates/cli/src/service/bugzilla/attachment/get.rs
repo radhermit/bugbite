@@ -102,7 +102,7 @@ impl Command {
 
         if self.options.list {
             for attachment in attachments {
-                service.render(attachment, f, *COLUMNS)?;
+                attachment.render(f, *COLUMNS)?;
             }
         } else if let Some(name) = self.options.output.as_deref() {
             for attachment in attachments {

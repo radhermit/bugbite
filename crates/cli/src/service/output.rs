@@ -69,14 +69,10 @@ where
     Ok(())
 }
 
-pub(crate) fn render_items<I, S, T, W>(
-    f: &mut W,
-    service: &S,
-    items: I,
-) -> Result<(), bugbite::Error>
+pub(crate) fn render_items<'a, I, T, W>(f: &mut W, items: I) -> Result<(), bugbite::Error>
 where
-    I: IntoIterator<Item = T>,
-    S: Render<T>,
+    I: IntoIterator<Item = &'a T>,
+    T: Render + 'a,
     W: IsTerminal + Write,
 {
     // text wrap width
@@ -88,7 +84,7 @@ where
 
     for item in items {
         writeln!(f, "{}", "=".repeat(width))?;
-        service.render(item, f, width)?;
+        item.render(f, width)?;
     }
 
     Ok(())

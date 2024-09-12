@@ -59,7 +59,7 @@ impl Command {
                 .history(!self.options.no_history)
                 .send()
                 .await?;
-            render_items(f, service, &bugs)?;
+            render_items(f, &bugs)?;
         }
 
         Ok(ExitCode::SUCCESS)

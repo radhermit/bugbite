@@ -98,41 +98,41 @@ impl Subcommand {
     }
 }
 
-impl Render<&Comment> for Redmine {
-    fn render<W>(&self, item: &Comment, f: &mut W, width: usize) -> io::Result<()>
+impl Render for Comment {
+    fn render<W>(&self, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
     {
-        if item.count != 0 {
-            write!(f, "Comment #{} ", item.count)?;
+        if self.count != 0 {
+            write!(f, "Comment #{} ", self.count)?;
         } else {
             write!(f, "Description ")?;
         }
-        writeln!(f, "by {}, {}", item.user, item.created)?;
+        writeln!(f, "by {}, {}", self.user, self.created)?;
         writeln!(f, "{}", "-".repeat(width))?;
         // wrap comment text
-        let wrapped = textwrap::wrap(item.text.trim(), width);
+        let wrapped = textwrap::wrap(self.text.trim(), width);
         writeln!(f, "{}", wrapped.iter().join("\n"))
     }
 }
 
-impl Render<&Issue> for Redmine {
-    fn render<W>(&self, item: &Issue, f: &mut W, width: usize) -> io::Result<()>
+impl Render for Issue {
+    fn render<W>(&self, f: &mut W, width: usize) -> io::Result<()>
     where
         W: IsTerminal + Write,
     {
-        output_field_wrapped!(f, "Subject", &item.subject, width);
-        output_field!(f, "Assignee", &item.assigned_to, width);
-        output_field!(f, "Reporter", &item.author, width);
-        output_field!(f, "Status", &item.status, width);
-        output_field!(f, "Tracker", &item.tracker, width);
-        output_field!(f, "Priority", &item.priority, width);
-        output_field!(f, "Closed", &item.closed, width);
-        output_field!(f, "Created", &item.created, width);
-        output_field!(f, "Updated", &item.updated, width);
-        writeln!(f, "{:<12} : {}", "ID", item.id)?;
+        output_field_wrapped!(f, "Subject", &self.subject, width);
+        output_field!(f, "Assignee", &self.assigned_to, width);
+        output_field!(f, "Reporter", &self.author, width);
+        output_field!(f, "Status", &self.status, width);
+        output_field!(f, "Tracker", &self.tracker, width);
+        output_field!(f, "Priority", &self.priority, width);
+        output_field!(f, "Closed", &self.closed, width);
+        output_field!(f, "Created", &self.created, width);
+        output_field!(f, "Updated", &self.updated, width);
+        writeln!(f, "{:<12} : {}", "ID", self.id)?;
 
-        if let Some(values) = &item.custom_fields {
+        if let Some(values) = &self.custom_fields {
             for field in values {
                 match &field.value {
                     CustomFieldValue::String(value) => {
@@ -149,14 +149,14 @@ impl Render<&Issue> for Redmine {
             }
         }
 
-        if !item.comments.is_empty() {
-            writeln!(f, "{:<12} : {}", "Comments", item.comments.len())?;
+        if !self.comments.is_empty() {
+            writeln!(f, "{:<12} : {}", "Comments", self.comments.len())?;
         }
 
         // render both comments
-        for comment in &item.comments {
+        for comment in &self.comments {
             writeln!(f)?;
-            self.render(comment, f, width)?;
+            comment.render(f, width)?;
         }
 
         Ok(())

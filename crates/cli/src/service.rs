@@ -13,8 +13,8 @@ pub(crate) mod github;
 pub(crate) mod redmine;
 
 /// Render an item for output to the terminal.
-pub(crate) trait Render<T> {
-    fn render<W: IsTerminal + Write>(&self, item: T, f: &mut W, width: usize) -> io::Result<()>;
+pub(crate) trait Render {
+    fn render<W: IsTerminal + Write>(&self, f: &mut W, width: usize) -> io::Result<()>;
 }
 
 #[derive(Args, Debug)]
