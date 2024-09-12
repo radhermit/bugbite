@@ -128,6 +128,11 @@ impl Bug {
     fn history(&self) -> Vec<Event> {
         self.0.history.clone().into_iter().map(Into::into).collect()
     }
+
+    // TODO: switch to using str pyclass parameter when >=pyo3-0.23
+    fn __str__(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 impl From<bugzilla::Bug> for Bug {

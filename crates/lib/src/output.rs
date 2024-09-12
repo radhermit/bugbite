@@ -55,6 +55,22 @@ pub trait Render {
     fn render<W: Write>(&self, f: &mut W, width: usize) -> io::Result<()>;
 }
 
+/// Implement std::fmt::Display trait for given types using the Render trait.
+#[macro_export]
+macro_rules! impl_render_display {
+    ($($type:ty),+) => {$(
+        impl std::fmt::Display for $type {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                let mut buf = vec![];
+                Render::render(self, &mut buf, *COLUMNS).unwrap();
+                let s = String::from_utf8(buf).unwrap();
+                s.fmt(f)
+            }
+        }
+    )+};
+}
+use impl_render_display;
+
 /// Truncate a string to the requested width of graphemes.
 fn truncate(data: &str, width: usize) -> Cow<'_, str> {
     if data.len() > width {

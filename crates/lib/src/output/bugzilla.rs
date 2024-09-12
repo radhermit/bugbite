@@ -178,3 +178,5 @@ impl Render for Bug {
         Ok(())
     }
 }
+
+impl_render_display!(Bug);
