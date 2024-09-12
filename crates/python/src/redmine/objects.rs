@@ -100,6 +100,11 @@ impl Comment {
     fn created<'a>(&self, py: Python<'a>) -> Bound<'a, PyDateTime> {
         datetime(self.0.created, py)
     }
+
+    // TODO: switch to using str pyclass parameter when >=pyo3-0.23
+    fn __str__(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 impl From<redmine::Comment> for Comment {

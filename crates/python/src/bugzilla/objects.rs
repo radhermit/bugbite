@@ -185,6 +185,11 @@ impl Comment {
     fn is_private(&self) -> bool {
         self.0.is_private
     }
+
+    // TODO: switch to using str pyclass parameter when >=pyo3-0.23
+    fn __str__(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 impl From<bugzilla::Comment> for Comment {

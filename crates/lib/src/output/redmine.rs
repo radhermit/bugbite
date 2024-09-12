@@ -69,4 +69,4 @@ impl Render for Issue {
     }
 }
 
-impl_render_display!(Issue);
+impl_render_display!(Issue, Comment);
