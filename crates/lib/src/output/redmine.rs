@@ -68,3 +68,5 @@ impl Render for Issue {
         Ok(())
     }
 }
+
+impl_render_display!(Issue);

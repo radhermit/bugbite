@@ -63,6 +63,11 @@ impl Issue {
             .map(Into::into)
             .collect()
     }
+
+    // TODO: switch to using str pyclass parameter when >=pyo3-0.23
+    fn __str__(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 impl From<redmine::Issue> for Issue {
