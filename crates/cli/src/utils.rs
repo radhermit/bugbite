@@ -1,17 +1,10 @@
-use std::borrow::Cow;
 use std::collections::VecDeque;
 use std::env;
 use std::ffi::OsStr;
-use std::io::{stderr, stdin, BufRead, IsTerminal, Write};
+use std::io::{stderr, stdin, BufRead, Write};
 use std::process::{Command, ExitStatus, Stdio};
-use std::sync::atomic::AtomicBool;
 
 use anyhow::{Context, Result};
-use bugbite::utils::is_terminal;
-use crossterm::terminal;
-use itertools::Itertools;
-use once_cell::sync::Lazy;
-use unicode_segmentation::UnicodeSegmentation;
 
 pub(crate) fn confirm<S>(prompt: S, default: bool) -> Result<bool>
 where
@@ -82,48 +75,6 @@ pub(crate) fn launch_editor<S: AsRef<OsStr>>(path: S) -> Result<ExitStatus> {
         .status()
         .with_context(|| format!("failed launching editor via {cmd}"))
 }
-
-pub(crate) static COLUMNS: Lazy<usize> = Lazy::new(|| {
-    let (cols, _rows) = terminal::size().unwrap_or((90, 24));
-    // use a static width when testing is enabled
-    if cfg!(feature = "test") {
-        90
-    } else {
-        cols.into()
-    }
-});
-
-/// Truncate a string to the requested width of graphemes.
-pub(crate) fn truncate<'a, W>(f: &W, data: &'a str, width: usize) -> Cow<'a, str>
-where
-    W: IsTerminal,
-{
-    if data.len() > width && is_terminal!(f) {
-        let mut iter = UnicodeSegmentation::graphemes(data, true).take(*COLUMNS);
-        Cow::Owned(iter.join(""))
-    } else {
-        Cow::Borrowed(data)
-    }
-}
-
-pub(crate) static VERBOSE: AtomicBool = AtomicBool::new(false);
-
-macro_rules! verbose {
-    ($dst:expr, $($arg:tt)+) => {
-        if $crate::utils::VERBOSE.load(std::sync::atomic::Ordering::Acquire) {
-            writeln!($dst, $($arg)+)
-        } else {
-            Ok(())
-        }
-    };
-    ($enable:expr) => {
-        $crate::utils::VERBOSE.store($enable, std::sync::atomic::Ordering::SeqCst);
-    };
-    () => {
-        $crate::utils::VERBOSE.load(std::sync::atomic::Ordering::Acquire)
-    };
-}
-pub(crate) use verbose;
 
 macro_rules! wrapped_doc {
     ($content:expr) => {{

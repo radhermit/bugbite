@@ -2,6 +2,7 @@ use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::Csv;
+use bugbite::output::COLUMNS;
 use bugbite::query::Order;
 use bugbite::service::github::search::{OrderField, Parameters};
 use bugbite::service::github::Github;
@@ -10,8 +11,6 @@ use bugbite::utils::is_terminal;
 use clap::Args;
 use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
-
-use crate::utils::COLUMNS;
 
 /// Available search parameters.
 #[derive(Args, Debug)]

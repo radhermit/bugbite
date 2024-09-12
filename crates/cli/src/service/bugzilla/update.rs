@@ -7,6 +7,7 @@ use std::{fmt, fs};
 use anyhow::Context;
 use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::objects::bugzilla::Flag;
+use bugbite::output::verbose;
 use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange, TriBool};
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::{Merge, RequestSend, RequestTemplate};
@@ -16,7 +17,7 @@ use itertools::Itertools;
 use tempfile::NamedTempFile;
 
 use crate::service::TemplateOptions;
-use crate::utils::{confirm, launch_editor, verbose};
+use crate::utils::{confirm, launch_editor};
 
 #[derive(Clone, Debug)]
 struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {

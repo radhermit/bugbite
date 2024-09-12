@@ -11,6 +11,7 @@ pub struct Request {
     service: Bugzilla,
     pub ids: Vec<String>,
     pub data: bool,
+    pub outdated: bool,
 }
 
 impl Request {
@@ -23,6 +24,7 @@ impl Request {
             service: service.clone(),
             ids: ids.into_iter().map(|s| s.to_string()).collect(),
             data: true,
+            outdated: false,
         }
     }
 
@@ -51,8 +53,13 @@ impl Request {
         Ok(url)
     }
 
-    pub fn data(mut self, fetch: bool) -> Self {
-        self.data = fetch;
+    pub fn data(mut self, status: bool) -> Self {
+        self.data = status;
+        self
+    }
+
+    pub fn outdated(mut self, status: bool) -> Self {
+        self.outdated = status;
         self
     }
 }
@@ -85,10 +92,15 @@ impl RequestSend for Request {
             for attachment in data {
                 // skip deserializing deleted attachments when retrieving data
                 if !self.data || !attachment["data"].is_null() {
-                    let attachment = serde_json::from_value(attachment).map_err(|_| {
-                        Error::InvalidResponse(format!("invalid attachment for bug {id}"))
-                    })?;
-                    bug_attachments.push(attachment);
+                    let attachment: Attachment =
+                        serde_json::from_value(attachment).map_err(|_| {
+                            Error::InvalidResponse(format!("invalid attachment for bug {id}"))
+                        })?;
+
+                    // conditionally skip outdated attachments
+                    if self.outdated || (!attachment.is_obsolete && !attachment.is_deleted()) {
+                        bug_attachments.push(attachment);
+                    }
                 }
             }
 

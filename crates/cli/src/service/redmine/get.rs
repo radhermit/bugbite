@@ -2,11 +2,11 @@ use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
+use bugbite::output::render_items;
 use bugbite::service::redmine::Redmine;
 use bugbite::traits::RequestSend;
 use clap::Args;
 
-use crate::service::output::render_items;
 use crate::utils::launch_browser;
 
 #[derive(Args, Debug)]

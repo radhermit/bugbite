@@ -1,12 +1,13 @@
 use std::io::stderr;
 use std::process::ExitCode;
 
+use bugbite::output::{verbose, COLUMNS};
 use clap::Parser;
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
 use tracing_log::AsTrace;
 
 use crate::subcmds::Subcommand;
-use crate::utils::{verbose, wrapped_doc, COLUMNS};
+use crate::utils::wrapped_doc;
 
 fn enable_logging(verbosity: LevelFilter) {
     // enable verbose output

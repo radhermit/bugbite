@@ -1,21 +1,11 @@
-use std::io::{self, IsTerminal, Write};
-
 use bugbite::service::ClientParameters;
 use camino::Utf8PathBuf;
 use clap::Args;
-
-// output and rendering support
-pub(crate) mod output;
 
 // service modules
 pub(crate) mod bugzilla;
 pub(crate) mod github;
 pub(crate) mod redmine;
-
-/// Render an item for output to the terminal.
-pub(crate) trait Render {
-    fn render<W: IsTerminal + Write>(&self, f: &mut W, width: usize) -> io::Result<()>;
-}
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Service options")]

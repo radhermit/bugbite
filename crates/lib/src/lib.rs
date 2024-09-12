@@ -2,6 +2,8 @@ pub mod args;
 pub mod config;
 pub mod error;
 pub mod objects;
+#[cfg(feature = "output")]
+pub mod output;
 pub mod query;
 pub(crate) mod serde;
 pub mod service;

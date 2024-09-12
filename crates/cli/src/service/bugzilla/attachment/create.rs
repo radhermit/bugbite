@@ -3,6 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::CsvOrStdin;
 use bugbite::objects::bugzilla::Flag;
+use bugbite::output::verbose;
 use bugbite::service::bugzilla::attachment::create::{Attachment, Compression};
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::RequestSend;
@@ -12,8 +13,6 @@ use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{Args, ValueHint};
 use itertools::Itertools;
 use strum::VariantNames;
-
-use crate::utils::verbose;
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attachment options")]

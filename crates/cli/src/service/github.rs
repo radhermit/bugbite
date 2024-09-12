@@ -1,17 +1,12 @@
-use std::io::{self, IsTerminal, Write};
+use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use anyhow::anyhow;
 use bugbite::config::Config;
-use bugbite::objects::github::*;
 use bugbite::service::github::{self, Github};
 use bugbite::service::ServiceKind;
 use bugbite::traits::Merge;
-use itertools::Itertools;
 use tracing::debug;
-
-use super::output::*;
-use super::Render;
 
 mod get;
 mod search;
@@ -90,17 +85,5 @@ impl Subcommand {
             Self::Get(cmd) => cmd.run(service, f).await,
             Self::Search(cmd) => cmd.run(service, f).await,
         }
-    }
-}
-
-impl Render for Issue {
-    fn render<W>(&self, f: &mut W, width: usize) -> io::Result<()>
-    where
-        W: IsTerminal + Write,
-    {
-        output_field_wrapped!(f, "Title", &self.title, width);
-        writeln!(f, "{:<12} : {}", "ID", self.id)?;
-
-        Ok(())
     }
 }

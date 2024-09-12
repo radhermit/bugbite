@@ -3,6 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
+use bugbite::output::verbose;
 use bugbite::service::bugzilla::create::Parameters;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::{Merge, RequestSend, RequestTemplate};
@@ -11,7 +12,6 @@ use clap::Args;
 use itertools::Itertools;
 
 use crate::service::TemplateOptions;
-use crate::utils::verbose;
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]

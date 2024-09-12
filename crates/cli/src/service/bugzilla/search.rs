@@ -4,6 +4,7 @@ use std::str::FromStr;
 
 use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
 use bugbite::objects::RangeOrValue;
+use bugbite::output::render_search;
 use bugbite::query::Order;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::service::bugzilla::{
@@ -14,7 +15,6 @@ use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::{Merge, RequestStream, RequestTemplate};
 use clap::Args;
 
-use crate::service::output::render_search;
 use crate::service::TemplateOptions;
 use crate::utils::launch_browser;
 

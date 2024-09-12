@@ -1,19 +1,15 @@
 use std::fs;
 use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
-use std::sync::atomic::Ordering;
 
 use anyhow::{anyhow, Context};
 use bugbite::args::MaybeStdinVec;
+use bugbite::output::{Render, COLUMNS};
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
 use clap::Args;
 use itertools::Itertools;
-
-use crate::service::bugzilla::OUTDATED;
-use crate::service::Render;
-use crate::utils::COLUMNS;
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attachment options")]
@@ -74,6 +70,7 @@ impl Command {
             service
                 .attachment_get_item(ids)
                 .data(!self.options.list)
+                .outdated(self.options.outdated)
                 .send()
                 .await?
                 .into_iter()
@@ -93,9 +90,6 @@ impl Command {
         };
 
         // conditionally skip deleted and obsolete attachments
-        if self.options.outdated {
-            OUTDATED.store(true, Ordering::SeqCst);
-        }
         let attachments = attachments
             .iter()
             .filter(|x| self.options.outdated || (!x.is_obsolete && !x.is_deleted()));
