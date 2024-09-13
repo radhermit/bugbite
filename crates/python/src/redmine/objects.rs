@@ -40,18 +40,18 @@ impl Issue {
     }
 
     #[getter]
-    fn closed<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
-        self.0.closed.map(|x| datetime(x, py))
+    fn closed<'a>(&self, py: Python<'a>) -> PyResult<Option<Bound<'a, PyDateTime>>> {
+        self.0.closed.map(|x| datetime(x, py)).transpose()
     }
 
     #[getter]
-    fn created<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
-        self.0.created.map(|x| datetime(x, py))
+    fn created<'a>(&self, py: Python<'a>) -> PyResult<Option<Bound<'a, PyDateTime>>> {
+        self.0.created.map(|x| datetime(x, py)).transpose()
     }
 
     #[getter]
-    fn updated<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
-        self.0.updated.map(|x| datetime(x, py))
+    fn updated<'a>(&self, py: Python<'a>) -> PyResult<Option<Bound<'a, PyDateTime>>> {
+        self.0.updated.map(|x| datetime(x, py)).transpose()
     }
 
     #[getter]
@@ -97,7 +97,7 @@ impl Comment {
     }
 
     #[getter]
-    fn created<'a>(&self, py: Python<'a>) -> Bound<'a, PyDateTime> {
+    fn created<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyDateTime>> {
         datetime(self.0.created, py)
     }
 

@@ -20,13 +20,13 @@ impl Bug {
     }
 
     #[getter]
-    fn created<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
-        self.0.created.map(|x| datetime(x, py))
+    fn created<'a>(&self, py: Python<'a>) -> PyResult<Option<Bound<'a, PyDateTime>>> {
+        self.0.created.map(|x| datetime(x, py)).transpose()
     }
 
     #[getter]
-    fn updated<'a>(&self, py: Python<'a>) -> Option<Bound<'a, PyDateTime>> {
-        self.0.updated.map(|x| datetime(x, py))
+    fn updated<'a>(&self, py: Python<'a>) -> PyResult<Option<Bound<'a, PyDateTime>>> {
+        self.0.updated.map(|x| datetime(x, py)).transpose()
     }
 
     #[getter]
@@ -95,28 +95,28 @@ impl Bug {
     }
 
     #[getter]
-    fn groups<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
-        PyFrozenSet::new_bound(py, &self.0.groups).unwrap()
+    fn groups<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
+        PyFrozenSet::new_bound(py, &self.0.groups)
     }
 
     #[getter]
-    fn keywords<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
-        PyFrozenSet::new_bound(py, &self.0.keywords).unwrap()
+    fn keywords<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
+        PyFrozenSet::new_bound(py, &self.0.keywords)
     }
 
     #[getter]
-    fn cc<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
-        PyFrozenSet::new_bound(py, &self.0.cc).unwrap()
+    fn cc<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
+        PyFrozenSet::new_bound(py, &self.0.cc)
     }
 
     #[getter]
-    fn tags<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
-        PyFrozenSet::new_bound(py, &self.0.tags).unwrap()
+    fn tags<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
+        PyFrozenSet::new_bound(py, &self.0.tags)
     }
 
     #[getter]
-    fn see_also<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
-        PyFrozenSet::new_bound(py, &self.0.see_also).unwrap()
+    fn see_also<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
+        PyFrozenSet::new_bound(py, &self.0.see_also)
     }
 
     #[getter]
@@ -130,13 +130,13 @@ impl Bug {
     }
 
     #[getter]
-    fn blocks<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
-        PyFrozenSet::new_bound(py, &self.0.blocks).unwrap()
+    fn blocks<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
+        PyFrozenSet::new_bound(py, &self.0.blocks)
     }
 
     #[getter]
-    fn depends_on<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
-        PyFrozenSet::new_bound(py, &self.0.depends_on).unwrap()
+    fn depends_on<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
+        PyFrozenSet::new_bound(py, &self.0.depends_on)
     }
 
     #[getter]
@@ -202,7 +202,7 @@ impl Comment {
     }
 
     #[getter]
-    fn created<'a>(&self, py: Python<'a>) -> Bound<'a, PyDateTime> {
+    fn created<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyDateTime>> {
         datetime(self.0.created, py)
     }
 
@@ -234,7 +234,7 @@ impl Event {
     }
 
     #[getter]
-    fn when<'a>(&self, py: Python<'a>) -> Bound<'a, PyDateTime> {
+    fn when<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyDateTime>> {
         datetime(self.0.when, py)
     }
 
