@@ -54,7 +54,7 @@ impl Command {
         let mut data = ids.iter().zip(events).peekable();
 
         // text wrap width
-        let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
+        let width = COLUMNS.min(90);
 
         while let Some((id, events)) = data.next() {
             if !events.is_empty() {

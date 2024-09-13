@@ -66,7 +66,7 @@ impl Command {
         let mut data = ids.iter().zip(comments).peekable();
 
         // text wrap width
-        let width = if *COLUMNS <= 90 { *COLUMNS } else { 90 };
+        let width = COLUMNS.min(90);
 
         while let Some((id, comments)) = data.next() {
             if !comments.is_empty() {
