@@ -72,7 +72,12 @@ impl Command {
             if !comments.is_empty() {
                 // output bug ID header
                 let bug_id = format!("Bug: {id} ");
-                writeln!(f, "{bug_id}{}", "=".repeat(width - bug_id.len()))?;
+                let sep_width = if bug_id.len() >= width {
+                    0
+                } else {
+                    width - bug_id.len()
+                };
+                writeln!(f, "{bug_id}{:=<width$}", "", width = sep_width)?;
 
                 let mut comments_iter = comments.iter().peekable();
                 while let Some(comment) = comments_iter.next() {
