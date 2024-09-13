@@ -1,7 +1,7 @@
 use std::io::stderr;
 use std::process::ExitCode;
 
-use bugbite::output::{verbose, COLUMNS};
+use bugbite::output::verbose;
 use clap::Parser;
 use clap_verbosity_flag::{LevelFilter, Verbosity, WarnLevel};
 use tracing_log::AsTrace;
@@ -34,7 +34,6 @@ fn enable_logging(verbosity: LevelFilter) {
     version,
     about = "command line tool for mangling bugs, issues, and tickets",
     disable_help_subcommand = true,
-    term_width = *COLUMNS,
     help_template = wrapped_doc!("
         {before-help}{name} {version}
 
