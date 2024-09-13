@@ -4,7 +4,6 @@ use std::process::ExitCode;
 
 use anyhow::{anyhow, Context};
 use bugbite::args::MaybeStdinVec;
-use bugbite::output::{Render, COLUMNS};
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::RequestSend;
 use camino::Utf8PathBuf;
@@ -96,7 +95,7 @@ impl Command {
 
         if self.options.list {
             for attachment in attachments {
-                attachment.render(f, *COLUMNS)?;
+                write!(f, "{attachment}")?;
             }
         } else if let Some(name) = self.options.output.as_deref() {
             for attachment in attachments {
