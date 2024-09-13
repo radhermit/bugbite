@@ -95,6 +95,31 @@ impl Bug {
     }
 
     #[getter]
+    fn groups<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
+        PyFrozenSet::new_bound(py, &self.0.groups).unwrap()
+    }
+
+    #[getter]
+    fn keywords<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
+        PyFrozenSet::new_bound(py, &self.0.keywords).unwrap()
+    }
+
+    #[getter]
+    fn cc<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
+        PyFrozenSet::new_bound(py, &self.0.cc).unwrap()
+    }
+
+    #[getter]
+    fn tags<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
+        PyFrozenSet::new_bound(py, &self.0.tags).unwrap()
+    }
+
+    #[getter]
+    fn see_also<'a>(&self, py: Python<'a>) -> Bound<'a, PyFrozenSet> {
+        PyFrozenSet::new_bound(py, &self.0.see_also).unwrap()
+    }
+
+    #[getter]
     fn url(&self) -> Option<&str> {
         self.0.url.as_deref()
     }
