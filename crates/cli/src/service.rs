@@ -15,7 +15,7 @@ struct ServiceOptions {
     connection: String,
 
     /// concurrent requests limit
-    #[arg(short = 'C', long, value_name = "VALUE", default_value = "3")]
+    #[arg(short = 'C', long, value_name = "VALUE")]
     concurrent: Option<usize>,
 
     /// add custom root certificate
