@@ -4,7 +4,7 @@ use std::{fmt, fs};
 
 use async_stream::try_stream;
 use camino::Utf8PathBuf;
-use futures_util::Stream;
+use futures_util::{stream, Stream, StreamExt, TryStreamExt};
 use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -68,30 +68,36 @@ pub trait RequestSend {
     fn send(&self) -> impl Future<Output = crate::Result<Self::Output>>;
 }
 
-pub trait RequestStream: RequestSend<Output = Vec<Self::Item>> + Clone + 'static {
+pub trait RequestStream: Clone {
     type Item: 'static;
 
     /// Return the page size if paging is enabled.
     fn paged(&mut self) -> Option<usize>;
-    /// Modify the request to return the next page.
-    fn next_page(&mut self, size: usize);
+    /// Iterator of consecutive, paged requests.
+    fn paged_requests(self, paged: Option<usize>) -> impl Iterator<Item = Self>;
+    /// Return the matching vector of items for a given request.
+    fn send(self) -> impl Future<Output = crate::Result<Vec<Self::Item>>>;
 
-    // TODO: submit multiple requests at once?
-    /// Send requests and return the stream of items for them.
-    fn stream(mut self) -> impl Stream<Item = crate::Result<Self::Item>> + 'static {
+    /// Return the matching stream of items for a given request.
+    fn stream(mut self) -> impl Stream<Item = crate::Result<Self::Item>> {
+        // determine if request paging is enabled
         let paged = self.paged();
 
-        try_stream! {
-            loop {
-                let items = self.send().await?;
-                let count = items.len();
+        // convert request into iterator of requests
+        let requests = self.paged_requests(paged);
 
+        // convert iterator of requests into buffered stream of futures
+        let mut futures = stream::iter(requests).map(|r| r.send()).buffered(3);
+
+        // flatten buffered stream into a stream of individual items
+        try_stream! {
+            while let Some(items) = futures.try_next().await? {
+                let count = items.len();
                 for item in items {
                     yield item;
                 }
-
                 match paged {
-                    Some(size) if count == size => self.next_page(size),
+                    Some(size) if count == size => (),
                     _ => break,
                 }
             }

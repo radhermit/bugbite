@@ -1,7 +1,7 @@
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 
-use itertools::Itertools;
+use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString};
@@ -14,7 +14,7 @@ use crate::query::{Order, Query};
 use crate::service::redmine::Redmine;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
-    Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, RequestTemplate, WebService,
+    Api, InjectAuth, Merge, MergeOption, RequestStream, RequestTemplate, WebService,
 };
 use crate::Error;
 
@@ -24,6 +24,66 @@ pub struct Request {
     service: Redmine,
     #[serde(flatten)]
     pub params: Parameters,
+}
+
+/// Iterator of consecutive, paged requests.
+struct PagedIterator {
+    paged: usize,
+    request: Request,
+}
+
+impl Iterator for PagedIterator {
+    type Item = Request;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let req = self.request.clone();
+        self.request.params.offset = self
+            .request
+            .params
+            .offset
+            .unwrap_or_default()
+            .checked_add(self.paged);
+        req.params.offset.map(|_| req)
+    }
+}
+
+impl RequestStream for Request {
+    type Item = Issue;
+
+    fn paged(&mut self) -> Option<usize> {
+        if self.params.paged.unwrap_or_default() || self.params.limit.is_none() {
+            self.params
+                .limit
+                .get_or_insert_with(|| self.service.config.max_search_results());
+            self.params.offset.get_or_insert_with(Default::default);
+            self.params.limit
+        } else {
+            None
+        }
+    }
+
+    fn paged_requests(self, paged: Option<usize>) -> impl Iterator<Item = Self> {
+        if let Some(value) = paged {
+            Either::Left(PagedIterator {
+                paged: value,
+                request: self,
+            })
+        } else {
+            Either::Right([self].into_iter())
+        }
+    }
+
+    async fn send(self) -> crate::Result<Vec<Issue>> {
+        let mut url = self.service.config.base.join("issues.json")?;
+        let query = self.encode()?;
+        url.query_pairs_mut().extend_pairs(query.iter());
+        let request = self.service.client.get(url).auth_optional(&self.service);
+        let response = request.send().await?;
+        let mut data = self.service.parse_response(response).await?;
+        let data = data["issues"].take();
+        serde_json::from_value(data)
+            .map_err(|e| Error::InvalidResponse(format!("failed deserializing issues: {e}")))
+    }
 }
 
 impl Request {
@@ -175,42 +235,6 @@ impl Request {
     {
         self.params.subject = Some(values.into_iter().map(Into::into).collect());
         self
-    }
-}
-
-impl RequestSend for Request {
-    type Output = Vec<Issue>;
-
-    async fn send(&self) -> crate::Result<Self::Output> {
-        let mut url = self.service.config.base.join("issues.json")?;
-        let query = self.encode()?;
-        url.query_pairs_mut().extend_pairs(query.iter());
-        let request = self.service.client.get(url).auth_optional(&self.service);
-        let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let data = data["issues"].take();
-        serde_json::from_value(data)
-            .map_err(|e| Error::InvalidResponse(format!("failed deserializing issues: {e}")))
-    }
-}
-
-impl RequestStream for Request {
-    type Item = Issue;
-
-    fn paged(&mut self) -> Option<usize> {
-        if self.params.paged.unwrap_or_default() || self.params.limit.is_none() {
-            self.params
-                .limit
-                .get_or_insert_with(|| self.service.config.max_search_results());
-            self.params.limit
-        } else {
-            None
-        }
-    }
-
-    fn next_page(&mut self, size: usize) {
-        // TODO: move to get_or_insert_default() when it is stable
-        *self.params.offset.get_or_insert_with(Default::default) += size;
     }
 }
 

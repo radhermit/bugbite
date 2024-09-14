@@ -4,7 +4,7 @@ use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 use indexmap::IndexSet;
-use itertools::Itertools;
+use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
 use strum::{AsRefStr, Display, EnumIter, EnumString};
@@ -17,7 +17,7 @@ use crate::query::{Order, Query};
 use crate::service::bugzilla::Bugzilla;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
-    Api, InjectAuth, Merge, MergeOption, RequestSend, RequestStream, RequestTemplate, WebService,
+    Api, InjectAuth, Merge, MergeOption, RequestStream, RequestTemplate, WebService,
 };
 use crate::Error;
 
@@ -31,10 +31,54 @@ pub struct Request {
     pub params: Parameters,
 }
 
-impl RequestSend for Request {
-    type Output = Vec<Bug>;
+/// Iterator of consecutive, paged requests.
+struct PagedIterator {
+    paged: usize,
+    request: Request,
+}
 
-    async fn send(&self) -> crate::Result<Self::Output> {
+impl Iterator for PagedIterator {
+    type Item = Request;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let req = self.request.clone();
+        self.request.params.offset = self
+            .request
+            .params
+            .offset
+            .unwrap_or_default()
+            .checked_add(self.paged);
+        req.params.offset.map(|_| req)
+    }
+}
+
+impl RequestStream for Request {
+    type Item = Bug;
+
+    fn paged(&mut self) -> Option<usize> {
+        if self.params.paged.unwrap_or_default() || self.params.limit.is_none() {
+            self.params
+                .limit
+                .get_or_insert_with(|| self.service.config.max_search_results());
+            self.params.offset.get_or_insert_with(Default::default);
+            self.params.limit
+        } else {
+            None
+        }
+    }
+
+    fn paged_requests(self, paged: Option<usize>) -> impl Iterator<Item = Self> {
+        if let Some(value) = paged {
+            Either::Left(PagedIterator {
+                paged: value,
+                request: self,
+            })
+        } else {
+            Either::Right([self].into_iter())
+        }
+    }
+
+    async fn send(self) -> crate::Result<Vec<Bug>> {
         let mut url = self.service.config.base.join("rest/bug")?;
         let query = self.encode()?;
         url.query_pairs_mut().extend_pairs(query.iter());
@@ -49,26 +93,6 @@ impl RequestSend for Request {
             }
         }
         Ok(bugs)
-    }
-}
-
-impl RequestStream for Request {
-    type Item = Bug;
-
-    fn paged(&mut self) -> Option<usize> {
-        if self.params.paged.unwrap_or_default() || self.params.limit.is_none() {
-            self.params
-                .limit
-                .get_or_insert_with(|| self.service.config.max_search_results());
-            self.params.limit
-        } else {
-            None
-        }
-    }
-
-    fn next_page(&mut self, size: usize) {
-        // TODO: move to get_or_insert_default() when it is stable
-        *self.params.offset.get_or_insert_with(Default::default) += size;
     }
 }
 
