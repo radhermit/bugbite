@@ -50,6 +50,10 @@ impl Iterator for PagedIterator {
 impl RequestStream for Request {
     type Item = Issue;
 
+    fn concurrent(&self) -> Option<usize> {
+        self.service.config.client.concurrent
+    }
+
     fn paged(&mut self) -> Option<usize> {
         if self.params.paged.unwrap_or_default() || self.params.limit.is_none() {
             self.params

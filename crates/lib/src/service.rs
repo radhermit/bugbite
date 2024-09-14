@@ -108,6 +108,7 @@ impl WebClient for Config {
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq)]
 pub struct ClientParameters {
     pub certificate: Option<Utf8PathBuf>,
+    pub concurrent: Option<usize>,
     pub insecure: Option<bool>,
     pub timeout: Option<f64>,
 }
@@ -116,6 +117,7 @@ impl Merge for ClientParameters {
     fn merge(&mut self, other: Self) {
         *self = Self {
             certificate: self.certificate.merge(other.certificate),
+            concurrent: self.concurrent.merge(other.concurrent),
             insecure: self.insecure.merge(other.insecure),
             timeout: self.timeout.merge(other.timeout),
         }

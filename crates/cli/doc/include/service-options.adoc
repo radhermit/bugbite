@@ -5,6 +5,12 @@
 +
 This can either be a pre-configured connection name or a service URL.
 
+*-C, --concurrent <value>*::
+    Maximum number of concurrent requests to a service.
++
+Certain types of actions such as searching can automatically send concurrent
+requests to support faster result paging, defaults to three.
+
 *--certificate <path>*::
     Add a custom root certificate.
 +

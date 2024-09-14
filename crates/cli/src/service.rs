@@ -14,6 +14,10 @@ struct ServiceOptions {
     #[arg(short, long, env = "BUGBITE_CONNECTION")]
     connection: String,
 
+    /// concurrent requests limit
+    #[arg(short = 'C', long, value_name = "VALUE", default_value = "3")]
+    concurrent: Option<usize>,
+
     /// add custom root certificate
     #[arg(long, value_name = "PATH", conflicts_with = "insecure")]
     certificate: Option<Utf8PathBuf>,
@@ -36,6 +40,7 @@ impl From<ServiceOptions> for ClientParameters {
     fn from(value: ServiceOptions) -> Self {
         Self {
             certificate: value.certificate,
+            concurrent: value.concurrent,
             insecure: value.insecure,
             timeout: value.timeout,
         }

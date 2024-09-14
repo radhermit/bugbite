@@ -71,6 +71,8 @@ pub trait RequestSend {
 pub trait RequestStream: Clone {
     type Item: 'static;
 
+    /// Return the maximum allowed concurrent requests.
+    fn concurrent(&self) -> Option<usize>;
     /// Return the page size if paging is enabled.
     fn paged(&mut self) -> Option<usize>;
     /// Iterator of consecutive, paged requests.
@@ -80,6 +82,9 @@ pub trait RequestStream: Clone {
 
     /// Return the matching stream of items for a given request.
     fn stream(mut self) -> impl Stream<Item = crate::Result<Self::Item>> {
+        // determine the number of requests to process concurrently
+        let concurrent = self.concurrent().unwrap_or(1);
+
         // determine if request paging is enabled
         let paged = self.paged();
 
@@ -87,7 +92,9 @@ pub trait RequestStream: Clone {
         let requests = self.paged_requests(paged);
 
         // convert iterator of requests into buffered stream of futures
-        let mut futures = stream::iter(requests).map(|r| r.send()).buffered(3);
+        let mut futures = stream::iter(requests)
+            .map(|r| r.send())
+            .buffered(concurrent);
 
         // flatten buffered stream into a stream of individual items
         try_stream! {
