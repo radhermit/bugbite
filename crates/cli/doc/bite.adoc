@@ -79,6 +79,10 @@ base = "https://bugs.gentoo.org/"
 # default: unset
 certificate = "path/to/cert.pem"
 
+# concurrent requests limit
+# default: 3
+concurrent = 10
+
 # allow connection to services with insecure certificates
 # default: false
 insecure = true
