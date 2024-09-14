@@ -3,6 +3,7 @@ use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
+use futures_util::Stream;
 use indexmap::IndexSet;
 use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
@@ -17,7 +18,7 @@ use crate::query::{Order, Query};
 use crate::service::bugzilla::Bugzilla;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
-    Api, InjectAuth, Merge, MergeOption, RequestStream, RequestTemplate, WebService,
+    Api, InjectAuth, Merge, MergeOption, RequestPagedStream, RequestTemplate, WebService,
 };
 use crate::Error;
 
@@ -52,7 +53,7 @@ impl Iterator for PagedIterator {
     }
 }
 
-impl RequestStream for Request {
+impl RequestPagedStream for Request {
     type Item = Bug;
 
     fn concurrent(&self) -> Option<usize> {
@@ -120,6 +121,11 @@ impl Request {
             service: service.clone(),
             params: Default::default(),
         }
+    }
+
+    /// Return the matching stream of items for a given request.
+    pub fn stream(self) -> impl Stream<Item = crate::Result<Bug>> {
+        RequestPagedStream::stream(self)
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {

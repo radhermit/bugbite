@@ -68,8 +68,9 @@ pub trait RequestSend {
     fn send(&self) -> impl Future<Output = crate::Result<Self::Output>>;
 }
 
-pub trait RequestStream: Clone {
-    type Item: 'static;
+/// Request support for streaming via pagination.
+pub(crate) trait RequestPagedStream: Clone {
+    type Item;
 
     /// Return the maximum allowed concurrent requests.
     fn concurrent(&self) -> Option<usize>;

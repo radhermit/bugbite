@@ -12,7 +12,7 @@ use bugbite::service::bugzilla::{
     FilterField,
 };
 use bugbite::time::TimeDeltaOrStatic;
-use bugbite::traits::{Merge, RequestStream, RequestTemplate};
+use bugbite::traits::{Merge, RequestTemplate};
 use clap::Args;
 
 use crate::service::TemplateOptions;

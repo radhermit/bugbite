@@ -1,6 +1,7 @@
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 
+use futures_util::Stream;
 use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -14,7 +15,7 @@ use crate::query::{Order, Query};
 use crate::service::redmine::Redmine;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
-    Api, InjectAuth, Merge, MergeOption, RequestStream, RequestTemplate, WebService,
+    Api, InjectAuth, Merge, MergeOption, RequestPagedStream, RequestTemplate, WebService,
 };
 use crate::Error;
 
@@ -47,7 +48,7 @@ impl Iterator for PagedIterator {
     }
 }
 
-impl RequestStream for Request {
+impl RequestPagedStream for Request {
     type Item = Issue;
 
     fn concurrent(&self) -> Option<usize> {
@@ -96,6 +97,11 @@ impl Request {
             service: service.clone(),
             params: Default::default(),
         }
+    }
+
+    /// Return the matching stream of items for a given request.
+    pub fn stream(self) -> impl Stream<Item = crate::Result<Issue>> {
+        RequestPagedStream::stream(self)
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {

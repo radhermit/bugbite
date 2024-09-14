@@ -2,7 +2,7 @@ use std::pin::Pin;
 
 use bugbite::objects::redmine;
 use bugbite::service::redmine::search;
-use bugbite::traits::{RequestStream, RequestTemplate};
+use bugbite::traits::RequestTemplate;
 use futures_util::Stream;
 use pyo3::prelude::*;
 
