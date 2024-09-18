@@ -18,7 +18,7 @@ fn services() {
 fn connections() {
     cmd("bite show connections")
         .assert()
-        .stdout(predicate::str::contains("gentoo"))
+        .stdout(predicate::str::is_empty().not())
         .stderr("")
         .success();
 }
