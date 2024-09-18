@@ -14,7 +14,7 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(super) fn run<W: Write>(&self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
+    pub(super) fn run<W: Write>(self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
         self.command.run(config, f)
     }
 }
@@ -22,13 +22,13 @@ impl Command {
 #[derive(clap::Subcommand, Debug)]
 enum Subcommand {
     /// Show available connections
-    Connections(connections::Subcommand),
+    Connections(connections::Command),
     /// Show available services
-    Services(services::Subcommand),
+    Services(services::Command),
 }
 
 impl Subcommand {
-    fn run<W: Write>(&self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
+    fn run<W: Write>(self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
         match self {
             Self::Connections(cmd) => cmd.run(config, f),
             Self::Services(cmd) => cmd.run(config, f),

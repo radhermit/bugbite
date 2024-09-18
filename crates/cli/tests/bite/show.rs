@@ -24,6 +24,24 @@ fn connections() {
 }
 
 #[test]
+fn connections_with_services() {
+    // invalid
+    cmd("bite show connections invalid")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::is_empty().not())
+        .failure()
+        .code(2);
+
+    // valid
+    cmd("bite show connections bugzilla redmine")
+        .assert()
+        .stdout(predicate::str::is_empty().not())
+        .stderr("")
+        .success();
+}
+
+#[test]
 fn custom_config() {
     let dir = tempdir().unwrap();
     let home_path = dir.path().to_str().unwrap();

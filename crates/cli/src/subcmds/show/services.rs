@@ -9,9 +9,9 @@ use indexmap::IndexMap;
 use itertools::Itertools;
 
 #[derive(Args, Debug)]
-pub(super) struct Subcommand {}
+pub(super) struct Command {}
 
-impl Subcommand {
+impl Command {
     pub(super) fn run<W: Write>(&self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
         let mut services = IndexMap::<ServiceKind, Vec<(&str, &str)>>::new();
         for (name, config) in config {
