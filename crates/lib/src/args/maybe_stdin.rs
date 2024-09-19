@@ -21,15 +21,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use std::io::{self, read_to_string, BufRead};
+use std::fmt;
+use std::io::{self, read_to_string};
+use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
-use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::utils::is_terminal;
 
 pub(crate) static STDIN_HAS_BEEN_USED: AtomicBool = AtomicBool::new(false);
 
-#[derive(Debug, thiserror::Error)]
+#[derive(thiserror::Error, Debug)]
 pub enum StdinError {
     #[error("stdin argument used more than once")]
     StdInRepeatedUse,
@@ -42,9 +44,9 @@ pub enum StdinError {
 }
 
 /// Source of the value contents will be either from `stdin` or a CLI arg provided value
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum Source {
-    Stdin,
+    Stdin(String),
     Arg(String),
 }
 
@@ -54,22 +56,18 @@ impl FromStr for Source {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "-" => {
-                if STDIN_HAS_BEEN_USED.load(std::sync::atomic::Ordering::Acquire) {
+                if STDIN_HAS_BEEN_USED.load(Ordering::Acquire) {
                     return Err(StdinError::StdInRepeatedUse);
                 }
-                STDIN_HAS_BEEN_USED.store(true, std::sync::atomic::Ordering::SeqCst);
-                Ok(Self::Stdin)
+                let mut stdin = io::stdin().lock();
+                if is_terminal!(&stdin) {
+                    return Err(StdinError::StdinIsTerminal);
+                }
+                let input = read_to_string(&mut stdin)?;
+                STDIN_HAS_BEEN_USED.store(true, Ordering::SeqCst);
+                Ok(Self::Stdin(input))
             }
             arg => Ok(Self::Arg(arg.to_owned())),
-        }
-    }
-}
-
-impl std::fmt::Debug for Source {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Source::Stdin => write!(f, "stdin"),
-            Source::Arg(v) => v.fmt(f),
         }
     }
 }
@@ -85,23 +83,16 @@ pub struct MaybeStdin<T> {
 impl<T> FromStr for MaybeStdin<T>
 where
     T: FromStr,
-    <T as FromStr>::Err: std::fmt::Display,
+    <T as FromStr>::Err: fmt::Display,
 {
     type Err = StdinError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let source = Source::from_str(s)?;
         match &source {
-            Source::Stdin => {
-                let mut stdin = io::stdin().lock();
-                if is_terminal!(&stdin) {
-                    return Err(StdinError::StdinIsTerminal);
-                }
-                let input = read_to_string(&mut stdin)?;
-                Ok(T::from_str(input.trim_end())
-                    .map_err(|e| StdinError::FromStr(format!("{e}")))
-                    .map(|val| Self { source, inner: val })?)
-            }
+            Source::Stdin(value) => Ok(T::from_str(value.trim_end())
+                .map_err(|e| StdinError::FromStr(format!("{e}")))
+                .map(|val| Self { source, inner: val })?),
             Source::Arg(value) => Ok(T::from_str(value)
                 .map_err(|e| StdinError::FromStr(format!("{e}")))
                 .map(|val| Self { source, inner: val })?),
@@ -116,25 +107,25 @@ impl<T> MaybeStdin<T> {
     }
 }
 
-impl<T> std::fmt::Display for MaybeStdin<T>
+impl<T> fmt::Display for MaybeStdin<T>
 where
-    T: std::fmt::Display,
+    T: fmt::Display,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
 }
 
-impl<T> std::fmt::Debug for MaybeStdin<T>
+impl<T> fmt::Debug for MaybeStdin<T>
 where
-    T: std::fmt::Debug,
+    T: fmt::Debug,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
 }
 
-impl<T> std::ops::Deref for MaybeStdin<T> {
+impl<T> Deref for MaybeStdin<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -142,7 +133,7 @@ impl<T> std::ops::Deref for MaybeStdin<T> {
     }
 }
 
-impl<T> std::ops::DerefMut for MaybeStdin<T> {
+impl<T> DerefMut for MaybeStdin<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
     }
@@ -159,20 +150,16 @@ pub struct MaybeStdinVec<T> {
 impl<T> FromStr for MaybeStdinVec<T>
 where
     T: FromStr,
-    <T as FromStr>::Err: std::fmt::Display,
+    <T as FromStr>::Err: fmt::Display,
 {
     type Err = StdinError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let source = Source::from_str(s)?;
         match &source {
-            Source::Stdin => {
-                let stdin = io::stdin().lock();
-                if is_terminal!(&stdin) {
-                    return Err(StdinError::StdinIsTerminal);
-                }
+            Source::Stdin(value) => {
                 let mut inner = vec![];
-                for arg in stdin.lines().map_while(Result::ok) {
+                for arg in value.lines() {
                     let val = T::from_str(arg.trim_end())
                         .map_err(|e| StdinError::FromStr(format!("{e}")))?;
                     inner.push(val);
@@ -196,16 +183,16 @@ impl<T> MaybeStdinVec<T> {
     }
 }
 
-impl<T> std::fmt::Debug for MaybeStdinVec<T>
+impl<T> fmt::Debug for MaybeStdinVec<T>
 where
-    T: std::fmt::Debug,
+    T: fmt::Debug,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
 }
 
-impl<T> std::ops::Deref for MaybeStdinVec<T> {
+impl<T> Deref for MaybeStdinVec<T> {
     type Target = Vec<T>;
 
     fn deref(&self) -> &Self::Target {
@@ -213,7 +200,7 @@ impl<T> std::ops::Deref for MaybeStdinVec<T> {
     }
 }
 
-impl<T> std::ops::DerefMut for MaybeStdinVec<T> {
+impl<T> DerefMut for MaybeStdinVec<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
     }
@@ -234,5 +221,54 @@ impl<'a, T> IntoIterator for &'a MaybeStdinVec<T> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::env;
+
+    use crate::test::assert_ordered_eq;
+
+    use super::*;
+
+    #[test]
+    fn repeated_use() {
+        let r: Result<MaybeStdin<String>, StdinError> = "-".parse();
+        assert!(r.is_ok());
+        let r: Result<MaybeStdin<String>, StdinError> = "-".parse();
+        assert!(matches!(r, Err(StdinError::StdInRepeatedUse)));
+    }
+
+    #[test]
+    fn is_terminal() {
+        env::set_var("BUGBITE_IS_TERMINAL", "1");
+        let r: Result<MaybeStdin<String>, StdinError> = "-".parse();
+        assert!(matches!(r, Err(StdinError::StdinIsTerminal)));
+        let r: Result<MaybeStdinVec<String>, StdinError> = "-".parse();
+        assert!(matches!(r, Err(StdinError::StdinIsTerminal)));
+    }
+
+    #[test]
+    fn maybe_stdin() {
+        // TODO: test from faked stdin
+        let mut value: MaybeStdin<String> = "test".parse().unwrap();
+        assert_eq!(value.to_string(), "test");
+        assert!(format!("{value:?}").contains("test"));
+        assert_eq!(value.len(), 4);
+        value.push_str("test");
+        assert_eq!(value.into_inner(), "testtest");
+    }
+
+    #[test]
+    fn maybe_stdin_vec() {
+        // TODO: test from faked stdin
+        let mut values: MaybeStdinVec<usize> = "12".parse().unwrap();
+        assert!(format!("{values:?}").contains("12"));
+        assert_eq!(values.len(), 1);
+        values.push(13);
+        assert_ordered_eq!(values.clone().into_iter(), [12, 13]);
+        assert_ordered_eq!((&values).into_iter(), [&12, &13]);
+        assert_eq!(values.into_inner(), [12, 13]);
     }
 }
