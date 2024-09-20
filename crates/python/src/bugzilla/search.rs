@@ -59,6 +59,24 @@ impl SearchRequest {
         Ok(())
     }
 
+    pub(super) fn cc(&mut self, value: Bound<'_, PyAny>) -> PyResult<()> {
+        if let Ok(value) = value.to_str() {
+            self.0.cc(value);
+        } else if let Ok(value) = value.downcast::<PyBool>() {
+            self.0.cc(value.is_true());
+        } else if let Ok(values) = value.downcast::<PyIterator>() {
+            let values: Vec<_> = values
+                .iter()?
+                .filter_map(|x| x.ok())
+                .map(|x| x.to_str_owned())
+                .try_collect()?;
+            self.0.cc(values);
+        } else {
+            return Err(PyTypeError::new_err(format!("invalid cc value: {value:?}")));
+        }
+        Ok(())
+    }
+
     pub(super) fn created(&mut self, value: &str) -> PyResult<()> {
         self.0.created(value.parse()?);
         Ok(())
