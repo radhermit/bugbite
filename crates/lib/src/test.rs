@@ -9,6 +9,11 @@ use crate::args::maybe_stdin::STDIN_HAS_BEEN_USED;
 #[cfg(feature = "test-bugzilla")]
 pub mod bugzilla;
 
+#[cfg(test)]
+mod internal;
+#[cfg(test)]
+pub(crate) use internal::*;
+
 /// Reset standard input argument usage flag.
 pub fn reset_stdin() {
     STDIN_HAS_BEEN_USED.store(false, Ordering::SeqCst);

@@ -2044,16 +2044,6 @@ mod tests {
 
     use super::*;
 
-    /// Test encoding a request and collecting the stream of resulting items.
-    macro_rules! stream {
-        ($req:expr) => {
-            let items = futures_util::TryStreamExt::try_collect::<Vec<_>>($req.stream())
-                .await
-                .unwrap();
-            assert!(items.is_empty());
-        };
-    }
-
     // ExistsOrValues<Match> trait conversion testing
     #[tokio::test]
     async fn exists_or_values_match() {
