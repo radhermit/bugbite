@@ -35,6 +35,21 @@ impl SearchRequest {
         Ok(())
     }
 
+    pub(super) fn created(&mut self, value: &str) -> PyResult<()> {
+        self.0.created(value.parse()?);
+        Ok(())
+    }
+
+    pub(super) fn updated(&mut self, value: &str) -> PyResult<()> {
+        self.0.updated(value.parse()?);
+        Ok(())
+    }
+
+    pub(super) fn closed(&mut self, value: &str) -> PyResult<()> {
+        self.0.closed(value.parse()?);
+        Ok(())
+    }
+
     pub(super) fn subject(&mut self, value: &str) -> PyResult<()> {
         self.0.subject([value]);
         Ok(())

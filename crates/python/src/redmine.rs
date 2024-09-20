@@ -55,6 +55,9 @@ impl Redmine {
         if let Some(values) = kwds {
             for (key, value) in values {
                 match key.to_str()? {
+                    "created" => req.created(value.to_str()?)?,
+                    "updated" => req.updated(value.to_str()?)?,
+                    "closed" => req.closed(value.to_str()?)?,
                     "subject" => req.subject(value.to_str()?)?,
                     kw => {
                         return Err(BugbiteError::new_err(format!(
