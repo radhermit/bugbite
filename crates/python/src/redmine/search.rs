@@ -22,7 +22,7 @@ impl From<search::Request> for SearchRequest {
 #[pymethods]
 impl SearchRequest {
     fn __iter__(&self) -> SearchIter {
-        SearchIter(Box::pin(self.0.clone().stream()))
+        SearchIter(Box::pin(self.0.stream()))
     }
 
     fn load_template(&mut self, name: &str) -> PyResult<()> {

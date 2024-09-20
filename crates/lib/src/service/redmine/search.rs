@@ -100,8 +100,8 @@ impl Request {
     }
 
     /// Return the matching stream of items for a given request.
-    pub fn stream(self) -> impl Stream<Item = crate::Result<Issue>> {
-        RequestPagedStream::stream(self)
+    pub fn stream(&self) -> impl Stream<Item = crate::Result<Issue>> {
+        RequestPagedStream::paged_stream(self.clone())
     }
 
     fn encode(&self) -> crate::Result<QueryBuilder> {

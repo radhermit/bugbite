@@ -82,7 +82,7 @@ pub(crate) trait RequestPagedStream: Clone {
     fn send(self) -> impl Future<Output = crate::Result<Vec<Self::Item>>>;
 
     /// Return the matching stream of items for a given request.
-    fn stream(mut self) -> impl Stream<Item = crate::Result<Self::Item>> {
+    fn paged_stream(mut self) -> impl Stream<Item = crate::Result<Self::Item>> {
         // determine the number of requests to process concurrently
         let concurrent = self.concurrent().unwrap_or(1);
 
