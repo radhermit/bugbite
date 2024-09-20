@@ -235,7 +235,7 @@ mod tests {
     async fn request_template() {
         let server = TestServer::new().await;
         let service = Bugzilla::new(server.uri()).unwrap();
-        let request1 = service.search();
+        let mut request1 = service.search();
         let mut request2 = service.search();
 
         // invalid names
@@ -257,7 +257,7 @@ mod tests {
         let path_str = path.to_str().unwrap();
 
         let time = "1d".parse().unwrap();
-        let request1 = request1.created(time);
+        request1.created(time);
 
         // save to specific path
         request1.save_template(path_str).unwrap();
@@ -283,7 +283,8 @@ mod tests {
         config.name = "service".to_string();
         let service = config.into_service().unwrap();
         let time = "2d".parse().unwrap();
-        let request1 = service.search().created(time);
+        let mut request1 = service.search();
+        request1.created(time);
         let mut request2 = service.search();
 
         // depends on linux specific config dir handling

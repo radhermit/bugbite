@@ -195,7 +195,7 @@ impl Request {
         Ok(url)
     }
 
-    pub fn id<T>(mut self, value: T) -> Self
+    pub fn id<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<RangeOrValue<u64>>,
     {
@@ -207,22 +207,22 @@ impl Request {
         self
     }
 
-    pub fn created(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+    pub fn created(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> &mut Self {
         self.params.created = Some(value);
         self
     }
 
-    pub fn updated(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+    pub fn updated(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> &mut Self {
         self.params.updated = Some(value);
         self
     }
 
-    pub fn closed(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+    pub fn closed(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> &mut Self {
         self.params.closed = Some(value);
         self
     }
 
-    pub fn order<I>(mut self, values: I) -> Self
+    pub fn order<I>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = Order<OrderField>>,
     {
@@ -230,7 +230,7 @@ impl Request {
         self
     }
 
-    pub fn status<S>(mut self, value: S) -> Self
+    pub fn status<S>(&mut self, value: S) -> &mut Self
     where
         S: Into<String>,
     {
@@ -238,7 +238,7 @@ impl Request {
         self
     }
 
-    pub fn subject<I, S>(mut self, values: I) -> Self
+    pub fn subject<I, S>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: Into<String>,
@@ -546,11 +546,20 @@ impl Api for Order<OrderField> {
 
 #[cfg(test)]
 mod tests {
+    use futures_util::TryStreamExt;
     use strum::IntoEnumIterator;
 
     use crate::test::*;
 
     use super::*;
+
+    /// Test encoding a request and collecting the stream of resulting items.
+    macro_rules! stream {
+        ($stream:expr) => {
+            let items = $stream.stream().try_collect::<Vec<_>>().await.unwrap();
+            assert!(items.is_empty());
+        };
+    }
 
     #[tokio::test]
     async fn request() {
@@ -585,72 +594,56 @@ mod tests {
         ];
 
         // ids
-        service.search().id(1).send().await.unwrap();
-        service.search().id(10..20).send().await.unwrap();
-        service.search().id(10..=20).send().await.unwrap();
-        service.search().id(..20).send().await.unwrap();
-        service.search().id(..=20).send().await.unwrap();
-        service.search().id(10..).send().await.unwrap();
-        service.search().id(..).send().await.unwrap();
+        stream!(service.search().id(1));
+        stream!(service.search().id(10..20));
+        stream!(service.search().id(10..=20));
+        stream!(service.search().id(..20));
+        stream!(service.search().id(..=20));
+        stream!(service.search().id(10..));
+        stream!(service.search().id(..));
         for s in &id_ranges {
             let range: RangeOrValue<u64> = s.parse().unwrap();
-            service.search().id(range).send().await.unwrap();
+            stream!(service.search().id(range));
         }
-        let err = service.search().id(10).id(10..).send().await.unwrap_err();
+        let err = service
+            .search()
+            .id(10)
+            .id(10..)
+            .clone()
+            .send()
+            .await
+            .unwrap_err();
         assert_err_re!(err, "IDs and ID ranges specified");
-        let err = service.search().id(..10).id(10..).send().await.unwrap_err();
+        let err = service
+            .search()
+            .id(..10)
+            .id(10..)
+            .clone()
+            .send()
+            .await
+            .unwrap_err();
         assert_err_re!(err, "multiple ID ranges specified");
 
         // time related combinators
         for time in &times {
             // created
-            service
-                .search()
-                .created(time.parse().unwrap())
-                .send()
-                .await
-                .unwrap();
+            stream!(service.search().created(time.parse().unwrap()));
 
             // updated
-            service
-                .search()
-                .updated(time.parse().unwrap())
-                .send()
-                .await
-                .unwrap();
+            stream!(service.search().updated(time.parse().unwrap()));
 
             // closed
-            service
-                .search()
-                .closed(time.parse().unwrap())
-                .send()
-                .await
-                .unwrap();
+            stream!(service.search().closed(time.parse().unwrap()));
         }
 
         // order
         for field in OrderField::iter() {
-            service
-                .search()
-                .order([Order::Ascending(field)])
-                .send()
-                .await
-                .unwrap();
+            stream!(service.search().order([Order::Ascending(field)]));
         }
 
         // subject
-        service.search().subject(["test"]).send().await.unwrap();
-        service
-            .search()
-            .subject(["test1", "test2"])
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .subject(["test with whitespace"])
-            .send()
-            .await
-            .unwrap();
+        stream!(service.search().subject(["test"]));
+        stream!(service.search().subject(["test1", "test2"]));
+        stream!(service.search().subject(["test with whitespace"]));
     }
 }

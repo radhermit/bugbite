@@ -35,8 +35,9 @@ impl SearchRequest {
         Ok(())
     }
 
-    fn subject(&mut self, value: &str) {
-        self.0.params.subject = Some(vec![value.into()]);
+    fn subject(&mut self, value: &str) -> PyResult<()> {
+        self.0.subject([value]);
+        Ok(())
     }
 }
 

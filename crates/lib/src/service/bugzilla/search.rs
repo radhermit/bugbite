@@ -545,7 +545,7 @@ impl Request {
         Ok(url)
     }
 
-    pub fn alias<T>(mut self, value: T) -> Self
+    pub fn alias<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -557,7 +557,7 @@ impl Request {
         self
     }
 
-    pub fn attachments<T>(mut self, value: T) -> Self
+    pub fn attachments<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -565,7 +565,7 @@ impl Request {
         self
     }
 
-    pub fn flags<T>(mut self, value: T) -> Self
+    pub fn flags<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -577,7 +577,7 @@ impl Request {
         self
     }
 
-    pub fn groups<T>(mut self, value: T) -> Self
+    pub fn groups<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -589,7 +589,7 @@ impl Request {
         self
     }
 
-    pub fn keywords<T>(mut self, value: T) -> Self
+    pub fn keywords<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -601,7 +601,7 @@ impl Request {
         self
     }
 
-    pub fn see_also<T>(mut self, value: T) -> Self
+    pub fn see_also<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -613,7 +613,7 @@ impl Request {
         self
     }
 
-    pub fn tags<T>(mut self, value: T) -> Self
+    pub fn tags<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -625,7 +625,7 @@ impl Request {
         self
     }
 
-    pub fn whiteboard<T>(mut self, value: T) -> Self
+    pub fn whiteboard<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -637,7 +637,7 @@ impl Request {
         self
     }
 
-    pub fn url<T>(mut self, value: T) -> Self
+    pub fn url<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -649,7 +649,7 @@ impl Request {
         self
     }
 
-    pub fn changed<F>(mut self, field: F) -> Self
+    pub fn changed<F>(&mut self, field: F) -> &mut Self
     where
         F: fmt::Display,
     {
@@ -660,7 +660,7 @@ impl Request {
         self
     }
 
-    pub fn changed_at<F>(mut self, field: F, value: RangeOrValue<TimeDeltaOrStatic>) -> Self
+    pub fn changed_at<F>(&mut self, field: F, value: RangeOrValue<TimeDeltaOrStatic>) -> &mut Self
     where
         F: fmt::Display,
     {
@@ -671,7 +671,7 @@ impl Request {
         self
     }
 
-    pub fn changed_by<F, I, S>(mut self, field: F, values: I) -> Self
+    pub fn changed_by<F, I, S>(&mut self, field: F, values: I) -> &mut Self
     where
         F: fmt::Display,
         I: IntoIterator<Item = S>,
@@ -685,7 +685,7 @@ impl Request {
         self
     }
 
-    pub fn changed_from<F, S>(mut self, field: F, value: S) -> Self
+    pub fn changed_from<F, S>(&mut self, field: F, value: S) -> &mut Self
     where
         F: fmt::Display,
         S: fmt::Display,
@@ -697,7 +697,7 @@ impl Request {
         self
     }
 
-    pub fn changed_to<F, S>(mut self, field: F, value: S) -> Self
+    pub fn changed_to<F, S>(&mut self, field: F, value: S) -> &mut Self
     where
         F: fmt::Display,
         S: fmt::Display,
@@ -709,7 +709,7 @@ impl Request {
         self
     }
 
-    pub fn assignee<I, T>(mut self, values: I) -> Self
+    pub fn assignee<I, T>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = T>,
         T: Into<Match>,
@@ -722,7 +722,7 @@ impl Request {
         self
     }
 
-    pub fn attacher<I, T>(mut self, values: I) -> Self
+    pub fn attacher<I, T>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = T>,
         T: Into<Match>,
@@ -735,7 +735,7 @@ impl Request {
         self
     }
 
-    pub fn commenter<I, T>(mut self, values: I) -> Self
+    pub fn commenter<I, T>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = T>,
         T: Into<Match>,
@@ -748,7 +748,7 @@ impl Request {
         self
     }
 
-    pub fn cc<T>(mut self, value: T) -> Self
+    pub fn cc<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -760,7 +760,7 @@ impl Request {
         self
     }
 
-    pub fn flagger<I, T>(mut self, values: I) -> Self
+    pub fn flagger<I, T>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = T>,
         T: Into<Match>,
@@ -773,7 +773,7 @@ impl Request {
         self
     }
 
-    pub fn qa<T>(mut self, value: T) -> Self
+    pub fn qa<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<Match>>,
     {
@@ -785,7 +785,7 @@ impl Request {
         self
     }
 
-    pub fn reporter<I, T>(mut self, values: I) -> Self
+    pub fn reporter<I, T>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = T>,
         T: Into<Match>,
@@ -798,7 +798,7 @@ impl Request {
         self
     }
 
-    pub fn order<I>(mut self, values: I) -> Self
+    pub fn order<I>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = Order<OrderField>>,
     {
@@ -806,7 +806,7 @@ impl Request {
         self
     }
 
-    pub fn fields<I, F>(mut self, values: I) -> Self
+    pub fn fields<I, F>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = F>,
         F: Into<FilterField>,
@@ -815,7 +815,7 @@ impl Request {
         self
     }
 
-    pub fn status<I, S>(mut self, values: I) -> Self
+    pub fn status<I, S>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: Into<String>,
@@ -824,7 +824,7 @@ impl Request {
         self
     }
 
-    pub fn summary<I, S>(mut self, values: I) -> Self
+    pub fn summary<I, S>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: Into<Match>,
@@ -833,7 +833,7 @@ impl Request {
         self
     }
 
-    pub fn blocks<T>(mut self, value: T) -> Self
+    pub fn blocks<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<RangeOrValue<i64>>>,
     {
@@ -845,7 +845,7 @@ impl Request {
         self
     }
 
-    pub fn depends<T>(mut self, value: T) -> Self
+    pub fn depends<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<RangeOrValue<i64>>>,
     {
@@ -857,7 +857,7 @@ impl Request {
         self
     }
 
-    pub fn ids<T>(mut self, value: T) -> Self
+    pub fn ids<T>(&mut self, value: T) -> &mut Self
     where
         T: Into<ExistsOrValues<RangeOrValue<i64>>>,
     {
@@ -869,32 +869,32 @@ impl Request {
         self
     }
 
-    pub fn created(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+    pub fn created(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> &mut Self {
         self.params.created = Some(value);
         self
     }
 
-    pub fn updated(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+    pub fn updated(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> &mut Self {
         self.params.updated = Some(value);
         self
     }
 
-    pub fn closed(mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> Self {
+    pub fn closed(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> &mut Self {
         self.params.closed = Some(value);
         self
     }
 
-    pub fn limit(mut self, value: usize) -> Self {
+    pub fn limit(&mut self, value: usize) -> &mut Self {
         self.params.limit = Some(value);
         self
     }
 
-    pub fn offset(mut self, value: usize) -> Self {
+    pub fn offset(&mut self, value: usize) -> &mut Self {
         self.params.offset = Some(value);
         self
     }
 
-    pub fn quicksearch<S: Into<String>>(mut self, value: S) -> Self {
+    pub fn quicksearch<S: Into<String>>(&mut self, value: S) -> &mut Self {
         self.params.quicksearch = Some(value.into());
         self
     }
@@ -2037,6 +2037,7 @@ impl ChangeField {
 
 #[cfg(test)]
 mod tests {
+    use futures_util::TryStreamExt;
     use strum::IntoEnumIterator;
 
     use crate::service::bugzilla::GroupField;
@@ -2044,83 +2045,73 @@ mod tests {
 
     use super::*;
 
+    /// Test encoding a request and collecting the stream of resulting items.
+    macro_rules! stream {
+        ($stream:expr) => {
+            let items = $stream.stream().try_collect::<Vec<_>>().await.unwrap();
+            assert!(items.is_empty());
+        };
+    }
+
     // ExistsOrValues<Match> trait conversion testing
     #[tokio::test]
     async fn exists_or_values_match() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let service = Bugzilla::new(server.uri()).unwrap();
-        server.respond(200, path.join("search/ids.json")).await;
+        server
+            .respond(200, path.join("search/nonexistent.json"))
+            .await;
 
         // boolean
-        service.search().alias(true).send().await.unwrap();
-        service.search().alias(false).send().await.unwrap();
+        stream!(service.search().alias(true));
+        stream!(service.search().alias(false));
 
         // string
         let value = "value".to_string();
-        service.search().alias("value").send().await.unwrap();
-        service.search().alias(&value).send().await.unwrap();
-        service.search().alias(value).send().await.unwrap();
+        stream!(service.search().alias("value"));
+        stream!(service.search().alias(&value));
+        stream!(service.search().alias(value));
 
         // array
-        service
-            .search()
-            .alias(["value1", "value2"])
-            .send()
-            .await
-            .unwrap();
+        stream!(service.search().alias(["value1", "value2"]));
 
         // vector str
         let values = vec!["value1", "value2"];
-        service.search().alias(&values).send().await.unwrap();
-        service
-            .search()
-            .alias(values.as_slice())
-            .send()
-            .await
-            .unwrap();
+        stream!(service.search().alias(&values));
+        stream!(service.search().alias(values.as_slice()));
         // vector owned
         let values: Vec<_> = values.iter().map(|x| x.to_string()).collect();
-        service.search().alias(&values).send().await.unwrap();
-        service
-            .search()
-            .alias(values.as_slice())
-            .send()
-            .await
-            .unwrap();
+        stream!(service.search().alias(&values));
+        stream!(service.search().alias(values.as_slice()));
         // vector ref
         let values: Vec<_> = values.iter().collect();
-        service.search().alias(&values).send().await.unwrap();
-        service
-            .search()
-            .alias(values.as_slice())
-            .send()
-            .await
-            .unwrap();
+        stream!(service.search().alias(&values));
+        stream!(service.search().alias(values.as_slice()));
 
         // slice str
         let values = &["value1", "value2"];
-        service.search().alias(values).send().await.unwrap();
+        stream!(service.search().alias(values));
 
         // hashset str
         let values = HashSet::from(["value1", "value2"]);
-        service.search().alias(&values).send().await.unwrap();
+        stream!(service.search().alias(&values));
         // hashset owned
         let values: HashSet<_> = values.iter().map(|x| x.to_string()).collect();
-        service.search().alias(&values).send().await.unwrap();
+        stream!(service.search().alias(&values));
         // hashset ref
         let values: HashSet<_> = values.iter().collect();
-        service.search().alias(&values).send().await.unwrap();
+        stream!(service.search().alias(&values));
 
         // IndexSet str
         let values = IndexSet::from(["value1", "value2"]);
-        service.search().alias(&values).send().await.unwrap();
+        stream!(service.search().alias(&values));
         // IndexSet owned
         let values: IndexSet<_> = values.iter().map(|x| x.to_string()).collect();
-        service.search().alias(&values).send().await.unwrap();
+        stream!(service.search().alias(&values));
         // IndexSet ref
         let values: IndexSet<_> = values.iter().collect();
-        service.search().alias(&values).send().await.unwrap();
+        stream!(service.search().alias(&values));
     }
 
     // ExistsOrValues<RangeOrValue<i64>> trait conversion testing
@@ -2129,39 +2120,36 @@ mod tests {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let service = Bugzilla::new(server.uri()).unwrap();
-        server.respond(200, path.join("search/ids.json")).await;
+        server
+            .respond(200, path.join("search/nonexistent.json"))
+            .await;
 
         // boolean
-        service.search().blocks(true).send().await.unwrap();
-        service.search().blocks(false).send().await.unwrap();
+        stream!(service.search().blocks(true));
+        stream!(service.search().blocks(false));
 
         // i64
-        service.search().blocks(1).send().await.unwrap();
+        stream!(service.search().blocks(1));
 
         // array
-        service.search().blocks([1, 2]).send().await.unwrap();
+        stream!(service.search().blocks([1, 2]));
 
         // vector
         let values = vec![1, 2];
-        service.search().blocks(&values).send().await.unwrap();
-        service
-            .search()
-            .blocks(values.as_slice())
-            .send()
-            .await
-            .unwrap();
+        stream!(service.search().blocks(&values));
+        stream!(service.search().blocks(values.as_slice()));
 
         // slice
         let values = &[1, 2];
-        service.search().blocks(values).send().await.unwrap();
+        stream!(service.search().blocks(values));
 
         // hashset
         let values = HashSet::from([1, 2]);
-        service.search().blocks(&values).send().await.unwrap();
+        stream!(service.search().blocks(&values));
 
         // IndexSet str
         let values = IndexSet::from([1, 2]);
-        service.search().blocks(&values).send().await.unwrap();
+        stream!(service.search().blocks(&values));
     }
 
     #[tokio::test]
@@ -2200,72 +2188,67 @@ mod tests {
         ];
 
         // alias
-        service.search().alias(true).send().await.unwrap();
-        service.search().alias(false).send().await.unwrap();
-        service.search().alias("value").send().await.unwrap();
-        service.search().alias(&matches).send().await.unwrap();
+        stream!(service.search().alias(true));
+        stream!(service.search().alias(false));
+        stream!(service.search().alias("value"));
+        stream!(service.search().alias(&matches));
 
         // attachments
-        service.search().attachments(true).send().await.unwrap();
-        service.search().attachments(false).send().await.unwrap();
-        service.search().attachments("value").send().await.unwrap();
-        service.search().attachments(&matches).send().await.unwrap();
+        stream!(service.search().attachments(true));
+        stream!(service.search().attachments(false));
+        stream!(service.search().attachments("value"));
+        stream!(service.search().attachments(&matches));
 
         // flags
-        service.search().flags(true).send().await.unwrap();
-        service.search().flags(false).send().await.unwrap();
-        service.search().flags("value").send().await.unwrap();
-        service.search().flags(&matches).send().await.unwrap();
+        stream!(service.search().flags(true));
+        stream!(service.search().flags(false));
+        stream!(service.search().flags("value"));
+        stream!(service.search().flags(&matches));
 
         // groups
-        service.search().groups(true).send().await.unwrap();
-        service.search().groups(false).send().await.unwrap();
-        service.search().groups("value").send().await.unwrap();
-        service.search().groups(&matches).send().await.unwrap();
+        stream!(service.search().groups(true));
+        stream!(service.search().groups(false));
+        stream!(service.search().groups("value"));
+        stream!(service.search().groups(&matches));
 
         // keywords
-        service.search().keywords(true).send().await.unwrap();
-        service.search().keywords(false).send().await.unwrap();
-        service.search().keywords("value").send().await.unwrap();
-        service.search().keywords(&matches).send().await.unwrap();
+        stream!(service.search().keywords(true));
+        stream!(service.search().keywords(false));
+        stream!(service.search().keywords("value"));
+        stream!(service.search().keywords(&matches));
 
         // see_also
-        service.search().see_also(true).send().await.unwrap();
-        service.search().see_also(false).send().await.unwrap();
-        service.search().see_also("value").send().await.unwrap();
-        service.search().see_also(&matches).send().await.unwrap();
+        stream!(service.search().see_also(true));
+        stream!(service.search().see_also(false));
+        stream!(service.search().see_also("value"));
+        stream!(service.search().see_also(&matches));
 
         // tags
-        service.search().tags(true).send().await.unwrap();
-        service.search().tags(false).send().await.unwrap();
-        service.search().tags("value").send().await.unwrap();
-        service.search().tags(&matches).send().await.unwrap();
+        stream!(service.search().tags(true));
+        stream!(service.search().tags(false));
+        stream!(service.search().tags("value"));
+        stream!(service.search().tags(&matches));
 
         // whiteboard
-        service.search().whiteboard(true).send().await.unwrap();
-        service.search().whiteboard(false).send().await.unwrap();
-        service.search().whiteboard("value").send().await.unwrap();
-        service.search().whiteboard(&matches).send().await.unwrap();
+        stream!(service.search().whiteboard(true));
+        stream!(service.search().whiteboard(false));
+        stream!(service.search().whiteboard("value"));
+        stream!(service.search().whiteboard(&matches));
 
         // url
-        service.search().url(true).send().await.unwrap();
-        service.search().url(false).send().await.unwrap();
-        service.search().url("value").send().await.unwrap();
-        service.search().url(&matches).send().await.unwrap();
+        stream!(service.search().url(true));
+        stream!(service.search().url(false));
+        stream!(service.search().url("value"));
+        stream!(service.search().url(&matches));
 
         // change related combinators
         for field in StaticChangeField::iter() {
             // ever changed
-            service.search().changed(&field).send().await.unwrap();
+            stream!(service.search().changed(&field));
 
             // changed at a certain time
             for time in &times {
-                service
-                    .search()
-                    .changed_at(&field, time.parse().unwrap())
-                    .send()
-                    .await
-                    .unwrap();
+                stream!(service.search().changed_at(&field, time.parse().unwrap()));
             }
 
             // invalid equality operator usage
@@ -2273,167 +2256,113 @@ mod tests {
                 assert!(service
                     .search()
                     .changed_at(&field, time.parse().unwrap())
+                    .clone()
                     .send()
                     .await
                     .is_err());
             }
 
             // changed by certain user(s)
-            service
-                .search()
-                .changed_by(&field, ["user1", "user2"])
-                .send()
-                .await
-                .unwrap();
+            stream!(service.search().changed_by(&field, ["user1", "user2"]));
 
             // changed from certain value
-            service
-                .search()
-                .changed_from(&field, "value")
-                .send()
-                .await
-                .unwrap();
+            stream!(service.search().changed_from(&field, "value"));
 
             // changed to certain value
-            service
-                .search()
-                .changed_to(&field, "value")
-                .send()
-                .await
-                .unwrap();
+            stream!(service.search().changed_to(&field, "value"));
         }
 
         // order
         for field in OrderField::iter() {
-            service
-                .search()
-                .order([Order::Ascending(field)])
-                .send()
-                .await
-                .unwrap();
+            stream!(service.search().order([Order::Ascending(field)]));
         }
 
         // assignee
-        service.search().assignee(["value"]).send().await.unwrap();
+        stream!(service.search().assignee(["value"]));
 
         // attacher
-        service.search().attacher(["value"]).send().await.unwrap();
+        stream!(service.search().attacher(["value"]));
 
         // cc
-        service.search().cc(true).send().await.unwrap();
-        service.search().cc(false).send().await.unwrap();
-        service.search().cc("value").send().await.unwrap();
-        service.search().cc(&matches).send().await.unwrap();
+        stream!(service.search().cc(true));
+        stream!(service.search().cc(false));
+        stream!(service.search().cc("value"));
+        stream!(service.search().cc(&matches));
 
         // commenter
-        service.search().commenter(["value"]).send().await.unwrap();
+        stream!(service.search().commenter(["value"]));
 
         // flagger
-        service.search().flagger(["value"]).send().await.unwrap();
+        stream!(service.search().flagger(["value"]));
 
         // qa
-        service.search().qa(true).send().await.unwrap();
-        service.search().qa(false).send().await.unwrap();
-        service.search().qa("value").send().await.unwrap();
-        service.search().qa(&matches).send().await.unwrap();
+        stream!(service.search().qa(true));
+        stream!(service.search().qa(false));
+        stream!(service.search().qa("value"));
+        stream!(service.search().qa(&matches));
 
         // reporter
-        service.search().reporter(["value"]).send().await.unwrap();
+        stream!(service.search().reporter(["value"]));
 
         // fields
-        service
-            .search()
-            .fields([BugField::Id])
-            .send()
-            .await
-            .unwrap();
-        service
-            .search()
-            .fields([GroupField::All])
-            .send()
-            .await
-            .unwrap();
+        stream!(service.search().fields([BugField::Id]));
+        stream!(service.search().fields([GroupField::All]));
         for field in FilterField::iter() {
-            service.search().fields([field]).send().await.unwrap();
+            stream!(service.search().fields([field]));
         }
 
         // blocks
-        service.search().blocks(true).send().await.unwrap();
-        service.search().blocks(false).send().await.unwrap();
-        service.search().blocks(1).send().await.unwrap();
-        service.search().blocks(-1).send().await.unwrap();
-        service.search().blocks([1, -2]).send().await.unwrap();
-        service.search().blocks(10..20).send().await.unwrap();
-        service.search().blocks(10..=20).send().await.unwrap();
-        service.search().blocks(..20).send().await.unwrap();
-        service.search().blocks(..=20).send().await.unwrap();
-        service.search().blocks(10..).send().await.unwrap();
-        service.search().blocks(..).send().await.unwrap();
+        stream!(service.search().blocks(true));
+        stream!(service.search().blocks(false));
+        stream!(service.search().blocks(1));
+        stream!(service.search().blocks(-1));
+        stream!(service.search().blocks([1, -2]));
+        stream!(service.search().blocks(10..20));
+        stream!(service.search().blocks(10..=20));
+        stream!(service.search().blocks(..20));
+        stream!(service.search().blocks(..=20));
+        stream!(service.search().blocks(10..));
+        stream!(service.search().blocks(..));
 
         // depends
-        service.search().depends(true).send().await.unwrap();
-        service.search().depends(false).send().await.unwrap();
-        service.search().depends(1).send().await.unwrap();
-        service.search().depends(-1).send().await.unwrap();
-        service.search().depends([1, -2]).send().await.unwrap();
-        service.search().depends(10..20).send().await.unwrap();
-        service.search().depends(10..=20).send().await.unwrap();
-        service.search().depends(..20).send().await.unwrap();
-        service.search().depends(..=20).send().await.unwrap();
-        service.search().depends(10..).send().await.unwrap();
-        service.search().depends(..).send().await.unwrap();
+        stream!(service.search().depends(true));
+        stream!(service.search().depends(false));
+        stream!(service.search().depends(1));
+        stream!(service.search().depends(-1));
+        stream!(service.search().depends([1, -2]));
+        stream!(service.search().depends(10..20));
+        stream!(service.search().depends(10..=20));
+        stream!(service.search().depends(..20));
+        stream!(service.search().depends(..=20));
+        stream!(service.search().depends(10..));
+        stream!(service.search().depends(..));
 
         // ids
-        service.search().ids(true).send().await.unwrap();
-        service.search().ids(false).send().await.unwrap();
-        service.search().ids(1).send().await.unwrap();
-        service.search().ids(-1).send().await.unwrap();
-        service.search().ids([1, -2]).send().await.unwrap();
-        service.search().ids(10..20).send().await.unwrap();
-        service.search().ids(10..=20).send().await.unwrap();
-        service.search().ids(..20).send().await.unwrap();
-        service.search().ids(..=20).send().await.unwrap();
-        service.search().ids(10..).send().await.unwrap();
-        service.search().ids(..).send().await.unwrap();
+        stream!(service.search().ids(true));
+        stream!(service.search().ids(false));
+        stream!(service.search().ids(1));
+        stream!(service.search().ids(-1));
+        stream!(service.search().ids([1, -2]));
+        stream!(service.search().ids(10..20));
+        stream!(service.search().ids(10..=20));
+        stream!(service.search().ids(..20));
+        stream!(service.search().ids(..=20));
+        stream!(service.search().ids(10..));
+        stream!(service.search().ids(..));
         for s in &id_ranges {
             let range: ExistsOrValues<RangeOrValue<i64>> = s.parse().unwrap();
-            service.search().ids(range).send().await.unwrap();
+            stream!(service.search().ids(range));
         }
 
         // time related combinators
         for time in &times {
-            // created
-            service
-                .search()
-                .created(time.parse().unwrap())
-                .send()
-                .await
-                .unwrap();
-
-            // updated
-            service
-                .search()
-                .updated(time.parse().unwrap())
-                .send()
-                .await
-                .unwrap();
-
-            // closed
-            service
-                .search()
-                .closed(time.parse().unwrap())
-                .send()
-                .await
-                .unwrap();
+            stream!(service.search().created(time.parse().unwrap()));
+            stream!(service.search().updated(time.parse().unwrap()));
+            stream!(service.search().closed(time.parse().unwrap()));
         }
 
-        service.search().limit(10).send().await.unwrap();
-        service.search().offset(10).send().await.unwrap();
-        service
-            .search()
-            .quicksearch("ALL @user OR reporter:user")
-            .send()
-            .await
-            .unwrap();
+        stream!(service.search().limit(10));
+        stream!(service.search().offset(10));
+        stream!(service.search().quicksearch("ALL @user OR reporter:user"));
     }
 }
