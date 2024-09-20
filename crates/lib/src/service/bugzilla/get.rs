@@ -58,15 +58,17 @@ impl Request {
     }
 
     /// Enable or disable fetching attachments.
-    pub fn attachments(mut self, fetch: bool) -> Self {
+    pub fn attachments(&mut self, fetch: bool) -> &mut Self {
         if fetch {
-            self.attachments = Some(self.service.attachment_get_item(&self.ids).data(false));
+            let mut req = self.service.attachment_get_item(&self.ids);
+            req.data(false);
+            self.attachments = Some(req);
         }
         self
     }
 
     /// Enable or disable fetching comments.
-    pub fn comments(mut self, fetch: bool) -> Self {
+    pub fn comments(&mut self, fetch: bool) -> &mut Self {
         if fetch {
             self.comments = Some(self.service.comment(&self.ids));
         }
@@ -74,7 +76,7 @@ impl Request {
     }
 
     /// Enable or disable fetching changes.
-    pub fn history(mut self, fetch: bool) -> Self {
+    pub fn history(&mut self, fetch: bool) -> &mut Self {
         if fetch {
             self.history = Some(self.service.history(&self.ids));
         }

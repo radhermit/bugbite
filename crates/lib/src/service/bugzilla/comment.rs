@@ -53,17 +53,17 @@ impl Request {
         Ok(url)
     }
 
-    pub fn attachment(mut self, value: bool) -> Self {
+    pub fn attachment(&mut self, value: bool) -> &mut Self {
         self.params.attachment = Some(value);
         self
     }
 
-    pub fn created_after(mut self, interval: TimeDeltaOrStatic) -> Self {
+    pub fn created_after(&mut self, interval: TimeDeltaOrStatic) -> &mut Self {
         self.params.created_after = Some(interval);
         self
     }
 
-    pub fn creator<S>(mut self, value: S) -> Self
+    pub fn creator<S>(&mut self, value: S) -> &mut Self
     where
         S: Into<String>,
     {

@@ -51,7 +51,7 @@ impl Request {
     }
 
     /// Enable or disable fetching attachments.
-    pub fn attachments(mut self, fetch: bool) -> Self {
+    pub fn attachments(&mut self, fetch: bool) -> &mut Self {
         if fetch {
             self.fields.insert(Field::Attachments);
         }
@@ -59,7 +59,7 @@ impl Request {
     }
 
     /// Enable or disable fetching comments.
-    pub fn comments(mut self, fetch: bool) -> Self {
+    pub fn comments(&mut self, fetch: bool) -> &mut Self {
         if fetch {
             self.fields.insert(Field::Journals);
         }

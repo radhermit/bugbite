@@ -49,7 +49,7 @@ impl Request {
         Ok(url)
     }
 
-    pub fn data(mut self, fetch: bool) -> Self {
+    pub fn data(&mut self, fetch: bool) -> &mut Self {
         self.data = fetch;
         self
     }

@@ -130,7 +130,7 @@ impl Request {
         Ok(params)
     }
 
-    pub fn alias<I, S>(mut self, value: I) -> Self
+    pub fn alias<I, S>(&mut self, value: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -139,7 +139,7 @@ impl Request {
         self
     }
 
-    pub fn assignee<S>(mut self, value: S) -> Self
+    pub fn assignee<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -147,7 +147,7 @@ impl Request {
         self
     }
 
-    pub fn blocks<I, S>(mut self, value: I) -> Self
+    pub fn blocks<I, S>(&mut self, value: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -156,7 +156,7 @@ impl Request {
         self
     }
 
-    pub fn cc<I, S>(mut self, value: I) -> Self
+    pub fn cc<I, S>(&mut self, value: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -165,7 +165,7 @@ impl Request {
         self
     }
 
-    pub fn component<S>(mut self, value: S) -> Self
+    pub fn component<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -173,7 +173,7 @@ impl Request {
         self
     }
 
-    pub fn depends<I, S>(mut self, value: I) -> Self
+    pub fn depends<I, S>(&mut self, value: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -182,7 +182,7 @@ impl Request {
         self
     }
 
-    pub fn description<S>(mut self, value: S) -> Self
+    pub fn description<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -190,7 +190,7 @@ impl Request {
         self
     }
 
-    pub fn flags<I>(mut self, value: I) -> Self
+    pub fn flags<I>(&mut self, value: I) -> &mut Self
     where
         I: IntoIterator<Item = Flag>,
     {
@@ -198,7 +198,7 @@ impl Request {
         self
     }
 
-    pub fn groups<I, S>(mut self, value: I) -> Self
+    pub fn groups<I, S>(&mut self, value: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -207,7 +207,7 @@ impl Request {
         self
     }
 
-    pub fn keywords<I, S>(mut self, value: I) -> Self
+    pub fn keywords<I, S>(&mut self, value: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -216,7 +216,7 @@ impl Request {
         self
     }
 
-    pub fn os<S>(mut self, value: S) -> Self
+    pub fn os<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -224,7 +224,7 @@ impl Request {
         self
     }
 
-    pub fn platform<S>(mut self, value: S) -> Self
+    pub fn platform<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -232,7 +232,7 @@ impl Request {
         self
     }
 
-    pub fn priority<S>(mut self, value: S) -> Self
+    pub fn priority<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -240,7 +240,7 @@ impl Request {
         self
     }
 
-    pub fn product<S>(mut self, value: S) -> Self
+    pub fn product<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -248,7 +248,7 @@ impl Request {
         self
     }
 
-    pub fn qa<S>(mut self, value: S) -> Self
+    pub fn qa<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -256,7 +256,7 @@ impl Request {
         self
     }
 
-    pub fn resolution<S>(mut self, value: S) -> Self
+    pub fn resolution<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -264,7 +264,7 @@ impl Request {
         self
     }
 
-    pub fn see_also<I, S>(mut self, value: I) -> Self
+    pub fn see_also<I, S>(&mut self, value: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
@@ -273,7 +273,7 @@ impl Request {
         self
     }
 
-    pub fn severity<S>(mut self, value: S) -> Self
+    pub fn severity<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -281,7 +281,7 @@ impl Request {
         self
     }
 
-    pub fn status<S>(mut self, value: S) -> Self
+    pub fn status<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -289,7 +289,7 @@ impl Request {
         self
     }
 
-    pub fn summary<S>(mut self, value: S) -> Self
+    pub fn summary<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -297,7 +297,7 @@ impl Request {
         self
     }
 
-    pub fn target<S>(mut self, value: S) -> Self
+    pub fn target<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -305,7 +305,7 @@ impl Request {
         self
     }
 
-    pub fn url<S>(mut self, value: S) -> Self
+    pub fn url<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -313,7 +313,7 @@ impl Request {
         self
     }
 
-    pub fn version<S>(mut self, value: S) -> Self
+    pub fn version<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -321,7 +321,7 @@ impl Request {
         self
     }
 
-    pub fn whiteboard<S>(mut self, value: S) -> Self
+    pub fn whiteboard<S>(&mut self, value: S) -> &mut Self
     where
         S: fmt::Display,
     {
@@ -329,7 +329,7 @@ impl Request {
         self
     }
 
-    pub fn custom_fields<I, S1, S2>(mut self, value: I) -> Self
+    pub fn custom_fields<I, S1, S2>(&mut self, value: I) -> &mut Self
     where
         I: IntoIterator<Item = (S1, S2)>,
         S1: fmt::Display,
@@ -505,12 +505,12 @@ mod tests {
 
         // create new request with default fields set
         let request = || {
-            service
-                .create()
-                .component("TestComponent")
-                .product("TestProduct")
-                .description("description")
-                .summary("summary")
+            let mut req = service.create();
+            req.component("TestComponent");
+            req.product("TestProduct");
+            req.description("description");
+            req.summary("summary");
+            req
         };
 
         server.respond(200, path.join("create/creation.json")).await;

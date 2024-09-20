@@ -53,12 +53,12 @@ impl Request {
         Ok(url)
     }
 
-    pub fn data(mut self, status: bool) -> Self {
+    pub fn data(&mut self, status: bool) -> &mut Self {
         self.data = status;
         self
     }
 
-    pub fn outdated(mut self, status: bool) -> Self {
+    pub fn outdated(&mut self, status: bool) -> &mut Self {
         self.outdated = status;
         self
     }
