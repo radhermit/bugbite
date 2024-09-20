@@ -50,6 +50,11 @@ impl SearchRequest {
         Ok(())
     }
 
+    pub(super) fn status(&mut self, value: &str) -> PyResult<()> {
+        self.0.status(value);
+        Ok(())
+    }
+
     pub(super) fn subject(&mut self, value: &str) -> PyResult<()> {
         self.0.subject([value]);
         Ok(())

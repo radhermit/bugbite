@@ -58,6 +58,7 @@ impl Redmine {
                     "created" => req.created(value.to_str()?)?,
                     "updated" => req.updated(value.to_str()?)?,
                     "closed" => req.closed(value.to_str()?)?,
+                    "status" => req.status(value.to_str()?)?,
                     "subject" => req.subject(value.to_str()?)?,
                     kw => {
                         return Err(BugbiteError::new_err(format!(
