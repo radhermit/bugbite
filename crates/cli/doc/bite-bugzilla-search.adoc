@@ -116,8 +116,8 @@ number of results per page.
 This allows setting a smaller page size to get quicker, initial results for
 large queries.
 +
-.All closed issues using 25 items per page:
- bite bugzilla search -s @closed -l 25 --paged
+.All closed issues using 100 items per page, fetching 3 pages concurrently:
+ bite bugzilla -C 3 search -s @closed -l 100 --paged
 
 *-S, --quicksearch <query>*::
     Search for bugs using quicksearch syntax.
