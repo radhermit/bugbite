@@ -3,7 +3,9 @@ use bugbite::service::redmine;
 use bugbite::traits::RequestSend;
 use bugbite::traits::WebClient;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
+use crate::traits::ToStr;
 use crate::utils::tokio;
 
 mod objects;
@@ -46,8 +48,24 @@ impl Redmine {
         })
     }
 
-    fn search(&self) -> search::SearchRequest {
-        self.0.search().into()
+    #[pyo3(signature = (**kwds))]
+    fn search(&self, kwds: Option<&Bound<'_, PyDict>>) -> PyResult<search::SearchRequest> {
+        let mut req: search::SearchRequest = self.0.search().into();
+
+        if let Some(values) = kwds {
+            for (key, value) in values {
+                match key.to_str()? {
+                    "subject" => req.subject(value.to_str()?)?,
+                    kw => {
+                        return Err(BugbiteError::new_err(format!(
+                            "invalid search parameter: {kw}"
+                        )))
+                    }
+                }
+            }
+        }
+
+        Ok(req)
     }
 }
 

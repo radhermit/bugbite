@@ -35,7 +35,7 @@ impl SearchRequest {
         Ok(())
     }
 
-    fn subject(&mut self, value: &str) -> PyResult<()> {
+    pub(super) fn subject(&mut self, value: &str) -> PyResult<()> {
         self.0.subject([value]);
         Ok(())
     }
