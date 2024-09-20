@@ -92,6 +92,24 @@ impl SearchRequest {
         Ok(())
     }
 
+    pub(super) fn status(&mut self, value: Bound<'_, PyAny>) -> PyResult<()> {
+        if let Ok(value) = value.to_str() {
+            self.0.status([value]);
+        } else if let Ok(values) = value.downcast::<PyIterator>() {
+            let values: Vec<_> = values
+                .iter()?
+                .filter_map(|x| x.ok())
+                .map(|x| x.to_str_owned())
+                .try_collect()?;
+            self.0.status(values);
+        } else {
+            return Err(PyTypeError::new_err(format!(
+                "invalid status value: {value:?}"
+            )));
+        }
+        Ok(())
+    }
+
     pub(super) fn summary(&mut self, value: &str) -> PyResult<()> {
         self.0.summary([value]);
         Ok(())
