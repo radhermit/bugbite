@@ -3,7 +3,7 @@ use pyo3::exceptions::{PyKeyError, PyTypeError};
 use pyo3::prelude::*;
 
 use crate::service;
-use crate::traits::ToStr;
+use crate::traits::ToStrWithBound;
 
 #[pyclass(mapping, module = "bugbite.config")]
 pub(super) struct Config(::bugbite::config::Config);
@@ -43,7 +43,7 @@ impl Config {
     }
 
     fn __contains__(&self, object: PyObject, py: Python<'_>) -> bool {
-        if let Ok(name) = object.to_str(py) {
+        if let Ok(name) = object.to_str_with_bound(py) {
             self.0.contains_key(name)
         } else {
             false
@@ -51,7 +51,7 @@ impl Config {
     }
 
     fn __getitem__(&self, object: PyObject, py: Python<'_>) -> PyResult<service::Config> {
-        if let Ok(name) = object.to_str(py) {
+        if let Ok(name) = object.to_str_with_bound(py) {
             self.0
                 .get(name)
                 .map(|x| x.clone().into())

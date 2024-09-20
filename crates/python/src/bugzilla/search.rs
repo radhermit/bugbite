@@ -35,8 +35,23 @@ impl SearchRequest {
         Ok(())
     }
 
-    fn summary(&mut self, value: &str) {
+    pub(super) fn summary(&mut self, value: &str) {
         self.0.params.summary = Some(vec![value.into()]);
+    }
+
+    pub(super) fn created(&mut self, value: &str) -> PyResult<()> {
+        self.0.params.created = Some(value.parse()?);
+        Ok(())
+    }
+
+    pub(super) fn updated(&mut self, value: &str) -> PyResult<()> {
+        self.0.params.updated = Some(value.parse()?);
+        Ok(())
+    }
+
+    pub(super) fn closed(&mut self, value: &str) -> PyResult<()> {
+        self.0.params.closed = Some(value.parse()?);
+        Ok(())
     }
 }
 
