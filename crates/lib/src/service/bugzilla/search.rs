@@ -2037,7 +2037,6 @@ impl ChangeField {
 
 #[cfg(test)]
 mod tests {
-    use futures_util::TryStreamExt;
     use strum::IntoEnumIterator;
 
     use crate::service::bugzilla::GroupField;
@@ -2047,8 +2046,10 @@ mod tests {
 
     /// Test encoding a request and collecting the stream of resulting items.
     macro_rules! stream {
-        ($stream:expr) => {
-            let items = $stream.stream().try_collect::<Vec<_>>().await.unwrap();
+        ($req:expr) => {
+            let items = futures_util::TryStreamExt::try_collect::<Vec<_>>($req.stream())
+                .await
+                .unwrap();
             assert!(items.is_empty());
         };
     }
