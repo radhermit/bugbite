@@ -1240,6 +1240,7 @@ macro_rules! make_exists_or_values_match_ref {
     )+};
 }
 make_exists_or_values_match_ref!(&[&str], &Vec<&str>, &HashSet<&str>, &IndexSet<&str>);
+make_exists_or_values_match_ref!(Vec<&str>, HashSet<&str>, IndexSet<&str>);
 make_exists_or_values_match_ref!(
     &[&String],
     &Vec<&String>,
@@ -1257,6 +1258,7 @@ macro_rules! make_exists_or_values_match_owned {
     )+};
 }
 make_exists_or_values_match_owned!(&[String], &Vec<String>, &HashSet<String>, &IndexSet<String>);
+make_exists_or_values_match_owned!(Vec<String>, HashSet<String>, IndexSet<String>);
 
 macro_rules! make_exists_or_values_i64 {
     ($($x:ty),+) => {$(

@@ -71,6 +71,7 @@ impl Bugzilla {
         if let Some(values) = kwds {
             for (key, value) in values {
                 match key.to_str()? {
+                    "alias" => req.alias(value)?,
                     "created" => req.created(value.to_str()?)?,
                     "updated" => req.updated(value.to_str()?)?,
                     "closed" => req.closed(value.to_str()?)?,

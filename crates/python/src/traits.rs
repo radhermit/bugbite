@@ -3,6 +3,9 @@ use pyo3::types::PyString;
 
 pub(crate) trait ToStr {
     fn to_str(&self) -> PyResult<&str>;
+    fn to_str_owned(&self) -> PyResult<String> {
+        self.to_str().map(|x| x.to_string())
+    }
 }
 
 pub(crate) trait ToStrWithBound {

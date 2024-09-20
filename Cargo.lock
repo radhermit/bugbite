@@ -363,6 +363,7 @@ dependencies = [
  "chrono",
  "futures-util",
  "indexmap",
+ "itertools",
  "pyo3",
  "tokio",
 ]
