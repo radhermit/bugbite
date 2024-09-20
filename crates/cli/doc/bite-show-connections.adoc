@@ -6,7 +6,7 @@ bite-show-connections - Show available connections
 
 == Synopsis
 
-*bite show connections*::
+*bite show connections* [<service>]...::
     Show available connections.
 
 *bite show connections* [-h|--help]::
@@ -17,6 +17,19 @@ bite-show-connections - Show available connections
 Show available connections.
 
 include::include/global-options.adoc[]
+
+== Arguments
+
+[<service>]...::
+    Service types of connections.
+
+== Examples
+
+.Show all connections:
+ bite show connections
+
+.Show connections for bugzilla services:
+ bite show connections bugzilla
 
 == See Also
 
