@@ -32,48 +32,6 @@ impl FromStr for ExistsOrMatches {
     }
 }
 
-#[derive(Clone, Debug)]
-struct ChangedBy {
-    fields: Vec<String>,
-    users: Vec<String>,
-}
-
-impl FromStr for ChangedBy {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let Some((raw_fields, users)) = s.split_once('=') else {
-            anyhow::bail!("missing value");
-        };
-
-        Ok(Self {
-            fields: raw_fields.split(',').map(Into::into).collect(),
-            users: users.split(',').map(Into::into).collect(),
-        })
-    }
-}
-
-#[derive(Clone, Debug)]
-struct ChangedValue {
-    field: String,
-    value: String,
-}
-
-impl FromStr for ChangedValue {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let Some((field, value)) = s.split_once('=') else {
-            anyhow::bail!("missing value");
-        };
-
-        Ok(Self {
-            field: field.to_string(),
-            value: value.to_string(),
-        })
-    }
-}
-
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct AttributeOptions {
@@ -545,18 +503,9 @@ impl From<Params> for Parameters {
             attachment_is_private: value.attach.attachment_is_private,
 
             changed: value.change.changed,
-            changed_by: value
-                .change
-                .changed_by
-                .map(|x| x.into_iter().map(|x| (x.fields, x.users)).collect()),
-            changed_from: value
-                .change
-                .changed_from
-                .map(|x| x.into_iter().map(|x| (x.field, x.value)).collect()),
-            changed_to: value
-                .change
-                .changed_to
-                .map(|x| x.into_iter().map(|x| (x.field, x.value)).collect()),
+            changed_by: value.change.changed_by,
+            changed_from: value.change.changed_from,
+            changed_to: value.change.changed_to,
 
             comments: value.range.comments,
             votes: value.range.votes,

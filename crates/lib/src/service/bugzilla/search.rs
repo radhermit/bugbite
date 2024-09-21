@@ -289,17 +289,23 @@ impl Request {
         }
 
         if let Some(values) = &self.params.changed_by {
-            for (fields, users) in values {
-                query.changed_by(fields.iter().map(|f| (f, users)))?;
+            for value in values {
+                for field in &value.fields {
+                    query.changed_by(field, &value.users)?;
+                }
             }
         }
 
         if let Some(values) = &self.params.changed_from {
-            query.changed_from(values)?;
+            for value in values {
+                query.changed_from(&value.field, &value.value)?;
+            }
         }
 
         if let Some(values) = &self.params.changed_to {
-            query.changed_to(values)?;
+            for value in values {
+                query.changed_to(&value.field, &value.value)?;
+            }
         }
 
         if let Some(value) = &self.params.comments {
@@ -682,17 +688,20 @@ impl Request {
         self
     }
 
-    pub fn changed_by<F, I, S>(&mut self, field: F, values: I) -> &mut Self
+    pub fn changed_by<F, I, S>(&mut self, field: F, users: I) -> &mut Self
     where
         F: fmt::Display,
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        let values = values.into_iter().map(|x| x.to_string()).collect();
+        let users = users.into_iter().map(|x| x.to_string()).collect();
         self.params
             .changed_by
             .get_or_insert_with(Default::default)
-            .push((vec![field.to_string()], values));
+            .push(ChangedBy {
+                fields: vec![field.to_string()],
+                users,
+            });
         self
     }
 
@@ -704,7 +713,10 @@ impl Request {
         self.params
             .changed_from
             .get_or_insert_with(Default::default)
-            .push((field.to_string(), value.to_string()));
+            .push(ChangedValue {
+                field: field.to_string(),
+                value: value.to_string(),
+            });
         self
     }
 
@@ -716,7 +728,10 @@ impl Request {
         self.params
             .changed_to
             .get_or_insert_with(Default::default)
-            .push((field.to_string(), value.to_string()));
+            .push(ChangedValue {
+                field: field.to_string(),
+                value: value.to_string(),
+            });
         self
     }
 
@@ -933,9 +948,9 @@ pub struct Parameters {
     pub attachment_is_private: Option<bool>,
 
     pub changed: Option<Vec<Changed>>,
-    pub changed_by: Option<Vec<(Vec<String>, Vec<String>)>>,
-    pub changed_from: Option<Vec<(String, String)>>,
-    pub changed_to: Option<Vec<(String, String)>>,
+    pub changed_by: Option<Vec<ChangedBy>>,
+    pub changed_from: Option<Vec<ChangedValue>>,
+    pub changed_to: Option<Vec<ChangedValue>>,
 
     pub assignee: Option<Vec<Vec<Match>>>,
     pub attacher: Option<Vec<Vec<Match>>>,
@@ -1090,7 +1105,7 @@ impl<'a> QueryBuilder<'a> {
     }
 }
 
-/// Field changed within a certain time interval.
+/// Fields changed within a specified time interval.
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub struct Changed {
     fields: Vec<String>,
@@ -1113,6 +1128,64 @@ impl fmt::Display for Changed {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let fields = self.fields.iter().join(",");
         write!(f, "{fields}={}", self.interval)
+    }
+}
+
+/// Fields changed by specified users.
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
+pub struct ChangedBy {
+    fields: Vec<String>,
+    users: Vec<String>,
+}
+
+impl FromStr for ChangedBy {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let Some((raw_fields, users)) = s.split_once('=') else {
+            return Err(Error::InvalidValue(format!("missing users: {s}")));
+        };
+
+        Ok(Self {
+            fields: raw_fields.split(',').map(Into::into).collect(),
+            users: users.split(',').map(Into::into).collect(),
+        })
+    }
+}
+
+impl fmt::Display for ChangedBy {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let fields = self.fields.iter().join(",");
+        let users = self.users.iter().join(",");
+        write!(f, "{fields}={users}")
+    }
+}
+
+/// Field changed from or to a specified value.
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
+pub struct ChangedValue {
+    field: String,
+    value: String,
+}
+
+impl FromStr for ChangedValue {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let Some((field, value)) = s.split_once('=') else {
+            return Err(Error::InvalidValue(format!("missing value: {s}")));
+        };
+
+        Ok(Self {
+            field: field.to_string(),
+            value: value.to_string(),
+        })
+    }
+}
+
+impl fmt::Display for ChangedValue {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}={}", self.field, self.value)
     }
 }
 
@@ -1555,46 +1628,37 @@ impl QueryBuilder<'_> {
         Ok(())
     }
 
-    fn changed_by<F, I, J, S>(&mut self, values: I) -> crate::Result<()>
+    fn changed_by<F, I, S>(&mut self, field: F, users: I) -> crate::Result<()>
     where
         F: AsRef<str>,
-        I: IntoIterator<Item = (F, J)>,
-        J: IntoIterator<Item = S>,
+        I: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
-        for (field, users) in values {
-            let field = ChangeField::from_str(field.as_ref())?;
-            for user in users {
-                let user = self.service.replace_user_alias(user.as_ref());
-                self.advanced_field(&field, "changedby", user);
-            }
+        let field = ChangeField::from_str(field.as_ref())?;
+        for user in users {
+            let user = self.service.replace_user_alias(user.as_ref());
+            self.advanced_field(&field, "changedby", user);
         }
         Ok(())
     }
 
-    fn changed_from<'a, F, I, S>(&mut self, values: I) -> crate::Result<()>
+    fn changed_from<F, S>(&mut self, field: F, value: S) -> crate::Result<()>
     where
-        F: AsRef<str> + 'a,
-        I: IntoIterator<Item = &'a (F, S)>,
-        S: Api + 'a,
+        F: AsRef<str>,
+        S: Api,
     {
-        for (field, value) in values {
-            let field = ChangeField::from_str(field.as_ref())?;
-            self.advanced_field(field, "changedfrom", value);
-        }
+        let field = ChangeField::from_str(field.as_ref())?;
+        self.advanced_field(field, "changedfrom", value);
         Ok(())
     }
 
-    fn changed_to<'a, F, I, S>(&mut self, values: I) -> crate::Result<()>
+    fn changed_to<F, S>(&mut self, field: F, value: S) -> crate::Result<()>
     where
-        F: AsRef<str> + 'a,
-        I: IntoIterator<Item = &'a (F, S)>,
-        S: Api + 'a,
+        F: AsRef<str>,
+        S: Api,
     {
-        for (field, value) in values {
-            let field = ChangeField::from_str(field.as_ref())?;
-            self.advanced_field(field, "changedto", value);
-        }
+        let field = ChangeField::from_str(field.as_ref())?;
+        self.advanced_field(field, "changedto", value);
         Ok(())
     }
 

@@ -254,7 +254,7 @@ async fn changed_by() {
     cmd("bite bugzilla search --changed-by alias")
         .assert()
         .stdout("")
-        .stderr(predicate::str::contains("missing value"))
+        .stderr(predicate::str::contains("missing users"))
         .failure()
         .code(2);
 
