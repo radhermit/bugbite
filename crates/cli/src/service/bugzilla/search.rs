@@ -1,6 +1,5 @@
 use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
-use std::str::FromStr;
 
 use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
 use bugbite::objects::RangeOrValue;
@@ -15,23 +14,6 @@ use clap::Args;
 use crate::service::TemplateOptions;
 use crate::utils::launch_browser;
 
-#[derive(Clone, Debug)]
-struct ExistsOrMatches(ExistsOrValues<Match>);
-
-impl ExistsOrMatches {
-    fn into_inner(self) -> ExistsOrValues<Match> {
-        self.0
-    }
-}
-
-impl FromStr for ExistsOrMatches {
-    type Err = bugbite::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self(s.parse()?))
-    }
-}
-
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
 struct AttributeOptions {
@@ -43,7 +25,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    alias: Option<Vec<ExistsOrMatches>>,
+    alias: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by attachments
     #[arg(
@@ -53,7 +35,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    attachments: Option<ExistsOrMatches>,
+    attachments: Option<ExistsOrValues<Match>>,
 
     /// restrict by blockers
     #[arg(
@@ -91,7 +73,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    flags: Option<Vec<ExistsOrMatches>>,
+    flags: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by group
     #[arg(
@@ -101,7 +83,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    groups: Option<Vec<ExistsOrMatches>>,
+    groups: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by ID
     #[arg(long, num_args = 1, value_name = "ID[,...]")]
@@ -115,7 +97,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    keywords: Option<Vec<ExistsOrMatches>>,
+    keywords: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by operating system
     #[arg(long, value_name = "VALUE[,...]")]
@@ -145,7 +127,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    see_also: Option<Vec<ExistsOrMatches>>,
+    see_also: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by severity
     #[arg(long, value_name = "VALUE[,...]")]
@@ -169,7 +151,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    tags: Option<Vec<ExistsOrMatches>>,
+    tags: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by target milestone
     #[arg(short = 'T', long, value_name = "VALUE[,...]")]
@@ -182,7 +164,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    url: Option<Vec<ExistsOrMatches>>,
+    url: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by version
     #[arg(short = 'V', long, value_name = "VALUE[,...]")]
@@ -196,7 +178,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         default_missing_value = "true",
     )]
-    whiteboard: Option<Vec<ExistsOrMatches>>,
+    whiteboard: Option<Vec<ExistsOrValues<Match>>>,
 }
 
 #[derive(Args, Debug)]
@@ -339,7 +321,7 @@ struct UserOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    cc: Option<Vec<ExistsOrMatches>>,
+    cc: Option<Vec<ExistsOrValues<Match>>>,
 
     /// user who commented
     #[arg(long, value_name = "USER[,...]")]
@@ -356,7 +338,7 @@ struct UserOptions {
         num_args = 0..=1,
         default_missing_value = "true",
     )]
-    qa: Option<Vec<ExistsOrMatches>>,
+    qa: Option<Vec<ExistsOrValues<Match>>>,
 
     /// user who reported
     #[arg(short = 'R', long, value_name = "USER[,...]")]
@@ -430,39 +412,15 @@ impl From<Params> for Parameters {
             paged: value.query.paged,
             quicksearch: value.query.quicksearch,
 
-            alias: value
-                .attr
-                .alias
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            attachments: value.attr.attachments.map(|x| x.into_inner()),
-            flags: value
-                .attr
-                .flags
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            groups: value
-                .attr
-                .groups
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            keywords: value
-                .attr
-                .keywords
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            see_also: value
-                .attr
-                .see_also
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            tags: value
-                .attr
-                .tags
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            url: value
-                .attr
-                .url
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            whiteboard: value
-                .attr
-                .whiteboard
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            alias: value.attr.alias,
+            attachments: value.attr.attachments,
+            flags: value.attr.flags,
+            groups: value.attr.groups,
+            keywords: value.attr.keywords,
+            see_also: value.attr.see_also,
+            tags: value.attr.tags,
+            url: value.attr.url,
+            whiteboard: value.attr.whiteboard,
             blocks: value
                 .attr
                 .blocks
@@ -522,10 +480,7 @@ impl From<Params> for Parameters {
                 .user
                 .attacher
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            cc: value
-                .user
-                .cc
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            cc: value.user.cc,
             commenter: value
                 .user
                 .commenter
@@ -534,10 +489,7 @@ impl From<Params> for Parameters {
                 .user
                 .flagger
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            qa: value
-                .user
-                .qa
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            qa: value.user.qa,
             reporter: value
                 .user
                 .reporter
