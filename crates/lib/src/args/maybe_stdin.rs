@@ -65,7 +65,7 @@ impl FromStr for Source {
                 }
                 let input = read_to_string(&mut stdin)?;
                 STDIN_HAS_BEEN_USED.store(true, Ordering::SeqCst);
-                Ok(Self::Stdin(input))
+                Ok(Self::Stdin(input.trim().to_string()))
             }
             arg => Ok(Self::Arg(arg.to_owned())),
         }
@@ -90,7 +90,7 @@ where
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let source = Source::from_str(s)?;
         match &source {
-            Source::Stdin(value) => Ok(T::from_str(value.trim_end())
+            Source::Stdin(value) => Ok(T::from_str(value)
                 .map_err(|e| StdinError::FromStr(format!("{e}")))
                 .map(|val| Self { source, inner: val })?),
             Source::Arg(value) => Ok(T::from_str(value)
@@ -160,7 +160,7 @@ where
             Source::Stdin(value) => {
                 let mut inner = vec![];
                 for arg in value.lines() {
-                    let val = T::from_str(arg.trim_end())
+                    let val = T::from_str(arg)
                         .map_err(|e| StdinError::FromStr(format!("{e}")))?;
                     inner.push(val);
                 }
