@@ -367,8 +367,9 @@ Values can use the `-` prefix to search for identifiers not equal to the value.
 .Not equal to 10:
  bite bugzilla search --id=-10
 +
-Multiple values can be specified in a comma-separated list for logical AND or
-multiple options for logical OR.
+Multiple values can be specified in a comma-separated list or multiple options.
+If any ID range is specified logical AND is used, otherwise values are combined
+via logical OR.
 +
 .IDs greater than 10 and less than 20:
  bite bugzilla search --id '>10,<20'

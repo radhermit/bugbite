@@ -434,7 +434,12 @@ impl Request {
                     match value {
                         ExistsOrValues::Exists(value) => query.exists("bug_id", *value),
                         ExistsOrValues::Values(values) => {
-                            query.and(|query| values.iter().for_each(|x| query.ids(x)))
+                            // only use logical AND when values contain ID ranges
+                            if values.iter().all(|x| matches!(x, RangeOrValue::Value(_))) {
+                                values.iter().for_each(|x| query.ids(x));
+                            } else {
+                                query.and(|query| values.iter().for_each(|x| query.ids(x)));
+                            }
                         }
                     }
                 }
