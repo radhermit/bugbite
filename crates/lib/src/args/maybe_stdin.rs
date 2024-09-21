@@ -159,10 +159,12 @@ where
         match &source {
             Source::Stdin(value) => {
                 let mut inner = vec![];
-                for arg in value.lines() {
-                    let val = T::from_str(arg)
-                        .map_err(|e| StdinError::FromStr(format!("{e}")))?;
-                    inner.push(val);
+                for line in value.lines() {
+                    for arg in line.split(',') {
+                        let val =
+                            T::from_str(arg).map_err(|e| StdinError::FromStr(format!("{e}")))?;
+                        inner.push(val);
+                    }
                 }
                 Ok(Self { source, inner })
             }
