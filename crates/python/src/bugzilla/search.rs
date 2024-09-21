@@ -7,7 +7,7 @@ use futures_util::Stream;
 use itertools::Itertools;
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyBool, PyIterator};
+use pyo3::types::PyBool;
 
 use crate::macros::stream_iterator;
 use crate::traits::ToStr;
@@ -44,9 +44,8 @@ impl SearchRequest {
             self.0.alias(value);
         } else if let Ok(value) = value.downcast::<PyBool>() {
             self.0.alias(value.is_true());
-        } else if let Ok(values) = value.downcast::<PyIterator>() {
+        } else if let Ok(values) = value.iter() {
             let values: Vec<_> = values
-                .iter()?
                 .filter_map(|x| x.ok())
                 .map(|x| x.to_str_owned())
                 .try_collect()?;
@@ -64,9 +63,8 @@ impl SearchRequest {
             self.0.cc(value);
         } else if let Ok(value) = value.downcast::<PyBool>() {
             self.0.cc(value.is_true());
-        } else if let Ok(values) = value.downcast::<PyIterator>() {
+        } else if let Ok(values) = value.iter() {
             let values: Vec<_> = values
-                .iter()?
                 .filter_map(|x| x.ok())
                 .map(|x| x.to_str_owned())
                 .try_collect()?;
@@ -100,9 +98,8 @@ impl SearchRequest {
     pub(super) fn status(&mut self, value: Bound<'_, PyAny>) -> PyResult<()> {
         if let Ok(value) = value.to_str() {
             self.0.status([value]);
-        } else if let Ok(values) = value.downcast::<PyIterator>() {
+        } else if let Ok(values) = value.iter() {
             let values: Vec<_> = values
-                .iter()?
                 .filter_map(|x| x.ok())
                 .map(|x| x.to_str_owned())
                 .try_collect()?;
