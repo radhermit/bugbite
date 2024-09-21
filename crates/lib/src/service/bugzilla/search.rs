@@ -281,8 +281,10 @@ impl Request {
         }
 
         if let Some(values) = &self.params.changed {
-            for (fields, interval) in values {
-                query.changed(fields.iter().map(|f| (f, interval)))?;
+            for value in values {
+                for field in &value.fields {
+                    query.changed(field, &value.interval)?;
+                }
             }
         }
 
@@ -478,7 +480,7 @@ impl Request {
         }
 
         if let Some(value) = &self.params.closed {
-            query.changed([(StaticChangeField::Status, value)])?;
+            query.changed(StaticChangeField::Status, value)?;
             query.status("@closed");
         }
 
@@ -649,25 +651,34 @@ impl Request {
         self
     }
 
-    pub fn changed<F>(&mut self, field: F) -> &mut Self
+    pub fn changed<I, S>(&mut self, values: I) -> &mut Self
     where
-        F: fmt::Display,
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
     {
-        self.params
-            .changed
-            .get_or_insert_with(Default::default)
-            .push((vec![field.to_string()], "<now".parse().unwrap()));
+        self.params.changed = Some(
+            values
+                .into_iter()
+                .map(|x| format!("{x}=<now").parse().unwrap())
+                .collect(),
+        );
         self
     }
 
-    pub fn changed_at<F>(&mut self, field: F, value: RangeOrValue<TimeDeltaOrStatic>) -> &mut Self
+    pub fn changed_at<I, S>(&mut self, values: I) -> &mut Self
     where
-        F: fmt::Display,
+        I: IntoIterator<Item = (S, RangeOrValue<TimeDeltaOrStatic>)>,
+        S: fmt::Display,
     {
-        self.params
-            .changed
-            .get_or_insert_with(Default::default)
-            .push((vec![field.to_string()], value));
+        self.params.changed = Some(
+            values
+                .into_iter()
+                .map(|(f, interval)| Changed {
+                    fields: vec![f.to_string()],
+                    interval,
+                })
+                .collect(),
+        );
         self
     }
 
@@ -921,7 +932,7 @@ pub struct Parameters {
     pub attachment_is_patch: Option<bool>,
     pub attachment_is_private: Option<bool>,
 
-    pub changed: Option<Vec<(Vec<String>, RangeOrValue<TimeDeltaOrStatic>)>>,
+    pub changed: Option<Vec<Changed>>,
     pub changed_by: Option<Vec<(Vec<String>, Vec<String>)>>,
     pub changed_from: Option<Vec<(String, String)>>,
     pub changed_to: Option<Vec<(String, String)>>,
@@ -1076,6 +1087,32 @@ impl<'a> QueryBuilder<'a> {
             query: Default::default(),
             advanced_count: Default::default(),
         }
+    }
+}
+
+/// Field changed within a certain time interval.
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
+pub struct Changed {
+    fields: Vec<String>,
+    interval: RangeOrValue<TimeDeltaOrStatic>,
+}
+
+impl FromStr for Changed {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (raw_fields, time) = s.split_once('=').unwrap_or((s, "<now"));
+        Ok(Self {
+            fields: raw_fields.split(',').map(Into::into).collect(),
+            interval: time.parse()?,
+        })
+    }
+}
+
+impl fmt::Display for Changed {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let fields = self.fields.iter().join(",");
+        write!(f, "{fields}={}", self.interval)
     }
 }
 
@@ -1433,86 +1470,87 @@ impl QueryBuilder<'_> {
         self.advanced_field("bug_file_loc", value.op(), value);
     }
 
-    fn changed<'a, F, I>(&mut self, values: I) -> crate::Result<()>
+    fn changed<F>(
+        &mut self,
+        field: F,
+        target: &RangeOrValue<TimeDeltaOrStatic>,
+    ) -> crate::Result<()>
     where
         F: AsRef<str>,
-        I: IntoIterator<Item = (F, &'a RangeOrValue<TimeDeltaOrStatic>)>,
     {
-        for (field, target) in values {
-            let (status, field) = ChangeField::invertable(field)?;
-            match target {
-                RangeOrValue::Value(value) => self.not(status, |query| {
-                    query.advanced_field(field, "changedafter", value)
-                }),
-                RangeOrValue::RangeOp(value) => match value {
-                    RangeOp::Less(value) => {
-                        self.not(status, |query| {
-                            query.advanced_field(field, "changedbefore", value)
-                        });
-                    }
-                    RangeOp::LessOrEqual(value) => {
-                        self.not(status, |query| {
-                            query.advanced_field(field, "changedbefore", value)
-                        });
-                    }
-                    // TODO: use more specific Range type that doesn't include equality ops
-                    RangeOp::Equal(_) => {
-                        return Err(Error::InvalidValue(format!(
-                            "equality operator invalid for change values: {target}"
-                        )))
-                    }
-                    RangeOp::NotEqual(_) => {
-                        return Err(Error::InvalidValue(format!(
-                            "equality operator invalid for change values: {target}"
-                        )))
-                    }
-                    RangeOp::GreaterOrEqual(value) => {
-                        self.not(status, |query| {
-                            query.advanced_field(field, "changedafter", value);
-                        });
-                    }
-                    RangeOp::Greater(value) => {
-                        self.not(status, |query| {
-                            query.advanced_field(field, "changedafter", value);
-                        });
-                    }
-                },
-                RangeOrValue::Range(value) => match value {
-                    Range::Range(r) => {
-                        self.not(status, |query| {
-                            query.advanced_field(&field, "changedafter", &r.start);
-                            query.advanced_field(&field, "changedbefore", &r.end);
-                        });
-                    }
-                    Range::Inclusive(r) => {
-                        self.not(status, |query| {
-                            query.advanced_field(&field, "changedafter", r.start());
-                            query.advanced_field(&field, "changedbefore", r.end());
-                        });
-                    }
-                    Range::To(r) => {
-                        self.not(status, |query| {
-                            query.advanced_field(field, "changedbefore", &r.end)
-                        });
-                    }
-                    Range::ToInclusive(r) => {
-                        self.not(status, |query| {
-                            query.advanced_field(field, "changedbefore", &r.end);
-                        });
-                    }
-                    Range::From(r) => {
-                        self.not(status, |query| {
-                            query.advanced_field(field, "changedafter", &r.start);
-                        });
-                    }
-                    Range::Full(_) => {
-                        let value = TimeDeltaOrStatic::from_str("now").unwrap();
-                        self.not(status, |query| {
-                            query.advanced_field(field, "changedbefore", value)
-                        });
-                    }
-                },
-            }
+        let (status, field) = ChangeField::invertable(field)?;
+        match target {
+            RangeOrValue::Value(value) => self.not(status, |query| {
+                query.advanced_field(field, "changedafter", value)
+            }),
+            RangeOrValue::RangeOp(value) => match value {
+                RangeOp::Less(value) => {
+                    self.not(status, |query| {
+                        query.advanced_field(field, "changedbefore", value)
+                    });
+                }
+                RangeOp::LessOrEqual(value) => {
+                    self.not(status, |query| {
+                        query.advanced_field(field, "changedbefore", value)
+                    });
+                }
+                // TODO: use more specific Range type that doesn't include equality ops
+                RangeOp::Equal(_) => {
+                    return Err(Error::InvalidValue(format!(
+                        "equality operator invalid for change values: {target}"
+                    )))
+                }
+                RangeOp::NotEqual(_) => {
+                    return Err(Error::InvalidValue(format!(
+                        "equality operator invalid for change values: {target}"
+                    )))
+                }
+                RangeOp::GreaterOrEqual(value) => {
+                    self.not(status, |query| {
+                        query.advanced_field(field, "changedafter", value);
+                    });
+                }
+                RangeOp::Greater(value) => {
+                    self.not(status, |query| {
+                        query.advanced_field(field, "changedafter", value);
+                    });
+                }
+            },
+            RangeOrValue::Range(value) => match value {
+                Range::Range(r) => {
+                    self.not(status, |query| {
+                        query.advanced_field(&field, "changedafter", &r.start);
+                        query.advanced_field(&field, "changedbefore", &r.end);
+                    });
+                }
+                Range::Inclusive(r) => {
+                    self.not(status, |query| {
+                        query.advanced_field(&field, "changedafter", r.start());
+                        query.advanced_field(&field, "changedbefore", r.end());
+                    });
+                }
+                Range::To(r) => {
+                    self.not(status, |query| {
+                        query.advanced_field(field, "changedbefore", &r.end)
+                    });
+                }
+                Range::ToInclusive(r) => {
+                    self.not(status, |query| {
+                        query.advanced_field(field, "changedbefore", &r.end);
+                    });
+                }
+                Range::From(r) => {
+                    self.not(status, |query| {
+                        query.advanced_field(field, "changedafter", &r.start);
+                    });
+                }
+                Range::Full(_) => {
+                    let value = TimeDeltaOrStatic::from_str("now").unwrap();
+                    self.not(status, |query| {
+                        query.advanced_field(field, "changedbefore", value)
+                    });
+                }
+            },
         }
         Ok(())
     }
@@ -2237,18 +2275,20 @@ mod tests {
         // change related combinators
         for field in StaticChangeField::iter() {
             // ever changed
-            stream!(service.search().changed(&field));
+            stream!(service.search().changed([&field]));
 
             // changed at a certain time
             for time in &times {
-                stream!(service.search().changed_at(&field, time.parse().unwrap()));
+                stream!(service
+                    .search()
+                    .changed_at([(&field, time.parse().unwrap())]));
             }
 
             // invalid equality operator usage
             for time in ["=2020", "!=2020-02-01", "=1d", "!=1w"] {
                 assert!(service
                     .search()
-                    .changed_at(&field, time.parse().unwrap())
+                    .changed_at([(&field, time.parse().unwrap())])
                     .clone()
                     .send()
                     .await

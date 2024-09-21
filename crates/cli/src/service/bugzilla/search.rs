@@ -6,11 +6,8 @@ use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
 use bugbite::objects::RangeOrValue;
 use bugbite::output::render_search;
 use bugbite::query::Order;
-use bugbite::service::bugzilla::Bugzilla;
-use bugbite::service::bugzilla::{
-    search::{Match, OrderField, Parameters},
-    FilterField,
-};
+use bugbite::service::bugzilla::search::*;
+use bugbite::service::bugzilla::{Bugzilla, FilterField};
 use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::{Merge, RequestTemplate};
 use clap::Args;
@@ -32,24 +29,6 @@ impl FromStr for ExistsOrMatches {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(s.parse()?))
-    }
-}
-
-#[derive(Clone, Debug)]
-struct Changed {
-    fields: Vec<String>,
-    interval: RangeOrValue<TimeDeltaOrStatic>,
-}
-
-impl FromStr for Changed {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (raw_fields, time) = s.split_once('=').unwrap_or((s, "<now"));
-        Ok(Self {
-            fields: raw_fields.split(',').map(Into::into).collect(),
-            interval: time.parse()?,
-        })
     }
 }
 
@@ -565,10 +544,7 @@ impl From<Params> for Parameters {
             attachment_is_patch: value.attach.attachment_is_patch,
             attachment_is_private: value.attach.attachment_is_private,
 
-            changed: value
-                .change
-                .changed
-                .map(|x| x.into_iter().map(|x| (x.fields, x.interval)).collect()),
+            changed: value.change.changed,
             changed_by: value
                 .change
                 .changed_by
