@@ -74,10 +74,10 @@ impl Command {
 #[derive(clap::Subcommand, Debug)]
 enum Subcommand {
     /// Get issues
-    #[command(alias = "g")]
+    #[command(visible_alias = "g")]
     Get(get::Command),
     /// Search issues
-    #[command(alias = "s")]
+    #[command(visible_alias = "s")]
     Search(Box<search::Command>),
 }
 

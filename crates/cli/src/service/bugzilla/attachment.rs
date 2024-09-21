@@ -25,15 +25,15 @@ impl Command {
 #[derive(clap::Subcommand, Debug)]
 enum Subcommand {
     /// Create attachments
-    #[command(alias = "c")]
+    #[command(visible_alias = "c")]
     Create(create::Command),
 
     /// Get attachments
-    #[command(alias = "g")]
+    #[command(visible_alias = "g")]
     Get(get::Command),
 
     /// Update attachments
-    #[command(alias = "u")]
+    #[command(visible_alias = "u")]
     Update(update::Command),
 }
 

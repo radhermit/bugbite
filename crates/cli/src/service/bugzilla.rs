@@ -82,32 +82,32 @@ impl Command {
 #[derive(clap::Subcommand, Debug)]
 enum Subcommand {
     /// Attachment commands
-    #[command(alias = "a")]
+    #[command(visible_alias = "a")]
     Attachment(Box<attachment::Command>),
 
     /// Get bug comments
     Comment(comment::Command),
 
     /// Create bug
-    #[command(alias = "c")]
+    #[command(visible_alias = "c")]
     Create(Box<create::Command>),
 
     /// Get bugzilla fields
     Fields(fields::Command),
 
     /// Get bugs
-    #[command(alias = "g")]
+    #[command(visible_alias = "g")]
     Get(get::Command),
 
     /// Get bug changes
     History(history::Command),
 
     /// Search bugs
-    #[command(alias = "s")]
+    #[command(visible_alias = "s")]
     Search(Box<search::Command>),
 
     /// Update bugs
-    #[command(alias = "u")]
+    #[command(visible_alias = "u")]
     Update(Box<update::Command>),
 
     /// Get bugzilla version
