@@ -8,7 +8,7 @@ use anyhow::Context;
 use bugbite::args::{MaybeStdin, MaybeStdinVec};
 use bugbite::objects::bugzilla::Flag;
 use bugbite::output::verbose;
-use bugbite::service::bugzilla::update::{Parameters, RangeOrSet, SetChange, TriBool};
+use bugbite::service::bugzilla::update::*;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use camino::Utf8PathBuf;

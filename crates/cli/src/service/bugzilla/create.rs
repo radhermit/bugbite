@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::output::verbose;
-use bugbite::service::bugzilla::create::Parameters;
+use bugbite::service::bugzilla::create::*;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use bugbite::utils::is_terminal;

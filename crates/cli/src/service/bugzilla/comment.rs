@@ -3,7 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::output::{Render, COLUMNS};
-use bugbite::service::bugzilla::comment::Parameters;
+use bugbite::service::bugzilla::comment::*;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::RequestSend;

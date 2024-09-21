@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use bugbite::args::CsvOrStdin;
 use bugbite::objects::bugzilla::Flag;
 use bugbite::output::verbose;
-use bugbite::service::bugzilla::attachment::create::{Attachment, Compression};
+use bugbite::service::bugzilla::attachment::create::*;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::RequestSend;
 use byte_unit::Byte;

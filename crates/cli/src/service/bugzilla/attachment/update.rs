@@ -3,7 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
 use bugbite::objects::bugzilla::Flag;
-use bugbite::service::bugzilla::attachment::update::Parameters;
+use bugbite::service::bugzilla::attachment::update::*;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::RequestSend;
 use clap::Args;
