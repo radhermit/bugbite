@@ -77,6 +77,11 @@ impl SearchRequest {
         Ok(())
     }
 
+    pub(super) fn changed(&mut self, value: &str) -> PyResult<()> {
+        self.0.changed([value]);
+        Ok(())
+    }
+
     pub(super) fn created(&mut self, value: &str) -> PyResult<()> {
         self.0.created(value.parse()?);
         Ok(())

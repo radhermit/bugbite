@@ -73,6 +73,7 @@ impl Bugzilla {
                 match key.to_str()? {
                     "alias" => req.alias(value)?,
                     "cc" => req.cc(value)?,
+                    "changed" => req.changed(value.to_str()?)?,
                     "created" => req.created(value.to_str()?)?,
                     "updated" => req.updated(value.to_str()?)?,
                     "closed" => req.closed(value.to_str()?)?,
