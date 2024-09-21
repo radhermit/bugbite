@@ -210,7 +210,7 @@ impl Command {
         request.params.merge(self.params.into());
 
         // write attributes to template
-        if let Some(name) = self.template.to.as_ref() {
+        if let Some(name) = &self.template.to {
             request.save_template(name)?;
         }
 
