@@ -90,6 +90,10 @@ impl Bugzilla {
 
         Ok(req)
     }
+
+    fn version(&self) -> PyResult<String> {
+        tokio().block_on(async { Ok(self.0.version().send().await?) })
+    }
 }
 
 #[pymodule]
