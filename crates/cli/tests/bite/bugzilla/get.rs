@@ -82,12 +82,33 @@ async fn single_bug() {
         )
         .await;
 
-    let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug")).unwrap();
+    let expected = indoc::indoc! {"
+        ==========================================================================================
+        Summary      : new summary
+        Assignee     : assignee
+        Creator      : person
+        Created      : 2024-03-13 14:02:53 UTC
+        Updated      : 2024-03-15 22:31:48 UTC
+        Status       : CONFIRMED
+        Whiteboard   : whiteboard
+        Component    : component
+        Product      : product
+        Platform     : All
+        OS           : Linux
+        Priority     : High
+        Severity     : normal
+        ID           : 1
+        Alias        : alias
+        CC           : person1, person2
+        See also     :
+          https://github.com/radhermit/bugbite/issues/1
+          https://github.com/radhermit/bugbite/issues/2
+    "};
 
     // bug fields only, no extra data
     cmd("bite bugzilla get -ACH 1")
         .assert()
-        .stdout(predicate::str::diff(expected.clone()))
+        .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 
@@ -95,7 +116,7 @@ async fn single_bug() {
     cmd("bite bugzilla get -ACH -")
         .write_stdin("1\n")
         .assert()
-        .stdout(predicate::str::diff(expected.clone()))
+        .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 
