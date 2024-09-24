@@ -60,6 +60,9 @@ Taken from standard input when `-`.
 .Get all bugs created in the last day:
  bite bugzilla search -c 1d -f id | bite bugzilla get -
 
+.Open all bugs created in the last hour in a browser:
+ bite bugzilla search -c 1h -f id | bite bugzilla get -b -
+
 == See Also
 
 linkcmd:bite-bugzilla[1]
