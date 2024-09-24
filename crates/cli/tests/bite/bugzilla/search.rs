@@ -334,3 +334,44 @@ async fn changed_to() {
         .stderr("")
         .success();
 }
+
+#[tokio::test]
+async fn id() {
+    let server = start_server().await;
+    server
+        .respond(200, TEST_DATA.join("search/nonexistent.json"))
+        .await;
+
+    // multiple options
+    cmd("bite bugzilla search --id 1 --id 2")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // comma separated args
+    for args in ["1,2,3", ">50,<100"] {
+        cmd("bite bugzilla search --id")
+            .arg(args)
+            .assert()
+            .stdout("")
+            .stderr("")
+            .success();
+    }
+
+    // comma separated stdin args
+    cmd("bite bugzilla search --id -")
+        .write_stdin("1,2,3\n")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // newline separated stdin args
+    cmd("bite bugzilla search --id -")
+        .write_stdin("1\n2\n3\n")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}
