@@ -50,7 +50,7 @@ serde_repr = "0.1.19"
 serde_with = { version = "3.9.0", default-features = false, features = ["alloc", "macros"] }
 strum = { version = "0.26.3", features = ["derive"] }
 tempfile = "3.12.0"
-thiserror = "1.0.63"
+thiserror = "1.0.64"
 toml = "0.8.19"
 tracing = "0.1.40"
 url = { version = "2.5.2", features = ["serde"] }
