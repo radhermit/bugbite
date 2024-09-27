@@ -1,7 +1,8 @@
-use std::env;
+use std::{env, fs};
 
 use camino::Utf8Path;
 use indexmap::IndexMap;
+use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::service::{self, ServiceKind};
@@ -12,22 +13,39 @@ use crate::Error;
 /// Bundled service data.
 static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.toml"));
 
-/// Connection config support.
-#[derive(Debug, Default)]
+/// Bugbite config support.
+#[derive(Deserialize, Serialize, Debug, Default)]
 pub struct Config {
+    /// Default connection.
+    pub default_connection: Option<String>,
+
+    /// Registered service connections.
+    #[serde(skip)]
     pub services: IndexMap<String, service::Config>,
 }
 
 impl Config {
     /// Create a new Config.
     pub fn new() -> crate::Result<Self> {
-        let mut config = Config {
-            services: toml::from_str(SERVICES_DATA)
-                .unwrap_or_else(|e| panic!("failed loading bundled service data: {e}")),
+        let config_dir = config_dir()?;
+        let path = config_dir.join("bugbite.toml");
+
+        // load user config if it exists
+        let mut config: Self = if path.exists() {
+            let data = fs::read_to_string(&path)
+                .map_err(|e| Error::InvalidValue(format!("failed reading config: {path}: {e}")))?;
+            toml::from_str(&data)
+                .map_err(|e| Error::InvalidValue(format!("failed loading config: {path}: {e}")))?
+        } else {
+            Default::default()
         };
 
+        // load bundled services
+        config.services = toml::from_str(SERVICES_DATA)
+            .unwrap_or_else(|e| panic!("failed loading bundled service data: {e}"));
+
         // load custom user services
-        let services_dir = config_dir()?.join("services");
+        let services_dir = config_dir.join("services");
         match env::var("BUGBITE_CONFIG").as_deref() {
             Err(_) if services_dir.exists() => config.load(services_dir)?,
             Ok("false") | Err(_) => (),

@@ -50,7 +50,7 @@ impl Command {
         W: IsTerminal + Write,
     {
         // load or create a service config
-        let connection = self.service.connection.as_str();
+        let connection = self.service.connection(config)?;
         let mut config = config
             .get_kind(ServiceKind::Github, connection)?
             .into_github()

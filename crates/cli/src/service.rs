@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+use bugbite::config::Config;
 use bugbite::service::ClientParameters;
 use camino::Utf8PathBuf;
 use clap::Args;
@@ -12,7 +14,7 @@ pub(crate) mod redmine;
 struct ServiceOptions {
     /// service connection
     #[arg(short, long, env = "BUGBITE_CONNECTION")]
-    connection: String,
+    connection: Option<String>,
 
     /// concurrent requests limit
     #[arg(short = 'C', long, value_name = "VALUE")]
@@ -34,6 +36,17 @@ struct ServiceOptions {
     /// request timeout in seconds
     #[arg(short, long, value_name = "SECONDS")]
     timeout: Option<f64>,
+}
+
+impl ServiceOptions {
+    /// Get the target connection using the user specified value falling back to the
+    /// config's default connection if available.
+    fn connection<'a>(&'a self, config: &'a Config) -> anyhow::Result<&'a str> {
+        self.connection
+            .as_deref()
+            .or(config.default_connection.as_deref())
+            .ok_or_else(|| anyhow!("no connection specified"))
+    }
 }
 
 impl From<ServiceOptions> for ClientParameters {
