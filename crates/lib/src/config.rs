@@ -3,7 +3,6 @@ use std::ops::Deref;
 
 use camino::Utf8Path;
 use indexmap::IndexMap;
-use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::service::{self, ServiceKind};
@@ -15,15 +14,18 @@ use crate::Error;
 static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.toml"));
 
 /// Connection config support.
-#[derive(Deserialize, Serialize, Debug, Default)]
-pub struct Config(IndexMap<String, service::Config>);
+#[derive(Debug, Default)]
+pub struct Config {
+    services: IndexMap<String, service::Config>,
+}
 
 impl Config {
     /// Create a new Config.
     pub fn new() -> crate::Result<Self> {
-        // load bundled services
-        let mut config: Self = toml::from_str(SERVICES_DATA)
-            .unwrap_or_else(|e| panic!("failed loading bundled service data: {e}"));
+        let mut config = Config {
+            services: toml::from_str(SERVICES_DATA)
+                .unwrap_or_else(|e| panic!("failed loading bundled service data: {e}")),
+        };
 
         // load custom user services
         let services_dir = config_dir()?.join("services");
@@ -44,7 +46,7 @@ impl Config {
                 "invalid connection name: {path}"
             )))
         } else {
-            self.0.insert(config.name().to_string(), config);
+            self.services.insert(config.name().to_string(), config);
             Ok(())
         }
     }
@@ -62,13 +64,13 @@ impl Config {
         }
 
         // re-sort by connection name
-        self.0.sort_keys();
+        self.services.sort_keys();
 
         Ok(())
     }
 
     pub fn get_kind(&self, kind: ServiceKind, name: &str) -> crate::Result<service::Config> {
-        if let Some(config) = self.0.get(name).cloned() {
+        if let Some(config) = self.services.get(name).cloned() {
             Ok(config)
         } else if Url::parse(name).is_ok() {
             service::Config::new(kind, name)
@@ -82,7 +84,7 @@ impl Deref for Config {
     type Target = IndexMap<String, service::Config>;
 
     fn deref(&self) -> &Self::Target {
-        &self.0
+        &self.services
     }
 }
 
@@ -91,7 +93,7 @@ impl IntoIterator for Config {
     type IntoIter = indexmap::map::IntoIter<String, service::Config>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
+        self.services.into_iter()
     }
 }
 
@@ -100,7 +102,7 @@ impl<'a> IntoIterator for &'a Config {
     type IntoIter = indexmap::map::Iter<'a, String, service::Config>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.0.iter()
+        self.services.iter()
     }
 }
 
