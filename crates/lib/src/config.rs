@@ -29,9 +29,12 @@ impl Config {
     pub fn new() -> crate::Result<Self> {
         let config_dir = config_dir()?;
         let path = config_dir.join("bugbite.toml");
+        let load_config = env::var("BUGBITE_CONFIG")
+            .map(|x| x != "false")
+            .unwrap_or(true);
 
         // load user config if it exists
-        let mut config: Self = if path.exists() {
+        let mut config: Self = if load_config && path.exists() {
             let data = fs::read_to_string(&path)
                 .map_err(|e| Error::InvalidValue(format!("failed reading config: {path}: {e}")))?;
             toml::from_str(&data)
@@ -46,10 +49,12 @@ impl Config {
 
         // load custom user services
         let services_dir = config_dir.join("services");
-        match env::var("BUGBITE_CONFIG").as_deref() {
-            Err(_) if services_dir.exists() => config.load(services_dir)?,
-            Ok("false") | Err(_) => (),
-            Ok(path) => config.load(path)?,
+        if load_config {
+            if let Ok(path) = env::var("BUGBITE_CONFIG").as_deref() {
+                config.load(path)?;
+            } else if services_dir.exists() {
+                config.load(services_dir)?;
+            }
         }
 
         Ok(config)
