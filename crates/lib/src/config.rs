@@ -1,5 +1,4 @@
 use std::env;
-use std::ops::Deref;
 
 use camino::Utf8Path;
 use indexmap::IndexMap;
@@ -16,7 +15,7 @@ static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.to
 /// Connection config support.
 #[derive(Debug, Default)]
 pub struct Config {
-    services: IndexMap<String, service::Config>,
+    pub services: IndexMap<String, service::Config>,
 }
 
 impl Config {
@@ -80,32 +79,6 @@ impl Config {
     }
 }
 
-impl Deref for Config {
-    type Target = IndexMap<String, service::Config>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.services
-    }
-}
-
-impl IntoIterator for Config {
-    type Item = (String, service::Config);
-    type IntoIter = indexmap::map::IntoIter<String, service::Config>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.services.into_iter()
-    }
-}
-
-impl<'a> IntoIterator for &'a Config {
-    type Item = (&'a String, &'a service::Config);
-    type IntoIter = indexmap::map::Iter<'a, String, service::Config>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.services.iter()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::fs;
@@ -120,11 +93,16 @@ mod tests {
         env::set_var("BUGBITE_CONFIG", "false");
 
         let mut config = Config::new().unwrap();
-        assert!(!config.is_empty());
-        let len = config.len();
+        assert!(!config.services.is_empty());
+        let len = config.services.len();
 
         // verify bundled gentoo connection doesn't set a user
-        let c = config.get("gentoo").unwrap().as_bugzilla().unwrap();
+        let c = config
+            .services
+            .get("gentoo")
+            .unwrap()
+            .as_bugzilla()
+            .unwrap();
         assert!(c.auth.user.is_none());
 
         let dir = tempdir().unwrap();
@@ -154,14 +132,19 @@ mod tests {
 
         // add new service from file
         config.load("1.toml").unwrap();
-        assert!(config.len() == len + 1);
+        assert!(config.services.len() == len + 1);
 
         // add new services from dir
         config.load(dir_path).unwrap();
-        assert!(config.len() == len + 2);
+        assert!(config.services.len() == len + 2);
 
         // verify gentoo connection was overridden
-        let c = config.get("gentoo").unwrap().as_bugzilla().unwrap();
+        let c = config
+            .services
+            .get("gentoo")
+            .unwrap()
+            .as_bugzilla()
+            .unwrap();
         assert_eq!(c.auth.user.as_deref().unwrap(), "user@email.com");
     }
 }

@@ -14,7 +14,7 @@ pub(super) struct Command {}
 impl Command {
     pub(super) fn run<W: Write>(&self, config: &Config, f: &mut W) -> anyhow::Result<ExitCode> {
         let mut services = IndexMap::<ServiceKind, Vec<(&str, &str)>>::new();
-        for (name, config) in config {
+        for (name, config) in &config.services {
             services
                 .entry(config.kind())
                 .or_default()

@@ -29,7 +29,7 @@ impl Command {
             self.service.into_iter().collect()
         };
 
-        for (name, config) in config {
+        for (name, config) in &config.services {
             if services.contains(&config.kind()) {
                 writeln!(f, "{name}")?;
             }
