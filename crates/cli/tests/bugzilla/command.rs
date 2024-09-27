@@ -7,7 +7,7 @@ macro_rules! cmd {
         let mut cmd = assert_cmd::Command::cargo_bin(cmd).unwrap();
         cmd.args(args);
         // disable config loading by default
-        cmd.env("BUGBITE_CONFIG", "false");
+        cmd.env("BUGBITE_CONFIG_DIR", "false");
         cmd
     }};
 }

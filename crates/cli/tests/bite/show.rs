@@ -47,10 +47,11 @@ fn custom_config() {
     let home_path = dir.path().to_str().unwrap();
     let dir = dir.path().join(".config");
     let xdg_path = dir.to_str().unwrap();
-    let dir = dir.join("bugbite/services");
-    let dir_path = dir.to_str().unwrap();
-    fs::create_dir_all(dir_path).unwrap();
-    let file = dir.join("config");
+    let config_dir = dir.join("bugbite");
+    let config_dir_path = config_dir.to_str().unwrap();
+    let services_dir = config_dir.join("services");
+    fs::create_dir_all(&services_dir).unwrap();
+    let file = services_dir.join("config");
     let file_path = file.to_str().unwrap();
     let config = indoc::indoc! {r#"
         type = "bugzilla"
@@ -66,17 +67,9 @@ fn custom_config() {
         .stderr("")
         .success();
 
-    // file target
-    cmd("bite show connections")
-        .env("BUGBITE_CONFIG", file_path)
-        .assert()
-        .stdout(predicate::str::contains("bugzilla-test"))
-        .stderr("")
-        .success();
-
     // dir target
     cmd("bite show connections")
-        .env("BUGBITE_CONFIG", dir_path)
+        .env("BUGBITE_CONFIG_DIR", config_dir_path)
         .assert()
         .stdout(predicate::str::contains("bugzilla-test"))
         .stderr("")
@@ -85,7 +78,7 @@ fn custom_config() {
     if cfg!(target_os = "linux") {
         // $HOME dir
         cmd("bite show connections")
-            .env_remove("BUGBITE_CONFIG")
+            .env_remove("BUGBITE_CONFIG_DIR")
             .env_remove("XDG_CONFIG_HOME")
             .env("HOME", home_path)
             .assert()
@@ -95,7 +88,7 @@ fn custom_config() {
 
         // xdg config dir
         cmd("bite show connections")
-            .env_remove("BUGBITE_CONFIG")
+            .env_remove("BUGBITE_CONFIG_DIR")
             .env("XDG_CONFIG_HOME", xdg_path)
             .assert()
             .stdout(predicate::str::contains("bugzilla-test"))

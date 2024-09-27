@@ -27,13 +27,15 @@ pub struct Config {
 impl Config {
     /// Create a new Config.
     pub fn new() -> crate::Result<Self> {
-        let config_dir = config_dir()?;
-        let path = config_dir.join("bugbite.toml");
-        let load_config = env::var("BUGBITE_CONFIG")
+        let config_dir = env::var("BUGBITE_CONFIG_DIR")
+            .map(Into::into)
+            .or_else(|_| config_dir())?;
+        let load_config = env::var("BUGBITE_CONFIG_DIR")
             .map(|x| x != "false")
             .unwrap_or(true);
 
         // load user config if it exists
+        let path = config_dir.join("bugbite.toml");
         let mut config: Self = if load_config && path.exists() {
             let data = fs::read_to_string(&path)
                 .map_err(|e| Error::InvalidValue(format!("failed reading config: {path}: {e}")))?;
@@ -48,11 +50,9 @@ impl Config {
             .unwrap_or_else(|e| panic!("failed loading bundled service data: {e}"));
 
         // load custom user services
-        let services_dir = config_dir.join("services");
         if load_config {
-            if let Ok(path) = env::var("BUGBITE_CONFIG").as_deref() {
-                config.load(path)?;
-            } else if services_dir.exists() {
+            let services_dir = config_dir.join("services");
+            if services_dir.exists() {
                 config.load(services_dir)?;
             }
         }
@@ -112,8 +112,8 @@ mod tests {
 
     #[test]
     fn load() {
-        // ignore custom user services
-        env::set_var("BUGBITE_CONFIG", "false");
+        // ignore system user config
+        env::set_var("BUGBITE_CONFIG_DIR", "false");
 
         let mut config = Config::new().unwrap();
         assert!(!config.services.is_empty());
