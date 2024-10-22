@@ -1,17 +1,17 @@
 use std::fmt;
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 use chrono::offset::Utc;
 use chronoutil::RelativeDuration;
-use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::traits::Api;
 use crate::Error;
 
-static RELATIVE_TIME_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"^(?<value>\d+)(?<unit>[[:alpha:]]+)$").unwrap());
+static RELATIVE_TIME_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(?<value>\d+)(?<unit>[[:alpha:]]+)$").unwrap());
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Clone, PartialEq, Eq)]
 pub struct TimeDelta {

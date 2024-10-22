@@ -1,8 +1,8 @@
 use std::env;
+use std::sync::LazyLock;
 use std::time::Duration;
 
 use camino::Utf8PathBuf;
-use once_cell::sync::Lazy;
 use predicates::prelude::*;
 use wiremock::{matchers, ResponseTemplate};
 
@@ -20,8 +20,10 @@ mod search;
 mod update;
 mod version;
 
-static TEST_DATA: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("bugbite/bugzilla"));
-static TEST_OUTPUT: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("output/bugzilla"));
+static TEST_DATA: LazyLock<Utf8PathBuf> =
+    LazyLock::new(|| crate::TEST_DATA_PATH.join("bugbite/bugzilla"));
+static TEST_OUTPUT: LazyLock<Utf8PathBuf> =
+    LazyLock::new(|| crate::TEST_DATA_PATH.join("output/bugzilla"));
 
 #[test]
 fn help() {

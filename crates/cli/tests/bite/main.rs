@@ -1,10 +1,10 @@
+use std::sync::LazyLock;
 use std::{env, fs};
 
 use bugbite::test::{build_path, TestServer};
 use camino::Utf8PathBuf;
 use indexmap::IndexSet;
 use itertools::Itertools;
-use once_cell::sync::Lazy;
 use predicates::prelude::*;
 use tempfile::tempdir;
 
@@ -15,8 +15,8 @@ mod command;
 mod redmine;
 mod show;
 
-pub(crate) static TEST_DATA_PATH: Lazy<Utf8PathBuf> =
-    Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
+pub(crate) static TEST_DATA_PATH: LazyLock<Utf8PathBuf> =
+    LazyLock::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
 
 async fn start_server() -> TestServer {
     let server = TestServer::new().await;

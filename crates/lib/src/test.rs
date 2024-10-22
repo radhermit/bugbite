@@ -20,8 +20,8 @@ pub fn reset_stdin() {
 }
 
 #[cfg(test)]
-pub(crate) static TESTDATA_PATH: once_cell::sync::Lazy<camino::Utf8PathBuf> =
-    once_cell::sync::Lazy::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
+pub(crate) static TESTDATA_PATH: std::sync::LazyLock<camino::Utf8PathBuf> =
+    std::sync::LazyLock::new(|| build_path!(env!("CARGO_MANIFEST_DIR"), "testdata"));
 
 pub struct TestServer {
     server: MockServer,

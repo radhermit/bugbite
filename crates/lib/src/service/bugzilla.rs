@@ -2,10 +2,9 @@ use std::collections::HashSet;
 use std::fmt;
 use std::ops::Deref;
 use std::str::FromStr;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 
 use indexmap::{IndexMap, IndexSet};
-use once_cell::sync::Lazy;
 use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
@@ -30,7 +29,7 @@ pub mod update;
 pub mod version;
 
 /// Common default values used for unset fields.
-pub(crate) static UNSET_VALUES: Lazy<HashSet<String>> = Lazy::new(|| {
+pub(crate) static UNSET_VALUES: LazyLock<HashSet<String>> = LazyLock::new(|| {
     ["unspecified", "Unspecified", "---", "--", "-", ""]
         .iter()
         .map(|s| s.to_string())

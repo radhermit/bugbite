@@ -1,5 +1,6 @@
+use std::sync::LazyLock;
+
 use camino::Utf8PathBuf;
-use once_cell::sync::Lazy;
 use predicates::prelude::*;
 
 use crate::command::cmd;
@@ -9,7 +10,8 @@ use super::*;
 mod get;
 mod search;
 
-static TEST_DATA: Lazy<Utf8PathBuf> = Lazy::new(|| crate::TEST_DATA_PATH.join("bugbite/redmine"));
+static TEST_DATA: LazyLock<Utf8PathBuf> =
+    LazyLock::new(|| crate::TEST_DATA_PATH.join("bugbite/redmine"));
 
 #[test]
 fn help() {

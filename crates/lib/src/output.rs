@@ -1,12 +1,11 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::io::{self, IsTerminal, Write};
-use std::sync::atomic::AtomicBool;
+use std::sync::{atomic::AtomicBool, LazyLock};
 
 use crossterm::terminal;
 use futures_util::{pin_mut, Stream, TryStreamExt};
 use itertools::Itertools;
-use once_cell::sync::Lazy;
 use serde::Serialize;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -17,7 +16,7 @@ mod bugzilla;
 mod github;
 mod redmine;
 
-pub static COLUMNS: Lazy<usize> = Lazy::new(|| {
+pub static COLUMNS: LazyLock<usize> = LazyLock::new(|| {
     let (cols, _rows) = terminal::size().unwrap_or((90, 24));
     // use a static width when testing is enabled
     if cfg!(feature = "test") {
@@ -28,7 +27,7 @@ pub static COLUMNS: Lazy<usize> = Lazy::new(|| {
 });
 
 // indentation for text-wrapping header field values
-static INDENT: Lazy<String> = Lazy::new(|| " ".repeat(15));
+static INDENT: LazyLock<String> = LazyLock::new(|| " ".repeat(15));
 
 /// Control output verbosity.
 pub static VERBOSE: AtomicBool = AtomicBool::new(false);

@@ -1,9 +1,9 @@
 use std::fmt;
 use std::ops::RangeBounds;
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 use base64::prelude::*;
-use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
@@ -151,8 +151,8 @@ impl<T: Eq> From<std::ops::RangeFull> for RangeOrValue<T> {
     }
 }
 
-static RANGE_OP_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"^(?<op>[<>]=?|!?=)(?<value>.+)$").unwrap());
+static RANGE_OP_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(?<op>[<>]=?|!?=)(?<value>.+)$").unwrap());
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub enum RangeOp<T: Eq> {
