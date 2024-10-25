@@ -1,7 +1,6 @@
 use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
-use anyhow::anyhow;
 use bugbite::config::Config;
 use bugbite::service::bugzilla::{self, Bugzilla};
 use bugbite::service::ServiceKind;
@@ -67,7 +66,7 @@ impl Command {
         let mut config = config
             .get_kind(ServiceKind::Bugzilla, connection)?
             .into_bugzilla()
-            .map_err(|_| anyhow!("incompatible connection: {connection}"))?;
+            .unwrap();
 
         // cli options override config settings
         config.auth.merge(self.auth.into());
