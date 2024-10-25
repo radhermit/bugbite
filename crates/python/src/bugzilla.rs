@@ -12,7 +12,7 @@ use objects::*;
 mod search;
 
 #[pyclass(module = "bugbite.bugzilla")]
-pub(super) struct Bugzilla(pub(crate) bugzilla::Bugzilla);
+pub(super) struct Bugzilla(bugzilla::Bugzilla);
 
 impl TryFrom<bugbite::service::bugzilla::Config> for Bugzilla {
     type Error = PyErr;

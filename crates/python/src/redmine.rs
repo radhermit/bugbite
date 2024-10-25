@@ -12,7 +12,7 @@ use objects::*;
 mod search;
 
 #[pyclass(module = "bugbite.redmine")]
-pub(super) struct Redmine(pub(crate) redmine::Redmine);
+pub(super) struct Redmine(redmine::Redmine);
 
 impl TryFrom<bugbite::service::redmine::Config> for Redmine {
     type Error = PyErr;
