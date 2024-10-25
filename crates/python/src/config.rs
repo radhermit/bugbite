@@ -1,4 +1,4 @@
-use bugbite::error::python::BugbiteError;
+use bugbite::service::ServiceKind;
 use pyo3::exceptions::{PyKeyError, PyTypeError};
 use pyo3::prelude::*;
 
@@ -19,20 +19,18 @@ impl Config {
     /// Get a bugzilla service using a configured connection.
     fn bugzilla(&self, name: &str) -> PyResult<crate::bugzilla::Bugzilla> {
         self.0
-            .services
-            .get(name)
-            .cloned()
-            .ok_or_else(|| BugbiteError::new_err(format!("unknown service: {name}")))?
+            .get_kind(ServiceKind::Bugzilla, name)?
+            .into_bugzilla()
+            .unwrap()
             .try_into()
     }
 
     /// Get a redmine service using a configured connection.
     fn redmine(&self, name: &str) -> PyResult<crate::redmine::Redmine> {
         self.0
-            .services
-            .get(name)
-            .cloned()
-            .ok_or_else(|| BugbiteError::new_err(format!("unknown service: {name}")))?
+            .get_kind(ServiceKind::Redmine, name)?
+            .into_redmine()
+            .unwrap()
             .try_into()
     }
 

@@ -1,7 +1,6 @@
 use bugbite::error::python::BugbiteError;
 use bugbite::service::bugzilla;
 use bugbite::traits::RequestSend;
-use bugbite::traits::WebClient;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
@@ -15,15 +14,11 @@ mod search;
 #[pyclass(module = "bugbite.bugzilla")]
 pub(super) struct Bugzilla(pub(crate) bugzilla::Bugzilla);
 
-impl TryFrom<bugbite::service::Config> for Bugzilla {
+impl TryFrom<bugbite::service::bugzilla::Config> for Bugzilla {
     type Error = PyErr;
 
-    fn try_from(value: bugbite::service::Config) -> Result<Self, Self::Error> {
-        let config = value
-            .into_bugzilla()
-            .map_err(|c| BugbiteError::new_err(format!("invalid service type: {}", c.kind())))?;
-        let service = config.into_service()?;
-        Ok(Self(service))
+    fn try_from(value: bugbite::service::bugzilla::Config) -> Result<Self, Self::Error> {
+        Ok(Self(value.into_service()?))
     }
 }
 

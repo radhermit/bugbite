@@ -1,7 +1,6 @@
 use bugbite::error::python::BugbiteError;
 use bugbite::service::redmine;
 use bugbite::traits::RequestSend;
-use bugbite::traits::WebClient;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
@@ -15,15 +14,11 @@ mod search;
 #[pyclass(module = "bugbite.redmine")]
 pub(super) struct Redmine(pub(crate) redmine::Redmine);
 
-impl TryFrom<bugbite::service::Config> for Redmine {
+impl TryFrom<bugbite::service::redmine::Config> for Redmine {
     type Error = PyErr;
 
-    fn try_from(value: bugbite::service::Config) -> Result<Self, Self::Error> {
-        let config = value
-            .into_redmine()
-            .map_err(|c| BugbiteError::new_err(format!("invalid service type: {}", c.kind())))?;
-        let service = config.into_service()?;
-        Ok(Self(service))
+    fn try_from(value: bugbite::service::redmine::Config) -> Result<Self, Self::Error> {
+        Ok(Self(value.into_service()?))
     }
 }
 
