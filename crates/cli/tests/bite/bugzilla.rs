@@ -38,14 +38,14 @@ fn help() {
 }
 
 #[test]
-fn incompatible_connection() {
+fn invalid_service_type() {
     for opt in ["-c", "--connection"] {
         cmd("bite bugzilla")
             .args([opt, "ruby"])
             .args(["search", "test"])
             .assert()
             .stdout("")
-            .stderr(predicate::str::contains("incompatible connection: ruby"))
+            .stderr(predicate::str::contains("invalid service type: redmine"))
             .failure();
     }
 }

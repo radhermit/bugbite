@@ -93,7 +93,14 @@ impl Config {
 
     pub fn get_kind(&self, kind: ServiceKind, name: &str) -> crate::Result<service::Config> {
         if let Some(config) = self.services.get(name).cloned() {
-            Ok(config)
+            if config.kind() != kind {
+                Err(Error::InvalidValue(format!(
+                    "invalid service type: {}",
+                    config.kind()
+                )))
+            } else {
+                Ok(config)
+            }
         } else if Url::parse(name).is_ok() {
             service::Config::new(kind, name)
         } else {

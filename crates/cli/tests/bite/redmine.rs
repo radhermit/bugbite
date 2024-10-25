@@ -26,14 +26,14 @@ fn help() {
 }
 
 #[test]
-fn incompatible_connection() {
+fn invalid_service_type() {
     for opt in ["-c", "--connection"] {
         cmd("bite redmine")
             .args([opt, "gentoo"])
             .args(["search", "test"])
             .assert()
             .stdout("")
-            .stderr(predicate::str::contains("incompatible connection: gentoo"))
+            .stderr(predicate::str::contains("invalid service type: bugzilla"))
             .failure();
     }
 }
