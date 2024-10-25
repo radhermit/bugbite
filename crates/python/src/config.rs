@@ -6,13 +6,13 @@ use crate::service;
 use crate::traits::ToStrWithBound;
 
 #[pyclass(mapping, module = "bugbite.config")]
-pub(super) struct Config(::bugbite::config::Config);
+pub(super) struct Config(bugbite::config::Config);
 
 #[pymethods]
 impl Config {
     #[new]
     fn new() -> PyResult<Self> {
-        let config = ::bugbite::config::Config::new()?;
+        let config = bugbite::config::Config::new()?;
         Ok(Self(config))
     }
 
@@ -64,7 +64,7 @@ impl Config {
 }
 
 #[pyclass]
-struct _Iter(indexmap::map::IntoIter<String, ::bugbite::service::Config>);
+struct _Iter(indexmap::map::IntoIter<String, bugbite::service::Config>);
 
 #[pymethods]
 impl _Iter {

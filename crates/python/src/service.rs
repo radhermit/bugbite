@@ -2,10 +2,10 @@ use bugbite::traits::WebClient;
 use pyo3::prelude::*;
 
 #[pyclass(module = "bugbite.service")]
-pub(super) struct Config(::bugbite::service::Config);
+pub(super) struct Config(bugbite::service::Config);
 
-impl From<::bugbite::service::Config> for Config {
-    fn from(value: ::bugbite::service::Config) -> Self {
+impl From<bugbite::service::Config> for Config {
+    fn from(value: bugbite::service::Config) -> Self {
         Self(value)
     }
 }
