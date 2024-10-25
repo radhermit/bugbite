@@ -91,8 +91,16 @@ impl Config {
         Ok(())
     }
 
-    pub fn get_kind(&self, kind: ServiceKind, name: &str) -> crate::Result<service::Config> {
-        if let Some(config) = self.services.get(name).cloned() {
+    pub fn get_kind(
+        &self,
+        kind: ServiceKind,
+        connection: Option<&str>,
+    ) -> crate::Result<service::Config> {
+        let connection = connection
+            .or(self.default_connection.as_deref())
+            .ok_or_else(|| Error::InvalidValue("no connection specified".to_string()))?;
+
+        if let Some(config) = self.services.get(connection).cloned() {
             if config.kind() != kind {
                 Err(Error::InvalidValue(format!(
                     "invalid service type: {}",
@@ -101,10 +109,12 @@ impl Config {
             } else {
                 Ok(config)
             }
-        } else if Url::parse(name).is_ok() {
-            service::Config::new(kind, name)
+        } else if Url::parse(connection).is_ok() {
+            service::Config::new(kind, connection)
         } else {
-            Err(Error::InvalidValue(format!("unknown connection: {name}")))
+            Err(Error::InvalidValue(format!(
+                "unknown connection: {connection}"
+            )))
         }
     }
 }

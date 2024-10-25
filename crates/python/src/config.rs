@@ -19,7 +19,7 @@ impl Config {
     /// Get a bugzilla service using a configured connection.
     fn bugzilla(&self, name: &str) -> PyResult<crate::bugzilla::Bugzilla> {
         self.0
-            .get_kind(ServiceKind::Bugzilla, name)?
+            .get_kind(ServiceKind::Bugzilla, Some(name))?
             .into_bugzilla()
             .unwrap()
             .try_into()
@@ -28,7 +28,7 @@ impl Config {
     /// Get a redmine service using a configured connection.
     fn redmine(&self, name: &str) -> PyResult<crate::redmine::Redmine> {
         self.0
-            .get_kind(ServiceKind::Redmine, name)?
+            .get_kind(ServiceKind::Redmine, Some(name))?
             .into_redmine()
             .unwrap()
             .try_into()
