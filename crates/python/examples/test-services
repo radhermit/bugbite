@@ -13,10 +13,13 @@ def main():
             match config.kind:
                 case "bugzilla":
                     service = c.bugzilla(name)
-                    version = service.version()
-                    print(f"{name}: {config.kind}-{version}")
-                case _:
-                    print(f"{name}: skipped")
+                    service.version()
+                case "redmine":
+                    service = c.redmine(name)
+                    service.search(created="1d")
+                case kind:
+                    raise TypeError(f"unhandled service type: {kind}")
+            print(f"{name}: passed")
         except BugbiteError:
             print(f"{name}: failed")
             continue
