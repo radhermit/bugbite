@@ -1,3 +1,4 @@
+use bugbite::service::ServiceKind;
 use bugbite::traits::WebClient;
 use pyo3::prelude::*;
 
@@ -13,13 +14,18 @@ impl From<bugbite::service::Config> for Config {
 #[pymethods]
 impl Config {
     #[getter]
-    fn name(&self) -> &str {
-        self.0.name()
+    fn base(&self) -> &str {
+        self.0.base().as_str()
     }
 
     #[getter]
-    fn base(&self) -> &str {
-        self.0.base().as_str()
+    fn kind(&self) -> ServiceKind {
+        self.0.kind()
+    }
+
+    #[getter]
+    fn name(&self) -> &str {
+        self.0.name()
     }
 }
 
