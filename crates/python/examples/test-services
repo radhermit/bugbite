@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+# Test registered services for existence.
+# TODO: use threaded or async calls
+
+from bugbite import BugbiteError
+from bugbite.config import Config
+
+
+def main():
+    c = Config()
+    for (name, config) in c:
+        try:
+            match config.kind:
+                case "bugzilla":
+                    service = c.bugzilla(name)
+                    version = service.version()
+                    print(f"{name}: {config.kind}-{version}")
+                case _:
+                    print(f"{name}: skipped")
+        except BugbiteError:
+            print(f"{name}: failed")
+            continue
+
+
+if __name__ == "__main__":
+    main()
