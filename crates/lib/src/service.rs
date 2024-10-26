@@ -18,7 +18,6 @@ pub mod redmine;
 static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"));
 
 /// Supported service variants
-#[cfg_attr(feature = "python", pyo3::pyclass(eq, eq_int))]
 #[derive(
     AsRefStr,
     Display,
