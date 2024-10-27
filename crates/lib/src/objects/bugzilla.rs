@@ -3,8 +3,8 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 
+use byte_unit::Byte;
 use chrono::prelude::*;
-use humansize::{format_size, BINARY};
 use indexmap::{IndexMap, IndexSet};
 use itertools::{Either, Itertools};
 use serde::{Deserialize, Deserializer, Serialize};
@@ -86,7 +86,8 @@ impl AsRef<[u8]> for Attachment {
 // TODO: support auto-decompressing standard archive formats
 impl Attachment {
     pub fn human_size(&self) -> String {
-        format_size(self.size, BINARY)
+        let byte = Byte::from_u64(self.size);
+        format!("{byte:#}")
     }
 
     /// Return true if the attachment has no data, otherwise false.

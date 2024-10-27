@@ -37,7 +37,6 @@ chronoutil = "0.2.7"
 dirs-next = "2.0.0"
 enum-as-inner = "0.6.1"
 futures-util = "0.3.31"
-humansize = "2.1.3"
 infer = "0.16.0"
 indexmap = { version = "2.6.0", features = ["serde"] }
 itertools = "0.13.0"
