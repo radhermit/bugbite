@@ -84,21 +84,21 @@ enum Subcommand {
     Attachment(Box<attachment::Command>),
 
     /// Get bug comments
-    Comment(comment::Command),
+    Comment(Box<comment::Command>),
 
     /// Create bug
     #[command(visible_alias = "c")]
     Create(Box<create::Command>),
 
     /// Get bugzilla fields
-    Fields(fields::Command),
+    Fields(Box<fields::Command>),
 
     /// Get bugs
     #[command(visible_alias = "g")]
-    Get(get::Command),
+    Get(Box<get::Command>),
 
     /// Get bug changes
-    History(history::Command),
+    History(Box<history::Command>),
 
     /// Search bugs
     #[command(visible_alias = "s")]
@@ -109,7 +109,7 @@ enum Subcommand {
     Update(Box<update::Command>),
 
     /// Get bugzilla version
-    Version(version::Command),
+    Version(Box<version::Command>),
 }
 
 impl Subcommand {

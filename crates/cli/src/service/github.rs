@@ -68,10 +68,10 @@ impl Command {
 enum Subcommand {
     /// Get issues
     #[command(visible_alias = "g")]
-    Get(get::Command),
+    Get(Box<get::Command>),
     /// Search issues
     #[command(visible_alias = "s")]
-    Search(search::Command),
+    Search(Box<search::Command>),
 }
 
 impl Subcommand {
