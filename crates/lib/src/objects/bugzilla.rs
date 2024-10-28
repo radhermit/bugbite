@@ -15,7 +15,7 @@ use serde_with::{
 };
 use strum::{Display, EnumString};
 
-use crate::serde::non_empty_str;
+use crate::serde::{byte_object, non_empty_str};
 use crate::service::bugzilla::{BugField, FilterField, GroupField, UNSET_VALUES};
 use crate::traits::RenderSearch;
 use crate::Error;
@@ -39,7 +39,8 @@ pub struct Attachment {
     pub summary: String,
 
     /// Size of the attachment in bytes.
-    pub size: u64,
+    #[serde(deserialize_with = "byte_object")]
+    pub size: Byte,
 
     /// Login identifier of the attachment's creator.
     pub creator: String,
@@ -86,8 +87,7 @@ impl AsRef<[u8]> for Attachment {
 // TODO: support auto-decompressing standard archive formats
 impl Attachment {
     pub fn human_size(&self) -> String {
-        let byte = Byte::from_u64(self.size);
-        format!("{byte:#}")
+        format!("{:#}", self.size)
     }
 
     /// Return true if the attachment has no data, otherwise false.
@@ -97,7 +97,7 @@ impl Attachment {
 
     /// Return true if the attachment has been deleted, otherwise false.
     pub fn is_deleted(&self) -> bool {
-        self.size == 0
+        self.size == 0_u64
     }
 }
 

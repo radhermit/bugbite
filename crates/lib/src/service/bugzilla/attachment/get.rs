@@ -164,7 +164,7 @@ mod tests {
         assert_eq!(attachment.bug_id, 321);
         assert_eq!(attachment.file_name, "test.txt");
         assert_eq!(attachment.summary, "test.txt");
-        assert_eq!(attachment.size, 8);
+        assert_eq!(attachment.size, 8_u64);
         assert_eq!(attachment.creator, "person");
         assert_eq!(attachment.content_type, "text/plain");
         assert!(!attachment.is_private);
