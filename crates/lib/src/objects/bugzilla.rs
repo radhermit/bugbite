@@ -86,10 +86,6 @@ impl AsRef<[u8]> for Attachment {
 
 // TODO: support auto-decompressing standard archive formats
 impl Attachment {
-    pub fn human_size(&self) -> String {
-        format!("{:#}", self.size)
-    }
-
     /// Return true if the attachment has no data, otherwise false.
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
