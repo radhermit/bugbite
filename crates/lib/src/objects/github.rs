@@ -1,7 +1,5 @@
 use std::fmt;
 
-use super::Item;
-
 #[derive(Debug, Eq, PartialEq)]
 pub struct Issue {
     pub id: u64,
@@ -11,12 +9,6 @@ pub struct Issue {
 impl Issue {
     pub fn search_display(&self) -> String {
         self.id.to_string()
-    }
-}
-
-impl From<Issue> for Item {
-    fn from(value: Issue) -> Self {
-        Item::Github(Box::new(value))
     }
 }
 

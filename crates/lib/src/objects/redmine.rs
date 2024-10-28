@@ -13,7 +13,7 @@ use std::fmt;
 use crate::service::redmine::IssueField;
 use crate::traits::RenderSearch;
 
-use super::{stringify, Item};
+use super::stringify;
 
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq)]
@@ -90,12 +90,6 @@ impl Borrow<str> for CustomField {
 pub enum CustomFieldValue {
     String(String),
     Array(Vec<String>),
-}
-
-impl From<Issue> for Item {
-    fn from(value: Issue) -> Self {
-        Item::Redmine(Box::new(value))
-    }
 }
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Clone)]

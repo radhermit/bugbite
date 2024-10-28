@@ -14,14 +14,6 @@ pub mod bugzilla;
 pub mod github;
 pub mod redmine;
 
-/// Generic bug, issue, or ticket object.
-#[derive(Debug, Eq, PartialEq)]
-pub enum Item {
-    Bugzilla(Box<bugzilla::Bug>),
-    Github(Box<github::Issue>),
-    Redmine(Box<redmine::Issue>),
-}
-
 /// Raw binary data encoded as Base64.
 #[derive(DeserializeFromStr, SerializeDisplay, Default, Debug, PartialEq, Eq, Hash)]
 pub(crate) struct Base64(pub(crate) Vec<u8>);

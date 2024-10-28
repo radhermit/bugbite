@@ -20,7 +20,7 @@ use crate::service::bugzilla::{BugField, FilterField, GroupField, UNSET_VALUES};
 use crate::traits::RenderSearch;
 use crate::Error;
 
-use super::{stringify, Base64, Item};
+use super::{stringify, Base64};
 
 /// A file attachment on a bug.
 #[serde_as]
@@ -368,12 +368,6 @@ pub struct Bug {
     pub history: Vec<Event>,
     #[serde(skip)]
     pub custom_fields: IndexMap<BugzillaFieldName, String>,
-}
-
-impl From<Bug> for Item {
-    fn from(value: Bug) -> Self {
-        Item::Bugzilla(Box::new(value))
-    }
 }
 
 impl Bug {
