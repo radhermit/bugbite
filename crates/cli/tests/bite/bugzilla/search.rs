@@ -147,11 +147,12 @@ async fn browser() {
 }
 
 #[tokio::test]
-async fn json() {
+async fn output() {
     let server = start_server().await;
 
     server.respond(200, TEST_DATA.join("search/ids.json")).await;
 
+    // JSON
     cmd("bite bugzilla search --json test")
         .assert()
         .stdout(predicate::str::diff(indoc::indoc! {r#"
@@ -161,6 +162,13 @@ async fn json() {
             {"id":924855}
             {"id":924856}
         "#}))
+        .stderr("")
+        .success();
+
+    // nonexistent field
+    cmd("bite bugzilla search -f alias test")
+        .assert()
+        .stdout("")
         .stderr("")
         .success();
 }
