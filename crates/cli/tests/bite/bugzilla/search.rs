@@ -147,6 +147,25 @@ async fn browser() {
 }
 
 #[tokio::test]
+async fn json() {
+    let server = start_server().await;
+
+    server.respond(200, TEST_DATA.join("search/ids.json")).await;
+
+    cmd("bite bugzilla search --json test")
+        .assert()
+        .stdout(predicate::str::diff(indoc::indoc! {r#"
+            {"id":924847}
+            {"id":924852}
+            {"id":924854}
+            {"id":924855}
+            {"id":924856}
+        "#}))
+        .stderr("")
+        .success();
+}
+
+#[tokio::test]
 async fn custom_fields() {
     let server = start_server().await;
     server
