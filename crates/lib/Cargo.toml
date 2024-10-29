@@ -41,14 +41,14 @@ infer = "0.16.0"
 indexmap = { version = "2.6.0", features = ["serde"] }
 itertools = "0.13.0"
 ordered-multimap = "0.7.3"
-regex = "1.11.0"
-serde = { version = "1.0.211", features = ["derive"] }
+regex = "1.11.1"
+serde = { version = "1.0.214", features = ["derive"] }
 serde_json = "1.0.132"
 serde_repr = "0.1.19"
 serde_with = { version = "3.11.0", default-features = false, features = ["alloc", "macros"] }
 strum = { version = "0.26.3", features = ["derive"] }
 tempfile = "3.13.0"
-thiserror = "1.0.64"
+thiserror = "1.0.65"
 toml = "0.8.19"
 tracing = "0.1.40"
 url = { version = "2.5.2", features = ["serde"] }
@@ -65,7 +65,7 @@ pyo3 = { version = "0.22.5", optional = true }
 wiremock = { version = "0.6.2", optional = true }
 
 [dependencies.reqwest]
-version = "0.12.8"
+version = "0.12.9"
 default-features = false
 features = ["cookies", "hickory-dns", "json", "rustls-tls", "socks"]
 
