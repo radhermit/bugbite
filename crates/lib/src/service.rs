@@ -110,6 +110,7 @@ pub struct ClientParameters {
     pub certificate: Option<Utf8PathBuf>,
     pub concurrent: Option<usize>,
     pub insecure: Option<bool>,
+    pub proxy: Option<String>,
     pub timeout: Option<f64>,
 }
 
@@ -119,6 +120,7 @@ impl Merge for ClientParameters {
             certificate: self.certificate.merge(other.certificate),
             concurrent: self.concurrent.merge(other.concurrent),
             insecure: self.insecure.merge(other.insecure),
+            proxy: self.proxy.merge(other.proxy),
             timeout: self.timeout.merge(other.timeout),
         }
     }
@@ -136,7 +138,15 @@ impl ClientParameters {
             .use_rustls_tls()
             .user_agent(USER_AGENT);
 
-        if let Some(path) = self.certificate.as_deref() {
+        if let Some(proxy) = &self.proxy {
+            let url = Url::parse(proxy)
+                .map_err(|e| Error::InvalidValue(format!("invalid proxy URL: {e}")))?;
+            let proxy = reqwest::Proxy::all(url)
+                .map_err(|_| Error::InvalidValue(format!("invalid proxy URL: {proxy}")))?;
+            builder = builder.proxy(proxy);
+        }
+
+        if let Some(path) = &self.certificate {
             let data = fs::read(path).map_err(|e| {
                 Error::InvalidValue(format!("failed reading certificate: {path}: {e}"))
             })?;

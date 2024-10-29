@@ -18,7 +18,7 @@ struct ServiceOptions {
     #[arg(short = 'C', long, value_name = "VALUE")]
     concurrent: Option<usize>,
 
-    /// add custom root certificate
+    /// custom root certificate
     #[arg(long, value_name = "PATH", conflicts_with = "insecure")]
     certificate: Option<Utf8PathBuf>,
 
@@ -31,6 +31,10 @@ struct ServiceOptions {
     )]
     insecure: Option<bool>,
 
+    /// custom proxy
+    #[arg(long, value_name = "URL")]
+    proxy: Option<String>,
+
     /// request timeout in seconds
     #[arg(short, long, value_name = "SECONDS")]
     timeout: Option<f64>,
@@ -42,6 +46,7 @@ impl From<ServiceOptions> for ClientParameters {
             certificate: value.certificate,
             concurrent: value.concurrent,
             insecure: value.insecure,
+            proxy: value.proxy,
             timeout: value.timeout,
         }
     }
