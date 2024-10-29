@@ -1,7 +1,5 @@
 use predicates::prelude::*;
 
-use crate::command::cmd;
-
 use super::*;
 
 #[tokio::test]

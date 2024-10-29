@@ -1,8 +1,6 @@
 use predicates::prelude::*;
 use wiremock::{matchers, ResponseTemplate};
 
-use crate::command::cmd;
-
 use super::*;
 
 #[tokio::test]

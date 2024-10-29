@@ -2,8 +2,6 @@ use std::fs;
 
 use predicates::prelude::*;
 
-use crate::command::cmd;
-
 use super::*;
 
 #[test]

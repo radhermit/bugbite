@@ -1,8 +1,6 @@
 use predicates::prelude::*;
 use tempfile::tempdir;
 
-use crate::command::cmd;
-
 use super::*;
 
 #[test]

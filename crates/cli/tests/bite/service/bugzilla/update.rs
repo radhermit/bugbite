@@ -2,8 +2,6 @@ use predicates::prelude::*;
 use tempfile::NamedTempFile;
 use wiremock::matchers;
 
-use crate::command::cmd;
-
 use super::*;
 
 #[test]

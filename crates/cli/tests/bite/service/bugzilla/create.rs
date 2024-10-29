@@ -2,8 +2,6 @@ use predicates::prelude::*;
 use tempfile::tempdir;
 use wiremock::matchers;
 
-use crate::command::cmd;
-
 use super::*;
 
 macro_rules! default_cmd {

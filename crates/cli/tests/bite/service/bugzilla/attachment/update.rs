@@ -1,8 +1,6 @@
 use predicates::prelude::*;
 
-use crate::command::cmd;
-
-use crate::bugzilla::*;
+use super::*;
 
 #[test]
 fn aliases() {

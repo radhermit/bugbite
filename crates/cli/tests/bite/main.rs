@@ -10,9 +10,8 @@ use tempfile::tempdir;
 
 use command::cmd;
 
-mod bugzilla;
 mod command;
-mod redmine;
+mod service;
 mod show;
 
 pub(crate) static TEST_DATA_PATH: LazyLock<Utf8PathBuf> =

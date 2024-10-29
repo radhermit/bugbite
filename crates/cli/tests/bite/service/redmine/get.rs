@@ -3,8 +3,6 @@ use std::time::Duration;
 use predicates::prelude::*;
 use wiremock::{matchers, ResponseTemplate};
 
-use crate::command::cmd;
-
 use super::*;
 
 #[test]

@@ -3,9 +3,7 @@ use std::{env, fs};
 use predicates::prelude::*;
 use tempfile::{tempdir, NamedTempFile};
 
-use crate::command::cmd;
-
-use crate::bugzilla::*;
+use super::*;
 
 #[test]
 fn aliases() {
