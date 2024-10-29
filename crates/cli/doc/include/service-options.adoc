@@ -22,5 +22,8 @@ certificate file.
 *--insecure*::
     Ignore invalid service certificates when connecting.
 
+*--proxy <URL>*::
+    Use a custom proxy.
+
 *-t, --timeout <seconds>*::
     Set the request timeout in seconds, defaults to 30.
