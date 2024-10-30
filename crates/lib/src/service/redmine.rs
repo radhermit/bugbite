@@ -11,7 +11,7 @@ use url::Url;
 use crate::traits::{Merge, MergeOption, WebClient, WebService};
 use crate::Error;
 
-use super::{ClientParameters, ServiceKind};
+use super::{Client, ClientParameters, ServiceKind};
 
 pub mod get;
 pub mod search;
@@ -62,16 +62,6 @@ impl Config {
         })
     }
 
-    /// Create a new Service from a Config.
-    pub fn into_service(self) -> crate::Result<Redmine> {
-        let client = self.client.build()?;
-        Ok(Redmine(Arc::new(Service {
-            config: self,
-            _cache: Default::default(),
-            client,
-        })))
-    }
-
     /// Return the base URL for the service, removing any project subpath if it exists.
     fn web_base(&self) -> &Url {
         self.web_base
@@ -115,9 +105,34 @@ impl WebClient for Config {
 // TODO: remove this once authentication support is added
 #[derive(Debug)]
 pub struct Service {
-    config: Config,
+    pub config: Config,
     _cache: ServiceCache,
-    client: reqwest::Client,
+    client: Client,
+}
+
+#[derive(Debug)]
+pub struct ServiceBuilder(Config);
+
+impl ServiceBuilder {
+    pub fn auth(mut self, value: Authentication) -> Self {
+        self.0.auth.merge(value);
+        self
+    }
+
+    pub fn client(mut self, value: ClientParameters) -> Self {
+        self.0.client.merge(value);
+        self
+    }
+
+    /// Create a new service.
+    pub fn build(self) -> crate::Result<Redmine> {
+        let client = self.0.client.build()?;
+        Ok(Redmine(Arc::new(Service {
+            config: self.0,
+            _cache: Default::default(),
+            client,
+        })))
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -144,10 +159,26 @@ impl fmt::Display for Redmine {
 }
 
 impl Redmine {
-    /// Create a new Service from a given base URL.
+    /// Create a new Service using a given base URL.
     pub fn new(base: &str) -> crate::Result<Self> {
-        let config = Config::new(base)?;
-        config.into_service()
+        Self::builder(base)?.build()
+    }
+
+    /// Create a new Service builder using a given base URL.
+    pub fn builder(base: &str) -> crate::Result<ServiceBuilder> {
+        Ok(ServiceBuilder(Config::new(base)?))
+    }
+
+    /// Create a new Service builder using a given base URL.
+    pub fn config_builder(
+        config: &crate::config::Config,
+        name: Option<&str>,
+    ) -> crate::Result<ServiceBuilder> {
+        let config = config
+            .get_kind(ServiceKind::Redmine, name)?
+            .into_redmine()
+            .unwrap();
+        Ok(ServiceBuilder(config))
     }
 
     /// Return the website URL for an item ID.

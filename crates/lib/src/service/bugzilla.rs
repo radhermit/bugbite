@@ -16,7 +16,7 @@ use crate::objects::bugzilla::{Bug, BugzillaField};
 use crate::traits::{Api, Merge, MergeOption, WebClient, WebService};
 use crate::Error;
 
-use super::{ClientParameters, ServiceKind};
+use super::{Client, ClientParameters, ServiceKind};
 
 pub mod attachment;
 pub mod comment;
@@ -80,16 +80,6 @@ impl Config {
         })
     }
 
-    /// Create a new Service from a Config.
-    pub fn into_service(self) -> crate::Result<Bugzilla> {
-        let client = self.client.build()?;
-        Ok(Bugzilla(Arc::new(Service {
-            config: self,
-            cache: Default::default(),
-            client,
-        })))
-    }
-
     /// Maximum number of results that can be returned by a search request.
     ///
     /// Fallback to bugzilla's internal default of 10000.
@@ -117,9 +107,49 @@ impl WebClient for Config {
 
 #[derive(Debug)]
 pub struct Service {
-    config: Config,
+    pub config: Config,
     cache: ServiceCache,
-    client: reqwest::Client,
+    client: Client,
+}
+
+#[derive(Debug)]
+pub struct ServiceBuilder(Config);
+
+impl ServiceBuilder {
+    pub fn name(mut self, value: &str) -> Self {
+        self.0.name = value.to_string();
+        self
+    }
+
+    pub fn auth(mut self, value: Authentication) -> Self {
+        self.0.auth.merge(value);
+        self
+    }
+
+    pub fn client(mut self, value: ClientParameters) -> Self {
+        self.0.client.merge(value);
+        self
+    }
+
+    pub fn user(mut self, value: &str) -> Self {
+        self.0.auth.user = Some(value.to_string());
+        self
+    }
+
+    pub fn password(mut self, value: &str) -> Self {
+        self.0.auth.password = Some(value.to_string());
+        self
+    }
+
+    /// Create a new service.
+    pub fn build(self) -> crate::Result<Bugzilla> {
+        let client = self.0.client.build()?;
+        Ok(Bugzilla(Arc::new(Service {
+            config: self.0,
+            cache: Default::default(),
+            client,
+        })))
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -146,10 +176,26 @@ impl fmt::Display for Bugzilla {
 }
 
 impl Bugzilla {
-    /// Create a new Service from a given base URL.
+    /// Create a new Service using a given base URL.
     pub fn new(base: &str) -> crate::Result<Self> {
-        let config = Config::new(base)?;
-        config.into_service()
+        Self::builder(base)?.build()
+    }
+
+    /// Create a new Service builder using a given base URL.
+    pub fn builder(base: &str) -> crate::Result<ServiceBuilder> {
+        Ok(ServiceBuilder(Config::new(base)?))
+    }
+
+    /// Create a new Service builder using a given base URL.
+    pub fn config_builder(
+        config: &crate::config::Config,
+        name: Option<&str>,
+    ) -> crate::Result<ServiceBuilder> {
+        let config = config
+            .get_kind(ServiceKind::Bugzilla, name)?
+            .into_bugzilla()
+            .unwrap();
+        Ok(ServiceBuilder(config))
     }
 
     /// Return the website URL for an item ID.

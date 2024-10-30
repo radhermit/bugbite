@@ -468,7 +468,6 @@ struct RequestParameters<'a> {
 mod tests {
     use std::str::FromStr;
 
-    use crate::service::bugzilla::Config;
     use crate::test::*;
 
     use super::*;
@@ -477,11 +476,12 @@ mod tests {
     async fn request() {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        // TODO: improve API for setting user info on config creation
-        let mut config = Config::new(server.uri()).unwrap();
-        config.auth.user = Some("user".to_string());
-        config.auth.password = Some("pass".to_string());
-        let service = config.into_service().unwrap();
+        let service = Bugzilla::builder(server.uri())
+            .unwrap()
+            .user("user")
+            .password("pass")
+            .build()
+            .unwrap();
 
         // missing required fields without defaults
         let err = service.create().send().await.unwrap_err();

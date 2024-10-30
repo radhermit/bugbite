@@ -5,7 +5,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::service::{self, ServiceKind};
+use crate::service::{self, ClientParameters, ServiceKind};
 use crate::traits::WebClient;
 use crate::utils::config_dir;
 use crate::Error;
@@ -18,6 +18,10 @@ static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.to
 pub struct Config {
     /// Default connection.
     pub default_connection: Option<String>,
+
+    /// Default client parameters.
+    #[serde(flatten)]
+    pub client: ClientParameters,
 
     /// Registered service connections.
     #[serde(skip)]
@@ -91,7 +95,7 @@ impl Config {
         Ok(())
     }
 
-    pub fn get_kind(
+    pub(crate) fn get_kind(
         &self,
         kind: ServiceKind,
         connection: Option<&str>,
@@ -100,22 +104,26 @@ impl Config {
             .or(self.default_connection.as_deref())
             .ok_or_else(|| Error::InvalidValue("no connection specified".to_string()))?;
 
-        if let Some(config) = self.services.get(connection).cloned() {
+        let mut config = if let Some(config) = self.services.get(connection).cloned() {
             if config.kind() != kind {
-                Err(Error::InvalidValue(format!(
+                return Err(Error::InvalidValue(format!(
                     "invalid service type: {}",
                     config.kind()
-                )))
-            } else {
-                Ok(config)
+                )));
             }
+            config
         } else if Url::parse(connection).is_ok() {
-            service::Config::new(kind, connection)
+            service::Config::new(kind, connection)?
         } else {
-            Err(Error::InvalidValue(format!(
+            return Err(Error::InvalidValue(format!(
                 "unknown connection: {connection}"
-            )))
-        }
+            )));
+        };
+
+        // merge default client parameters
+        config.merge(self.client.clone());
+
+        Ok(config)
     }
 }
 
@@ -124,6 +132,8 @@ mod tests {
     use std::fs;
 
     use tempfile::tempdir;
+
+    use crate::service::bugzilla::Bugzilla;
 
     use super::*;
 
@@ -137,13 +147,11 @@ mod tests {
         let len = config.services.len();
 
         // verify bundled gentoo connection doesn't set a user
-        let c = config
-            .services
-            .get("gentoo")
+        let service = Bugzilla::config_builder(&config, Some("gentoo"))
             .unwrap()
-            .as_bugzilla()
+            .build()
             .unwrap();
-        assert!(c.auth.user.is_none());
+        assert!(service.config.auth.user.is_none());
 
         let dir = tempdir().unwrap();
         let dir_path = dir.path().to_str().unwrap();
@@ -179,12 +187,13 @@ mod tests {
         assert!(config.services.len() == len + 2);
 
         // verify gentoo connection was overridden
-        let c = config
-            .services
-            .get("gentoo")
+        let service = Bugzilla::config_builder(&config, Some("gentoo"))
             .unwrap()
-            .as_bugzilla()
+            .build()
             .unwrap();
-        assert_eq!(c.auth.user.as_deref().unwrap(), "user@email.com");
+        assert_eq!(
+            service.config.auth.user.as_deref().unwrap(),
+            "user@email.com"
+        );
     }
 }

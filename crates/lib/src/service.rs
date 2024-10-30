@@ -1,4 +1,5 @@
 use std::fs;
+use std::ops::Deref;
 use std::time::Duration;
 
 use camino::{Utf8Path, Utf8PathBuf};
@@ -62,13 +63,13 @@ pub enum Config {
 
 impl Config {
     pub(super) fn new(kind: ServiceKind, base: &str) -> crate::Result<Self> {
-        let config = match kind {
+        let service = match kind {
             ServiceKind::Bugzilla => Self::Bugzilla(bugzilla::Config::new(base)?),
             ServiceKind::Github => Self::Github(github::Config::new(base)?),
             ServiceKind::Redmine => Self::Redmine(redmine::Config::new(base)?),
         };
 
-        Ok(config)
+        Ok(service)
     }
 
     pub(super) fn try_from_path(path: &Utf8Path) -> crate::Result<Self> {
@@ -76,6 +77,14 @@ impl Config {
             .map_err(|e| Error::InvalidValue(format!("failed loading config: {path}: {e}")))?;
         toml::from_str(&data)
             .map_err(|e| Error::InvalidValue(format!("failed parsing config: {path}: {e}")))
+    }
+
+    pub(super) fn merge(&mut self, value: ClientParameters) {
+        match self {
+            Self::Bugzilla(config) => config.client.merge(value),
+            Self::Github(config) => config.client.merge(value),
+            Self::Redmine(config) => config.client.merge(value),
+        }
     }
 }
 
@@ -127,7 +136,7 @@ impl Merge for ClientParameters {
 }
 
 impl ClientParameters {
-    fn build(&self) -> crate::Result<reqwest::Client> {
+    fn build(&self) -> crate::Result<Client> {
         let mut builder = reqwest::Client::builder()
             // TODO: switch to cookie_provider() once cookie (de)serialization is supported
             .cookie_store(true)
@@ -155,8 +164,33 @@ impl ClientParameters {
             builder = builder.add_root_certificate(cert);
         }
 
-        builder
+        let client = builder
             .build()
-            .map_err(|e| Error::InvalidValue(format!("failed creating client: {e}")))
+            .map_err(|e| Error::InvalidValue(format!("failed creating client: {e}")))?;
+
+        Ok(Client {
+            params: self.clone(),
+            client,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct Client {
+    pub params: ClientParameters,
+    client: reqwest::Client,
+}
+
+impl Default for Client {
+    fn default() -> Self {
+        ClientParameters::default().build().unwrap()
+    }
+}
+
+impl Deref for Client {
+    type Target = reqwest::Client;
+
+    fn deref(&self) -> &Self::Target {
+        &self.client
     }
 }

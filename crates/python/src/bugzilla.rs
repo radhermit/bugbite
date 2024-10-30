@@ -14,11 +14,11 @@ mod search;
 #[pyclass(module = "bugbite.bugzilla")]
 pub(super) struct Bugzilla(bugzilla::Bugzilla);
 
-impl TryFrom<bugbite::service::bugzilla::Config> for Bugzilla {
+impl TryFrom<bugbite::service::bugzilla::ServiceBuilder> for Bugzilla {
     type Error = PyErr;
 
-    fn try_from(value: bugbite::service::bugzilla::Config) -> Result<Self, Self::Error> {
-        Ok(Self(value.into_service()?))
+    fn try_from(value: bugbite::service::bugzilla::ServiceBuilder) -> Result<Self, Self::Error> {
+        Ok(Self(value.build()?))
     }
 }
 

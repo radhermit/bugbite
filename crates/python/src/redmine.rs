@@ -14,11 +14,11 @@ mod search;
 #[pyclass(module = "bugbite.redmine")]
 pub(super) struct Redmine(redmine::Redmine);
 
-impl TryFrom<bugbite::service::redmine::Config> for Redmine {
+impl TryFrom<bugbite::service::redmine::ServiceBuilder> for Redmine {
     type Error = PyErr;
 
-    fn try_from(value: bugbite::service::redmine::Config) -> Result<Self, Self::Error> {
-        Ok(Self(value.into_service()?))
+    fn try_from(value: bugbite::service::redmine::ServiceBuilder) -> Result<Self, Self::Error> {
+        Ok(Self(value.build()?))
     }
 }
 

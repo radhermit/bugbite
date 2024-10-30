@@ -226,7 +226,7 @@ mod tests {
 
     use tempfile::tempdir;
 
-    use crate::service::bugzilla::{Bugzilla, Config};
+    use crate::service::bugzilla::Bugzilla;
     use crate::test::*;
 
     use super::*;
@@ -279,9 +279,11 @@ mod tests {
         assert_eq!(request1, request2);
 
         // named services save to config dir path
-        let mut config = Config::new(server.uri()).unwrap();
-        config.name = "service".to_string();
-        let service = config.into_service().unwrap();
+        let service = Bugzilla::builder(server.uri())
+            .unwrap()
+            .name("service")
+            .build()
+            .unwrap();
         let time = "2d".parse().unwrap();
         let mut request1 = service.search();
         request1.created(time);

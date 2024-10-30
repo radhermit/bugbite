@@ -3,8 +3,6 @@ use std::process::ExitCode;
 
 use bugbite::config::Config;
 use bugbite::service::bugzilla::{self, Bugzilla};
-use bugbite::service::ServiceKind;
-use bugbite::traits::Merge;
 use clap::Args;
 use tracing::debug;
 
@@ -61,17 +59,10 @@ impl Command {
     where
         W: IsTerminal + Write,
     {
-        // load or create a service config
-        let mut config = config
-            .get_kind(ServiceKind::Bugzilla, self.service.connection.as_deref())?
-            .into_bugzilla()
-            .unwrap();
-
-        // cli options override config settings
-        config.auth.merge(self.auth.into());
-        config.client.merge(self.service.into());
-
-        let service = config.into_service()?;
+        let service = Bugzilla::config_builder(config, self.service.connection.as_deref())?
+            .auth(self.auth.into())
+            .client(self.service.into())
+            .build()?;
         debug!("Service: {service}");
         self.cmd.run(&service, f).await
     }

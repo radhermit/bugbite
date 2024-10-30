@@ -9,7 +9,7 @@ use url::Url;
 use crate::traits::{Merge, MergeOption, WebClient, WebService};
 use crate::Error;
 
-use super::{ClientParameters, ServiceKind};
+use super::{Client, ClientParameters, ServiceKind};
 
 mod get;
 pub mod search;
@@ -52,16 +52,6 @@ impl Config {
             client: Default::default(),
         })
     }
-
-    /// Create a new Service from a Config.
-    pub fn into_service(self) -> crate::Result<Github> {
-        let _client = self.client.build()?;
-        Ok(Github(Arc::new(Service {
-            config: self,
-            _cache: Default::default(),
-            _client,
-        })))
-    }
 }
 
 impl WebClient for Config {
@@ -80,9 +70,34 @@ impl WebClient for Config {
 
 #[derive(Debug)]
 pub struct Service {
-    config: Config,
+    pub config: Config,
     _cache: ServiceCache,
-    _client: reqwest::Client,
+    _client: Client,
+}
+
+#[derive(Debug)]
+pub struct ServiceBuilder(Config);
+
+impl ServiceBuilder {
+    pub fn auth(mut self, value: Authentication) -> Self {
+        self.0.auth.merge(value);
+        self
+    }
+
+    pub fn client(mut self, value: ClientParameters) -> Self {
+        self.0.client.merge(value);
+        self
+    }
+
+    /// Create a new service.
+    pub fn build(self) -> crate::Result<Github> {
+        let _client = self.0.client.build()?;
+        Ok(Github(Arc::new(Service {
+            config: self.0,
+            _cache: Default::default(),
+            _client,
+        })))
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -109,10 +124,26 @@ impl fmt::Display for Github {
 }
 
 impl Github {
-    /// Create a new Service from a given base URL.
+    /// Create a new Service using a given base URL.
     pub fn new(base: &str) -> crate::Result<Self> {
-        let config = Config::new(base)?;
-        config.into_service()
+        Self::builder(base)?.build()
+    }
+
+    /// Create a new Service builder using a given base URL.
+    pub fn builder(base: &str) -> crate::Result<ServiceBuilder> {
+        Ok(ServiceBuilder(Config::new(base)?))
+    }
+
+    /// Create a new Service builder using a given base URL.
+    pub fn config_builder(
+        config: &crate::config::Config,
+        name: Option<&str>,
+    ) -> crate::Result<ServiceBuilder> {
+        let config = config
+            .get_kind(ServiceKind::Github, name)?
+            .into_github()
+            .unwrap();
+        Ok(ServiceBuilder(config))
     }
 
     /// Return the website URL for an item ID.
