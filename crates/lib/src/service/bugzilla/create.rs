@@ -22,11 +22,11 @@ impl RequestSend for Request {
     type Output = u64;
 
     async fn send(&self) -> crate::Result<Self::Output> {
-        let url = self.service.config.base.join("rest/bug")?;
+        let url = self.service.config().base.join("rest/bug")?;
         let params = self.encode()?;
         let request = self
             .service
-            .client
+            .client()
             .post(url)
             .json(&params)
             .auth(&self.service)?;

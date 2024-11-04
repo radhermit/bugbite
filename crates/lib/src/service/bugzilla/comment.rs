@@ -35,7 +35,7 @@ impl Request {
 
         let mut url = self
             .service
-            .config
+            .config()
             .base
             .join(&format!("rest/bug/{id}/comment"))?;
 
@@ -78,7 +78,7 @@ impl RequestSend for Request {
     async fn send(&self) -> crate::Result<Self::Output> {
         let request = self
             .service
-            .client
+            .client()
             .get(self.url()?)
             .auth_optional(&self.service);
         let response = request.send().await?;

@@ -1,5 +1,4 @@
 use std::fmt;
-use std::ops::Deref;
 use std::sync::{Arc, OnceLock};
 
 use reqwest::RequestBuilder;
@@ -104,8 +103,8 @@ impl WebClient for Config {
 
 // TODO: remove this once authentication support is added
 #[derive(Debug)]
-pub struct Service {
-    pub config: Config,
+struct Service {
+    config: Config,
     _cache: ServiceCache,
     client: Client,
 }
@@ -138,17 +137,9 @@ impl ServiceBuilder {
 #[derive(Debug, Clone)]
 pub struct Redmine(Arc<Service>);
 
-impl Deref for Redmine {
-    type Target = Service;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
 impl PartialEq for Redmine {
     fn eq(&self, other: &Self) -> bool {
-        self.config == other.config
+        self.config() == other.config()
     }
 }
 
@@ -181,9 +172,17 @@ impl Redmine {
         Ok(ServiceBuilder(config))
     }
 
+    pub fn config(&self) -> &Config {
+        &self.0.config
+    }
+
+    pub fn client(&self) -> &Client {
+        &self.0.client
+    }
+
     /// Return the website URL for an item ID.
     pub fn item_url<I: fmt::Display>(&self, id: I) -> String {
-        let base = self.config.web_base().as_str().trim_end_matches('/');
+        let base = self.config().web_base().as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
 
@@ -208,7 +207,7 @@ impl WebService for Redmine {
         request: RequestBuilder,
         required: bool,
     ) -> crate::Result<RequestBuilder> {
-        let auth = &self.config.auth;
+        let auth = &self.config().auth;
         if let Some(key) = auth.key.as_ref() {
             Ok(request.header("X-Redmine-API-Key", key))
         } else if let (Some(user), Some(pass)) = (&auth.user, &auth.password) {
@@ -260,15 +259,15 @@ impl WebService for Redmine {
 
 impl WebClient for Redmine {
     fn base(&self) -> &Url {
-        self.config.base()
+        self.config().base()
     }
 
     fn kind(&self) -> ServiceKind {
-        self.config.kind()
+        self.config().kind()
     }
 
     fn name(&self) -> &str {
-        self.config.name()
+        self.config().name()
     }
 }
 

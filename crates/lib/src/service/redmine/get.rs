@@ -37,7 +37,7 @@ impl Request {
         for id in &self.ids {
             let mut url = self
                 .service
-                .config
+                .config()
                 .web_base()
                 .join(&format!("issues/{id}.json"))?;
             if !self.fields.is_empty() {
@@ -84,7 +84,7 @@ impl RequestSend for Request {
             .into_iter()
             .map(|u| {
                 self.service
-                    .client
+                    .client()
                     .get(u)
                     .auth_optional(&self.service)
                     .send()

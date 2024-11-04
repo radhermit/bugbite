@@ -20,8 +20,8 @@ impl RequestSend for Request {
     type Output = Vec<BugzillaField>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
-        let url = self.service.config.base.join("rest/field/bug")?;
-        let request = self.service.client.get(url);
+        let url = self.service.config().base.join("rest/field/bug")?;
+        let request = self.service.client().get(url);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         serde_json::from_value(data["fields"].take())

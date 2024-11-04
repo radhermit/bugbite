@@ -133,7 +133,7 @@ impl RequestSend for Request {
         let params = self.encode().await?;
         let request = self
             .service
-            .client
+            .client()
             .put(url)
             .json(&params)
             .auth(&self.service)?;
@@ -183,7 +183,7 @@ impl Request {
             .ids
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
-        let url = self.service.config.base.join(&format!("rest/bug/{id}"))?;
+        let url = self.service.config().base.join(&format!("rest/bug/{id}"))?;
         Ok(url)
     }
 

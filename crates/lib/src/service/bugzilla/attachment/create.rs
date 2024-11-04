@@ -410,7 +410,7 @@ impl Request {
 
         let url = self
             .service
-            .config
+            .config()
             .base
             .join(&format!("rest/bug/{id}/attachment"))?;
 
@@ -449,7 +449,7 @@ impl RequestSend for Request {
             let attachment = attachment.build(&self.ids, temp_dir_path)?;
             futures.push(
                 self.service
-                    .client
+                    .client()
                     .post(url.clone())
                     .json(&attachment)
                     .auth(&self.service)?

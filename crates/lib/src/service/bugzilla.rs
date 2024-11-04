@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 use std::fmt;
-use std::ops::Deref;
 use std::str::FromStr;
 use std::sync::{Arc, LazyLock};
 
@@ -106,8 +105,8 @@ impl WebClient for Config {
 }
 
 #[derive(Debug)]
-pub struct Service {
-    pub config: Config,
+struct Service {
+    config: Config,
     cache: ServiceCache,
     client: Client,
 }
@@ -155,17 +154,9 @@ impl ServiceBuilder {
 #[derive(Debug, Clone)]
 pub struct Bugzilla(Arc<Service>);
 
-impl Deref for Bugzilla {
-    type Target = Service;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
 impl PartialEq for Bugzilla {
     fn eq(&self, other: &Self) -> bool {
-        self.config == other.config
+        self.config() == other.config()
     }
 }
 
@@ -198,6 +189,14 @@ impl Bugzilla {
         Ok(ServiceBuilder(config))
     }
 
+    pub fn config(&self) -> &Config {
+        &self.0.config
+    }
+
+    pub fn client(&self) -> &Client {
+        &self.0.client
+    }
+
     /// Return the website URL for an item ID.
     pub fn item_url<I: fmt::Display>(&self, id: I) -> String {
         let base = self.base().as_str().trim_end_matches('/');
@@ -207,7 +206,7 @@ impl Bugzilla {
     fn deserialize_bug(&self, mut value: serde_json::Value) -> crate::Result<Bug> {
         let mut custom_fields = IndexMap::new();
         if let Some(map) = value.as_object_mut() {
-            for field in &self.cache.custom_fields {
+            for field in &self.0.cache.custom_fields {
                 let Some(value) = map.remove(&field.name.id) else {
                     continue;
                 };
@@ -233,7 +232,7 @@ impl Bugzilla {
     // TODO: support pulling aliases from the config?
     fn replace_user_alias<'a>(&'a self, value: &'a str) -> &'a str {
         if value == "@me" {
-            self.config.auth.user.as_deref().unwrap_or(value)
+            self.config().auth.user.as_deref().unwrap_or(value)
         } else {
             value
         }
@@ -342,7 +341,7 @@ impl WebService for Bugzilla {
         request: RequestBuilder,
         required: bool,
     ) -> crate::Result<RequestBuilder> {
-        let auth = &self.config.auth;
+        let auth = &self.config().auth;
         if let Some(key) = auth.key.as_ref() {
             Ok(request.query(&[("Bugzilla_api_key", key)]))
         } else if let (Some(user), Some(pass)) = (&auth.user, &auth.password) {
@@ -380,15 +379,15 @@ impl WebService for Bugzilla {
 
 impl WebClient for Bugzilla {
     fn base(&self) -> &Url {
-        self.config.base()
+        self.config().base()
     }
 
     fn kind(&self) -> ServiceKind {
-        self.config.kind()
+        self.config().kind()
     }
 
     fn name(&self) -> &str {
-        self.config.name()
+        self.config().name()
     }
 }
 

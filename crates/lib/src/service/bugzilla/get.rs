@@ -38,7 +38,7 @@ impl Request {
             .first()
             .ok_or_else(|| Error::InvalidRequest("no IDs specified".to_string()))?;
 
-        let mut url = self.service.config.base.join(&format!("rest/bug/{id}"))?;
+        let mut url = self.service.config().base.join(&format!("rest/bug/{id}"))?;
 
         // Note that multiple request support is missing from upstream's REST API
         // documentation, but exists in older RPC-based docs.
@@ -90,7 +90,7 @@ impl RequestSend for Request {
     async fn send(&self) -> crate::Result<Self::Output> {
         let request = self
             .service
-            .client
+            .client()
             .get(self.url()?)
             .auth_optional(&self.service);
 

@@ -151,7 +151,7 @@ mod tests {
             .unwrap()
             .build()
             .unwrap();
-        assert!(service.config.auth.user.is_none());
+        assert!(service.config().auth.user.is_none());
 
         let dir = tempdir().unwrap();
         let dir_path = dir.path().to_str().unwrap();
@@ -192,7 +192,7 @@ mod tests {
             .build()
             .unwrap();
         assert_eq!(
-            service.config.auth.user.as_deref().unwrap(),
+            service.config().auth.user.as_deref().unwrap(),
             "user@email.com"
         );
     }

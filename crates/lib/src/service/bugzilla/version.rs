@@ -21,8 +21,8 @@ impl RequestSend for Request {
     type Output = String;
 
     async fn send(&self) -> crate::Result<Self::Output> {
-        let url = self.service.config.base.join("rest/version")?;
-        let request = self.service.client.get(url).auth_optional(&self.service);
+        let url = self.service.config().base.join("rest/version")?;
+        let request = self.service.client().get(url).auth_optional(&self.service);
 
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;

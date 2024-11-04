@@ -1,5 +1,4 @@
 use std::fmt;
-use std::ops::Deref;
 use std::sync::Arc;
 
 use reqwest::RequestBuilder;
@@ -69,10 +68,10 @@ impl WebClient for Config {
 }
 
 #[derive(Debug)]
-pub struct Service {
-    pub config: Config,
+struct Service {
+    config: Config,
     _cache: ServiceCache,
-    _client: Client,
+    client: Client,
 }
 
 #[derive(Debug)]
@@ -91,11 +90,11 @@ impl ServiceBuilder {
 
     /// Create a new service.
     pub fn build(self) -> crate::Result<Github> {
-        let _client = self.0.client.build()?;
+        let client = self.0.client.build()?;
         Ok(Github(Arc::new(Service {
             config: self.0,
             _cache: Default::default(),
-            _client,
+            client,
         })))
     }
 }
@@ -103,17 +102,9 @@ impl ServiceBuilder {
 #[derive(Debug, Clone)]
 pub struct Github(Arc<Service>);
 
-impl Deref for Github {
-    type Target = Service;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
 impl PartialEq for Github {
     fn eq(&self, other: &Self) -> bool {
-        self.config == other.config
+        self.config() == other.config()
     }
 }
 
@@ -144,6 +135,14 @@ impl Github {
             .into_github()
             .unwrap();
         Ok(ServiceBuilder(config))
+    }
+
+    pub fn config(&self) -> &Config {
+        &self.0.config
+    }
+
+    pub fn client(&self) -> &Client {
+        &self.0.client
     }
 
     /// Return the website URL for an item ID.
@@ -183,15 +182,15 @@ impl WebService for Github {
 
 impl WebClient for Github {
     fn base(&self) -> &Url {
-        self.config.base()
+        self.config().base()
     }
 
     fn kind(&self) -> ServiceKind {
-        self.config.kind()
+        self.config().kind()
     }
 
     fn name(&self) -> &str {
-        self.config.name()
+        self.config().name()
     }
 }
 

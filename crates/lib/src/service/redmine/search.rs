@@ -52,14 +52,14 @@ impl RequestPagedStream for Request {
     type Item = Issue;
 
     fn concurrent(&self) -> Option<usize> {
-        self.service.client.params.concurrent
+        self.service.client().params.concurrent
     }
 
     fn paged(&mut self) -> Option<usize> {
         if self.params.paged.unwrap_or_default() || self.params.limit.is_none() {
             self.params
                 .limit
-                .get_or_insert_with(|| self.service.config.max_search_results());
+                .get_or_insert_with(|| self.service.config().max_search_results());
             self.params.offset.get_or_insert_with(Default::default);
             self.params.limit
         } else {
@@ -79,10 +79,10 @@ impl RequestPagedStream for Request {
     }
 
     async fn send(self) -> crate::Result<Vec<Issue>> {
-        let mut url = self.service.config.base.join("issues.json")?;
+        let mut url = self.service.config().base.join("issues.json")?;
         let query = self.encode()?;
         url.query_pairs_mut().extend_pairs(query.iter());
-        let request = self.service.client.get(url).auth_optional(&self.service);
+        let request = self.service.client().get(url).auth_optional(&self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
         let data = data["issues"].take();
@@ -189,7 +189,7 @@ impl Request {
 
     /// Return the website URL for a query.
     pub fn search_url(self) -> crate::Result<Url> {
-        let mut url = self.service.config.base.join("issues?set_filter=1")?;
+        let mut url = self.service.config().base.join("issues?set_filter=1")?;
         let query = self.encode()?;
         url.query_pairs_mut().extend_pairs(query.iter());
         Ok(url)

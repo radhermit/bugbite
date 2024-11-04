@@ -55,7 +55,7 @@ impl Request {
 
         let url = self
             .service
-            .config
+            .config()
             .base
             .join(&format!("rest/bug/attachment/{id}"))?;
 
@@ -71,7 +71,7 @@ impl RequestSend for Request {
         let params = self.encode()?;
         let request = self
             .service
-            .client
+            .client()
             .put(url)
             .json(&params)
             .auth(&self.service)?;
