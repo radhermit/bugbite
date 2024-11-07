@@ -148,11 +148,11 @@ impl ClientParameters {
 
         // force enabled TLS backend using native-tls when both are enabled
         #[cfg(feature = "rustls-tls")]
-        if cfg!(feature = "rustls-tls") {
+        {
             builder = builder.use_rustls_tls();
         }
         #[cfg(feature = "native-tls")]
-        if cfg!(feature = "native-tls") {
+        {
             builder = builder.use_native_tls();
         }
 
