@@ -146,6 +146,11 @@ impl ClientParameters {
             .timeout(Duration::from_secs_f64(self.timeout.unwrap_or(30.0)))
             .user_agent(USER_AGENT);
 
+        // force rustls usage when enabled
+        if cfg!(feature = "rustls-tls") {
+            builder = builder.use_rustls_tls();
+        }
+
         if let Some(proxy) = &self.proxy {
             let url = Url::parse(proxy)
                 .map_err(|e| Error::InvalidValue(format!("invalid proxy URL: {e}")))?;

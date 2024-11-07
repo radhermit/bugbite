@@ -17,7 +17,11 @@ workspace = true
 name = "bugbite"
 
 [features]
-default = []
+default = ["rustls-tls"]
+# use system libraries for TLS
+native-tls = ["reqwest/native-tls"]
+# use rustls for TLS
+rustls-tls = ["reqwest/rustls-tls"]
 # support rendering output
 output = ["dep:crossterm", "dep:textwrap", "dep:unicode-segmentation"]
 # support for python bindings
@@ -67,7 +71,7 @@ wiremock = { version = "0.6.2", optional = true }
 [dependencies.reqwest]
 version = "0.12.9"
 default-features = false
-features = ["cookies", "hickory-dns", "json", "rustls-tls", "socks"]
+features = ["cookies", "hickory-dns", "json", "socks"]
 
 [dev-dependencies]
 indoc = "2.0.5"
