@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.0.13
+
+### Added
+
+- Import render support for cli to provide Display trait support for items.
+- Send and process concurrent requests while paging for search support.
+- Support a configurable concurrent request limit.
+- Support a default connection via the ~/.config/bugbite/bugbite.toml config file.
+- Use `BUGBITE_CONFIG_DIR` instead of `BUGBITE_CONFIG` for config override via environment.
+- Add SOCKS proxy support.
+- Support overriding the system proxy settings via client parameters.
+- Support default client parameters such as a custom connection timeout.
+- Add native-tls and rustls-tls features to allow TLS backend choice, defaulting to rustls.
+
+### Changed
+
+- Move to using non-consuming mutation combinators for building requests.
+- Split comma-separated values when reading from standard input for arguments
+  which allows using rendered search output for multi-valued fields for input
+  values.
+- Bump the minimum supported rust version to 1.80.
+
+#### Bugzilla
+
+- search: Don't use logical AND for ID parameters with regular values fixing
+  queries trying to match against a list of ID values piped from standard
+  input.
+
 ## 0.0.12
 
 ### Added

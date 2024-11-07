@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.0.13
+
+### Added
+
+- Support a configurable concurrent request limit.
+- Support service type positional arguments for the `show connections` command.
+- Support overriding the system proxy settings via client parameters.
+- Add native-tls and rustls-tls features to allow TLS backend choice, defaulting to rustls.
+
+### Changed
+
+- Use visible aliases for subcommands which also allows for generation shell
+  completion to work for aliases.
+- Bump the minimum supported rust version to 1.80.
+
 ## 0.0.12
 
 ### Fixed
