@@ -31,7 +31,11 @@ name = "bugzilla"
 required-features = ["test-bugzilla"]
 
 [features]
-default = []
+default = ["rustls-tls"]
+# use system libraries for TLS
+native-tls = ["bugbite/native-tls"]
+# use rustls for TLS
+rustls-tls = ["bugbite/rustls-tls"]
 # build shell completion
 generate = ["dep:clap_complete"]
 # test support
