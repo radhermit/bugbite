@@ -144,7 +144,6 @@ impl ClientParameters {
             .hickory_dns(true)
             .pool_max_idle_per_host(self.concurrent.unwrap_or(3))
             .timeout(Duration::from_secs_f64(self.timeout.unwrap_or(30.0)))
-            .use_rustls_tls()
             .user_agent(USER_AGENT);
 
         if let Some(proxy) = &self.proxy {
