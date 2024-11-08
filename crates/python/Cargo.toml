@@ -16,7 +16,7 @@ name = "bugbite"
 crate-type = ["cdylib"]
 
 [dependencies]
-bugbite = { path = "../lib", version = "0.0.13", features = ["output", "python"] }
+bugbite = { path = "../lib", version = "0.0.14", features = ["output", "python"] }
 chrono = "0.4.38"
 futures-util = "0.3.31"
 indexmap = "2.6.0"
