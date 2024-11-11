@@ -78,3 +78,9 @@ ctor = "0.2.8"
 predicates = "3.1.2"
 tokio = { version = "1.41.1", features = ["full"] }
 wiremock = { version = "0.6.2" }
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/{ name }-{ version }/{ name }-{ version }-{ target }{ archive-suffix }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "txz"
+disabled-strategies = ["quick-install", "compile"]
