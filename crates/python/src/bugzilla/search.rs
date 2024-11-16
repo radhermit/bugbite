@@ -44,7 +44,7 @@ impl SearchRequest {
             self.0.alias(value);
         } else if let Ok(value) = value.downcast::<PyBool>() {
             self.0.alias(value.is_true());
-        } else if let Ok(values) = value.iter() {
+        } else if let Ok(values) = value.try_iter() {
             let values: Vec<_> = values
                 .filter_map(|x| x.ok())
                 .map(|x| x.to_str_owned())
@@ -63,7 +63,7 @@ impl SearchRequest {
             self.0.cc(value);
         } else if let Ok(value) = value.downcast::<PyBool>() {
             self.0.cc(value.is_true());
-        } else if let Ok(values) = value.iter() {
+        } else if let Ok(values) = value.try_iter() {
             let values: Vec<_> = values
                 .filter_map(|x| x.ok())
                 .map(|x| x.to_str_owned())
@@ -98,7 +98,7 @@ impl SearchRequest {
     pub(super) fn status(&mut self, value: Bound<'_, PyAny>) -> PyResult<()> {
         if let Ok(value) = value.to_str() {
             self.0.status([value]);
-        } else if let Ok(values) = value.iter() {
+        } else if let Ok(values) = value.try_iter() {
             let values: Vec<_> = values
                 .filter_map(|x| x.ok())
                 .map(|x| x.to_str_owned())
@@ -119,6 +119,6 @@ impl SearchRequest {
 }
 
 #[pyclass(module = "bugbite.bugzilla")]
-struct SearchIter(Pin<Box<dyn Stream<Item = bugbite::Result<bugzilla::Bug>> + Send>>);
+struct SearchIter(Pin<Box<dyn Stream<Item = bugbite::Result<bugzilla::Bug>> + Sync + Send>>);
 
 stream_iterator!(SearchIter, Bug);

@@ -62,6 +62,6 @@ impl SearchRequest {
 }
 
 #[pyclass(module = "bugbite.redmine")]
-struct SearchIter(Pin<Box<dyn Stream<Item = bugbite::Result<redmine::Issue>> + Send>>);
+struct SearchIter(Pin<Box<dyn Stream<Item = bugbite::Result<redmine::Issue>> + Sync + Send>>);
 
 stream_iterator!(SearchIter, Issue);

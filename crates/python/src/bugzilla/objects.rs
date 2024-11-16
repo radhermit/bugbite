@@ -96,27 +96,27 @@ impl Bug {
 
     #[getter]
     fn groups<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
-        PyFrozenSet::new_bound(py, &self.0.groups)
+        PyFrozenSet::new(py, &self.0.groups)
     }
 
     #[getter]
     fn keywords<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
-        PyFrozenSet::new_bound(py, &self.0.keywords)
+        PyFrozenSet::new(py, &self.0.keywords)
     }
 
     #[getter]
     fn cc<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
-        PyFrozenSet::new_bound(py, &self.0.cc)
+        PyFrozenSet::new(py, &self.0.cc)
     }
 
     #[getter]
     fn tags<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
-        PyFrozenSet::new_bound(py, &self.0.tags)
+        PyFrozenSet::new(py, &self.0.tags)
     }
 
     #[getter]
     fn see_also<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
-        PyFrozenSet::new_bound(py, &self.0.see_also)
+        PyFrozenSet::new(py, &self.0.see_also)
     }
 
     #[getter]
@@ -131,12 +131,12 @@ impl Bug {
 
     #[getter]
     fn blocks<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
-        PyFrozenSet::new_bound(py, &self.0.blocks)
+        PyFrozenSet::new(py, &self.0.blocks)
     }
 
     #[getter]
     fn depends_on<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyFrozenSet>> {
-        PyFrozenSet::new_bound(py, &self.0.depends_on)
+        PyFrozenSet::new(py, &self.0.depends_on)
     }
 
     #[getter]
