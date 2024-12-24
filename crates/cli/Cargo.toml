@@ -18,9 +18,9 @@ name = "bite"
 path = "src/main.rs"
 
 [[bin]]
-name = "generate"
-path = "src/generate.rs"
-required-features = ["generate"]
+name = "bite-shell-comp"
+path = "src/shell.rs"
+required-features = ["shell"]
 
 [[test]]
 name = "bite"
@@ -36,8 +36,8 @@ default = ["rustls-tls"]
 native-tls = ["bugbite/native-tls"]
 # use rustls for TLS
 rustls-tls = ["bugbite/rustls-tls"]
-# build shell completion
-generate = ["dep:clap_complete"]
+# shell completion support
+shell = ["dep:clap_complete"]
 # test support
 test = ["bugbite/test"]
 # bugzilla integration tests that require a local instance
