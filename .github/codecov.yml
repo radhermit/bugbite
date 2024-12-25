@@ -1,3 +1,5 @@
 ignore:
   - "crates/python"
   - "crates/tui"
+  # ignore binaries that generate shell completion files
+  - "crates/*/src/shell.rs"

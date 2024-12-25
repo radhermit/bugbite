@@ -101,17 +101,10 @@ jobs:
       run: |
         # only collect code coverage for the latest rust release on linux
         if [[ ${{ matrix.rust-version }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
-          # run tests while collecting coverage data
           cargo llvm-cov --no-report nextest --features test --workspace --tests
-          # generate shell completion files
-          cargo llvm-cov --no-report run --features shell --bin bite-shell-comp -p bugbite-cli
-          # generate coverage reports
           cargo llvm-cov report --lcov --output-path lcov.info
         else
-          # run tests
           cargo nextest run --features test --workspace --tests
-          # generate shell completion files
-          cargo run --features shell --bin bite-shell-comp -p bugbite-cli
         fi
 
     - name: Upload build artifacts
