@@ -103,6 +103,8 @@ jobs:
         if [[ ${{ matrix.rust-version }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
           cargo llvm-cov --no-report nextest --features test --workspace --tests
           cargo llvm-cov report --lcov --output-path lcov.info
+          # remove generated coverage data to avoid caching it
+          find . -name \*.profraw -delete
         else
           cargo nextest run --features test --workspace --tests
         fi
