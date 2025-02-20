@@ -156,7 +156,7 @@ async fn reply() {
     let server = start_server_with_auth().await;
 
     // override interactive editor default
-    env::set_var("EDITOR", "sed -i -e '$a\\\n\\\nreply'");
+    unsafe { env::set_var("EDITOR", "sed -i -e '$a\\\n\\\nreply'") };
 
     for opt in ["-R", "--reply"] {
         // invalid
@@ -289,7 +289,7 @@ async fn comment() {
         .await;
 
     // override interactive editor default
-    env::set_var("EDITOR", "tee");
+    unsafe { env::set_var("EDITOR", "tee") };
 
     for opt in ["-c", "--comment"] {
         // no output by default

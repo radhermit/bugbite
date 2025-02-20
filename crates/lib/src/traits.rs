@@ -292,8 +292,10 @@ mod tests {
         // depends on linux specific config dir handling
         if cfg!(target_os = "linux") {
             // $XDG_CONFIG_HOME takes precedence over $HOME
-            env::set_var("HOME", dir.path());
-            env::set_var("XDG_CONFIG_HOME", dir.path());
+            unsafe {
+                env::set_var("HOME", dir.path());
+                env::set_var("XDG_CONFIG_HOME", dir.path());
+            }
             request1.save_template("test").unwrap();
             assert_eq!(
                 fs::read_to_string("bugbite/templates/service/search/test")
@@ -305,7 +307,7 @@ mod tests {
             assert_eq!(request1, request2);
 
             // $HOME is used when $XDG_CONFIG_HOME is unset
-            env::remove_var("XDG_CONFIG_HOME");
+            unsafe { env::remove_var("XDG_CONFIG_HOME") };
             request1.save_template("test").unwrap();
             assert_eq!(
                 fs::read_to_string(".config/bugbite/templates/service/search/test")

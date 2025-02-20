@@ -80,14 +80,16 @@ mod tests {
 
     #[tokio::test]
     async fn doc() {
-        // wipe bugbite-related environment variables
-        for (key, _value) in env::vars() {
-            if key.starts_with("BUGBITE_") {
-                env::remove_var(key);
+        unsafe {
+            // wipe bugbite-related environment variables
+            for (key, _value) in env::vars() {
+                if key.starts_with("BUGBITE_") {
+                    env::remove_var(key);
+                }
             }
-        }
 
-        env::set_var("BUGBITE_CONNECTION", "doc-test");
+            env::set_var("BUGBITE_CONNECTION", "doc-test");
+        }
 
         let doc_dir = build_path!(env!("CARGO_MANIFEST_DIR"), "doc");
         for entry in doc_dir.read_dir_utf8().unwrap() {

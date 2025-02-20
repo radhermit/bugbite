@@ -19,29 +19,33 @@ pub(crate) static TEST_DATA_PATH: LazyLock<Utf8PathBuf> =
 
 async fn start_server() -> TestServer {
     let server = TestServer::new().await;
-    env::set_var("BUGBITE_CONNECTION", server.uri());
+    unsafe { env::set_var("BUGBITE_CONNECTION", server.uri()) };
     server
 }
 
 async fn start_server_with_auth() -> TestServer {
-    let server = start_server().await;
-    env::set_var("BUGBITE_USER", "bugbite@bugbite.test");
-    env::set_var("BUGBITE_PASS", "bugbite");
-    env::set_var("BUGBITE_KEY", "bugbite");
-    server
+    unsafe {
+        env::set_var("BUGBITE_USER", "bugbite@bugbite.test");
+        env::set_var("BUGBITE_PASS", "bugbite");
+        env::set_var("BUGBITE_KEY", "bugbite");
+    }
+
+    start_server().await
 }
 
 /// Initialization for all test executables.
 #[ctor::ctor]
 fn initialize() {
-    // avoid spawning a real browser or editor by default
-    env::set_var("EDITOR", "true");
-    env::set_var("BROWSER", "true");
+    unsafe {
+        // avoid spawning a real browser or editor by default
+        env::set_var("EDITOR", "true");
+        env::set_var("BROWSER", "true");
 
-    // wipe bugbite-related environment variables
-    for (key, _value) in env::vars() {
-        if key.starts_with("BUGBITE_") {
-            env::remove_var(key);
+        // wipe bugbite-related environment variables
+        for (key, _value) in env::vars() {
+            if key.starts_with("BUGBITE_") {
+                env::remove_var(key);
+            }
         }
     }
 }

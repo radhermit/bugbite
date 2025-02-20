@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn load() {
         // ignore system user config
-        env::set_var("BUGBITE_CONFIG_DIR", "false");
+        unsafe { env::set_var("BUGBITE_CONFIG_DIR", "false") };
 
         let mut config = Config::new().unwrap();
         assert!(!config.services.is_empty());
