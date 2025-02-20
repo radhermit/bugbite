@@ -124,7 +124,7 @@ impl Request {
     }
 
     /// Return the matching stream of items for a given request.
-    pub fn stream(&self) -> impl Stream<Item = crate::Result<Bug>> {
+    pub fn stream(&self) -> impl Stream<Item = crate::Result<Bug>> + 'static {
         RequestPagedStream::paged_stream(self.clone())
     }
 
