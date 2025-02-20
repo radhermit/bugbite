@@ -405,7 +405,7 @@ struct Params {
 impl From<Params> for Parameters {
     fn from(value: Params) -> Self {
         Self {
-            fields: Some(value.query.fields.into_iter().map(Into::into).collect()),
+            fields: Some(value.query.fields.into_iter().collect()),
             limit: value.query.limit,
             offset: value.query.offset,
             order: value.query.order.map(|x| x.into_iter().collect()),
