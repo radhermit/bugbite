@@ -77,7 +77,7 @@ pub enum RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {
 
 impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for RangeOrSet<T>
 where
-    <T as FromStr>::Err: fmt::Display + fmt::Debug,
+    T::Err: fmt::Display + fmt::Debug,
 {
     type Err = crate::Error;
 

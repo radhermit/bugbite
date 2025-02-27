@@ -38,7 +38,7 @@ impl<T: fmt::Display + FromStr> CsvOrStdin<T> {
 impl<T> FromStr for CsvOrStdin<T>
 where
     T: fmt::Display + FromStr,
-    <T as FromStr>::Err: fmt::Display,
+    T::Err: fmt::Display,
 {
     type Err = Error;
 

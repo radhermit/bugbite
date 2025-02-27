@@ -21,7 +21,7 @@ impl<T: fmt::Display + FromStr> Csv<T> {
 impl<T> FromStr for Csv<T>
 where
     T: fmt::Display + FromStr,
-    <T as FromStr>::Err: fmt::Display,
+    T::Err: fmt::Display,
 {
     type Err = Error;
 

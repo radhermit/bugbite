@@ -68,7 +68,7 @@ pub enum RangeOrValue<T: Eq> {
 impl<T> FromStr for RangeOrValue<T>
 where
     T: FromStr + Eq,
-    <T as FromStr>::Err: std::fmt::Display + std::fmt::Debug,
+    T::Err: std::fmt::Display + std::fmt::Debug,
 {
     type Err = Error;
 
@@ -159,7 +159,7 @@ pub enum RangeOp<T: Eq> {
 impl<T> FromStr for RangeOp<T>
 where
     T: FromStr + Eq,
-    <T as FromStr>::Err: std::fmt::Display + std::fmt::Debug,
+    T::Err: std::fmt::Display + std::fmt::Debug,
 {
     type Err = Error;
 
@@ -211,7 +211,7 @@ pub enum Range<T: Eq> {
 impl<T> FromStr for Range<T>
 where
     T: FromStr + Eq,
-    <T as FromStr>::Err: std::fmt::Display + std::fmt::Debug,
+    T::Err: std::fmt::Display + std::fmt::Debug,
 {
     type Err = Error;
 

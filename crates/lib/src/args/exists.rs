@@ -26,7 +26,7 @@ impl<T> ExistsOrValues<MaybeStdinVec<T>> {
 impl<T> FromStr for ExistsOrValues<T>
 where
     T: FromStr,
-    <T as FromStr>::Err: fmt::Display,
+    T::Err: fmt::Display,
 {
     type Err = Error;
 

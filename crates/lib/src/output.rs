@@ -81,12 +81,12 @@ fn truncate(data: &str, width: usize) -> Cow<'_, str> {
 }
 
 /// Output an iterable field in truncated list format.
-fn truncated_list<W, I, S>(f: &mut W, name: &str, data: I, width: usize) -> io::Result<()>
+fn truncated_list<W, I>(f: &mut W, name: &str, data: I, width: usize) -> io::Result<()>
 where
     W: Write,
-    I: IntoIterator<Item = S>,
-    <I as IntoIterator>::IntoIter: ExactSizeIterator,
-    S: std::fmt::Display,
+    I: IntoIterator,
+    I::IntoIter: ExactSizeIterator,
+    I::Item: std::fmt::Display,
 {
     let mut values = data.into_iter();
     match values.len().cmp(&1) {
