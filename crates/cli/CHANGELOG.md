@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.14
+
+### Changed
+
+- Bump the minimum supported rust version to 1.84.
+
 ## 0.0.13
 
 ### Added
