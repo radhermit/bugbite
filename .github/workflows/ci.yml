@@ -38,9 +38,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        rust-version: [${{ needs.msrv.outputs.version }}, stable]
         include:
+          - os: ubuntu-latest
+            rust-version: ${{ needs.msrv.outputs.version }}
+          - os: ubuntu-latest
+            rust-version: stable
           - os: macos-latest
             rust-version: stable
 
