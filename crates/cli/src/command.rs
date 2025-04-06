@@ -30,7 +30,7 @@ fn enable_logging(verbosity: LevelFilter) {
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "bite",
+    name = env!("CARGO_BIN_NAME"),
     version,
     about = "command line tool for mangling bugs, issues, and tickets",
     disable_help_subcommand = true,

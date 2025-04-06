@@ -17,11 +17,6 @@ workspace = true
 name = "bite"
 path = "src/main.rs"
 
-[[bin]]
-name = "bite-shell-comp"
-path = "src/shell.rs"
-required-features = ["shell"]
-
 [[test]]
 name = "bite"
 required-features = ["test"]
@@ -36,8 +31,6 @@ default = ["rustls-tls"]
 native-tls = ["bugbite/native-tls"]
 # use rustls for TLS
 rustls-tls = ["bugbite/rustls-tls"]
-# shell completion support
-shell = ["dep:clap_complete"]
 # test support
 test = ["bugbite/test"]
 # bugzilla integration tests that require a local instance
@@ -49,7 +42,7 @@ bugbite = { path = "../lib", version = "0.0.14", features = ["output"] }
 byte-unit = "5.1.6"
 camino = { version = "1.1.9", features = ["serde1"] }
 clap = { version = "4.5.35", features = ["cargo", "derive", "env", "wrap_help"] }
-clap_complete = { version = "4.5.47", optional = true }
+clap_complete = "4.5.47"
 clap-verbosity-flag = "3.0.2"
 crossterm = "0.28.1"
 enum-as-inner = "0.6.1"

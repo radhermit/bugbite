@@ -47,7 +47,7 @@ jobs:
           exit 1
         fi
 
-  shellcomp:
+  shell:
     needs: msrv
     runs-on: ubuntu-latest
     steps:
@@ -60,19 +60,19 @@ jobs:
         toolchain: ${{ needs.msrv.outputs.version }}
 
     - name: Generate files
-      run: cargo run --features shell --bin bite-shell-comp -p bugbite-cli
+      run: cargo run --bin bite completion --dir shell
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: shellcomp
+        name: shell
         path: shell
         if-no-files-found: error
         retention-days: 3
 
   source:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [man, shellcomp, msrv]
+    needs: [man, shell, msrv]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -95,7 +95,7 @@ jobs:
     - name: Download generated shell completion
       uses: actions/download-artifact@v4
       with:
-        name: shellcomp
+        name: shell
         path: shell
 
     - name: Create archive

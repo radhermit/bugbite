@@ -6,6 +6,7 @@ use strum::VariantNames;
 
 use crate::service::*;
 
+mod completion;
 mod show;
 
 #[derive(VariantNames, clap::Subcommand, Debug)]
@@ -20,6 +21,8 @@ pub(crate) enum Subcommand {
     Redmine(redmine::Command),
 
     // regular subcommands
+    /// generate shell completion
+    Completion(completion::Command),
     /// show service information
     Show(show::Command),
 }
@@ -33,6 +36,7 @@ impl Subcommand {
             Self::Bugzilla(cmd) => cmd.run(&config, &mut stdout).await,
             Self::Github(cmd) => cmd.run(&config, &mut stdout).await,
             Self::Redmine(cmd) => cmd.run(&config, &mut stdout).await,
+            Self::Completion(cmd) => cmd.run(),
             Self::Show(cmd) => cmd.run(&config, &mut stdout),
         }
     }
