@@ -2,6 +2,10 @@
 
 ## 0.0.14
 
+### Added
+
+- Support generating shell completion via `bite completion`.
+
 ### Changed
 
 - Bump the minimum supported rust version to 1.84.
