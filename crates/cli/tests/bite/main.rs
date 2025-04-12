@@ -11,6 +11,7 @@ use tempfile::tempdir;
 use command::cmd;
 
 mod command;
+mod completion;
 mod service;
 mod show;
 
