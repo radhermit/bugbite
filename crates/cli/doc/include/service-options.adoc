@@ -19,10 +19,10 @@ This can be used to connect to a server that has a self-signed certificate
 without having to use `--insecure`. Note that this requires a PEM encoded
 certificate file.
 
-*--insecure*::
+*-I, --insecure*::
     Ignore invalid service certificates when connecting.
 
-*--proxy <URL>*::
+*-P, --proxy <URL>*::
     Use a custom proxy.
 
 *-t, --timeout <seconds>*::

@@ -24,6 +24,7 @@ struct ServiceOptions {
 
     /// ignore invalid service certificates
     #[arg(
+        short = 'I',
         long,
         num_args = 0,
         default_missing_value = "true",
@@ -32,7 +33,7 @@ struct ServiceOptions {
     insecure: Option<bool>,
 
     /// custom proxy
-    #[arg(long, value_name = "URL")]
+    #[arg(short = 'P', long, value_name = "URL")]
     proxy: Option<String>,
 
     /// request timeout in seconds
