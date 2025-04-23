@@ -13,23 +13,33 @@ mod service;
 mod subcmds;
 mod utils;
 
-fn enable_logging(verbosity: LevelFilter) {
+fn enable_logging(cmd: &Command) {
     // enable verbose output
-    if verbosity >= LevelFilter::Info {
+    let level = cmd.verbosity.log_level_filter();
+    if level >= LevelFilter::Info {
         verbose!(true);
     };
 
+    // create custom log event formatter
     let format = tracing_subscriber::fmt::format()
         .with_level(true)
         .with_target(true)
         .without_time()
         .compact();
 
-    tracing_subscriber::fmt()
+    // create formatting subscriber that uses stderr
+    let mut subscriber = tracing_subscriber::fmt()
         .event_format(format)
-        .with_max_level(verbosity.as_trace())
-        .with_writer(stderr)
-        .init();
+        .with_max_level(level.as_trace())
+        .with_writer(stderr);
+
+    // forcibly enable or disable subscriber output color
+    if let Some(value) = cmd.color {
+        subscriber = subscriber.with_ansi(value);
+    }
+
+    // initialize global subscriber
+    subscriber.init();
 }
 
 #[derive(Parser, Debug)]
@@ -52,6 +62,10 @@ pub(crate) struct Command {
     #[clap(flatten)]
     verbosity: Verbosity<WarnLevel>,
 
+    /// Enable/disable color support
+    #[arg(long, value_name = "BOOL", hide_possible_values = true, global = true)]
+    color: Option<bool>,
+
     #[command(subcommand)]
     subcmd: Subcommand,
 }
@@ -59,7 +73,9 @@ pub(crate) struct Command {
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
     let cmd = Command::parse();
-    enable_logging(cmd.verbosity.log_level_filter());
+
+    // enable logging support
+    enable_logging(&cmd);
 
     // TODO: drop this once stable rust supports `unix_sigpipe`,
     // see https://github.com/rust-lang/rust/issues/97889.
