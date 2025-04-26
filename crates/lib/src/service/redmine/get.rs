@@ -4,10 +4,10 @@ use reqwest::StatusCode;
 use strum::Display;
 use url::Url;
 
+use crate::Error;
 use crate::objects::redmine::{Comment, Issue};
 use crate::service::redmine::Redmine;
 use crate::traits::{InjectAuth, RequestSend, WebService};
-use crate::Error;
 
 #[derive(Debug)]
 pub struct Request {
@@ -145,7 +145,7 @@ impl RequestSend for Request {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::{matchers, ResponseTemplate};
+    use wiremock::{ResponseTemplate, matchers};
 
     use crate::test::*;
 

@@ -9,8 +9,8 @@ use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{AsRefStr, Display, EnumIter, EnumString, VariantNames};
 use url::Url;
 
-use crate::traits::{Merge, MergeOption, WebClient};
 use crate::Error;
+use crate::traits::{Merge, MergeOption, WebClient};
 
 pub mod bugzilla;
 pub mod github;

@@ -1,10 +1,10 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::io::{self, IsTerminal, Write};
-use std::sync::{atomic::AtomicBool, LazyLock};
+use std::sync::{LazyLock, atomic::AtomicBool};
 
 use crossterm::terminal;
-use futures_util::{pin_mut, Stream, TryStreamExt};
+use futures_util::{Stream, TryStreamExt, pin_mut};
 use itertools::Itertools;
 use serde::Serialize;
 use unicode_segmentation::UnicodeSegmentation;

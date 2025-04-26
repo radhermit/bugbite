@@ -2,7 +2,7 @@ use std::fs;
 use std::sync::atomic::Ordering;
 
 use camino::Utf8Path;
-use wiremock::{matchers, Match, Mock, MockServer, ResponseTemplate};
+use wiremock::{Match, Mock, MockServer, ResponseTemplate, matchers};
 
 use crate::args::maybe_stdin::STDIN_HAS_BEEN_USED;
 

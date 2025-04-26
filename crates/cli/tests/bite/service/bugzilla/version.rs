@@ -1,5 +1,5 @@
 use predicates::prelude::*;
-use wiremock::{matchers, ResponseTemplate};
+use wiremock::{ResponseTemplate, matchers};
 
 use super::*;
 

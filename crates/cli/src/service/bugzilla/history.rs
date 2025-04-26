@@ -2,9 +2,9 @@ use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
-use bugbite::output::{Render, COLUMNS};
-use bugbite::service::bugzilla::history::*;
+use bugbite::output::{COLUMNS, Render};
 use bugbite::service::bugzilla::Bugzilla;
+use bugbite::service::bugzilla::history::*;
 use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::RequestSend;
 use clap::Args;

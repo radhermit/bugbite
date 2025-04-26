@@ -3,7 +3,7 @@ use std::process::ExitCode;
 
 use bugbite::output::verbose;
 use clap::Parser;
-use clap_verbosity_flag::{log::LevelFilter, Verbosity, WarnLevel};
+use clap_verbosity_flag::{Verbosity, WarnLevel, log::LevelFilter};
 use tracing_log::AsTrace;
 
 use crate::subcmds::Subcommand;

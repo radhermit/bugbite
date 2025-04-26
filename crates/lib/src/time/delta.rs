@@ -7,8 +7,8 @@ use chronoutil::RelativeDuration;
 use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
-use crate::traits::Api;
 use crate::Error;
+use crate::traits::Api;
 
 static RELATIVE_TIME_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^(?<value>\d+)(?<unit>[[:alpha:]]+)$").unwrap());

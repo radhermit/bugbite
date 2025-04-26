@@ -2,12 +2,12 @@ use std::fmt;
 use std::str::FromStr;
 use std::sync::LazyLock;
 
-use chrono::{offset::Utc, DateTime, NaiveDate, NaiveTime};
+use chrono::{DateTime, NaiveDate, NaiveTime, offset::Utc};
 use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
-use crate::traits::Api;
 use crate::Error;
+use crate::traits::Api;
 
 static STATIC_DATE_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^(?<year>\d\d\d\d)(-(?<month>\d\d))?(-(?<day>\d\d))?$").unwrap());

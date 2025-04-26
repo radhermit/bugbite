@@ -1,10 +1,10 @@
 use serde_json::Value;
 use url::Url;
 
+use crate::Error;
 use crate::objects::bugzilla::Bug;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, RequestSend, WebService};
-use crate::Error;
 
 use super::{attachment, comment, history};
 

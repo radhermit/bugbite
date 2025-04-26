@@ -5,8 +5,8 @@ use std::process::ExitCode;
 use bugbite::config::Config;
 use bugbite::service::ServiceKind;
 use bugbite::traits::WebClient;
-use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Args;
+use clap::builder::{PossibleValuesParser, TypedValueParser};
 use strum::{IntoEnumIterator, VariantNames};
 
 #[derive(Args, Debug)]

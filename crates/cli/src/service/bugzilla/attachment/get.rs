@@ -2,7 +2,7 @@ use std::fs;
 use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use bugbite::args::MaybeStdinVec;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::traits::RequestSend;

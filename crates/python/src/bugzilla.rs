@@ -77,7 +77,7 @@ impl Bugzilla {
                     kw => {
                         return Err(BugbiteError::new_err(format!(
                             "invalid search parameter: {kw}"
-                        )))
+                        )));
                     }
                 }
             }

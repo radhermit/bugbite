@@ -1,8 +1,8 @@
 use serde_json::Value;
 
+use crate::Error;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, RequestSend, WebService};
-use crate::Error;
 
 #[derive(Debug)]
 pub struct Request {

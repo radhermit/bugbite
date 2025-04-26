@@ -1,7 +1,7 @@
 use std::{env, fs};
 
 use predicates::prelude::*;
-use tempfile::{tempdir, NamedTempFile};
+use tempfile::{NamedTempFile, tempdir};
 
 use super::*;
 

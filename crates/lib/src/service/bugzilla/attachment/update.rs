@@ -3,10 +3,10 @@ use serde_json::Value;
 use serde_with::skip_serializing_none;
 use url::Url;
 
+use crate::Error;
 use crate::objects::bugzilla::Flag;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, RequestSend, WebService};
-use crate::Error;
 
 #[derive(Debug)]
 pub struct Request {

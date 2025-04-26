@@ -7,8 +7,8 @@ use base64::prelude::*;
 use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
-use crate::traits::Contains;
 use crate::Error;
+use crate::traits::Contains;
 
 pub mod bugzilla;
 pub mod github;

@@ -10,11 +10,11 @@ use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 use url::Url;
 
-use crate::objects::bugzilla::Flag;
+use crate::Error;
 use crate::objects::Base64;
+use crate::objects::bugzilla::Flag;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, RequestSend, WebService};
-use crate::Error;
 
 /// Compression variants supported by attachments.
 #[derive(

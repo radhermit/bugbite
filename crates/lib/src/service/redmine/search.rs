@@ -8,6 +8,7 @@ use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString};
 use url::Url;
 
+use crate::Error;
 use crate::args::ExistsOrValues;
 use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
@@ -17,7 +18,6 @@ use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
     Api, InjectAuth, Merge, MergeOption, RequestPagedStream, RequestTemplate, WebService,
 };
-use crate::Error;
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request {

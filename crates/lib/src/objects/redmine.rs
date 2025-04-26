@@ -6,7 +6,7 @@ use chrono::prelude::*;
 use indexmap::IndexSet;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, skip_serializing_none, DefaultOnNull};
+use serde_with::{DefaultOnNull, serde_as, skip_serializing_none};
 
 use std::fmt;
 

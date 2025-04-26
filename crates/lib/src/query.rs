@@ -5,8 +5,8 @@ use std::str::FromStr;
 use ordered_multimap::ListOrderedMultimap;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
-use crate::traits::Api;
 use crate::Error;
+use crate::traits::Api;
 
 #[derive(Debug, Default)]
 pub(crate) struct Query(ListOrderedMultimap<String, String>);

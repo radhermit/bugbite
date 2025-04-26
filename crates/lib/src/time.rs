@@ -3,8 +3,8 @@ use std::str::FromStr;
 
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
-use crate::traits::Api;
 use crate::Error;
+use crate::traits::Api;
 
 mod delta;
 pub use delta::TimeDelta;

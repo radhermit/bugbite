@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 use std::{env, fs};
 
-use bugbite::test::{build_path, TestServer};
+use bugbite::test::{TestServer, build_path};
 use camino::Utf8PathBuf;
 use indexmap::IndexSet;
 use itertools::Itertools;

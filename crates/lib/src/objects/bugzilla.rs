@@ -10,17 +10,17 @@ use itertools::{Either, Itertools};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use serde_with::{
-    serde_as, skip_serializing_none, BoolFromInt, DefaultOnError, DefaultOnNull,
-    DeserializeFromStr, SerializeDisplay,
+    BoolFromInt, DefaultOnError, DefaultOnNull, DeserializeFromStr, SerializeDisplay, serde_as,
+    skip_serializing_none,
 };
 use strum::{Display, EnumString};
 
+use crate::Error;
 use crate::serde::{byte_object, non_empty_str};
 use crate::service::bugzilla::{BugField, FilterField, GroupField, UNSET_VALUES};
 use crate::traits::RenderSearch;
-use crate::Error;
 
-use super::{stringify, Base64};
+use super::{Base64, stringify};
 
 /// A file attachment on a bug.
 #[serde_as]

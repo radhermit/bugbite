@@ -5,10 +5,10 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+use crate::Error;
 use crate::service::{self, ClientParameters, ServiceKind};
 use crate::traits::WebClient;
 use crate::utils::config_dir;
-use crate::Error;
 
 /// Bundled service data.
 static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.toml"));

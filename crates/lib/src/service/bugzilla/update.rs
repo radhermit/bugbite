@@ -8,17 +8,17 @@ use camino::Utf8PathBuf;
 use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
+use serde_with::{DeserializeFromStr, SerializeDisplay, skip_serializing_none};
 use strum::{Display, EnumString};
 use url::Url;
 
-use crate::objects::{bugzilla::Flag, Range};
+use crate::Error;
+use crate::objects::{Range, bugzilla::Flag};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{
     Contains, InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService,
 };
-use crate::Error;
 
 /// Changes made to a field.
 #[derive(Deserialize, Debug, Eq, PartialEq, Hash)]

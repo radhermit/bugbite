@@ -11,9 +11,9 @@ use strum::{Display, EnumIter, EnumString, IntoEnumIterator, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
+use crate::Error;
 use crate::objects::bugzilla::{Bug, BugzillaField};
 use crate::traits::{Api, Merge, MergeOption, WebClient, WebService};
-use crate::Error;
 
 use super::{Client, ClientParameters, ServiceKind};
 

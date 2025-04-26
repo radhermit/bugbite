@@ -2,7 +2,7 @@ use std::sync::OnceLock;
 
 use chrono::{DateTime, Utc};
 use pyo3::prelude::*;
-use pyo3::types::{timezone_utc, PyDateTime};
+use pyo3::types::{PyDateTime, timezone_utc};
 
 /// Convert rust-based DateTime into PyDateTime.
 pub(crate) fn datetime(value: DateTime<Utc>, py: Python<'_>) -> PyResult<Bound<'_, PyDateTime>> {

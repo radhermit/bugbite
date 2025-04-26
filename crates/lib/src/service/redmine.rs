@@ -7,8 +7,8 @@ use strum::{Display, EnumString, VariantNames};
 use tracing::{debug, trace};
 use url::Url;
 
-use crate::traits::{Merge, MergeOption, WebClient, WebService};
 use crate::Error;
+use crate::traits::{Merge, MergeOption, WebClient, WebService};
 
 use super::{Client, ClientParameters, ServiceKind};
 

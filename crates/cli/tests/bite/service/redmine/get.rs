@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use predicates::prelude::*;
-use wiremock::{matchers, ResponseTemplate};
+use wiremock::{ResponseTemplate, matchers};
 
 use super::*;
 

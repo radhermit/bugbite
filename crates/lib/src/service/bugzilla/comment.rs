@@ -1,11 +1,11 @@
 use serde_json::Value;
 use url::Url;
 
+use crate::Error;
 use crate::objects::bugzilla::Comment;
 use crate::service::bugzilla::Bugzilla;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{InjectAuth, RequestSend, WebService};
-use crate::Error;
 
 #[derive(Debug)]
 pub struct Request {

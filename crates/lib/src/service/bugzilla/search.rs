@@ -7,10 +7,11 @@ use futures_util::Stream;
 use indexmap::IndexSet;
 use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
-use serde_with::{skip_serializing_none, DeserializeFromStr, SerializeDisplay};
+use serde_with::{DeserializeFromStr, SerializeDisplay, skip_serializing_none};
 use strum::{AsRefStr, Display, EnumIter, EnumString};
 use url::Url;
 
+use crate::Error;
 use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
@@ -20,7 +21,6 @@ use crate::time::TimeDeltaOrStatic;
 use crate::traits::{
     Api, InjectAuth, Merge, MergeOption, RequestPagedStream, RequestTemplate, WebService,
 };
-use crate::Error;
 
 use super::{BugField, FilterField};
 
@@ -1576,12 +1576,12 @@ impl QueryBuilder<'_> {
                 RangeOp::Equal(_) => {
                     return Err(Error::InvalidValue(format!(
                         "equality operator invalid for change values: {target}"
-                    )))
+                    )));
                 }
                 RangeOp::NotEqual(_) => {
                     return Err(Error::InvalidValue(format!(
                         "equality operator invalid for change values: {target}"
-                    )))
+                    )));
                 }
                 RangeOp::GreaterOrEqual(value) => {
                     self.not(status, |query| {
@@ -2348,20 +2348,24 @@ mod tests {
 
             // changed at a certain time
             for time in &times {
-                stream!(service
-                    .search()
-                    .changed_at([(&field, time.parse().unwrap())]));
+                stream!(
+                    service
+                        .search()
+                        .changed_at([(&field, time.parse().unwrap())])
+                );
             }
 
             // invalid equality operator usage
             for time in ["=2020", "!=2020-02-01", "=1d", "!=1w"] {
-                assert!(service
-                    .search()
-                    .changed_at([(&field, time.parse().unwrap())])
-                    .clone()
-                    .send()
-                    .await
-                    .is_err());
+                assert!(
+                    service
+                        .search()
+                        .changed_at([(&field, time.parse().unwrap())])
+                        .clone()
+                        .send()
+                        .await
+                        .is_err()
+                );
             }
 
             // changed by certain user(s)

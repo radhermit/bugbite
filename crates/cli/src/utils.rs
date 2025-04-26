@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use std::env;
 use std::ffi::OsStr;
-use std::io::{stderr, stdin, BufRead, Write};
+use std::io::{BufRead, Write, stderr, stdin};
 use std::process::{Command, ExitStatus, Stdio};
 
 use anyhow::{Context, Result};

@@ -1,17 +1,17 @@
 use std::future::Future;
-use std::io::{stdout, Write};
+use std::io::{Write, stdout};
 use std::{fmt, fs};
 
 use async_stream::try_stream;
 use camino::Utf8PathBuf;
-use futures_util::{stream, Stream, StreamExt, TryStreamExt};
+use futures_util::{Stream, StreamExt, TryStreamExt, stream};
 use reqwest::RequestBuilder;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+use crate::Error;
 use crate::service::ServiceKind;
 use crate::utils::config_dir;
-use crate::Error;
 
 /// Return true if a type contains a given object, otherwise false.
 pub trait Contains<T> {
@@ -205,7 +205,7 @@ pub(crate) trait WebService: fmt::Display {
 
     /// Inject authentication into a request before it's sent.
     fn inject_auth(&self, request: RequestBuilder, required: bool)
-        -> crate::Result<RequestBuilder>;
+    -> crate::Result<RequestBuilder>;
 
     /// Parse a raw response into a service response.
     async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response>;

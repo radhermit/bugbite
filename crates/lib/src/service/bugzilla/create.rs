@@ -5,10 +5,10 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
+use crate::Error;
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService};
-use crate::Error;
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request {

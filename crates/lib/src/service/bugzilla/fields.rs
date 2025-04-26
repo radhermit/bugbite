@@ -1,7 +1,7 @@
+use crate::Error;
 use crate::objects::bugzilla::BugzillaField;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{RequestSend, WebService};
-use crate::Error;
 
 #[derive(Debug)]
 pub struct Request {
