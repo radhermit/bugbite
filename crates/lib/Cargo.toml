@@ -36,7 +36,7 @@ async-stream = "0.3.6"
 base64 = "0.22.1"
 byte-unit = { version = "5.1.6", features = ["serde"] }
 camino = { version = "1.1.9", features = ["serde1"] }
-chrono = { version = "0.4.40", features = ["serde"] }
+chrono = { version = "0.4.41", features = ["serde"] }
 chronoutil = "0.2.7"
 dirs-next = "2.0.0"
 enum-as-inner = "0.6.1"
@@ -53,7 +53,7 @@ serde_with = { version = "3.12.0", default-features = false, features = ["alloc"
 strum = { version = "0.27.1", features = ["derive"] }
 tempfile = "3.19.1"
 thiserror = "2.0.12"
-toml = "0.8.20"
+toml = "0.8.22"
 tracing = "0.1.41"
 url = { version = "2.5.4", features = ["serde"] }
 
