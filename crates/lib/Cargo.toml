@@ -69,11 +69,11 @@ pyo3 = { version = "0.25.0", optional = true }
 wiremock = { version = "0.6.3", optional = true }
 
 [dependencies.reqwest]
-version = "0.12.15"
+version = "0.12.16"
 default-features = false
 features = ["cookies", "hickory-dns", "json", "socks"]
 
 [dev-dependencies]
 indoc = "2.0.6"
 serde_test = "1.0.177"
-tokio = { version = "1.45.0", features = ["full"] }
+tokio = { version = "1.45.1", features = ["full"] }
