@@ -21,5 +21,5 @@ chrono = "0.4.41"
 futures-util = "0.3.31"
 indexmap = "2.9.0"
 itertools = "0.14.0"
-pyo3 = { version = "0.25.0", features = ["extension-module", "indexmap"] }
+pyo3 = { version = "0.25.1", features = ["extension-module", "indexmap"] }
 tokio = { version = "1.45.1", features = ["full"] }
