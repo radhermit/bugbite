@@ -24,7 +24,7 @@ impl Command {
         for (kind, entries) in services.iter().sorted() {
             writeln!(f, "Service: {kind}")?;
             for (name, base) in entries.iter().sorted() {
-                writeln!(f, "  {name:<12}: {}", base)?;
+                writeln!(f, "  {name:<12}: {base}")?;
             }
         }
 

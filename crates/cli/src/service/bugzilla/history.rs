@@ -60,7 +60,7 @@ impl Command {
             if !events.is_empty() {
                 // output bug ID header
                 let bug_id = format!("Bug: {id} ");
-                writeln!(f, "{bug_id:=<width$}", width = width)?;
+                writeln!(f, "{bug_id:=<width$}")?;
 
                 let mut events = events.iter().peekable();
                 while let Some(event) = events.next() {
