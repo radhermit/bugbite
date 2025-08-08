@@ -200,6 +200,7 @@ impl InjectAuth for RequestBuilder {
 }
 
 pub(crate) trait WebService: fmt::Display {
+    #[allow(dead_code)]
     const API_VERSION: &'static str;
     type Response;
 

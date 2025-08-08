@@ -28,7 +28,7 @@ impl Request {
     }
 
     /// Encode parameters into the form required for the request.
-    fn encode(&self) -> crate::Result<RequestParameters> {
+    fn encode(&self) -> crate::Result<RequestParameters<'_>> {
         // verify parameters exist
         if self.params == Parameters::default() {
             return Err(Error::EmptyParams);

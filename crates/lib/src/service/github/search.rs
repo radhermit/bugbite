@@ -26,7 +26,7 @@ impl Request {
         }
     }
 
-    fn encode(&self) -> crate::Result<QueryBuilder> {
+    fn encode(&self) -> crate::Result<QueryBuilder<'_>> {
         let mut query = QueryBuilder::new(&self.service);
 
         if let Some(value) = &self.params.order {

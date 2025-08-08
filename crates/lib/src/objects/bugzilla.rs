@@ -367,7 +367,7 @@ pub struct Bug {
 }
 
 impl Bug {
-    pub fn updates(&self) -> impl Iterator<Item = BugUpdate> {
+    pub fn updates(&self) -> impl Iterator<Item = BugUpdate<'_>> {
         let comments = self.comments.iter().map(BugUpdate::Comment);
         let history = self.history.iter().map(BugUpdate::Event);
         comments.chain(history).sorted()

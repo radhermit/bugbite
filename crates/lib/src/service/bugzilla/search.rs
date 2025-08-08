@@ -128,7 +128,7 @@ impl Request {
         RequestPagedStream::paged_stream(self.clone())
     }
 
-    fn encode(&self) -> crate::Result<QueryBuilder> {
+    fn encode(&self) -> crate::Result<QueryBuilder<'_>> {
         let mut query = QueryBuilder::new(&self.service);
 
         if let Some(values) = &self.params.status {

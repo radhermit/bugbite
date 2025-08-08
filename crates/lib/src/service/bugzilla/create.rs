@@ -60,7 +60,7 @@ impl Request {
     }
 
     /// Encode parameters into the form required for the request.
-    fn encode(&self) -> crate::Result<RequestParameters> {
+    fn encode(&self) -> crate::Result<RequestParameters<'_>> {
         let params = RequestParameters {
             // required fields with defaults
             op_sys: self.params.os.as_deref().unwrap_or("All"),
