@@ -18,7 +18,7 @@ impl ToStr for Bound<'_, PyAny> {
     }
 }
 
-impl ToStrWithBound for PyObject {
+impl ToStrWithBound for Py<PyAny> {
     fn to_str_with_bound<'a>(&'a self, py: Python<'a>) -> PyResult<&'a str> {
         self.downcast_bound::<PyString>(py).map(|x| x.to_str())?
     }

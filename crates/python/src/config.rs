@@ -33,7 +33,7 @@ impl Config {
         self.0.services.len()
     }
 
-    fn __contains__(&self, object: PyObject, py: Python<'_>) -> bool {
+    fn __contains__(&self, object: Py<PyAny>, py: Python<'_>) -> bool {
         if let Ok(name) = object.to_str_with_bound(py) {
             self.0.services.contains_key(name)
         } else {
@@ -41,7 +41,7 @@ impl Config {
         }
     }
 
-    fn __getitem__(&self, object: PyObject, py: Python<'_>) -> PyResult<service::Config> {
+    fn __getitem__(&self, object: Py<PyAny>, py: Python<'_>) -> PyResult<service::Config> {
         if let Ok(name) = object.to_str_with_bound(py) {
             self.0
                 .services
