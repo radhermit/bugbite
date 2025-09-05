@@ -65,10 +65,10 @@ impl Config {
     fn web_base(&self) -> &Url {
         self.web_base
             .get_or_init(|| {
-                if let Some((base, _project)) = self.base.as_str().split_once("/projects/") {
-                    if let Ok(url) = Url::parse(base) {
-                        return Some(url);
-                    }
+                if let Some((base, _project)) = self.base.as_str().split_once("/projects/")
+                    && let Ok(url) = Url::parse(base)
+                {
+                    return Some(url);
                 }
                 None
             })

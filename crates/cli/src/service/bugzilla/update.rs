@@ -379,11 +379,11 @@ impl Command {
             }
             let comment = get_reply(service, &request.ids[0], &mut values).await?;
             request.params.comment = Some(comment);
-        } else if let Some(value) = request.params.comment.as_ref() {
-            if value.trim().is_empty() {
-                let comment = edit_comment(value.trim())?;
-                request.params.comment = Some(comment);
-            }
+        } else if let Some(value) = request.params.comment.as_ref()
+            && value.trim().is_empty()
+        {
+            let comment = edit_comment(value.trim())?;
+            request.params.comment = Some(comment);
         }
 
         if !self.template.dry_run {

@@ -124,16 +124,16 @@ pub struct Parameters {
 
 impl Parameters {
     fn filter(&self, comment: &Comment) -> bool {
-        if let Some(value) = self.attachment {
-            if comment.attachment_id.is_some() != value {
-                return false;
-            }
+        if let Some(value) = self.attachment
+            && comment.attachment_id.is_some() != value
+        {
+            return false;
         }
 
-        if let Some(value) = self.creator.as_ref() {
-            if !comment.creator.contains(value) {
-                return false;
-            }
+        if let Some(value) = self.creator.as_ref()
+            && !comment.creator.contains(value)
+        {
+            return false;
         }
 
         true

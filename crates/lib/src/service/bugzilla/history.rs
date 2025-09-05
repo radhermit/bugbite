@@ -116,10 +116,10 @@ pub struct Parameters {
 
 impl Parameters {
     fn filter(&self, event: &Event) -> bool {
-        if let Some(value) = self.creator.as_ref() {
-            if !event.who.contains(value) {
-                return false;
-            }
+        if let Some(value) = self.creator.as_ref()
+            && !event.who.contains(value)
+        {
+            return false;
         }
 
         true
