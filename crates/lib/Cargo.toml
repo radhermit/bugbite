@@ -35,25 +35,25 @@ test-bugzilla = []
 async-stream = "0.3.6"
 base64 = "0.22.1"
 byte-unit = { version = "5.1.6", features = ["serde"] }
-camino = { version = "1.1.12", features = ["serde1"] }
-chrono = { version = "0.4.41", features = ["serde"] }
+camino = { version = "1.2.0", features = ["serde1"] }
+chrono = { version = "0.4.42", features = ["serde"] }
 chronoutil = "0.2.7"
 dirs-next = "2.0.0"
 enum-as-inner = "0.6.1"
 futures-util = "0.3.31"
 infer = "0.19.0"
-indexmap = { version = "2.11.0", features = ["serde"] }
+indexmap = { version = "2.11.4", features = ["serde"] }
 itertools = "0.14.0"
 ordered-multimap = "0.7.3"
 regex = "1.11.2"
-serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.143"
+serde = { version = "1.0.225", features = ["derive"] }
+serde_json = "1.0.145"
 serde_repr = "0.1.20"
-serde_with = { version = "3.14.0", default-features = false, features = ["alloc", "macros"] }
+serde_with = { version = "3.14.1", default-features = false, features = ["alloc", "macros"] }
 strum = { version = "0.27.2", features = ["derive"] }
-tempfile = "3.21.0"
+tempfile = "3.22.0"
 thiserror = "2.0.16"
-toml = "0.9.5"
+toml = "0.9.7"
 tracing = "0.1.41"
 url = { version = "2.5.7", features = ["serde"] }
 
