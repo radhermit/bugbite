@@ -14,12 +14,12 @@ pub(crate) trait ToStrWithBound {
 
 impl ToStr for Bound<'_, PyAny> {
     fn to_str(&self) -> PyResult<&str> {
-        self.downcast::<PyString>().map(|x| x.to_str())?
+        self.cast::<PyString>().map(|x| x.to_str())?
     }
 }
 
 impl ToStrWithBound for Py<PyAny> {
     fn to_str_with_bound<'a>(&'a self, py: Python<'a>) -> PyResult<&'a str> {
-        self.downcast_bound::<PyString>(py).map(|x| x.to_str())?
+        self.cast_bound::<PyString>(py).map(|x| x.to_str())?
     }
 }

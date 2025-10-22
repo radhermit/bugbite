@@ -42,7 +42,7 @@ impl SearchRequest {
     pub(super) fn alias(&mut self, value: Bound<'_, PyAny>) -> PyResult<()> {
         if let Ok(value) = value.to_str() {
             self.0.alias(value);
-        } else if let Ok(value) = value.downcast::<PyBool>() {
+        } else if let Ok(value) = value.cast::<PyBool>() {
             self.0.alias(value.is_true());
         } else if let Ok(values) = value.try_iter() {
             let values: Vec<_> = values
@@ -61,7 +61,7 @@ impl SearchRequest {
     pub(super) fn cc(&mut self, value: Bound<'_, PyAny>) -> PyResult<()> {
         if let Ok(value) = value.to_str() {
             self.0.cc(value);
-        } else if let Ok(value) = value.downcast::<PyBool>() {
+        } else if let Ok(value) = value.cast::<PyBool>() {
             self.0.cc(value.is_true());
         } else if let Ok(values) = value.try_iter() {
             let values: Vec<_> = values
