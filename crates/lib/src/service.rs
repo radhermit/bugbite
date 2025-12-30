@@ -147,7 +147,7 @@ impl ClientParameters {
             .user_agent(USER_AGENT);
 
         // force enabled TLS backend using native-tls when both are enabled
-        #[cfg(feature = "rustls-tls")]
+        #[cfg(feature = "rustls")]
         {
             builder = builder.use_rustls_tls();
         }
