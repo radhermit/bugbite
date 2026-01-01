@@ -116,7 +116,7 @@ jobs:
         fi
 
         # build tests
-        cargo build --all-features --workspace --tests
+        cargo build --features test --workspace --tests
 
     - name: Save cache
       if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
@@ -144,7 +144,7 @@ jobs:
         fi
 
         # run tests
-        cargo nextest run --all-features --workspace --tests
+        cargo nextest run --features test --workspace --tests
 
         # only collect coverage for the latest rust release on linux
         if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
