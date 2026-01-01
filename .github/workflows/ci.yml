@@ -60,6 +60,12 @@ jobs:
         toolchain: ${{ matrix.rust-version }}
         components: llvm-tools-preview
 
+    - name: Install tools on macOS
+      if: runner.os == 'macOS'
+      run: |
+        # install the latest bash release -- macos defaults to an ancient version due to licensing
+        brew install bash
+
     - name: Restore cache
       uses: actions/cache/restore@v4
       id: restore-cache
@@ -74,6 +80,7 @@ jobs:
     - name: Remove old caches
       if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
       continue-on-error: true
+      shell: bash
       run: |
         gh extension install actions/gh-actions-cache
 
