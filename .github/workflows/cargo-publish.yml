@@ -1,0 +1,62 @@
+name: cargo-publish
+
+on:
+  push:
+    tags: ['**']
+    branches: ['**']
+    paths:
+      - ".github/workflows/cargo-publish.yml"
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Determine package to publish
+      run: |
+        if [[ ${{ github.ref_type }} == 'tag' ]]; then
+          TAG=${{ github.ref_name }}
+          echo "PUBLISH_CRATE=true" >> $GITHUB_ENV
+        elif [[ -n "${{ inputs.tag }}" ]]; then
+          TAG=${{ inputs.tag }}
+          echo "Doing a dry run for tag: ${TAG}"
+        else
+          TAG=bugbite
+          echo "Doing a test run for bugbite"
+        fi
+
+        echo "PKG=${TAG%%-[0-9]*}" >> $GITHUB_ENV
+        echo "VERSION=${TAG##*[a-z]-}" >> $GITHUB_ENV
+
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Set up rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Install cargo-nextest
+      uses: taiki-e/install-action@nextest
+
+    - name: Run tests for package
+      run: cargo nextest run --all-features --tests -p ${PKG}
+
+    - name: Clean up git repos
+      run: |
+        git clean -fxd
+        git submodule foreach --recursive git clean -fxd
+
+    - name: Publish crate
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      run: |
+        if [[ ${{ github.ref_type }} == 'tag' ]]; then
+          cargo publish --no-verify -p ${PKG}
+        elif [[ -n "${{ inputs.tag }}" ]]; then
+          cargo publish --no-verify --dry-run -p ${PKG}
+        else
+          echo "Test run skipping crate publish"
+        fi
