@@ -101,22 +101,22 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Install cargo-llvm-cov
-      if: ${{ matrix.rust == 'stable' && runner.os == 'Linux' }}
-      uses: taiki-e/install-action@cargo-llvm-cov
-
     - name: Build tests
       run: |
         # only collect coverage for the latest rust release on linux
         if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
-          # set environment variables needed for coverage
-          source <(cargo llvm-cov show-env --export-prefix)
-          # remove artifacts that may affect coverage results
-          cargo llvm-cov clean --workspace
+          export RUSTFLAGS="-C instrument-coverage"
+          export CFLAGS="-Wl,--build-id"
+          export LLVM_PROFILE_FILE="${PWD}/target/%b-%4m.profraw"
         fi
 
         # build tests
         cargo build --features test --workspace --tests
+
+        # remove unnecessary profile data
+        if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
+          find . -name \*.profraw -delete
+        fi
 
     - name: Save cache
       if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
@@ -137,52 +137,72 @@ jobs:
       uses: taiki-e/install-action@nextest
 
     - name: Run tests
+      id: test
       run: |
         # set environment variables needed for coverage
         if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
-          source <(cargo llvm-cov show-env --export-prefix)
+          export RUSTFLAGS="-C instrument-coverage"
+          export CFLAGS="-Wl,--build-id"
+          export LLVM_PROFILE_FILE="${PWD}/target/%b-%4m.profraw"
         fi
 
         # run tests
         cargo nextest run --features test --workspace --tests
 
+        # default to not uploading coverage
+        COVERAGE=false
+
         # only collect coverage for the latest rust release on linux
         if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
-          # make sure all profile data is in the expected directory
-          find crates -name \*.profraw -exec mv '{}' target/debug/ \;
+          # move all profile data respecting $LLVM_PROFILE_FILE to the expected location
+          mkdir -p target/coverage
+          mv target/*.profraw target/coverage
 
           # process coverage information
-          grcov . -s . --binary-path target/debug \
-            --keep-only "crates/*/src/*" -t lcov --llvm --branch -o lcov.info \
+          mkdir coverage
+          grcov target/coverage \
+            --source-dir . --binary-path target/debug --llvm --branch \
+            --keep-only "crates/*/src/*" -t html,lcov -o coverage \
             --excl-line "unreachable!(.*)|grcov-excl-line" \
             --excl-start grcov-excl-start \
             --excl-stop grcov-excl-stop
+
+          # Manually check if coverage processing failed since grcov doesn't return a
+          # failure status on error.
+          #
+          # See the upstream issue at https://github.com/mozilla/grcov/issues/1160.
+          if [[ $(grep -c . coverage/lcov) -le 1 ]]; then
+            echo "::warning:: Skipping code coverage, grcov failed processing data"
+          else
+            COVERAGE=true
+          fi
+
+          # error out if $LLVM_PROFILE_FILE isn't being respected by any tests
+          rm -rf target/coverage
+          profraw_files=$(find . -name \*.profraw)
+          if [[ -n "${profraw_files}" ]]; then
+            echo "Unknown profraw files: ${profraw_files}"
+            exit 1
+          fi
         fi
 
-    - name: Upload build artifacts
-      if: ${{ matrix.rust == 'stable' && runner.os == 'Linux' }}
-      uses: actions/upload-artifact@v4
+        # set output to disable uploading code coverage on grcov failure
+        echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
+
+    - name: Upload coverage artifacts
+      if: ${{ steps.test.outputs.coverage == 'true' }}
+      uses: actions/upload-artifact@v6
       with:
         name: coverage
-        path: lcov.info
+        path: coverage
         if-no-files-found: error
         retention-days: 1
 
-  coverage:
-    needs: test
-    runs-on: ubuntu-latest
-    continue-on-error: true
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v6
-
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      if: ${{ steps.test.outputs.coverage == 'true' }}
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: coverage/lcov.info
-        fail_ci_if_error: true
+        files: coverage/lcov
+        disable_search: true
+        fail_ci_if_error: false
