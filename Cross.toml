@@ -1,0 +1,8 @@
+[build]
+pre-build = [
+    "dpkg --add-architecture $CROSS_DEB_ARCH",
+    "apt update",
+    "apt install --assume-yes libclang-dev clang",
+    "update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100",
+    "update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100"
+]

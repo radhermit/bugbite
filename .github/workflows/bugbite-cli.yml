@@ -5,6 +5,7 @@ on:
     tags: [bugbite-cli-*]
     branches: ['**']
     paths:
+      - "Cross.toml"
       - ".github/workflows/bugbite-cli.yml"
   workflow_dispatch:
 
