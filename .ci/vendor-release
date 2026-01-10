@@ -8,16 +8,13 @@ REPO_DIR=${PWD}
 PACKAGE=$1
 
 # build crate
-cargo package -p ${PACKAGE}
+cargo package --no-verify -p ${PACKAGE}
 
 pushd target/package >/dev/null
 
 # determine release name
 RELEASE=$(echo ${PACKAGE}-*.crate)
 RELEASE=${RELEASE%.crate}
-
-# rename old workdir
-mv ${RELEASE} ${RELEASE}.old
 
 # unpack crate
 tar -zvxf ${RELEASE}.crate
@@ -41,9 +38,9 @@ EOF
 #
 # TODO: drop this once `cargo vendor` supports platform targeting:
 # https://github.com/rust-lang/cargo/issues/7058
-rm -fr vendor/winapi-*gnu*/lib/*.a
-rm -fr vendor/windows_*gnu*/lib/*.a
-rm -fr vendor/windows_*msvc*/lib/*.lib
+rm -rf vendor/winapi-*gnu*/lib/*.a
+rm -rf vendor/windows_*gnu*/lib/*.a
+rm -rf vendor/windows_*msvc*/lib/*.lib
 
 popd >/dev/null
 
