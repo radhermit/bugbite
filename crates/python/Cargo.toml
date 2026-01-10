@@ -19,7 +19,7 @@ crate-type = ["cdylib"]
 bugbite = { path = "../lib", version = "0.0.14", features = ["output", "python"] }
 chrono = "0.4.42"
 futures-util = "0.3.31"
-indexmap = "2.12.1"
+indexmap = "2.13.0"
 itertools = "0.14.0"
 pyo3 = { version = "0.27.2", features = ["extension-module", "indexmap"] }
-tokio = { version = "1.48.0", features = ["full"] }
+tokio = { version = "1.49.0", features = ["full"] }
