@@ -37,11 +37,11 @@ test = ["bugbite/test"]
 test-bugzilla = ["bugbite/test", "bugbite/test-bugzilla"]
 
 [dependencies]
-anyhow = "1.0.100"
+anyhow = "1.0.101"
 bugbite = { path = "../lib", version = "0.0.14", features = ["output"] }
 byte-unit = "5.2.0"
 camino = { version = "1.2.2", features = ["serde1"] }
-clap = { version = "4.5.56", features = ["cargo", "derive", "env", "wrap_help"] }
+clap = { version = "4.5.57", features = ["cargo", "derive", "env", "wrap_help"] }
 clap_complete = "4.5.65"
 clap-verbosity-flag = "3.0.4"
 crossterm = "0.29.0"
