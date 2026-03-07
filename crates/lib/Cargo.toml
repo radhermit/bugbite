@@ -53,7 +53,7 @@ serde_with = { version = "3.17.0", default-features = false, features = ["alloc"
 strum = { version = "0.28.0", features = ["derive"] }
 tempfile = "3.26.0"
 thiserror = "2.0.18"
-toml = "1.0.3"
+toml = "1.0.6"
 tracing = "0.1.44"
 url = { version = "2.5.8", features = ["serde"] }
 
@@ -76,4 +76,4 @@ features = ["cookies", "hickory-dns", "json", "query", "socks"]
 [dev-dependencies]
 indoc = "2.0.7"
 serde_test = "1.0.177"
-tokio = { version = "1.49.0", features = ["full"] }
+tokio = { version = "1.50.0", features = ["full"] }
