@@ -1,0 +1,47 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-user-update - update users
+
+== Synopsis
+
+*bite bugzilla user <update|u>* [<options>] [id[,...]]::
+    Update users.
+
+*bite bugzilla user <update|u>* [-h|--help]::
+    Output help information.
+
+== Description
+
+Update users.
+
+include::include/global-options.adoc[]
+
+== User options
+
+*-e, --email* <value>::
+    Update email address.
+
+*-n, --name* <value>::
+    Update real name.
+
+*-p, --password* <value>::
+    Update password.
+
+*-E, --email-enabled* <bool>::
+	Toggle sending bug-related email.
+
+*-d, --disable* <reason>::
+	Disable user account with reason.
+
+== Arguments
+
+<id[,...]>::
+    User IDs or names.
++
+Taken from standard input when `-`.
+
+== See Also
+
+linkcmd:bite-bugzilla-user[1]

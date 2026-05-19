@@ -25,6 +25,7 @@ mod get;
 pub mod history;
 pub mod search;
 pub mod update;
+pub mod user;
 pub mod version;
 
 /// Common default values used for unset fields.
@@ -314,6 +315,30 @@ impl Bugzilla {
 
     pub fn version(&self) -> version::Request {
         version::Request::new(self)
+    }
+
+    pub fn user_create<I, S>(&self, emails: I) -> user::create::Request
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        user::create::Request::new(self, emails)
+    }
+
+    pub fn user_get<I, S>(&self, ids: I) -> user::get::Request
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        user::get::Request::new(self, ids)
+    }
+
+    pub fn user_update<I, S>(&self, ids: I) -> user::update::Request
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        user::update::Request::new(self, ids)
     }
 }
 

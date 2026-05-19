@@ -14,6 +14,7 @@ mod get;
 mod history;
 mod search;
 mod update;
+mod user;
 mod version;
 
 #[derive(Args, Debug)]
@@ -99,6 +100,9 @@ enum Subcommand {
     #[command(visible_alias = "u")]
     Update(Box<update::Command>),
 
+    /// User commands
+    User(Box<user::Command>),
+
     /// Get bugzilla version
     Version(Box<version::Command>),
 }
@@ -117,6 +121,7 @@ impl Subcommand {
             Self::History(cmd) => cmd.run(service, f).await,
             Self::Search(cmd) => cmd.run(service, f).await,
             Self::Update(cmd) => cmd.run(service, f).await,
+            Self::User(cmd) => cmd.run(service, f).await,
             Self::Version(cmd) => cmd.run(service, f).await,
         }
     }

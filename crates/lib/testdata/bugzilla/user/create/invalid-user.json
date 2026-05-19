@@ -1,0 +1,6 @@
+{
+  "code": 501,
+  "documentation": "https://bugzilla.readthedocs.org/en/5.0/api/",
+  "error": true,
+  "message": "The e-mail address you entered (test) didn't pass our syntax checking for a legal email address. A legal address must contain exactly one '@', and at least one '.' after the @. It also must not contain any illegal characters."
+}

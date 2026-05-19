@@ -1,0 +1,38 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-user-get - get users
+
+== Synopsis
+
+*bite bugzilla user <get|g>* [<options>] <id[,...]>::
+    Get users.
+
+*bite bugzilla user <get|g>* [-h|--help]::
+    Output help information.
+
+== Description
+
+Get users.
+
+include::include/global-options.adoc[]
+
+== User options
+
+*-d, --disabled*::
+    Include disabled user accounts.
+
+*-g, --groups <value[,...]>*::
+	User group IDs or names.
+
+== Arguments
+
+<id[,...]>::
+    User IDs or names.
++
+Taken from standard input when `-`.
+
+== See Also
+
+linkcmd:bite-bugzilla-user[1]

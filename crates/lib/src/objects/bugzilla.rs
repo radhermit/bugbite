@@ -560,3 +560,31 @@ pub struct BugzillaFieldValue {
     description: Option<String>,
     is_open: Option<bool>,
 }
+
+/// Bugzilla user.
+#[serde_as]
+#[derive(Deserialize, Debug, PartialEq, Eq, Hash)]
+pub struct User {
+    /// Unique user identifier.
+    pub id: u64,
+
+    /// Actual name of the user.
+    #[serde(deserialize_with = "non_empty_str")]
+    pub real_name: Option<String>,
+
+    /// Login name of the user.
+    pub name: String,
+
+    /// Email address of the user.
+    pub email: Option<String>,
+}
+
+impl fmt::Display for User {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if let Some(real_name) = &self.real_name {
+            write!(f, "{real_name} ({})", self.name)
+        } else {
+            write!(f, "{}", self.name)
+        }
+    }
+}

@@ -1,0 +1,34 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-user - user support
+
+== Synopsis
+
+*bite bugzilla user* [<options>] <command> [<args>]::
+    Run user commands.
+
+*bite bugzilla user* [-h|--help]::
+    Output help information.
+
+== Description
+
+User support.
+
+include::include/global-options.adoc[]
+
+== Subcommands
+
+linkcmd:bite-bugzilla-user-create[1]::
+	create users
+
+linkcmd:bite-bugzilla-user-get[1]::
+	get users
+
+linkcmd:bite-bugzilla-user-update[1]::
+	update users
+
+== See Also
+
+linkcmd:bite-bugzilla[1]

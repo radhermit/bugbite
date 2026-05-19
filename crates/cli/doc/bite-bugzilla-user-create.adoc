@@ -1,0 +1,39 @@
+include::include/header.adoc[]
+
+== Name
+
+bite-bugzilla-user-create - create user
+
+== Synopsis
+
+*bite bugzilla user <create|c>* [<options>] [id[,...]] <files>::
+    Create user.
+
+*bite bugzilla user <create|c>* [-h|--help]::
+    Output help information.
+
+== Description
+
+Create user.
+
+include::include/global-options.adoc[]
+
+== User options
+
+*-n, --name* <value>::
+	Real name of user.
+
+*-p, --password* <value>::
+	Password for the user.
++
+By default it is unspecified forcing a new user to reset their password before initially
+logging in.
+
+== Arguments
+
+<email>::
+	Email address for the user.
+
+== See Also
+
+linkcmd:bite-bugzilla-user[1]
