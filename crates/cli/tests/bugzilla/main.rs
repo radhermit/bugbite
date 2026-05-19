@@ -8,7 +8,7 @@ mod search;
 mod update;
 
 /// Initialization for all test executables.
-#[ctor::ctor]
+#[ctor::ctor(unsafe)]
 fn initialize() {
     unsafe {
         // wipe bugbite-related environment variables

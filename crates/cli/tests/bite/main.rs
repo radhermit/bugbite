@@ -35,7 +35,7 @@ async fn start_server_with_auth() -> TestServer {
 }
 
 /// Initialization for all test executables.
-#[ctor::ctor]
+#[ctor::ctor(unsafe)]
 fn initialize() {
     unsafe {
         // avoid spawning a real browser or editor by default
