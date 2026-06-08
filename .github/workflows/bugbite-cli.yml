@@ -72,7 +72,7 @@ jobs:
         # copy vendored release outside of the workspace to avoid cargo errors
         cp -a ${{ github.ref_name }} ${HOME}
         pushd ${HOME}/${{ github.ref_name }}
-        cargo nextest run --all-features --tests
+        cargo nextest run --features tests --tests
         popd
         rm -rf ${HOME}/${{ github.ref_name }}
 
