@@ -66,6 +66,11 @@ impl Request {
 
         Ok(url)
     }
+
+    pub fn name<S: std::fmt::Display>(&mut self, value: S) -> &mut Self {
+        self.params.name = Some(value.to_string());
+        self
+    }
 }
 
 impl RequestSend for Request {
@@ -138,6 +143,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
+        let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let service = Bugzilla::new(server.uri()).unwrap();
 
@@ -146,5 +152,42 @@ mod tests {
         let err = service.user_update(ids).send().await.unwrap_err();
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
+
+        // no parameters
+        let err = service
+            .user_update(["user@domain.com"])
+            .send()
+            .await
+            .unwrap_err();
+        assert_err_re!(err, "no parameters specified");
+
+        // unauthenticated session
+        let err = service
+            .user_update(["user@domain.com"])
+            .name("test")
+            .send()
+            .await
+            .unwrap_err();
+        assert_err_re!(err, "authentication required");
+
+        // create authenticated service
+        let service = Bugzilla::builder(server.uri())
+            .unwrap()
+            .user("test")
+            .password("test")
+            .build()
+            .unwrap();
+
+        // single user, update name
+        server
+            .respond(200, path.join("user/update/single-name.json"))
+            .await;
+        let id = service
+            .user_update(["user@domain.com"])
+            .name("test")
+            .send()
+            .await
+            .unwrap()[0];
+        assert_eq!(id, 123);
     }
 }

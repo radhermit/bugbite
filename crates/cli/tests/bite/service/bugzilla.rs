@@ -16,6 +16,7 @@ mod get;
 mod history;
 mod search;
 mod update;
+mod user;
 mod version;
 
 static TEST_DATA: LazyLock<Utf8PathBuf> =

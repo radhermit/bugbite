@@ -118,7 +118,7 @@ mod tests {
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no emails specified");
 
-        // single user, unauthenticated session
+        // unauthenticated session
         server
             .respond(200, path.join("user/create/single.json"))
             .await;

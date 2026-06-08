@@ -124,9 +124,9 @@ mod tests {
         assert!(matches!(err, Error::InvalidRequest(_)));
         assert_err_re!(err, "no IDs specified");
 
-        // nonexistent user
+        // nonexistent email
         server
-            .respond(200, path.join("user/get/nonexistent.json"))
+            .respond(200, path.join("user/get/nonexistent-email.json"))
             .await;
         let err = service
             .user_get(["nonexistent@domain.com"])
@@ -134,6 +134,15 @@ mod tests {
             .await
             .unwrap_err();
         assert_err_re!(err, "There is no user named 'nonexistent@domain.com'.");
+
+        server.reset().await;
+
+        // nonexistent id
+        server
+            .respond(200, path.join("user/get/nonexistent-id.json"))
+            .await;
+        let users = service.user_get([123]).send().await.unwrap();
+        assert_eq!(users, []);
 
         server.reset().await;
 

@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "changes": {
+        "full_name": {
+          "added": "B User",
+          "removed": "A User"
+        }
+      },
+      "id": 123
+    }
+  ]
+}
