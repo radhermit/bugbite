@@ -1,15 +1,23 @@
 # Changelog
 
+## 0.0.15
+
+### Added
+
+#### Bugzilla
+- Support user creation, updating, and querying.
+
+### Changed
+- Bump the minimum supported rust version to 1.93.
+
 ## 0.0.14
 
 ### Changed
-
 - Bump the minimum supported rust version to 1.84.
 
 ## 0.0.13
 
 ### Added
-
 - Import render support for cli to provide Display trait support for items.
 - Send and process concurrent requests while paging for search support.
 - Support a configurable concurrent request limit.
@@ -21,7 +29,6 @@
 - Add native-tls and rustls-tls features to allow TLS backend choice, defaulting to rustls.
 
 ### Changed
-
 - Move to using non-consuming mutation combinators for building requests.
 - Split comma-separated values when reading from standard input for arguments
   which allows using rendered search output for multi-valued fields for input
@@ -29,7 +36,6 @@
 - Bump the minimum supported rust version to 1.80.
 
 #### Bugzilla
-
 - search: Don't use logical AND for ID parameters with regular values fixing
   queries trying to match against a list of ID values piped from standard
   input.
@@ -37,14 +43,12 @@
 ## 0.0.12
 
 ### Added
-
 - Support custom root certificate for service connections.
 - Support loading custom user configs.
 - Support loading and saving templates for various actions (e.g. search) into
   user config locations for named connections.
 
 #### Bugzilla
-
 - fields: Add initial fields request support
 - search: Add support for restricting by bug closure time.
 - search: Add initial offset support.
@@ -56,19 +60,16 @@
 - version: Add initial version request support returning the service version.
 
 #### Redmine
-
 - search: Add initial offset support.
 - search: Add initial paged request support.
 
 ## 0.0.11
 
 ### Changed
-
 - Rework service support to expose Request objects allowing combinator-style
   parameter mutation.
 
 #### Bugzilla
-
 - search: Separate match operators from values with a single space.
 - search: Support various attachment-related queries.
 - search: Support comment tag and privacy queries.
@@ -79,14 +80,12 @@
 ### Changed
 
 #### Bugzilla
-
 - search: Re-add explicit case-insensitive substring match operator.
 - search: Revert to using `!` instead of `~` for logical NOT.
 
 ### Fixed
 
 #### Bugzilla
-
 - attach: Respect explicit MIME type for attachments.
 
 ## 0.0.9

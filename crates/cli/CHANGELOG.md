@@ -1,26 +1,32 @@
 # Changelog
 
-## 0.0.14
+## 0.0.15
 
 ### Added
 
+#### Bugzilla
+- Support user creation, updating, and query subcommands.
+
+### Changed
+- Bump the minimum supported rust version to 1.93.
+
+## 0.0.14
+
+### Added
 - Support generating shell completion via `bite completion`.
 
 ### Changed
-
 - Bump the minimum supported rust version to 1.84.
 
 ## 0.0.13
 
 ### Added
-
 - Support a configurable concurrent request limit.
 - Support service type positional arguments for the `show connections` command.
 - Support overriding the system proxy settings via client parameters.
 - Add native-tls and rustls-tls features to allow TLS backend choice, defaulting to rustls.
 
 ### Changed
-
 - Use visible aliases for subcommands which also allows for generation shell
   completion to work for aliases.
 - Bump the minimum supported rust version to 1.80.
@@ -28,18 +34,15 @@
 ## 0.0.12
 
 ### Fixed
-
 - Discard output from editor and browser commands when launching them.
 
 ### Added
-
 - Support custom root certificate for service connections via --certificate.
 - Support loading custom user configs.
 - Support loading and saving templates for various actions (e.g. search) into
   user config locations for named connections.
 
 #### Bugzilla
-
 - attachment create: Support unit symbols for --auto-compress value.
 - attachment get: Add -D/--deleted and -O/--obsolete options.
 - fields: Add initial fields command support.
@@ -54,14 +57,12 @@
 - version: Add initial version command support returning the service version.
 
 #### Redmine
-
 - search: Add initial -O/--offset support.
 - search: Add initial paged request support.
 
 ## 0.0.11
 
 ### Changed
-
 - Rework service command layout to make usage patterns more consistent. This includes
   dropping support for linked connection commands, replacing the -s/--service option with
   a required subcommand, and merging the -b/--base option into -c/--connection. See the
@@ -69,7 +70,6 @@
 - Try launching $BROWSER before using xdg-open for web browser support.
 
 #### Bugzilla
-
 - attachment create: Rename `attach` command to `attachment create`.
 - attachment create: Drop --dir option to use automatic directory target handling instead.
 - attachment create: Rename -s/--summary to -d/--description.
@@ -87,12 +87,10 @@
 ## 0.0.10
 
 ### Changed
-
 - Move long help for commands into external documentation. Use the man pages or
   online docs for additional information beyond what -h/--help provides.
 
 #### Bugzilla
-
 - search: Use comma-separated values instead of multiple options combined via
   logical OR for bug fields that are unique, e.g. -C/--component values.
 
