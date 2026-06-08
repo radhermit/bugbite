@@ -24,7 +24,7 @@ jobs:
         components: clippy, rustfmt
 
     - name: Restore cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       id: restore-cache
       with:
         path: |
@@ -65,7 +65,7 @@ jobs:
 
     - name: Save cache
       if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: |
           ~/.cargo/registry/index
