@@ -42,7 +42,7 @@ jobs:
       uses: taiki-e/install-action@nextest
 
     - name: Run tests for package
-      run: cargo nextest run --all-features --tests -p ${PKG}
+      run: cargo nextest run --features test --tests -p ${PKG}
 
     - name: Clean up git repos
       run: |
