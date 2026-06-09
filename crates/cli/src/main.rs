@@ -1,8 +1,11 @@
+use std::env;
+use std::ffi::OsString;
 use std::io::stderr;
 use std::process::ExitCode;
 
+use bugbite::config::Config;
 use bugbite::output::verbose;
-use clap::Parser;
+use clap::{Parser, error::ErrorKind};
 use clap_verbosity_flag::{Verbosity, WarnLevel, log::LevelFilter};
 use tracing_log::AsTrace;
 
@@ -72,11 +75,6 @@ pub(crate) struct Command {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
-    let cmd = Command::parse();
-
-    // enable logging support
-    enable_logging(&cmd);
-
     // TODO: drop this once stable rust supports `unix_sigpipe`,
     // see https://github.com/rust-lang/rust/issues/97889.
     //
@@ -85,12 +83,32 @@ async fn main() -> anyhow::Result<ExitCode> {
         libc::signal(libc::SIGPIPE, libc::SIG_DFL);
     }
 
-    cmd.subcmd.run().await
+    let config = Config::new()?;
+
+    // parse command, injecting default service variant if missing
+    let cmd = match Command::try_parse() {
+        Ok(value) => value,
+        // unspecified service subcommand, try injecting from default connection
+        Err(e)
+            if e.kind() == ErrorKind::InvalidSubcommand
+                && let Some(service) = config.default_service() =>
+        {
+            let mut raw_args: Vec<OsString> = env::args_os().collect();
+            raw_args.insert(1, OsString::from(service.as_ref()));
+            Command::parse_from(raw_args)
+        }
+        Err(e) => e.exit(),
+    };
+
+    // enable logging support
+    enable_logging(&cmd);
+
+    cmd.subcmd.run(&config).await
 }
 
 #[cfg(test)]
 mod tests {
-    use std::{env, fs};
+    use std::fs;
 
     use bugbite::test::{build_path, reset_stdin};
 

@@ -28,16 +28,15 @@ pub(crate) enum Subcommand {
 }
 
 impl Subcommand {
-    pub(crate) async fn run(self) -> anyhow::Result<ExitCode> {
-        let config = Config::new()?;
+    pub(crate) async fn run(self, config: &Config) -> anyhow::Result<ExitCode> {
         let mut stdout = stdout().lock();
 
         match self {
-            Self::Bugzilla(cmd) => cmd.run(&config, &mut stdout).await,
-            Self::Github(cmd) => cmd.run(&config, &mut stdout).await,
-            Self::Redmine(cmd) => cmd.run(&config, &mut stdout).await,
+            Self::Bugzilla(cmd) => cmd.run(config, &mut stdout).await,
+            Self::Github(cmd) => cmd.run(config, &mut stdout).await,
+            Self::Redmine(cmd) => cmd.run(config, &mut stdout).await,
             Self::Completion(cmd) => cmd.run(),
-            Self::Show(cmd) => cmd.run(&config, &mut stdout),
+            Self::Show(cmd) => cmd.run(config, &mut stdout),
         }
     }
 }
