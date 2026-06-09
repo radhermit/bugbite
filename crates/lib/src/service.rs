@@ -2,7 +2,7 @@ use std::fs;
 use std::ops::Deref;
 use std::time::Duration;
 
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 use enum_as_inner::EnumAsInner;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
@@ -61,6 +61,27 @@ pub enum Config {
     Redmine(redmine::Config),
 }
 
+impl Merge for Config {
+    fn merge(&mut self, other: Self) {
+        match (self, other) {
+            (Self::Bugzilla(config), Self::Bugzilla(other)) => config.merge(other),
+            (Self::Github(config), Self::Github(other)) => config.merge(other),
+            (Self::Redmine(config), Self::Redmine(other)) => config.merge(other),
+            _ => (),
+        }
+    }
+}
+
+impl Merge<ClientParameters> for Config {
+    fn merge(&mut self, other: ClientParameters) {
+        match self {
+            Self::Bugzilla(config) => config.client.merge(other),
+            Self::Github(config) => config.client.merge(other),
+            Self::Redmine(config) => config.client.merge(other),
+        }
+    }
+}
+
 impl Config {
     pub(super) fn new(kind: ServiceKind, base: &str) -> crate::Result<Self> {
         let service = match kind {
@@ -70,21 +91,6 @@ impl Config {
         };
 
         Ok(service)
-    }
-
-    pub(super) fn try_from_path(path: &Utf8Path) -> crate::Result<Self> {
-        let data = fs::read_to_string(path)
-            .map_err(|e| Error::InvalidValue(format!("failed loading config: {path}: {e}")))?;
-        toml::from_str(&data)
-            .map_err(|e| Error::InvalidValue(format!("failed parsing config: {path}: {e}")))
-    }
-
-    pub(super) fn merge(&mut self, value: ClientParameters) {
-        match self {
-            Self::Bugzilla(config) => config.client.merge(value),
-            Self::Github(config) => config.client.merge(value),
-            Self::Redmine(config) => config.client.merge(value),
-        }
     }
 }
 

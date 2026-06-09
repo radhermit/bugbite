@@ -58,8 +58,8 @@ impl<T> MergeOption<T> for Option<T> {
     }
 }
 
-pub trait Merge {
-    fn merge(&mut self, other: Self);
+pub trait Merge<T = Self> {
+    fn merge(&mut self, other: T);
 }
 
 pub trait RequestSend {

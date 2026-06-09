@@ -2,40 +2,16 @@ use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::config::Config;
-use bugbite::service::github::{self, Github};
+use bugbite::service::github::Github;
 use tracing::debug;
 
 mod get;
 mod search;
 
 #[derive(clap::Args, Debug)]
-#[clap(next_help_heading = "Authentication")]
-struct Authentication {
-    /// GitHub personal access token
-    #[arg(short, long, env = "BUGBITE_KEY")]
-    key: Option<String>,
-
-    /// username
-    #[arg(short, long, env = "BUGBITE_USER")]
-    user: Option<String>,
-}
-
-impl From<Authentication> for github::Authentication {
-    fn from(value: Authentication) -> Self {
-        Self {
-            user: value.user,
-            token: value.key,
-        }
-    }
-}
-
-#[derive(clap::Args, Debug)]
 pub(crate) struct Command {
     #[clap(flatten)]
     service: super::ServiceOptions,
-
-    #[clap(flatten)]
-    auth: Authentication,
 
     #[command(subcommand)]
     cmd: Subcommand,
@@ -47,7 +23,6 @@ impl Command {
         W: IsTerminal + Write,
     {
         let service = Github::config_builder(config, self.service.connection.as_deref())?
-            .auth(self.auth.into())
             .client(self.service.into())
             .build()?;
         debug!("Service: {service}");

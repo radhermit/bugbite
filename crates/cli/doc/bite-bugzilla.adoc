@@ -28,7 +28,7 @@ include::include/service-options.adoc[]
 *BUGBITE_USER*::
 	Set the username for service access.
 
-*BUGBITE_PASS*::
+*BUGBITE_PASSWORD*::
 	Set the password for service access.
 
 == Subcommands

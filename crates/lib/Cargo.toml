@@ -38,6 +38,7 @@ byte-unit = { version = "5.2.0", features = ["serde"] }
 camino = { version = "1.2.2", features = ["serde1"] }
 chrono = { version = "0.4.45", features = ["serde"] }
 chronoutil = "0.2.7"
+config = { version = "0.15.23", default-features = false, features = ["toml", "convert-case", "async"] }
 dirs = "6.0.0"
 enum-as-inner = "0.7.0"
 futures-util = "0.3.32"

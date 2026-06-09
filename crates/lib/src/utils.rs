@@ -1,5 +1,5 @@
 use std::process::Command;
-use std::str;
+use std::{env, str};
 
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -7,12 +7,16 @@ use crate::Error;
 
 /// Get the user config directory for bugbite.
 pub fn config_dir() -> crate::Result<Utf8PathBuf> {
-    let config_dir = dirs::config_dir()
-        .ok_or_else(|| Error::InvalidValue("failed getting config directory".to_string()))?;
-    let config_dir = Utf8PathBuf::from_path_buf(config_dir)
-        .map_err(|e| Error::InvalidValue(format!("invalid bugbite config directory: {e:?}")))?;
+    if let Ok(value) = env::var("BUGBITE_CONFIG_DIR") {
+        Ok(value.into())
+    } else {
+        let config_dir = dirs::config_dir()
+            .ok_or_else(|| Error::InvalidValue("failed getting config directory".to_string()))?;
+        let config_dir = Utf8PathBuf::from_path_buf(config_dir)
+            .map_err(|e| Error::InvalidValue(format!("invalid bugbite config directory: {e:?}")))?;
 
-    Ok(config_dir.join("bugbite"))
+        Ok(config_dir.join("bugbite"))
+    }
 }
 
 /// Get the current working directory as an absolute [`Utf8PathBuf`].

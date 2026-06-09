@@ -38,6 +38,13 @@ pub struct Config {
     pub client: ClientParameters,
 }
 
+impl Merge for Config {
+    fn merge(&mut self, other: Self) {
+        self.auth.merge(other.auth);
+        self.client.merge(other.client);
+    }
+}
+
 impl Config {
     pub fn new(base: &str) -> crate::Result<Self> {
         let base = base.trim_end_matches('/');
@@ -75,24 +82,26 @@ struct Service {
 }
 
 #[derive(Debug)]
-pub struct ServiceBuilder(Config);
+pub struct ServiceBuilder {
+    config: Config,
+}
 
 impl ServiceBuilder {
     pub fn auth(mut self, value: Authentication) -> Self {
-        self.0.auth.merge(value);
+        self.config.auth.merge(value);
         self
     }
 
     pub fn client(mut self, value: ClientParameters) -> Self {
-        self.0.client.merge(value);
+        self.config.client.merge(value);
         self
     }
 
     /// Create a new service.
     pub fn build(self) -> crate::Result<Github> {
-        let client = self.0.client.build()?;
+        let client = self.config.client.build()?;
         Ok(Github(Arc::new(Service {
-            config: self.0,
+            config: self.config,
             _cache: Default::default(),
             client,
         })))
@@ -122,7 +131,9 @@ impl Github {
 
     /// Create a new Service builder using a given base URL.
     pub fn builder(base: &str) -> crate::Result<ServiceBuilder> {
-        Ok(ServiceBuilder(Config::new(base)?))
+        Ok(ServiceBuilder {
+            config: Config::new(base)?,
+        })
     }
 
     /// Create a new Service builder using a given base URL.
@@ -134,7 +145,7 @@ impl Github {
             .get_kind(ServiceKind::Github, name)?
             .into_github()
             .unwrap();
-        Ok(ServiceBuilder(config))
+        Ok(ServiceBuilder { config })
     }
 
     pub fn config(&self) -> &Config {

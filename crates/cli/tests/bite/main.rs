@@ -27,7 +27,7 @@ async fn start_server() -> TestServer {
 async fn start_server_with_auth() -> TestServer {
     unsafe {
         env::set_var("BUGBITE_USER", "bugbite@bugbite.test");
-        env::set_var("BUGBITE_PASS", "bugbite");
+        env::set_var("BUGBITE_PASSWORD", "bugbite");
         env::set_var("BUGBITE_KEY", "bugbite");
     }
 

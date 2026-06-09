@@ -1,5 +1,3 @@
-use std::{env, fs};
-
 use camino::Utf8Path;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
@@ -7,7 +5,7 @@ use url::Url;
 
 use crate::Error;
 use crate::service::{self, ClientParameters, ServiceKind};
-use crate::traits::WebClient;
+use crate::traits::{Merge, WebClient};
 use crate::utils::config_dir;
 
 /// Bundled service data.
@@ -31,23 +29,25 @@ pub struct Config {
 impl Config {
     /// Create a new Config.
     pub fn new() -> crate::Result<Self> {
-        let config_dir = env::var("BUGBITE_CONFIG_DIR")
-            .map(Into::into)
-            .or_else(|_| config_dir())?;
-        let load_config = env::var("BUGBITE_CONFIG_DIR")
-            .map(|x| x != "false")
-            .unwrap_or(true);
+        let mut builder = config::Config::builder();
+
+        let config_dir = config_dir()?;
+        let load_config = config_dir != "false";
 
         // load user config if it exists
         let path = config_dir.join("bugbite.toml");
-        let mut config: Self = if load_config && path.exists() {
-            let data = fs::read_to_string(&path)
-                .map_err(|e| Error::InvalidValue(format!("failed reading config: {path}: {e}")))?;
-            toml::from_str(&data)
-                .map_err(|e| Error::InvalidValue(format!("failed loading config: {path}: {e}")))?
-        } else {
-            Default::default()
-        };
+        if load_config {
+            builder = builder.add_source(config::File::from(path.as_ref()).required(false));
+        }
+
+        // load settings from environment
+        builder = builder.add_source(config::Environment::with_prefix("BUGBITE").try_parsing(true));
+
+        // convert settings into config
+        let mut config: Config = builder
+            .build()
+            .and_then(|c| c.try_deserialize())
+            .map_err(|e| Error::Config(format!("failed loading bugbite config: {e}")))?;
 
         // load bundled services
         config.services = toml::from_str(SERVICES_DATA)
@@ -66,15 +66,23 @@ impl Config {
 
     /// Add a connection config from a given path.
     fn add_config(&mut self, path: &Utf8Path) -> crate::Result<()> {
-        let config = service::Config::try_from_path(path)?;
-        if config.name().trim().is_empty() {
-            Err(Error::InvalidValue(format!(
+        // load service config to determine connection name
+        let config: service::Config = config::Config::builder()
+            .add_source(config::File::from(path.as_ref()).required(true))
+            .build()
+            .and_then(|c| c.try_deserialize())
+            .map_err(|e| Error::Config(e.to_string()))?;
+
+        let connection_name = config.name().trim().to_string();
+        if connection_name.is_empty() {
+            return Err(Error::InvalidValue(format!(
                 "invalid connection name: {path}"
-            )))
-        } else {
-            self.services.insert(config.name().to_string(), config);
-            Ok(())
+            )));
         }
+
+        self.services.insert(connection_name, config);
+
+        Ok(())
     }
 
     /// Load connections from a given path, overriding any bundled matches.
@@ -104,7 +112,8 @@ impl Config {
             .or(self.default_connection.as_deref())
             .ok_or_else(|| Error::InvalidValue("no connection specified".to_string()))?;
 
-        let mut config = if let Some(config) = self.services.get(connection).cloned() {
+        // get default connection config
+        let default_config = if let Some(config) = self.services.get(connection).cloned() {
             if config.kind() != kind {
                 return Err(Error::InvalidValue(format!(
                     "invalid service type: {}",
@@ -119,6 +128,32 @@ impl Config {
                 "unknown connection: {connection}"
             )));
         };
+
+        // load default connection settings
+        let default_source = config::Config::try_from(&default_config).map_err(|e| {
+            Error::Config(format!(
+                "failed loading default service config: {connection}: {e}"
+            ))
+        })?;
+        let mut builder = config::Config::builder().add_source(default_source);
+
+        // load custom user service options from non-connection specific env vars
+        builder = builder.add_source(config::Environment::with_prefix("BUGBITE").try_parsing(true));
+
+        // load custom user service options from connection specific env vars
+        let env_prefix = format!("BUGBITE_{}", connection.to_uppercase());
+        builder = builder.add_source(
+            config::Environment::with_prefix(&env_prefix)
+                .try_parsing(true)
+                .separator("__"),
+        );
+
+        let mut config: service::Config = builder
+            .build()
+            .and_then(|c| c.try_deserialize())
+            .map_err(|e| {
+                Error::Config(format!("failed loading service config: {connection}: {e}"))
+            })?;
 
         // merge default client parameters
         config.merge(self.client.clone());
@@ -137,7 +172,7 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
+    use std::{env, fs};
 
     use tempfile::tempdir;
 

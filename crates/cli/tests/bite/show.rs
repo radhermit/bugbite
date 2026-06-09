@@ -51,7 +51,7 @@ fn custom_config() {
     let config_dir_path = config_dir.to_str().unwrap();
     let services_dir = config_dir.join("services");
     fs::create_dir_all(&services_dir).unwrap();
-    let file = services_dir.join("config");
+    let file = services_dir.join("config.toml");
     let file_path = file.to_str().unwrap();
     let config = indoc::indoc! {r#"
         type = "bugzilla"

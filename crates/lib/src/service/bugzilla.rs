@@ -65,6 +65,14 @@ pub struct Config {
     pub max_search_results: Option<usize>,
 }
 
+impl Merge for Config {
+    fn merge(&mut self, other: Self) {
+        self.auth.merge(other.auth);
+        self.client.merge(other.client);
+        self.max_search_results.merge(other.max_search_results);
+    }
+}
+
 impl Config {
     pub fn new(base: &str) -> crate::Result<Self> {
         let base = base.trim_end_matches('/');
@@ -113,39 +121,41 @@ struct Service {
 }
 
 #[derive(Debug)]
-pub struct ServiceBuilder(Config);
+pub struct ServiceBuilder {
+    config: Config,
+}
 
 impl ServiceBuilder {
     pub fn name(mut self, value: &str) -> Self {
-        self.0.name = value.to_string();
+        self.config.name = value.to_string();
         self
     }
 
     pub fn auth(mut self, value: Authentication) -> Self {
-        self.0.auth.merge(value);
+        self.config.auth.merge(value);
         self
     }
 
     pub fn client(mut self, value: ClientParameters) -> Self {
-        self.0.client.merge(value);
+        self.config.client.merge(value);
         self
     }
 
     pub fn user(mut self, value: &str) -> Self {
-        self.0.auth.user = Some(value.to_string());
+        self.config.auth.user = Some(value.to_string());
         self
     }
 
     pub fn password(mut self, value: &str) -> Self {
-        self.0.auth.password = Some(value.to_string());
+        self.config.auth.password = Some(value.to_string());
         self
     }
 
     /// Create a new service.
     pub fn build(self) -> crate::Result<Bugzilla> {
-        let client = self.0.client.build()?;
+        let client = self.config.client.build()?;
         Ok(Bugzilla(Arc::new(Service {
-            config: self.0,
+            config: self.config,
             cache: Default::default(),
             client,
         })))
@@ -175,7 +185,9 @@ impl Bugzilla {
 
     /// Create a new Service builder using a given base URL.
     pub fn builder(base: &str) -> crate::Result<ServiceBuilder> {
-        Ok(ServiceBuilder(Config::new(base)?))
+        Ok(ServiceBuilder {
+            config: Config::new(base)?,
+        })
     }
 
     /// Create a new Service builder using a given base URL.
@@ -187,7 +199,7 @@ impl Bugzilla {
             .get_kind(ServiceKind::Bugzilla, name)?
             .into_bugzilla()
             .unwrap();
-        Ok(ServiceBuilder(config))
+        Ok(ServiceBuilder { config })
     }
 
     pub fn config(&self) -> &Config {

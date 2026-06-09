@@ -61,7 +61,7 @@ async fn auth_required() {
     // user and password
     cmd("bite bugzilla")
         .env("BUGBITE_USER", "user")
-        .env("BUGBITE_PASS", "pass")
+        .env("BUGBITE_PASSWORD", "pass")
         .arg("create")
         .args(["--component", "TestComponent"])
         .args(["--product", "TestProduct"])

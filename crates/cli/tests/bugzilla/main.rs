@@ -21,6 +21,6 @@ fn initialize() {
         // use local bugzilla instance
         env::set_var("BUGBITE_CONNECTION", BASE);
         env::set_var("BUGBITE_USER", USER);
-        env::set_var("BUGBITE_PASS", PASSWORD);
+        env::set_var("BUGBITE_PASSWORD", PASSWORD);
     }
 }
