@@ -125,6 +125,14 @@ impl Config {
 
         Ok(config)
     }
+
+    /// Get the service variant for the default connection if it exists.
+    pub fn default_service(&self) -> Option<ServiceKind> {
+        self.default_connection
+            .as_ref()
+            .and_then(|connection| self.services.get(connection))
+            .map(|config| config.kind())
+    }
 }
 
 #[cfg(test)]
