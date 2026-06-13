@@ -20,17 +20,6 @@ include::include/global-options.adoc[]
 
 include::include/service-options.adoc[]
 
-== Authentication
-
-*-k, --key*::
-	Set the API key for service access.
-
-*-u, --user*::
-	Set the username for service access.
-
-*-p, --password*::
-	Set the password for service access.
-
 == Environment variables
 
 *BUGBITE_KEY*::

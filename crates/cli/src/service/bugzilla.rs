@@ -2,7 +2,7 @@ use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::config::Config;
-use bugbite::service::bugzilla::{self, Bugzilla};
+use bugbite::service::bugzilla::Bugzilla;
 use clap::Args;
 use tracing::debug;
 
@@ -18,38 +18,9 @@ mod user;
 mod version;
 
 #[derive(Args, Debug)]
-#[clap(next_help_heading = "Authentication")]
-struct Authentication {
-    /// API key
-    #[arg(short, long, env = "BUGBITE_KEY")]
-    key: Option<String>,
-
-    /// username
-    #[arg(short, long, env = "BUGBITE_USER")]
-    user: Option<String>,
-
-    /// password
-    #[arg(short, long, env = "BUGBITE_PASS")]
-    password: Option<String>,
-}
-
-impl From<Authentication> for bugzilla::Authentication {
-    fn from(value: Authentication) -> Self {
-        Self {
-            key: value.key,
-            user: value.user,
-            password: value.password,
-        }
-    }
-}
-
-#[derive(Args, Debug)]
 pub(crate) struct Command {
     #[clap(flatten)]
     service: super::ServiceOptions,
-
-    #[clap(flatten)]
-    auth: Authentication,
 
     #[command(subcommand)]
     cmd: Subcommand,
@@ -61,7 +32,6 @@ impl Command {
         W: IsTerminal + Write,
     {
         let service = Bugzilla::config_builder(config, self.service.connection.as_deref())?
-            .auth(self.auth.into())
             .client(self.service.into())
             .build()?;
         debug!("Service: {service}");

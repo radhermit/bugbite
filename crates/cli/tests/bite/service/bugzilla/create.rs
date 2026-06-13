@@ -59,30 +59,27 @@ async fn auth_required() {
         .code(1);
 
     // user and password
-    for (opt1, opt2) in [("-u", "-p"), ("--user", "--password")] {
-        cmd("bite bugzilla")
-            .args([opt1, "user", opt2, "pass"])
-            .arg("create")
-            .args(["--component", "TestComponent"])
-            .args(["--product", "TestProduct"])
-            .args(["--summary", "summary"])
-            .args(["--description", "description"])
-            .assert()
-            .success();
-    }
+    cmd("bite bugzilla")
+        .env("BUGBITE_USER", "user")
+        .env("BUGBITE_PASS", "pass")
+        .arg("create")
+        .args(["--component", "TestComponent"])
+        .args(["--product", "TestProduct"])
+        .args(["--summary", "summary"])
+        .args(["--description", "description"])
+        .assert()
+        .success();
 
     // API key
-    for opt in ["-k", "--key"] {
-        cmd("bite bugzilla")
-            .args([opt, "keydata"])
-            .arg("create")
-            .args(["--component", "TestComponent"])
-            .args(["--product", "TestProduct"])
-            .args(["--summary", "summary"])
-            .args(["--description", "description"])
-            .assert()
-            .success();
-    }
+    cmd("bite bugzilla")
+        .env("BUGBITE_KEY", "keydata")
+        .arg("create")
+        .args(["--component", "TestComponent"])
+        .args(["--product", "TestProduct"])
+        .args(["--summary", "summary"])
+        .args(["--description", "description"])
+        .assert()
+        .success();
 }
 
 #[tokio::test]
