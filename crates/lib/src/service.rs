@@ -162,9 +162,7 @@ impl ClientParameters {
         }
 
         if let Some(proxy) = &self.proxy {
-            let url = Url::parse(proxy)
-                .map_err(|e| Error::InvalidValue(format!("invalid proxy URL: {e}")))?;
-            let proxy = reqwest::Proxy::all(url)
+            let proxy = reqwest::Proxy::all(proxy)
                 .map_err(|_| Error::InvalidValue(format!("invalid proxy URL: {proxy}")))?;
             builder = builder.proxy(proxy);
         }

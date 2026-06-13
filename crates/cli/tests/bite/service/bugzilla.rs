@@ -84,10 +84,19 @@ async fn proxy() {
     for opt in ["-P", "--proxy"] {
         proxy.reset().await;
 
-        // missing proxy service
+        // invalid
+        cmd("bite bugzilla")
+            .args([opt, "http://"])
+            .args(["get", "1"])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::diff("Error: invalid proxy URL: http://").trim())
+            .failure();
+
+        // missing
         cmd("bite bugzilla")
             .args([opt, proxy.uri()])
-            .args(["search", "test", "--fields", "id"])
+            .args(["get", "1"])
             .assert()
             .stdout("")
             .stderr(predicate::str::diff("Error: HTTP status client error (404 Not Found)").trim())
@@ -95,7 +104,7 @@ async fn proxy() {
 
         proxy.respond(200, TEST_DATA.join("search/ids.json")).await;
 
-        // IDS only
+        // valid
         cmd("bite bugzilla")
             .args([opt, proxy.uri()])
             .args(["search", "test", "--fields", "id"])
