@@ -55,7 +55,7 @@ impl RequestPagedStream for Request {
     type Item = Bug;
 
     fn concurrent(&self) -> Option<usize> {
-        self.service.client().params.concurrent
+        self.service.config().client.concurrent
     }
 
     fn paged(&mut self) -> Option<usize> {

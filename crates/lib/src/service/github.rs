@@ -8,7 +8,7 @@ use url::Url;
 use crate::Error;
 use crate::traits::{Merge, WebClient, WebService};
 
-use super::{Client, ClientParameters, ServiceKind};
+use super::{ClientParameters, ServiceKind};
 
 mod get;
 pub mod search;
@@ -76,9 +76,9 @@ impl WebClient for Config {
 
 #[derive(Debug)]
 struct Service {
+    client: reqwest::Client,
     config: Config,
     _cache: ServiceCache,
-    client: Client,
 }
 
 #[derive(Debug)]
@@ -152,7 +152,7 @@ impl Github {
         &self.0.config
     }
 
-    pub fn client(&self) -> &Client {
+    pub fn client(&self) -> &reqwest::Client {
         &self.0.client
     }
 

@@ -15,7 +15,7 @@ use crate::Error;
 use crate::objects::bugzilla::{Bug, BugzillaField};
 use crate::traits::{Api, Merge, WebClient, WebService};
 
-use super::{Client, ClientParameters, ServiceKind};
+use super::{ClientParameters, ServiceKind};
 
 pub mod attachment;
 pub mod comment;
@@ -115,9 +115,9 @@ impl WebClient for Config {
 
 #[derive(Debug)]
 struct Service {
+    client: reqwest::Client,
     config: Config,
     cache: ServiceCache,
-    client: Client,
 }
 
 #[derive(Debug)]
@@ -206,7 +206,7 @@ impl Bugzilla {
         &self.0.config
     }
 
-    pub fn client(&self) -> &Client {
+    pub fn client(&self) -> &reqwest::Client {
         &self.0.client
     }
 

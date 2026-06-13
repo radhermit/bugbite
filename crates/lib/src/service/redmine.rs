@@ -10,7 +10,7 @@ use url::Url;
 use crate::Error;
 use crate::traits::{Merge, WebClient, WebService};
 
-use super::{Client, ClientParameters, ServiceKind};
+use super::{ClientParameters, ServiceKind};
 
 pub mod get;
 pub mod search;
@@ -112,9 +112,9 @@ impl WebClient for Config {
 // TODO: remove this once authentication support is added
 #[derive(Debug)]
 struct Service {
+    client: reqwest::Client,
     config: Config,
     _cache: ServiceCache,
-    client: Client,
 }
 
 #[derive(Debug)]
@@ -135,11 +135,10 @@ impl ServiceBuilder {
 
     /// Create a new service.
     pub fn build(self) -> crate::Result<Redmine> {
-        let client = self.config.client.build()?;
         Ok(Redmine(Arc::new(Service {
+            client: self.config.client.build()?,
             config: self.config,
             _cache: Default::default(),
-            client,
         })))
     }
 }
@@ -188,7 +187,7 @@ impl Redmine {
         &self.0.config
     }
 
-    pub fn client(&self) -> &Client {
+    pub fn client(&self) -> &reqwest::Client {
         &self.0.client
     }
 
