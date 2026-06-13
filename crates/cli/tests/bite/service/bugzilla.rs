@@ -76,3 +76,38 @@ async fn timeout() {
         .stderr("Error: request timed out\n")
         .failure();
 }
+
+#[tokio::test]
+async fn proxy() {
+    let proxy = start_server().await;
+
+    for opt in ["-P", "--proxy"] {
+        proxy.reset().await;
+
+        // missing proxy service
+        cmd("bite bugzilla")
+            .args([opt, proxy.uri()])
+            .args(["search", "test", "--fields", "id"])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::diff("Error: HTTP status client error (404 Not Found)").trim())
+            .failure();
+
+        proxy.respond(200, TEST_DATA.join("search/ids.json")).await;
+
+        // IDS only
+        cmd("bite bugzilla")
+            .args([opt, proxy.uri()])
+            .args(["search", "test", "--fields", "id"])
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                924847
+                924852
+                924854
+                924855
+                924856
+            "}))
+            .stderr("")
+            .success();
+    }
+}
