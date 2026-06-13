@@ -138,13 +138,19 @@ impl Config {
         let mut builder = config::Config::builder().add_source(default_source);
 
         // load custom user service options from non-connection specific env vars
-        builder = builder.add_source(config::Environment::with_prefix("BUGBITE").try_parsing(true));
+        builder = builder.add_source(
+            config::Environment::with_prefix("BUGBITE")
+                .try_parsing(true)
+                .prefix_separator("_")
+                .separator("__"),
+        );
 
         // load custom user service options from connection specific env vars
         let env_prefix = format!("BUGBITE_{}", connection.to_uppercase());
         builder = builder.add_source(
             config::Environment::with_prefix(&env_prefix)
                 .try_parsing(true)
+                .prefix_separator("_")
                 .separator("__"),
         );
 

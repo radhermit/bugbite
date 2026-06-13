@@ -120,3 +120,27 @@ async fn proxy() {
             .success();
     }
 }
+
+#[tokio::test]
+async fn env() {
+    let server = start_server().await;
+    server.respond(200, TEST_DATA.join("search/ids.json")).await;
+
+    // override base url
+    for var in ["BUGBITE_BASE", "BUGBITE_GENTOO_BASE"] {
+        cmd("bite bugzilla")
+            .env("BUGBITE_CONNECTION", "gentoo")
+            .env(var, server.uri())
+            .args(["search", "bugbite", "--fields", "id"])
+            .assert()
+            .stdout(predicate::str::diff(indoc::indoc! {"
+                924847
+                924852
+                924854
+                924855
+                924856
+            "}))
+            .stderr("")
+            .success();
+    }
+}
