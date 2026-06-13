@@ -22,16 +22,6 @@ pub struct Authentication {
     pub password: Option<String>,
 }
 
-impl Merge for Authentication {
-    fn merge(&mut self, other: Self) {
-        *self = Self {
-            key: self.key.merge(other.key),
-            user: self.user.merge(other.user),
-            password: self.password.merge(other.password),
-        }
-    }
-}
-
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Config {
     base: Url,
@@ -43,14 +33,6 @@ pub struct Config {
     #[serde(flatten)]
     pub client: ClientParameters,
     pub max_search_results: Option<usize>,
-}
-
-impl Merge for Config {
-    fn merge(&mut self, other: Self) {
-        self.auth.merge(other.auth);
-        self.client.merge(other.client);
-        self.max_search_results.merge(other.max_search_results);
-    }
 }
 
 impl Config {
@@ -123,11 +105,6 @@ pub struct ServiceBuilder {
 }
 
 impl ServiceBuilder {
-    pub fn auth(mut self, value: Authentication) -> Self {
-        self.config.auth.merge(value);
-        self
-    }
-
     pub fn client(mut self, value: ClientParameters) -> Self {
         self.config.client.merge(value);
         self

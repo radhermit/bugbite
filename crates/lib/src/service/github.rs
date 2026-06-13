@@ -19,15 +19,6 @@ pub struct Authentication {
     pub token: Option<String>,
 }
 
-impl Merge for Authentication {
-    fn merge(&mut self, other: Self) {
-        *self = Self {
-            user: self.user.merge(other.user),
-            token: self.token.merge(other.token),
-        }
-    }
-}
-
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Config {
     base: Url,
@@ -36,13 +27,6 @@ pub struct Config {
     pub auth: Authentication,
     #[serde(flatten)]
     pub client: ClientParameters,
-}
-
-impl Merge for Config {
-    fn merge(&mut self, other: Self) {
-        self.auth.merge(other.auth);
-        self.client.merge(other.client);
-    }
 }
 
 impl Config {
@@ -87,11 +71,6 @@ pub struct ServiceBuilder {
 }
 
 impl ServiceBuilder {
-    pub fn auth(mut self, value: Authentication) -> Self {
-        self.config.auth.merge(value);
-        self
-    }
-
     pub fn client(mut self, value: ClientParameters) -> Self {
         self.config.client.merge(value);
         self

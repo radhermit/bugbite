@@ -60,17 +60,6 @@ pub enum Config {
     Redmine(redmine::Config),
 }
 
-impl Merge for Config {
-    fn merge(&mut self, other: Self) {
-        match (self, other) {
-            (Self::Bugzilla(config), Self::Bugzilla(other)) => config.merge(other),
-            (Self::Github(config), Self::Github(other)) => config.merge(other),
-            (Self::Redmine(config), Self::Redmine(other)) => config.merge(other),
-            _ => (),
-        }
-    }
-}
-
 impl Merge<ClientParameters> for Config {
     fn merge(&mut self, other: ClientParameters) {
         match self {
