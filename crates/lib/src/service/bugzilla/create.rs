@@ -8,7 +8,7 @@ use serde_with::skip_serializing_none;
 use crate::Error;
 use crate::objects::bugzilla::{Bug, Flag};
 use crate::service::bugzilla::Bugzilla;
-use crate::traits::{InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService};
+use crate::traits::{InjectAuth, Merge, RequestSend, RequestTemplate, WebService};
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request {

@@ -10,7 +10,7 @@ use strum::{AsRefStr, Display, EnumIter, EnumString, VariantNames};
 use url::Url;
 
 use crate::Error;
-use crate::traits::{Merge, MergeOption, WebClient};
+use crate::traits::{Merge, WebClient};
 
 pub mod bugzilla;
 pub mod github;

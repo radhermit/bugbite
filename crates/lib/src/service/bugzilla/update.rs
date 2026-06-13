@@ -16,9 +16,7 @@ use crate::Error;
 use crate::objects::{Range, bugzilla::Flag};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Bugzilla;
-use crate::traits::{
-    Contains, InjectAuth, Merge, MergeOption, RequestSend, RequestTemplate, WebService,
-};
+use crate::traits::{Contains, InjectAuth, Merge, RequestSend, RequestTemplate, WebService};
 
 /// Changes made to a field.
 #[derive(Deserialize, Debug, Eq, PartialEq, Hash)]

@@ -13,7 +13,7 @@ use url::Url;
 
 use crate::Error;
 use crate::objects::bugzilla::{Bug, BugzillaField};
-use crate::traits::{Api, Merge, MergeOption, WebClient, WebService};
+use crate::traits::{Api, Merge, WebClient, WebService};
 
 use super::{Client, ClientParameters, ServiceKind};
 

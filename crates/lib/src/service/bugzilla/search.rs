@@ -18,9 +18,7 @@ use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
 use crate::service::bugzilla::Bugzilla;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{
-    Api, InjectAuth, Merge, MergeOption, RequestPagedStream, RequestTemplate, WebService,
-};
+use crate::traits::{Api, InjectAuth, Merge, RequestPagedStream, RequestTemplate, WebService};
 
 use super::{BugField, FilterField};
 

@@ -48,18 +48,14 @@ impl<T: Api> Api for &T {
     }
 }
 
-pub trait MergeOption<T> {
-    fn merge(&mut self, value: Option<T>) -> Self;
+pub trait Merge<T = Self, Output = ()> {
+    fn merge(&mut self, other: T) -> Output;
 }
 
-impl<T> MergeOption<T> for Option<T> {
-    fn merge(&mut self, value: Option<T>) -> Self {
-        value.or_else(|| self.take())
+impl<T> Merge<Option<T>, Option<T>> for Option<T> {
+    fn merge(&mut self, other: Option<T>) -> Option<T> {
+        other.or_else(|| self.take())
     }
-}
-
-pub trait Merge<T = Self> {
-    fn merge(&mut self, other: T);
 }
 
 pub trait RequestSend {

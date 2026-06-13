@@ -8,7 +8,7 @@ use tracing::{debug, trace};
 use url::Url;
 
 use crate::Error;
-use crate::traits::{Merge, MergeOption, WebClient, WebService};
+use crate::traits::{Merge, WebClient, WebService};
 
 use super::{Client, ClientParameters, ServiceKind};
 

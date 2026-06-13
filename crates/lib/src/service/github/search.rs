@@ -8,7 +8,7 @@ use tracing::debug;
 use crate::objects::github::Issue;
 use crate::query::{Order, Query};
 use crate::service::github::Github;
-use crate::traits::{Api, Merge, MergeOption, RequestSend, RequestTemplate};
+use crate::traits::{Api, Merge, RequestSend, RequestTemplate};
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request {
