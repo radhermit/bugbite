@@ -9,6 +9,7 @@ authors = [{name = "Tim Harder", email = "radhermit@gmail.com"}]
 requires-python = ">=3.12"
 keywords = ["bugs"]
 license = {text = "MIT"}
+dynamic = ["version"]
 
 [tool.maturin]
 compatibility = "linux"
