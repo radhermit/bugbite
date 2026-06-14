@@ -52,7 +52,17 @@ pub struct Config {
     pub auth: Authentication,
     #[serde(flatten)]
     pub client: ClientParameters,
-    pub max_search_results: Option<usize>,
+
+    /// Maximum number of results that can be returned by a search request.
+    #[serde(default = "default_max_search_results")]
+    pub max_search_results: usize,
+}
+
+// TODO: replace with default field value when stabilized
+// (https://github.com/rust-lang/rfcs/pull/3681)
+/// Return the default size of bugzilla's max search results.
+fn default_max_search_results() -> usize {
+    10000
 }
 
 impl Config {
@@ -66,18 +76,8 @@ impl Config {
             name: Default::default(),
             auth: Default::default(),
             client: Default::default(),
-            max_search_results: Default::default(),
+            max_search_results: default_max_search_results(),
         })
-    }
-
-    /// Maximum number of results that can be returned by a search request.
-    ///
-    /// Fallback to bugzilla's internal default of 10000.
-    fn max_search_results(&self) -> usize {
-        match self.max_search_results.unwrap_or_default() {
-            0 => 10000,
-            n => n,
-        }
     }
 }
 
