@@ -33,6 +33,20 @@ include::include/global-options.adoc[]
 +
 Taken from standard input when `-`.
 
+== Examples
+
+.Get user with ID:
+ bite bugzilla user get 123
+
+.Get user with email address:
+ bite bugzilla user get email@domain.com
+
+.Get all users with gmail addresses:
+ bite bugzilla user get gmail.com
+
+.Get all users belonging to group #123 and "test":
+ bite bugzilla user get -g 123,test "*"
+
 == See Also
 
 linkcmd:bite-bugzilla-user[1]
