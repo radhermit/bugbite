@@ -98,41 +98,25 @@ where
     let src_file_name = src
         .file_name()
         .ok_or_else(|| Error::InvalidValue(format!("invalid tarball source: {src}")))?;
-    let src_dir = src
-        .parent()
-        .ok_or_else(|| Error::InvalidValue(format!("invalid tarball source: {src}")))?;
     let dest_file_name = format!("{src_file_name}.tar");
     let dest = dest_dir.join(&dest_file_name);
 
-    // use GNU tar on macos
-    let tool = if cfg!(target_os = "macos") {
-        "gtar"
-    } else {
-        "tar"
-    };
+    // create destination tar file
+    let tar_file = File::create(&dest)
+        .map_err(|e| Error::InvalidValue(format!("failed creating tarball: {dest}: {e}")))?;
 
-    let mut cmd = Command::new(tool);
-    cmd.args([
-        "-C",
-        src_dir.as_str(),
-        "-c",
-        src_file_name,
-        "-f",
-        dest.as_str(),
-    ]);
+    // recursively add all files inside src directory to tarball
+    let mut archive = tar::Builder::new(tar_file);
+    archive
+        .append_dir_all(src_file_name, &src)
+        .map_err(|e| Error::InvalidValue(format!("failed writing tarball: {dest}: {e}")))?;
 
-    match cmd.status() {
-        Ok(status) if status.success() => Ok(dest_file_name),
-        Ok(_) => Err(Error::InvalidValue(format!(
-            "failed creating tarball: {dest}"
-        ))),
-        Err(e) if e.kind() == io::ErrorKind::NotFound => Err(Error::InvalidValue(format!(
-            "failed creating tarball: {dest}: {tool} not available"
-        ))),
-        Err(e) => Err(Error::InvalidValue(format!(
-            "failed creating tarball: {dest}: {e}"
-        ))),
-    }
+    // finalize tarball
+    archive
+        .finish()
+        .map_err(|e| Error::InvalidValue(format!("failed finalizing tarball: {e}")))?;
+
+    Ok(dest_file_name)
 }
 
 /// Attachment object.
