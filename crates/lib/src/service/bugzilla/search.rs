@@ -2222,6 +2222,24 @@ mod tests {
         let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
         let service = Bugzilla::new(server.uri()).unwrap();
+
+        // invalid response
+        server.respond(200, path.join("search/invalid.json")).await;
+        let err = service
+            .search()
+            .blocks(true)
+            .clone()
+            .send()
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, Error::InvalidResponse(_)),
+            "unmatched error: {err:?}"
+        );
+        assert_err_re!(err, "invalid service response");
+
+        server.reset().await;
+
         server
             .respond(200, path.join("search/nonexistent.json"))
             .await;
