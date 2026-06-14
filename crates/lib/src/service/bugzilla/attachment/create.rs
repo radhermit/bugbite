@@ -56,26 +56,16 @@ impl Compression {
         cmd.arg("-c").stdin(src).stdout(dest);
 
         match cmd.status() {
-            Ok(status) => {
-                if !status.success() {
-                    Err(Error::InvalidValue(format!(
-                        "failed compressing file: {path}"
-                    )))
-                } else {
-                    Ok(name)
-                }
-            }
-            Err(e) => {
-                let msg = if e.kind() == io::ErrorKind::NotFound {
-                    format!("{tool} not available")
-                } else {
-                    e.to_string()
-                };
-
-                Err(Error::InvalidValue(format!(
-                    "failed compressing file: {path}: {msg}"
-                )))
-            }
+            Ok(status) if status.success() => Ok(name),
+            Ok(_) => Err(Error::InvalidValue(format!(
+                "failed compressing file: {path}"
+            ))),
+            Err(e) if e.kind() == io::ErrorKind::NotFound => Err(Error::InvalidValue(format!(
+                "failed compressing file: {path}: {tool} not available"
+            ))),
+            Err(e) => Err(Error::InvalidValue(format!(
+                "failed compressing file: {path}: {e}"
+            ))),
         }
     }
 }
