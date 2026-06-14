@@ -91,7 +91,7 @@ async fn main() -> anyhow::Result<ExitCode> {
         // unspecified service subcommand, try injecting from default connection
         Err(e)
             if e.kind() == ErrorKind::InvalidSubcommand
-                && let Some(service) = config.default_service() =>
+                && let Some(service) = config.service() =>
         {
             let mut raw_args: Vec<OsString> = env::args_os().collect();
             raw_args.insert(1, OsString::from(service.as_ref()));

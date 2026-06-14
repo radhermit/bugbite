@@ -11,7 +11,7 @@ pub(crate) mod redmine;
 #[clap(next_help_heading = "Service options")]
 struct ServiceOptions {
     /// service connection
-    #[arg(short, long, env = "BUGBITE_CONNECTION")]
+    #[arg(short, long)]
     connection: Option<String>,
 
     /// concurrent requests limit

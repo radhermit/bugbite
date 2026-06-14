@@ -29,7 +29,7 @@ include::include/global-options.adoc[]
 == Environment variables
 
 *BUGBITE_CONNECTION*::
-    Define a service connection to use.
+    Select a service connection to use.
 
 == Subcommands
 

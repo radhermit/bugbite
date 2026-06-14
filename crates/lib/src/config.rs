@@ -15,7 +15,7 @@ static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.to
 #[derive(Deserialize, Serialize, Debug, Default)]
 pub struct Config {
     /// Default connection.
-    pub default_connection: Option<String>,
+    pub connection: Option<String>,
 
     /// Default client parameters.
     #[serde(flatten)]
@@ -109,10 +109,10 @@ impl Config {
         connection: Option<&str>,
     ) -> crate::Result<service::Config> {
         let connection = connection
-            .or(self.default_connection.as_deref())
+            .or(self.connection.as_deref())
             .ok_or_else(|| Error::InvalidValue("no connection specified".to_string()))?;
 
-        // get default connection config
+        // get default config
         let default_config = if let Some(config) = self.services.get(connection).cloned() {
             if config.kind() != kind {
                 return Err(Error::InvalidValue(format!(
@@ -129,7 +129,7 @@ impl Config {
             )));
         };
 
-        // load default connection settings
+        // load default settings
         let default_source = config::Config::try_from(&default_config).map_err(|e| {
             Error::Config(format!(
                 "failed loading default service config: {connection}: {e}"
@@ -167,9 +167,9 @@ impl Config {
         Ok(config)
     }
 
-    /// Get the service variant for the default connection if it exists.
-    pub fn default_service(&self) -> Option<ServiceKind> {
-        self.default_connection
+    /// Get the service variant for the selected connection if it exists.
+    pub fn service(&self) -> Option<ServiceKind> {
+        self.connection
             .as_ref()
             .and_then(|connection| self.services.get(connection))
             .map(|config| config.kind())
