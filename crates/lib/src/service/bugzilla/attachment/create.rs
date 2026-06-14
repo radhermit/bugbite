@@ -105,43 +105,33 @@ where
     let dest = dest_dir.join(&dest_file_name);
 
     // use GNU tar on macos
-    let cmd = if cfg!(target_os = "macos") {
+    let tool = if cfg!(target_os = "macos") {
         "gtar"
     } else {
         "tar"
     };
 
-    match Command::new(cmd)
-        .args([
-            "-C",
-            src_dir.as_str(),
-            "-c",
-            src_file_name,
-            "-f",
-            dest.as_str(),
-        ])
-        .status()
-    {
-        Ok(status) => {
-            if !status.success() {
-                Err(Error::InvalidValue(format!(
-                    "failed creating tarball: {dest}"
-                )))
-            } else {
-                Ok(dest_file_name)
-            }
-        }
-        Err(e) => {
-            let msg = if e.kind() == io::ErrorKind::NotFound {
-                format!("{cmd} not available")
-            } else {
-                e.to_string()
-            };
+    let mut cmd = Command::new(tool);
+    cmd.args([
+        "-C",
+        src_dir.as_str(),
+        "-c",
+        src_file_name,
+        "-f",
+        dest.as_str(),
+    ]);
 
-            Err(Error::InvalidValue(format!(
-                "failed creating tarball: {dest}: {msg}"
-            )))
-        }
+    match cmd.status() {
+        Ok(status) if status.success() => Ok(dest_file_name),
+        Ok(_) => Err(Error::InvalidValue(format!(
+            "failed creating tarball: {dest}"
+        ))),
+        Err(e) if e.kind() == io::ErrorKind::NotFound => Err(Error::InvalidValue(format!(
+            "failed creating tarball: {dest}: {tool} not available"
+        ))),
+        Err(e) => Err(Error::InvalidValue(format!(
+            "failed creating tarball: {dest}: {e}"
+        ))),
     }
 }
 
