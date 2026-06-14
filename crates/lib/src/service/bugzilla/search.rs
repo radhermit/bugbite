@@ -7,6 +7,7 @@ use futures_util::Stream;
 use indexmap::IndexSet;
 use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use serde_with::{DeserializeFromStr, SerializeDisplay, skip_serializing_none};
 use strum::{AsRefStr, Display, EnumIter, EnumString};
 use url::Url;
@@ -88,13 +89,16 @@ impl RequestPagedStream for Request {
         let request = self.service.client().get(url).auth_optional(&self.service);
         let response = request.send().await?;
         let mut data = self.service.parse_response(response).await?;
+        let Value::Array(data) = data["bugs"].take() else {
+            return Err(Error::InvalidResponse("search request".to_string()));
+        };
+
         let mut bugs = vec![];
-        if let serde_json::Value::Array(values) = data["bugs"].take() {
-            for value in values {
-                let bug = self.service.deserialize_bug(value)?;
-                bugs.push(bug);
-            }
+        for value in data {
+            let bug = self.service.deserialize_bug(value)?;
+            bugs.push(bug);
         }
+
         Ok(bugs)
     }
 }
