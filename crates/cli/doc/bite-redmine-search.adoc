@@ -247,6 +247,9 @@ Values are taken from standard input when `-`.
     Restrict by status.
 +
 Query issue status from the following options: @open, @closed, and @any.
++
+.All closed issues:
+ bite redmine search --status @closed
 
 == Time options
 

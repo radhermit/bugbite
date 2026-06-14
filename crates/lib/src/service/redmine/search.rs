@@ -634,5 +634,12 @@ mod tests {
         stream!(service.search().subject(["test"]));
         stream!(service.search().subject(["test1", "test2"]));
         stream!(service.search().subject(["test with whitespace"]));
+
+        // status
+        stream!(service.search().status("@open"));
+        stream!(service.search().status("@closed"));
+        stream!(service.search().status("@any"));
+        let err = stream_result!(service.search().status("invalid")).unwrap_err();
+        assert_err_re!(err, "invalid status: invalid");
     }
 }
