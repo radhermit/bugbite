@@ -109,7 +109,7 @@ struct AttributeOptions {
 
     /// restrict by priority
     #[arg(long, value_name = "VALUE[,...]")]
-    priority: Option<Csv<Match>>,
+    priority: Option<Vec<Csv<Match>>>,
 
     /// restrict by product
     #[arg(short, long, value_name = "VALUE[,...]")]
@@ -131,7 +131,7 @@ struct AttributeOptions {
 
     /// restrict by severity
     #[arg(long, value_name = "VALUE[,...]")]
-    severity: Option<Csv<Match>>,
+    severity: Option<Vec<Csv<Match>>>,
 
     /// restrict by status
     #[arg(
@@ -433,8 +433,14 @@ impl From<Params> for Parameters {
                 .attr
                 .id
                 .map(|x| x.into_iter().map(|x| x.flatten()).collect()),
-            priority: value.attr.priority.map(|x| x.into_inner()),
-            severity: value.attr.severity.map(|x| x.into_inner()),
+            priority: value
+                .attr
+                .priority
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
+            severity: value
+                .attr
+                .severity
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
             version: value.attr.version.map(|x| x.into_inner()),
             component: value.attr.component.map(|x| x.into_inner()),
             product: value.attr.product.map(|x| x.into_inner()),

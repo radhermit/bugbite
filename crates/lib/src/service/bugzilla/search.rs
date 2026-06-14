@@ -449,11 +449,19 @@ impl Request {
         }
 
         if let Some(values) = &self.params.priority {
-            query.or(|query| values.iter().for_each(|x| query.priority(x)));
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.priority(x)))
+                }
+            });
         }
 
         if let Some(values) = &self.params.severity {
-            query.or(|query| values.iter().for_each(|x| query.severity(x)));
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.severity(x)))
+                }
+            });
         }
 
         if let Some(values) = &self.params.version {
@@ -902,6 +910,32 @@ impl Request {
         self
     }
 
+    pub fn priority<I, T>(&mut self, values: I) -> &mut Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<Match>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .priority
+            .get_or_insert_with(Default::default)
+            .push(values.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn severity<I, T>(&mut self, values: I) -> &mut Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<Match>,
+    {
+        // TODO: move to get_or_insert_default() when it is stable
+        self.params
+            .severity
+            .get_or_insert_with(Default::default)
+            .push(values.into_iter().map(Into::into).collect());
+        self
+    }
+
     pub fn created(&mut self, value: RangeOrValue<TimeDeltaOrStatic>) -> &mut Self {
         self.params.created = Some(value);
         self
@@ -985,8 +1019,8 @@ pub struct Parameters {
     pub blocks: Option<Vec<ExistsOrValues<RangeOrValue<i64>>>>,
     pub depends: Option<Vec<ExistsOrValues<RangeOrValue<i64>>>>,
     pub ids: Option<Vec<ExistsOrValues<RangeOrValue<i64>>>>,
-    pub priority: Option<Vec<Match>>,
-    pub severity: Option<Vec<Match>>,
+    pub priority: Option<Vec<Vec<Match>>>,
+    pub severity: Option<Vec<Vec<Match>>>,
     pub version: Option<Vec<Match>>,
     pub component: Option<Vec<Match>>,
     pub product: Option<Vec<Match>>,
@@ -2462,6 +2496,24 @@ mod tests {
         stream!(service.search().depends(..=20));
         stream!(service.search().depends(10..));
         stream!(service.search().depends(..));
+
+        // priority
+        stream!(service.search().priority(["=~ High"]));
+        stream!(service.search().priority(["~~ High"]));
+        stream!(service.search().priority(["!~ High"]));
+        stream!(service.search().priority(["== High"]));
+        stream!(service.search().priority(["!= High"]));
+        stream!(service.search().priority(["=* High"]));
+        stream!(service.search().priority(["!* High"]));
+
+        // severity
+        stream!(service.search().severity(["=~ normal"]));
+        stream!(service.search().severity(["~~ normal"]));
+        stream!(service.search().severity(["!~ normal"]));
+        stream!(service.search().severity(["== normal"]));
+        stream!(service.search().severity(["!= normal"]));
+        stream!(service.search().severity(["=* normal"]));
+        stream!(service.search().severity(["!* normal"]));
 
         // ids
         stream!(service.search().ids(true));
