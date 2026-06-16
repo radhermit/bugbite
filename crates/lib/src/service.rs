@@ -140,12 +140,14 @@ impl ClientParameters {
             .timeout(Duration::from_secs_f64(self.timeout.unwrap_or(30.0)))
             .user_agent(USER_AGENT);
 
-        // force enabled TLS backend using native-tls when both are enabled
+        // use rustls by default if it's selected
         #[cfg(feature = "rustls")]
         {
             builder = builder.use_rustls_tls();
         }
-        #[cfg(feature = "native-tls")]
+
+        // use native-tls if rustls isn't selected
+        #[cfg(all(feature = "native-tls", not(feature = "rustls")))]
         {
             builder = builder.use_native_tls();
         }

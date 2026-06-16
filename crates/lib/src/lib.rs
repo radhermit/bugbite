@@ -17,3 +17,7 @@ pub use self::error::Error;
 
 /// A `Result` alias where the `Err` case is `pkgcraft::Error`.
 pub type Result<T> = std::result::Result<T, Error>;
+
+// force TLS backend to be enabled
+#[cfg(not(any(feature = "rustls", feature = "native-tls")))]
+compile_error!("You must enable at least one TLS backend.");
