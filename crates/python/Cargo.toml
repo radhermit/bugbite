@@ -20,6 +20,6 @@ bugbite = { path = "../lib", version = "0.0.15", features = ["output", "python"]
 chrono = "0.4.45"
 futures-util = "0.3.32"
 indexmap = "2.14.0"
-itertools = "0.14.0"
+itertools = "0.15.0"
 pyo3 = { version = "0.29.0", features = ["abi3-py312", "extension-module", "indexmap"] }
 tokio = { version = "1.52.3", features = ["full"] }

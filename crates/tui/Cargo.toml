@@ -18,7 +18,7 @@ name = "chew"
 path = "src/main.rs"
 
 [dependencies]
-anyhow = "1.0.102"
+anyhow = "1.0.103"
 bugbite = { path = "../lib", version = "0.0.15" }
 crossterm = "0.29.0"
-ratatui = "0.30.1"
+ratatui = "0.30.2"
