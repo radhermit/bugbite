@@ -169,7 +169,12 @@ mod tests {
 
         // changes after a specific time
         let time = "1d".parse().unwrap();
-        let changes = service.history([1]).created_after(time).send().await.unwrap();
+        let changes = service
+            .history([1])
+            .created_after(time)
+            .send()
+            .await
+            .unwrap();
         assert_eq!(changes[0].len(), 3);
     }
 }
