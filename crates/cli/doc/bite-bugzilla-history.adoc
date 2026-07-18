@@ -23,14 +23,14 @@ include::include/global-options.adoc[]
 *-c, --created*::
     Restrict by creation time.
 +
-.Changed in the last day:
- bite bugzilla history -c 1d
+.Changes to bug #123 in the last day:
+ bite bugzilla history -c 1d 123
 
 *-R, --creator*::
     Restrict by creator.
 +
-.Changed by user1:
- bite bugzilla history --creator user1
+.Changes to bug #123 by user1:
+ bite bugzilla history --creator user1 123
 
 == Arguments
 
