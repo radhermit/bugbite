@@ -1,4 +1,4 @@
-include::include/header.adoc[]
+include::{docdir}/common/header.adoc[]
 
 == Name
 
@@ -19,7 +19,7 @@ trackers. It aims to support common actions such as searching, requesting,
 creating, and updating bugs, issues, or tickets in addition to other
 functionality provided by a service.
 
-include::include/global-options.adoc[]
+include::{docdir}/common/global-options.adoc[]
 
 == Options
 

@@ -1,4 +1,4 @@
-include::include/header.adoc[]
+include::{docdir}/common/header.adoc[]
 
 == Name
 
@@ -16,7 +16,7 @@ bite-bugzilla-user-create - create user
 
 Create user.
 
-include::include/global-options.adoc[]
+include::{docdir}/common/global-options.adoc[]
 
 == User options
 

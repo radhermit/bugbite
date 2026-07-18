@@ -1,4 +1,4 @@
-include::include/header.adoc[]
+include::{docdir}/common/header.adoc[]
 
 == Name
 
@@ -16,9 +16,9 @@ bite-bugzilla - Bugzilla service support
 
 Bugzilla service support.
 
-include::include/global-options.adoc[]
+include::{docdir}/common/global-options.adoc[]
 
-include::include/service-options.adoc[]
+include::{docdir}/common/service-options.adoc[]
 
 == Environment variables
 

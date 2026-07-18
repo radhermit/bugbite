@@ -1,4 +1,4 @@
-include::include/header.adoc[]
+include::{docdir}/common/header.adoc[]
 
 == Name
 
@@ -16,7 +16,7 @@ bite-bugzilla-attachment-create - create attachments
 
 Create attachments.
 
-include::include/global-options.adoc[]
+include::{docdir}/common/global-options.adoc[]
 
 == Attachment options
 

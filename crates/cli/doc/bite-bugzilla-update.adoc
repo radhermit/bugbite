@@ -1,4 +1,4 @@
-include::include/header.adoc[]
+include::{docdir}/common/header.adoc[]
 
 == Name
 
@@ -16,7 +16,7 @@ bite-bugzilla-update - update bugs
 
 Update bugs.
 
-include::include/global-options.adoc[]
+include::{docdir}/common/global-options.adoc[]
 
 == Update options
 
@@ -39,7 +39,7 @@ Multiple arguments can be specified in a comma-separated list.
 .Reply to the last comment:
  bite bugzilla update 123 --reply
 
-include::include/template-options.adoc[]
+include::{docdir}/common/template-options.adoc[]
 
 .Update bug using template:
  bite bugzilla update 123 --from template1 -c 'updated using template'

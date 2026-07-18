@@ -1,4 +1,4 @@
-include::include/header.adoc[]
+include::{docdir}/common/header.adoc[]
 
 == Name
 
@@ -24,7 +24,7 @@ instead use the `search` command similar to the following:
 .Output bug 10's summary:
  bite bugzilla search --id 10 -f summary -s @all
 
-include::include/global-options.adoc[]
+include::{docdir}/common/global-options.adoc[]
 
 == Get options
 

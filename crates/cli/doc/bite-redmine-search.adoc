@@ -1,4 +1,4 @@
-include::include/header.adoc[]
+include::{docdir}/common/header.adoc[]
 
 == Name
 
@@ -16,7 +16,7 @@ bite-redmine-search - search issues
 
 Search issues.
 
-include::include/global-options.adoc[]
+include::{docdir}/common/global-options.adoc[]
 
 == Search options
 
@@ -34,7 +34,7 @@ This uses `$BROWSER` to open URLs, falling back to `xdg-open` if undefined.
 .Return all open issues created in the past day rendered in JSON:
  bite redmine search --created 1d --json
 
-include::include/template-options.adoc[]
+include::{docdir}/common/template-options.adoc[]
 
 == Query options
 

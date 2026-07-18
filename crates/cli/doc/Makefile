@@ -1,5 +1,5 @@
 DESTDIR ?= build
-OPTIONS := -I . -r adoc_exts --failure-level WARNING
+OPTIONS := -I . -a docdir=$(shell pwd) -r adoc_exts --failure-level WARNING
 all: html man
 .PHONY: all html man
 
