@@ -166,5 +166,10 @@ mod tests {
         // changes by a specific user
         let changes = service.history([1]).creator("user1").send().await.unwrap();
         assert_eq!(changes[0].len(), 2);
+
+        // changes after a specific time
+        let time = "1d".parse().unwrap();
+        let changes = service.history([1]).created_after(time).send().await.unwrap();
+        assert_eq!(changes[0].len(), 3);
     }
 }
