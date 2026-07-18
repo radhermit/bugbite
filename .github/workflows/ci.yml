@@ -6,12 +6,14 @@ on:
     paths:
       - "Cargo.*"
       - "**/*.rs"
+      - "crates/*/doc/**"
       - "crates/*/testdata/**"
       - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
     paths:
       - "Cargo.*"
+      - "crates/*/doc/**"
       - "crates/*/src/**"
 
 jobs:
