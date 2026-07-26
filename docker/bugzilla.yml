@@ -1,0 +1,25 @@
+services:
+  db:
+    image: mariadb:12
+    environment:
+      MARIADB_ROOT_PASSWORD: bugzilla
+      MARIADB_DATABASE: bugzilla
+      MARIADB_USER: bugzilla
+      MARIADB_PASSWORD: bugzilla
+
+  bugzilla:
+    image: ghcr.io/radhermit/bugbite-bugzilla:5.2.0.20260726
+    ports:
+      - 8080:80
+    environment: &bugzilla_env
+      - BZ_ADMIN_EMAIL=bugbite@bugbite.test
+      - BZ_ADMIN_PASSWORD=bugbite
+      - BZ_ADMIN_REALNAME=Bugbite
+      - BZ_URLBASE=http://127.0.0.1:8080/
+      - BZ_DB_HOST=db
+      - BZ_DB_PORT=3306
+      - BZ_DB_USER=bugzilla
+      - BZ_DB_NAME=bugzilla
+      - BZ_DB_PASS=bugzilla
+    depends_on:
+      - db
