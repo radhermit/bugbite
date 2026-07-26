@@ -11,7 +11,7 @@ services:
     image: ghcr.io/radhermit/bugbite-bugzilla:5.2.0.20260726
     ports:
       - 8080:80
-    environment: &bugzilla_env
+    environment:
       - BZ_ADMIN_EMAIL=bugbite@bugbite.test
       - BZ_ADMIN_PASSWORD=bugbite
       - BZ_ADMIN_REALNAME=Bugbite
