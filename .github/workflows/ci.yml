@@ -152,7 +152,7 @@ jobs:
         fi
 
         # run tests
-        cargo nextest run --all-features --profile unit --workspace --tests
+        cargo nextest run --all-features --workspace --tests
 
     - name: Run Bugzilla integration tests
       if: ${{ matrix.rust == 'stable' && runner.os == 'Linux' }}

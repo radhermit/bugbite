@@ -1,5 +1,5 @@
-# unit tests
-[profile.unit]
+# all unit tests
+[profile.default]
 default-filter = "not (test(/^bugzilla_/) or binary(/^bugzilla$/))"
 
 # bugzilla integration tests
