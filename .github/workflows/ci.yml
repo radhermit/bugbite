@@ -142,7 +142,7 @@ jobs:
       with:
         tool: nextest
 
-    - name: Run unit tests
+    - name: Run tests
       run: |
         # set environment variables needed for coverage
         if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
@@ -151,17 +151,18 @@ jobs:
           export LLVM_PROFILE_FILE="${PWD}/target/%b-%4m.profraw"
         fi
 
-        # run tests
+        # run unit tests
         cargo nextest run --all-features --workspace --tests
 
-    - name: Run Bugzilla integration tests
-      if: ${{ matrix.rust == 'stable' && runner.os == 'Linux' }}
-      run: |
-        # start bugzilla service
-        docker compose -f docker/bugzilla.yml up -d --wait
-
-        # run tests
-        cargo nextest run --all-features --profile bugzilla --workspace --tests
+        # run integration tests
+        if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
+          # start bugzilla service
+          docker compose -f docker/bugzilla.yml up -d --wait
+          # run tests
+          cargo nextest run --all-features --profile bugzilla --workspace --tests
+          # stop bugzilla service
+          docker compose -f docker/bugzilla.yml down
+        fi
 
     - name: Process code coverage
       id: coverage
