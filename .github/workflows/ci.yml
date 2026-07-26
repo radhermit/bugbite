@@ -113,7 +113,7 @@ jobs:
         fi
 
         # build tests
-        cargo build --features test --workspace --tests
+        cargo build --all-features --workspace --tests
 
         # remove unnecessary profile data
         if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
@@ -142,7 +142,7 @@ jobs:
       with:
         tool: nextest
 
-    - name: Run tests
+    - name: Run unit tests
       run: |
         # set environment variables needed for coverage
         if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
@@ -152,7 +152,7 @@ jobs:
         fi
 
         # run tests
-        cargo nextest run --features test --workspace --tests
+        cargo nextest run --all-features --profile unit --workspace --tests
 
     - name: Process code coverage
       id: coverage
@@ -236,4 +236,4 @@ jobs:
         tool: nextest
 
     - name: Run tests
-      run: cargo nextest run --features test,test-bugzilla --workspace --tests
+      run: cargo nextest run --all-features --profile bugzilla --workspace --tests
