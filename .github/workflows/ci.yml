@@ -154,6 +154,15 @@ jobs:
         # run tests
         cargo nextest run --all-features --profile unit --workspace --tests
 
+    - name: Run Bugzilla integration tests
+      if: ${{ matrix.rust == 'stable' && runner.os == 'Linux' }}
+      run: |
+        # start bugzilla service
+        docker compose -f docker/bugzilla.yml up -d --wait
+
+        # run tests
+        cargo nextest run --all-features --profile bugzilla --workspace --tests
+
     - name: Process code coverage
       id: coverage
       run: |
@@ -214,26 +223,3 @@ jobs:
         files: coverage/lcov
         disable_search: true
         fail_ci_if_error: false
-
-  bugzilla-integration:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-
-    - name: Start Docker Compose Stack
-      run: docker compose -f docker/bugzilla.yml up -d --wait
-
-    - name: Set up rust toolchain
-      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
-      with:
-        toolchain: stable
-
-    - name: Install cargo-nextest
-      uses: taiki-e/install-action@7a79fe8c3a13344501c80d99cae481c1c9085912 # v2.81.10
-      with:
-        tool: nextest
-
-    - name: Run tests
-      run: cargo nextest run --all-features --profile bugzilla --workspace --tests
