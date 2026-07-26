@@ -275,6 +275,9 @@ impl Attachment {
 
         let mut data = fs::read(&path)
             .map_err(|e| Error::InvalidValue(format!("failed reading attachment: {path}: {e}")))?;
+        if data.is_empty() {
+            return Err(Error::InvalidValue(format!("empty attachment: {path}")));
+        }
         let mut mime_type = get_mime_type(&path, &data);
 
         // determine if a file of a given size will be auto-compressed

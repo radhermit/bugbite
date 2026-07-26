@@ -47,6 +47,7 @@ fn required_args() {
 async fn auth_required() {
     let _server = start_server().await;
     let file = NamedTempFile::new().unwrap();
+    fs::write(&file, "test").unwrap();
     let path = file.path().to_str().unwrap();
 
     cmd("bite bugzilla attachment create 1")
@@ -54,7 +55,23 @@ async fn auth_required() {
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())
-        .failure();
+        .failure()
+        .code(1);
+}
+
+#[tokio::test]
+async fn empty_file() {
+    let _server = start_server().await;
+    let file = NamedTempFile::new().unwrap();
+    let path = file.path().to_str().unwrap();
+
+    cmd("bite bugzilla attachment create 1")
+        .arg(path)
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff(format!("Error: empty attachment: {path}")).trim())
+        .failure()
+        .code(1);
 }
 
 #[tokio::test]
@@ -84,6 +101,7 @@ async fn single_bug() {
         .await;
 
     let file = NamedTempFile::new().unwrap();
+    fs::write(&file, "test").unwrap();
     let path = file.path().to_str().unwrap();
 
     cmd("bite bugzilla attachment create 1")
@@ -121,6 +139,7 @@ async fn multiple_bugs() {
         .await;
 
     let file = NamedTempFile::new().unwrap();
+    fs::write(&file, "test").unwrap();
     let path = file.path().to_str().unwrap();
 
     // invalid command -- ID args must be in a single comma-separated string
