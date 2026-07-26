@@ -8,6 +8,7 @@ on:
       - "**/*.rs"
       - "crates/*/doc/**"
       - "crates/*/testdata/**"
+      - "docker/*"
       - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
