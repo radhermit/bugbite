@@ -223,16 +223,6 @@ jobs:
     - name: Start Docker Compose Stack
       run: docker compose -f docker/bugzilla.yml up -d
 
-    - name: Wait for Bugzilla Endpoint
-      run: |
-        echo "Waiting for Bugzilla container initialization..."
-        curl --connect-timeout 5 \
-              --max-time 10 \
-              --retry 12 \
-              --retry-delay 5 \
-              --retry-all-errors \
-              http://localhost:8080/index.cgi
-
     - name: Set up rust toolchain
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
       with:
