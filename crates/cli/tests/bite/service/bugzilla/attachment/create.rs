@@ -58,6 +58,25 @@ async fn auth_required() {
 }
 
 #[tokio::test]
+async fn nonexistent_file() {
+    let server = start_server_with_auth().await;
+    server
+        .respond(200, TEST_DATA.join("attachment/create/single.json"))
+        .await;
+
+    cmd("bite bugzilla attachment create 1")
+        .arg("/path/to/nonexistent/file")
+        .assert()
+        .stdout("")
+        .stderr(
+            predicate::str::diff("Error: failed reading attachment: /path/to/nonexistent/file: No such file or directory (os error 2)")
+                .trim(),
+        )
+        .failure()
+        .code(1);
+}
+
+#[tokio::test]
 async fn single_bug() {
     let server = start_server_with_auth().await;
     server
