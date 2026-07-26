@@ -2,6 +2,7 @@ use std::env;
 
 use bugbite::test::bugzilla::*;
 
+mod attachment;
 mod command;
 mod create;
 mod search;
