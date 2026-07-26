@@ -6,11 +6,19 @@ services:
       MARIADB_DATABASE: bugzilla
       MARIADB_USER: bugzilla
       MARIADB_PASSWORD: bugzilla
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   bugzilla:
     image: ghcr.io/radhermit/bugbite-bugzilla:5.2.0.20260726
     ports:
       - 8080:80
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       - BZ_ADMIN_EMAIL=bugbite@bugbite.test
       - BZ_ADMIN_PASSWORD=bugbite
@@ -21,5 +29,9 @@ services:
       - BZ_DB_USER=bugzilla
       - BZ_DB_NAME=bugzilla
       - BZ_DB_PASS=bugzilla
-    depends_on:
-      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/index.cgi"]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
