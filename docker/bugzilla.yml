@@ -30,7 +30,7 @@ services:
       - BZ_DB_NAME=bugzilla
       - BZ_DB_PASS=bugzilla
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/index.cgi"]
+      test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 5s
       timeout: 5s
       retries: 6
