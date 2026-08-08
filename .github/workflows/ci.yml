@@ -24,7 +24,7 @@ jobs:
       version: ${{ steps.msrv.outputs.version }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
 
     - name: Get the minimum supported rust version (MSRV)
       id: msrv
@@ -54,7 +54,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
 
     - name: Set up rust toolchain
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
@@ -70,7 +70,7 @@ jobs:
         brew install bash
 
     - name: Restore cache
-      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
       id: restore-cache
       with:
         path: |
@@ -123,7 +123,7 @@ jobs:
 
     - name: Save cache
       if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
       with:
         path: |
           ~/.cargo/registry/index
@@ -134,12 +134,12 @@ jobs:
 
     - name: Install grcov
       if: ${{ matrix.rust == 'stable' && runner.os == 'Linux' }}
-      uses: taiki-e/install-action@7a79fe8c3a13344501c80d99cae481c1c9085912 # v2.81.10
+      uses: taiki-e/install-action@6c6fd71fe4fb72c3697d269963d0e15df8adedad #v2.85.10
       with:
         tool: grcov
 
     - name: Install cargo-nextest
-      uses: taiki-e/install-action@7a79fe8c3a13344501c80d99cae481c1c9085912 # v2.81.10
+      uses: taiki-e/install-action@6c6fd71fe4fb72c3697d269963d0e15df8adedad #v2.85.10
       with:
         tool: nextest
 
