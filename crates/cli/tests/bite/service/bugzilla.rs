@@ -3,7 +3,6 @@ use std::sync::LazyLock;
 use std::time::Duration;
 
 use camino::Utf8PathBuf;
-use predicates::prelude::*;
 use wiremock::{ResponseTemplate, matchers};
 
 use super::*;

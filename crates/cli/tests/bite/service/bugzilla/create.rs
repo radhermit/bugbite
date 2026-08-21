@@ -1,4 +1,3 @@
-use predicates::prelude::*;
 use tempfile::tempdir;
 use wiremock::matchers;
 

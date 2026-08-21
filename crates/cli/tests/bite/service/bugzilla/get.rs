@@ -1,6 +1,5 @@
 use std::fs;
 
-use predicates::prelude::*;
 use wiremock::matchers;
 
 use super::*;

@@ -1,5 +1,3 @@
-use predicates::prelude::*;
-
 use super::*;
 
 #[tokio::test]

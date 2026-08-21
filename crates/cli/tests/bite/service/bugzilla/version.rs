@@ -1,4 +1,3 @@
-use predicates::prelude::*;
 use wiremock::{ResponseTemplate, matchers};
 
 use super::*;

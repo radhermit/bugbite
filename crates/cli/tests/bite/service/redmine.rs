@@ -1,7 +1,6 @@
 use std::sync::LazyLock;
 
 use camino::Utf8PathBuf;
-use predicates::prelude::*;
 
 use super::*;
 
