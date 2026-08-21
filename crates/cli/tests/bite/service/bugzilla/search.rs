@@ -1,4 +1,4 @@
-use tempfile::tempdir;
+use camino_tempfile::tempdir;
 
 use super::*;
 
@@ -105,7 +105,7 @@ async fn template() {
 
     let dir = tempdir().unwrap();
     let path = dir.path().join("template");
-    let path = path.to_str().unwrap();
+    let path = path.as_str();
 
     // save template to a specific path
     cmd("bite bugzilla search -c 1d -n")

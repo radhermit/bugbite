@@ -1,7 +1,7 @@
 use std::fs;
 
+use camino_tempfile::tempdir;
 use predicates::prelude::*;
-use tempfile::tempdir;
 
 use crate::command::cmd;
 
@@ -44,15 +44,12 @@ fn connections_with_services() {
 #[test]
 fn custom_config() {
     let dir = tempdir().unwrap();
-    let home_path = dir.path().to_str().unwrap();
-    let dir = dir.path().join(".config");
-    let xdg_path = dir.to_str().unwrap();
-    let config_dir = dir.join("bugbite");
-    let config_dir_path = config_dir.to_str().unwrap();
+    let home_path = dir.path();
+    let config_base = dir.path().join(".config");
+    let config_dir = config_base.join("bugbite");
     let services_dir = config_dir.join("services");
     fs::create_dir_all(&services_dir).unwrap();
-    let file = services_dir.join("config.toml");
-    let file_path = file.to_str().unwrap();
+    let file_path = services_dir.join("config.toml");
     let config = indoc::indoc! {r#"
         type = "bugzilla"
         name = "bugzilla-test"
@@ -69,7 +66,7 @@ fn custom_config() {
 
     // dir target
     cmd("bite show connections")
-        .env("BUGBITE_CONFIG_DIR", config_dir_path)
+        .env("BUGBITE_CONFIG_DIR", config_dir)
         .assert()
         .stdout(predicate::str::contains("bugzilla-test"))
         .stderr("")
@@ -89,7 +86,7 @@ fn custom_config() {
         // xdg config dir
         cmd("bite show connections")
             .env_remove("BUGBITE_CONFIG_DIR")
-            .env("XDG_CONFIG_HOME", xdg_path)
+            .env("XDG_CONFIG_HOME", config_base)
             .assert()
             .stdout(predicate::str::contains("bugzilla-test"))
             .stderr("")

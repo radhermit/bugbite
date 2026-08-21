@@ -1,6 +1,6 @@
 use std::{env, fs};
 
-use tempfile::{NamedTempFile, tempdir};
+use camino_tempfile::{NamedUtf8TempFile, tempdir};
 
 use super::*;
 
@@ -45,9 +45,9 @@ fn required_args() {
 #[tokio::test]
 async fn auth_required() {
     let _server = start_server().await;
-    let file = NamedTempFile::new().unwrap();
+    let file = NamedUtf8TempFile::new().unwrap();
     fs::write(&file, "test").unwrap();
-    let path = file.path().to_str().unwrap();
+    let path = file.path();
 
     cmd("bite bugzilla attachment create 1")
         .arg(path)
@@ -61,8 +61,8 @@ async fn auth_required() {
 #[tokio::test]
 async fn empty_file() {
     let _server = start_server().await;
-    let file = NamedTempFile::new().unwrap();
-    let path = file.path().to_str().unwrap();
+    let file = NamedUtf8TempFile::new().unwrap();
+    let path = file.path();
 
     cmd("bite bugzilla attachment create 1")
         .arg(path)
@@ -99,9 +99,9 @@ async fn single_bug() {
         .respond(200, TEST_DATA.join("attachment/create/single.json"))
         .await;
 
-    let file = NamedTempFile::new().unwrap();
+    let file = NamedUtf8TempFile::new().unwrap();
     fs::write(&file, "test").unwrap();
-    let path = file.path().to_str().unwrap();
+    let path = file.path();
 
     cmd("bite bugzilla attachment create 1")
         .arg(path)
@@ -137,9 +137,9 @@ async fn multiple_bugs() {
         .respond(200, TEST_DATA.join("attachment/create/multiple.json"))
         .await;
 
-    let file = NamedTempFile::new().unwrap();
+    let file = NamedUtf8TempFile::new().unwrap();
     fs::write(&file, "test").unwrap();
-    let path = file.path().to_str().unwrap();
+    let path = file.path();
 
     // invalid command -- ID args must be in a single comma-separated string
     cmd("bite bugzilla attachment create 1 2")

@@ -3,10 +3,10 @@ use std::{env, fs};
 
 use bugbite::test::{TestServer, build_path};
 use camino::Utf8PathBuf;
+use camino_tempfile::tempdir;
 use indexmap::IndexSet;
 use itertools::Itertools;
 use predicates::prelude::*;
-use tempfile::tempdir;
 
 use command::cmd;
 

@@ -1,5 +1,5 @@
 use bugbite::traits::RequestSend;
-use tempfile::tempdir;
+use camino_tempfile::tempdir;
 
 use crate::command::cmd;
 
@@ -36,7 +36,6 @@ async fn from_template() {
 
     let dir = tempdir().unwrap();
     let path = dir.path().join("template");
-    let path = path.to_str().unwrap();
 
     // create template from bug
     cmd!("bite bugzilla create --from-bug {id} --to {path} --dry-run")

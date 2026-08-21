@@ -358,6 +358,7 @@ dependencies = [
  "bugbite",
  "byte-unit",
  "camino",
+ "camino-tempfile",
  "clap",
  "clap-verbosity-flag",
  "clap_complete",
@@ -375,7 +376,6 @@ dependencies = [
  "serde_with",
  "shlex",
  "strum",
- "tempfile",
  "textwrap",
  "tokio",
  "toml",
@@ -474,6 +474,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb1307f12aa967b5a58416e87b3653360e0fd614a016b6e970db08fecbb1b80d"
 dependencies = [
  "serde_core",
+]
+
+[[package]]
+name = "camino-tempfile"
+version = "1.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "64308c4c82a5c38679945ddf88738dc1483dcc563bbb5780755ae9f8497d2b20"
+dependencies = [
+ "camino",
+ "tempfile",
 ]
 
 [[package]]

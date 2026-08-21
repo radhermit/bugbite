@@ -1,8 +1,8 @@
 use std::fs;
 
 use bugbite::traits::RequestSend;
+use camino_tempfile::NamedUtf8TempFile;
 use predicates::prelude::*;
-use tempfile::NamedTempFile;
 
 use crate::command::cmd;
 
@@ -20,9 +20,9 @@ async fn single_attachment_to_single_bug() {
         .await
         .unwrap();
 
-    let file = NamedTempFile::new().unwrap();
+    let file = NamedUtf8TempFile::new().unwrap();
     fs::write(&file, "test").unwrap();
-    let path = file.path().to_str().unwrap();
+    let path = file.path();
 
     cmd!("bite bugzilla attachment create {id} -v")
         .arg(path)

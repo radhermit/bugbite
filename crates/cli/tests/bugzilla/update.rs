@@ -1,6 +1,6 @@
 use bugbite::traits::RequestSend;
+use camino_tempfile::tempdir;
 use itertools::Itertools;
-use tempfile::tempdir;
 
 use crate::command::cmd;
 
@@ -20,7 +20,6 @@ async fn from_template() {
 
     let dir = tempdir().unwrap();
     let path = dir.path().join("template");
-    let path = path.to_str().unwrap();
 
     // create template
     cmd!("bite bugzilla update -S new-summary --to {path} --dry-run")

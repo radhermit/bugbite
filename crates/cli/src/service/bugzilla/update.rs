@@ -12,9 +12,9 @@ use bugbite::service::bugzilla::Bugzilla;
 use bugbite::service::bugzilla::update::*;
 use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use camino::Utf8PathBuf;
+use camino_tempfile::NamedUtf8TempFile;
 use clap::{Args, ValueHint};
 use itertools::Itertools;
-use tempfile::NamedTempFile;
 
 use crate::service::TemplateOptions;
 use crate::utils::{confirm, launch_editor};
@@ -331,7 +331,7 @@ async fn get_reply(
 
 /// Interactively edit a comment.
 fn edit_comment(data: &str) -> anyhow::Result<String> {
-    let temp_file = NamedTempFile::new()?;
+    let temp_file = NamedUtf8TempFile::new()?;
     if !data.is_empty() {
         fs::write(&temp_file, data).context("failed saving comment file")?;
     }

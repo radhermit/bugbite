@@ -1,4 +1,4 @@
-use tempfile::tempdir;
+use camino_tempfile::tempdir;
 use wiremock::matchers;
 
 use super::*;
@@ -152,7 +152,7 @@ async fn template() {
 
     let dir = tempdir().unwrap();
     let path = dir.path().join("template");
-    let path = path.to_str().unwrap();
+    let path = path.as_str();
 
     // create template
     default_cmd!()

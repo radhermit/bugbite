@@ -1,6 +1,6 @@
 use std::{env, fs};
 
-use tempfile::{NamedTempFile, tempdir};
+use camino_tempfile::{NamedUtf8TempFile, tempdir};
 
 use super::*;
 
@@ -203,8 +203,8 @@ async fn output_plain_text() {
             .success();
 
         // file target
-        let file = NamedTempFile::new().unwrap();
-        let path = file.path().to_str().unwrap();
+        let file = NamedUtf8TempFile::new().unwrap();
+        let path = file.path().as_str();
         cmd("bite bugzilla attachment get 123")
             .args([opt, path])
             .assert()
@@ -226,9 +226,8 @@ async fn save_single_with_plain_text() {
         fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-plain-text")).unwrap();
 
     let dir = tempdir().unwrap();
-    let dir_path = dir.path().to_str().unwrap();
     // save files to the current working directory
-    env::set_current_dir(dir_path).unwrap();
+    env::set_current_dir(dir.path()).unwrap();
 
     cmd("bite bugzilla attachment get 123")
         .assert()
@@ -250,7 +249,7 @@ async fn save_single_existing_error() {
         .await;
 
     let dir = tempdir().unwrap();
-    let dir_path = dir.path().to_str().unwrap();
+    let dir_path = dir.path().as_str();
 
     cmd("bite bugzilla attachment get 123")
         .args(["-d", dir_path])
@@ -325,9 +324,8 @@ async fn save_multiple_with_plain_text() {
         fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-plain-text")).unwrap();
 
     let dir = tempdir().unwrap();
-    let dir_path = dir.path().to_str().unwrap();
     // save files to the current working directory
-    env::set_current_dir(dir_path).unwrap();
+    env::set_current_dir(dir.path()).unwrap();
 
     let ids = ["12345", "23456", "34567"];
     cmd("bite bugzilla attachment get -i")

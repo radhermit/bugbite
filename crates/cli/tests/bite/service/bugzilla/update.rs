@@ -1,4 +1,4 @@
-use tempfile::NamedTempFile;
+use camino_tempfile::NamedUtf8TempFile;
 use wiremock::matchers;
 
 use super::*;
@@ -91,8 +91,8 @@ async fn no_changes() {
 async fn template() {
     let server = start_server_with_auth().await;
 
-    let file = NamedTempFile::new().unwrap();
-    let path = file.path().to_str().unwrap();
+    let file = NamedUtf8TempFile::new().unwrap();
+    let path = file.path().as_str();
 
     // create template
     cmd("bite bugzilla update --dry-run")
@@ -373,8 +373,8 @@ async fn comment_from() {
             .failure()
             .code(1);
 
-        let file = NamedTempFile::new().unwrap();
-        let path = file.path().to_str().unwrap();
+        let file = NamedUtf8TempFile::new().unwrap();
+        let path = file.path().as_str();
 
         // empty file
         cmd("bite bugzilla update 1")
@@ -431,8 +431,8 @@ async fn comment_privacy() {
         .failure()
         .code(1);
 
-    let file = NamedTempFile::new().unwrap();
-    let path = file.path().to_str().unwrap();
+    let file = NamedUtf8TempFile::new().unwrap();
+    let path = file.path().as_str();
 
     // various values for targeted comments and comment ranges
     for arg in ["1", "1,2", "..", "1,2:false", "2..=5:true"] {
