@@ -7,7 +7,7 @@ use crate::command::cmd;
 use super::SERVICE;
 
 #[tokio::test]
-async fn from_template() {
+async fn from_template() -> anyhow::Result<()> {
     let id = SERVICE
         .create()
         .summary("summary")
@@ -15,8 +15,7 @@ async fn from_template() {
         .product("TestProduct")
         .description("description")
         .send()
-        .await
-        .unwrap();
+        .await?;
 
     let dir = tempdir().unwrap();
     let path = dir.path().join("template");
@@ -33,20 +32,15 @@ async fn from_template() {
         .assert()
         .success();
 
-    let bug = SERVICE
-        .get([id])
-        .send()
-        .await
-        .unwrap()
-        .into_iter()
-        .next()
-        .unwrap();
+    let bug = SERVICE.get([id]).send().await?.into_iter().next().unwrap();
 
     assert_eq!(bug.summary.unwrap(), "new-summary");
+
+    Ok(())
 }
 
 #[tokio::test]
-async fn multiple_bugs() {
+async fn multiple_bugs() -> anyhow::Result<()> {
     let id1 = SERVICE
         .create()
         .summary("summary")
@@ -54,8 +48,7 @@ async fn multiple_bugs() {
         .product("TestProduct")
         .description("description")
         .send()
-        .await
-        .unwrap();
+        .await?;
 
     let id2 = SERVICE
         .create()
@@ -64,8 +57,7 @@ async fn multiple_bugs() {
         .product("TestProduct")
         .description("description")
         .send()
-        .await
-        .unwrap();
+        .await?;
 
     cmd!("bite bugzilla update {id1} {id2} -S new-summary")
         .assert()
@@ -74,12 +66,13 @@ async fn multiple_bugs() {
     let (bug1, bug2) = SERVICE
         .get([id1, id2])
         .send()
-        .await
-        .unwrap()
+        .await?
         .into_iter()
         .collect_tuple()
         .unwrap();
 
     assert_eq!(bug1.summary.unwrap(), "new-summary");
     assert_eq!(bug2.summary.unwrap(), "new-summary");
+
+    Ok(())
 }

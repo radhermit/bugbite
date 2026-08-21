@@ -6,7 +6,7 @@ use crate::command::cmd;
 use super::SERVICE;
 
 #[tokio::test]
-async fn id() {
+async fn id() -> anyhow::Result<()> {
     let id = SERVICE
         .create()
         .summary("summary")
@@ -14,12 +14,13 @@ async fn id() {
         .product("TestProduct")
         .description("description")
         .send()
-        .await
-        .unwrap();
+        .await?;
 
     cmd!("bite bugzilla search --id {id} --fields id")
         .assert()
         .stdout(predicate::eq(id.to_string()).trim())
         .stderr("")
         .success();
+
+    Ok(())
 }

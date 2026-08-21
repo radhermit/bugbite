@@ -6,7 +6,7 @@ use crate::command::cmd;
 use super::SERVICE;
 
 #[tokio::test]
-async fn from_bug() {
+async fn from_bug() -> anyhow::Result<()> {
     let id = SERVICE
         .create()
         .summary("summary")
@@ -14,16 +14,17 @@ async fn from_bug() {
         .product("TestProduct")
         .description("description")
         .send()
-        .await
-        .unwrap();
+        .await?;
 
     cmd!("bite bugzilla create --from-bug {id} -S summary -D description")
         .assert()
         .success();
+
+    Ok(())
 }
 
 #[tokio::test]
-async fn from_template() {
+async fn from_template() -> anyhow::Result<()> {
     let id = SERVICE
         .create()
         .summary("summary")
@@ -31,10 +32,9 @@ async fn from_template() {
         .product("TestProduct")
         .description("description")
         .send()
-        .await
-        .unwrap();
+        .await?;
 
-    let dir = tempdir().unwrap();
+    let dir = tempdir()?;
     let path = dir.path().join("template");
 
     // create template from bug
@@ -48,4 +48,6 @@ async fn from_template() {
     cmd!("bite bugzilla create --from {path} -S summary -D description")
         .assert()
         .success();
+
+    Ok(())
 }
