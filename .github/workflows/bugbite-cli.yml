@@ -196,5 +196,5 @@ jobs:
       with:
         files: |
           artifacts/*.tar.xz
-          artifacts/${{ github.ref_name }}-macos.zip
+          artifacts/*.zip
         fail_on_unmatched_files: true
