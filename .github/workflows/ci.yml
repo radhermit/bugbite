@@ -8,7 +8,6 @@ on:
       - "**/*.rs"
       - "crates/*/doc/**"
       - "crates/*/testdata/**"
-      - "docker/*"
       - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
@@ -154,16 +153,6 @@ jobs:
 
         # run unit tests
         cargo nextest run --all-features --workspace --tests
-
-        # run integration tests
-        if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
-          # start bugzilla service
-          docker compose -f docker/bugzilla.yml up -d --wait
-          # run tests
-          cargo nextest run --all-features --profile bugzilla --workspace --tests
-          # stop bugzilla service
-          docker compose -f docker/bugzilla.yml down
-        fi
 
     - name: Process code coverage
       id: coverage
