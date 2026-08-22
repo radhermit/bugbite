@@ -1,23 +1,15 @@
 use std::fs;
 
-use bugbite::traits::RequestSend;
 use camino_tempfile::NamedUtf8TempFile;
 use predicates::prelude::*;
 
 use crate::command::cmd;
 
-use super::SERVICE;
+use super::get_existing_bug;
 
 #[tokio::test]
 async fn single_attachment_to_single_bug() -> anyhow::Result<()> {
-    let id = SERVICE
-        .create()
-        .summary("summary")
-        .component("TestComponent")
-        .product("TestProduct")
-        .description("description")
-        .send()
-        .await?;
+    let id = get_existing_bug().await?;
 
     let file = NamedUtf8TempFile::new()?;
     fs::write(&file, "test")?;

@@ -4,19 +4,11 @@ use itertools::Itertools;
 
 use crate::command::cmd;
 
-use super::SERVICE;
+use super::{SERVICE, get_existing_bug};
 
 #[tokio::test]
 async fn from_template() -> anyhow::Result<()> {
-    let id = SERVICE
-        .create()
-        .summary("summary")
-        .component("TestComponent")
-        .product("TestProduct")
-        .description("description")
-        .send()
-        .await?;
-
+    let id = get_existing_bug().await?;
     let dir = tempdir().unwrap();
     let path = dir.path().join("template");
 
@@ -41,15 +33,7 @@ async fn from_template() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn multiple_bugs() -> anyhow::Result<()> {
-    let id1 = SERVICE
-        .create()
-        .summary("summary")
-        .component("TestComponent")
-        .product("TestProduct")
-        .description("description")
-        .send()
-        .await?;
-
+    let id1 = get_existing_bug().await?;
     let id2 = SERVICE
         .create()
         .summary("summary")

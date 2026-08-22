@@ -1,20 +1,12 @@
-use bugbite::traits::RequestSend;
 use predicates::prelude::*;
 
 use crate::command::cmd;
 
-use super::SERVICE;
+use super::get_existing_bug;
 
 #[tokio::test]
 async fn id() -> anyhow::Result<()> {
-    let id = SERVICE
-        .create()
-        .summary("summary")
-        .component("TestComponent")
-        .product("TestProduct")
-        .description("description")
-        .send()
-        .await?;
+    let id = get_existing_bug().await?;
 
     cmd!("bite bugzilla search --id {id} --fields id")
         .assert()

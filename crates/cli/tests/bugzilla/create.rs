@@ -1,20 +1,12 @@
-use bugbite::traits::RequestSend;
 use camino_tempfile::tempdir;
 
 use crate::command::cmd;
 
-use super::SERVICE;
+use super::get_existing_bug;
 
 #[tokio::test]
 async fn from_bug() -> anyhow::Result<()> {
-    let id = SERVICE
-        .create()
-        .summary("summary")
-        .component("TestComponent")
-        .product("TestProduct")
-        .description("description")
-        .send()
-        .await?;
+    let id = get_existing_bug().await?;
 
     cmd!("bite bugzilla create --from-bug {id} -S summary -D description")
         .assert()
@@ -25,15 +17,7 @@ async fn from_bug() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn from_template() -> anyhow::Result<()> {
-    let id = SERVICE
-        .create()
-        .summary("summary")
-        .component("TestComponent")
-        .product("TestProduct")
-        .description("description")
-        .send()
-        .await?;
-
+    let id = get_existing_bug().await?;
     let dir = tempdir()?;
     let path = dir.path().join("template");
 
