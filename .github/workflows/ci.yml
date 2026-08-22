@@ -213,4 +213,5 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: coverage/lcov
         disable_search: true
+        flags: unit
         fail_ci_if_error: false

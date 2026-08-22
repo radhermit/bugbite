@@ -1,3 +1,19 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+      unit:
+        flags: [unit]
+      integration:
+        flags: [integration]
+
+flags:
+  unit:
+    carryforward: true
+  integration:
+    carryforward: true
+
 ignore:
   - "crates/python"
   - "crates/tui"
