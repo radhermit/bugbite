@@ -102,6 +102,8 @@ impl RequestSend for Request {
 
 #[cfg(test)]
 mod tests {
+    use std::assert_matches;
+
     use crate::test::*;
 
     use super::*;
@@ -115,7 +117,7 @@ mod tests {
         // no emails
         let emails = Vec::<&str>::new();
         let err = service.user_create(emails).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_matches!(err, Error::InvalidRequest(_));
         assert_err_re!(err, "no emails specified");
 
         // unauthenticated session

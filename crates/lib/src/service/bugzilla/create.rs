@@ -466,6 +466,7 @@ struct RequestParameters<'a> {
 
 #[cfg(test)]
 mod tests {
+    use std::assert_matches;
     use std::str::FromStr;
 
     use crate::test::*;
@@ -485,7 +486,7 @@ mod tests {
 
         // missing required fields without defaults
         let err = service.create().send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_matches!(err, Error::InvalidRequest(_));
         assert_err_re!(
             err,
             "missing required fields: component, description, product, summary"
@@ -500,7 +501,7 @@ mod tests {
             .send()
             .await
             .unwrap_err();
-        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_matches!(err, Error::InvalidRequest(_));
         assert_err_re!(err, "missing required fields: component, os, product");
 
         // create new request with default fields set

@@ -95,6 +95,8 @@ impl RequestSend for Request {
 
 #[cfg(test)]
 mod tests {
+    use std::assert_matches;
+
     use crate::test::*;
 
     use super::*;
@@ -108,7 +110,7 @@ mod tests {
         // no IDs
         let ids = Vec::<u64>::new();
         let err = service.attachment_get(ids).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_matches!(err, Error::InvalidRequest(_));
         assert_err_re!(err, "no IDs specified");
 
         // nonexistent
@@ -116,7 +118,7 @@ mod tests {
             .respond(200, path.join("attachment/get/nonexistent.json"))
             .await;
         let err = service.attachment_get([1]).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidValue(_)));
+        assert_matches!(err, Error::InvalidValue(_));
         assert_err_re!(err, "nonexistent attachment: 1");
 
         server.reset().await;
@@ -126,7 +128,7 @@ mod tests {
             .respond(200, path.join("attachment/get/deleted.json"))
             .await;
         let err = service.attachment_get([21]).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidValue(_)));
+        assert_matches!(err, Error::InvalidValue(_));
         assert_err_re!(err, "deleted attachment: 21");
 
         server.reset().await;
@@ -136,7 +138,7 @@ mod tests {
             .respond(200, path.join("attachment/get/invalid.json"))
             .await;
         let err = service.attachment_get([123]).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidResponse(_)));
+        assert_matches!(err, Error::InvalidResponse(_));
         assert_err_re!(err, "failed deserializing attachment: 123");
 
         server.reset().await;

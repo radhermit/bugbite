@@ -113,6 +113,8 @@ impl RequestSend for Request {
 
 #[cfg(test)]
 mod tests {
+    use std::assert_matches;
+
     use crate::test::*;
 
     use super::*;
@@ -126,7 +128,7 @@ mod tests {
         // no IDs
         let ids = Vec::<u64>::new();
         let err = service.attachment_get_item(ids).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_matches!(err, Error::InvalidRequest(_));
         assert_err_re!(err, "no IDs specified");
 
         // nonexistent bug
@@ -134,10 +136,7 @@ mod tests {
             .respond(404, path.join("errors/nonexistent-bug.json"))
             .await;
         let err = service.attachment_get_item([1]).send().await.unwrap_err();
-        assert!(
-            matches!(err, Error::Bugzilla { code: 101, .. }),
-            "unmatched error: {err:?}"
-        );
+        assert_matches!(err, Error::Bugzilla { code: 101, .. });
 
         server.reset().await;
 

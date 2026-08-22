@@ -128,6 +128,8 @@ impl Parameters {
 
 #[cfg(test)]
 mod tests {
+    use std::assert_matches;
+
     use crate::test::*;
 
     use super::*;
@@ -141,7 +143,7 @@ mod tests {
         // no IDs
         let ids = Vec::<u32>::new();
         let err = service.history(ids).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_matches!(err, Error::InvalidRequest(_));
         assert_err_re!(err, "no IDs specified");
 
         server.reset().await;

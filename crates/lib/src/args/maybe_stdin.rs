@@ -228,7 +228,7 @@ impl<'a, T> IntoIterator for &'a MaybeStdinVec<T> {
 
 #[cfg(test)]
 mod tests {
-    use std::env;
+    use std::{assert_matches, env};
 
     use crate::test::assert_ordered_eq;
 
@@ -239,16 +239,16 @@ mod tests {
         let r: Result<MaybeStdin<String>, StdinError> = "-".parse();
         assert!(r.is_ok());
         let r: Result<MaybeStdin<String>, StdinError> = "-".parse();
-        assert!(matches!(r, Err(StdinError::StdInRepeatedUse)));
+        assert_matches!(r, Err(StdinError::StdInRepeatedUse));
     }
 
     #[test]
     fn is_terminal() {
         unsafe { env::set_var("BUGBITE_IS_TERMINAL", "1") };
         let r: Result<MaybeStdin<String>, StdinError> = "-".parse();
-        assert!(matches!(r, Err(StdinError::StdinIsTerminal)));
+        assert_matches!(r, Err(StdinError::StdinIsTerminal));
         let r: Result<MaybeStdinVec<String>, StdinError> = "-".parse();
-        assert!(matches!(r, Err(StdinError::StdinIsTerminal)));
+        assert_matches!(r, Err(StdinError::StdinIsTerminal));
     }
 
     #[test]

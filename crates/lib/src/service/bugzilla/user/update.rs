@@ -137,6 +137,8 @@ struct RequestParameters<'a> {
 
 #[cfg(test)]
 mod tests {
+    use std::assert_matches;
+
     use crate::test::*;
 
     use super::*;
@@ -150,7 +152,7 @@ mod tests {
         // no IDs
         let ids = Vec::<u64>::new();
         let err = service.user_update(ids).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_matches!(err, Error::InvalidRequest(_));
         assert_err_re!(err, "no IDs specified");
 
         // no parameters

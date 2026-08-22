@@ -145,6 +145,8 @@ impl RequestSend for Request {
 
 #[cfg(test)]
 mod tests {
+    use std::assert_matches;
+
     use wiremock::{ResponseTemplate, matchers};
 
     use crate::test::*;
@@ -160,14 +162,14 @@ mod tests {
         // no IDs
         let ids = Vec::<u64>::new();
         let err = service.get(ids).send().await.unwrap_err();
-        assert!(matches!(err, Error::InvalidRequest(_)));
+        assert_matches!(err, Error::InvalidRequest(_));
         assert_err_re!(err, "no IDs specified");
 
         // nonexistent
         let template = ResponseTemplate::new(404);
         server.respond_custom(matchers::any(), template).await;
         let err = service.get([1]).send().await.unwrap_err();
-        assert!(matches!(err, Error::Redmine(_)));
+        assert_matches!(err, Error::Redmine(_));
         assert_err_re!(err, "nonexistent issue: 1");
 
         server.reset().await;
