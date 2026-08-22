@@ -19,8 +19,8 @@ cargo nextest run --all-features --workspace --tests
 
 ## Containers
 
-Some services have containers provided in `docker/*`. All service containers
-provide the following user for testing purposes:
+Some services have containers in `docker/*` that provide the following user for
+testing purposes:
 
     username: bugbite
     password: bugbite
