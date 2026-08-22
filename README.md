@@ -9,4 +9,35 @@ Library and tools for bug, issue, and ticket mangling.
 - [bite]: CLI client
 - chew: TUI client
 
+## Test
+
+Testing is supported via [nextest]. To run all bugbite workspace unit tests:
+
+```bash
+cargo nextest run --all-features --workspace --tests
+```
+
+## Containers
+
+Some services have containers provided in `docker/*`. All service containers
+provide the following user for testing purposes:
+
+    username: bugbite
+    password: bugbite
+    email: bugbite@bugbite.test
+
+Start a Bugzilla instance:
+
+```bash
+docker compose -f docker/bugzilla.yml up --wait
+```
+
+In addition, some services have integration tests that can be run against the
+related container. For example, to run the bugzilla integration tests:
+
+```bash
+cargo nextest run --all-features --profile bugzilla --workspace --tests
+```
+
 [bite]: <https://github.com/radhermit/bugbite/tree/main/crates/cli>
+[nextest]: <https://nexte.st/>
