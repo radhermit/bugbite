@@ -62,12 +62,6 @@ jobs:
         toolchain: ${{ matrix.rust-version }}
         components: llvm-tools-preview
 
-    - name: Install tools on macOS
-      if: runner.os == 'macOS'
-      run: |
-        # install the latest bash release -- macos defaults to an ancient version due to licensing
-        brew install bash
-
     - name: Restore cache
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
       id: restore-cache
@@ -82,24 +76,13 @@ jobs:
     - name: Remove old caches
       if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
       continue-on-error: true
-      shell: bash
       run: |
-        gh extension install actions/gh-actions-cache
+        REPO="${{ github.repository }}"
+        BRANCH="${{ github.ref }}"
+        KEY="${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-rust-${{ matrix.rust }}-"
 
-        REPO=${{ github.repository }}
-        BRANCH=${{ github.ref }}
-        KEY=${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-rust-${{ matrix.rust }}-
-
-        # find matching caches
-        mapfile -t cache_keys < <( gh actions-cache list -R $REPO -B $BRANCH --key $KEY --sort created-at --order desc | cut -f 1 )
-
-        # remove all matching caches
-        for key in ${cache_keys[@]}
-        do
-          gh actions-cache delete $key -R $REPO -B $BRANCH --confirm
-        done
-
-        exit 0
+        # delete all caches matching the partial key prefix for this branch
+        gh cache delete --repo "$REPO" --ref "$BRANCH" --match prefix "$KEY" --succeed-on-no-caches
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
