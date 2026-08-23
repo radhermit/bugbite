@@ -187,6 +187,16 @@ mod tests {
         let comments = service.comment([1]).attachment(false).send().await.unwrap();
         assert_ordered_eq!(comments[0].iter().map(|x| x.id), [1, 5, 6, 7]);
 
+        // comments with time bounds
+        let value = "2020".parse().unwrap();
+        let comments = service
+            .comment([1])
+            .created_after(value)
+            .send()
+            .await
+            .unwrap();
+        assert_ordered_eq!(comments[0].iter().map(|x| x.id), [1, 2, 3, 4, 5, 6, 7]);
+
         // comments by a specific user
         let comments = service.comment([1]).creator("user1").send().await.unwrap();
         assert_ordered_eq!(comments[0].iter().map(|x| x.id), [1, 2, 3, 7]);
