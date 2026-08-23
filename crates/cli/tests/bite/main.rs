@@ -76,6 +76,25 @@ fn version() {
     }
 }
 
+#[test]
+fn default_service() {
+    // no connection specified
+    cmd("bite version")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::contains("error: unrecognized subcommand"))
+        .failure()
+        .code(2);
+
+    // service subcommand can be skipped when connection is known
+    cmd("bite version -h")
+        .env("BUGBITE_CONNECTION", "gentoo")
+        .assert()
+        .stdout(predicate::str::contains("bugzilla"))
+        .stderr("")
+        .success();
+}
+
 #[tokio::test]
 async fn doc() {
     let server = start_server_with_auth().await;
