@@ -97,6 +97,7 @@ async fn template() {
     // create template
     cmd("bite bugzilla update --dry-run")
         .args(["--summary", "new summary"])
+        .args(["--comment-privacy", "2..=5:true"])
         .args(["--to", path])
         .assert()
         .stdout("")
@@ -104,7 +105,18 @@ async fn template() {
         .success();
 
     server
-        .respond(200, TEST_DATA.join("update/summary.json"))
+        .respond_match(
+            matchers::path("/rest/bug/123/comment"),
+            200,
+            TEST_DATA.join("comment/single-bug.json"),
+        )
+        .await;
+    server
+        .respond_match(
+            matchers::path("/rest/bug/123"),
+            200,
+            TEST_DATA.join("update/summary.json"),
+        )
         .await;
 
     cmd("bite bugzilla update 123 -v")
