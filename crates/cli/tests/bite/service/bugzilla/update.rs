@@ -260,9 +260,11 @@ async fn reply() {
         cmd("bite bugzilla update 1 -v")
             .arg(opt)
             .env("EDITOR", "sed -i -e '100d'")
-            .write_stdin("Y\n")
+            .write_stdin("n\nY\n")
             .assert()
-            .stderr(predicate::str::diff("No changes made, submit anyway? (y/N):").trim())
+            .stderr(predicate::str::contains(
+                "No changes made, submit anyway? (y/N):",
+            ))
             .stdout(predicate::str::diff(indoc::indoc! {"
                 === Bug #1 ===
                 --- Updated fields ---
