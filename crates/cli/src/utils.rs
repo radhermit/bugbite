@@ -1,35 +1,45 @@
 use std::collections::VecDeque;
 use std::env;
 use std::ffi::OsStr;
-use std::io::{BufRead, Write, stderr, stdin};
+use std::io::{self, BufRead, Write};
 use std::process::{Command, ExitStatus, Stdio};
 
 use anyhow::{Context, Result};
 
-pub(crate) fn confirm<S>(prompt: S, default: bool) -> Result<bool>
+fn confirm_inner<S, R, W>(
+    prompt: S,
+    default: bool,
+    mut reader: R,
+    mut writer: W,
+) -> io::Result<bool>
+where
+    S: std::fmt::Display,
+    R: BufRead,
+    W: Write,
+{
+    let vals = if default { "Y/n" } else { "y/N" };
+    loop {
+        write!(writer, "{prompt} ({vals}): ")?;
+        writer.flush()?;
+        let mut answer = String::new();
+        reader.read_line(&mut answer)?;
+        let value = answer.trim();
+
+        match value {
+            "" => return Ok(default),
+            "Y" | "y" => return Ok(true),
+            "N" | "n" => return Ok(false),
+            _ => writeln!(writer, "please answer y or n")?,
+        }
+    }
+}
+
+/// Requests interactive user confirmation.
+pub(crate) fn confirm<S>(prompt: S, default: bool) -> io::Result<bool>
 where
     S: std::fmt::Display,
 {
-    let mut stderr = stderr().lock();
-    let mut stdin = stdin().lock();
-    let vals = if default { "Y/n" } else { "y/N" };
-    loop {
-        write!(stderr, "{prompt} ({vals}): ")?;
-        stderr.flush()?;
-        let mut answer = String::new();
-        stdin.read_line(&mut answer)?;
-        let value = answer.trim();
-
-        if value.is_empty() {
-            return Ok(default);
-        } else if value == "Y" || value == "y" {
-            return Ok(true);
-        } else if value == "N" || value == "n" {
-            return Ok(false);
-        } else {
-            writeln!(stderr, "please answer y or n")?;
-        }
-    }
+    confirm_inner(prompt, default, io::stdin().lock(), io::stderr().lock())
 }
 
 pub(crate) fn launch_browser<I, S>(urls: I) -> Result<()>
@@ -91,3 +101,45 @@ macro_rules! wrapped_doc {
     }};
 }
 pub(crate) use wrapped_doc;
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use super::*;
+
+    #[test]
+    fn test_confirm() {
+        // default true
+        let input = Cursor::new("\n"); // user hits Enter immediately
+        let mut output = Vec::new();
+        let result = confirm_inner("Proceed?", true, input, &mut output);
+        assert!(result.unwrap());
+        let output_str = str::from_utf8(&output).unwrap();
+        assert!(output_str.contains("Proceed? (Y/n): "));
+
+        // explicit yes
+        for value in ["y", "Y"] {
+            let input = Cursor::new(format!("{value}\n"));
+            let mut output = Vec::new();
+            let result = confirm_inner("Proceed?", true, input, &mut output);
+            assert!(result.unwrap());
+        }
+
+        // explicit no
+        for value in ["n", "N"] {
+            let input = Cursor::new(format!("{value}\n"));
+            let mut output = Vec::new();
+            let result = confirm_inner("Proceed?", true, input, &mut output);
+            assert!(!result.unwrap());
+        }
+
+        // confirm retry on invalid, first input is invalid ("maybe"), second input is valid ("y")
+        let input = Cursor::new("maybe\ny\n");
+        let mut output = Vec::new();
+        let result = confirm_inner("Proceed?", false, input, &mut output);
+        assert!(result.unwrap());
+        let output_str = str::from_utf8(&output).unwrap();
+        assert!(output_str.contains("please answer y or n"));
+    }
+}
