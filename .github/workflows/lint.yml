@@ -24,43 +24,14 @@ jobs:
         toolchain: stable
         components: clippy, rustfmt
 
-    - name: Restore cache
-      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
-      id: restore-cache
+    - name: Set up rust build cache
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 #v2.9.2
       with:
-        path: |
-          ~/.cargo/registry/index
-          ~/.cargo/registry/cache
-          ~/.cargo/git/db
-          target
-        key: ${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-rust-${{ steps.rust.outputs.cachekey }}-cargo-${{ hashFiles('Cargo.lock') }}
-
-    - name: Remove old caches
-      if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
-      continue-on-error: true
-      run: |
-        REPO="${{ github.repository }}"
-        BRANCH="${{ github.ref }}"
-        KEY="${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-rust-${{ matrix.rust }}-"
-
-        # delete all caches matching the partial key prefix for this branch
-        gh cache delete --repo "$REPO" --ref "$BRANCH" --match prefix "$KEY" --succeed-on-no-caches
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # only save cache when running on the main branch
+        save-if: ${{ github.ref_name == 'main' }}
 
     - name: Run rustfmt
       run: cargo fmt --check
 
     - name: Run clippy
       run: cargo clippy --all-features --all-targets
-
-    - name: Save cache
-      if: ${{ github.ref_name == 'main' && steps.restore-cache.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
-      with:
-        path: |
-          ~/.cargo/registry/index
-          ~/.cargo/registry/cache
-          ~/.cargo/git/db
-          target
-        key: ${{ steps.restore-cache.outputs.cache-primary-key }}
