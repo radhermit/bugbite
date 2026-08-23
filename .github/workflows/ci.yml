@@ -139,15 +139,6 @@ jobs:
         # set output to disable uploading code coverage on grcov failure
         echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
 
-    - name: Upload coverage artifacts
-      if: ${{ steps.coverage.outputs.coverage == 'true' }}
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-      with:
-        name: coverage
-        path: coverage
-        if-no-files-found: error
-        retention-days: 1
-
     - name: Upload coverage to Codecov
       if: ${{ steps.coverage.outputs.coverage == 'true' }}
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f #v7.0.0
