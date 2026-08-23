@@ -1,0 +1,41 @@
+include::{docdir}/common/header.adoc[]
+
+== Name
+
+bite-bugzilla-comment-get - get bug comments
+
+== Synopsis
+
+*bite bugzilla comment get* [<options>] <ids>::
+    Fetch and output bug comments.
+
+*bite bugzilla comment get* [-h|--help]::
+    Output help information.
+
+== Description
+
+Get bug comments.
+
+include::{docdir}/common/global-options.adoc[]
+
+== Options
+
+*-a, --attachment [<bool>]*::
+    Restrict by attachments.
+
+*-c, --created*::
+    Restrict by creation time.
+
+*-R, --creator*::
+    Restrict by creator.
+
+== Arguments
+
+*<ids>*::
+    Bug IDs or aliases of comments to fetch.
++
+Taken from standard input when `-`.
+
+== See Also
+
+linkcmd:bite-bugzilla-comment[1]

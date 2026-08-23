@@ -13,7 +13,8 @@ use strum::Display;
 use url::Url;
 
 use crate::Error;
-use crate::objects::{Range, bugzilla::Flag};
+use crate::objects::{Range, SetChanges};
+pub use crate::objects::{SetChange, bugzilla::Flag};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{Contains, InjectAuth, Merge, RequestSend, RequestTemplate, WebService};
@@ -275,7 +276,7 @@ impl Request {
             // pull comments for a given bug ID
             let comments = self
                 .service
-                .comment([&params.ids[0]])
+                .comment_get([&params.ids[0]])
                 .send()
                 .await?
                 .into_iter()
@@ -312,47 +313,6 @@ impl Request {
         }
 
         Ok(params)
-    }
-}
-
-/// Supported change variants for set-based fields.
-#[derive(DeserializeFromStr, SerializeDisplay, Debug, Eq, PartialEq, Clone)]
-pub enum SetChange<T> {
-    Add(T),
-    Remove(T),
-    Set(T),
-}
-
-impl<T: FromStr> FromStr for SetChange<T> {
-    type Err = Error;
-
-    fn from_str(s: &str) -> crate::Result<Self> {
-        if let Some(value) = s.strip_prefix('+') {
-            let value = value
-                .parse()
-                .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
-            Ok(Self::Add(value))
-        } else if let Some(value) = s.strip_prefix('-') {
-            let value = value
-                .parse()
-                .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
-            Ok(Self::Remove(value))
-        } else {
-            let value = s
-                .parse()
-                .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
-            Ok(Self::Set(value))
-        }
-    }
-}
-
-impl<T: fmt::Display> fmt::Display for SetChange<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Add(value) => write!(f, "+{value}"),
-            Self::Remove(value) => write!(f, "-{value}"),
-            Self::Set(value) => value.fmt(f),
-        }
     }
 }
 
@@ -493,39 +453,6 @@ impl Merge for Parameters {
             version: self.version.merge(other.version),
             whiteboard: self.whiteboard.merge(other.whiteboard),
             custom_fields: self.custom_fields.merge(other.custom_fields),
-        }
-    }
-}
-
-#[skip_serializing_none]
-#[derive(Serialize)]
-struct SetChanges<T> {
-    add: Option<Vec<T>>,
-    remove: Option<Vec<T>>,
-    set: Option<Vec<T>>,
-}
-
-impl<'a, T: FromStr> FromIterator<&'a SetChange<T>> for SetChanges<&'a T> {
-    fn from_iter<I: IntoIterator<Item = &'a SetChange<T>>>(iterable: I) -> Self {
-        let (mut add, mut remove, mut set) = (vec![], vec![], vec![]);
-        for change in iterable {
-            match change {
-                SetChange::Add(value) => add.push(value),
-                SetChange::Remove(value) => remove.push(value),
-                SetChange::Set(value) => set.push(value),
-            }
-        }
-
-        let set = if !set.is_empty() || (add.is_empty() && remove.is_empty()) {
-            Some(set)
-        } else {
-            None
-        };
-
-        Self {
-            add: Some(add),
-            remove: Some(remove),
-            set,
         }
     }
 }

@@ -16,14 +16,14 @@ async fn get_single_bug() -> anyhow::Result<()> {
     }
 
     // get all comments
-    cmd!("bite bugzilla comment {id}")
+    cmd!("bite bugzilla comment get {id}")
         .assert()
         .stdout(predicate::str::is_empty().not())
         .stderr("")
         .success();
 
     // get comments with attachments
-    cmd!("bite bugzilla comment {id} -a")
+    cmd!("bite bugzilla comment get {id} -a")
         .assert()
         .stdout("")
         .stderr("")
@@ -45,7 +45,7 @@ async fn get_multiple_bugs() -> anyhow::Result<()> {
     }
 
     // get all comments
-    cmd!("bite bugzilla comment {id1} {id2}")
+    cmd!("bite bugzilla comment get {id1} {id2}")
         .assert()
         .stdout(predicate::str::contains(format!("bug #{id1}")))
         .stdout(predicate::str::contains(format!("bug #{id2}")))
@@ -65,12 +65,12 @@ async fn time_bounds() -> anyhow::Result<()> {
         .success();
 
     // created after
-    cmd!("bite bugzilla comment {id} -c 2000-01-01")
+    cmd!("bite bugzilla comment get {id} -c 2000-01-01")
         .assert()
         .stdout(predicate::str::is_empty().not())
         .stderr("")
         .success();
-    cmd!("bite bugzilla comment {id} --created 9999-01-01")
+    cmd!("bite bugzilla comment get {id} --created 9999-01-01")
         .assert()
         .stdout(predicate::str::is_empty())
         .stderr("")

@@ -13,7 +13,7 @@ pub struct Request {
     service: Bugzilla,
     pub ids: Vec<String>,
     attachments: Option<attachment::get_item::Request>,
-    comments: Option<comment::Request>,
+    comments: Option<comment::get::Request>,
     history: Option<history::Request>,
 }
 
@@ -70,7 +70,7 @@ impl Request {
     /// Enable or disable fetching comments.
     pub fn comments(&mut self, fetch: bool) -> &mut Self {
         if fetch {
-            self.comments = Some(self.service.comment(&self.ids));
+            self.comments = Some(self.service.comment_get(&self.ids));
         }
         self
     }

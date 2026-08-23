@@ -30,9 +30,9 @@ impl Bugzilla {
         Ok(Self(service))
     }
 
-    fn comment(&self, ids: Vec<String>) -> PyResult<Vec<Vec<Comment>>> {
+    fn comment_get(&self, ids: Vec<String>) -> PyResult<Vec<Vec<Comment>>> {
         tokio().block_on(async {
-            let comments = self.0.comment(ids).send().await?;
+            let comments = self.0.comment_get(ids).send().await?;
             Ok(comments
                 .into_iter()
                 .map(|x| x.into_iter().map(Into::into).collect())

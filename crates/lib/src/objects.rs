@@ -5,7 +5,8 @@ use std::sync::LazyLock;
 
 use base64::prelude::*;
 use regex::Regex;
-use serde_with::{DeserializeFromStr, SerializeDisplay};
+use serde::Serialize;
+use serde_with::{DeserializeFromStr, SerializeDisplay, skip_serializing_none};
 
 use crate::Error;
 use crate::traits::Contains;
@@ -276,6 +277,80 @@ impl<T: PartialOrd + Eq> Contains<T> for Range<T> {
             Self::ToInclusive(r) => r.contains(obj),
             Self::From(r) => r.contains(obj),
             Self::Full(r) => r.contains(obj),
+        }
+    }
+}
+
+/// Supported change variants for set-based fields.
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, Eq, PartialEq, Clone)]
+pub enum SetChange<T> {
+    Add(T),
+    Remove(T),
+    Set(T),
+}
+
+impl<T: FromStr> FromStr for SetChange<T> {
+    type Err = Error;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        if let Some(value) = s.strip_prefix('+') {
+            let value = value
+                .parse()
+                .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
+            Ok(Self::Add(value))
+        } else if let Some(value) = s.strip_prefix('-') {
+            let value = value
+                .parse()
+                .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
+            Ok(Self::Remove(value))
+        } else {
+            let value = s
+                .parse()
+                .map_err(|_| Error::InvalidValue(format!("failed parsing change: {s}")))?;
+            Ok(Self::Set(value))
+        }
+    }
+}
+
+impl<T: fmt::Display> fmt::Display for SetChange<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Add(value) => write!(f, "+{value}"),
+            Self::Remove(value) => write!(f, "-{value}"),
+            Self::Set(value) => value.fmt(f),
+        }
+    }
+}
+
+#[skip_serializing_none]
+#[derive(Serialize)]
+pub struct SetChanges<T> {
+    pub add: Option<Vec<T>>,
+    pub remove: Option<Vec<T>>,
+    pub set: Option<Vec<T>>,
+}
+
+impl<'a, T: FromStr> FromIterator<&'a SetChange<T>> for SetChanges<&'a T> {
+    fn from_iter<I: IntoIterator<Item = &'a SetChange<T>>>(iterable: I) -> Self {
+        let (mut add, mut remove, mut set) = (vec![], vec![], vec![]);
+        for change in iterable {
+            match change {
+                SetChange::Add(value) => add.push(value),
+                SetChange::Remove(value) => remove.push(value),
+                SetChange::Set(value) => set.push(value),
+            }
+        }
+
+        let set = if !set.is_empty() || (add.is_empty() && remove.is_empty()) {
+            Some(set)
+        } else {
+            None
+        };
+
+        Self {
+            add: Some(add),
+            remove: Some(remove),
+            set,
         }
     }
 }

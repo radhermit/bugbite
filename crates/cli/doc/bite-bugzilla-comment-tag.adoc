@@ -1,0 +1,47 @@
+include::{docdir}/common/header.adoc[]
+
+== Name
+
+bite-bugzilla-comment-tag - tag bug comments
+
+== Synopsis
+
+*bite bugzilla comment tag* [<options>] <ids>::
+    Tag bug comments.
+
+*bite bugzilla comment tag* [-h|--help]::
+    Output help information.
+
+== Description
+
+Tag bug comments.
+
+include::{docdir}/common/global-options.adoc[]
+
+== Options
+
+*-a, --attachment [<bool>]*::
+    Restrict by attachments.
+
+*-c, --created*::
+    Restrict by creation time.
+
+*-R, --creator*::
+    Restrict by creator.
+
+*-t, --tags*::
+	Add, remove, or set comment tags.
+
+*-u, --untag [<bool>]*::
+	Untag comments.
+
+== Arguments
+
+*<ids>*::
+    Bug IDs to target for comments.
++
+Taken from standard input when `-`.
+
+== See Also
+
+linkcmd:bite-bugzilla-comment[1]

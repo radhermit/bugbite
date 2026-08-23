@@ -4,7 +4,6 @@ use std::process::ExitCode;
 
 use anyhow::Context;
 use bugbite::args::{MaybeStdin, MaybeStdinVec};
-use bugbite::objects::bugzilla::Flag;
 use bugbite::output::verbose;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::service::bugzilla::update::*;
@@ -263,7 +262,7 @@ async fn get_reply(
     comment_ids: &mut Vec<usize>,
 ) -> anyhow::Result<String> {
     let comments = service
-        .comment([id])
+        .comment_get([id])
         .send()
         .await?
         .into_iter()

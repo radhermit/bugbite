@@ -258,12 +258,20 @@ impl Bugzilla {
         attachment::update::Request::new(self, ids)
     }
 
-    pub fn comment<I, S>(&self, ids: I) -> comment::Request
+    pub fn comment_get<I, S>(&self, ids: I) -> comment::get::Request
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        comment::Request::new(self, ids)
+        comment::get::Request::new(self, ids)
+    }
+
+    pub fn comment_tag<I, S>(&self, ids: I) -> comment::tag::Request
+    where
+        I: IntoIterator<Item = S>,
+        S: fmt::Display,
+    {
+        comment::tag::Request::new(self, ids)
     }
 
     pub fn create(&self) -> create::Request {
