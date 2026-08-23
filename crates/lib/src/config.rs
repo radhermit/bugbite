@@ -180,7 +180,7 @@ impl Config {
 mod tests {
     use std::{env, fs};
 
-    use tempfile::tempdir;
+    use camino_tempfile::tempdir;
 
     use crate::service::bugzilla::Bugzilla;
 
@@ -203,8 +203,7 @@ mod tests {
         assert!(service.config().auth.user.is_none());
 
         let dir = tempdir().unwrap();
-        let dir_path = dir.path().to_str().unwrap();
-        env::set_current_dir(dir_path).unwrap();
+        env::set_current_dir(dir.path()).unwrap();
 
         // create service files
         let service1 = indoc::indoc! {r#"
@@ -232,7 +231,7 @@ mod tests {
         assert!(config.services.len() == len + 1);
 
         // add new services from dir
-        config.load(dir_path).unwrap();
+        config.load(dir.path()).unwrap();
         assert!(config.services.len() == len + 2);
 
         // verify gentoo connection was overridden

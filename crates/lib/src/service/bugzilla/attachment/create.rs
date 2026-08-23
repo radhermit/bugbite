@@ -4,6 +4,7 @@ use std::{fmt, io, str};
 
 use byte_unit::Byte;
 use camino::{Utf8Path, Utf8PathBuf};
+use camino_tempfile::tempdir;
 use itertools::Itertools;
 use serde::Serialize;
 use serde_with::skip_serializing_none;
@@ -404,14 +405,12 @@ impl RequestSend for Request {
         };
 
         // create temporary directory used for creating transient attachment files
-        let temp_dir = tempfile::tempdir()
+        let temp_dir = tempdir()
             .map_err(|e| Error::InvalidValue(format!("failed acquiring temporary dir: {e}")))?;
-        let temp_dir_path = Utf8Path::from_path(temp_dir.path())
-            .ok_or_else(|| Error::InvalidValue("non-unicode temporary dir path".to_string()))?;
 
         let mut futures = vec![];
         for attachment in &self.attachments {
-            let attachment = attachment.build(&self.ids, temp_dir_path)?;
+            let attachment = attachment.build(&self.ids, temp_dir.path())?;
             futures.push(
                 self.service
                     .client()

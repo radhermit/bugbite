@@ -221,7 +221,7 @@ pub trait WebClient {
 mod tests {
     use std::env;
 
-    use tempfile::tempdir;
+    use camino_tempfile::tempdir;
 
     use crate::service::bugzilla::Bugzilla;
     use crate::test::*;
@@ -251,19 +251,18 @@ mod tests {
         let dir = tempdir().unwrap();
         env::set_current_dir(dir.path()).unwrap();
         let path = dir.path().join("dir/template");
-        let path_str = path.to_str().unwrap();
 
         let time = "1d".parse().unwrap();
         request1.created(time);
 
         // save to specific path
-        request1.save_template(path_str).unwrap();
+        request1.save_template(path.as_str()).unwrap();
         assert_eq!(
             fs::read_to_string(&path).unwrap().trim(),
             r#"created = "1d""#
         );
         assert_ne!(request1, request2);
-        request2.load_template(path_str).unwrap();
+        request2.load_template(path.as_str()).unwrap();
         assert_eq!(request1, request2);
 
         // unnamed services save to current working directory

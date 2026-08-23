@@ -36,6 +36,7 @@ async-stream = "0.3.6"
 base64 = "0.22.1"
 byte-unit = { version = "5.2.5", features = ["serde"] }
 camino = { version = "1.2.5", features = ["serde1"] }
+camino-tempfile = "1.4.1"
 chrono = { version = "0.4.45", features = ["serde"] }
 chronoutil = "0.2.7"
 config = { version = "0.15.25", default-features = false, features = ["toml", "convert-case", "async"] }
@@ -53,7 +54,6 @@ serde_repr = "0.1.21"
 serde_with = { version = "3.22.0", default-features = false, features = ["alloc", "macros"] }
 strum = { version = "0.28.0", features = ["derive"] }
 tar = "0.4.46"
-tempfile = "3.27.0"
 thiserror = "2.0.20"
 tokio = { version = "1.53.1", features = ["full"] }
 toml = "1.1.4"
