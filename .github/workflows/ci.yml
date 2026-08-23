@@ -80,12 +80,15 @@ jobs:
         # only save cache when running on the main branch
         save-if: ${{ github.ref_name == 'main' }}
 
-    - name: Enable code coverage support
-      if: ${{ matrix.rust == 'stable' && runner.os == 'Linux' }}
+    - name: Configure build environment
       run: |
-          echo "RUSTFLAGS=-C instrument-coverage" >> $GITHUB_ENV
+        if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
+          echo "RUSTFLAGS=-C instrument-coverage -C strip=symbols" >> $GITHUB_ENV
           echo "CFLAGS=-Wl,--build-id" >> $GITHUB_ENV
           echo "LLVM_PROFILE_FILE=${{ github.workspace }}/target/%b-%4m.profraw" >> $GITHUB_ENV
+        else
+          echo "RUSTFLAGS=-C strip=symbols" >> $GITHUB_ENV
+        fi
 
     - name: Build tests
       run: |
