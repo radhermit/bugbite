@@ -9,7 +9,7 @@ use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay, skip_serializing_none};
-use strum::{Display, EnumString};
+use strum::Display;
 use url::Url;
 
 use crate::Error;
@@ -265,7 +265,7 @@ impl Request {
             });
         }
 
-        if let Some((value, is_private)) = &self.params.comment_privacy {
+        if let Some(value) = &self.params.comment_privacy {
             if params.ids.len() > 1 {
                 return Err(Error::InvalidValue(
                     "can't toggle comment privacy for multiple bugs".to_string(),
@@ -283,11 +283,11 @@ impl Request {
                 .expect("invalid comments response");
 
             for c in comments {
-                if value.contains(&c.count) {
+                if value.range_or_set.contains(&c.count) {
                     params
                         .comment_is_private
                         .get_or_insert_with(Default::default)
-                        .insert(c.id, is_private.unwrap_or(!c.is_private));
+                        .insert(c.id, value.is_private.unwrap_or(!c.is_private));
                 }
             }
         }
@@ -357,14 +357,25 @@ impl<T: fmt::Display> fmt::Display for SetChange<T> {
 }
 
 /// Tri-state boolean logic that supports (de)serialization.
-#[derive(
-    DeserializeFromStr, SerializeDisplay, Display, EnumString, Debug, PartialEq, Eq, Clone, Copy,
-)]
+#[derive(DeserializeFromStr, SerializeDisplay, Display, Debug, PartialEq, Eq, Clone, Copy)]
 #[strum(serialize_all = "kebab-case")]
 pub enum TriBool {
     False,
     True,
     None,
+}
+
+impl FromStr for TriBool {
+    type Err = crate::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "false" => Ok(Self::False),
+            "true" => Ok(Self::True),
+            "none" => Ok(Self::None),
+            _ => Err(Error::InvalidValue(format!("invalid TriBool value: {s}"))),
+        }
+    }
 }
 
 impl Deref for TriBool {
@@ -379,6 +390,40 @@ impl Deref for TriBool {
     }
 }
 
+#[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
+pub struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
+    raw: String,
+    range_or_set: RangeOrSet<T>,
+    is_private: TriBool,
+}
+
+impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for CommentPrivacy<T>
+where
+    T::Err: fmt::Display + fmt::Debug,
+{
+    type Err = crate::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (range_or_set, is_private) = if let Some((ids, value)) = s.split_once(':') {
+            (ids.parse()?, value.parse()?)
+        } else {
+            (s.parse()?, TriBool::None)
+        };
+
+        Ok(Self {
+            raw: s.to_string(),
+            range_or_set,
+            is_private,
+        })
+    }
+}
+
+impl<T: FromStr + PartialOrd + Eq + Hash> fmt::Display for CommentPrivacy<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.raw.fmt(f)
+    }
+}
+
 /// Bug update parameters.
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
@@ -390,7 +435,7 @@ pub struct Parameters {
     pub comment: Option<String>,
     pub comment_from: Option<Utf8PathBuf>,
     pub comment_is_private: Option<bool>,
-    pub comment_privacy: Option<(RangeOrSet<usize>, TriBool)>,
+    pub comment_privacy: Option<CommentPrivacy<usize>>,
     pub component: Option<String>,
     pub depends: Option<Vec<SetChange<u64>>>,
     pub duplicate_of: Option<u64>,

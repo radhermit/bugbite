@@ -1,8 +1,6 @@
-use std::hash::Hash;
+use std::fs;
 use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
-use std::str::FromStr;
-use std::{fmt, fs};
 
 use anyhow::Context;
 use bugbite::args::{MaybeStdin, MaybeStdinVec};
@@ -18,40 +16,6 @@ use itertools::Itertools;
 
 use crate::service::TemplateOptions;
 use crate::utils::{confirm, launch_editor};
-
-#[derive(Clone, Debug)]
-struct CommentPrivacy<T: FromStr + PartialOrd + Eq + Hash> {
-    raw: String,
-    range_or_set: Option<RangeOrSet<T>>,
-    is_private: TriBool,
-}
-
-impl<T: FromStr + PartialOrd + Eq + Hash> FromStr for CommentPrivacy<T>
-where
-    T::Err: fmt::Display + fmt::Debug,
-{
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (range_or_set, is_private) = if let Some((ids, value)) = s.split_once(':') {
-            (Some(ids.parse()?), value.parse()?)
-        } else {
-            (Some(s.parse()?), TriBool::None)
-        };
-
-        Ok(Self {
-            raw: s.to_string(),
-            range_or_set,
-            is_private,
-        })
-    }
-}
-
-impl<T: FromStr + PartialOrd + Eq + Hash> fmt::Display for CommentPrivacy<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.raw.fmt(f)
-    }
-}
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attribute options")]
@@ -230,9 +194,7 @@ impl From<Params> for Parameters {
             comment: value.comment.map(|x| x.into_inner()),
             comment_from: value.comment_from,
             comment_is_private: value.comment_is_private,
-            comment_privacy: value
-                .comment_privacy
-                .and_then(|x| x.range_or_set.map(|value| (value, x.is_private))),
+            comment_privacy: value.comment_privacy,
             component: value.component,
             depends: value.depends,
             duplicate_of: value.duplicate_of,
