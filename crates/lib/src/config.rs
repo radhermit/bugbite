@@ -16,6 +16,8 @@ static SERVICES_DATA: &str = include_str!(concat!(env!("OUT_DIR"), "/services.to
 pub struct Config {
     /// Default connection.
     pub connection: Option<String>,
+    /// Default service variant.
+    pub service: Option<ServiceKind>,
 
     /// Default client parameters.
     #[serde(flatten)]
@@ -169,10 +171,12 @@ impl Config {
 
     /// Get the service variant for the selected connection if it exists.
     pub fn service(&self) -> Option<ServiceKind> {
-        self.connection
-            .as_ref()
-            .and_then(|connection| self.services.get(connection))
-            .map(|config| config.kind())
+        self.service.or_else(|| {
+            self.connection
+                .as_ref()
+                .and_then(|connection| self.services.get(connection))
+                .map(|config| config.kind())
+        })
     }
 }
 
