@@ -21,19 +21,22 @@ pub static SERVICE: LazyLock<Bugzilla> = LazyLock::new(|| {
 /// ID of an existing bug.
 static EXISTING_ID: OnceCell<u64> = OnceCell::const_new();
 
+/// Create a bug.
+pub async fn create_bug(summary: &str) -> crate::Result<u64> {
+    SERVICE
+        .create()
+        .summary(summary)
+        .component("TestComponent")
+        .product("TestProduct")
+        .description("description")
+        .send()
+        .await
+}
+
 /// Return an existing bug ID.
 pub async fn get_existing_bug() -> crate::Result<u64> {
     EXISTING_ID
-        .get_or_try_init(|| async {
-            SERVICE
-                .create()
-                .summary("existing-bug")
-                .component("TestComponent")
-                .product("TestProduct")
-                .description("description")
-                .send()
-                .await
-        })
+        .get_or_try_init(|| async { create_bug("existing-bug").await })
         .await
         .copied()
 }

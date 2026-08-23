@@ -4,6 +4,7 @@ use bugbite::test::bugzilla::*;
 
 mod attachment;
 mod command;
+mod comment;
 mod create;
 mod search;
 mod update;
