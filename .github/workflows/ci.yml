@@ -86,15 +86,15 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Enable code coverage support
+      if: ${{ matrix.rust == 'stable' && runner.os == 'Linux' }}
+      run: |
+          echo "RUSTFLAGS=-C instrument-coverage" >> $GITHUB_ENV
+          echo "CFLAGS=-Wl,--build-id" >> $GITHUB_ENV
+          echo "LLVM_PROFILE_FILE=${{ github.workspace }}/target/%b-%4m.profraw" >> $GITHUB_ENV
+
     - name: Build tests
       run: |
-        # only collect coverage for the latest rust release on linux
-        if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
-          export RUSTFLAGS="-C instrument-coverage"
-          export CFLAGS="-Wl,--build-id"
-          export LLVM_PROFILE_FILE="${PWD}/target/%b-%4m.profraw"
-        fi
-
         # build tests
         cargo build --all-features --workspace --tests
 
@@ -127,13 +127,6 @@ jobs:
 
     - name: Run tests
       run: |
-        # set environment variables needed for coverage
-        if [[ ${{ matrix.rust }} == 'stable' && ${{ runner.os }} == 'Linux' ]]; then
-          export RUSTFLAGS="-C instrument-coverage"
-          export CFLAGS="-Wl,--build-id"
-          export LLVM_PROFILE_FILE="${PWD}/target/%b-%4m.profraw"
-        fi
-
         # run unit tests
         cargo nextest run --all-features --workspace --tests
 
