@@ -27,7 +27,7 @@ enum Subcommand {
     #[command(visible_alias = "g")]
     Get(get::Command),
 
-    /// tag comments
+    /// Tag comments
     #[command(visible_alias = "t")]
     Tag(tag::Command),
 }

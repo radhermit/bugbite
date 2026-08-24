@@ -45,7 +45,7 @@ enum Subcommand {
     #[command(visible_alias = "a")]
     Attachment(Box<attachment::Command>),
 
-    /// Get bug comments
+    /// Comment commands
     Comment(Box<comment::Command>),
 
     /// Create bug
