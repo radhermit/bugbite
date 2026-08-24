@@ -162,7 +162,7 @@ mod tests {
 
         server.reset().await;
         server
-            .respond(200, path.join("comment/multiple-bugs.json"))
+            .respond(200, path.join("comment/get/multiple-bugs.json"))
             .await;
 
         let comments = service.comment_get([1, 2]).send().await.unwrap();
@@ -172,7 +172,7 @@ mod tests {
 
         server.reset().await;
         server
-            .respond(200, path.join("comment/single-bug.json"))
+            .respond(200, path.join("comment/get/single-bug.json"))
             .await;
 
         // all comments

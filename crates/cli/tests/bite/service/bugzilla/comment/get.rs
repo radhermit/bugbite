@@ -35,7 +35,7 @@ async fn nonexistent() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_DATA.join("comment/nonexistent.json"))
+        .respond(200, TEST_DATA.join("comment/get/nonexistent.json"))
         .await;
 
     cmd("bite bugzilla comment get 1")
@@ -50,9 +50,9 @@ async fn description() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_DATA.join("comment/description.json"))
+        .respond(200, TEST_DATA.join("comment/get/description.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/description")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/get/description")).unwrap();
 
     cmd("bite bugzilla comment get 1")
         .assert()
@@ -66,9 +66,9 @@ async fn single_bug() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_DATA.join("comment/single-bug.json"))
+        .respond(200, TEST_DATA.join("comment/get/single-bug.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/single-bug")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/get/single-bug")).unwrap();
 
     cmd("bite bugzilla comment get 1")
         .assert()
@@ -90,9 +90,9 @@ async fn multiple_bugs() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_DATA.join("comment/multiple-bugs.json"))
+        .respond(200, TEST_DATA.join("comment/get/multiple-bugs.json"))
         .await;
-    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/multiple-bugs")).unwrap();
+    let expected = fs::read_to_string(TEST_OUTPUT.join("comment/get/multiple-bugs")).unwrap();
 
     cmd("bite bugzilla comment get 1 2")
         .assert()
@@ -114,7 +114,7 @@ async fn creator() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_DATA.join("comment/single-bug.json"))
+        .respond(200, TEST_DATA.join("comment/get/single-bug.json"))
         .await;
 
     for opt in ["-R", "--creator"] {
@@ -151,7 +151,7 @@ async fn attachment() {
     let server = start_server().await;
 
     server
-        .respond(200, TEST_DATA.join("comment/single-bug.json"))
+        .respond(200, TEST_DATA.join("comment/get/single-bug.json"))
         .await;
 
     for opt in ["-a", "--attachment"] {

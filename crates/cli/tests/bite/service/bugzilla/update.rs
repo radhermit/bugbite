@@ -108,7 +108,7 @@ async fn template() {
         .respond_match(
             matchers::path("/rest/bug/123/comment"),
             200,
-            TEST_DATA.join("comment/single-bug.json"),
+            TEST_DATA.join("comment/get/single-bug.json"),
         )
         .await;
     server
@@ -185,7 +185,7 @@ async fn reply() {
             .respond_match(
                 matchers::path("/rest/bug/1/comment"),
                 200,
-                TEST_DATA.join("comment/nonexistent.json"),
+                TEST_DATA.join("comment/get/nonexistent.json"),
             )
             .await;
         cmd("bite bugzilla update 1")
@@ -201,7 +201,7 @@ async fn reply() {
             .respond_match(
                 matchers::path("/rest/bug/1/comment"),
                 200,
-                TEST_DATA.join("comment/single-bug.json"),
+                TEST_DATA.join("comment/get/single-bug.json"),
             )
             .await;
         server
@@ -424,7 +424,7 @@ async fn comment_privacy() {
         .respond_match(
             matchers::path("/rest/bug/1/comment"),
             200,
-            TEST_DATA.join("comment/single-bug.json"),
+            TEST_DATA.join("comment/get/single-bug.json"),
         )
         .await;
     server

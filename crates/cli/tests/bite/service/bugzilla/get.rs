@@ -68,7 +68,7 @@ async fn single_bug() {
         .respond_match(
             matchers::path("/rest/bug/1/comment"),
             200,
-            TEST_DATA.join("comment/single-bug.json"),
+            TEST_DATA.join("comment/get/single-bug.json"),
         )
         .await;
     server
