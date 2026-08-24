@@ -1,7 +1,9 @@
 use super::*;
 
-#[test]
-fn required_args() {
+#[tokio::test]
+async fn required_args() {
+    let _server = start_server().await;
+
     // missing IDs
     cmd("bite bugzilla comment tag")
         .assert()
@@ -16,11 +18,9 @@ fn required_args() {
     cmd("bite bugzilla comment tag 1")
         .assert()
         .stdout("")
-        .stderr(predicate::str::contains(
-            "required arguments were not provided",
-        ))
+        .stderr(predicate::str::contains("no tags specified"))
         .failure()
-        .code(2);
+        .code(1);
 }
 
 #[tokio::test]
@@ -39,7 +39,7 @@ async fn nonexistent_bug() {
 }
 
 #[tokio::test]
-async fn nonexistent() {
+async fn nonexistent_comments() {
     let server = start_server().await;
 
     server

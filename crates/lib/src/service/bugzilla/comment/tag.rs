@@ -54,17 +54,16 @@ impl Request {
             ..Default::default()
         };
 
-        if let Some(tags) = self.params.tags.as_ref() {
-            let changes: SetChanges<_> = tags.iter().collect();
-            if let Some(tags) = &changes.set {
-                params.add = Some(tags.to_vec());
-                params.remove = Some(comment.tags.iter().collect());
-            } else {
-                params.add = changes.add;
-                params.remove = changes.remove;
-            }
-        } else {
+        // tags are guaranteed to exist by earlier check
+        let tags = self.params.tags.as_ref().expect("no tags exist");
+
+        let changes: SetChanges<_> = tags.iter().collect();
+        if let Some(tags) = &changes.set {
+            params.add = Some(tags.to_vec());
             params.remove = Some(comment.tags.iter().collect());
+        } else {
+            params.add = changes.add;
+            params.remove = changes.remove;
         }
 
         Ok(params)
@@ -95,12 +94,28 @@ impl Request {
         self.params.tags = Some(values.into_iter().collect());
         self
     }
+
+    pub fn untag(&mut self, value: bool) -> &mut Self {
+        if value {
+            self.params.tags = Some(Default::default());
+        }
+        self
+    }
 }
 
 impl RequestSend for Request {
     type Output = Vec<Vec<String>>;
 
     async fn send(&self) -> crate::Result<Self::Output> {
+        if self.ids.is_empty() {
+            return Err(Error::InvalidRequest("no IDs specified".to_string()));
+        }
+
+        // tags have to exist, to unset tags it should be empty
+        if self.params.tags.is_none() {
+            return Err(Error::InvalidRequest("no tags specified".to_string()));
+        }
+
         // get the matching comments
         let comments = self.service.comment_get(&self.ids).send().await?;
         let comments = comments.into_iter().flatten();
@@ -182,19 +197,146 @@ struct RequestParameters<'a> {
 mod tests {
     use std::assert_matches;
 
+    use indexmap::IndexSet;
+    use wiremock::matchers;
+
     use crate::test::*;
 
     use super::*;
 
     #[tokio::test]
     async fn request() {
+        let path = TESTDATA_PATH.join("bugzilla");
         let server = TestServer::new().await;
-        let service = Bugzilla::new(server.uri()).unwrap();
+        let service = Bugzilla::builder(server.uri())
+            .unwrap()
+            .user("user")
+            .password("pass")
+            .build()
+            .unwrap();
 
         // no IDs
         let ids = Vec::<u32>::new();
         let err = service.comment_tag(ids).send().await.unwrap_err();
         assert_matches!(err, Error::InvalidRequest(_));
         assert_err_re!(err, "no IDs specified");
+
+        // no tags
+        let err = service.comment_tag([1]).send().await.unwrap_err();
+        assert_matches!(err, Error::InvalidRequest(_));
+        assert_err_re!(err, "no tags specified");
+
+        server.reset().await;
+        server
+            .respond_match(
+                matchers::path("/rest/bug/1/comment"),
+                200,
+                path.join("comment/get/single-bug.json"),
+            )
+            .await;
+        server
+            .respond_match(
+                matchers::path_regex("/rest/bug/comment/.*"),
+                200,
+                path.join("comment/tag/nonexistent.json"),
+            )
+            .await;
+
+        // nonexistent tags
+        let tag = "+tag".parse().unwrap();
+        let tags = service.comment_tag([1]).tags([tag]).send().await.unwrap();
+        assert_eq!(tags.iter().flatten().count(), 0);
+
+        server.reset().await;
+        server
+            .respond_match(
+                matchers::path("/rest/bug/1/comment"),
+                200,
+                path.join("comment/get/single-bug.json"),
+            )
+            .await;
+        server
+            .respond_match(
+                matchers::path_regex("/rest/bug/comment/.*"),
+                200,
+                path.join("comment/tag/single.json"),
+            )
+            .await;
+
+        // set single tag
+        let tag = "tag".parse().unwrap();
+        let tags = service.comment_tag([1]).tags([tag]).send().await.unwrap();
+        // all seven comments have the same tag
+        assert_eq!(tags.len(), 7);
+        let tags: IndexSet<_> = tags.iter().flatten().collect();
+        assert_ordered_eq!(tags, ["tag"]);
+
+        server.reset().await;
+        server
+            .respond_match(
+                matchers::path("/rest/bug/1/comment"),
+                200,
+                path.join("comment/get/single-bug.json"),
+            )
+            .await;
+        server
+            .respond_match(
+                matchers::path_regex("/rest/bug/comment/.*"),
+                200,
+                path.join("comment/tag/nonexistent.json"),
+            )
+            .await;
+
+        // comments with attachments
+        let tags = service
+            .comment_tag([1])
+            .attachment(true)
+            .untag(true)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(tags.iter().flatten().count(), 0);
+
+        // comments without attachments
+        let tags = service
+            .comment_tag([1])
+            .attachment(false)
+            .untag(true)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(tags.iter().flatten().count(), 0);
+
+        // comments with time bounds
+        let value = "2020".parse().unwrap();
+        let tags = service
+            .comment_tag([1])
+            .created_after(value)
+            .untag(true)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(tags.iter().flatten().count(), 0);
+
+        // comments by a specific user
+        let tags = service
+            .comment_tag([1])
+            .creator("user1")
+            .untag(true)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(tags.iter().flatten().count(), 0);
+
+        // comments with attachments by a specific user
+        let tags = service
+            .comment_tag([1])
+            .attachment(true)
+            .creator("user2")
+            .untag(true)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(tags.iter().flatten().count(), 0);
     }
 }

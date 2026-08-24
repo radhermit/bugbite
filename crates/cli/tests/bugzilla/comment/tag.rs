@@ -1,5 +1,6 @@
 use bugbite::test::assert_ordered_eq;
 use bugbite::traits::RequestSend;
+use camino_tempfile::tempdir;
 use indexmap::IndexSet;
 
 use crate::command::cmd;
@@ -47,6 +48,40 @@ async fn single_bug() -> anyhow::Result<()> {
 
     // untag all comments
     cmd!("bite bugzilla comment tag {id} -u").assert().success();
+
+    let comments = SERVICE.comment_get([id]).send().await?;
+    assert!(comments.iter().flatten().all(|x| x.tags.is_empty()));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn from_template() -> anyhow::Result<()> {
+    let id = create_bug("comment-create").await?;
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("template");
+
+    // add tags
+    cmd!("bite bugzilla comment tag -t +foo,+bar {id}")
+        .assert()
+        .success();
+
+    let comments = SERVICE.comment_get([id]).send().await?;
+    let tags: IndexSet<_> = comments.iter().flatten().flat_map(|x| &x.tags).collect();
+    // bugzilla lexically orders tags
+    assert_ordered_eq!(tags, ["bar", "foo"]);
+
+    // create template
+    cmd!("bite bugzilla comment tag {id} -t spam --to {path} --dry-run")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+
+    // use template
+    cmd!("bite bugzilla comment tag {id} --from {path}")
+        .assert()
+        .success();
 
     let comments = SERVICE.comment_get([id]).send().await?;
     assert!(comments.iter().flatten().all(|x| x.tags.is_empty()));

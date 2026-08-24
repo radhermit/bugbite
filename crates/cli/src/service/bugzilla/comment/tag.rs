@@ -45,7 +45,6 @@ struct Params {
         value_name = "BOOL",
         hide_possible_values = true,
         conflicts_with = "tags",
-        required_unless_present = "tags",
     )]
     untag: Option<bool>,
 }
@@ -82,8 +81,8 @@ impl Command {
         W: IsTerminal + Write,
     {
         let ids = self.ids.iter().flatten().collect::<Vec<_>>();
-        let untag = self.params.untag.unwrap_or_default();
         let mut request = service.comment_tag(&ids);
+        let untag = self.params.untag.unwrap_or_default();
 
         // read attributes from templates
         if let Some(names) = &self.template.from {
@@ -94,9 +93,8 @@ impl Command {
 
         // command line parameters override template
         request.params.merge(self.params.into());
-        if untag {
-            request.params.tags = Some(Default::default());
-        }
+        // unset tags on untag request
+        request.untag(untag);
 
         // write attributes to template
         if let Some(name) = &self.template.to {
