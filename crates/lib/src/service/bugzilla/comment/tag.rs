@@ -7,12 +7,15 @@ use crate::objects::bugzilla::Comment;
 pub use crate::objects::{SetChange, SetChanges};
 use crate::service::bugzilla::Bugzilla;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{InjectAuth, RequestSend, WebService};
+use crate::traits::{InjectAuth, Merge, RequestSend, RequestTemplate, WebService};
 
-#[derive(Debug)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request {
+    #[serde(skip)]
     service: Bugzilla,
+    #[serde(skip)]
     pub ids: Vec<String>,
+    #[serde(flatten)]
     pub params: Parameters,
 }
 
@@ -124,6 +127,20 @@ impl RequestSend for Request {
     }
 }
 
+impl RequestTemplate for Request {
+    type Params = Parameters;
+    type Service = Bugzilla;
+    const TYPE: &'static str = "update";
+
+    fn service(&self) -> &Self::Service {
+        &self.service
+    }
+
+    fn params(&mut self) -> &mut Self::Params {
+        &mut self.params
+    }
+}
+
 /// Construct bug comment parameters.
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
 pub struct Parameters {
@@ -131,6 +148,17 @@ pub struct Parameters {
     pub created_after: Option<TimeDeltaOrStatic>,
     pub creator: Option<String>,
     pub tags: Option<Vec<SetChange<String>>>,
+}
+
+impl Merge for Parameters {
+    fn merge(&mut self, other: Self) {
+        *self = Self {
+            attachment: self.attachment.merge(other.attachment),
+            created_after: self.created_after.merge(other.created_after),
+            creator: self.creator.merge(other.creator),
+            tags: self.tags.merge(other.tags),
+        }
+    }
 }
 
 /// Internal comment tag request parameters.

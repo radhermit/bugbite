@@ -5,8 +5,10 @@ use bugbite::args::MaybeStdinVec;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::service::bugzilla::comment::tag::*;
 use bugbite::time::TimeDeltaOrStatic;
-use bugbite::traits::RequestSend;
+use bugbite::traits::{Merge, RequestSend, RequestTemplate};
 use clap::Args;
+
+use crate::service::TemplateOptions;
 
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Comment options")]
@@ -64,6 +66,9 @@ pub(super) struct Command {
     #[clap(flatten)]
     params: Params,
 
+    #[clap(flatten)]
+    template: TemplateOptions,
+
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
     /// bug IDs or aliases
@@ -79,11 +84,27 @@ impl Command {
         let ids = self.ids.iter().flatten().collect::<Vec<_>>();
         let untag = self.params.untag.unwrap_or_default();
         let mut request = service.comment_tag(&ids);
-        request.params = self.params.into();
+
+        // read attributes from templates
+        if let Some(names) = &self.template.from {
+            for name in names {
+                request.load_template(name)?;
+            }
+        }
+
+        // command line parameters override template
+        request.params.merge(self.params.into());
         if untag {
             request.params.tags = Some(Default::default());
         }
+
+        // write attributes to template
+        if let Some(name) = &self.template.to {
+            request.save_template(name)?;
+        }
+
         request.send().await?;
+
         Ok(ExitCode::SUCCESS)
     }
 }
