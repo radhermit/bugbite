@@ -71,8 +71,8 @@ impl Compression {
     }
 }
 
-// Try to detect data content type use `file` then via `infer, and finally falling back to
-// generic text-based vs binary data.
+/// Try to detect data content type use `file` then via `infer, and finally falling back to
+/// generic text-based vs binary data.
 fn get_mime_type<P: AsRef<Utf8Path>>(path: P, data: &[u8]) -> String {
     if let Ok(value) = crate::utils::get_mime_type(path) {
         value
@@ -351,11 +351,16 @@ struct RequestAttachment<'a> {
 #[derive(Debug)]
 pub struct Request {
     service: Bugzilla,
+
+    /// Bug IDs or aliases to add the attachment(s) to.
     pub ids: Vec<String>,
+
+    /// Attachments that will be added.
     pub attachments: Vec<Attachment>,
 }
 
 impl Request {
+    /// Create a new request.
     pub(crate) fn new<I, S>(service: &Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
@@ -368,6 +373,7 @@ impl Request {
         }
     }
 
+    /// Generate the URL for the request.
     fn url(&self) -> crate::Result<Url> {
         let id = self
             .ids
@@ -383,6 +389,7 @@ impl Request {
         Ok(url)
     }
 
+    /// Attachments to add to the target bugs.
     pub fn attachments<I>(mut self, values: I) -> Self
     where
         I: IntoIterator<Item = Attachment>,

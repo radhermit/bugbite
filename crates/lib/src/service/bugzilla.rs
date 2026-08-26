@@ -37,13 +37,16 @@ pub(crate) static UNSET_VALUES: LazyLock<HashSet<String>> = LazyLock::new(|| {
 });
 
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq)]
+/// Bugzilla authentication information.
 pub struct Authentication {
+    /// API key
     pub key: Option<String>,
     pub user: Option<String>,
     pub password: Option<String>,
 }
 
 // TODO: improve API for setting user info on config creation
+/// Bugzilla service config.
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Config {
     base: Url,
@@ -66,6 +69,7 @@ fn default_max_search_results() -> usize {
 }
 
 impl Config {
+    /// Create a new Bugzilla service config.
     pub fn new(base: &str) -> crate::Result<Self> {
         let base = base.trim_end_matches('/');
         let base = Url::parse(&format!("{base}/"))
@@ -108,21 +112,25 @@ pub struct ServiceBuilder {
 }
 
 impl ServiceBuilder {
+    /// Create a new Bugzilla service builder.
     pub fn name(mut self, value: &str) -> Self {
         self.config.name = value.to_string();
         self
     }
 
+    /// Set the client parameters for the service.
     pub fn client(mut self, value: ClientParameters) -> Self {
         self.config.client.merge(value);
         self
     }
 
+    /// Set the user for the service.
     pub fn user(mut self, value: &str) -> Self {
         self.config.auth.user = Some(value.to_string());
         self
     }
 
+    /// Set the user's password for the service.
     pub fn password(mut self, value: &str) -> Self {
         self.config.auth.password = Some(value.to_string());
         self
@@ -179,10 +187,12 @@ impl Bugzilla {
         Ok(ServiceBuilder { config })
     }
 
+    /// Return the service config.
     pub fn config(&self) -> &Config {
         &self.0.config
     }
 
+    /// Return the service client.
     pub fn client(&self) -> &reqwest::Client {
         &self.0.client
     }
@@ -193,6 +203,7 @@ impl Bugzilla {
         format!("{base}/show_bug.cgi?id={id}")
     }
 
+    /// Deserialize raw bug data into a [`Bug`] object.
     fn deserialize_bug(&self, mut value: serde_json::Value) -> crate::Result<Bug> {
         let mut custom_fields = IndexMap::new();
         if let Some(map) = value.as_object_mut() {
@@ -228,6 +239,7 @@ impl Bugzilla {
         }
     }
 
+    /// Create a request to add attachments to the specified bugs.
     pub fn attachment_create<I, S>(&self, ids: I) -> attachment::create::Request
     where
         I: IntoIterator<Item = S>,
@@ -236,6 +248,7 @@ impl Bugzilla {
         attachment::create::Request::new(self, ids)
     }
 
+    /// Create a request to get the specified attachments.
     pub fn attachment_get<I>(&self, ids: I) -> attachment::get::Request
     where
         I: IntoIterator<Item = u64>,
@@ -243,6 +256,7 @@ impl Bugzilla {
         attachment::get::Request::new(self, ids)
     }
 
+    /// Create a request to get attachments from the specified bugs.
     pub fn attachment_get_item<I, S>(&self, ids: I) -> attachment::get_item::Request
     where
         I: IntoIterator<Item = S>,
@@ -251,6 +265,7 @@ impl Bugzilla {
         attachment::get_item::Request::new(self, ids)
     }
 
+    /// Create a request to update the specified attachments.
     pub fn attachment_update<I>(&self, ids: I) -> attachment::update::Request
     where
         I: IntoIterator<Item = u64>,
@@ -258,6 +273,7 @@ impl Bugzilla {
         attachment::update::Request::new(self, ids)
     }
 
+    /// Create a request to get the comments from the specified bugs.
     pub fn comment_get<I, S>(&self, ids: I) -> comment::get::Request
     where
         I: IntoIterator<Item = S>,
@@ -266,6 +282,7 @@ impl Bugzilla {
         comment::get::Request::new(self, ids)
     }
 
+    /// Create a request to tag the comments from the specified bugs.
     pub fn comment_tag<I, S>(&self, ids: I) -> comment::tag::Request
     where
         I: IntoIterator<Item = S>,
@@ -274,14 +291,17 @@ impl Bugzilla {
         comment::tag::Request::new(self, ids)
     }
 
+    /// Create a request to create a bug.
     pub fn create(&self) -> create::Request {
         create::Request::new(self)
     }
 
+    /// Create a request to get the Bugzilla service fields.
     pub fn fields(&self) -> fields::Request {
         fields::Request::new(self)
     }
 
+    /// Create a request to get the specified bugs.
     pub fn get<I, S>(&self, ids: I) -> get::Request
     where
         I: IntoIterator<Item = S>,
@@ -290,6 +310,7 @@ impl Bugzilla {
         get::Request::new(self, ids)
     }
 
+    /// Create a request to get the history of the specified bugs.
     pub fn history<I, S>(&self, ids: I) -> history::Request
     where
         I: IntoIterator<Item = S>,
@@ -298,10 +319,12 @@ impl Bugzilla {
         history::Request::new(self, ids)
     }
 
+    /// Create a request to search for bugs.
     pub fn search(&self) -> search::Request {
         search::Request::new(self)
     }
 
+    /// Create a request to update the specified bugs.
     pub fn update<I, S>(&self, ids: I) -> update::Request
     where
         I: IntoIterator<Item = S>,
@@ -310,10 +333,12 @@ impl Bugzilla {
         update::Request::new(self, ids)
     }
 
+    /// Create a request to get the Bugzilla service version.
     pub fn version(&self) -> version::Request {
         version::Request::new(self)
     }
 
+    /// Create a request to create the specified users.
     pub fn user_create<I, S>(&self, emails: I) -> user::create::Request
     where
         I: IntoIterator<Item = S>,
@@ -322,6 +347,7 @@ impl Bugzilla {
         user::create::Request::new(self, emails)
     }
 
+    /// Create a request to get the specified users.
     pub fn user_get<I, S>(&self, ids: I) -> user::get::Request
     where
         I: IntoIterator<Item = S>,
@@ -330,6 +356,7 @@ impl Bugzilla {
         user::get::Request::new(self, ids)
     }
 
+    /// Create a request to update the specified users.
     pub fn user_update<I, S>(&self, ids: I) -> user::update::Request
     where
         I: IntoIterator<Item = S>,

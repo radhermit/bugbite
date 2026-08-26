@@ -8,11 +8,16 @@ use crate::traits::{InjectAuth, RequestSend, WebService};
 #[derive(Debug)]
 pub struct Request {
     service: Bugzilla,
+
+    /// Attachment IDs.
     pub ids: Vec<u64>,
+
+    /// Include attachment data.
     pub data: bool,
 }
 
 impl Request {
+    /// Create a new request.
     pub(crate) fn new<I>(service: &Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = u64>,
@@ -24,6 +29,7 @@ impl Request {
         }
     }
 
+    /// Generate the URL for the request.
     fn url(&self) -> crate::Result<Url> {
         let id = self
             .ids
@@ -49,6 +55,7 @@ impl Request {
         Ok(url)
     }
 
+    /// Include attachment data.
     pub fn data(&mut self, fetch: bool) -> &mut Self {
         self.data = fetch;
         self
