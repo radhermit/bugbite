@@ -184,6 +184,10 @@ struct AttributeOptions {
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attachment options")]
 struct AttachmentOptions {
+    /// restrict by creator
+    #[arg(long, value_name = "VALUE[,...]")]
+    attachment_creator: Option<Vec<Csv<Match>>>,
+
     /// restrict by description
     #[arg(long, value_name = "VALUE[,...]")]
     attachment_description: Option<Vec<Csv<Match>>>,
@@ -450,6 +454,10 @@ impl From<Params> for Parameters {
             status: value.attr.status,
             target: value.attr.target.map(|x| x.into_inner()),
 
+            attachment_creator: value
+                .attach
+                .attachment_creator
+                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
             attachment_description: value
                 .attach
                 .attachment_description

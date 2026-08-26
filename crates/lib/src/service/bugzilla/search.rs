@@ -521,6 +521,14 @@ impl Request {
             });
         }
 
+        if let Some(values) = &self.params.attachment_creator {
+            query.or(|query| {
+                for value in values {
+                    query.and(|query| value.iter().for_each(|x| query.attachment_creator(x)))
+                }
+            });
+        }
+
         if let Some(values) = &self.params.attachment_description {
             query.or(|query| {
                 for value in values {
@@ -981,6 +989,7 @@ pub struct Parameters {
     pub whiteboard: Option<Vec<ExistsOrValues<Match>>>,
     pub url: Option<Vec<ExistsOrValues<Match>>>,
 
+    pub attachment_creator: Option<Vec<Vec<Match>>>,
     pub attachment_description: Option<Vec<Vec<Match>>>,
     pub attachment_filename: Option<Vec<Vec<Match>>>,
     pub attachment_mime: Option<Vec<Vec<Match>>>,
@@ -1049,6 +1058,7 @@ impl Merge for Parameters {
             whiteboard: self.whiteboard.merge(other.whiteboard),
             url: self.url.merge(other.url),
 
+            attachment_creator: self.attachment_creator.merge(other.attachment_creator),
             attachment_description: self
                 .attachment_description
                 .merge(other.attachment_description),
@@ -1491,6 +1501,10 @@ impl QueryBuilder<'_> {
         self.advanced_count += 1;
         let num = self.advanced_count;
         self.insert(format!("f{num}"), "CP");
+    }
+
+    fn attachment_creator(&mut self, value: &Match) {
+        self.advanced_field("attachments.submitter", value.op(), value);
     }
 
     fn attachment_description(&mut self, value: &Match) {
