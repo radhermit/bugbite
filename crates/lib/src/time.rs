@@ -1,6 +1,8 @@
+use std::cmp::Ordering;
 use std::fmt;
 use std::str::FromStr;
 
+use chrono::{DateTime, offset::Utc};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::Error;
@@ -15,6 +17,36 @@ pub use r#static::TimeStatic;
 pub enum TimeDeltaOrStatic {
     Delta(TimeDelta),
     Static(TimeStatic),
+}
+
+impl PartialOrd<DateTime<Utc>> for TimeDeltaOrStatic {
+    fn partial_cmp(&self, other: &DateTime<Utc>) -> Option<Ordering> {
+        match self {
+            Self::Delta(value) => value.partial_cmp(other),
+            Self::Static(value) => value.partial_cmp(other),
+        }
+    }
+}
+
+impl PartialOrd<TimeDeltaOrStatic> for DateTime<Utc> {
+    fn partial_cmp(&self, other: &TimeDeltaOrStatic) -> Option<Ordering> {
+        other.partial_cmp(self)
+    }
+}
+
+impl PartialEq<DateTime<Utc>> for TimeDeltaOrStatic {
+    fn eq(&self, other: &DateTime<Utc>) -> bool {
+        match self {
+            Self::Delta(value) => value < other,
+            Self::Static(value) => value.eq(other),
+        }
+    }
+}
+
+impl PartialEq<TimeDeltaOrStatic> for DateTime<Utc> {
+    fn eq(&self, other: &TimeDeltaOrStatic) -> bool {
+        other.eq(self)
+    }
 }
 
 impl FromStr for TimeDeltaOrStatic {
@@ -60,8 +92,6 @@ impl Api for TimeDeltaOrStatic {
 
 #[cfg(test)]
 mod tests {
-    use chrono::DateTime;
-
     use crate::test::assert_err_re;
 
     use super::*;

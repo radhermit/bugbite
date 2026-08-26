@@ -265,6 +265,11 @@ impl Bugzilla {
         attachment::get_item::Request::new(self.clone(), ids)
     }
 
+    /// Create a request to search for attachments.
+    pub fn attachment_search(&self) -> attachment::search::Request {
+        attachment::search::Request::new(self.clone())
+    }
+
     /// Create a request to update the specified attachments.
     pub fn attachment_update<I>(&self, ids: I) -> attachment::update::Request
     where

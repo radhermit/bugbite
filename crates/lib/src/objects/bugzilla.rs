@@ -24,7 +24,7 @@ use super::{Base64, stringify};
 
 /// A file attachment on a bug.
 #[serde_as]
-#[derive(Deserialize, Debug, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
 pub struct Attachment {
     /// Unique attachment identifier.
     pub id: u64,

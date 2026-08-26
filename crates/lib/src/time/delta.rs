@@ -1,8 +1,9 @@
+use std::cmp::Ordering;
 use std::fmt;
 use std::str::FromStr;
 use std::sync::LazyLock;
 
-use chrono::offset::Utc;
+use chrono::{DateTime, offset::Utc};
 use chronoutil::RelativeDuration;
 use regex::Regex;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
@@ -17,6 +18,19 @@ static RELATIVE_TIME_RE: LazyLock<Regex> =
 pub struct TimeDelta {
     raw: String,
     delta: RelativeDuration,
+}
+
+impl PartialOrd<DateTime<Utc>> for TimeDelta {
+    fn partial_cmp(&self, other: &DateTime<Utc>) -> Option<Ordering> {
+        let datetime = Utc::now() - self.delta();
+        datetime.partial_cmp(other)
+    }
+}
+
+impl PartialEq<DateTime<Utc>> for TimeDelta {
+    fn eq(&self, _other: &DateTime<Utc>) -> bool {
+        false
+    }
 }
 
 impl TimeDelta {
@@ -91,8 +105,6 @@ impl Api for TimeDelta {
 
 #[cfg(test)]
 mod tests {
-    use chrono::DateTime;
-
     use crate::test::assert_err_re;
 
     use super::*;

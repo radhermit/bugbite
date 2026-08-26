@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt;
 use std::str::FromStr;
 use std::sync::LazyLock;
@@ -16,6 +17,18 @@ static STATIC_DATE_RE: LazyLock<Regex> =
 pub struct TimeStatic {
     raw: String,
     value: DateTime<Utc>,
+}
+
+impl PartialOrd<DateTime<Utc>> for TimeStatic {
+    fn partial_cmp(&self, other: &DateTime<Utc>) -> Option<Ordering> {
+        self.value.partial_cmp(other)
+    }
+}
+
+impl PartialEq<DateTime<Utc>> for TimeStatic {
+    fn eq(&self, other: &DateTime<Utc>) -> bool {
+        &self.value == other
+    }
 }
 
 impl FromStr for TimeStatic {

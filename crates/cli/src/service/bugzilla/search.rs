@@ -406,130 +406,130 @@ struct Params {
     summary: Option<Vec<MaybeStdinVec<Match>>>,
 }
 
-impl From<Params> for Parameters {
-    fn from(value: Params) -> Self {
-        Self {
-            fields: Some(value.query.fields.into_iter().collect()),
-            limit: value.query.limit,
-            offset: value.query.offset,
-            order: value.query.order.map(|x| x.into_iter().collect()),
-            paged: value.query.paged,
-            quicksearch: value.query.quicksearch,
+impl Merge<Params> for Parameters {
+    fn merge(&mut self, other: Params) {
+        self.merge(Self {
+            fields: Some(other.query.fields.into_iter().collect()),
+            limit: other.query.limit,
+            offset: other.query.offset,
+            order: other.query.order.map(|x| x.into_iter().collect()),
+            paged: other.query.paged,
+            quicksearch: other.query.quicksearch,
 
-            alias: value.attr.alias,
-            attachments: value.attr.attachments,
-            flags: value.attr.flags,
-            groups: value.attr.groups,
-            keywords: value.attr.keywords,
-            see_also: value.attr.see_also,
-            tags: value.attr.tags,
-            url: value.attr.url,
-            whiteboard: value.attr.whiteboard,
-            blocks: value
+            alias: other.attr.alias,
+            attachments: other.attr.attachments,
+            flags: other.attr.flags,
+            groups: other.attr.groups,
+            keywords: other.attr.keywords,
+            see_also: other.attr.see_also,
+            tags: other.attr.tags,
+            url: other.attr.url,
+            whiteboard: other.attr.whiteboard,
+            blocks: other
                 .attr
                 .blocks
                 .map(|x| x.into_iter().map(|x| x.flatten()).collect()),
-            depends: value
+            depends: other
                 .attr
                 .depends
                 .map(|x| x.into_iter().map(|x| x.flatten()).collect()),
-            ids: value
+            ids: other
                 .attr
                 .id
                 .map(|x| x.into_iter().map(|x| x.flatten()).collect()),
-            priority: value
+            priority: other
                 .attr
                 .priority
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            severity: value
+            severity: other
                 .attr
                 .severity
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            version: value.attr.version.map(|x| x.into_inner()),
-            component: value.attr.component.map(|x| x.into_inner()),
-            product: value.attr.product.map(|x| x.into_inner()),
-            platform: value.attr.platform.map(|x| x.into_inner()),
-            os: value.attr.os.map(|x| x.into_inner()),
-            resolution: value.attr.resolution.map(|x| x.into_inner()),
-            status: value.attr.status,
-            target: value.attr.target.map(|x| x.into_inner()),
+            version: other.attr.version.map(|x| x.into_inner()),
+            component: other.attr.component.map(|x| x.into_inner()),
+            product: other.attr.product.map(|x| x.into_inner()),
+            platform: other.attr.platform.map(|x| x.into_inner()),
+            os: other.attr.os.map(|x| x.into_inner()),
+            resolution: other.attr.resolution.map(|x| x.into_inner()),
+            status: other.attr.status,
+            target: other.attr.target.map(|x| x.into_inner()),
 
-            attachment_creator: value
+            attachment_creator: other
                 .attach
                 .attachment_creator
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            attachment_description: value
+            attachment_description: other
                 .attach
                 .attachment_description
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            attachment_filename: value
+            attachment_filename: other
                 .attach
                 .attachment_filename
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            attachment_mime: value
+            attachment_mime: other
                 .attach
                 .attachment_mime
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            attachment_is_obsolete: value.attach.attachment_is_obsolete,
-            attachment_is_patch: value.attach.attachment_is_patch,
-            attachment_is_private: value.attach.attachment_is_private,
+            attachment_is_obsolete: other.attach.attachment_is_obsolete,
+            attachment_is_patch: other.attach.attachment_is_patch,
+            attachment_is_private: other.attach.attachment_is_private,
 
-            changed: value.change.changed,
-            changed_by: value.change.changed_by,
-            changed_from: value.change.changed_from,
-            changed_to: value.change.changed_to,
+            changed: other.change.changed,
+            changed_by: other.change.changed_by,
+            changed_from: other.change.changed_from,
+            changed_to: other.change.changed_to,
 
-            comments: value.range.comments,
-            votes: value.range.votes,
+            comments: other.range.comments,
+            votes: other.range.votes,
 
-            created: value.time.created,
-            updated: value.time.updated,
-            closed: value.time.closed,
+            created: other.time.created,
+            updated: other.time.updated,
+            closed: other.time.closed,
 
-            assignee: value
+            assignee: other
                 .user
                 .assignee
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            attacher: value
+            attacher: other
                 .user
                 .attacher
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            cc: value.user.cc,
-            commenter: value
+            cc: other.user.cc,
+            commenter: other
                 .user
                 .commenter
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            flagger: value
+            flagger: other
                 .user
                 .flagger
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            qa: value.user.qa,
-            reporter: value
+            qa: other.user.qa,
+            reporter: other
                 .user
                 .reporter
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
 
-            comment: value
+            comment: other
                 .comment
                 .comment
                 .map(|x| x.into_iter().flatten().collect()),
-            comment_is_private: value.comment.comment_is_private,
-            comment_tag: value
+            comment_is_private: other.comment.comment_is_private,
+            comment_tag: other
                 .comment
                 .comment_tag
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
 
-            summary: value.summary.map(|x| x.into_iter().flatten().collect()),
+            summary: other.summary.map(|x| x.into_iter().flatten().collect()),
 
-            custom_fields: value.attr.custom_fields.map(|x| {
+            custom_fields: other.attr.custom_fields.map(|x| {
                 x.into_iter()
                     .map(|s| {
-                        let (name, value) = s.split_once('=').unwrap_or((&s, "true"));
-                        (name.to_string(), value.parse().unwrap())
+                        let (name, other) = s.split_once('=').unwrap_or((&s, "true"));
+                        (name.to_string(), other.parse().unwrap())
                     })
                     .collect()
             }),
-        }
+        })
     }
 }
 
@@ -573,7 +573,7 @@ impl Command {
 
         // command line parameters override template
         let fields = self.params.query.fields.clone();
-        request.params.merge(self.params.into());
+        request.params.merge(self.params);
 
         // write attributes to template
         if let Some(name) = &self.template.to {

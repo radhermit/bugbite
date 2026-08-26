@@ -66,6 +66,21 @@ pub enum RangeOrValue<T: Eq> {
     Range(Range<T>),
 }
 
+impl<T: Eq> RangeOrValue<T> {
+    pub fn matches<V>(&self, item: &V) -> bool
+    where
+        T: PartialEq<V>,
+        T: PartialOrd<V>,
+        V: PartialOrd<T>,
+    {
+        match self {
+            Self::Value(value) => value == item,
+            Self::RangeOp(value) => value.matches(item),
+            Self::Range(value) => value.matches(item),
+        }
+    }
+}
+
 impl<T> FromStr for RangeOrValue<T>
 where
     T: FromStr + Eq,
@@ -157,6 +172,24 @@ pub enum RangeOp<T: Eq> {
     Greater(T),
 }
 
+impl<T: Eq> RangeOp<T> {
+    pub fn matches<V>(&self, item: &V) -> bool
+    where
+        T: PartialEq<V>,
+        T: PartialOrd<V>,
+        V: PartialOrd<T>,
+    {
+        match self {
+            Self::Less(value) => item < value,
+            Self::LessOrEqual(value) => item <= value,
+            Self::Equal(value) => item == value,
+            Self::NotEqual(value) => item != value,
+            Self::GreaterOrEqual(value) => item >= value,
+            Self::Greater(value) => item > value,
+        }
+    }
+}
+
 impl<T> FromStr for RangeOp<T>
 where
     T: FromStr + Eq,
@@ -207,6 +240,24 @@ pub enum Range<T: Eq> {
     ToInclusive(std::ops::RangeToInclusive<T>), // ..=1
     From(std::ops::RangeFrom<T>),               // 0..
     Full(std::ops::RangeFull),                  // ..
+}
+
+impl<T: Eq> Range<T> {
+    pub fn matches<V>(&self, item: &V) -> bool
+    where
+        T: PartialEq<V>,
+        T: PartialOrd<V>,
+        V: PartialOrd<T>,
+    {
+        match self {
+            Self::Range(r) => r.contains(item),
+            Self::Inclusive(r) => r.contains(item),
+            Self::To(r) => r.contains(item),
+            Self::ToInclusive(r) => r.contains(item),
+            Self::From(r) => r.contains(item),
+            Self::Full(r) => r.contains(item),
+        }
+    }
 }
 
 impl<T> FromStr for Range<T>

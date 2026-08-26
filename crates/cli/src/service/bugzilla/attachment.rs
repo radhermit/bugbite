@@ -5,6 +5,7 @@ use bugbite::service::bugzilla::Bugzilla;
 
 mod create;
 mod get;
+mod search;
 mod update;
 
 #[derive(clap::Args, Debug)]
@@ -32,6 +33,10 @@ enum Subcommand {
     #[command(visible_alias = "g")]
     Get(get::Command),
 
+    /// Search attachments
+    #[command(visible_alias = "s")]
+    Search(search::Command),
+
     /// Update attachments
     #[command(visible_alias = "u")]
     Update(update::Command),
@@ -45,6 +50,7 @@ impl Subcommand {
         match self {
             Self::Create(cmd) => cmd.run(service, f).await,
             Self::Get(cmd) => cmd.run(service, f).await,
+            Self::Search(cmd) => cmd.run(service, f).await,
             Self::Update(cmd) => cmd.run(service, f).await,
         }
     }
