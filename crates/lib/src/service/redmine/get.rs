@@ -17,12 +17,12 @@ pub struct Request {
 }
 
 impl Request {
-    pub(super) fn new<I>(service: &Redmine, ids: I) -> Self
+    pub(super) fn new<I>(service: Redmine, ids: I) -> Self
     where
         I: IntoIterator<Item = u64>,
     {
         Self {
-            service: service.clone(),
+            service,
             ids: ids.into_iter().collect(),
             fields: Default::default(),
         }

@@ -149,7 +149,7 @@ impl Github {
     }
 
     pub fn search(&self) -> search::Request {
-        search::Request::new(self)
+        search::Request::new(self.clone())
     }
 }
 

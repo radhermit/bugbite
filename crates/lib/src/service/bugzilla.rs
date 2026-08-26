@@ -245,7 +245,7 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        attachment::create::Request::new(self, ids)
+        attachment::create::Request::new(self.clone(), ids)
     }
 
     /// Create a request to get the specified attachments.
@@ -253,7 +253,7 @@ impl Bugzilla {
     where
         I: IntoIterator<Item = u64>,
     {
-        attachment::get::Request::new(self, ids)
+        attachment::get::Request::new(self.clone(), ids)
     }
 
     /// Create a request to get attachments from the specified bugs.
@@ -262,7 +262,7 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        attachment::get_item::Request::new(self, ids)
+        attachment::get_item::Request::new(self.clone(), ids)
     }
 
     /// Create a request to update the specified attachments.
@@ -270,7 +270,7 @@ impl Bugzilla {
     where
         I: IntoIterator<Item = u64>,
     {
-        attachment::update::Request::new(self, ids)
+        attachment::update::Request::new(self.clone(), ids)
     }
 
     /// Create a request to get the comments from the specified bugs.
@@ -279,7 +279,7 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        comment::get::Request::new(self, ids)
+        comment::get::Request::new(self.clone(), ids)
     }
 
     /// Create a request to tag the comments from the specified bugs.
@@ -288,17 +288,17 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        comment::tag::Request::new(self, ids)
+        comment::tag::Request::new(self.clone(), ids)
     }
 
     /// Create a request to create a bug.
     pub fn create(&self) -> create::Request {
-        create::Request::new(self)
+        create::Request::new(self.clone())
     }
 
     /// Create a request to get the Bugzilla service fields.
     pub fn fields(&self) -> fields::Request {
-        fields::Request::new(self)
+        fields::Request::new(self.clone())
     }
 
     /// Create a request to get the specified bugs.
@@ -307,7 +307,7 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        get::Request::new(self, ids)
+        get::Request::new(self.clone(), ids)
     }
 
     /// Create a request to get the history of the specified bugs.
@@ -316,12 +316,12 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        history::Request::new(self, ids)
+        history::Request::new(self.clone(), ids)
     }
 
     /// Create a request to search for bugs.
     pub fn search(&self) -> search::Request {
-        search::Request::new(self)
+        search::Request::new(self.clone())
     }
 
     /// Create a request to update the specified bugs.
@@ -330,12 +330,12 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        update::Request::new(self, ids)
+        update::Request::new(self.clone(), ids)
     }
 
     /// Create a request to get the Bugzilla service version.
     pub fn version(&self) -> version::Request {
-        version::Request::new(self)
+        version::Request::new(self.clone())
     }
 
     /// Create a request to create the specified users.
@@ -344,7 +344,7 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        user::create::Request::new(self, emails)
+        user::create::Request::new(self.clone(), emails)
     }
 
     /// Create a request to get the specified users.
@@ -353,7 +353,7 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        user::get::Request::new(self, ids)
+        user::get::Request::new(self.clone(), ids)
     }
 
     /// Create a request to update the specified users.
@@ -362,7 +362,7 @@ impl Bugzilla {
         I: IntoIterator<Item = S>,
         S: fmt::Display,
     {
-        user::update::Request::new(self, ids)
+        user::update::Request::new(self.clone(), ids)
     }
 }
 

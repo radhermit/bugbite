@@ -21,12 +21,12 @@ pub struct Request {
 
 impl Request {
     /// Create a new request.
-    pub(crate) fn new<I>(service: &Bugzilla, ids: I) -> Self
+    pub(crate) fn new<I>(service: Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = u64>,
     {
         Self {
-            service: service.clone(),
+            service,
             ids: ids.into_iter().collect(),
             params: Default::default(),
         }

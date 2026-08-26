@@ -10,10 +10,8 @@ pub struct Request {
 }
 
 impl Request {
-    pub(super) fn new(service: &Bugzilla) -> Self {
-        Self {
-            service: service.clone(),
-        }
+    pub(super) fn new(service: Bugzilla) -> Self {
+        Self { service }
     }
 }
 

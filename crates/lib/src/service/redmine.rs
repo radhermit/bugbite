@@ -178,11 +178,11 @@ impl Redmine {
     where
         I: IntoIterator<Item = u64>,
     {
-        get::Request::new(self, ids)
+        get::Request::new(self.clone(), ids)
     }
 
     pub fn search(&self) -> search::Request {
-        search::Request::new(self)
+        search::Request::new(self.clone())
     }
 }
 

@@ -118,9 +118,9 @@ impl RequestTemplate for Request {
 }
 
 impl Request {
-    pub(super) fn new(service: &Bugzilla) -> Self {
+    pub(super) fn new(service: Bugzilla) -> Self {
         Self {
-            service: service.clone(),
+            service,
             params: Default::default(),
         }
     }

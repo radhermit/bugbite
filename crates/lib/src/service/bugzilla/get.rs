@@ -18,13 +18,13 @@ pub struct Request {
 }
 
 impl Request {
-    pub(super) fn new<I, S>(service: &Bugzilla, ids: I) -> Self
+    pub(super) fn new<I, S>(service: Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: std::fmt::Display,
     {
         Self {
-            service: service.clone(),
+            service,
             ids: ids.into_iter().map(|s| s.to_string()).collect(),
             attachments: None,
             comments: None,

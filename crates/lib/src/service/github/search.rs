@@ -19,9 +19,9 @@ pub struct Request {
 }
 
 impl Request {
-    pub(super) fn new(service: &Github) -> Self {
+    pub(super) fn new(service: Github) -> Self {
         Self {
-            service: service.clone(),
+            service,
             params: Default::default(),
         }
     }
