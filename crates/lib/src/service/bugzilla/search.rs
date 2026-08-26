@@ -326,14 +326,6 @@ impl Request {
             });
         }
 
-        if let Some(values) = &self.params.attacher {
-            query.or(|query| {
-                for value in values {
-                    query.and(|query| value.iter().for_each(|x| query.attacher(x)))
-                }
-            });
-        }
-
         if let Some(values) = &self.params.cc {
             query.or(|query| {
                 for value in values {
@@ -771,19 +763,6 @@ impl Request {
         self
     }
 
-    pub fn attacher<I, T>(&mut self, values: I) -> &mut Self
-    where
-        I: IntoIterator<Item = T>,
-        T: Into<Match>,
-    {
-        // TODO: move to get_or_insert_default() when it is stable
-        self.params
-            .attacher
-            .get_or_insert_with(Default::default)
-            .push(values.into_iter().map(Into::into).collect());
-        self
-    }
-
     pub fn commenter<I, T>(&mut self, values: I) -> &mut Self
     where
         I: IntoIterator<Item = T>,
@@ -1003,7 +982,6 @@ pub struct Parameters {
     pub changed_to: Option<Vec<ChangedValue>>,
 
     pub assignee: Option<Vec<Vec<Match>>>,
-    pub attacher: Option<Vec<Vec<Match>>>,
     pub cc: Option<Vec<ExistsOrValues<Match>>>,
     pub commenter: Option<Vec<Vec<Match>>>,
     pub flagger: Option<Vec<Vec<Match>>>,
@@ -1078,7 +1056,6 @@ impl Merge for Parameters {
             changed_to: self.changed_to.merge(other.changed_to),
 
             assignee: self.assignee.merge(other.assignee),
-            attacher: self.attacher.merge(other.attacher),
             cc: self.cc.merge(other.cc),
             commenter: self.commenter.merge(other.commenter),
             flagger: self.flagger.merge(other.flagger),
@@ -1577,11 +1554,6 @@ impl QueryBuilder<'_> {
     fn order(&mut self, values: &[Order<OrderField>]) {
         let value = values.iter().map(|x| x.api()).join(",");
         self.insert("order", value);
-    }
-
-    fn attacher(&mut self, value: &Match) {
-        let value = value.replace_user_alias(self.service);
-        self.advanced_field("attachments.submitter", value.op(), value);
     }
 
     fn commenter(&mut self, value: &Match) {
@@ -2453,9 +2425,6 @@ mod tests {
 
         // assignee
         stream!(service.search().assignee(["value"]));
-
-        // attacher
-        stream!(service.search().attacher(["value"]));
 
         // cc
         stream!(service.search().cc(true));

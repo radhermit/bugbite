@@ -583,6 +583,17 @@ application. See the <<Match Operators>> section for more information.
 
 == Attachment options
 
+*--attachment-creator* <value[,...]>::
+    Restrict by attachment description.
++
+Values search for matching substrings and multiple values can be specified in a
+comma-separated list for logical AND or multiple options for logical OR. Match
+operators can also be used alter query application, see the <<Match Operators>>
+section for more information.
++
+.Attachments created by user:
+ bite bugzilla search --attachment-creator user
+
 *--attachment-description* <value[,...]>::
     Restrict by attachment description.
 +
@@ -751,12 +762,6 @@ current service connection.
 +
 .Assigned to yourself:
  bite bugzilla search --assignee @me
-
-*--attacher* <user[,...]>::
-    Restrict by attachment creation user.
-+
-.Attachment created by Gmail user:
- bite bugzilla search --attacher @gmail.com
 
 *--cc* [<user[,...]>]::
     Restrict by CC user.

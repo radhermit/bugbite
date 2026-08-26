@@ -324,10 +324,6 @@ struct UserOptions {
     #[arg(short, long, value_name = "USER[,...]")]
     assignee: Option<Vec<Csv<Match>>>,
 
-    /// user created attachment
-    #[arg(long, value_name = "USER[,...]")]
-    attacher: Option<Vec<Csv<Match>>>,
-
     /// user in CC list
     #[arg(
         long,
@@ -501,10 +497,6 @@ impl Merge<Params> for Parameters {
             assignee: other
                 .user
                 .assignee
-                .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
-            attacher: other
-                .user
-                .attacher
                 .map(|x| x.into_iter().map(|x| x.into_inner()).collect()),
             cc: other.user.cc,
             commenter: other
