@@ -9,9 +9,10 @@ use clap::{Parser, error::ErrorKind};
 use clap_verbosity_flag::{Verbosity, WarnLevel, log::LevelFilter};
 use tracing_log::AsTrace;
 
+use crate::macros::wrapped_doc;
 use crate::subcmds::Subcommand;
-use crate::utils::wrapped_doc;
 
+mod macros;
 mod service;
 mod subcmds;
 mod utils;

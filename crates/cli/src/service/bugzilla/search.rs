@@ -11,6 +11,7 @@ use bugbite::time::TimeDeltaOrStatic;
 use bugbite::traits::{Merge, RequestTemplate};
 use clap::Args;
 
+use crate::macros::parse_as;
 use crate::service::TemplateOptions;
 use crate::utils::launch_browser;
 
@@ -24,6 +25,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     alias: Option<Vec<ExistsOrValues<Match>>>,
 
@@ -34,6 +36,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     attachments: Option<ExistsOrValues<Match>>,
 
@@ -72,6 +75,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     flags: Option<Vec<ExistsOrValues<Match>>>,
 
@@ -82,6 +86,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     groups: Option<Vec<ExistsOrValues<Match>>>,
 
@@ -96,6 +101,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     keywords: Option<Vec<ExistsOrValues<Match>>>,
 
@@ -126,6 +132,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     see_also: Option<Vec<ExistsOrValues<Match>>>,
 
@@ -150,6 +157,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         num_args = 0..=1,
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     tags: Option<Vec<ExistsOrValues<Match>>>,
 
@@ -163,6 +171,7 @@ struct AttributeOptions {
         value_name = "VALUE[,...]",
         num_args = 0..=1,
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     url: Option<Vec<ExistsOrValues<Match>>>,
 
@@ -177,6 +186,7 @@ struct AttributeOptions {
         num_args = 0..=1,
         value_name = "VALUE[,...]",
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     whiteboard: Option<Vec<ExistsOrValues<Match>>>,
 }
@@ -324,6 +334,7 @@ struct UserOptions {
         value_name = "USER[,...]",
         num_args = 0..=1,
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     cc: Option<Vec<ExistsOrValues<Match>>>,
 
@@ -341,6 +352,7 @@ struct UserOptions {
         value_name = "USER[,...]",
         num_args = 0..=1,
         default_missing_value = "true",
+        value_parser = parse_as!(ExistsOrValues<Match>),
     )]
     qa: Option<Vec<ExistsOrValues<Match>>>,
 
