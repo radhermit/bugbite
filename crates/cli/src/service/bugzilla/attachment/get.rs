@@ -10,6 +10,8 @@ use camino::Utf8PathBuf;
 use clap::Args;
 use itertools::Itertools;
 
+use crate::utils::confirm;
+
 #[derive(Args, Debug)]
 #[clap(next_help_heading = "Attachment options")]
 struct Options {
@@ -49,6 +51,10 @@ struct Options {
 pub(super) struct Command {
     #[clap(flatten)]
     options: Options,
+
+    /// forcibly overwrite files
+    #[arg(short, long)]
+    force: bool,
 
     // TODO: rework stdin support once clap supports custom containers
     // See: https://github.com/clap-rs/clap/issues/3114
@@ -119,9 +125,12 @@ impl Command {
                     dir.join(&attachment.file_name)
                 };
 
-                // TODO: confirm overwriting file (with a -f/--force option?)
-                if path.exists() {
-                    anyhow::bail!("file already exists: {path}");
+                // allow overwrites when forcing or with confirmation
+                if !self.force
+                    && path.exists()
+                    && !confirm(format!("{path}: file exists, overwrite?"), false)?
+                {
+                    anyhow::bail!("file exists: {path}");
                 }
 
                 writeln!(f, "Saving attachment: {path}")?;

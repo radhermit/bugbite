@@ -249,24 +249,42 @@ async fn save_single_existing_error() {
         .await;
 
     let dir = tempdir().unwrap();
-    let dir_path = dir.path().as_str();
+    let prefix = dir.path().as_str();
 
     cmd("bite bugzilla attachment get 123")
-        .args(["-d", dir_path])
+        .args(["-d", prefix])
         .assert()
-        .stdout(predicate::str::diff(format!("Saving attachment: {dir_path}/test.txt")).trim())
+        .stdout(predicate::str::diff(format!("Saving attachment: {prefix}/test.txt")).trim())
         .stderr("")
         .success();
 
     // re-running causes a file existence failure
     cmd("bite bugzilla attachment get 123")
-        .args(["-d", dir_path])
+        .args(["-d", prefix])
         .assert()
         .stdout("")
-        .stderr(
-            predicate::str::diff(format!("Error: file already exists: {dir_path}/test.txt")).trim(),
-        )
+        .stderr(predicate::str::contains(format!("Error: file exists: {prefix}/test.txt")).trim())
         .failure();
+
+    // but works when forcing
+    cmd("bite bugzilla attachment get 123 -f")
+        .args(["-d", prefix])
+        .assert()
+        .stdout(predicate::str::diff(format!("Saving attachment: {prefix}/test.txt")).trim())
+        .stderr("")
+        .success();
+
+    // or when confirming overwrite
+    cmd("bite bugzilla attachment get 123")
+        .args(["-d", prefix])
+        .write_stdin("y\n")
+        .assert()
+        .stdout(predicate::str::diff(format!("Saving attachment: {prefix}/test.txt")).trim())
+        .stderr(
+            predicate::str::diff(format!("{prefix}/test.txt: file exists, overwrite? (y/N):"))
+                .trim(),
+        )
+        .success();
 }
 
 #[tokio::test]
