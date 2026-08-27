@@ -67,6 +67,11 @@ allows altering that target directory.
 .Save all attachments from bug 123 to the specified directory:
  bite bugzilla attachment get -i 123 --dir path/to/dir
 
+*-f, --force*::
+    Forcibly overwrite files.
++
+By default, existing files won't be overwritten.
+
 == Arguments
 
 <id[,...]>::
