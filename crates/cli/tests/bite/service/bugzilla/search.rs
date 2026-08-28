@@ -19,13 +19,15 @@ fn aliases() {
 
 #[test]
 fn invalid_ids() {
-    cmd("bite bugzilla search")
-        .args(["--id", "id"])
-        .assert()
-        .stdout("")
-        .stderr(predicate::str::is_empty().not())
-        .failure()
-        .code(2);
+    for opt in ["-i", "--id"] {
+        cmd("bite bugzilla search")
+            .args([opt, "id"])
+            .assert()
+            .stdout("")
+            .stderr(predicate::str::is_empty().not())
+            .failure()
+            .code(2);
+    }
 }
 
 #[test]

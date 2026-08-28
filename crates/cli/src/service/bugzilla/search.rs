@@ -91,7 +91,7 @@ struct AttributeOptions {
     groups: Option<Vec<ExistsOrValues<Match>>>,
 
     /// restrict by ID
-    #[arg(long, num_args = 1, value_name = "ID[,...]")]
+    #[arg(short, long, num_args = 1, value_name = "ID[,...]")]
     id: Option<Vec<ExistsOrValues<MaybeStdinVec<RangeOrValue<i64>>>>>,
 
     /// restrict by keyword
