@@ -154,9 +154,11 @@ impl Command {
             request.save_template(name)?;
         }
 
-        let attachments = request.send().await?;
-        for attachment in attachments {
-            write!(f, "{attachment}")?;
+        if !self.template.dry_run {
+            let attachments = request.send().await?;
+            for attachment in attachments {
+                write!(f, "{attachment}")?;
+            }
         }
 
         Ok(ExitCode::SUCCESS)

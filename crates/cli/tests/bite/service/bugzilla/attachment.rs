@@ -2,6 +2,7 @@ use super::*;
 
 mod create;
 mod get;
+mod search;
 mod update;
 
 #[test]
