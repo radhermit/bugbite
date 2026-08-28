@@ -101,13 +101,19 @@ impl Merge<Parameters> for search::Parameters {
             attachment_filename: self.attachment_filename.merge(other.filename),
             ids: self.ids.merge(other.ids),
             attachment_mime: self.attachment_mime.merge(other.mime),
-            created: self.created.merge(other.created),
-            updated: self.updated.merge(other.updated),
             attachment_is_obsolete: self.attachment_is_obsolete.merge(other.is_obsolete),
             attachment_is_patch: self.attachment_is_patch.merge(other.is_patch),
             attachment_is_private: self.attachment_is_private.merge(other.is_private),
             ..Default::default()
-        }
+        };
+
+        // attachment creation and updating alters a bug's modification time
+        self.updated = match (other.created, other.updated) {
+            (Some(created), None) => Some(created),
+            (None, Some(updated)) => Some(updated),
+            // if both are specified ignore the fields for bug searching
+            _ => None,
+        };
     }
 }
 
