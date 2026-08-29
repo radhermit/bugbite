@@ -4,7 +4,7 @@ use serde_with::skip_serializing_none;
 use crate::args::ExistsOrValues;
 use crate::objects::RangeOrValue;
 use crate::objects::bugzilla::Attachment;
-use crate::service::bugzilla::{Bugzilla, search};
+use crate::service::bugzilla::{BugField, Bugzilla, search};
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Merge, RequestPagedStream, RequestSend, RequestTemplate};
 
@@ -119,17 +119,14 @@ impl Merge for Parameters {
 
 impl Merge<Parameters> for search::Parameters {
     fn merge(&mut self, other: Parameters) {
-        *self = Self {
-            attachment_creator: self.attachment_creator.merge(other.creator),
-            attachment_description: self.attachment_description.merge(other.description),
-            attachment_filename: self.attachment_filename.merge(other.filename),
-            ids: self.ids.merge(other.ids),
-            attachment_mime: self.attachment_mime.merge(other.mime),
-            attachment_is_obsolete: self.attachment_is_obsolete.merge(other.is_obsolete),
-            attachment_is_patch: self.attachment_is_patch.merge(other.is_patch),
-            attachment_is_private: self.attachment_is_private.merge(other.is_private),
-            ..Default::default()
-        };
+        self.attachment_creator = self.attachment_creator.merge(other.creator);
+        self.attachment_description = self.attachment_description.merge(other.description);
+        self.attachment_filename = self.attachment_filename.merge(other.filename);
+        self.ids = self.ids.merge(other.ids);
+        self.attachment_mime = self.attachment_mime.merge(other.mime);
+        self.attachment_is_obsolete = self.attachment_is_obsolete.merge(other.is_obsolete);
+        self.attachment_is_patch = self.attachment_is_patch.merge(other.is_patch);
+        self.attachment_is_private = self.attachment_is_private.merge(other.is_private);
 
         // attachment creation and updating alters a bug's modification time
         self.updated = match (other.created, other.updated) {
@@ -147,6 +144,8 @@ impl RequestSend for Request {
     async fn send(&self) -> crate::Result<Self::Output> {
         // search for bugs with matching attachments
         let mut request = self.service.search();
+        request.status(["@all"]);
+        request.fields([BugField::Id]);
         request.params.merge(self.params.clone());
         let bugs = request.send().await?;
         let ids: Vec<_> = bugs.into_iter().map(|b| b.id).collect();
