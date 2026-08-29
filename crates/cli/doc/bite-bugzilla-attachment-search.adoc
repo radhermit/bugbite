@@ -31,7 +31,7 @@ include::{docdir}/common/template-options.adoc[]
     Filter by creator.
 +
 .Attachments created by user:
- bite bugzilla attachment search -c user
+ bite bugzilla attachment search --creator user
 
 *-d, --description* <value>::
     Filter by description.
