@@ -7,9 +7,7 @@ use super::*;
 fn aliases() {
     for subcmd in ["u", "update"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla")
-                .arg(subcmd)
-                .arg(opt)
+            cmd!("bite bugzilla {subcmd} {opt}")
                 .assert()
                 .stdout(predicate::str::is_empty().not())
                 .stderr("")
@@ -23,7 +21,7 @@ async fn required_args() {
     let _server = start_server().await;
 
     // missing IDs
-    cmd("bite bugzilla update -A test")
+    cmd!("bite bugzilla update -A test")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -33,7 +31,7 @@ async fn required_args() {
         .code(2);
 
     // missing changes
-    cmd("bite bugzilla update 1")
+    cmd!("bite bugzilla update 1")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: no parameters specified").trim())
@@ -45,7 +43,7 @@ async fn required_args() {
 async fn auth_required() {
     let _server = start_server().await;
 
-    cmd("bite bugzilla update 1 -A test")
+    cmd!("bite bugzilla update 1 -A test")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())
@@ -61,7 +59,7 @@ async fn no_changes() {
         .await;
 
     // no field changes if new value is the same as the original value
-    cmd("bite bugzilla update 123 -v")
+    cmd!("bite bugzilla update 123 -v")
         .args(["--summary", "new summary"])
         .assert()
         .stdout(predicate::str::diff(indoc::indoc! {"
@@ -73,7 +71,7 @@ async fn no_changes() {
         .success();
 
     // no field changes for comment only updates
-    cmd("bite bugzilla update 123 -v")
+    cmd!("bite bugzilla update 123 -v")
         .args(["--comment", "comment"])
         .assert()
         .stdout(predicate::str::diff(indoc::indoc! {"
@@ -95,7 +93,7 @@ async fn template() {
     let path = file.path().as_str();
 
     // create template
-    cmd("bite bugzilla update --dry-run")
+    cmd!("bite bugzilla update --dry-run")
         .args(["--summary", "new summary"])
         .args(["--comment-privacy", "2..=5:true"])
         .args(["--to", path])
@@ -119,7 +117,7 @@ async fn template() {
         )
         .await;
 
-    cmd("bite bugzilla update 123 -v")
+    cmd!("bite bugzilla update 123 -v")
         .args(["--from", path])
         .assert()
         .stdout(predicate::str::diff(indoc::indoc! {"
@@ -140,7 +138,7 @@ async fn summary() {
         .await;
 
     for opt in ["-S", "--summary"] {
-        cmd("bite bugzilla update 123")
+        cmd!("bite bugzilla update 123")
             .args([opt, "new summary"])
             .assert()
             .stdout("")
@@ -148,7 +146,7 @@ async fn summary() {
             .success();
 
         // verify output when running verbosely
-        cmd("bite bugzilla update 123 -v")
+        cmd!("bite bugzilla update 123 -v")
             .args([opt, "new summary"])
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
@@ -171,8 +169,7 @@ async fn reply() {
 
     for opt in ["-R", "--reply"] {
         // invalid
-        cmd("bite bugzilla update 1 2")
-            .arg(opt)
+        cmd!("bite bugzilla update 1 2 {opt}")
             .assert()
             .stdout("")
             .stderr(predicate::str::diff("Error: reply must target a single bug").trim())
@@ -188,8 +185,7 @@ async fn reply() {
                 TEST_DATA.join("comment/get/nonexistent.json"),
             )
             .await;
-        cmd("bite bugzilla update 1")
-            .arg(opt)
+        cmd!("bite bugzilla update 1 {opt}")
             .assert()
             .stdout("")
             .stderr(predicate::str::diff("Error: reply invalid, bug 1 has no comments").trim())
@@ -213,7 +209,7 @@ async fn reply() {
             .await;
 
         // invalid comment ID
-        cmd("bite bugzilla update 1")
+        cmd!("bite bugzilla update 1")
             .args([opt, "7"])
             .assert()
             .stdout("")
@@ -222,8 +218,7 @@ async fn reply() {
             .code(1);
 
         // editor returned failure
-        cmd("bite bugzilla update 1")
-            .arg(opt)
+        cmd!("bite bugzilla update 1 {opt}")
             .env("EDITOR", "sed -i -e '0d'")
             .assert()
             .stdout("")
@@ -232,16 +227,14 @@ async fn reply() {
             .code(1);
 
         // no output by default
-        cmd("bite bugzilla update 1")
-            .arg(opt)
+        cmd!("bite bugzilla update 1 {opt}")
             .assert()
             .stdout("")
             .stderr("")
             .success();
 
         // last comment default
-        cmd("bite bugzilla update 1 -v")
-            .arg(opt)
+        cmd!("bite bugzilla update 1 -v {opt}")
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
                 === Bug #1 ===
@@ -257,8 +250,7 @@ async fn reply() {
             .success();
 
         // no changes made
-        cmd("bite bugzilla update 1 -v")
-            .arg(opt)
+        cmd!("bite bugzilla update 1 -v {opt}")
             .env("EDITOR", "sed -i -e '100d'")
             .write_stdin("n\nY\n")
             .assert()
@@ -276,7 +268,7 @@ async fn reply() {
             .success();
 
         // specific comment ID
-        cmd("bite bugzilla update 1 -v")
+        cmd!("bite bugzilla update 1 -v")
             .args([opt, "4"])
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
@@ -306,7 +298,7 @@ async fn comment() {
 
     for opt in ["-c", "--comment"] {
         // no output by default
-        cmd("bite bugzilla update 1")
+        cmd!("bite bugzilla update 1")
             .args([opt, "comment"])
             .assert()
             .stdout("")
@@ -314,7 +306,7 @@ async fn comment() {
             .success();
 
         // verbose output
-        cmd("bite bugzilla update 1 -v")
+        cmd!("bite bugzilla update 1 -v")
             .args([opt, "static"])
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
@@ -328,7 +320,7 @@ async fn comment() {
             .success();
 
         // comment from stdin
-        cmd("bite bugzilla update 1 -v")
+        cmd!("bite bugzilla update 1 -v")
             .args([opt, "-"])
             .write_stdin("comment\n")
             .assert()
@@ -343,8 +335,7 @@ async fn comment() {
             .success();
 
         // option used without argument spawns editor
-        cmd("bite bugzilla update 1 -v")
-            .arg(opt)
+        cmd!("bite bugzilla update 1 -v {opt}")
             .write_stdin("interactive\n")
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
@@ -368,8 +359,7 @@ async fn comment_from() {
 
     for opt in ["-F", "--comment-from"] {
         // missing path
-        cmd("bite bugzilla update 1")
-            .arg(opt)
+        cmd!("bite bugzilla update 1 {opt}")
             .assert()
             .stdout("")
             .stderr(predicate::str::contains("a value is required"))
@@ -377,7 +367,7 @@ async fn comment_from() {
             .code(2);
 
         // nonexistent path
-        cmd("bite bugzilla update 1")
+        cmd!("bite bugzilla update 1")
             .args([opt, "nonexistent"])
             .assert()
             .stdout("")
@@ -391,7 +381,7 @@ async fn comment_from() {
         let path = file.path().as_str();
 
         // empty file
-        cmd("bite bugzilla update 1")
+        cmd!("bite bugzilla update 1")
             .args([opt, path])
             .assert()
             .stdout("")
@@ -402,7 +392,7 @@ async fn comment_from() {
         fs::write(path, "comment-from-file").unwrap();
 
         // verbose output
-        cmd("bite bugzilla update 1 -v")
+        cmd!("bite bugzilla update 1 -v")
             .args([opt, path])
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
@@ -436,7 +426,7 @@ async fn comment_privacy() {
         .await;
 
     // invalid when targeting multiple bugs
-    cmd("bite bugzilla update 1 2 --comment-privacy 1")
+    cmd!("bite bugzilla update 1 2 --comment-privacy 1")
         .assert()
         .stdout("")
         .stderr(
@@ -450,7 +440,7 @@ async fn comment_privacy() {
 
     // various values for targeted comments and comment ranges
     for arg in ["1", "1,2", "..", "1,2:false", "2..=5:true"] {
-        cmd("bite bugzilla update 1")
+        cmd!("bite bugzilla update 1")
             .args(["--comment-privacy", arg])
             .assert()
             .stdout("")
@@ -458,14 +448,14 @@ async fn comment_privacy() {
             .success();
 
         // template support
-        cmd("bite bugzilla update 1")
+        cmd!("bite bugzilla update 1")
             .args(["--comment-privacy", arg])
             .args(["-n", "--to", path])
             .assert()
             .stdout("")
             .stderr("")
             .success();
-        cmd("bite bugzilla update 1")
+        cmd!("bite bugzilla update 1")
             .args(["--from", path])
             .assert()
             .stdout("")

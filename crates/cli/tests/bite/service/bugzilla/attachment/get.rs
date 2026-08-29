@@ -8,9 +8,7 @@ use super::*;
 fn aliases() {
     for subcmd in ["g", "get"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla attachment")
-                .arg(subcmd)
-                .arg(opt)
+            cmd!("bite bugzilla attachment {subcmd} {opt}")
                 .assert()
                 .stdout(predicate::str::is_empty().not())
                 .stderr("")
@@ -22,7 +20,7 @@ fn aliases() {
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite bugzilla attachment get")
+    cmd!("bite bugzilla attachment get")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -40,7 +38,7 @@ async fn invalid_ids() {
         .await;
 
     // string IDs only work with -i/--item-ids
-    cmd("bite bugzilla attachment get abc")
+    cmd!("bite bugzilla attachment get abc")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: invalid attachment ID: abc").trim())
@@ -48,8 +46,7 @@ async fn invalid_ids() {
         .code(1);
 
     for opt in ["-i", "--item-ids"] {
-        cmd("bite bugzilla attachment get abc")
-            .arg(opt)
+        cmd!("bite bugzilla attachment get abc {opt}")
             .assert()
             .stdout("")
             .stderr("")
@@ -66,8 +63,7 @@ async fn nonexistent_bug() {
         .await;
 
     for opt in ["-i", "--item-ids"] {
-        cmd("bite bugzilla attachment get 1")
-            .arg(opt)
+        cmd!("bite bugzilla attachment get 1 {opt}")
             .assert()
             .stdout("")
             .stderr(predicate::str::diff("Error: bugzilla: Bug #1 does not exist.").trim())
@@ -83,7 +79,7 @@ async fn deleted_attachment() {
         .respond(200, TEST_DATA.join("attachment/get/deleted.json"))
         .await;
 
-    cmd("bite bugzilla attachment get 21")
+    cmd!("bite bugzilla attachment get 21")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: deleted attachment: 21").trim())
@@ -101,11 +97,9 @@ async fn list() {
         .await;
 
     for opt in ["-l", "--list"] {
-        // conflicts with -d/--dir and -o/--output
-        for x in ["-d", "--dir", "-o", "--output"] {
-            cmd("bite bugzilla attachment get 123")
-                .arg(opt)
-                .args([x, "arg"])
+        // conflicts with -d/--dir and -f/--file
+        for x in ["-d", "--dir", "-f", "--file"] {
+            cmd!("bite bugzilla attachment get 123 {opt} {x} arg")
                 .assert()
                 .stdout("")
                 .stderr(predicate::str::contains("cannot be used with"))
@@ -114,16 +108,14 @@ async fn list() {
         }
 
         // default output for single attachment
-        cmd("bite bugzilla attachment get 123")
-            .arg(opt)
+        cmd!("bite bugzilla attachment get 123 {opt}")
             .assert()
             .stdout(predicate::str::diff("123: test.txt").trim())
             .stderr("")
             .success();
 
         // verbose output for single attachment
-        cmd("bite bugzilla attachment get 123 -v")
-            .arg(opt)
+        cmd!("bite bugzilla attachment get 123 -v {opt}")
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
                 123: test.txt
@@ -143,8 +135,7 @@ async fn list() {
 
     for opt in ["-l", "--list"] {
         // default output for multiple attachments
-        cmd("bite bugzilla attachment get 123 124 125 126")
-            .arg(opt)
+        cmd!("bite bugzilla attachment get 123 124 125 126 {opt}")
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
                 123: test file 1 (test1)
@@ -153,11 +144,9 @@ async fn list() {
             .stderr("")
             .success();
 
-        // include outdated attachments
-        for x in ["-O", "--outdated"] {
-            cmd("bite bugzilla attachment get 123 124 125 126")
-                .arg(opt)
-                .arg(x)
+        // include obsolete attachments
+        for x in ["-o", "--obsolete"] {
+            cmd!("bite bugzilla attachment get 123 124 125 126 {opt} {x}")
                 .assert()
                 .stdout(predicate::str::diff(indoc::indoc! {"
                     123: test file 1 (test1)
@@ -170,8 +159,7 @@ async fn list() {
         }
 
         // verbose output for multiple attachments
-        cmd("bite bugzilla attachment get 123 124 125 126 -v")
-            .arg(opt)
+        cmd!("bite bugzilla attachment get 123 124 125 126 -v {opt}")
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
                 123: test file 1 (test1)
@@ -193,9 +181,9 @@ async fn output_plain_text() {
     let expected =
         fs::read_to_string(TEST_OUTPUT.join("attachment/get/single-plain-text")).unwrap();
 
-    for opt in ["-o", "--output"] {
+    for opt in ["-f", "--file"] {
         // stdout target
-        cmd("bite bugzilla attachment get 123")
+        cmd!("bite bugzilla attachment get 123")
             .args([opt, "-"])
             .assert()
             .stdout(predicate::str::diff(expected.clone()))
@@ -205,7 +193,7 @@ async fn output_plain_text() {
         // file target
         let file = NamedUtf8TempFile::new().unwrap();
         let path = file.path().as_str();
-        cmd("bite bugzilla attachment get 123")
+        cmd!("bite bugzilla attachment get 123")
             .args([opt, path])
             .assert()
             .stdout("")
@@ -229,7 +217,7 @@ async fn save_single_with_plain_text() {
     // save files to the current working directory
     env::set_current_dir(dir.path()).unwrap();
 
-    cmd("bite bugzilla attachment get 123")
+    cmd!("bite bugzilla attachment get 123")
         .assert()
         .stdout(predicate::str::diff("Saving attachment: ./test.txt").trim())
         .stderr("")
@@ -251,32 +239,30 @@ async fn save_single_existing_error() {
     let dir = tempdir().unwrap();
     let prefix = dir.path().as_str();
 
-    cmd("bite bugzilla attachment get 123")
-        .args(["-d", prefix])
+    cmd!("bite bugzilla attachment get 123 -d {prefix}")
         .assert()
         .stdout(predicate::str::diff(format!("Saving attachment: {prefix}/test.txt")).trim())
         .stderr("")
         .success();
 
     // re-running causes a file existence failure
-    cmd("bite bugzilla attachment get 123")
-        .args(["-d", prefix])
+    cmd!("bite bugzilla attachment get 123 -d {prefix}")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(format!("Error: file exists: {prefix}/test.txt")).trim())
         .failure();
 
     // but works when forcing
-    cmd("bite bugzilla attachment get 123 -f")
-        .args(["-d", prefix])
-        .assert()
-        .stdout(predicate::str::diff(format!("Saving attachment: {prefix}/test.txt")).trim())
-        .stderr("")
-        .success();
+    for opt in ["-F", "--force"] {
+        cmd!("bite bugzilla attachment get 123 {opt} -d {prefix}")
+            .assert()
+            .stdout(predicate::str::diff(format!("Saving attachment: {prefix}/test.txt")).trim())
+            .stderr("")
+            .success();
+    }
 
     // or when confirming overwrite
-    cmd("bite bugzilla attachment get 123")
-        .args(["-d", prefix])
+    cmd!("bite bugzilla attachment get 123 -d {prefix}")
         .write_stdin("y\n")
         .assert()
         .stdout(predicate::str::diff(format!("Saving attachment: {prefix}/test.txt")).trim())
@@ -299,8 +285,7 @@ async fn single_bug_with_no_attachments() {
         .await;
 
     for opt in ["-i", "--item-ids"] {
-        cmd("bite bugzilla attachment get 12345")
-            .arg(opt)
+        cmd!("bite bugzilla attachment get 12345 {opt}")
             .assert()
             .stdout("")
             .stderr("")
@@ -320,8 +305,7 @@ async fn multiple_bugs_with_no_attachments() {
         .await;
 
     for opt in ["-i", "--item-ids"] {
-        cmd("bite bugzilla attachment get 12345 23456 34567")
-            .arg(opt)
+        cmd!("bite bugzilla attachment get 12345 23456 34567 {opt}")
             .assert()
             .stdout("")
             .stderr("")
@@ -346,7 +330,7 @@ async fn save_multiple_with_plain_text() {
     env::set_current_dir(dir.path()).unwrap();
 
     let ids = ["12345", "23456", "34567"];
-    cmd("bite bugzilla attachment get -i")
+    cmd!("bite bugzilla attachment get -i")
         .args(ids)
         .assert()
         .stdout(predicate::str::is_empty().not())

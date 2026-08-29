@@ -13,7 +13,7 @@ static TEST_DATA: LazyLock<Utf8PathBuf> =
 #[test]
 fn help() {
     for opt in ["-h", "--help"] {
-        cmd("bite redmine")
+        cmd!("bite redmine")
             .arg(opt)
             .assert()
             .stdout(predicate::str::is_empty().not())
@@ -25,7 +25,7 @@ fn help() {
 #[test]
 fn invalid_service_type() {
     for opt in ["-c", "--connection"] {
-        cmd("bite redmine")
+        cmd!("bite redmine")
             .args([opt, "gentoo"])
             .args(["search", "test"])
             .assert()
@@ -38,7 +38,7 @@ fn invalid_service_type() {
 #[test]
 fn unknown_connection() {
     for opt in ["-c", "--connection"] {
-        cmd("bite redmine")
+        cmd!("bite redmine")
             .args([opt, "unknown"])
             .args(["search", "test"])
             .assert()

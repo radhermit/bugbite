@@ -4,9 +4,7 @@ use super::*;
 fn aliases() {
     for subcmd in ["u", "update"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla attachment")
-                .arg(subcmd)
-                .arg(opt)
+            cmd!("bite bugzilla attachment {subcmd} {opt}")
                 .assert()
                 .stdout(predicate::str::is_empty().not())
                 .stderr("")
@@ -18,7 +16,7 @@ fn aliases() {
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite bugzilla attachment update")
+    cmd!("bite bugzilla attachment update")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -32,7 +30,7 @@ fn required_args() {
 async fn auth_required() {
     let _server = start_server().await;
 
-    cmd("bite bugzilla attachment update 1 -p")
+    cmd!("bite bugzilla attachment update 1 -p")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())

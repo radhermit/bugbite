@@ -6,9 +6,7 @@ use super::*;
 fn aliases() {
     for subcmd in ["s", "search"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla")
-                .arg(subcmd)
-                .arg(opt)
+            cmd!("bite bugzilla {subcmd} {opt}")
                 .assert()
                 .stdout(predicate::str::is_empty().not())
                 .stderr("")
@@ -20,7 +18,7 @@ fn aliases() {
 #[test]
 fn invalid_ids() {
     for opt in ["-i", "--id"] {
-        cmd("bite bugzilla search")
+        cmd!("bite bugzilla search")
             .args([opt, "id"])
             .assert()
             .stdout("")
@@ -32,7 +30,7 @@ fn invalid_ids() {
 
 #[test]
 fn multiple_stdin() {
-    cmd("bite bugzilla search --id - -")
+    cmd!("bite bugzilla search --id - -")
         .write_stdin("12345\n")
         .assert()
         .stdout("")
@@ -51,7 +49,7 @@ async fn fields() {
 
     for opt in ["-f", "--fields"] {
         // invalid field
-        cmd("bite bugzilla search test")
+        cmd!("bite bugzilla search test")
             .args([opt, "field"])
             .assert()
             .stdout("")
@@ -60,7 +58,7 @@ async fn fields() {
             .code(2);
 
         // IDS only
-        cmd("bite bugzilla search test")
+        cmd!("bite bugzilla search test")
             .args([opt, "id"])
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
@@ -84,8 +82,7 @@ async fn no_matches() {
         .await;
 
     for opt in ["", "-v", "--verbose"] {
-        cmd("bite bugzilla search nonexistent")
-            .arg(opt)
+        cmd!("bite bugzilla search nonexistent {opt}")
             .assert()
             .stdout("")
             .stderr("")
@@ -98,7 +95,7 @@ async fn template() {
     let server = start_server().await;
 
     // output template to stdout
-    cmd("bite bugzilla search -c 1d -n")
+    cmd!("bite bugzilla search -c 1d -n")
         .args(["--to", "-"])
         .assert()
         .stdout(predicate::str::diff("created = \"1d\"").trim())
@@ -110,7 +107,7 @@ async fn template() {
     let path = path.as_str();
 
     // save template to a specific path
-    cmd("bite bugzilla search -c 1d -n")
+    cmd!("bite bugzilla search -c 1d -n")
         .args(["--to", path])
         .assert()
         .stdout("")
@@ -122,7 +119,7 @@ async fn template() {
         .await;
 
     // load template
-    cmd("bite bugzilla search")
+    cmd!("bite bugzilla search")
         .args(["--from", path])
         .assert()
         .stdout("")
@@ -135,8 +132,7 @@ async fn browser() {
     let _server = start_server().await;
 
     for opt in ["-b", "--browser"] {
-        cmd("bite bugzilla search test")
-            .arg(opt)
+        cmd!("bite bugzilla search test {opt}")
             .env("BROWSER", "true")
             .assert()
             .stdout("")
@@ -152,7 +148,7 @@ async fn output() {
     server.respond(200, TEST_DATA.join("search/ids.json")).await;
 
     // JSON
-    cmd("bite bugzilla search --json test")
+    cmd!("bite bugzilla search --json test")
         .assert()
         .stdout(predicate::str::diff(indoc::indoc! {r#"
             {"id":924847}
@@ -165,7 +161,7 @@ async fn output() {
         .success();
 
     // nonexistent field
-    cmd("bite bugzilla search -f alias test")
+    cmd!("bite bugzilla search -f alias test")
         .assert()
         .stdout("")
         .stderr("")
@@ -180,7 +176,7 @@ async fn custom_fields() {
         .await;
 
     // missing args
-    cmd("bite bugzilla search --cf")
+    cmd!("bite bugzilla search --cf")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("value is required"))
@@ -188,21 +184,21 @@ async fn custom_fields() {
         .code(2);
 
     // existing
-    cmd("bite bugzilla search --cf field")
+    cmd!("bite bugzilla search --cf field")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // single
-    cmd("bite bugzilla search --cf field=value")
+    cmd!("bite bugzilla search --cf field=value")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // multiple
-    cmd("bite bugzilla search --cf field1=value --cf field1='!= value'")
+    cmd!("bite bugzilla search --cf field1=value --cf field1='!= value'")
         .assert()
         .stdout("")
         .stderr("")
@@ -217,7 +213,7 @@ async fn changed() {
         .await;
 
     // missing field
-    cmd("bite bugzilla search --changed")
+    cmd!("bite bugzilla search --changed")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("value is required"))
@@ -225,21 +221,21 @@ async fn changed() {
         .code(2);
 
     // single
-    cmd("bite bugzilla search --changed alias")
+    cmd!("bite bugzilla search --changed alias")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // multiple
-    cmd("bite bugzilla search --changed blocks,depends")
+    cmd!("bite bugzilla search --changed blocks,depends")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // invalid time
-    cmd("bite bugzilla search --changed blocks=2")
+    cmd!("bite bugzilla search --changed blocks=2")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("invalid range or value: 2"))
@@ -247,14 +243,14 @@ async fn changed() {
         .code(2);
 
     // time range
-    cmd("bite bugzilla search --changed blocks=1d")
+    cmd!("bite bugzilla search --changed blocks=1d")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // time static
-    cmd("bite bugzilla search --changed blocks,depends=2020-02-02")
+    cmd!("bite bugzilla search --changed blocks,depends=2020-02-02")
         .assert()
         .stdout("")
         .stderr("")
@@ -269,7 +265,7 @@ async fn changed_by() {
         .await;
 
     // missing args
-    cmd("bite bugzilla search --changed-by")
+    cmd!("bite bugzilla search --changed-by")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("value is required"))
@@ -277,7 +273,7 @@ async fn changed_by() {
         .code(2);
 
     // missing value
-    cmd("bite bugzilla search --changed-by alias")
+    cmd!("bite bugzilla search --changed-by alias")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("missing users"))
@@ -285,14 +281,14 @@ async fn changed_by() {
         .code(2);
 
     // single
-    cmd("bite bugzilla search --changed-by alias=user")
+    cmd!("bite bugzilla search --changed-by alias=user")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // multiple
-    cmd("bite bugzilla search --changed-by blocks,depends=user1,user2")
+    cmd!("bite bugzilla search --changed-by blocks,depends=user1,user2")
         .assert()
         .stdout("")
         .stderr("")
@@ -307,7 +303,7 @@ async fn changed_from() {
         .await;
 
     // missing args
-    cmd("bite bugzilla search --changed-from")
+    cmd!("bite bugzilla search --changed-from")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("value is required"))
@@ -315,7 +311,7 @@ async fn changed_from() {
         .code(2);
 
     // missing value
-    cmd("bite bugzilla search --changed-from alias")
+    cmd!("bite bugzilla search --changed-from alias")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("missing value"))
@@ -323,7 +319,7 @@ async fn changed_from() {
         .code(2);
 
     // single
-    cmd("bite bugzilla search --changed-from alias=user")
+    cmd!("bite bugzilla search --changed-from alias=user")
         .assert()
         .stdout("")
         .stderr("")
@@ -338,7 +334,7 @@ async fn changed_to() {
         .await;
 
     // missing args
-    cmd("bite bugzilla search --changed-to")
+    cmd!("bite bugzilla search --changed-to")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("value is required"))
@@ -346,7 +342,7 @@ async fn changed_to() {
         .code(2);
 
     // missing value
-    cmd("bite bugzilla search --changed-to alias")
+    cmd!("bite bugzilla search --changed-to alias")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("missing value"))
@@ -354,7 +350,7 @@ async fn changed_to() {
         .code(2);
 
     // single
-    cmd("bite bugzilla search --changed-to alias=user")
+    cmd!("bite bugzilla search --changed-to alias=user")
         .assert()
         .stdout("")
         .stderr("")
@@ -369,16 +365,15 @@ async fn id() {
         .await;
 
     // multiple options
-    cmd("bite bugzilla search --id 1 --id 2")
+    cmd!("bite bugzilla search --id 1 --id 2")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // comma separated args
-    for args in ["1,2,3", ">50,<100"] {
-        cmd("bite bugzilla search --id")
-            .arg(args)
+    for arg in ["1,2,3", ">50,<100"] {
+        cmd!("bite bugzilla search --id {arg}")
             .assert()
             .stdout("")
             .stderr("")
@@ -386,7 +381,7 @@ async fn id() {
     }
 
     // comma separated stdin args
-    cmd("bite bugzilla search --id -")
+    cmd!("bite bugzilla search --id -")
         .write_stdin("1,2,3\n")
         .assert()
         .stdout("")
@@ -394,7 +389,7 @@ async fn id() {
         .success();
 
     // newline separated stdin args
-    cmd("bite bugzilla search --id -")
+    cmd!("bite bugzilla search --id -")
         .write_stdin("1\n2\n3\n")
         .assert()
         .stdout("")

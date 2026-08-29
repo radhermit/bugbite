@@ -29,21 +29,21 @@ include::{docdir}/common/global-options.adoc[]
 .List all attachments for bug 10:
  bite bugzilla attachment get -il 10
 
-*-o, --output* [<file>]::
-    Output attachment to a specified file.
+*-F, --file* <file>::
+    Write attachment data to a specified file.
 +
 Note that multiple attachments will be output to the same location.
 +
 Use `-` for standard output.
 +
 .Output attachment data to standard output:
- bite bugzilla attachment get 123 -o -
+ bite bugzilla attachment get 123 -F -
 
-*-O, --outdated*::
-    Include outdated attachments.
+*-o, --obsolete*::
+    Include obsolete attachments.
 +
-This forces deleted and obsolete attachments to be shown instead of being
-skipped by default.
+This forces obsolete attachments to be shown instead of being skipped by
+default.
 
 *-i, --item-ids*::
     Treat ID arguments as bug IDs or aliases, not attachment IDs.
@@ -67,7 +67,7 @@ allows altering that target directory.
 .Save all attachments from bug 123 to the specified directory:
  bite bugzilla attachment get -i 123 --dir path/to/dir
 
-*-f, --force*::
+*-F, --force*::
     Forcibly overwrite files.
 +
 By default, existing files won't be overwritten.

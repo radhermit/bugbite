@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite bugzilla user get")
+    cmd!("bite bugzilla user get")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -18,7 +18,7 @@ async fn name() {
     let _server = start_server().await;
 
     // authentication required
-    cmd("bite bugzilla user update user@domain.com -n test")
+    cmd!("bite bugzilla user update user@domain.com -n test")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())
@@ -32,7 +32,7 @@ async fn name() {
         .respond(200, TEST_DATA.join("user/update/single-name.json"))
         .await;
     for opt in ["-n", "--name"] {
-        cmd("bite bugzilla user update user@domain.com")
+        cmd!("bite bugzilla user update user@domain.com")
             .args([opt, "test"])
             .assert()
             .stdout(predicate::str::diff("123").trim())

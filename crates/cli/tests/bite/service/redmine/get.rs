@@ -8,7 +8,7 @@ use super::*;
 fn aliases() {
     for subcmd in ["g", "get"] {
         for opt in ["-h", "--help"] {
-            cmd("bite redmine")
+            cmd!("bite redmine")
                 .arg(subcmd)
                 .arg(opt)
                 .assert()
@@ -22,7 +22,7 @@ fn aliases() {
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite redmine get")
+    cmd!("bite redmine get")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -39,7 +39,7 @@ async fn timeout() {
     let template = ResponseTemplate::new(200).set_delay(delay);
     server.respond_custom(matchers::any(), template).await;
 
-    cmd("bite redmine -t 0.25 get 1")
+    cmd!("bite redmine -t 0.25 get 1")
         .assert()
         .stdout("")
         .stderr("Error: request timed out\n")
@@ -75,7 +75,7 @@ async fn single() {
     "};
 
     // pull ID from stdin
-    cmd("bite redmine get -")
+    cmd!("bite redmine get -")
         .write_stdin("1\n")
         .assert()
         .stdout(predicate::str::diff(expected))
@@ -83,7 +83,7 @@ async fn single() {
         .success();
 
     // default output with all extra data
-    cmd("bite redmine get 1")
+    cmd!("bite redmine get 1")
         .assert()
         .stdout(predicate::str::diff(expected))
         .stderr("")
@@ -91,7 +91,7 @@ async fn single() {
 
     // without comments
     for opt in ["-C", "--no-comments"] {
-        cmd("bite redmine get 1")
+        cmd!("bite redmine get 1")
             .arg(opt)
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
@@ -118,7 +118,7 @@ async fn browser() {
     server.respond(200, TEST_DATA.join("get/single.json")).await;
 
     for opt in ["-b", "--browser"] {
-        cmd("bite redmine get 1")
+        cmd!("bite redmine get 1")
             .arg(opt)
             .env("BROWSER", "true")
             .assert()

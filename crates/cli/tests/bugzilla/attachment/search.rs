@@ -108,5 +108,31 @@ async fn filters() -> anyhow::Result<()> {
             .success();
     }
 
+    // mark attachment obsolete
+    let (updated_id,) = SERVICE
+        .attachment_update([id1])
+        .obsolete(true)
+        .send()
+        .await?
+        .into_iter()
+        .collect_tuple()
+        .unwrap();
+    assert_eq!(updated_id, id1);
+
+    // obsolete attachments aren't returned by default
+    cmd!("bite bugzilla attachment search -d {uuid}")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+    for opt in ["-o", "--obsolete"] {
+        cmd!("bite bugzilla attachment search {opt} -d {uuid}")
+            .assert()
+            .stdout(predicate::str::contains(format!("{id1}: ")))
+            .stdout(predicate::str::contains(format!("{id2}: ")).not())
+            .stderr("")
+            .success();
+    }
+
     Ok(())
 }

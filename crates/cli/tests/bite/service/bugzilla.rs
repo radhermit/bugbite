@@ -26,7 +26,7 @@ static TEST_OUTPUT: LazyLock<Utf8PathBuf> =
 #[test]
 fn help() {
     for opt in ["-h", "--help"] {
-        cmd("bite bugzilla")
+        cmd!("bite bugzilla")
             .arg(opt)
             .assert()
             .stdout(predicate::str::is_empty().not())
@@ -38,7 +38,7 @@ fn help() {
 #[test]
 fn invalid_service_type() {
     for opt in ["-c", "--connection"] {
-        cmd("bite bugzilla")
+        cmd!("bite bugzilla")
             .args([opt, "ruby"])
             .args(["search", "test"])
             .assert()
@@ -51,7 +51,7 @@ fn invalid_service_type() {
 #[test]
 fn unknown_connection() {
     for opt in ["-c", "--connection"] {
-        cmd("bite bugzilla")
+        cmd!("bite bugzilla")
             .args([opt, "unknown"])
             .args(["search", "test"])
             .assert()
@@ -69,7 +69,7 @@ async fn timeout() {
     let template = ResponseTemplate::new(200).set_delay(delay);
     server.respond_custom(matchers::any(), template).await;
 
-    cmd("bite bugzilla -t 0.25 get 1")
+    cmd!("bite bugzilla -t 0.25 get 1")
         .assert()
         .stdout("")
         .stderr("Error: request timed out\n")
@@ -84,7 +84,7 @@ async fn proxy() {
         proxy.reset().await;
 
         // invalid
-        cmd("bite bugzilla")
+        cmd!("bite bugzilla")
             .args([opt, "http://"])
             .args(["get", "1"])
             .assert()
@@ -93,7 +93,7 @@ async fn proxy() {
             .failure();
 
         // missing
-        cmd("bite bugzilla")
+        cmd!("bite bugzilla")
             .args([opt, proxy.uri()])
             .args(["get", "1"])
             .assert()
@@ -104,7 +104,7 @@ async fn proxy() {
         proxy.respond(200, TEST_DATA.join("search/ids.json")).await;
 
         // valid
-        cmd("bite bugzilla")
+        cmd!("bite bugzilla")
             .args([opt, proxy.uri()])
             .args(["search", "test", "--fields", "id"])
             .assert()
@@ -127,7 +127,7 @@ async fn env() {
 
     // override base url
     for var in ["BUGBITE_BASE", "BUGBITE_GENTOO_BASE"] {
-        cmd("bite bugzilla")
+        cmd!("bite bugzilla")
             .env("BUGBITE_CONNECTION", "gentoo")
             .env(var, server.uri())
             .args(["search", "bugbite", "--fields", "id"])

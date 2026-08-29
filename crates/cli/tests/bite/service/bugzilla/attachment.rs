@@ -9,9 +9,7 @@ mod update;
 fn aliases() {
     for subcmd in ["a", "attachment"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla")
-                .arg(subcmd)
-                .arg(opt)
+            cmd!("bite bugzilla {subcmd} {opt}")
                 .assert()
                 .stdout(predicate::str::is_empty().not())
                 .stderr("")

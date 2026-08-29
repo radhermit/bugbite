@@ -54,9 +54,9 @@ pub struct Parameters {
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
     pub updated: Option<RangeOrValue<TimeDeltaOrStatic>>,
 
-    pub is_obsolete: Option<bool>,
-    pub is_patch: Option<bool>,
-    pub is_private: Option<bool>,
+    pub obsolete: Option<bool>,
+    pub patch: Option<bool>,
+    pub private: Option<bool>,
 }
 
 impl Parameters {
@@ -85,15 +85,15 @@ impl Parameters {
                 .as_ref()
                 .is_none_or(|x| x.matches(&attachment.updated))
             && self
-                .is_obsolete
+                .obsolete
                 .as_ref()
                 .is_none_or(|x| x == &attachment.is_obsolete)
             && self
-                .is_patch
+                .patch
                 .as_ref()
                 .is_none_or(|x| x == &attachment.is_patch)
             && self
-                .is_private
+                .private
                 .as_ref()
                 .is_none_or(|x| x == &attachment.is_private)
     }
@@ -110,9 +110,9 @@ impl Merge for Parameters {
             size: self.size.merge(other.size),
             created: self.created.merge(other.created),
             updated: self.updated.merge(other.updated),
-            is_obsolete: self.is_obsolete.merge(other.is_obsolete),
-            is_patch: self.is_patch.merge(other.is_patch),
-            is_private: self.is_private.merge(other.is_private),
+            obsolete: self.obsolete.merge(other.obsolete),
+            patch: self.patch.merge(other.patch),
+            private: self.private.merge(other.private),
         }
     }
 }
@@ -124,9 +124,9 @@ impl Merge<Parameters> for search::Parameters {
         self.attachment_filename = self.attachment_filename.merge(other.filename);
         self.ids = self.ids.merge(other.ids);
         self.attachment_mime = self.attachment_mime.merge(other.mime);
-        self.attachment_is_obsolete = self.attachment_is_obsolete.merge(other.is_obsolete);
-        self.attachment_is_patch = self.attachment_is_patch.merge(other.is_patch);
-        self.attachment_is_private = self.attachment_is_private.merge(other.is_private);
+        self.attachment_is_obsolete = self.attachment_is_obsolete.merge(other.obsolete);
+        self.attachment_is_patch = self.attachment_is_patch.merge(other.patch);
+        self.attachment_is_private = self.attachment_is_private.merge(other.private);
 
         // attachment creation and updating alters a bug's modification time
         self.updated = match (other.created, other.updated) {
@@ -156,6 +156,7 @@ impl RequestSend for Request {
         if !ids.is_empty() {
             let mut request = self.service.attachment_get_item(ids);
             request.data(false);
+            request.obsolete(self.params.obsolete.unwrap_or_default());
             let data = request.send().await?;
             attachments.extend(
                 data.into_iter()

@@ -57,7 +57,7 @@ struct Params {
         value_name = "BOOL",
         hide_possible_values = true,
     )]
-    is_obsolete: Option<bool>,
+    obsolete: Option<bool>,
 
     /// filter by patch status
     #[arg(
@@ -68,7 +68,7 @@ struct Params {
         value_name = "BOOL",
         hide_possible_values = true,
     )]
-    is_patch: Option<bool>,
+    patch: Option<bool>,
 
     /// filter by private status
     #[arg(
@@ -79,7 +79,7 @@ struct Params {
         value_name = "BOOL",
         hide_possible_values = true,
     )]
-    is_private: Option<bool>,
+    private: Option<bool>,
 }
 
 impl Merge<Params> for Parameters {
@@ -105,9 +105,9 @@ impl Merge<Params> for Parameters {
             created: other.created,
             updated: other.updated,
 
-            is_obsolete: other.is_obsolete,
-            is_patch: other.is_patch,
-            is_private: other.is_private,
+            obsolete: other.obsolete,
+            patch: other.patch,
+            private: other.private,
         })
     }
 }

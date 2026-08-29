@@ -5,7 +5,7 @@ use super::*;
 
 macro_rules! default_cmd {
     () => {
-        $crate::command::cmd("bite bugzilla create")
+        $crate::command::cmd!("bite bugzilla create")
             .args(["--component", "TestComponent"])
             .args(["--product", "TestProduct"])
             .args(["--summary", "summary"])
@@ -17,9 +17,7 @@ macro_rules! default_cmd {
 fn aliases() {
     for subcmd in ["c", "create"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla")
-                .arg(subcmd)
-                .arg(opt)
+            cmd!("bite bugzilla {subcmd} {opt}")
                 .assert()
                 .stdout(predicate::str::is_empty().not())
                 .stderr("")
@@ -34,7 +32,7 @@ async fn required_args() {
 
     // missing fields
     let err = "Error: missing required fields: component, description, product, summary";
-    cmd("bite bugzilla create")
+    cmd!("bite bugzilla create")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff(err).trim())
@@ -58,7 +56,7 @@ async fn auth_required() {
         .code(1);
 
     // user and password
-    cmd("bite bugzilla")
+    cmd!("bite bugzilla")
         .env("BUGBITE_USER", "user")
         .env("BUGBITE_PASSWORD", "pass")
         .arg("create")
@@ -70,7 +68,7 @@ async fn auth_required() {
         .success();
 
     // API key
-    cmd("bite bugzilla")
+    cmd!("bite bugzilla")
         .env("BUGBITE_KEY", "keydata")
         .arg("create")
         .args(["--component", "TestComponent"])
@@ -127,7 +125,7 @@ async fn from_bug() {
 
     // description and summary must be specified
     let err = "Error: missing required fields: description, summary";
-    cmd("bite bugzilla create")
+    cmd!("bite bugzilla create")
         .args(["--from-bug", "12345"])
         .assert()
         .stdout("")
@@ -136,7 +134,7 @@ async fn from_bug() {
         .code(1);
 
     // valid
-    cmd("bite bugzilla create")
+    cmd!("bite bugzilla create")
         .args(["--from-bug", "12345"])
         .args(["--description", "description"])
         .args(["--summary", "summary"])
@@ -168,7 +166,7 @@ async fn template() {
         .await;
 
     // create bug from template
-    cmd("bite bugzilla create")
+    cmd!("bite bugzilla create")
         .args(["--from", path])
         .assert()
         .stdout(predicate::str::diff("123").trim())

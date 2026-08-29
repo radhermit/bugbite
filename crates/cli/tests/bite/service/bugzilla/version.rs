@@ -9,7 +9,7 @@ async fn version() {
         ResponseTemplate::new(200).set_body_raw(r#"{"version":"5.1.1"}"#, "application/json");
     server.respond_custom(matchers::any(), template).await;
 
-    cmd("bite bugzilla version")
+    cmd!("bite bugzilla version")
         .assert()
         .stdout(predicate::str::diff("5.1.1").trim())
         .stderr("")

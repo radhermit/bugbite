@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite bugzilla user get")
+    cmd!("bite bugzilla user get")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -21,7 +21,7 @@ async fn nonexistent_user() {
     server
         .respond(200, TEST_DATA.join("user/get/nonexistent-email.json"))
         .await;
-    cmd("bite bugzilla user get nonexistent@domain.com")
+    cmd!("bite bugzilla user get nonexistent@domain.com")
         .assert()
         .stdout("")
         .stderr(
@@ -38,7 +38,7 @@ async fn nonexistent_user() {
     server
         .respond(200, TEST_DATA.join("user/get/nonexistent-id.json"))
         .await;
-    cmd("bite bugzilla user get 123")
+    cmd!("bite bugzilla user get 123")
         .assert()
         .stdout("")
         .stderr("")
@@ -54,14 +54,14 @@ async fn single_user() {
         .await;
 
     // email
-    cmd("bite bugzilla user get user@domain.com")
+    cmd!("bite bugzilla user get user@domain.com")
         .assert()
         .stdout(predicate::str::diff("A User (user)").trim())
         .stderr("")
         .success();
 
     // pull email from stdin
-    cmd("bite bugzilla user get -")
+    cmd!("bite bugzilla user get -")
         .write_stdin("user@domain.com\n")
         .assert()
         .stdout(predicate::str::diff("A User (user)").trim())

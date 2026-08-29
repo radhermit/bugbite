@@ -16,21 +16,21 @@ use crate::utils::confirm;
 #[clap(next_help_heading = "Attachment options")]
 struct Options {
     /// list attachment metadata
-    #[arg(short, long, conflicts_with_all = ["dir", "output"])]
+    #[arg(short, long, conflicts_with_all = ["dir", "file"])]
     list: bool,
 
-    /// output attachment data
+    /// write attachment data to file
     #[arg(
         short,
         long,
         conflicts_with_all = ["dir", "list"],
         value_name = "FILE",
     )]
-    output: Option<String>,
+    file: Option<String>,
 
-    /// include outdated attachments
-    #[arg(short = 'O', long)]
-    outdated: bool,
+    /// include obsolete attachments
+    #[arg(short, long)]
+    obsolete: bool,
 
     /// request attachments from bug IDs or aliases
     #[arg(short, long)]
@@ -42,7 +42,7 @@ struct Options {
         long,
         value_name = "PATH",
         default_value = ".",
-        conflicts_with_all = ["list", "output"],
+        conflicts_with_all = ["list", "file"],
     )]
     dir: Utf8PathBuf,
 }
@@ -53,7 +53,7 @@ pub(super) struct Command {
     options: Options,
 
     /// forcibly overwrite files
-    #[arg(short, long)]
+    #[arg(short = 'F', long)]
     force: bool,
 
     // TODO: rework stdin support once clap supports custom containers
@@ -75,7 +75,7 @@ impl Command {
             service
                 .attachment_get_item(ids)
                 .data(!self.options.list)
-                .outdated(self.options.outdated)
+                .obsolete(self.options.obsolete)
                 .send()
                 .await?
                 .into_iter()
@@ -97,13 +97,13 @@ impl Command {
         // conditionally skip deleted and obsolete attachments
         let attachments = attachments
             .iter()
-            .filter(|x| self.options.outdated || (!x.is_obsolete && !x.is_deleted()));
+            .filter(|x| self.options.obsolete || (!x.is_obsolete && !x.is_deleted()));
 
         if self.options.list {
             for attachment in attachments {
                 write!(f, "{attachment}")?;
             }
-        } else if let Some(name) = self.options.output.as_deref() {
+        } else if let Some(name) = self.options.file.as_deref() {
             for attachment in attachments {
                 if name == "-" {
                     f.write_all(attachment.as_ref())

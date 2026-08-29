@@ -6,7 +6,7 @@ use super::*;
 fn aliases() {
     for subcmd in ["s", "search"] {
         for opt in ["-h", "--help"] {
-            cmd("bite redmine")
+            cmd!("bite redmine")
                 .arg(subcmd)
                 .arg(opt)
                 .assert()
@@ -19,7 +19,7 @@ fn aliases() {
 
 #[test]
 fn invalid_ids() {
-    cmd("bite redmine search")
+    cmd!("bite redmine search")
         .args(["--id", "id"])
         .assert()
         .stdout("")
@@ -30,7 +30,7 @@ fn invalid_ids() {
 
 #[test]
 fn multiple_stdin() {
-    cmd("bite redmine search --id - -")
+    cmd!("bite redmine search --id - -")
         .write_stdin("12345\n")
         .assert()
         .stdout("")
@@ -50,7 +50,7 @@ async fn no_matches() {
         .await;
 
     for opt in ["", "-v", "--verbose"] {
-        cmd("bite redmine search nonexistent")
+        cmd!("bite redmine search nonexistent")
             .arg(opt)
             .assert()
             .stdout("")
@@ -68,7 +68,7 @@ async fn template() {
     let path = path.as_str();
 
     // create template
-    cmd("bite redmine search --dry-run test")
+    cmd!("bite redmine search --dry-run test")
         .args(["--to", path])
         .assert()
         .stdout("")
@@ -79,7 +79,7 @@ async fn template() {
         .respond(200, TEST_DATA.join("search/nonexistent.json"))
         .await;
 
-    cmd("bite redmine search")
+    cmd!("bite redmine search")
         .args(["--from", path])
         .assert()
         .stdout("")
@@ -92,7 +92,7 @@ async fn browser() {
     let _server = start_server().await;
 
     for opt in ["-b", "--browser"] {
-        cmd("bite redmine search test")
+        cmd!("bite redmine search test")
             .arg(opt)
             .env("BROWSER", "true")
             .assert()

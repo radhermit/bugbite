@@ -16,8 +16,8 @@ pub struct Request {
     /// Include attachment data.
     pub data: bool,
 
-    /// Include outdated attachments (skipped by default).
-    pub outdated: bool,
+    /// Include obsolete attachments (skipped by default).
+    pub obsolete: bool,
 }
 
 impl Request {
@@ -31,7 +31,7 @@ impl Request {
             service,
             ids: ids.into_iter().map(|s| s.to_string()).collect(),
             data: true,
-            outdated: false,
+            obsolete: false,
         }
     }
 
@@ -67,9 +67,9 @@ impl Request {
         self
     }
 
-    /// Filter outdated attachments.
-    pub fn outdated(&mut self, status: bool) -> &mut Self {
-        self.outdated = status;
+    /// Filter obsolete attachments.
+    pub fn obsolete(&mut self, status: bool) -> &mut Self {
+        self.obsolete = status;
         self
     }
 }
@@ -107,8 +107,8 @@ impl RequestSend for Request {
                             Error::InvalidResponse(format!("invalid attachment for bug {id}"))
                         })?;
 
-                    // conditionally skip outdated attachments
-                    if self.outdated || (!attachment.is_obsolete && !attachment.is_deleted()) {
+                    // conditionally skip obsolete attachments
+                    if self.obsolete || (!attachment.is_obsolete && !attachment.is_deleted()) {
                         bug_attachments.push(attachment);
                     }
                 }

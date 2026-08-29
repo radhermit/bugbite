@@ -5,7 +5,7 @@ use super::*;
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite bugzilla comment get")
+    cmd!("bite bugzilla comment get")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -23,7 +23,7 @@ async fn nonexistent_bug() {
         .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
         .await;
 
-    cmd("bite bugzilla comment get 1")
+    cmd!("bite bugzilla comment get 1")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: bugzilla: Bug #1 does not exist.").trim())
@@ -38,7 +38,7 @@ async fn nonexistent() {
         .respond(200, TEST_DATA.join("comment/get/nonexistent.json"))
         .await;
 
-    cmd("bite bugzilla comment get 1")
+    cmd!("bite bugzilla comment get 1")
         .assert()
         .stdout("")
         .stderr("")
@@ -54,7 +54,7 @@ async fn description() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("comment/get/description")).unwrap();
 
-    cmd("bite bugzilla comment get 1")
+    cmd!("bite bugzilla comment get 1")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
@@ -70,14 +70,14 @@ async fn single_bug() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("comment/get/single-bug")).unwrap();
 
-    cmd("bite bugzilla comment get 1")
+    cmd!("bite bugzilla comment get 1")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
         .success();
 
     // pull id from stdin
-    cmd("bite bugzilla comment get -")
+    cmd!("bite bugzilla comment get -")
         .write_stdin("1\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
@@ -94,14 +94,14 @@ async fn multiple_bugs() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("comment/get/multiple-bugs")).unwrap();
 
-    cmd("bite bugzilla comment get 1 2")
+    cmd!("bite bugzilla comment get 1 2")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
         .success();
 
     // pull ids from stdin
-    cmd("bite bugzilla comment get -")
+    cmd!("bite bugzilla comment get -")
         .write_stdin("1\n2\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
@@ -118,7 +118,7 @@ async fn creator() {
         .await;
 
     for opt in ["-R", "--creator"] {
-        cmd("bite bugzilla comment get 1")
+        cmd!("bite bugzilla comment get 1")
             .args([opt, "user1"])
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
@@ -156,8 +156,7 @@ async fn attachment() {
 
     for opt in ["-a", "--attachment"] {
         // comments with attachments
-        cmd("bite bugzilla comment get 1")
-            .arg(opt)
+        cmd!("bite bugzilla comment get 1 {opt}")
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
                 Bug: 1 ===================================================================================
@@ -180,7 +179,7 @@ async fn attachment() {
             .success();
 
         // comments without attachments
-        cmd("bite bugzilla comment get 1")
+        cmd!("bite bugzilla comment get 1")
             .args([opt, "false"])
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
@@ -205,8 +204,7 @@ async fn attachment() {
             .success();
 
         // comments with attachments by a specific user
-        cmd("bite bugzilla comment get 1 --creator user2")
-            .arg(opt)
+        cmd!("bite bugzilla comment get 1 --creator user2 {opt}")
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"
                 Bug: 1 ===================================================================================

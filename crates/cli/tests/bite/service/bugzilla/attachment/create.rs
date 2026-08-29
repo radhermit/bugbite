@@ -8,9 +8,7 @@ use super::*;
 fn aliases() {
     for subcmd in ["c", "create"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla attachment")
-                .arg(subcmd)
-                .arg(opt)
+            cmd!("bite bugzilla attachment {subcmd} {opt}")
                 .assert()
                 .stdout(predicate::str::is_empty().not())
                 .stderr("")
@@ -22,7 +20,7 @@ fn aliases() {
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite bugzilla attachment create")
+    cmd!("bite bugzilla attachment create")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -32,7 +30,7 @@ fn required_args() {
         .code(2);
 
     // missing files
-    cmd("bite bugzilla attachment create 1")
+    cmd!("bite bugzilla attachment create 1")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -49,8 +47,7 @@ async fn auth_required() {
     fs::write(&file, "test").unwrap();
     let path = file.path();
 
-    cmd("bite bugzilla attachment create 1")
-        .arg(path)
+    cmd!("bite bugzilla attachment create 1 {path}")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())
@@ -64,8 +61,7 @@ async fn empty_file() {
     let file = NamedUtf8TempFile::new().unwrap();
     let path = file.path();
 
-    cmd("bite bugzilla attachment create 1")
-        .arg(path)
+    cmd!("bite bugzilla attachment create 1 {path}")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff(format!("Error: empty attachment: {path}")).trim())
@@ -80,8 +76,7 @@ async fn nonexistent_file() {
         .respond(200, TEST_DATA.join("attachment/create/single.json"))
         .await;
 
-    cmd("bite bugzilla attachment create 1")
-        .arg("/path/to/nonexistent/file")
+    cmd!("bite bugzilla attachment create 1 /path/to/nonexistent/file")
         .assert()
         .stdout("")
         .stderr(
@@ -103,16 +98,14 @@ async fn single_bug() {
     fs::write(&file, "test").unwrap();
     let path = file.path();
 
-    cmd("bite bugzilla attachment create 1")
-        .arg(path)
+    cmd!("bite bugzilla attachment create 1 {path}")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // verify output when running verbosely
-    cmd("bite bugzilla attachment create 1 -v")
-        .arg(path)
+    cmd!("bite bugzilla attachment create 1 -v {path}")
         .assert()
         .stdout(predicate::str::diff(indoc::formatdoc! {"
             {path}: attached to bug(s): 1 (attachment ID(s) 123)
@@ -121,8 +114,7 @@ async fn single_bug() {
         .success();
 
     // IDs from standard input
-    cmd("bite bugzilla attachment create -")
-        .arg(path)
+    cmd!("bite bugzilla attachment create - {path}")
         .write_stdin("1\n")
         .assert()
         .stdout("")
@@ -142,8 +134,7 @@ async fn multiple_bugs() {
     let path = file.path();
 
     // invalid command -- ID args must be in a single comma-separated string
-    cmd("bite bugzilla attachment create 1 2")
-        .arg(path)
+    cmd!("bite bugzilla attachment create 1 2 {path}")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -152,16 +143,14 @@ async fn multiple_bugs() {
         .failure()
         .code(1);
 
-    cmd("bite bugzilla attachment create 1,2")
-        .arg(path)
+    cmd!("bite bugzilla attachment create 1,2 {path}")
         .assert()
         .stdout("")
         .stderr("")
         .success();
 
     // verify output when running verbosely
-    cmd("bite bugzilla attachment create 1,2 -v")
-        .arg(path)
+    cmd!("bite bugzilla attachment create 1,2 -v {path}")
         .assert()
         .stdout(predicate::str::diff(indoc::formatdoc! {"
             {path}: attached to bug(s): 1, 2 (attachment ID(s) 123, 124)
@@ -170,8 +159,7 @@ async fn multiple_bugs() {
         .success();
 
     // IDs from standard input
-    cmd("bite bugzilla attachment create -")
-        .arg(path)
+    cmd!("bite bugzilla attachment create - {path}")
         .write_stdin("1\n2\n")
         .assert()
         .stdout("")
@@ -191,7 +179,7 @@ async fn dir_target() {
     fs::create_dir("src").unwrap();
 
     // invalid MIME type
-    cmd("bite bugzilla attachment create 1 src")
+    cmd!("bite bugzilla attachment create 1 src")
         .args(["--mime", "text/plain"])
         .assert()
         .stdout("")
@@ -203,8 +191,7 @@ async fn dir_target() {
         .code(1);
 
     // invalid MIME type
-    cmd("bite bugzilla attachment create 1 src")
-        .arg("--patch")
+    cmd!("bite bugzilla attachment create 1 src --patch")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: patch type invalid for directory targets").trim())
@@ -212,7 +199,7 @@ async fn dir_target() {
         .code(1);
 
     // empty directory target
-    cmd("bite bugzilla attachment create 1 src")
+    cmd!("bite bugzilla attachment create 1 src")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: empty directory target: src").trim())
@@ -224,7 +211,7 @@ async fn dir_target() {
     fs::write("src/test2", "test2").unwrap();
 
     // valid
-    cmd("bite bugzilla attachment create 1 src")
+    cmd!("bite bugzilla attachment create 1 src")
         .assert()
         .stdout("")
         .stderr("")

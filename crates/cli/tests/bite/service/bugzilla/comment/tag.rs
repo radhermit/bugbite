@@ -5,7 +5,7 @@ async fn required_args() {
     let _server = start_server().await;
 
     // missing IDs
-    cmd("bite bugzilla comment tag")
+    cmd!("bite bugzilla comment tag")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -15,7 +15,7 @@ async fn required_args() {
         .code(2);
 
     // missing --tags or --untag
-    cmd("bite bugzilla comment tag 1")
+    cmd!("bite bugzilla comment tag 1")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("no tags specified"))
@@ -31,7 +31,7 @@ async fn nonexistent_bug() {
         .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
         .await;
 
-    cmd("bite bugzilla comment tag 1 -u")
+    cmd!("bite bugzilla comment tag 1 -u")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: bugzilla: Bug #1 does not exist.").trim())
@@ -46,7 +46,7 @@ async fn nonexistent_comments() {
         .respond(200, TEST_DATA.join("comment/get/nonexistent.json"))
         .await;
 
-    cmd("bite bugzilla comment tag 1 -u")
+    cmd!("bite bugzilla comment tag 1 -u")
         .assert()
         .stdout("")
         .stderr("")

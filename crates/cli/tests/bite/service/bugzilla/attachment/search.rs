@@ -6,9 +6,7 @@ use super::*;
 fn aliases() {
     for subcmd in ["s", "search"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla attachment")
-                .arg(subcmd)
-                .arg(opt)
+            cmd!("bite bugzilla attachment {subcmd} {opt}")
                 .assert()
                 .stdout(predicate::str::is_empty().not())
                 .stderr("")
@@ -26,7 +24,7 @@ async fn nonexistent_bug() {
         .await;
 
     for opt in ["-i", "--id"] {
-        cmd("bite bugzilla attachment search")
+        cmd!("bite bugzilla attachment search")
             .args([opt, "1"])
             .assert()
             .stdout("")
@@ -40,7 +38,7 @@ async fn template() {
     let server = start_server().await;
 
     // output template to stdout
-    cmd("bite bugzilla attachment search -c 1d -n")
+    cmd!("bite bugzilla attachment search -c 1d -n")
         .args(["--to", "-"])
         .assert()
         .stdout(predicate::str::diff("created = \"1d\"").trim())
@@ -52,7 +50,7 @@ async fn template() {
     let path = path.as_str();
 
     // save template to a specific path
-    cmd("bite bugzilla attachment search -c 1d -n")
+    cmd!("bite bugzilla attachment search -c 1d -n")
         .args(["--to", path])
         .assert()
         .stdout("")
@@ -64,7 +62,7 @@ async fn template() {
         .await;
 
     // load template
-    cmd("bite bugzilla attachment search")
+    cmd!("bite bugzilla attachment search")
         .args(["--from", path])
         .assert()
         .stdout("")

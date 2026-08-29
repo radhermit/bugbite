@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite bugzilla user get")
+    cmd!("bite bugzilla user get")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -18,7 +18,7 @@ async fn single_user() {
     let _server = start_server().await;
 
     // authentication required
-    cmd("bite bugzilla user create test")
+    cmd!("bite bugzilla user create test")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: authentication required").trim())
@@ -31,7 +31,7 @@ async fn single_user() {
     server
         .respond(400, TEST_DATA.join("user/create/invalid-user.json"))
         .await;
-    cmd("bite bugzilla user create test")
+    cmd!("bite bugzilla user create test")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("e-mail address"))
@@ -44,7 +44,7 @@ async fn single_user() {
     server
         .respond(200, TEST_DATA.join("user/create/single.json"))
         .await;
-    cmd("bite bugzilla user create user@domain.com")
+    cmd!("bite bugzilla user create user@domain.com")
         .assert()
         .stdout(predicate::str::diff("2").trim())
         .stderr("")

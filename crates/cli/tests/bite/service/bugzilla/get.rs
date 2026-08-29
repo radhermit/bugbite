@@ -8,9 +8,7 @@ use super::*;
 fn aliases() {
     for subcmd in ["g", "get"] {
         for opt in ["-h", "--help"] {
-            cmd("bite bugzilla")
-                .arg(subcmd)
-                .arg(opt)
+            cmd!("bite bugzilla {subcmd} {opt}")
                 .assert()
                 .stdout(predicate::str::is_empty().not())
                 .stderr("")
@@ -22,7 +20,7 @@ fn aliases() {
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite bugzilla get")
+    cmd!("bite bugzilla get")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -40,7 +38,7 @@ async fn nonexistent_bug() {
         .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
         .await;
 
-    cmd("bite bugzilla get 1")
+    cmd!("bite bugzilla get 1")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: bugzilla: Bug #1 does not exist.").trim())
@@ -103,14 +101,14 @@ async fn single_bug() {
     "};
 
     // bug fields only, no extra data
-    cmd("bite bugzilla get -ACH 1")
+    cmd!("bite bugzilla get -ACH 1")
         .assert()
         .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 
     // pull ID from stdin
-    cmd("bite bugzilla get -ACH -")
+    cmd!("bite bugzilla get -ACH -")
         .write_stdin("1\n")
         .assert()
         .stdout(predicate::str::diff(expected))
@@ -120,7 +118,7 @@ async fn single_bug() {
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug-default")).unwrap();
 
     // default output with all extra data
-    cmd("bite bugzilla get 1")
+    cmd!("bite bugzilla get 1")
         .assert()
         .stdout(predicate::str::diff(expected))
         .stderr("")
@@ -129,7 +127,7 @@ async fn single_bug() {
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug-attachments")).unwrap();
 
     // bug fields with attachments
-    cmd("bite bugzilla get -CH 1")
+    cmd!("bite bugzilla get -CH 1")
         .assert()
         .stdout(predicate::str::diff(expected))
         .stderr("")
@@ -138,7 +136,7 @@ async fn single_bug() {
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/single-bug-no-attachments")).unwrap();
 
     // bug fields without attachments
-    cmd("bite bugzilla get -A 1")
+    cmd!("bite bugzilla get -A 1")
         .assert()
         .stdout(predicate::str::diff(expected))
         .stderr("")
@@ -153,14 +151,14 @@ async fn multiple_bugs() {
         .await;
     let expected = fs::read_to_string(TEST_OUTPUT.join("get/multiple-bugs")).unwrap();
 
-    cmd("bite bugzilla get -ACH 12345 23456 34567")
+    cmd!("bite bugzilla get -ACH 12345 23456 34567")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
         .stderr("")
         .success();
 
     // pull IDs from stdin
-    cmd("bite bugzilla get -ACH -")
+    cmd!("bite bugzilla get -ACH -")
         .write_stdin("12345\n23456\n34567\n")
         .assert()
         .stdout(predicate::str::diff(expected.clone()))
@@ -176,8 +174,7 @@ async fn browser() {
         .await;
 
     for opt in ["-b", "--browser"] {
-        cmd("bite bugzilla get 1")
-            .arg(opt)
+        cmd!("bite bugzilla get 1 {opt}")
             .env("BROWSER", "true")
             .assert()
             .stdout("")

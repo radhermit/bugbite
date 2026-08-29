@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn required_args() {
     // missing IDs
-    cmd("bite bugzilla history")
+    cmd!("bite bugzilla history")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains(
@@ -21,7 +21,7 @@ async fn nonexistent_bug() {
         .respond(404, TEST_DATA.join("errors/nonexistent-bug.json"))
         .await;
 
-    cmd("bite bugzilla history 1")
+    cmd!("bite bugzilla history 1")
         .assert()
         .stdout("")
         .stderr(predicate::str::diff("Error: bugzilla: Bug #1 does not exist.").trim())
@@ -36,7 +36,7 @@ async fn nonexistent() {
         .respond(200, TEST_DATA.join("history/nonexistent.json"))
         .await;
 
-    cmd("bite bugzilla history 1")
+    cmd!("bite bugzilla history 1")
         .assert()
         .stdout("")
         .stderr("")
@@ -66,14 +66,14 @@ async fn single_bug() {
         blocks: -100
     "};
 
-    cmd("bite bugzilla history 1")
+    cmd!("bite bugzilla history 1")
         .assert()
         .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 
     // pull id from stdin
-    cmd("bite bugzilla history -")
+    cmd!("bite bugzilla history -")
         .write_stdin("1\n")
         .assert()
         .stdout(predicate::str::diff(expected))
@@ -109,14 +109,14 @@ async fn multiple_bugs() {
         depends_on: +1
     "};
 
-    cmd("bite bugzilla history 1 2")
+    cmd!("bite bugzilla history 1 2")
         .assert()
         .stdout(predicate::str::diff(expected))
         .stderr("")
         .success();
 
     // pull ids from stdin
-    cmd("bite bugzilla history -")
+    cmd!("bite bugzilla history -")
         .write_stdin("1\n2\n")
         .assert()
         .stdout(predicate::str::diff(expected))
@@ -133,7 +133,7 @@ async fn creator() {
         .await;
 
     for opt in ["-R", "--creator"] {
-        cmd("bite bugzilla history 1")
+        cmd!("bite bugzilla history 1")
             .args([opt, "user1"])
             .assert()
             .stdout(predicate::str::diff(indoc::indoc! {"

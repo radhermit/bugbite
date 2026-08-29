@@ -7,7 +7,7 @@ use crate::command::cmd;
 
 #[test]
 fn services() {
-    cmd("bite show services")
+    cmd!("bite show services")
         .assert()
         .stdout(predicate::str::starts_with("Service: "))
         .stderr("")
@@ -16,7 +16,7 @@ fn services() {
 
 #[test]
 fn connections() {
-    cmd("bite show connections")
+    cmd!("bite show connections")
         .assert()
         .stdout(predicate::str::is_empty().not())
         .stderr("")
@@ -26,7 +26,7 @@ fn connections() {
 #[test]
 fn connections_with_services() {
     // invalid
-    cmd("bite show connections invalid")
+    cmd!("bite show connections invalid")
         .assert()
         .stdout("")
         .stderr(predicate::str::is_empty().not())
@@ -34,7 +34,7 @@ fn connections_with_services() {
         .code(2);
 
     // valid
-    cmd("bite show connections bugzilla redmine")
+    cmd!("bite show connections bugzilla redmine")
         .assert()
         .stdout(predicate::str::is_empty().not())
         .stderr("")
@@ -58,14 +58,14 @@ fn custom_config() {
     fs::write(file_path, config).unwrap();
 
     // no custom config
-    cmd("bite show connections")
+    cmd!("bite show connections")
         .assert()
         .stdout(predicate::str::contains("bugzilla-test").not())
         .stderr("")
         .success();
 
     // dir target
-    cmd("bite show connections")
+    cmd!("bite show connections")
         .env("BUGBITE_CONFIG_DIR", config_dir)
         .assert()
         .stdout(predicate::str::contains("bugzilla-test"))
@@ -74,7 +74,7 @@ fn custom_config() {
 
     if cfg!(target_os = "linux") {
         // $HOME dir
-        cmd("bite show connections")
+        cmd!("bite show connections")
             .env_remove("BUGBITE_CONFIG_DIR")
             .env_remove("XDG_CONFIG_HOME")
             .env("HOME", home_path)
@@ -84,7 +84,7 @@ fn custom_config() {
             .success();
 
         // xdg config dir
-        cmd("bite show connections")
+        cmd!("bite show connections")
             .env_remove("BUGBITE_CONFIG_DIR")
             .env("XDG_CONFIG_HOME", config_base)
             .assert()

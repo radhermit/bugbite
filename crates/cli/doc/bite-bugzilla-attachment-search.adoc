@@ -57,13 +57,13 @@ include::{docdir}/common/template-options.adoc[]
 *-u, --updated* <value>::
     Filter by update time.
 
-*-o, --is-obsolete* [<bool>]::
+*-o, --obsolete* [<bool>]::
 	Filter by obsolete status.
 
-*-p, --is-patch* [<bool>]::
+*-p, --patch* [<bool>]::
 	Filter by patch status.
 
-*-P, --is-private* [<bool>]::
+*-P, --private* [<bool>]::
     Filter by private status.
 
 == See Also

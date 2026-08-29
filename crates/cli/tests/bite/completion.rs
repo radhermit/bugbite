@@ -7,7 +7,7 @@ use crate::command::cmd;
 
 #[test]
 fn no_target() {
-    cmd("bite completion")
+    cmd!("bite completion")
         .assert()
         .stdout("")
         .stderr(predicate::str::is_empty().not())
@@ -19,7 +19,7 @@ fn no_target() {
 fn dir() {
     let dir = tempdir().unwrap();
     for opt in ["-d", "--dir"] {
-        cmd("bite completion")
+        cmd!("bite completion")
             .arg(opt)
             .arg(dir.path())
             .assert()
@@ -33,7 +33,7 @@ fn dir() {
 #[test]
 fn target() {
     // invalid
-    cmd("bite completion unknown")
+    cmd!("bite completion unknown")
         .assert()
         .stdout("")
         .stderr(predicate::str::is_empty().not())
@@ -41,7 +41,7 @@ fn target() {
         .code(2);
 
     // valid
-    cmd("bite completion zsh")
+    cmd!("bite completion zsh")
         .assert()
         .stdout(predicate::str::is_empty().not())
         .stderr("")

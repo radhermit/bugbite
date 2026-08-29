@@ -7,7 +7,7 @@ async fn fields() {
         .respond(200, TEST_DATA.join("fields/gentoo.json"))
         .await;
 
-    cmd("bite bugzilla fields")
+    cmd!("bite bugzilla fields")
         .assert()
         .stdout(predicate::str::is_empty().not())
         .stderr("")

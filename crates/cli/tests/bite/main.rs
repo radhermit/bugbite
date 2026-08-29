@@ -54,7 +54,7 @@ fn initialize() {
 #[test]
 fn help() {
     for opt in ["-h", "--help"] {
-        cmd("bite")
+        cmd!("bite")
             .arg(opt)
             .assert()
             .stdout(predicate::str::is_empty().not())
@@ -67,7 +67,7 @@ fn help() {
 fn version() {
     let version = env!("CARGO_PKG_VERSION");
     for opt in ["-V", "--version"] {
-        cmd("bite")
+        cmd!("bite")
             .arg(opt)
             .assert()
             .stdout(predicate::str::diff(format!("bite {version}")).trim())
@@ -79,7 +79,7 @@ fn version() {
 #[test]
 fn default_service() {
     // no connection specified
-    cmd("bite version")
+    cmd!("bite version")
         .assert()
         .stdout("")
         .stderr(predicate::str::contains("error: unrecognized subcommand"))
@@ -87,7 +87,7 @@ fn default_service() {
         .code(2);
 
     // service subcommand can be skipped when connection is known
-    cmd("bite version -h")
+    cmd!("bite version -h")
         .env("BUGBITE_CONNECTION", "gentoo")
         .assert()
         .stdout(predicate::str::contains("bugzilla"))
@@ -149,7 +149,7 @@ async fn doc() {
                     }
 
                     let cmd_str = args.iter().join(" ");
-                    let cmd_result = cmd(cmd_str).assert();
+                    let cmd_result = cmd!("{cmd_str}").assert();
                     let output = cmd_result.get_output();
                     let stderr = std::str::from_utf8(&output.stderr).unwrap().trim();
                     // ignore command errors requiring multiple responses
@@ -172,7 +172,7 @@ async fn doc() {
                         let mut save_args = args.clone();
                         save_args.extend(["-n", "--to", "template"]);
                         let cmd_str = save_args.iter().join(" ");
-                        if cmd(cmd_str).assert().try_success().is_err() {
+                        if cmd!("{cmd_str}").assert().try_success().is_err() {
                             panic!(
                                 "failed saving template: {s}\nfile: {name}, line {}",
                                 lineno + 1
@@ -183,7 +183,7 @@ async fn doc() {
                         let mut load_args = args.clone();
                         load_args.extend(["--from", "template"]);
                         let cmd_str = load_args.iter().join(" ");
-                        if cmd(cmd_str).assert().try_success().is_err() {
+                        if cmd!("{cmd_str}").assert().try_success().is_err() {
                             panic!(
                                 "failed loading template: {s}\nfile: {name}, line {}",
                                 lineno + 1
