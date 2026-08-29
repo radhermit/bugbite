@@ -856,8 +856,8 @@ Values are taken from standard input when `-`.
 
 == Match Operators
 
-Various restrictions can use match operators to alter a value's query
-application. Values with no or unknown operators default to substring matching.
+Various restrictions can use match operators to alter a value's query application.
+Values with no or unknown operators default to case-sensitive substring matching.
 
 .Supported operators:
 - `=~` -- contains case-sensitive substring
