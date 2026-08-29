@@ -1,3 +1,5 @@
+use std::fmt;
+
 use serde::Serialize;
 use serde_json::Value;
 use serde_with::skip_serializing_none;
@@ -66,6 +68,60 @@ impl Request {
             .join(&format!("rest/bug/attachment/{id}"))?;
 
         Ok(url)
+    }
+
+    /// Update the attachment comment.
+    pub fn comment<S>(&mut self, value: S) -> &mut Self
+    where
+        S: fmt::Display,
+    {
+        self.params.comment = Some(value.to_string());
+        self
+    }
+
+    /// Update the attachment description.
+    pub fn description<S>(&mut self, value: S) -> &mut Self
+    where
+        S: fmt::Display,
+    {
+        self.params.description = Some(value.to_string());
+        self
+    }
+
+    /// Update the attachment MIME type.
+    pub fn mime_type<S>(&mut self, value: S) -> &mut Self
+    where
+        S: fmt::Display,
+    {
+        self.params.mime_type = Some(value.to_string());
+        self
+    }
+
+    /// Update the attachment file name.
+    pub fn name<S>(&mut self, value: S) -> &mut Self
+    where
+        S: fmt::Display,
+    {
+        self.params.name = Some(value.to_string());
+        self
+    }
+
+    /// Update the attachment obsolete status.
+    pub fn obsolete(&mut self, value: bool) -> &mut Self {
+        self.params.obsolete = Some(value);
+        self
+    }
+
+    /// Update the attachment patch status.
+    pub fn patch(&mut self, value: bool) -> &mut Self {
+        self.params.patch = Some(value);
+        self
+    }
+
+    /// Update the attachment private status.
+    pub fn private(&mut self, value: bool) -> &mut Self {
+        self.params.private = Some(value);
+        self
     }
 }
 

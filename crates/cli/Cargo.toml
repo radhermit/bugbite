@@ -67,8 +67,10 @@ unicode-segmentation = "1.13.3"
 
 [dev-dependencies]
 assert_cmd = "2.2.2"
+chrono = { version = "0.4.45" }
 ctor = "1.0.13"
 predicates = "3.1.4"
+uuid = { version = "1.26.0", features = ["v4", "fast-rng"] }
 wiremock = { version = "0.6.5" }
 
 [package.metadata.binstall]
