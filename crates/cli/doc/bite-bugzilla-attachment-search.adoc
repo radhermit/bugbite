@@ -1,0 +1,71 @@
+include::{docdir}/common/header.adoc[]
+
+== Name
+
+bite-bugzilla-attachment-search - search attachments
+
+== Synopsis
+
+*bite bugzilla attachment <search|s>* [<options>] [id[,...]] <files>::
+    Search attachments.
+
+*bite bugzilla attachment <search|s>* [-h|--help]::
+    Output help information.
+
+== Description
+
+Search attachments.
+
+include::{docdir}/common/global-options.adoc[]
+
+== Search options
+
+*--json*::
+    Output in JSON format.
+
+include::{docdir}/common/template-options.adoc[]
+
+== Attachment options
+
+*-c, --creator* <value>::
+    Filter by creator.
++
+.Attachments created by user:
+ bite bugzilla search --creator user
+
+*-d, --description* <value>::
+    Filter by description.
+
+*-f, --filename* <value>[,...]::
+    Filter by file name.
+
+*-i, --id* <value>[,...]::
+	Filter by bug ID.
+
+*-m, --mime* <type>::
+    Filter by MIME type.
++
+.Text-based attachments:
+ bite bugzilla attachment search -m '=* text/.+'
+
+*-s, --size* <value>::
+    Filter by size.
+
+*-c, --created* <value>::
+    Filter by creation time.
+
+*-u, --updated* <value>::
+    Filter by update time.
+
+*-o, --is-obsolete* [<bool>]::
+	Filter by obsolete status.
+
+*-p, --is-patch* [<bool>]::
+	Filter by patch status.
+
+*-P, --is-private* [<bool>]::
+    Filter by private status.
+
+== See Also
+
+linkcmd:bite-bugzilla-attachment[1]

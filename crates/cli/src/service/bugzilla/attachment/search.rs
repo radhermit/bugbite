@@ -50,7 +50,7 @@ struct Params {
 
     /// filter by obsolete status
     #[arg(
-        short = 'O',
+        short = 'o',
         long,
         num_args = 0..=1,
         default_missing_value = "true",
