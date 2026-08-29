@@ -6,10 +6,12 @@ use std::str::FromStr;
 use futures_util::Stream;
 use indexmap::IndexSet;
 use itertools::{Either, Itertools};
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::{DeserializeFromStr, SerializeDisplay, skip_serializing_none};
 use strum::{AsRefStr, Display, EnumIter, EnumString};
+use tracing::error;
 use url::Url;
 
 use crate::Error;
@@ -1277,6 +1279,30 @@ impl Match {
 
     fn op(&self) -> MatchOp {
         self.op.unwrap_or_default()
+    }
+
+    pub fn matches<V>(&self, item: V) -> bool
+    where
+        V: AsRef<str>,
+    {
+        use MatchOp::*;
+        let value = &self.value;
+        let item = item.as_ref();
+
+        match self.op {
+            None | Some(CaseSubstring) => value.contains(item),
+            Some(Substring) => value.to_lowercase().contains(&item.to_lowercase()),
+            Some(NotSubstring) => !value.to_lowercase().contains(&item.to_lowercase()),
+            Some(Equals) => value == item,
+            Some(NotEquals) => value != item,
+            Some(val @ (Regexp | NotRegexp)) => match Regex::new(value) {
+                Ok(regex) => regex.is_match(item) && matches!(val, Regexp),
+                Err(e) => {
+                    error!("invalid regex: {value}: {e}");
+                    false
+                }
+            },
+        }
     }
 }
 

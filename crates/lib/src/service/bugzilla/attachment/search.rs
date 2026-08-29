@@ -61,9 +61,21 @@ pub struct Parameters {
 
 impl Parameters {
     fn matches(&self, attachment: &Attachment) -> bool {
-        self.size
-            .as_ref()
-            .is_none_or(|x| x.matches(&attachment.size.as_u64()))
+        // helper closure to evaluate Vec<Vec<search::Match>> filters
+        let matches_text_filters = |filters: &Option<Vec<Vec<search::Match>>>, target: &str| {
+            filters
+                .as_ref()
+                .is_none_or(|values| values.iter().any(|x| x.iter().all(|s| s.matches(target))))
+        };
+
+        matches_text_filters(&self.creator, &attachment.creator)
+            && matches_text_filters(&self.description, &attachment.summary)
+            && matches_text_filters(&self.filename, &attachment.file_name)
+            && matches_text_filters(&self.mime, &attachment.content_type)
+            && self
+                .size
+                .as_ref()
+                .is_none_or(|x| x.matches(&attachment.size.as_u64()))
             && self
                 .created
                 .as_ref()
@@ -72,6 +84,18 @@ impl Parameters {
                 .updated
                 .as_ref()
                 .is_none_or(|x| x.matches(&attachment.updated))
+            && self
+                .is_obsolete
+                .as_ref()
+                .is_none_or(|x| x == &attachment.is_obsolete)
+            && self
+                .is_patch
+                .as_ref()
+                .is_none_or(|x| x == &attachment.is_patch)
+            && self
+                .is_private
+                .as_ref()
+                .is_none_or(|x| x == &attachment.is_private)
     }
 }
 
