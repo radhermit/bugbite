@@ -1296,7 +1296,7 @@ impl Match {
             Some(Equals) => value == item,
             Some(NotEquals) => value != item,
             Some(val @ (Regexp | NotRegexp)) => match Regex::new(value) {
-                Ok(regex) => regex.is_match(item) && matches!(val, Regexp),
+                Ok(regex) => regex.is_match(item) || matches!(val, NotRegexp),
                 Err(e) => {
                     error!("invalid regex: {value}: {e}");
                     false
