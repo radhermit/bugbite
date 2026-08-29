@@ -76,7 +76,7 @@ impl RequestPagedStream for Request {
         }
     }
 
-    async fn send(self) -> crate::Result<Vec<Issue>> {
+    async fn send(self) -> crate::Result<Vec<Self::Item>> {
         let mut url = self.service.config().base.join("issues.json")?;
         let query = self.encode()?;
         url.query_pairs_mut().extend_pairs(query.iter());
