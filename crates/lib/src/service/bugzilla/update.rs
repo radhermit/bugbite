@@ -287,7 +287,7 @@ impl Request {
                 if value.range_or_set.contains(&c.count) {
                     params
                         .comment_is_private
-                        .get_or_insert_with(Default::default)
+                        .get_or_insert_default()
                         .insert(c.id, value.is_private.unwrap_or(!c.is_private));
                 }
             }

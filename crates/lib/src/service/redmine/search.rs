@@ -58,7 +58,7 @@ impl RequestPagedStream for Request {
             self.params
                 .limit
                 .get_or_insert_with(|| self.service.config().max_search_results);
-            self.params.offset.get_or_insert_with(Default::default);
+            self.params.offset.get_or_insert_default();
             self.params.limit
         } else {
             None
@@ -197,11 +197,7 @@ impl Request {
     where
         T: Into<RangeOrValue<u64>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
-        self.params
-            .ids
-            .get_or_insert_with(Default::default)
-            .push(value.into());
+        self.params.ids.get_or_insert_default().push(value.into());
         self
     }
 

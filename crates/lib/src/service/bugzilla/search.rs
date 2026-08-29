@@ -66,7 +66,7 @@ impl RequestPagedStream for Request {
             self.params
                 .limit
                 .get_or_insert_with(|| self.service.config().max_search_results);
-            self.params.offset.get_or_insert_with(Default::default);
+            self.params.offset.get_or_insert_default();
             self.params.limit
         } else {
             None
@@ -574,11 +574,7 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
-        self.params
-            .alias
-            .get_or_insert_with(Default::default)
-            .push(value.into());
+        self.params.alias.get_or_insert_default().push(value.into());
         self
     }
 
@@ -594,11 +590,7 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
-        self.params
-            .flags
-            .get_or_insert_with(Default::default)
-            .push(value.into());
+        self.params.flags.get_or_insert_default().push(value.into());
         self
     }
 
@@ -606,10 +598,9 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .groups
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(value.into());
         self
     }
@@ -618,10 +609,9 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .keywords
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(value.into());
         self
     }
@@ -630,10 +620,9 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .see_also
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(value.into());
         self
     }
@@ -642,11 +631,7 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
-        self.params
-            .tags
-            .get_or_insert_with(Default::default)
-            .push(value.into());
+        self.params.tags.get_or_insert_default().push(value.into());
         self
     }
 
@@ -654,10 +639,9 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .whiteboard
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(value.into());
         self
     }
@@ -666,11 +650,7 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
-        self.params
-            .url
-            .get_or_insert_with(Default::default)
-            .push(value.into());
+        self.params.url.get_or_insert_default().push(value.into());
         self
     }
 
@@ -714,7 +694,7 @@ impl Request {
         let users = users.into_iter().map(|x| x.to_string()).collect();
         self.params
             .changed_by
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(ChangedBy {
                 fields: vec![field.to_string()],
                 users,
@@ -729,7 +709,7 @@ impl Request {
     {
         self.params
             .changed_from
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(ChangedValue {
                 field: field.to_string(),
                 value: value.to_string(),
@@ -744,7 +724,7 @@ impl Request {
     {
         self.params
             .changed_to
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(ChangedValue {
                 field: field.to_string(),
                 value: value.to_string(),
@@ -757,10 +737,9 @@ impl Request {
         I: IntoIterator<Item = T>,
         T: Into<Match>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .assignee
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(values.into_iter().map(Into::into).collect());
         self
     }
@@ -770,10 +749,9 @@ impl Request {
         I: IntoIterator<Item = T>,
         T: Into<Match>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .commenter
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(values.into_iter().map(Into::into).collect());
         self
     }
@@ -782,11 +760,7 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
-        self.params
-            .cc
-            .get_or_insert_with(Default::default)
-            .push(value.into());
+        self.params.cc.get_or_insert_default().push(value.into());
         self
     }
 
@@ -795,10 +769,9 @@ impl Request {
         I: IntoIterator<Item = T>,
         T: Into<Match>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .flagger
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(values.into_iter().map(Into::into).collect());
         self
     }
@@ -807,11 +780,7 @@ impl Request {
     where
         T: Into<ExistsOrValues<Match>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
-        self.params
-            .qa
-            .get_or_insert_with(Default::default)
-            .push(value.into());
+        self.params.qa.get_or_insert_default().push(value.into());
         self
     }
 
@@ -820,10 +789,9 @@ impl Request {
         I: IntoIterator<Item = T>,
         T: Into<Match>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .reporter
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(values.into_iter().map(Into::into).collect());
         self
     }
@@ -867,10 +835,9 @@ impl Request {
     where
         T: Into<ExistsOrValues<RangeOrValue<i64>>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .blocks
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(value.into());
         self
     }
@@ -879,10 +846,9 @@ impl Request {
     where
         T: Into<ExistsOrValues<RangeOrValue<i64>>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .depends
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(value.into());
         self
     }
@@ -891,11 +857,7 @@ impl Request {
     where
         T: Into<ExistsOrValues<RangeOrValue<i64>>>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
-        self.params
-            .ids
-            .get_or_insert_with(Default::default)
-            .push(value.into());
+        self.params.ids.get_or_insert_default().push(value.into());
         self
     }
 
@@ -904,10 +866,9 @@ impl Request {
         I: IntoIterator<Item = T>,
         T: Into<Match>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .priority
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(values.into_iter().map(Into::into).collect());
         self
     }
@@ -917,10 +878,9 @@ impl Request {
         I: IntoIterator<Item = T>,
         T: Into<Match>,
     {
-        // TODO: move to get_or_insert_default() when it is stable
         self.params
             .severity
-            .get_or_insert_with(Default::default)
+            .get_or_insert_default()
             .push(values.into_iter().map(Into::into).collect());
         self
     }
