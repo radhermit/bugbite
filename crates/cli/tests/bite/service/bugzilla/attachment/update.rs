@@ -51,3 +51,18 @@ async fn nonexistent() {
         .stderr(predicate::str::diff("Error: bugzilla: The attachment id 0 is invalid.").trim())
         .failure();
 }
+
+#[tokio::test]
+async fn no_change() {
+    let server = start_server_with_auth().await;
+
+    server
+        .respond(200, TEST_DATA.join("attachment/update/no-change.json"))
+        .await;
+
+    cmd!("bite bugzilla attachment update -d test 1")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}
