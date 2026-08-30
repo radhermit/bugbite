@@ -66,3 +66,18 @@ async fn no_change() {
         .stderr("")
         .success();
 }
+
+#[tokio::test]
+async fn single_change() {
+    let server = start_server_with_auth().await;
+
+    server
+        .respond(200, TEST_DATA.join("attachment/update/single-change.json"))
+        .await;
+
+    cmd!("bite bugzilla attachment update -d new 1")
+        .assert()
+        .stdout("")
+        .stderr("")
+        .success();
+}
