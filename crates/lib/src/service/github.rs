@@ -2,6 +2,7 @@ use std::fmt;
 use std::sync::Arc;
 
 use reqwest::RequestBuilder;
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -155,7 +156,6 @@ impl Github {
 
 impl WebService for Github {
     const API_VERSION: &'static str = "2022-11-28";
-    type Response = serde_json::Value;
 
     fn inject_auth(
         &self,
@@ -165,7 +165,10 @@ impl WebService for Github {
         unimplemented!("authentication unsupported")
     }
 
-    async fn parse_response(&self, _response: reqwest::Response) -> crate::Result<Self::Response> {
+    async fn parse_response<T>(&self, _response: reqwest::Response) -> crate::Result<T>
+    where
+        T: DeserializeOwned,
+    {
         unimplemented!("request parsing unsupported")
     }
 }

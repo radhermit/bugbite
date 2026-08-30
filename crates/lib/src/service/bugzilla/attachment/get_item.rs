@@ -1,4 +1,5 @@
-use serde_json::Value;
+use indexmap::IndexMap;
+use serde::Deserialize;
 use url::Url;
 
 use crate::Error;
@@ -74,6 +75,16 @@ impl Request {
     }
 }
 
+/// Bugzilla REST API response to an attachment get request.
+///
+/// https://bugzilla.readthedocs.io/en/latest/api/core/v1/attachment.html#get-attachment
+#[derive(Deserialize, Debug)]
+struct Response {
+    bugs: IndexMap<u64, Vec<Attachment>>,
+    #[serde(rename = "attachments")]
+    _attachments: IndexMap<u64, Attachment>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<Vec<Attachment>>;
 
@@ -84,35 +95,18 @@ impl RequestSend for Request {
             .get(self.url()?)
             .auth_optional(&self.service);
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let data = data["bugs"].take();
-        let Value::Object(data) = data else {
-            panic!("invalid bugzilla attachment response");
-        };
+        let data: Response = self.service.parse_response(response).await?;
 
         // Bugzilla's response always uses bug IDs even if attachments were requested via
         // alias so we assume the response is in the same order as the request.
         let mut attachments = vec![];
-        for (id, values) in data {
-            let Value::Array(data) = values else {
-                return Err(Error::InvalidResponse("attachment get request".to_string()));
-            };
-
-            let mut bug_attachments = vec![];
-            for attachment in data {
-                // skip deserializing deleted attachments when retrieving data
-                if !self.data || !attachment["data"].is_null() {
-                    let attachment: Attachment =
-                        serde_json::from_value(attachment).map_err(|_| {
-                            Error::InvalidResponse(format!("invalid attachment for bug {id}"))
-                        })?;
-
-                    // conditionally skip obsolete attachments
-                    if self.obsolete || (!attachment.is_obsolete && !attachment.is_deleted()) {
-                        bug_attachments.push(attachment);
-                    }
-                }
-            }
+        for (_, mut bug_attachments) in data.bugs {
+            bug_attachments.retain(|x| {
+                // skip deleted attachments when retrieving data
+                (!self.data || !x.is_deleted()) &&
+                // conditionally skip obsolete attachments
+                (self.obsolete || !x.is_obsolete)
+            });
 
             attachments.push(bug_attachments);
         }

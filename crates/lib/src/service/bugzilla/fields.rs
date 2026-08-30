@@ -1,4 +1,5 @@
-use crate::Error;
+use serde::Deserialize;
+
 use crate::objects::bugzilla::BugzillaField;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{RequestSend, WebService};
@@ -14,6 +15,11 @@ impl Request {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct Response {
+    fields: Vec<BugzillaField>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<BugzillaField>;
 
@@ -21,9 +27,8 @@ impl RequestSend for Request {
         let url = self.service.config().base.join("rest/field/bug")?;
         let request = self.service.client().get(url);
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        serde_json::from_value(data["fields"].take())
-            .map_err(|e| Error::InvalidResponse(format!("failed deserializing fields: {e}")))
+        let data: Response = self.service.parse_response(response).await?;
+        Ok(data.fields)
     }
 }
 

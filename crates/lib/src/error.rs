@@ -7,26 +7,40 @@ pub mod python;
 pub enum Error {
     #[error("authentication required")]
     Auth,
+
     #[error("{0}")]
     Config(String),
+
     #[error("no parameters specified")]
     EmptyParams,
+
+    #[error("client request failed ({0})")]
+    Http(reqwest::StatusCode),
+
     #[error("invalid URL: {0}")]
     InvalidUrl(url::ParseError),
+
     #[error("{0}")]
     InvalidRequest(String),
-    #[error("invalid service response: {0}")]
+
+    #[error("failed to parse response: {0}")]
     InvalidResponse(String),
+
     #[error("{0}")]
     InvalidValue(String),
+
     #[error("{0}")]
     IO(String),
+
     #[error("bugzilla: {message}")]
-    Bugzilla { code: i64, message: String },
+    Bugzilla { code: i32, message: String },
+
     #[error("redmine: {0}")]
     Redmine(String),
+
     #[error("{0}")]
     Request(reqwest::Error),
+
     #[error("request timed out")]
     Timeout,
 }

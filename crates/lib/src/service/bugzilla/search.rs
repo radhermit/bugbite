@@ -8,7 +8,6 @@ use indexmap::IndexSet;
 use itertools::{Either, Itertools};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use serde_with::{DeserializeFromStr, SerializeDisplay, skip_serializing_none};
 use strum::{AsRefStr, Display, EnumIter, EnumString};
 use tracing::error;
@@ -54,6 +53,11 @@ impl Iterator for PagedIterator {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct Response {
+    bugs: Vec<Bug>,
+}
+
 impl RequestPagedStream for Request {
     type Item = Bug;
 
@@ -90,18 +94,8 @@ impl RequestPagedStream for Request {
         url.query_pairs_mut().extend_pairs(query.iter());
         let request = self.service.client().get(url).auth_optional(&self.service);
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let Value::Array(data) = data["bugs"].take() else {
-            return Err(Error::InvalidResponse("search request".to_string()));
-        };
-
-        let mut bugs = vec![];
-        for value in data {
-            let bug = self.service.deserialize_bug(value)?;
-            bugs.push(bug);
-        }
-
-        Ok(bugs)
+        let data: Response = self.service.parse_response(response).await?;
+        Ok(data.bugs)
     }
 }
 
@@ -2154,6 +2148,8 @@ impl ChangeField {
 
 #[cfg(test)]
 mod tests {
+    use std::assert_matches;
+
     use strum::IntoEnumIterator;
 
     use crate::service::bugzilla::GroupField;
@@ -2238,11 +2234,8 @@ mod tests {
             .send()
             .await
             .unwrap_err();
-        assert!(
-            matches!(err, Error::InvalidResponse(_)),
-            "unmatched error: {err:?}"
-        );
-        assert_err_re!(err, "invalid service response");
+        assert_matches!(err, Error::InvalidResponse(_));
+        assert_err_re!(err, "missing field `bugs` at line 3 column 1");
 
         server.reset().await;
 

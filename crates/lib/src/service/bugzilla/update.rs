@@ -5,6 +5,7 @@ use std::str::FromStr;
 use std::{fmt, fs};
 
 use camino::Utf8PathBuf;
+use chrono::prelude::*;
 use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -18,55 +19,6 @@ pub use crate::objects::{SetChange, bugzilla::Flag};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{Contains, InjectAuth, Merge, RequestSend, RequestTemplate, WebService};
-
-/// Changes made to a field.
-#[derive(Deserialize, Debug, Eq, PartialEq, Hash)]
-pub struct FieldChange {
-    #[serde(deserialize_with = "non_empty_str")]
-    added: Option<String>,
-    #[serde(deserialize_with = "non_empty_str")]
-    removed: Option<String>,
-}
-
-impl fmt::Display for FieldChange {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match (self.removed.as_ref(), self.added.as_ref()) {
-            (Some(removed), Some(added)) => write!(f, "{removed} -> {added}"),
-            (Some(removed), None) => write!(f, "-{removed}"),
-            (None, Some(added)) => write!(f, "+{added}"),
-            (None, None) => panic!("invalid FieldChange"),
-        }
-    }
-}
-
-/// Changes made to a bug.
-#[derive(Deserialize, Debug, Eq, PartialEq)]
-pub struct BugChange {
-    id: u64,
-    comment: Option<String>,
-    changes: IndexMap<String, FieldChange>,
-}
-
-impl fmt::Display for BugChange {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "=== Bug #{} ===", self.id)?;
-        write!(f, "--- Updated fields ---")?;
-        if !self.changes.is_empty() {
-            for (name, change) in &self.changes {
-                write!(f, "\n{name}: {change}")?;
-            }
-        } else {
-            write!(f, "\nNone")?;
-        }
-
-        if let Some(comment) = self.comment.as_ref() {
-            write!(f, "\n--- Added comment ---")?;
-            write!(f, "\n{comment}")?;
-        }
-
-        Ok(())
-    }
-}
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub enum RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {
@@ -124,6 +76,68 @@ pub struct Request {
     pub params: Parameters,
 }
 
+/// Changes made to a field.
+#[derive(Deserialize, Debug, Eq, PartialEq, Hash)]
+pub struct FieldChange {
+    #[serde(deserialize_with = "non_empty_str")]
+    added: Option<String>,
+    #[serde(deserialize_with = "non_empty_str")]
+    removed: Option<String>,
+}
+
+impl fmt::Display for FieldChange {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match (self.removed.as_ref(), self.added.as_ref()) {
+            (Some(removed), Some(added)) => write!(f, "{removed} -> {added}"),
+            (Some(removed), None) => write!(f, "-{removed}"),
+            (None, Some(added)) => write!(f, "+{added}"),
+            (None, None) => panic!("invalid FieldChange"),
+        }
+    }
+}
+
+/// Changes made to a bug.
+#[derive(Deserialize, Debug, Eq, PartialEq)]
+pub struct BugChange {
+    id: u64,
+    #[serde(rename = "alias")]
+    _alias: Vec<String>,
+    #[serde(rename = "last_change_time")]
+    _updated: DateTime<Utc>,
+    #[serde(skip)]
+    comment: Option<String>,
+    changes: IndexMap<String, FieldChange>,
+}
+
+impl fmt::Display for BugChange {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "=== Bug #{} ===", self.id)?;
+        write!(f, "--- Updated fields ---")?;
+        if !self.changes.is_empty() {
+            for (name, change) in &self.changes {
+                write!(f, "\n{name}: {change}")?;
+            }
+        } else {
+            write!(f, "\nNone")?;
+        }
+
+        if let Some(comment) = self.comment.as_ref() {
+            write!(f, "\n--- Added comment ---")?;
+            write!(f, "\n{comment}")?;
+        }
+
+        Ok(())
+    }
+}
+
+/// Bugzilla REST API response to a bug update request.
+///
+/// https://bugzilla.readthedocs.io/en/latest/api/core/v1/comment.html#get-comments
+#[derive(Deserialize, Debug)]
+struct Response {
+    bugs: Vec<BugChange>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<BugChange>;
 
@@ -137,16 +151,15 @@ impl RequestSend for Request {
             .json(&params)
             .auth(&self.service)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let data = data["bugs"].take();
-        let mut changes: Vec<BugChange> = serde_json::from_value(data)
-            .map_err(|e| Error::InvalidResponse(format!("failed deserializing changes: {e}")))?;
+        let mut data: Response = self.service.parse_response(response).await?;
+
         if let Some(comment) = &params.comment {
-            for change in changes.iter_mut() {
+            for change in data.bugs.iter_mut() {
                 change.comment = Some(comment.body.to_string());
             }
         }
-        Ok(changes)
+
+        Ok(data.bugs)
     }
 }
 

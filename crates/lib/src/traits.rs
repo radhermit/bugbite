@@ -6,6 +6,7 @@ use async_stream::try_stream;
 use camino::Utf8PathBuf;
 use futures_util::{Stream, StreamExt, TryStreamExt, stream};
 use reqwest::RequestBuilder;
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -198,14 +199,15 @@ impl InjectAuth for RequestBuilder {
 pub(crate) trait WebService: fmt::Display {
     #[allow(dead_code)]
     const API_VERSION: &'static str;
-    type Response;
 
     /// Inject authentication into a request before it's sent.
     fn inject_auth(&self, request: RequestBuilder, required: bool)
     -> crate::Result<RequestBuilder>;
 
     /// Parse a raw response into a service response.
-    async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response>;
+    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
+    where
+        T: DeserializeOwned;
 }
 
 pub trait WebClient {

@@ -1,4 +1,4 @@
-use serde_json::Value;
+use serde::Deserialize;
 use url::Url;
 
 use crate::Error;
@@ -80,6 +80,11 @@ impl Request {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct Response {
+    users: Vec<User>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<User>;
 
@@ -90,19 +95,9 @@ impl RequestSend for Request {
             .get(self.url()?)
             .auth_optional(&self.service);
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let Value::Array(data) = data["users"].take() else {
-            return Err(Error::InvalidResponse("user get request".to_string()));
-        };
+        let data: Response = self.service.parse_response(response).await?;
 
-        let mut users = vec![];
-        for value in data {
-            let user: User = serde_json::from_value(value)
-                .map_err(|e| Error::InvalidResponse(format!("failed deserializing user: {e}")))?;
-            users.push(user);
-        }
-
-        Ok(users)
+        Ok(data.users)
     }
 }
 

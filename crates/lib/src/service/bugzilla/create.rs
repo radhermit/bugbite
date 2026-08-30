@@ -18,6 +18,11 @@ pub struct Request {
     pub params: Parameters,
 }
 
+#[derive(Deserialize, Debug)]
+struct Response {
+    id: u64,
+}
+
 impl RequestSend for Request {
     type Output = u64;
 
@@ -31,9 +36,8 @@ impl RequestSend for Request {
             .json(&params)
             .auth(&self.service)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        serde_json::from_value(data["id"].take())
-            .map_err(|e| Error::InvalidResponse(format!("failed deserializing id: {e}")))
+        let data: Response = self.service.parse_response(response).await?;
+        Ok(data.id)
     }
 }
 

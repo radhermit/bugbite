@@ -1,6 +1,6 @@
+use indexmap::IndexMap;
 use itertools::{Either, Itertools};
-use serde::Serialize;
-use serde_json::Value;
+use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use url::Url;
 
@@ -73,6 +73,26 @@ impl Request {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct Change {
+    #[serde(rename = "added")]
+    _added: Option<String>,
+    #[serde(rename = "removed")]
+    _removed: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+struct UserChange {
+    id: u64,
+    #[serde(rename = "changes")]
+    _changes: IndexMap<String, Change>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Response {
+    users: Vec<UserChange>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<u64>;
 
@@ -86,17 +106,11 @@ impl RequestSend for Request {
             .json(&params)
             .auth(&self.service)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let Value::Array(data) = data["users"].take() else {
-            return Err(Error::InvalidResponse("user update request".to_string()));
-        };
+        let data: Response = self.service.parse_response(response).await?;
 
         let mut ids = vec![];
-        for mut change in data {
-            let id = serde_json::from_value(change["id"].take()).map_err(|e| {
-                Error::InvalidResponse(format!("failed deserializing changes: {e}"))
-            })?;
-            ids.push(id);
+        for user in data.users {
+            ids.push(user.id);
         }
 
         Ok(ids)

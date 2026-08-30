@@ -1,4 +1,5 @@
-use serde_json::Value;
+use indexmap::IndexMap;
+use serde::Deserialize;
 use url::Url;
 
 use crate::Error;
@@ -72,6 +73,21 @@ impl Request {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct BugComments {
+    comments: Vec<Comment>,
+}
+
+/// Bugzilla REST API response to a comment get request.
+///
+/// https://bugzilla.readthedocs.io/en/latest/api/core/v1/comment.html#get-comments
+#[derive(Deserialize, Debug)]
+struct Response {
+    bugs: IndexMap<u64, BugComments>,
+    #[serde(rename = "comments")]
+    _comments: IndexMap<u64, Comment>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<Vec<Comment>>;
 
@@ -82,34 +98,17 @@ impl RequestSend for Request {
             .get(self.url()?)
             .auth_optional(&self.service);
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let data = data["bugs"].take();
-        let serde_json::value::Value::Object(data) = data else {
-            return Err(Error::InvalidResponse("comment request".to_string()));
-        };
+        let data: Response = self.service.parse_response(response).await?;
 
         // Bugzilla's response always uses bug IDs even if attachments were requested via
         // alias so we assume the response is in the same order as the request.
         let mut comments = vec![];
-
-        for (_id, mut data) in data {
-            let Value::Array(data) = data["comments"].take() else {
-                return Err(Error::InvalidResponse("comment request".to_string()));
-            };
-
-            // deserialize and filter comments
-            let mut bug_comments = vec![];
-            for value in data {
-                let comment: Comment = serde_json::from_value(value).map_err(|e| {
-                    Error::InvalidResponse(format!("failed deserializing comment: {e}"))
-                })?;
-                if self.params.filter(&comment) {
-                    bug_comments.push(comment);
-                }
-            }
-
-            comments.push(bug_comments);
+        for mut bug in data.bugs.into_values() {
+            // filter comments
+            bug.comments.retain(|x| self.params.filter(x));
+            comments.push(bug.comments);
         }
+
         Ok(comments)
     }
 }

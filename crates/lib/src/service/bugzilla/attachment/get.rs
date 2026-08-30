@@ -1,3 +1,5 @@
+use indexmap::IndexMap;
+use serde::Deserialize;
 use url::Url;
 
 use crate::Error;
@@ -62,6 +64,16 @@ impl Request {
     }
 }
 
+/// Bugzilla REST API response to an attachment get request.
+///
+/// https://bugzilla.readthedocs.io/en/latest/api/core/v1/attachment.html#get-attachment
+#[derive(Deserialize, Debug)]
+struct Response {
+    #[serde(rename = "bugs")]
+    _bugs: IndexMap<u64, Vec<Attachment>>,
+    attachments: IndexMap<u64, Attachment>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<Attachment>;
 
@@ -72,26 +84,19 @@ impl RequestSend for Request {
             .get(self.url()?)
             .auth_optional(&self.service);
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let mut data = data["attachments"].take();
+        let mut data: Response = self.service.parse_response(response).await?;
 
         let mut attachments = vec![];
-        for id in self.ids.iter().map(|x| x.to_string()) {
-            let data = data[&id].take();
-
+        for id in &self.ids {
             // bugzilla doesn't return errors for nonexistent attachment IDs
-            if data.is_null() {
+            let Some(attachment) = data.attachments.swap_remove(id) else {
                 return Err(Error::InvalidValue(format!("nonexistent attachment: {id}")));
-            }
+            };
 
             // bugzilla doesn't return errors for deleted attachments
-            if self.data && data["data"].is_null() {
+            if self.data && attachment.is_deleted() {
                 return Err(Error::InvalidValue(format!("deleted attachment: {id}")));
             }
-
-            let attachment = serde_json::from_value(data).map_err(|_| {
-                Error::InvalidResponse(format!("failed deserializing attachment: {id}"))
-            })?;
 
             attachments.push(attachment);
         }
@@ -146,7 +151,10 @@ mod tests {
             .await;
         let err = service.attachment_get([123]).send().await.unwrap_err();
         assert_matches!(err, Error::InvalidResponse(_));
-        assert_err_re!(err, "failed deserializing attachment: 123");
+        assert_err_re!(
+            err,
+            "invalid type: boolean `false`, expected an integer 0 or 1"
+        );
 
         server.reset().await;
 

@@ -1,4 +1,4 @@
-use serde_json::Value;
+use serde::Deserialize;
 use url::Url;
 
 use crate::Error;
@@ -84,6 +84,11 @@ impl Request {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct Response {
+    bugs: Vec<Bug>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<Bug>;
 
@@ -100,10 +105,7 @@ impl RequestSend for Request {
         let history = self.history.as_ref().map(|r| r.send());
 
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let Value::Array(data) = data["bugs"].take() else {
-            return Err(Error::InvalidResponse("get request".to_string()));
-        };
+        let data: Response = self.service.parse_response(response).await?;
 
         // parse data requests
         let mut attachments = match attachments {
@@ -120,8 +122,7 @@ impl RequestSend for Request {
         };
 
         let mut bugs = vec![];
-        for value in data {
-            let mut bug = self.service.deserialize_bug(value)?;
+        for mut bug in data.bugs {
             bug.attachments = attachments.next().unwrap_or_default();
             bug.comments = comments.next().unwrap_or_default();
             bug.history = history.next().unwrap_or_default();
@@ -157,21 +158,15 @@ mod tests {
             .respond(404, path.join("errors/nonexistent-bug.json"))
             .await;
         let err = service.get([1]).send().await.unwrap_err();
-        assert!(
-            matches!(err, Error::Bugzilla { code: 101, .. }),
-            "unmatched error: {err:?}"
-        );
+        assert_matches!(err, Error::Bugzilla { code: 101, .. });
 
         server.reset().await;
 
         // invalid response
         server.respond(200, path.join("get/invalid.json")).await;
         let err = service.get([1]).send().await.unwrap_err();
-        assert!(
-            matches!(err, Error::InvalidResponse(_)),
-            "unmatched error: {err:?}"
-        );
-        assert_err_re!(err, "invalid service response");
+        assert_matches!(err, Error::InvalidResponse(_));
+        assert_err_re!(err, "missing field `bugs` at line 3 column 1");
 
         server.reset().await;
 

@@ -1,4 +1,4 @@
-use serde_json::Value;
+use serde::Deserialize;
 use url::Url;
 
 use crate::Error;
@@ -67,6 +67,23 @@ impl Request {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct BugHistory {
+    #[serde(rename = "id")]
+    _id: u64,
+    #[serde(rename = "alias")]
+    _alias: Vec<String>,
+    history: Vec<Event>,
+}
+
+/// Bugzilla REST API response to a comment get request.
+///
+/// https://bugzilla.readthedocs.io/en/latest/api/core/v1/comment.html#get-comments
+#[derive(Deserialize, Debug)]
+struct Response {
+    bugs: Vec<BugHistory>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<Vec<Event>>;
 
@@ -77,30 +94,13 @@ impl RequestSend for Request {
             .get(self.url()?)
             .auth_optional(&self.service);
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let Value::Array(bugs) = data["bugs"].take() else {
-            return Err(Error::InvalidResponse("history request".to_string()));
-        };
+        let data: Response = self.service.parse_response(response).await?;
 
         let mut history = vec![];
-
-        for mut bug in bugs {
-            let Value::Array(data) = bug["history"].take() else {
-                return Err(Error::InvalidResponse("history request".to_string()));
-            };
-
-            // deserialize and filter events
-            let mut bug_history = vec![];
-            for value in data {
-                let event: Event = serde_json::from_value(value).map_err(|e| {
-                    Error::InvalidResponse(format!("failed deserializing event: {e}"))
-                })?;
-                if self.params.filter(&event) {
-                    bug_history.push(event);
-                }
-            }
-
-            history.push(bug_history);
+        for mut bug in data.bugs {
+            // filter events
+            bug.history.retain(|x| self.params.filter(x));
+            history.push(bug.history);
         }
 
         Ok(history)

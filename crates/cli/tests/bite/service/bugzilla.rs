@@ -98,7 +98,7 @@ async fn proxy() {
             .args(["get", "1"])
             .assert()
             .stdout("")
-            .stderr(predicate::str::diff("Error: HTTP status client error (404 Not Found)").trim())
+            .stderr(predicate::str::diff("Error: client request failed (404 Not Found)").trim())
             .failure();
 
         proxy.respond(200, TEST_DATA.join("search/ids.json")).await;

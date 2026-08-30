@@ -1,18 +1,20 @@
 use std::collections::HashSet;
 use std::fmt;
-use std::str::FromStr;
+use std::str::{self, FromStr};
 use std::sync::{Arc, LazyLock};
 
-use indexmap::{IndexMap, IndexSet};
+use indexmap::IndexSet;
 use reqwest::RequestBuilder;
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{Display, EnumIter, EnumString, IntoEnumIterator, VariantNames};
-use tracing::{debug, trace};
+use tracing::{Level, debug, enabled, trace};
 use url::Url;
 
 use crate::Error;
-use crate::objects::bugzilla::{Bug, BugzillaField};
+use crate::objects::bugzilla::BugzillaField;
 use crate::traits::{Api, Merge, WebClient, WebService};
 
 use super::{ClientParameters, ServiceKind};
@@ -103,7 +105,7 @@ impl WebClient for Config {
 struct Service {
     client: reqwest::Client,
     config: Config,
-    cache: ServiceCache,
+    _cache: ServiceCache,
 }
 
 #[derive(Debug)]
@@ -141,7 +143,7 @@ impl ServiceBuilder {
         let client = self.config.client.build()?;
         Ok(Bugzilla(Arc::new(Service {
             config: self.config,
-            cache: Default::default(),
+            _cache: Default::default(),
             client,
         })))
     }
@@ -201,32 +203,6 @@ impl Bugzilla {
     pub fn item_url<I: fmt::Display>(&self, id: I) -> String {
         let base = self.base().as_str().trim_end_matches('/');
         format!("{base}/show_bug.cgi?id={id}")
-    }
-
-    /// Deserialize raw bug data into a [`Bug`] object.
-    fn deserialize_bug(&self, mut value: serde_json::Value) -> crate::Result<Bug> {
-        let mut custom_fields = IndexMap::new();
-        if let Some(map) = value.as_object_mut() {
-            for field in &self.0.cache.custom_fields {
-                let Some(value) = map.remove(&field.name.id) else {
-                    continue;
-                };
-
-                // TODO: handle different custom field value types
-                let serde_json::Value::String(value) = value else {
-                    continue;
-                };
-
-                if !UNSET_VALUES.contains(&value) {
-                    custom_fields.insert(field.name.clone(), value);
-                }
-            }
-        }
-
-        let mut bug: Bug = serde_json::from_value(value)
-            .map_err(|e| Error::InvalidResponse(format!("failed deserializing bug: {e}")))?;
-        bug.custom_fields = custom_fields;
-        Ok(bug)
     }
 
     /// Substitute user alias for matching value.
@@ -371,24 +347,28 @@ impl Bugzilla {
     }
 }
 
-/// Return a bugzilla error if one is returned in the response data.
-macro_rules! return_if_error {
-    ($data:expr) => {{
-        if $data.get("error").is_some() {
-            let code = $data["code"].as_i64().unwrap_or_default();
-            let message = if let Some(value) = $data["message"].as_str() {
-                value.to_string()
-            } else {
-                format!("unknown error: {code}")
-            };
-            return Err(Error::Bugzilla { code, message });
+/// Bugzilla REST API error response.
+#[derive(Deserialize, Debug)]
+struct ApiErrorResponse {
+    error: bool,
+    message: String,
+    code: i32,
+}
+
+impl From<ApiErrorResponse> for Error {
+    fn from(value: ApiErrorResponse) -> Self {
+        // error should always be set to true for errors
+        debug_assert!(value.error);
+
+        Self::Bugzilla {
+            code: value.code,
+            message: value.message,
         }
-    }};
+    }
 }
 
 impl WebService for Bugzilla {
     const API_VERSION: &'static str = "v1";
-    type Response = serde_json::Value;
 
     fn inject_auth(
         &self,
@@ -407,25 +387,47 @@ impl WebService for Bugzilla {
         }
     }
 
-    async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response> {
+    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
+    where
+        T: DeserializeOwned,
+    {
         trace!("{response:?}");
 
-        match response.error_for_status_ref() {
-            Ok(_) => {
-                let data: serde_json::Value = response.json().await?;
-                debug!(
-                    "response data:\n{}",
-                    serde_json::to_string_pretty(&data).unwrap()
-                );
-                return_if_error!(&data);
-                Ok(data)
+        let status = response.status();
+        let data = response.bytes().await?;
+
+        // output raw response data
+        if enabled!(Level::DEBUG) {
+            let data = if let Ok(value) = serde_json::from_slice::<Value>(&data) {
+                serde_json::to_string_pretty(&value).unwrap()
+            } else {
+                String::from_utf8_lossy(&data).to_string()
+            };
+
+            debug!("response data:\n{data}");
+        }
+
+        if !status.is_success() {
+            // handle HTTP error codes
+            if let Ok(error) = serde_json::from_slice::<ApiErrorResponse>(&data) {
+                // Bugzilla returned error
+                Err(error.into())
+            } else {
+                Err(Error::Http(status))
             }
-            Err(e) => {
-                if let Ok(data) = response.json::<serde_json::Value>().await {
-                    debug!("error:\n{}", serde_json::to_string_pretty(&data).unwrap());
-                    return_if_error!(&data);
+        } else {
+            // handle parsing failures mapping them to JSON paths
+            let deserializer = &mut serde_json::Deserializer::from_slice(&data);
+            match serde_path_to_error::deserialize(deserializer) {
+                Ok(data) => Ok(data),
+                Err(e) => {
+                    if let Ok(error) = serde_json::from_slice::<ApiErrorResponse>(&data) {
+                        // Bugzilla returned error for non-error response
+                        Err(error.into())
+                    } else {
+                        Err(Error::InvalidResponse(e.to_string()))
+                    }
                 }
-                Err(e.into())
             }
         }
     }

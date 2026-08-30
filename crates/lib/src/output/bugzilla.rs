@@ -146,12 +146,12 @@ impl Render for Bug {
         }
 
         // TODO: handle different custom field value types
-        for (name, value) in &self.custom_fields {
-            let options = textwrap::Options::new(width - 15).subsequent_indent(&INDENT);
-            let wrapped = textwrap::wrap(value, &options);
-            let data = wrapped.iter().join("\n");
-            writeln!(f, "{name:<12} : {data}")?;
-        }
+        // for (name, value) in &self.custom_fields {
+        //     let options = textwrap::Options::new(width - 15).subsequent_indent(&INDENT);
+        //     let wrapped = textwrap::wrap(value, &options);
+        //     let data = wrapped.iter().join("\n");
+        //     writeln!(f, "{name:<12} : {data}")?;
+        // }
 
         if !self.comments.is_empty() {
             writeln!(f, "{:<12} : {}", "Comments", self.comments.len())?;

@@ -2,9 +2,10 @@ use std::fmt;
 use std::sync::{Arc, OnceLock};
 
 use reqwest::RequestBuilder;
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, VariantNames};
-use tracing::{debug, trace};
+use tracing::{Level, debug, enabled, trace};
 use url::Url;
 
 use crate::Error;
@@ -188,7 +189,6 @@ impl Redmine {
 
 impl WebService for Redmine {
     const API_VERSION: &'static str = "5.1";
-    type Response = serde_json::Value;
 
     fn inject_auth(
         &self,
@@ -207,30 +207,45 @@ impl WebService for Redmine {
         }
     }
 
-    async fn parse_response(&self, response: reqwest::Response) -> crate::Result<Self::Response> {
+    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
+    where
+        T: DeserializeOwned,
+    {
         trace!("{response:?}");
+
         match response.error_for_status_ref() {
             Ok(_) => {
-                let mut data: serde_json::Value = response.json().await?;
-                debug!(
-                    "response data:\n{}",
-                    serde_json::to_string_pretty(&data).unwrap()
-                );
-                let errors = data["errors"].take();
-                if !errors.is_null() {
-                    let errors: Vec<_> = serde_json::from_value(errors).map_err(|e| {
-                        Error::InvalidValue(format!("failed deserializing errors: {e}"))
-                    })?;
-                    let error = errors.into_iter().next().unwrap();
-                    Err(Error::Redmine(error))
+                if enabled!(Level::DEBUG) {
+                    let data = response.text().await?;
+                    if let Ok(mut value) = serde_json::from_str::<serde_json::Value>(&data) {
+                        debug!(
+                            "response data:\n{}",
+                            serde_json::to_string_pretty(&value).unwrap()
+                        );
+                        let errors = value["errors"].take();
+                        if !errors.is_null() {
+                            let errors: Vec<_> = serde_json::from_value(errors).map_err(|e| {
+                                Error::InvalidValue(format!("failed deserializing errors: {e}"))
+                            })?;
+                            let error = errors.into_iter().next().unwrap();
+                            Err(Error::Redmine(error))
+                        } else {
+                            serde_json::from_value(value).map_err(|e| {
+                                Error::InvalidValue(format!("failed parsing data: {e}"))
+                            })
+                        }
+                    } else {
+                        debug!("response data (raw string):\n{data}");
+                        Err(Error::InvalidValue("invalid JSON".to_string()))
+                    }
                 } else {
-                    Ok(data)
+                    Ok(response.json().await?)
                 }
             }
             Err(e) => {
-                if let Ok(mut data) = response.json::<serde_json::Value>().await {
-                    debug!("error:\n{}", serde_json::to_string_pretty(&data).unwrap());
-                    let errors = data["errors"].take();
+                if let Ok(mut value) = response.json::<serde_json::Value>().await {
+                    debug!("error:\n{}", serde_json::to_string_pretty(&value).unwrap());
+                    let errors = value["errors"].take();
                     if !errors.is_null() {
                         let errors: Vec<_> = serde_json::from_value(errors).map_err(|e| {
                             Error::InvalidValue(format!("failed deserializing errors: {e}"))

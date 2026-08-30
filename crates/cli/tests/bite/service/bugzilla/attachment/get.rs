@@ -34,7 +34,7 @@ fn required_args() {
 async fn invalid_ids() {
     let server = start_server().await;
     server
-        .respond(200, TEST_DATA.join("attachment/get/single-plain-text.json"))
+        .respond(200, TEST_DATA.join("attachment/get/nonexistent.json"))
         .await;
 
     // string IDs only work with -i/--item-ids

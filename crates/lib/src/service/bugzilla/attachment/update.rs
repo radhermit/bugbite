@@ -1,12 +1,14 @@
 use std::fmt;
 
-use serde::Serialize;
-use serde_json::Value;
-use serde_with::skip_serializing_none;
+use chrono::prelude::*;
+use indexmap::IndexMap;
+use serde::{Deserialize, Serialize};
+use serde_with::{serde_as, skip_serializing_none};
 use url::Url;
 
 use crate::Error;
 use crate::objects::bugzilla::Flag;
+use crate::serde::non_empty_str;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, RequestSend, WebService};
 
@@ -125,6 +127,40 @@ impl Request {
     }
 }
 
+#[serde_as]
+#[derive(Deserialize, Debug)]
+struct Change {
+    #[serde(deserialize_with = "non_empty_str")]
+    #[serde(rename = "added")]
+    _added: Option<String>,
+
+    #[serde(deserialize_with = "non_empty_str")]
+    #[serde(rename = "removed")]
+    _removed: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+struct AttachmentChanges {
+    /// Attachment ID
+    id: u64,
+
+    /// Attachment update time
+    #[serde(rename = "last_change_time")]
+    _updated: DateTime<Utc>,
+
+    /// Attachment changes made
+    #[serde(rename = "changes")]
+    _changes: IndexMap<String, Change>,
+}
+
+/// Bugzilla REST API response to an attachment update request.
+///
+/// https://bugzilla.readthedocs.io/en/latest/api/core/v1/attachment.html#update-attachment
+#[derive(Deserialize, Debug)]
+struct Response {
+    attachments: Vec<AttachmentChanges>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<u64>;
 
@@ -138,19 +174,11 @@ impl RequestSend for Request {
             .json(&params)
             .auth(&self.service)?;
         let response = request.send().await?;
-        let mut data = self.service.parse_response(response).await?;
-        let Value::Array(data) = data["attachments"].take() else {
-            return Err(Error::InvalidResponse(
-                "attachment update request".to_string(),
-            ));
-        };
+        let data: Response = self.service.parse_response(response).await?;
 
         let mut ids = vec![];
-        for mut change in data {
-            let id = serde_json::from_value(change["id"].take()).map_err(|e| {
-                Error::InvalidResponse(format!("failed deserializing changes: {e}"))
-            })?;
-            ids.push(id);
+        for change in data.attachments {
+            ids.push(change.id);
         }
 
         Ok(ids)

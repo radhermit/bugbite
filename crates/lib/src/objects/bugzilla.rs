@@ -362,8 +362,9 @@ pub struct Bug {
     pub attachments: Vec<Attachment>,
     #[serde(skip)]
     pub history: Vec<Event>,
-    #[serde(skip)]
-    pub custom_fields: IndexMap<BugzillaFieldName, String>,
+
+    #[serde(flatten)]
+    pub custom_fields: IndexMap<String, serde_json::Value>,
 }
 
 impl Bug {

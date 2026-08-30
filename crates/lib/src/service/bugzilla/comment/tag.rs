@@ -137,9 +137,7 @@ impl RequestSend for Request {
         let mut tags = vec![];
         for request in requests {
             let response = request.await?;
-            let data = self.service.parse_response(response).await?;
-            let comment_tags: Vec<String> = serde_json::from_value(data)
-                .map_err(|e| Error::InvalidResponse(format!("tag request: {e}")))?;
+            let comment_tags = self.service.parse_response(response).await?;
             tags.push(comment_tags);
         }
 

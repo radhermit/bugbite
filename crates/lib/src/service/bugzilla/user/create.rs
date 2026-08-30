@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use url::Url;
 
@@ -64,6 +64,11 @@ struct RequestUser<'a> {
     password: Option<&'a str>,
 }
 
+#[derive(Deserialize, Debug)]
+struct Response {
+    id: u64,
+}
+
 impl RequestSend for Request {
     type Output = Vec<u64>;
 
@@ -89,11 +94,8 @@ impl RequestSend for Request {
         let mut user_ids = vec![];
         for future in futures {
             let response = future.await?;
-            let mut data = self.service.parse_response(response).await?;
-            let id = data["id"].take();
-            let id = serde_json::from_value(id)
-                .map_err(|e| Error::InvalidResponse(format!("failed deserializing id: {e}")))?;
-            user_ids.push(id);
+            let data: Response = self.service.parse_response(response).await?;
+            user_ids.push(data.id);
         }
 
         Ok(user_ids)

@@ -6,7 +6,7 @@ use byte_unit::Byte;
 use camino::{Utf8Path, Utf8PathBuf};
 use camino_tempfile::tempdir;
 use itertools::Itertools;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString, VariantNames};
 use url::Url;
@@ -399,6 +399,14 @@ impl Request {
     }
 }
 
+/// Bugzilla REST API response to an attachment create request.
+///
+/// https://bugzilla.readthedocs.io/en/latest/api/core/v1/attachment.html#create-attachment
+#[derive(Deserialize, Debug)]
+struct Response {
+    ids: Vec<u64>,
+}
+
 impl RequestSend for Request {
     type Output = Vec<Vec<u64>>;
 
@@ -431,11 +439,11 @@ impl RequestSend for Request {
         let mut attachment_ids = vec![];
         for future in futures {
             let response = future.await?;
-            let mut data = self.service.parse_response(response).await?;
-            let data = data["ids"].take();
-            let ids = serde_json::from_value(data)
-                .map_err(|e| Error::InvalidResponse(format!("failed deserializing ids: {e}")))?;
-            attachment_ids.push(ids);
+            let data: Response =
+                self.service.parse_response(response).await.map_err(|e| {
+                    Error::InvalidResponse(format!("attachment create request: {e}"))
+                })?;
+            attachment_ids.push(data.ids);
         }
 
         Ok(attachment_ids)
