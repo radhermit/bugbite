@@ -1,0 +1,6 @@
+{
+  "code": 32000,
+  "documentation": "https://bugzilla.readthedocs.org/en/5.0/api/",
+  "error": true,
+  "message": "The attachment id 0 is invalid."
+}

@@ -36,3 +36,18 @@ async fn auth_required() {
         .stderr(predicate::str::diff("Error: authentication required").trim())
         .failure();
 }
+
+#[tokio::test]
+async fn nonexistent() {
+    let server = start_server_with_auth().await;
+
+    server
+        .respond(400, TEST_DATA.join("attachment/update/nonexistent.json"))
+        .await;
+
+    cmd!("bite bugzilla attachment update -d test 0")
+        .assert()
+        .stdout("")
+        .stderr(predicate::str::diff("Error: bugzilla: The attachment id 0 is invalid.").trim())
+        .failure();
+}
