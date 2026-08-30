@@ -4,7 +4,7 @@ use url::Url;
 use crate::Error;
 use crate::objects::bugzilla::User;
 use crate::service::bugzilla::Bugzilla;
-use crate::traits::{InjectAuth, RequestSend, WebService};
+use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 #[derive(Debug)]
 pub struct Request {
@@ -96,7 +96,6 @@ impl RequestSend for Request {
             .auth_optional(&self.service);
         let response = request.send().await?;
         let data: Response = self.service.parse_response(response).await?;
-
         Ok(data.users)
     }
 }

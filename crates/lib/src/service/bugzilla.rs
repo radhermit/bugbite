@@ -7,15 +7,13 @@ use indexmap::IndexSet;
 use reqwest::RequestBuilder;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 use strum::{Display, EnumIter, EnumString, IntoEnumIterator, VariantNames};
-use tracing::{Level, debug, enabled, trace};
 use url::Url;
 
 use crate::Error;
 use crate::objects::bugzilla::BugzillaField;
-use crate::traits::{Api, Merge, WebClient, WebService};
+use crate::traits::{Api, JsonResponse, Merge, ParseResponse, WebClient, WebService};
 
 use super::{ClientParameters, ServiceKind};
 
@@ -349,21 +347,33 @@ impl Bugzilla {
 
 /// Bugzilla REST API error response.
 #[derive(Deserialize, Debug)]
-struct ApiErrorResponse {
-    error: bool,
-    message: String,
-    code: i32,
+pub struct ServiceError {
+    pub message: String,
+    pub code: i32,
 }
 
-impl From<ApiErrorResponse> for Error {
-    fn from(value: ApiErrorResponse) -> Self {
-        // error should always be set to true for errors
-        debug_assert!(value.error);
+impl From<ServiceError> for Error {
+    fn from(value: ServiceError) -> Self {
+        Self::Service(super::ServiceError::Bugzilla(value))
+    }
+}
 
-        Self::Bugzilla {
-            code: value.code,
-            message: value.message,
-        }
+impl fmt::Display for ServiceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl JsonResponse for Bugzilla {}
+
+impl ParseResponse for Bugzilla {
+    type ServiceError = ServiceError;
+
+    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        self.parse_json(response).await
     }
 }
 
@@ -384,51 +394,6 @@ impl WebService for Bugzilla {
             Ok(request)
         } else {
             Err(Error::Auth)
-        }
-    }
-
-    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        trace!("{response:?}");
-
-        let status = response.status();
-        let data = response.bytes().await?;
-
-        // output raw response data
-        if enabled!(Level::DEBUG) {
-            let data = if let Ok(value) = serde_json::from_slice::<Value>(&data) {
-                serde_json::to_string_pretty(&value).unwrap()
-            } else {
-                String::from_utf8_lossy(&data).to_string()
-            };
-
-            debug!("response data:\n{data}");
-        }
-
-        if !status.is_success() {
-            // handle HTTP error codes
-            if let Ok(error) = serde_json::from_slice::<ApiErrorResponse>(&data) {
-                // Bugzilla returned error
-                Err(error.into())
-            } else {
-                Err(Error::Http(status))
-            }
-        } else {
-            // handle parsing failures mapping them to JSON paths
-            let deserializer = &mut serde_json::Deserializer::from_slice(&data);
-            match serde_path_to_error::deserialize(deserializer) {
-                Ok(data) => Ok(data),
-                Err(e) => {
-                    if let Ok(error) = serde_json::from_slice::<ApiErrorResponse>(&data) {
-                        // Bugzilla returned error for non-error response
-                        Err(error.into())
-                    } else {
-                        Err(Error::InvalidResponse(e.to_string()))
-                    }
-                }
-            }
         }
     }
 }

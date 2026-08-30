@@ -1,15 +1,15 @@
 use std::fmt;
 use std::sync::{Arc, OnceLock};
 
+use itertools::Itertools;
 use reqwest::RequestBuilder;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, VariantNames};
-use tracing::{Level, debug, enabled, trace};
 use url::Url;
 
 use crate::Error;
-use crate::traits::{Merge, WebClient, WebService};
+use crate::traits::{JsonResponse, Merge, ParseResponse, WebClient, WebService};
 
 use super::{ClientParameters, ServiceKind};
 
@@ -187,6 +187,46 @@ impl Redmine {
     }
 }
 
+/// Redmine REST API error response.
+#[derive(Deserialize, Debug)]
+pub struct ServiceError {
+    pub errors: Vec<String>,
+}
+
+impl From<ServiceError> for Error {
+    fn from(value: ServiceError) -> Self {
+        Self::Service(super::ServiceError::Redmine(value))
+    }
+}
+
+impl fmt::Display for ServiceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let errors = self
+            .errors
+            .iter()
+            .map(|msg| format!("  - {msg}"))
+            .join("\n");
+
+        write!(
+            f,
+            "server rejected the request with these violations:\n{errors}"
+        )
+    }
+}
+
+impl JsonResponse for Redmine {}
+
+impl ParseResponse for Redmine {
+    type ServiceError = ServiceError;
+
+    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        self.parse_json(response).await
+    }
+}
+
 impl WebService for Redmine {
     const API_VERSION: &'static str = "5.1";
 
@@ -204,58 +244,6 @@ impl WebService for Redmine {
             Ok(request)
         } else {
             Err(Error::Auth)
-        }
-    }
-
-    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        trace!("{response:?}");
-
-        match response.error_for_status_ref() {
-            Ok(_) => {
-                if enabled!(Level::DEBUG) {
-                    let data = response.text().await?;
-                    if let Ok(mut value) = serde_json::from_str::<serde_json::Value>(&data) {
-                        debug!(
-                            "response data:\n{}",
-                            serde_json::to_string_pretty(&value).unwrap()
-                        );
-                        let errors = value["errors"].take();
-                        if !errors.is_null() {
-                            let errors: Vec<_> = serde_json::from_value(errors).map_err(|e| {
-                                Error::InvalidValue(format!("failed deserializing errors: {e}"))
-                            })?;
-                            let error = errors.into_iter().next().unwrap();
-                            Err(Error::Redmine(error))
-                        } else {
-                            serde_json::from_value(value).map_err(|e| {
-                                Error::InvalidValue(format!("failed parsing data: {e}"))
-                            })
-                        }
-                    } else {
-                        debug!("response data (raw string):\n{data}");
-                        Err(Error::InvalidValue("invalid JSON".to_string()))
-                    }
-                } else {
-                    Ok(response.json().await?)
-                }
-            }
-            Err(e) => {
-                if let Ok(mut value) = response.json::<serde_json::Value>().await {
-                    debug!("error:\n{}", serde_json::to_string_pretty(&value).unwrap());
-                    let errors = value["errors"].take();
-                    if !errors.is_null() {
-                        let errors: Vec<_> = serde_json::from_value(errors).map_err(|e| {
-                            Error::InvalidValue(format!("failed deserializing errors: {e}"))
-                        })?;
-                        let error = errors.into_iter().next().unwrap();
-                        return Err(Error::Redmine(error));
-                    }
-                }
-                Err(e.into())
-            }
         }
     }
 }

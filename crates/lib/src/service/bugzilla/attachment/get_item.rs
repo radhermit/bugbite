@@ -5,7 +5,7 @@ use url::Url;
 use crate::Error;
 use crate::objects::bugzilla::Attachment;
 use crate::service::bugzilla::Bugzilla;
-use crate::traits::{InjectAuth, RequestSend, WebService};
+use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 #[derive(Debug)]
 pub struct Request {
@@ -140,7 +140,8 @@ mod tests {
             .respond(404, path.join("errors/nonexistent-bug.json"))
             .await;
         let err = service.attachment_get_item([1]).send().await.unwrap_err();
-        assert_matches!(err, Error::Bugzilla { code: 101, .. });
+        assert_matches!(err, Error::Service(_));
+        assert_err_re!(err, "bugzilla: Bug #1 does not exist.");
 
         server.reset().await;
 

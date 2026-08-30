@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 use crate::service::bugzilla::Bugzilla;
-use crate::traits::{InjectAuth, RequestSend, WebService};
+use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 #[derive(Debug)]
 pub struct Request {

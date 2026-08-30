@@ -8,7 +8,7 @@ use url::Url;
 use crate::Error;
 use crate::objects::redmine::{Comment, Issue};
 use crate::service::redmine::Redmine;
-use crate::traits::{InjectAuth, RequestSend, WebService};
+use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 #[derive(Debug)]
 pub struct Request {
@@ -95,16 +95,13 @@ impl RequestSend for Request {
         let mut issues = vec![];
         for (future, id) in futures.into_iter().zip(&self.ids) {
             let response = future.await?;
-            let mut data: Value =
-                self.service
-                    .parse_response(response)
-                    .await
-                    .map_err(|e| match e {
-                        Error::Request(e) if e.status() == Some(StatusCode::NOT_FOUND) => {
-                            Error::Redmine(format!("nonexistent issue: {id}"))
-                        }
-                        _ => e,
-                    })?;
+            let mut data: Value = match self.service.parse_response(response).await {
+                Ok(data) => data,
+                Err(Error::Http(StatusCode::NOT_FOUND)) => {
+                    return Err(Error::InvalidValue(format!("nonexistent issue: {id}")));
+                }
+                Err(e) => return Err(e),
+            };
             let mut data = data["issue"].take();
             let journals = data["journals"].take();
             let mut issue: Issue = serde_json::from_value(data)
@@ -170,7 +167,7 @@ mod tests {
         let template = ResponseTemplate::new(404);
         server.respond_custom(matchers::any(), template).await;
         let err = service.get([1]).send().await.unwrap_err();
-        assert_matches!(err, Error::Redmine(_));
+        assert_matches!(err, Error::InvalidValue(_));
         assert_err_re!(err, "nonexistent issue: 1");
 
         server.reset().await;

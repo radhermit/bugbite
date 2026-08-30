@@ -1,5 +1,5 @@
-use std::fs;
 use std::time::Duration;
+use std::{fmt, fs};
 
 use camino::Utf8PathBuf;
 use enum_as_inner::EnumAsInner;
@@ -50,6 +50,24 @@ pub enum ServiceKind {
     /// Targets the REST API using the JSON format.
     /// API docs: https://www.redmine.org/projects/redmine/wiki/rest_api
     Redmine,
+}
+
+/// Service error variants
+#[derive(Debug)]
+pub enum ServiceError {
+    Bugzilla(bugzilla::ServiceError),
+    Github(github::ServiceError),
+    Redmine(redmine::ServiceError),
+}
+
+impl fmt::Display for ServiceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Bugzilla(e) => write!(f, "bugzilla: {e}"),
+            Self::Github(e) => write!(f, "github: {e}"),
+            Self::Redmine(e) => write!(f, "redmine: {e}"),
+        }
+    }
 }
 
 #[derive(EnumAsInner, Deserialize, Serialize, Debug, Clone)]

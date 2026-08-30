@@ -18,7 +18,7 @@ use crate::objects::{Range, SetChanges};
 pub use crate::objects::{SetChange, bugzilla::Flag};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Bugzilla;
-use crate::traits::{Contains, InjectAuth, Merge, RequestSend, RequestTemplate, WebService};
+use crate::traits::{Contains, InjectAuth, Merge, ParseResponse, RequestSend, RequestTemplate};
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub enum RangeOrSet<T: FromStr + PartialOrd + Eq + Hash> {

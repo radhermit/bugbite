@@ -7,7 +7,7 @@ use crate::objects::bugzilla::Comment;
 pub use crate::objects::{SetChange, SetChanges};
 use crate::service::bugzilla::Bugzilla;
 use crate::time::TimeDeltaOrStatic;
-use crate::traits::{InjectAuth, Merge, RequestSend, RequestTemplate, WebService};
+use crate::traits::{InjectAuth, Merge, ParseResponse, RequestSend, RequestTemplate};
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request {

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::Error;
-use crate::traits::{Merge, WebClient, WebService};
+use crate::traits::{JsonResponse, Merge, ParseResponse, WebClient, WebService};
 
 use super::{ClientParameters, ServiceKind};
 
@@ -154,6 +154,38 @@ impl Github {
     }
 }
 
+/// Github REST API error response.
+#[derive(Deserialize, Debug)]
+pub struct ServiceError {
+    pub code: String,
+    pub message: String,
+}
+
+impl From<ServiceError> for Error {
+    fn from(value: ServiceError) -> Self {
+        Self::Service(super::ServiceError::Github(value))
+    }
+}
+
+impl fmt::Display for ServiceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl JsonResponse for Github {}
+
+impl ParseResponse for Github {
+    type ServiceError = ServiceError;
+
+    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        self.parse_json(response).await
+    }
+}
+
 impl WebService for Github {
     const API_VERSION: &'static str = "2022-11-28";
 
@@ -163,13 +195,6 @@ impl WebService for Github {
         _required: bool,
     ) -> crate::Result<RequestBuilder> {
         unimplemented!("authentication unsupported")
-    }
-
-    async fn parse_response<T>(&self, _response: reqwest::Response) -> crate::Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        unimplemented!("request parsing unsupported")
     }
 }
 

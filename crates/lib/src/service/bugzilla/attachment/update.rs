@@ -10,7 +10,7 @@ use crate::Error;
 use crate::objects::bugzilla::Flag;
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Bugzilla;
-use crate::traits::{InjectAuth, RequestSend, WebService};
+use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 #[derive(Debug)]
 pub struct Request {

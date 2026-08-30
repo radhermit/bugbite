@@ -8,6 +8,7 @@ use futures_util::{Stream, StreamExt, TryStreamExt, stream};
 use reqwest::RequestBuilder;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
+use tracing::{Level, debug, enabled, trace};
 use url::Url;
 
 use crate::Error;
@@ -196,18 +197,72 @@ impl InjectAuth for RequestBuilder {
     }
 }
 
-pub(crate) trait WebService: fmt::Display {
+/// Trait for parsing service response data.
+pub(crate) trait ParseResponse {
+    type ServiceError: DeserializeOwned + Into<Error> + fmt::Debug;
+
+    /// Parse a raw response into a service response.
+    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
+    where
+        T: DeserializeOwned;
+}
+
+/// Trait for parsing service response data that uses JSON.
+pub(crate) trait JsonResponse: ParseResponse {
+    /// Parse JSON-formatted response data.
+    async fn parse_json<T>(&self, response: reqwest::Response) -> crate::Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        trace!("{response:?}");
+
+        let status = response.status();
+        let data = response.bytes().await?;
+
+        // output raw response data
+        if enabled!(Level::DEBUG) {
+            let data = if let Ok(value) = serde_json::from_slice::<serde_json::Value>(&data) {
+                serde_json::to_string_pretty(&value).unwrap()
+            } else {
+                String::from_utf8_lossy(&data).to_string()
+            };
+
+            debug!("response data:\n{data}");
+        }
+
+        if !status.is_success() {
+            // handle HTTP error codes
+            if let Ok(error) = serde_json::from_slice::<Self::ServiceError>(&data) {
+                // service returned error
+                Err(error.into())
+            } else {
+                Err(Error::Http(status))
+            }
+        } else {
+            // handle parsing failures mapping them to JSON paths
+            let deserializer = &mut serde_json::Deserializer::from_slice(&data);
+            match serde_path_to_error::deserialize(deserializer) {
+                Ok(data) => Ok(data),
+                Err(e) => {
+                    if let Ok(error) = serde_json::from_slice::<Self::ServiceError>(&data) {
+                        // service returned error for non-error response
+                        Err(error.into())
+                    } else {
+                        Err(Error::InvalidResponse(e.to_string()))
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub(crate) trait WebService: ParseResponse + fmt::Display {
     #[allow(dead_code)]
     const API_VERSION: &'static str;
 
     /// Inject authentication into a request before it's sent.
     fn inject_auth(&self, request: RequestBuilder, required: bool)
     -> crate::Result<RequestBuilder>;
-
-    /// Parse a raw response into a service response.
-    async fn parse_response<T>(&self, response: reqwest::Response) -> crate::Result<T>
-    where
-        T: DeserializeOwned;
 }
 
 pub trait WebClient {

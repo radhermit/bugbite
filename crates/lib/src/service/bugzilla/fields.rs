@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::objects::bugzilla::BugzillaField;
 use crate::service::bugzilla::Bugzilla;
-use crate::traits::{RequestSend, WebService};
+use crate::traits::{ParseResponse, RequestSend};
 
 #[derive(Debug)]
 pub struct Request {

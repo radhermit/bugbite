@@ -15,7 +15,7 @@ use crate::Error;
 use crate::objects::Base64;
 use crate::objects::bugzilla::Flag;
 use crate::service::bugzilla::Bugzilla;
-use crate::traits::{InjectAuth, RequestSend, WebService};
+use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 /// Compression variants supported by attachments.
 #[derive(

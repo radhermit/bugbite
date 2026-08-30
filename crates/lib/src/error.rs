@@ -32,11 +32,8 @@ pub enum Error {
     #[error("{0}")]
     IO(String),
 
-    #[error("bugzilla: {message}")]
-    Bugzilla { code: i32, message: String },
-
-    #[error("redmine: {0}")]
-    Redmine(String),
+    #[error("{0}")]
+    Service(crate::service::ServiceError),
 
     #[error("{0}")]
     Request(reqwest::Error),
