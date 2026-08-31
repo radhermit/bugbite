@@ -51,6 +51,7 @@ impl Render for Issue {
                             wrapped_csv(f, &field.name, values, width)?;
                         }
                     }
+                    CustomFieldValue::None => (),
                 }
             }
         }

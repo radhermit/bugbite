@@ -1,12 +1,12 @@
 use indexmap::IndexSet;
 use itertools::Itertools;
 use reqwest::StatusCode;
-use serde_json::Value;
+use serde::Deserialize;
 use strum::Display;
 use url::Url;
 
 use crate::Error;
-use crate::objects::redmine::{Comment, Issue};
+use crate::objects::redmine::{Issue, IssueRaw};
 use crate::service::redmine::Redmine;
 use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
@@ -68,6 +68,11 @@ impl Request {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct Response {
+    issue: IssueRaw,
+}
+
 /// Bug fields composed of value arrays.
 #[derive(Display, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 #[strum(serialize_all = "snake_case")]
@@ -95,46 +100,15 @@ impl RequestSend for Request {
         let mut issues = vec![];
         for (future, id) in futures.into_iter().zip(&self.ids) {
             let response = future.await?;
-            let mut data: Value = match self.service.parse_response(response).await {
+            let data: Response = match self.service.parse_response(response).await {
                 Ok(data) => data,
                 Err(Error::Http(StatusCode::NOT_FOUND)) => {
                     return Err(Error::InvalidValue(format!("nonexistent issue: {id}")));
                 }
                 Err(e) => return Err(e),
             };
-            let mut data = data["issue"].take();
-            let journals = data["journals"].take();
-            let mut issue: Issue = serde_json::from_value(data)
-                .map_err(|e| Error::InvalidResponse(format!("failed deserializing issue: {e}")))?;
 
-            if self.fields.contains(&Field::Journals) {
-                let mut count = 0;
-                // treat description as a comment
-                if let Some(text) = issue.description.take() {
-                    issue.comments.push(Comment {
-                        count,
-                        text,
-                        user: issue.author.clone().unwrap(),
-                        created: issue.created.unwrap(),
-                    });
-                }
-
-                // TODO: handle parsing changes within journal data
-                if let serde_json::Value::Array(values) = journals {
-                    for data in values {
-                        let mut comment: Comment = serde_json::from_value(data).map_err(|e| {
-                            Error::InvalidResponse(format!("failed deserializing comment: {e}"))
-                        })?;
-                        if !comment.text.is_empty() {
-                            count += 1;
-                            comment.count = count;
-                            issue.comments.push(comment);
-                        }
-                    }
-                }
-            }
-
-            issues.push(issue);
+            issues.push(data.issue.into());
         }
 
         Ok(issues)

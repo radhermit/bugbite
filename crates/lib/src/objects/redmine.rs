@@ -5,7 +5,7 @@ use std::ops::Deref;
 use chrono::prelude::*;
 use indexmap::IndexSet;
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::{DefaultOnNull, serde_as, skip_serializing_none};
 
 use std::fmt;
@@ -22,20 +22,76 @@ pub struct Issue {
     pub id: u64,
     pub assigned_to: Option<Person>,
     pub subject: Option<String>,
-    pub description: Option<String>,
     pub status: Option<Field>,
     pub tracker: Option<Field>,
     pub priority: Option<Field>,
     pub author: Option<Person>,
     pub custom_fields: Option<IndexSet<CustomField>>,
-    #[serde(rename = "closed_on")]
     pub closed: Option<DateTime<Utc>>,
-    #[serde(rename = "created_on")]
     pub created: Option<DateTime<Utc>>,
-    #[serde(rename = "updated_on")]
     pub updated: Option<DateTime<Utc>>,
-    #[serde(skip)]
     pub comments: Vec<Comment>,
+}
+
+#[derive(Deserialize, Debug, Default, PartialEq, Eq)]
+#[serde(default)]
+pub(crate) struct IssueRaw {
+    id: u64,
+    assigned_to: Option<Person>,
+    subject: Option<String>,
+    status: Option<Field>,
+    tracker: Option<Field>,
+    priority: Option<Field>,
+    author: Option<Person>,
+    #[serde(default, deserialize_with = "skip_null_fields")]
+    custom_fields: Option<IndexSet<CustomField>>,
+    closed_on: Option<DateTime<Utc>>,
+    created_on: Option<DateTime<Utc>>,
+    updated_on: Option<DateTime<Utc>>,
+
+    description: Option<String>,
+    journals: Vec<Comment>,
+}
+
+impl From<IssueRaw> for Issue {
+    fn from(mut value: IssueRaw) -> Self {
+        let mut issue = Self {
+            id: value.id,
+            assigned_to: value.assigned_to,
+            subject: value.subject,
+            status: value.status,
+            tracker: value.tracker,
+            priority: value.priority,
+            author: value.author,
+            custom_fields: value.custom_fields,
+            closed: value.closed_on,
+            created: value.created_on,
+            updated: value.updated_on,
+            comments: Default::default(),
+        };
+
+        // treat description as a comment
+        let mut count = 0;
+        if let Some(text) = value.description.take() {
+            issue.comments.push(Comment {
+                count,
+                text,
+                user: issue.author.clone().unwrap(),
+                created: issue.created.unwrap(),
+            });
+        }
+
+        // TODO: handle parsing changes within journal data
+        for mut comment in value.journals {
+            if !comment.text.is_empty() {
+                count += 1;
+                comment.count = count;
+                issue.comments.push(comment);
+            }
+        }
+
+        issue
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
@@ -85,11 +141,34 @@ impl Borrow<str> for CustomField {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(untagged)]
 pub enum CustomFieldValue {
     String(String),
     Array(Vec<String>),
+    None,
+}
+
+/// Deserializing function for custom fields that skips null values.
+fn skip_null_fields<'de, D>(deserializer: D) -> Result<Option<IndexSet<CustomField>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let mut fields: Option<IndexSet<CustomField>> = Deserialize::deserialize(deserializer)?;
+
+    if let Some(values) = fields.as_mut() {
+        values.retain(|x| match &x.value {
+            CustomFieldValue::None => false,
+            CustomFieldValue::Array(values) if values.is_empty() => false,
+            CustomFieldValue::String(value) if value.is_empty() => false,
+            _ => true,
+        });
+    }
+
+    match fields {
+        Some(set) if !set.is_empty() => Ok(Some(set)),
+        _ => Ok(None),
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Clone)]

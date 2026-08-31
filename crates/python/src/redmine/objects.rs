@@ -21,7 +21,7 @@ impl Issue {
 
     #[getter]
     fn description(&self) -> Option<&str> {
-        self.0.description.as_deref()
+        self.0.comments.first().map(|x| x.text.as_str())
     }
 
     #[getter]

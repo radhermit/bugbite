@@ -4,7 +4,6 @@ use std::ops::{Deref, DerefMut};
 use futures_util::Stream;
 use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString};
 use url::Url;
@@ -47,6 +46,11 @@ impl Iterator for PagedIterator {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct Response {
+    issues: Vec<Issue>,
+}
+
 impl RequestPagedStream for Request {
     type Item = Issue;
 
@@ -83,10 +87,8 @@ impl RequestPagedStream for Request {
         url.query_pairs_mut().extend_pairs(query.iter());
         let request = self.service.client().get(url).auth_optional(&self.service);
         let response = request.send().await?;
-        let mut data: Value = self.service.parse_response(response).await?;
-        let data = data["issues"].take();
-        serde_json::from_value(data)
-            .map_err(|e| Error::InvalidResponse(format!("failed deserializing issues: {e}")))
+        let data: Response = self.service.parse_response(response).await?;
+        Ok(data.issues)
     }
 }
 
