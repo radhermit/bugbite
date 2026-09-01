@@ -8,6 +8,7 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::{DefaultOnNull, serde_as, skip_serializing_none};
+use strum::Display;
 
 use crate::objects::stringify;
 use crate::service::redmine::IssueField;
@@ -51,45 +52,56 @@ pub(crate) struct IssueRaw {
     journals: Vec<Comment>,
 }
 
-impl From<IssueRaw> for Issue {
-    fn from(mut value: IssueRaw) -> Self {
-        let mut issue = Self {
-            id: value.id,
-            assigned_to: value.assigned_to,
-            subject: value.subject,
-            status: value.status,
-            tracker: value.tracker,
-            priority: value.priority,
-            author: value.author,
-            custom_fields: value.custom_fields,
-            closed: value.closed_on,
-            created: value.created_on,
-            updated: value.updated_on,
+impl IssueRaw {
+    pub(crate) fn collapse(mut self, fields: &IndexSet<DataField>) -> Issue {
+        let mut issue = Issue {
+            id: self.id,
+            assigned_to: self.assigned_to,
+            subject: self.subject,
+            status: self.status,
+            tracker: self.tracker,
+            priority: self.priority,
+            author: self.author,
+            custom_fields: self.custom_fields,
+            closed: self.closed_on,
+            created: self.created_on,
+            updated: self.updated_on,
             comments: Default::default(),
         };
 
-        // treat description as a comment
-        let mut count = 0;
-        if let Some(text) = value.description.take() {
-            issue.comments.push(Comment {
-                count,
-                text,
-                user: issue.author.clone().unwrap(),
-                created: issue.created.unwrap(),
-            });
-        }
+        // only handle comments when requested
+        if fields.contains(&DataField::Journals) {
+            // treat description as a comment
+            let mut count = 0;
+            if let Some(text) = self.description.take() {
+                issue.comments.push(Comment {
+                    count,
+                    text,
+                    user: issue.author.clone().unwrap(),
+                    created: issue.created.unwrap(),
+                });
+            }
 
-        // TODO: handle parsing changes within journal data
-        for mut comment in value.journals {
-            if !comment.text.is_empty() {
-                count += 1;
-                comment.count = count;
-                issue.comments.push(comment);
+            // TODO: handle parsing changes within journal data
+            for mut comment in self.journals {
+                if !comment.text.is_empty() {
+                    count += 1;
+                    comment.count = count;
+                    issue.comments.push(comment);
+                }
             }
         }
 
         issue
     }
+}
+
+/// Bug fields composed of value arrays.
+#[derive(Display, Debug, Eq, PartialEq, Hash, Clone, Copy)]
+#[strum(serialize_all = "snake_case")]
+pub(crate) enum DataField {
+    Attachments,
+    Journals,
 }
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]

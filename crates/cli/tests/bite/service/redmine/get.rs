@@ -89,6 +89,11 @@ async fn single() {
         .stderr("")
         .success();
 
+    server.reset().await;
+    server
+        .respond(200, TEST_DATA.join("get/single-no-comments.json"))
+        .await;
+
     // without comments
     for opt in ["-C", "--no-comments"] {
         cmd!("bite redmine get 1")

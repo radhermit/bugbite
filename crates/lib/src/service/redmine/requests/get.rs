@@ -2,19 +2,18 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 use reqwest::StatusCode;
 use serde::Deserialize;
-use strum::Display;
 use url::Url;
 
 use crate::Error;
 use crate::service::redmine::Redmine;
-use crate::service::redmine::objects::{Issue, IssueRaw};
+use crate::service::redmine::objects::{DataField, Issue, IssueRaw};
 use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 #[derive(Debug)]
 pub struct Request {
     service: Redmine,
     pub ids: Vec<u64>,
-    fields: IndexSet<Field>,
+    fields: IndexSet<DataField>,
 }
 
 impl Request {
@@ -54,7 +53,7 @@ impl Request {
     /// Enable or disable fetching attachments.
     pub fn attachments(&mut self, fetch: bool) -> &mut Self {
         if fetch {
-            self.fields.insert(Field::Attachments);
+            self.fields.insert(DataField::Attachments);
         }
         self
     }
@@ -62,7 +61,7 @@ impl Request {
     /// Enable or disable fetching comments.
     pub fn comments(&mut self, fetch: bool) -> &mut Self {
         if fetch {
-            self.fields.insert(Field::Journals);
+            self.fields.insert(DataField::Journals);
         }
         self
     }
@@ -71,14 +70,6 @@ impl Request {
 #[derive(Deserialize, Debug)]
 struct Response {
     issue: IssueRaw,
-}
-
-/// Bug fields composed of value arrays.
-#[derive(Display, Debug, Eq, PartialEq, Hash, Clone, Copy)]
-#[strum(serialize_all = "snake_case")]
-enum Field {
-    Attachments,
-    Journals,
 }
 
 impl RequestSend for Request {
@@ -108,7 +99,7 @@ impl RequestSend for Request {
                 Err(e) => return Err(e),
             };
 
-            issues.push(data.issue.into());
+            issues.push(data.issue.collapse(&self.fields));
         }
 
         Ok(issues)
