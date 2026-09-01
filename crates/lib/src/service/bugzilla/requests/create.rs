@@ -56,7 +56,7 @@ impl RequestTemplate for Request {
 }
 
 impl Request {
-    pub(super) fn new(service: Bugzilla) -> Self {
+    pub(crate) fn new(service: Bugzilla) -> Self {
         Self {
             service,
             params: Default::default(),

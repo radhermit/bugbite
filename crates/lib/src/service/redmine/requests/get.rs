@@ -18,7 +18,7 @@ pub struct Request {
 }
 
 impl Request {
-    pub(super) fn new<I>(service: Redmine, ids: I) -> Self
+    pub(crate) fn new<I>(service: Redmine, ids: I) -> Self
     where
         I: IntoIterator<Item = u64>,
     {

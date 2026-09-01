@@ -11,8 +11,8 @@ use crate::traits::{JsonResponse, Merge, ParseResponse, WebClient, WebService};
 
 use super::{ClientParameters, ServiceKind};
 
-mod get;
-pub mod search;
+mod requests;
+pub use requests::*;
 
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq)]
 pub struct Authentication {

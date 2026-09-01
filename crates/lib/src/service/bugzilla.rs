@@ -17,16 +17,8 @@ use crate::traits::{Api, JsonResponse, Merge, ParseResponse, WebClient, WebServi
 
 use super::{ClientParameters, ServiceKind};
 
-pub mod attachment;
-pub mod comment;
-pub mod create;
-pub mod fields;
-mod get;
-pub mod history;
-pub mod search;
-pub mod update;
-pub mod user;
-pub mod version;
+mod requests;
+pub use requests::*;
 
 /// Common default values used for unset fields.
 pub(crate) static UNSET_VALUES: LazyLock<HashSet<String>> = LazyLock::new(|| {

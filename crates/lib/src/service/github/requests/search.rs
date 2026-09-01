@@ -19,7 +19,7 @@ pub struct Request {
 }
 
 impl Request {
-    pub(super) fn new(service: Github) -> Self {
+    pub(crate) fn new(service: Github) -> Self {
         Self {
             service,
             params: Default::default(),

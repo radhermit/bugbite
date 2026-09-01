@@ -178,7 +178,7 @@ impl RequestTemplate for Request {
 }
 
 impl Request {
-    pub(super) fn new<I, S>(service: Bugzilla, ids: I) -> Self
+    pub(crate) fn new<I, S>(service: Bugzilla, ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: fmt::Display,

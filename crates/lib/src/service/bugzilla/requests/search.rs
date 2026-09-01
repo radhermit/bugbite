@@ -18,11 +18,9 @@ use crate::args::ExistsOrValues;
 use crate::objects::bugzilla::Bug;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
-use crate::service::bugzilla::Bugzilla;
+use crate::service::bugzilla::{BugField, Bugzilla, FilterField};
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, Merge, ParseResponse, RequestPagedStream, RequestTemplate};
-
-use super::{BugField, FilterField};
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request {
@@ -114,7 +112,7 @@ impl RequestTemplate for Request {
 }
 
 impl Request {
-    pub(super) fn new(service: Bugzilla) -> Self {
+    pub(crate) fn new(service: Bugzilla) -> Self {
         Self {
             service,
             params: Default::default(),

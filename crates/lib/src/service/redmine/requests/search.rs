@@ -93,7 +93,7 @@ impl RequestPagedStream for Request {
 }
 
 impl Request {
-    pub(super) fn new(service: Redmine) -> Self {
+    pub(crate) fn new(service: Redmine) -> Self {
         Self {
             service,
             params: Default::default(),
