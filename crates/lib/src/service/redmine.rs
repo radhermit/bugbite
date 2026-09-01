@@ -13,7 +13,11 @@ use crate::traits::{JsonResponse, Merge, ParseResponse, WebClient, WebService};
 
 use super::{ClientParameters, ServiceKind};
 
+mod objects;
+mod output;
 mod requests;
+
+pub use objects::*;
 pub use requests::*;
 
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq)]

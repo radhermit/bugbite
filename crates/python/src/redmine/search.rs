@@ -1,7 +1,6 @@
 use std::pin::Pin;
 
-use bugbite::objects::redmine;
-use bugbite::service::redmine::search;
+use bugbite::service::redmine;
 use bugbite::traits::RequestTemplate;
 use futures_util::Stream;
 use pyo3::prelude::*;
@@ -11,10 +10,10 @@ use crate::macros::stream_iterator;
 use super::Issue;
 
 #[pyclass(module = "bugbite.redmine")]
-pub(super) struct SearchRequest(search::Request);
+pub(super) struct SearchRequest(redmine::search::Request);
 
-impl From<search::Request> for SearchRequest {
-    fn from(value: search::Request) -> Self {
+impl From<redmine::search::Request> for SearchRequest {
+    fn from(value: redmine::search::Request) -> Self {
         Self(value)
     }
 }

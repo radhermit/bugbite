@@ -5,9 +5,9 @@ use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter, EnumString};
 use tracing::debug;
 
-use crate::objects::github::Issue;
 use crate::query::{Order, Query};
 use crate::service::github::Github;
+use crate::service::github::objects::Issue;
 use crate::traits::{Api, Merge, RequestSend, RequestTemplate};
 
 #[derive(Serialize, Debug, Clone, PartialEq)]

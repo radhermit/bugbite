@@ -10,10 +10,10 @@ use url::Url;
 
 use crate::Error;
 use crate::args::ExistsOrValues;
-use crate::objects::redmine::Issue;
 use crate::objects::{Range, RangeOp, RangeOrValue};
 use crate::query::{Order, Query};
 use crate::service::redmine::Redmine;
+use crate::service::redmine::objects::Issue;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, Merge, ParseResponse, RequestPagedStream, RequestTemplate};
 

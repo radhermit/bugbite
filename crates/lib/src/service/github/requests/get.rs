@@ -1,6 +1,6 @@
 use tracing::debug;
 
-use crate::objects::github::Issue;
+use crate::service::github::objects::Issue;
 use crate::traits::RequestSend;
 
 #[derive(Debug)]

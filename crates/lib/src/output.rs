@@ -12,10 +12,6 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::traits::RenderSearch;
 use crate::utils::is_terminal;
 
-mod bugzilla;
-mod github;
-mod redmine;
-
 pub static COLUMNS: LazyLock<usize> = LazyLock::new(|| {
     let (cols, _rows) = terminal::size().unwrap_or((90, 24));
     // use a static width when testing is enabled
@@ -27,7 +23,7 @@ pub static COLUMNS: LazyLock<usize> = LazyLock::new(|| {
 });
 
 // indentation for text-wrapping header field values
-static INDENT: LazyLock<String> = LazyLock::new(|| " ".repeat(15));
+pub(crate) static INDENT: LazyLock<String> = LazyLock::new(|| " ".repeat(15));
 
 /// Control output verbosity.
 pub static VERBOSE: AtomicBool = AtomicBool::new(false);
@@ -68,10 +64,10 @@ macro_rules! impl_render_display {
         }
     )+};
 }
-use impl_render_display;
+pub(crate) use impl_render_display;
 
 /// Truncate a string to the requested width of graphemes.
-fn truncate(data: &str, width: usize) -> Cow<'_, str> {
+pub(crate) fn truncate(data: &str, width: usize) -> Cow<'_, str> {
     if data.len() > width {
         let mut iter = UnicodeSegmentation::graphemes(data, true).take(*COLUMNS);
         Cow::Owned(iter.join(""))
@@ -81,7 +77,7 @@ fn truncate(data: &str, width: usize) -> Cow<'_, str> {
 }
 
 /// Output an iterable field in truncated list format.
-fn truncated_list<W, I>(f: &mut W, name: &str, data: I, width: usize) -> io::Result<()>
+pub(crate) fn truncated_list<W, I>(f: &mut W, name: &str, data: I, width: usize) -> io::Result<()>
 where
     W: Write,
     I: IntoIterator,
@@ -109,7 +105,7 @@ where
 }
 
 /// Output an iterable field in wrapped CSV format.
-fn wrapped_csv<I, W, S>(f: &mut W, name: &str, data: I, width: usize) -> io::Result<()>
+pub(crate) fn wrapped_csv<I, W, S>(f: &mut W, name: &str, data: I, width: usize) -> io::Result<()>
 where
     I: IntoIterator<Item = S>,
     W: Write,
@@ -137,7 +133,7 @@ macro_rules! output_field {
         }
     };
 }
-use output_field;
+pub(crate) use output_field;
 
 macro_rules! output_field_wrapped {
     ($f:expr, $name:expr, $value:expr, $width:expr) => {
@@ -150,7 +146,7 @@ macro_rules! output_field_wrapped {
         }
     };
 }
-use output_field_wrapped;
+pub(crate) use output_field_wrapped;
 
 pub async fn render_search<I, V, T, W>(
     f: &mut W,

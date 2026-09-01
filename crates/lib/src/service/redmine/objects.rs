@@ -1,4 +1,5 @@
 use std::borrow::Borrow;
+use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 
@@ -8,12 +9,9 @@ use itertools::Itertools;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::{DefaultOnNull, serde_as, skip_serializing_none};
 
-use std::fmt;
-
+use crate::objects::stringify;
 use crate::service::redmine::IssueField;
 use crate::traits::RenderSearch;
-
-use super::stringify;
 
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, PartialEq, Eq)]

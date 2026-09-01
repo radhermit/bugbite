@@ -7,10 +7,11 @@ use serde_with::{serde_as, skip_serializing_none};
 use url::Url;
 
 use crate::Error;
-use crate::objects::bugzilla::Flag;
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Bugzilla;
 use crate::traits::{InjectAuth, ParseResponse, RequestSend};
+
+pub use crate::service::bugzilla::objects::Flag;
 
 #[derive(Debug)]
 pub struct Request {

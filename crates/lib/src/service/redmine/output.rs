@@ -1,8 +1,9 @@
 use std::io::{self, Write};
 
-use crate::objects::redmine::*;
+use itertools::Itertools;
 
-use super::*;
+use crate::output::*;
+use crate::service::redmine::objects::*;
 
 impl Render for Comment {
     fn render<W>(&self, f: &mut W, width: usize) -> io::Result<()>

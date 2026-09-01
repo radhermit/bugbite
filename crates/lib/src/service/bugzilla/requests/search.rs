@@ -15,12 +15,14 @@ use url::Url;
 
 use crate::Error;
 use crate::args::ExistsOrValues;
-use crate::objects::bugzilla::Bug;
-use crate::objects::{Range, RangeOp, RangeOrValue};
+use crate::objects::{Range, RangeOp};
 use crate::query::{Order, Query};
+use crate::service::bugzilla::objects::Bug;
 use crate::service::bugzilla::{BugField, Bugzilla, FilterField};
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Api, InjectAuth, Merge, ParseResponse, RequestPagedStream, RequestTemplate};
+
+pub use crate::objects::RangeOrValue;
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request {

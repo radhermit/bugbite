@@ -1,8 +1,7 @@
 use std::io::{self, Write};
 
-use crate::objects::github::*;
-
-use super::*;
+use crate::output::*;
+use crate::service::github::objects::*;
 
 impl Render for Issue {
     fn render<W>(&self, f: &mut W, width: usize) -> io::Result<()>

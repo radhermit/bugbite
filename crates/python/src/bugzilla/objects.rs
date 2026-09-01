@@ -1,4 +1,4 @@
-use bugbite::objects::bugzilla;
+use bugbite::service::bugzilla;
 use pyo3::prelude::*;
 use pyo3::types::{PyDateTime, PyFrozenSet};
 

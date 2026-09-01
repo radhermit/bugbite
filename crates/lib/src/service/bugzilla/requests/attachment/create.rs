@@ -13,8 +13,8 @@ use url::Url;
 
 use crate::Error;
 use crate::objects::Base64;
-use crate::objects::bugzilla::Flag;
 use crate::service::bugzilla::Bugzilla;
+pub use crate::service::bugzilla::objects::Flag;
 use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 /// Compression variants supported by attachments.

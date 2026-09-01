@@ -6,8 +6,8 @@ use strum::Display;
 use url::Url;
 
 use crate::Error;
-use crate::objects::redmine::{Issue, IssueRaw};
 use crate::service::redmine::Redmine;
+use crate::service::redmine::objects::{Issue, IssueRaw};
 use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 #[derive(Debug)]

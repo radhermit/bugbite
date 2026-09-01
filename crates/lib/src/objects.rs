@@ -11,10 +11,6 @@ use serde_with::{DeserializeFromStr, SerializeDisplay, skip_serializing_none};
 use crate::Error;
 use crate::traits::Contains;
 
-pub mod bugzilla;
-pub mod github;
-pub mod redmine;
-
 /// Raw binary data encoded as Base64.
 #[derive(DeserializeFromStr, SerializeDisplay, Default, Debug, PartialEq, Eq, Hash)]
 pub(crate) struct Base64(pub(crate) Vec<u8>);
@@ -43,7 +39,7 @@ impl AsRef<[u8]> for Base64 {
 }
 
 impl Base64 {
-    fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }
@@ -57,7 +53,7 @@ macro_rules! stringify {
         }
     };
 }
-use stringify;
+pub(crate) use stringify;
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]
 pub enum RangeOrValue<T: Eq> {

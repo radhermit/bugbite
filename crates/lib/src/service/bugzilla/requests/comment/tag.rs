@@ -3,9 +3,9 @@ use serde_with::skip_serializing_none;
 use url::Url;
 
 use crate::Error;
-use crate::objects::bugzilla::Comment;
 pub use crate::objects::{SetChange, SetChanges};
 use crate::service::bugzilla::Bugzilla;
+use crate::service::bugzilla::objects::Comment;
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{InjectAuth, Merge, ParseResponse, RequestSend, RequestTemplate};
 

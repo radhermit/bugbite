@@ -14,10 +14,11 @@ use strum::Display;
 use url::Url;
 
 use crate::Error;
+pub use crate::objects::SetChange;
 use crate::objects::{Range, SetChanges};
-pub use crate::objects::{SetChange, bugzilla::Flag};
 use crate::serde::non_empty_str;
 use crate::service::bugzilla::Bugzilla;
+pub use crate::service::bugzilla::objects::Flag;
 use crate::traits::{Contains, InjectAuth, Merge, ParseResponse, RequestSend, RequestTemplate};
 
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, PartialEq, Eq, Clone)]

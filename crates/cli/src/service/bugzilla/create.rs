@@ -2,7 +2,6 @@ use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::MaybeStdinVec;
-use bugbite::objects::bugzilla::Flag;
 use bugbite::output::verbose;
 use bugbite::service::bugzilla::Bugzilla;
 use bugbite::service::bugzilla::create::*;

@@ -2,11 +2,13 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::args::ExistsOrValues;
-use crate::objects::RangeOrValue;
-use crate::objects::bugzilla::Attachment;
+use crate::service::bugzilla::objects::Attachment;
 use crate::service::bugzilla::{BugField, Bugzilla, search};
 use crate::time::TimeDeltaOrStatic;
 use crate::traits::{Merge, RequestPagedStream, RequestSend, RequestTemplate};
+
+pub use crate::objects::RangeOrValue;
+pub use crate::service::bugzilla::search::Match;
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Request {
@@ -44,11 +46,11 @@ impl RequestTemplate for Request {
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq)]
 pub struct Parameters {
-    pub creator: Option<Vec<Vec<search::Match>>>,
-    pub description: Option<Vec<Vec<search::Match>>>,
-    pub filename: Option<Vec<Vec<search::Match>>>,
+    pub creator: Option<Vec<Vec<Match>>>,
+    pub description: Option<Vec<Vec<Match>>>,
+    pub filename: Option<Vec<Vec<Match>>>,
     pub ids: Option<Vec<ExistsOrValues<RangeOrValue<i64>>>>,
-    pub mime: Option<Vec<Vec<search::Match>>>,
+    pub mime: Option<Vec<Vec<Match>>>,
     pub size: Option<RangeOrValue<u64>>,
 
     pub created: Option<RangeOrValue<TimeDeltaOrStatic>>,
@@ -61,8 +63,8 @@ pub struct Parameters {
 
 impl Parameters {
     fn matches(&self, attachment: &Attachment) -> bool {
-        // helper closure to evaluate Vec<Vec<search::Match>> filters
-        let matches_text_filters = |filters: &Option<Vec<Vec<search::Match>>>, target: &str| {
+        // helper closure to evaluate Vec<Vec<Match>> filters
+        let matches_text_filters = |filters: &Option<Vec<Vec<Match>>>, target: &str| {
             filters
                 .as_ref()
                 .is_none_or(|values| values.iter().any(|x| x.iter().all(|s| s.matches(target))))

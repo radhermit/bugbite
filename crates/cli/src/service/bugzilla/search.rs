@@ -2,7 +2,6 @@ use std::io::{IsTerminal, Write};
 use std::process::ExitCode;
 
 use bugbite::args::{Csv, ExistsOrValues, MaybeStdinVec};
-use bugbite::objects::RangeOrValue;
 use bugbite::output::render_search;
 use bugbite::query::Order;
 use bugbite::service::bugzilla::search::*;

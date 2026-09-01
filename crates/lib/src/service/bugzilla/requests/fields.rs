@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
-use crate::objects::bugzilla::BugzillaField;
 use crate::service::bugzilla::Bugzilla;
+use crate::service::bugzilla::objects::BugzillaField;
 use crate::traits::{ParseResponse, RequestSend};
 
 #[derive(Debug)]

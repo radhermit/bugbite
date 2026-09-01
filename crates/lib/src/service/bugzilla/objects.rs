@@ -16,11 +16,10 @@ use serde_with::{
 use strum::{Display, EnumString};
 
 use crate::Error;
+use crate::objects::{Base64, stringify};
 use crate::serde::{byte_object, non_empty_str};
 use crate::service::bugzilla::{BugField, FilterField, GroupField, UNSET_VALUES};
 use crate::traits::RenderSearch;
-
-use super::{Base64, stringify};
 
 /// A file attachment on a bug.
 #[serde_as]

@@ -12,12 +12,15 @@ use strum::{Display, EnumIter, EnumString, IntoEnumIterator, VariantNames};
 use url::Url;
 
 use crate::Error;
-use crate::objects::bugzilla::BugzillaField;
 use crate::traits::{Api, JsonResponse, Merge, ParseResponse, WebClient, WebService};
 
 use super::{ClientParameters, ServiceKind};
 
+mod objects;
+mod output;
 mod requests;
+
+pub use objects::*;
 pub use requests::*;
 
 /// Common default values used for unset fields.

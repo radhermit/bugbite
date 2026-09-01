@@ -1,4 +1,4 @@
-use bugbite::objects::redmine;
+use bugbite::service::redmine;
 use pyo3::prelude::*;
 use pyo3::types::PyDateTime;
 

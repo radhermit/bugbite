@@ -1,6 +1,6 @@
 use std::pin::Pin;
 
-use bugbite::objects::bugzilla;
+use bugbite::service::bugzilla;
 use bugbite::service::bugzilla::search;
 use bugbite::traits::RequestTemplate;
 use futures_util::Stream;

@@ -2,8 +2,8 @@ use serde::Deserialize;
 use url::Url;
 
 use crate::Error;
-use crate::objects::bugzilla::User;
 use crate::service::bugzilla::Bugzilla;
+use crate::service::bugzilla::objects::User;
 use crate::traits::{InjectAuth, ParseResponse, RequestSend};
 
 #[derive(Debug)]
