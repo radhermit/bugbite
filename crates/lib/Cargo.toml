@@ -44,7 +44,7 @@ dirs = "6.0.0"
 enum-as-inner = "0.7.0"
 futures-util = "0.3.34"
 infer = "0.22.0"
-indexmap = { version = "2.14.0", features = ["serde"] }
+indexmap = { version = "2.14.1", features = ["serde"] }
 itertools = "0.15.0"
 ordered-multimap = "0.7.3"
 regex = "1.13.1"
