@@ -43,10 +43,10 @@ Group fields relate to groups of bug fields and are most useful when using JSON
 formatted output:
 +
 .Open bugs created in the past day rendered in JSON:
- bite bugzilla search --created 1d -f all --json
+ bite bugzilla search --created 1d -f @all --json
 +
 // TODO: link to rust docs for field descriptions
-Possible group fields: all, default, extra, custom
+Possible group fields: @all, @default, @extra, @custom
 +
 Possible bug fields: alias, assignee, blocks, cc, component, created, creator
 deadline, depends, duplicate-of, flags, id, keywords, os, platform, priority,

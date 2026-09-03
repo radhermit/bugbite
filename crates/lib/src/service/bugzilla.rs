@@ -407,21 +407,7 @@ impl WebClient for Bugzilla {
     }
 }
 
-#[derive(
-    Display,
-    EnumIter,
-    EnumString,
-    VariantNames,
-    DeserializeFromStr,
-    SerializeDisplay,
-    Debug,
-    Eq,
-    PartialEq,
-    Hash,
-    Clone,
-    Copy,
-)]
-#[strum(serialize_all = "kebab-case")]
+#[derive(EnumIter, VariantNames, SerializeDisplay, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum GroupField {
     /// All possible fields
     All,
@@ -436,6 +422,33 @@ pub enum GroupField {
 impl From<GroupField> for FilterField {
     fn from(value: GroupField) -> Self {
         Self::Group(value)
+    }
+}
+
+impl FromStr for GroupField {
+    type Err = Error;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        match s {
+            "@all" => Ok(Self::All),
+            "@default" => Ok(Self::Default),
+            "@extra" => Ok(Self::Extra),
+            "@custom" => Ok(Self::Custom),
+            _ => Err(Error::InvalidValue(format!("invalid group field: {s}"))),
+        }
+    }
+}
+
+impl fmt::Display for GroupField {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let value = match self {
+            Self::All => "@all",
+            Self::Default => "@default",
+            Self::Extra => "@extra",
+            Self::Custom => "@custom",
+        };
+
+        value.fmt(f)
     }
 }
 
