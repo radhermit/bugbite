@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::io::{self, IsTerminal, Write};
-use std::sync::{LazyLock, atomic::AtomicBool};
+use std::sync::LazyLock;
 
 use crossterm::terminal;
 use futures_util::{Stream, TryStreamExt, pin_mut};
@@ -25,22 +25,15 @@ pub static COLUMNS: LazyLock<usize> = LazyLock::new(|| {
 // indentation for text-wrapping header field values
 pub(crate) static INDENT: LazyLock<String> = LazyLock::new(|| " ".repeat(15));
 
-/// Control output verbosity.
-pub static VERBOSE: AtomicBool = AtomicBool::new(false);
+/// Output message when at least one level of verbosity is enabled.
 #[macro_export]
 macro_rules! verbose {
     ($dst:expr, $($arg:tt)+) => {
-        if $crate::output::VERBOSE.load(std::sync::atomic::Ordering::Acquire) {
+        if tracing::enabled!(tracing::Level::INFO) {
             writeln!($dst, $($arg)+)
         } else {
             Ok(())
         }
-    };
-    ($enable:expr) => {
-        $crate::output::VERBOSE.store($enable, std::sync::atomic::Ordering::SeqCst);
-    };
-    () => {
-        $crate::output::VERBOSE.load(std::sync::atomic::Ordering::Acquire)
     };
 }
 pub use verbose;

@@ -4,9 +4,8 @@ use std::io::stderr;
 use std::process::ExitCode;
 
 use bugbite::config::Config;
-use bugbite::output::verbose;
 use clap::{Parser, error::ErrorKind};
-use clap_verbosity_flag::{Verbosity, WarnLevel, log::LevelFilter};
+use clap_verbosity_flag::{Verbosity, WarnLevel};
 use tracing_log::AsTrace;
 
 use crate::macros::wrapped_doc;
@@ -18,11 +17,7 @@ mod subcmds;
 mod utils;
 
 fn enable_logging(cmd: &Command) {
-    // enable verbose output
     let level = cmd.verbosity.log_level_filter();
-    if level >= LevelFilter::Info {
-        verbose!(true);
-    };
 
     // create custom log event formatter
     let format = tracing_subscriber::fmt::format()
