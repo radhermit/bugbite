@@ -407,14 +407,18 @@ impl WebClient for Bugzilla {
     }
 }
 
+/// Attribute sets that can be used for search filtering.
 #[derive(EnumIter, VariantNames, SerializeDisplay, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum GroupField {
     /// All possible fields
     All,
+
     /// All default fields
     Default,
+
     /// All extra fields
     Extra,
+
     /// All custom fields
     Custom,
 }
@@ -464,6 +468,11 @@ impl Api for GroupField {
     }
 }
 
+/// Bug attributes.
+///
+/// They can be used for search filtering or output customization, for example a search
+/// query can return data for the single, requested field or when rendering bugs for
+/// output a single, selected field can be shown.
 #[derive(
     Display,
     EnumIter,
@@ -482,46 +491,89 @@ impl Api for GroupField {
 pub enum BugField {
     /// Unique aliases for the bug.
     Alias,
+
     /// User the bug is assigned to.
     Assignee,
+
     /// Bugs that are blocked by this bug.
     Blocks,
+
     /// Users in the CC list.
     Cc,
+
     /// Name of the bug component.
     Component,
+
     /// Time when the bug was created.
     Created,
+
     /// User who created the bug.
     Creator,
+
     /// Bug completion date.
     Deadline,
+
     /// Dependencies of the bug.
     Depends,
+
     /// Bug ID that this bug is a duplicate of.
     DuplicateOf,
+
+    /// Flags set for the bug,
     Flags,
+
+    /// Unique ID of the bug,
     Id,
+
+    /// Keywords of the bug,
     Keywords,
+
+    /// Operating system of the bug,
     Os,
+
+    /// Platform of the bug,
     Platform,
+
+    /// Priority of the bug,
     Priority,
+
+    /// Product of the bug,
     Product,
+
     /// User who is the QA contact.
     Qa,
+
+    /// Current resolution of the bug,
     Resolution,
+
     /// URLs to external trackers.
     SeeAlso,
+
+    /// Current severity of the bug,
     Severity,
+
+    /// Current status of the bug,
     Status,
+
+    /// Summary of the bug,
     Summary,
+
+    /// Tags set for the bug,
     Tags,
+
+    /// Target milestone of the bug,
     Target,
+
     /// Time when the bug was last updated.
     Updated,
+
     /// URL related to the bug.
     Url,
+
+    /// Version of the bug,
     Version,
+
+    /// Whiteboard of the bug,
     Whiteboard,
 }
 
@@ -568,6 +620,7 @@ impl Api for BugField {
     }
 }
 
+/// All possible fields that can be used for search filtering.
 #[derive(DeserializeFromStr, SerializeDisplay, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum FilterField {
     Bug(BugField),
