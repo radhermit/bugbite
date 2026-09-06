@@ -361,10 +361,10 @@ pub struct Request {
 
 impl Request {
     /// Create a new request.
-    pub(crate) fn new<I, S>(service: Bugzilla, ids: I) -> Self
+    pub(crate) fn new<I>(service: Bugzilla, ids: I) -> Self
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         Self {
             service,

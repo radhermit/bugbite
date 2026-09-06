@@ -136,10 +136,10 @@ impl Request {
         Ok(params)
     }
 
-    pub fn alias<I, S>(&mut self, value: I) -> &mut Self
+    pub fn alias<I>(&mut self, value: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         self.params.alias = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
@@ -153,19 +153,19 @@ impl Request {
         self
     }
 
-    pub fn blocks<I, S>(&mut self, value: I) -> &mut Self
+    pub fn blocks<I>(&mut self, value: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         self.params.blocks = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
     }
 
-    pub fn cc<I, S>(&mut self, value: I) -> &mut Self
+    pub fn cc<I>(&mut self, value: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         self.params.cc = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
@@ -179,10 +179,10 @@ impl Request {
         self
     }
 
-    pub fn depends<I, S>(&mut self, value: I) -> &mut Self
+    pub fn depends<I>(&mut self, value: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         self.params.depends = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
@@ -204,19 +204,19 @@ impl Request {
         self
     }
 
-    pub fn groups<I, S>(&mut self, value: I) -> &mut Self
+    pub fn groups<I>(&mut self, value: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         self.params.groups = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
     }
 
-    pub fn keywords<I, S>(&mut self, value: I) -> &mut Self
+    pub fn keywords<I>(&mut self, value: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         self.params.keywords = Some(value.into_iter().map(|x| x.to_string()).collect());
         self
@@ -270,10 +270,10 @@ impl Request {
         self
     }
 
-    pub fn see_also<I, S>(&mut self, value: I) -> &mut Self
+    pub fn see_also<I>(&mut self, value: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         self.params.see_also = Some(value.into_iter().map(|x| x.to_string()).collect());
         self

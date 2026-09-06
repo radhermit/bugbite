@@ -98,11 +98,11 @@ where
 }
 
 /// Output an iterable field in wrapped CSV format.
-pub(crate) fn wrapped_csv<I, W, S>(f: &mut W, name: &str, data: I, width: usize) -> io::Result<()>
+pub(crate) fn wrapped_csv<I, W>(f: &mut W, name: &str, data: I, width: usize) -> io::Result<()>
 where
-    I: IntoIterator<Item = S>,
+    I: IntoIterator,
+    I::Item: std::fmt::Display,
     W: Write,
-    S: std::fmt::Display,
 {
     let rendered = data.into_iter().join(", ");
     if !rendered.is_empty() {

@@ -235,10 +235,10 @@ impl Request {
         self
     }
 
-    pub fn subject<I, S>(&mut self, values: I) -> &mut Self
+    pub fn subject<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
+        I: IntoIterator,
+        I::Item: Into<String>,
     {
         self.params.subject = Some(values.into_iter().map(Into::into).collect());
         self
@@ -447,10 +447,10 @@ impl<'a> QueryBuilder<'a> {
 }
 
 /// Quote terms containing whitespace, combining them into a query value.
-fn quoted_strings<I, S>(values: I) -> String
+fn quoted_strings<I>(values: I) -> String
 where
-    I: IntoIterator<Item = S>,
-    S: fmt::Display,
+    I: IntoIterator,
+    I::Item: fmt::Display,
 {
     values
         .into_iter()

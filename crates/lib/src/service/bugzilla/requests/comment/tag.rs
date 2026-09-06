@@ -20,10 +20,10 @@ pub struct Request {
 }
 
 impl Request {
-    pub(crate) fn new<I, S>(service: Bugzilla, ids: I) -> Self
+    pub(crate) fn new<I>(service: Bugzilla, ids: I) -> Self
     where
-        I: IntoIterator<Item = S>,
-        S: std::fmt::Display,
+        I: IntoIterator,
+        I::Item: std::fmt::Display,
     {
         Self {
             service,

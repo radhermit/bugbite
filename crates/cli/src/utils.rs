@@ -42,10 +42,10 @@ where
     confirm_inner(prompt, default, io::stdin().lock(), io::stderr().lock())
 }
 
-pub(crate) fn launch_browser<I, S>(urls: I) -> Result<()>
+pub(crate) fn launch_browser<I>(urls: I) -> Result<()>
 where
-    I: IntoIterator<Item = S>,
-    S: AsRef<str>,
+    I: IntoIterator,
+    I::Item: AsRef<str>,
 {
     let browser = env::var("BROWSER").unwrap_or_default();
     let mut args = shlex::split(&browser)

@@ -648,10 +648,10 @@ impl Request {
         self
     }
 
-    pub fn changed<I, S>(&mut self, values: I) -> &mut Self
+    pub fn changed<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         self.params.changed = Some(
             values
@@ -679,11 +679,11 @@ impl Request {
         self
     }
 
-    pub fn changed_by<F, I, S>(&mut self, field: F, users: I) -> &mut Self
+    pub fn changed_by<F, I>(&mut self, field: F, users: I) -> &mut Self
     where
         F: fmt::Display,
-        I: IntoIterator<Item = S>,
-        S: fmt::Display,
+        I: IntoIterator,
+        I::Item: fmt::Display,
     {
         let users = users.into_iter().map(|x| x.to_string()).collect();
         self.params
@@ -726,10 +726,10 @@ impl Request {
         self
     }
 
-    pub fn assignee<I, T>(&mut self, values: I) -> &mut Self
+    pub fn assignee<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = T>,
-        T: Into<Match>,
+        I: IntoIterator,
+        I::Item: Into<Match>,
     {
         self.params
             .assignee
@@ -738,10 +738,10 @@ impl Request {
         self
     }
 
-    pub fn commenter<I, T>(&mut self, values: I) -> &mut Self
+    pub fn commenter<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = T>,
-        T: Into<Match>,
+        I: IntoIterator,
+        I::Item: Into<Match>,
     {
         self.params
             .commenter
@@ -758,10 +758,10 @@ impl Request {
         self
     }
 
-    pub fn flagger<I, T>(&mut self, values: I) -> &mut Self
+    pub fn flagger<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = T>,
-        T: Into<Match>,
+        I: IntoIterator,
+        I::Item: Into<Match>,
     {
         self.params
             .flagger
@@ -778,10 +778,10 @@ impl Request {
         self
     }
 
-    pub fn reporter<I, T>(&mut self, values: I) -> &mut Self
+    pub fn reporter<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = T>,
-        T: Into<Match>,
+        I: IntoIterator,
+        I::Item: Into<Match>,
     {
         self.params
             .reporter
@@ -798,28 +798,28 @@ impl Request {
         self
     }
 
-    pub fn fields<I, F>(&mut self, values: I) -> &mut Self
+    pub fn fields<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = F>,
-        F: Into<FilterField>,
+        I: IntoIterator,
+        I::Item: Into<FilterField>,
     {
         self.params.fields = Some(values.into_iter().map(Into::into).collect());
         self
     }
 
-    pub fn status<I, S>(&mut self, values: I) -> &mut Self
+    pub fn status<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
+        I: IntoIterator,
+        I::Item: Into<String>,
     {
         self.params.status = Some(values.into_iter().map(Into::into).collect());
         self
     }
 
-    pub fn summary<I, S>(&mut self, values: I) -> &mut Self
+    pub fn summary<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = S>,
-        S: Into<Match>,
+        I: IntoIterator,
+        I::Item: Into<Match>,
     {
         self.params.summary = Some(values.into_iter().map(Into::into).collect());
         self
@@ -855,10 +855,10 @@ impl Request {
         self
     }
 
-    pub fn priority<I, T>(&mut self, values: I) -> &mut Self
+    pub fn priority<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = T>,
-        T: Into<Match>,
+        I: IntoIterator,
+        I::Item: Into<Match>,
     {
         self.params
             .priority
@@ -867,10 +867,10 @@ impl Request {
         self
     }
 
-    pub fn severity<I, T>(&mut self, values: I) -> &mut Self
+    pub fn severity<I>(&mut self, values: I) -> &mut Self
     where
-        I: IntoIterator<Item = T>,
-        T: Into<Match>,
+        I: IntoIterator,
+        I::Item: Into<Match>,
     {
         self.params
             .severity
@@ -1635,11 +1635,11 @@ impl QueryBuilder<'_> {
         Ok(())
     }
 
-    fn changed_by<F, I, S>(&mut self, field: F, users: I) -> crate::Result<()>
+    fn changed_by<F, I>(&mut self, field: F, users: I) -> crate::Result<()>
     where
         F: AsRef<str>,
-        I: IntoIterator<Item = S>,
-        S: AsRef<str>,
+        I: IntoIterator,
+        I::Item: AsRef<str>,
     {
         let field = ChangeField::from_str(field.as_ref())?;
         for user in users {
@@ -1813,10 +1813,10 @@ impl QueryBuilder<'_> {
         self.advanced_field("cc", value.op(), value);
     }
 
-    fn fields<I, F>(&mut self, fields: I)
+    fn fields<I>(&mut self, fields: I)
     where
-        I: IntoIterator<Item = F>,
-        F: Into<FilterField>,
+        I: IntoIterator,
+        I::Item: Into<FilterField>,
     {
         let mut fields: IndexSet<_> = fields.into_iter().map(Into::into).collect();
 

@@ -15,10 +15,10 @@ pub struct Request {
 }
 
 impl Request {
-    pub(crate) fn new<I, S>(service: Bugzilla, ids: I) -> Self
+    pub(crate) fn new<I>(service: Bugzilla, ids: I) -> Self
     where
-        I: IntoIterator<Item = S>,
-        S: std::fmt::Display,
+        I: IntoIterator,
+        I::Item: std::fmt::Display,
     {
         Self {
             service,
@@ -65,10 +65,10 @@ impl Request {
         Ok(url)
     }
 
-    pub fn groups<I, S>(mut self, values: I) -> Self
+    pub fn groups<I>(mut self, values: I) -> Self
     where
-        I: IntoIterator<Item = S>,
-        S: std::fmt::Display,
+        I: IntoIterator,
+        I::Item: std::fmt::Display,
     {
         self.groups = values.into_iter().map(|s| s.to_string()).collect();
         self
