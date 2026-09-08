@@ -145,17 +145,6 @@ impl Github {
         let base = self.base().as_str().trim_end_matches('/');
         format!("{base}/issues/{id}")
     }
-
-    pub fn get<I>(&self, _ids: I) -> get::Request
-    where
-        I: IntoIterator<Item = u64>,
-    {
-        todo!("get requests unsupported")
-    }
-
-    pub fn search(&self) -> search::Request {
-        search::Request::new(self.clone())
-    }
 }
 
 /// Github REST API error response.
