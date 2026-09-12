@@ -2,15 +2,13 @@ use std::io::stdout;
 use std::process::ExitCode;
 
 use bugbite::config::Config;
-use strum::VariantNames;
 
 use crate::service::*;
 
 mod completion;
 mod show;
 
-#[derive(VariantNames, clap::Subcommand, Debug)]
-#[strum(serialize_all = "kebab-case")]
+#[derive(clap::Subcommand, Debug)]
 pub(crate) enum Subcommand {
     // service subcommands
     /// bugzilla service support
