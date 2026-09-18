@@ -1515,18 +1515,22 @@ impl QueryBuilder<'_> {
 
     fn created(&mut self, value: &RangeOrValue<TimeDeltaOrStatic>) {
         match value {
+            // static value implies range to the present
             RangeOrValue::Value(value) => {
-                self.advanced_field("creation_ts", "greaterthaneq", value)
+                self.time_range_op("creation_ts", &RangeOp::LessOrEqual(value))
             }
-            RangeOrValue::RangeOp(value) => self.range_op("creation_ts", value),
+            RangeOrValue::RangeOp(value) => self.time_range_op("creation_ts", value),
             RangeOrValue::Range(value) => self.range("creation_ts", value),
         }
     }
 
     fn updated(&mut self, value: &RangeOrValue<TimeDeltaOrStatic>) {
         match value {
-            RangeOrValue::Value(value) => self.advanced_field("delta_ts", "greaterthaneq", value),
-            RangeOrValue::RangeOp(value) => self.range_op("delta_ts", value),
+            // static value implies range to the present
+            RangeOrValue::Value(value) => {
+                self.time_range_op("delta_ts", &RangeOp::LessOrEqual(value))
+            }
+            RangeOrValue::RangeOp(value) => self.time_range_op("delta_ts", value),
             RangeOrValue::Range(value) => self.range("delta_ts", value),
         }
     }
@@ -1826,6 +1830,7 @@ impl QueryBuilder<'_> {
         self.insert("include_fields", fields.iter().map(|f| f.api()).join(","));
     }
 
+    /// Range operator support for numeric values.
     fn range_op<T>(&mut self, field: &str, value: &RangeOp<T>)
     where
         T: Api + Eq,
@@ -1848,6 +1853,33 @@ impl QueryBuilder<'_> {
             }
             RangeOp::Greater(value) => {
                 self.advanced_field(field, "greaterthan", value);
+            }
+        }
+    }
+
+    /// Range operator support for time ranges.
+    fn time_range_op<T>(&mut self, field: &str, value: &RangeOp<T>)
+    where
+        T: Api + Eq,
+    {
+        match value {
+            RangeOp::Less(value) => {
+                self.advanced_field(field, "greaterthan", value);
+            }
+            RangeOp::LessOrEqual(value) => {
+                self.advanced_field(field, "greaterthaneq", value);
+            }
+            RangeOp::Equal(value) => {
+                self.advanced_field(field, "equals", value);
+            }
+            RangeOp::NotEqual(value) => {
+                self.advanced_field(field, "notequals", value);
+            }
+            RangeOp::GreaterOrEqual(value) => {
+                self.advanced_field(field, "lessthaneq", value);
+            }
+            RangeOp::Greater(value) => {
+                self.advanced_field(field, "lessthan", value);
             }
         }
     }
