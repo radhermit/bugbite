@@ -22,4 +22,4 @@ futures-util = "0.3.34"
 indexmap = "2.14.2"
 itertools = "0.15.0"
 pyo3 = { version = "0.30.1", features = ["abi3-py312", "extension-module", "indexmap"] }
-tokio = { version = "1.53.3", features = ["full"] }
+tokio = { version = "1.54.1", features = ["full"] }
