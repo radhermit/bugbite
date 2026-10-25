@@ -64,18 +64,18 @@ jobs:
         components: llvm-tools-preview
 
     - name: Install cargo-nextest
-      uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 #v2.87.7
+      uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 #v2.87.31
       with:
         tool: nextest
 
     - name: Install grcov
       if: ${{ matrix.rust == 'stable' && runner.os == 'Linux' }}
-      uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 #v2.87.7
+      uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 #v2.87.31
       with:
         tool: grcov
 
     - name: Set up rust build cache
-      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 #v2.9.2
+      uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 #v2.9.3
       with:
         # only save cache when running on the main branch
         save-if: ${{ github.ref_name == 'main' }}
@@ -155,7 +155,7 @@ jobs:
 
     - name: Upload coverage to Codecov
       if: ${{ steps.coverage.outputs.coverage == 'true' }}
-      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f #v7.0.0
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 #v7.1.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: coverage/lcov
