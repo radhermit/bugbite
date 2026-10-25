@@ -46,7 +46,7 @@ jobs:
         tool: nextest
 
     - name: Run tests for package
-      run: cargo nextest run --features test --tests -p ${PKG}
+      run: cargo nextest run --all-features --tests -p ${PKG}
 
     - name: Clean up git repos
       run: |
