@@ -59,7 +59,7 @@ shlex = "2.0.1"
 strum = { version = "0.28.0", features = ["derive"] }
 textwrap = "0.16.4"
 tokio = { version = "1.54.1", features = ["full"] }
-toml = "1.1.8"
+toml = "1.2.1"
 tracing = "0.1.44"
 tracing-log = "0.2.0"
 tracing-subscriber = "0.3.23"
@@ -68,9 +68,9 @@ unicode-segmentation = "1.13.3"
 [dev-dependencies]
 assert_cmd = "2.2.2"
 chrono = { version = "0.4.45" }
-ctor = "1.0.13"
+ctor = "1.0.14"
 predicates = "3.1.4"
-uuid = { version = "1.29.0", features = ["v4", "fast-rng"] }
+uuid = { version = "1.29.2", features = ["v4", "fast-rng"] }
 wiremock = { version = "0.6.5" }
 
 [package.metadata.binstall]
